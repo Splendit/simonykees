@@ -13,6 +13,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.preview.model.PayPerUseRuleStatisticsSectionPageModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
@@ -36,7 +37,7 @@ public class PayPerUseRuleStatisticsSection extends RuleStatisticsSection {
 		super.initializeDataBindings();
 
 		IConverter convertRequiredCredit = IConverter.create(Integer.class, String.class,
-				x -> String.format("Used credit: %s", x));
+				x -> String.format(Messages.PayPerUseRuleStatisticsSection_usedCredit, x));
 		IObservableValue requiredCreditLabelObserveValue = WidgetProperties.text()
 			.observe(requiredCredit);
 		IObservableValue requiredCreditModelObserveValue = BeanProperties.value("requiredCredit") //$NON-NLS-1$

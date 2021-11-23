@@ -22,6 +22,7 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.core.statistic.DurationFormatUtil;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.preview.model.StatisticsSectionPageModel;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
@@ -56,7 +57,7 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 	public void initializeDataBindings() {
 		DataBindingContext bindingContext = new DataBindingContext();
 		IConverter convertRunDuration = IConverter.create(Long.class, String.class,
-				x -> String.format("Run Duration: %s", DurationFormatUtil.formatRunDuration((Long) x)));
+				x -> String.format(Messages.TotalPayPerUseStatisticsSection_runDuration, DurationFormatUtil.formatRunDuration((Long) x)));
 		IObservableValue<String> observeTextLabelRunDurationObserveWidget = WidgetProperties.text()
 			.observe(totalExecutionTime);
 		IObservableValue<Object> runDurationWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$
@@ -65,7 +66,7 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 				runDurationWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertRunDuration));
 
 		IConverter convertTotalIssuesFixed = IConverter.create(Integer.class, String.class,
-				x -> (String.format("Total Issues Fixed: %s", (Integer) x)));
+				x -> (String.format(Messages.TotalPayPerUseStatisticsSection_totalIssuesFixed, (Integer) x)));
 		ISWTObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
 			.observe(totalIssuesFixed);
 		IObservableValue<Object> issuesFixedSummaryWizardPageModelObserveValue = BeanProperties
@@ -76,7 +77,7 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 				UpdateValueStrategy.create(convertTotalIssuesFixed));
 
 		IConverter convertTotalTimeSaved = IConverter.create(Duration.class, String.class, x -> String
-			.format("Total Time Saved: %s", DurationFormatUtil.formatTimeSaved((Duration) x)));
+			.format(Messages.TotalPayPerUseStatisticsSection_totalTimeSaved, DurationFormatUtil.formatTimeSaved((Duration) x)));
 		ISWTObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
 			.observe(totalHoursSaved);
 		IObservableValue<Object> hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("totalTimeSaved") //$NON-NLS-1$
@@ -85,7 +86,7 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 				null, UpdateValueStrategy.create(convertTotalTimeSaved));
 
 		IConverter converterRequiredCredit = IConverter.create(Integer.class, String.class,
-				x -> (String.format("Required credit: %d", (Integer) x)));
+				x -> (String.format(Messages.TotalPayPerUseStatisticsSection_requiredCredit, (Integer) x)));
 		ISWTObservableValue observeTextLabelRequiredCreditObserveWidget = WidgetProperties.text()
 			.observe(totalRequiredCredit);
 		IObservableValue<Object> requiredCreditPageModelObserveValue = BeanProperties.value("totalRequiredCredit") //$NON-NLS-1$
@@ -94,7 +95,7 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 				requiredCreditPageModelObserveValue, null, UpdateValueStrategy.create(converterRequiredCredit));
 
 		IConverter convertAvailableCredit = IConverter.create(Integer.class, String.class,
-				x -> String.format("Available credit: %s", x));
+				x -> String.format(Messages.TotalPayPerUseStatisticsSection_availableCredit, x));
 		IObservableValue availableCreditLabelObserveValue = WidgetProperties.text()
 			.observe(availableCredit);
 		IObservableValue availableCreditModelObserveValue = BeanProperties.value("availableCredit") //$NON-NLS-1$

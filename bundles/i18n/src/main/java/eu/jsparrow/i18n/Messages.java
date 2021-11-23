@@ -172,6 +172,9 @@ public class Messages extends NLS {
 	public static String MavenProjectImporter_startImport;
 	public static String MessageDialog_licensingError_failedToLoad;
 	public static String MessageDialog_licensingError_failedToValidate;
+	public static String MinimalStatisticsSection_runDuration;
+	public static String MinimalStatisticsSection_totalIssuesFixed;
+	public static String MinimalStatisticsSection_totalTimeSaved;
 	public static String ReplaceJUnit3TestCasesRule_description;
 	public static String ReplaceJUnit3TestCasesRule_name;
 	public static String ReplaceJUnit4AnnotationsWithJupiterRule_description;
@@ -311,6 +314,7 @@ public class Messages extends NLS {
 	public static String OrganiseImportsRule_name;
 	public static String OverrideAnnotationRule_description;
 	public static String OverrideAnnotationRule_name;
+	public static String PayPerUseRuleStatisticsSection_usedCredit;
 	public static String PrimitiveBoxedForStringResolver_message;
 	public static String PrimitiveBoxedForStringResolver_name;
 	public static String PrimitiveBoxedForStringRule_description;
@@ -558,6 +562,8 @@ public class Messages extends NLS {
 	public static String StandardLoggerRule_name;
 	public static String StatementLambdaToExpressionRule_description;
 	public static String StatementLambdaToExpressionRule_name;
+	public static String StatusDetail_PAY_PER_USE_outOfCredit;
+	public static String StatusDetail_PAY_PER_USE_REGISTERED;
 	public static String StringBufferToBuilderRule_description;
 	public static String StringBufferToBuilderRule_name;
 	public static String StringBuildingLoopRule_description;
@@ -587,6 +593,11 @@ public class Messages extends NLS {
 	public static String SummaryWizardPage_TimesApplied;
 	public static String SummaryWizardPage_TimeSaved;
 	public static String SummaryWizardPageModel_IssuesFixed;
+	public static String TotalPayPerUseStatisticsSection_availableCredit;
+	public static String TotalPayPerUseStatisticsSection_requiredCredit;
+	public static String TotalPayPerUseStatisticsSection_runDuration;
+	public static String TotalPayPerUseStatisticsSection_totalIssuesFixed;
+	public static String TotalPayPerUseStatisticsSection_totalTimeSaved;
 	public static String TryWithResourceRule_description;
 	public static String TryWithResourceRule_name;
 	public static String UpdateLicenseDialog_error_couldNotSave;

@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Label;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.statistic.DurationFormatUtil;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
@@ -51,7 +52,7 @@ public class MinimalStatisticsSection implements StatisticsSection {
 	public void initializeDataBindings() {
 		DataBindingContext bindingContext = new DataBindingContext();
 		IConverter convertRunDuration = IConverter.create(Long.class, String.class,
-				x -> String.format("Run Duration: %s", DurationFormatUtil.formatRunDuration((Long) x)));
+				x -> String.format(Messages.MinimalStatisticsSection_runDuration, DurationFormatUtil.formatRunDuration((Long) x)));
 		IObservableValue<String> observeTextLabelRunDurationObserveWidget = WidgetProperties.text()
 			.observe(totalExecutionTime);
 		IObservableValue<Object> runDurationWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$
@@ -60,7 +61,7 @@ public class MinimalStatisticsSection implements StatisticsSection {
 				runDurationWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertRunDuration));
 
 		IConverter convertTotalIssuesFixed = IConverter.create(Integer.class, String.class,
-				x -> (String.format("Total Issues Fixed: %s", (Integer) x)));
+				x -> (String.format(Messages.MinimalStatisticsSection_totalIssuesFixed, (Integer) x)));
 		ISWTObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
 			.observe(totalIssuesFixed);
 		IObservableValue<Object> issuesFixedSummaryWizardPageModelObserveValue = BeanProperties
@@ -71,7 +72,7 @@ public class MinimalStatisticsSection implements StatisticsSection {
 				UpdateValueStrategy.create(convertTotalIssuesFixed));
 
 		IConverter convertTotalTimeSaved = IConverter.create(Duration.class, String.class, x -> String
-			.format("Total Time Saved: %s", DurationFormatUtil.formatTimeSaved((Duration) x)));
+			.format(Messages.MinimalStatisticsSection_totalTimeSaved, DurationFormatUtil.formatTimeSaved((Duration) x)));
 		ISWTObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
 			.observe(totalHoursSaved);
 		IObservableValue<Object> hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("totalTimeSaved") //$NON-NLS-1$
