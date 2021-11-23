@@ -6,14 +6,14 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-class TransformationData_NEW {
+class TransformationData {
 	private final Block block;
 	private final ExpressionStatement firstAssertThatStatement;
 	private final List<ExpressionStatement> assertJAssertThatStatementsToRemove;
 	private final MethodInvocation assertThatInvocation;
 	private final List<InvocationChainElement> invocationChainElementList;
 
-	TransformationData_NEW(Block block, ExpressionStatement firstAssertThatStatement,
+	TransformationData(Block block, ExpressionStatement firstAssertThatStatement,
 			List<ExpressionStatement> assertJAssertThatStatementsToRemove, MethodInvocation assertThatInvocation,
 			List<InvocationChainElement> invocationChainElementList) {
 		this.block = block;

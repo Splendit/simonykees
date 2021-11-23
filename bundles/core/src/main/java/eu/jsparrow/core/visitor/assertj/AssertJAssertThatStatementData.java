@@ -5,14 +5,14 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-class AssertJAssertThatStatementData_NEW {
+class AssertJAssertThatStatementData {
 
 	private final MethodInvocation assertThatInvocation;
 	private final String assertThatArgumentIdentifier;
 	private final List<MethodInvocation> chainFollowingAssertThat;
 	private final ExpressionStatement assertThatStatement;
 
-	AssertJAssertThatStatementData_NEW(MethodInvocation assertThatInvocation,
+	AssertJAssertThatStatementData(MethodInvocation assertThatInvocation,
 			String assertThatArgumentIdentifier,
 			List<MethodInvocation> chainFollowingAssertThat, ExpressionStatement assertThatStatement) {
 		this.assertThatInvocation = assertThatInvocation;

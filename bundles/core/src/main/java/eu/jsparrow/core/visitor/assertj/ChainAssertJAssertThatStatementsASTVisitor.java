@@ -51,19 +51,18 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 
 	@Override
 	public boolean visit(Block node) {
-		List<TransformationData_NEW> transformationDataList_NEW = collectTransformationData_NEW(node);
-		transformationDataList_NEW.forEach(this::transform_NEW);
+		collectTransformationData(node).forEach(this::transform);
 		return true;
 	}
 
-	private List<TransformationData_NEW> collectTransformationData_NEW(Block block) {
+	private List<TransformationData> collectTransformationData(Block block) {
 		List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
-		List<TransformationData_NEW> transformationDataList = new ArrayList<>();
+		List<TransformationData> transformationDataList = new ArrayList<>();
 		int i = 0;
 		while (i < statements.size()) {
 			Statement firstStatement = statements.get(i);
 			List<Statement> followingStatements = statements.subList(i + 1, statements.size());
-			TransformationData_NEW transformationData = findTransformationData_NEW(block, firstStatement,
+			TransformationData transformationData = findTransformationData(block, firstStatement,
 					followingStatements).orElse(null);
 			if (transformationData != null) {
 				i += transformationData.getAssertJAssertThatStatementsToRemove()
@@ -76,7 +75,7 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		return transformationDataList;
 	}
 
-	private Optional<AssertJAssertThatStatementData_NEW> findAssertThatStatementData_NEW(Statement statement) {
+	private Optional<AssertJAssertThatStatementData> findAssertThatStatementData(Statement statement) {
 
 		if (statement.getNodeType() != ASTNode.EXPRESSION_STATEMENT) {
 			return Optional.empty();
@@ -120,20 +119,20 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		String assertThatArgumentIdentifier = simpleNameArguments.get(0)
 			.getIdentifier();
 
-		AssertJAssertThatStatementData_NEW assertJAssertThatStatementData = new AssertJAssertThatStatementData_NEW(
+		AssertJAssertThatStatementData assertJAssertThatStatementData = new AssertJAssertThatStatementData(
 				assumedAssertThatInvocation, assertThatArgumentIdentifier, chainFollowingAssertThat,
 				expressionStatement);
 
 		return Optional.of(assertJAssertThatStatementData);
 	}
 
-	private List<AssertJAssertThatStatementData_NEW> findSubsequentAssertionDataOnSameObject_NEW(
+	private List<AssertJAssertThatStatementData> findSubsequentAssertionDataOnSameObject(
 			String expectedArgumentIdentifier, List<Statement> statements) {
 
-		List<AssertJAssertThatStatementData_NEW> subsequentAssertionDataList = new ArrayList<>();
+		List<AssertJAssertThatStatementData> subsequentAssertionDataList = new ArrayList<>();
 		for (int i = 0; i < statements.size(); i++) {
 			Statement statement = statements.get(i);
-			AssertJAssertThatStatementData_NEW assertJAssertThatStatementData = findAssertThatStatementData_NEW(
+			AssertJAssertThatStatementData assertJAssertThatStatementData = findAssertThatStatementData(
 					statement)
 						.filter(data -> data.getAssertThatArgumentIdentifier()
 							.equals(expectedArgumentIdentifier))
@@ -147,10 +146,10 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		return subsequentAssertionDataList;
 	}
 
-	private Optional<TransformationData_NEW> findTransformationData_NEW(Block block, Statement firstStatement,
+	private Optional<TransformationData> findTransformationData(Block block, Statement firstStatement,
 			List<Statement> followingStatements) {
 
-		AssertJAssertThatStatementData_NEW firstAssertJAssertThatStatementData = findAssertThatStatementData_NEW(
+		AssertJAssertThatStatementData firstAssertJAssertThatStatementData = findAssertThatStatementData(
 				firstStatement).orElse(null);
 		if (firstAssertJAssertThatStatementData == null) {
 			return Optional.empty();
@@ -158,7 +157,7 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 
 		String expectedArgumentIdentifier = firstAssertJAssertThatStatementData
 			.getAssertThatArgumentIdentifier();
-		List<AssertJAssertThatStatementData_NEW> subsequentDataOnSameObject = findSubsequentAssertionDataOnSameObject_NEW(
+		List<AssertJAssertThatStatementData> subsequentDataOnSameObject = findSubsequentAssertionDataOnSameObject(
 				expectedArgumentIdentifier, followingStatements);
 
 		if (subsequentDataOnSameObject.isEmpty()) {
@@ -172,38 +171,38 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		statementsToRemove.add(firstAssertThatStatement);
 
 		List<ExpressionStatement> subsequentStatementsToRemove = subsequentDataOnSameObject.stream()
-			.map(AssertJAssertThatStatementData_NEW::getAssertThatStatement)
+			.map(AssertJAssertThatStatementData::getAssertThatStatement)
 			.collect(Collectors.toList());
 
 		statementsToRemove.addAll(subsequentStatementsToRemove);
 
 		return Optional
-			.of(createTransformationData_NEW(block, firstAssertJAssertThatStatementData, subsequentDataOnSameObject));
+			.of(createTransformationData(block, firstAssertJAssertThatStatementData, subsequentDataOnSameObject));
 	}
 
-	private TransformationData_NEW createTransformationData_NEW(Block block,
-			AssertJAssertThatStatementData_NEW firstAssertJAssertThatStatementData,
-			List<AssertJAssertThatStatementData_NEW> subsequentDataOnSameObject) {
+	private TransformationData createTransformationData(Block block,
+			AssertJAssertThatStatementData firstAssertJAssertThatStatementData,
+			List<AssertJAssertThatStatementData> subsequentDataOnSameObject) {
 
 		ExpressionStatement firstAssertThatStatement = firstAssertJAssertThatStatementData
 			.getAssertThatStatement();
 		MethodInvocation assertThatInvocation = firstAssertJAssertThatStatementData.getAssertThatInvocation();
 
-		List<AssertJAssertThatStatementData_NEW> listOfAllAssertThatData = new ArrayList<>();
+		List<AssertJAssertThatStatementData> listOfAllAssertThatData = new ArrayList<>();
 		listOfAllAssertThatData.add(firstAssertJAssertThatStatementData);
 		listOfAllAssertThatData.addAll(subsequentDataOnSameObject);
 
 		List<ExpressionStatement> statementsToRemove = listOfAllAssertThatData.stream()
-			.map(AssertJAssertThatStatementData_NEW::getAssertThatStatement)
+			.map(AssertJAssertThatStatementData::getAssertThatStatement)
 			.collect(Collectors.toList());
 
 		List<InvocationChainElement> invocationChainElementList = listOfAllAssertThatData.stream()
-			.map(AssertJAssertThatStatementData_NEW::getChainFollowingAssertThat)
+			.map(AssertJAssertThatStatementData::getChainFollowingAssertThat)
 			.flatMap(List<MethodInvocation>::stream)
 			.map(this::createInvocationChainElement)
 			.collect(Collectors.toList());
 
-		return new TransformationData_NEW(block, firstAssertThatStatement, statementsToRemove, assertThatInvocation,
+		return new TransformationData(block, firstAssertThatStatement, statementsToRemove, assertThatInvocation,
 				invocationChainElementList);
 	}
 
@@ -233,7 +232,7 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		return Optional.empty();
 	}
 
-	private void transform_NEW(TransformationData_NEW data) {
+	private void transform(TransformationData data) {
 		MethodInvocation newChain = createNewMethodInvocationChain(data.getAssertThatInvocation(),
 				data.getInvocationChainElementList());
 		AST ast = astRewrite.getAST();

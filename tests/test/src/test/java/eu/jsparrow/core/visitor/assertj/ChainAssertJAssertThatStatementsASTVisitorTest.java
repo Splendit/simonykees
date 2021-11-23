@@ -16,7 +16,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesSimpleJD
 	}
 
 	@Test
-	public void visit_ForResearch_AllAssertionsOnSameObject_shouldNotTransform() throws Exception {
+	public void visit_AllAssertionsOnSameList_shouldTransform() throws Exception {
 
 		fixture.addImport(java.util.Arrays.class.getName());
 		fixture.addImport(java.util.List.class.getName());
@@ -48,7 +48,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesSimpleJD
 	}
 
 	@Test
-	public void visit_ForResearch_AssertionsOnDifferentObjects_shouldNotTransform() throws Exception {
+	public void visit_AssertionsOnTwoDifferentLists_shouldNotTransform() throws Exception {
 
 		fixture.addImport(java.util.Arrays.class.getName());
 		fixture.addImport(java.util.List.class.getName());
