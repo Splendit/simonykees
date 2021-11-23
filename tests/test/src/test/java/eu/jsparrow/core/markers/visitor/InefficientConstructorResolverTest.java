@@ -51,7 +51,7 @@ class InefficientConstructorResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals(18, event.getHighlightLength()),
 				() -> assertEquals(101, event.getOffset()),
 				() -> assertEquals(14, event.getLength()),
-				() -> assertEquals(3, event.getWeightValue()));
+				() -> assertEquals(5, event.getWeightValue()));
 	}
 	
 	

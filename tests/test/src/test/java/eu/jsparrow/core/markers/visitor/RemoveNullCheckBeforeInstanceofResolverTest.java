@@ -64,7 +64,7 @@ class RemoveNullCheckBeforeInstanceofResolverTest extends UsesSimpleJDTUnitFixtu
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(129, event.getOffset()),
 				() -> assertEquals(12, event.getLength()),
-				() -> assertEquals(3, event.getWeightValue()));
+				() -> assertEquals(5, event.getWeightValue()));
 	}
 	
 	@Test

@@ -52,7 +52,7 @@ class EnumsWithoutEqualsResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals(31, event.getHighlightLength()),
 				() -> assertEquals(177, event.getOffset()),
 				() -> assertEquals(36, event.getLength()),
-				() -> assertEquals(3, event.getWeightValue()));
+				() -> assertEquals(5, event.getWeightValue()));
 	}
 	
 	@Test

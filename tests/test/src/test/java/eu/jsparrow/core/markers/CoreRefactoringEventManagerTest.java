@@ -51,7 +51,7 @@ class CoreRefactoringEventManagerTest extends UsesJDTUnitFixture {
 				()-> assertEquals("eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver", event.getResolver()),
 				()-> assertEquals("Comparator.naturalOrder()", event.getCodePreview()),
 				()-> assertEquals("Lambda expression can be replaced with predefined comparator", event.getMessage()),
-				()-> assertEquals(3, event.getWeightValue()));
+				()-> assertEquals(5, event.getWeightValue()));
 		
 		RefactoringMarkerEvent event2 = events.get(1);
 		assertAll(

@@ -39,11 +39,11 @@ public class RuleDescription {
 		Map<Integer, Integer> map = new HashMap<>();
 		map.put(1, 1);
 		map.put(2,  2);
-		map.put(5, 3);
-		map.put(10, 4);
-		map.put(15, 5);
-		map.put(20, 5);
-		map.put(30, 10);
+		map.put(5, 5);
+		map.put(10, 10);
+		map.put(15, 15);
+		map.put(20, 20);
+		map.put(30, 20);
 		return Collections.unmodifiableMap(map);
 	}
 

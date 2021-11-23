@@ -48,6 +48,7 @@ public class StatisticsSectionUpdater {
 			.getRemediationCost()
 			.multipliedBy(timesApplied);
 		model.setTimeSaved(timeSaved);
+		summary.updateForSelected();
 	}
 
 	private void updateIssuesTimeSavedAndCreditForSelected(

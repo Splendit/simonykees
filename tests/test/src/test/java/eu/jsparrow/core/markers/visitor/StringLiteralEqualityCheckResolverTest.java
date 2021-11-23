@@ -62,7 +62,7 @@ class StringLiteralEqualityCheckResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(133, event.getOffset()),
 				() -> assertEquals(2, event.getLength()),
-				() -> assertEquals(4, event.getWeightValue()));
+				() -> assertEquals(10, event.getWeightValue()));
 	}
 	
 	@Test
