@@ -33,7 +33,7 @@ public class ChainAssertJAssertThatStatementsRule
 		this.id = "ChainAssertJAssertThatStatements"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.ChainAssertJAssertThatStatementsRule_name,
 				Messages.ChainAssertJAssertThatStatementsRule_description,
-				Duration.ofMinutes(10),
+				Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 	}
 
