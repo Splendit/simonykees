@@ -57,7 +57,8 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 	public void initializeDataBindings() {
 		DataBindingContext bindingContext = new DataBindingContext();
 		IConverter convertRunDuration = IConverter.create(Long.class, String.class,
-				x -> String.format(Messages.TotalPayPerUseStatisticsSection_runDuration, DurationFormatUtil.formatRunDuration((Long) x)));
+				x -> String.format(Messages.TotalPayPerUseStatisticsSection_runDuration,
+						DurationFormatUtil.formatRunDuration((Long) x)));
 		IObservableValue<String> observeTextLabelRunDurationObserveWidget = WidgetProperties.text()
 			.observe(totalExecutionTime);
 		IObservableValue<Object> runDurationWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$
@@ -77,7 +78,8 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 				UpdateValueStrategy.create(convertTotalIssuesFixed));
 
 		IConverter convertTotalTimeSaved = IConverter.create(Duration.class, String.class, x -> String
-			.format(Messages.TotalPayPerUseStatisticsSection_totalTimeSaved, DurationFormatUtil.formatTimeSaved((Duration) x)));
+			.format(Messages.TotalPayPerUseStatisticsSection_totalTimeSaved,
+					DurationFormatUtil.formatTimeSaved((Duration) x)));
 		ISWTObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
 			.observe(totalHoursSaved);
 		IObservableValue<Object> hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("totalTimeSaved") //$NON-NLS-1$
@@ -135,6 +137,19 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		rootComposite.addDisposeListener(e -> {
+			totalExecutionTime.getImage()
+				.dispose();
+			totalIssuesFixed.getImage()
+				.dispose();
+			totalHoursSaved.getImage()
+				.dispose();
+			totalRequiredCredit.getImage()
+				.dispose();
+			availableCredit.getImage()
+				.dispose();
+		});
 	}
 
 	@Override
@@ -164,5 +179,19 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 		Duration newSavedTime = model.getTotalTimeSaved()
 			.minus(deltaTimeSaved);
 		model.setTotalTimeSaved(newSavedTime);
+	}
+
+	@Override
+	public void dispose() {
+		totalExecutionTime.getImage()
+			.dispose();
+		totalIssuesFixed.getImage()
+			.dispose();
+		totalHoursSaved.getImage()
+			.dispose();
+		totalRequiredCredit.getImage()
+			.dispose();
+		availableCredit.getImage()
+			.dispose();
 	}
 }

@@ -207,6 +207,10 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		 * container is disposed
 		 */
 		container.addDisposeListener((DisposeEvent e) -> {
+			tickmarkGreenIconImage.dispose();
+			closeRedIconImage.dispose();
+			jSparrowImageInactive.dispose();
+			jSparrowImageActive.dispose();
 			scaledJSparrowImageActive.dispose();
 			scaledJSparrowImageInactive.dispose();
 			scaledTickmarkGreenIconImage.dispose();

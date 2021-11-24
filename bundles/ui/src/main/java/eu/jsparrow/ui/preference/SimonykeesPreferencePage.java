@@ -16,6 +16,7 @@ import org.eclipse.jface.wizard.ProgressMonitorPart;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -129,6 +130,16 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		});
 
 		createButtonsPart(viewerComposite);
+		composite.addDisposeListener((DisposeEvent e) -> {
+				TableItem[] items = profilesTable.getItems();
+				for(TableItem item : items) {
+					Font itemFont = item.getFont();
+					if(itemFont != font) {
+						itemFont.dispose();
+					}
+				}
+				
+			});
 	}
 
 	private void populateTable() {

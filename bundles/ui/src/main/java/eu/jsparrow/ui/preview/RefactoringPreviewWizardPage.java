@@ -483,5 +483,12 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				.getApplicationsForFile(newSelection.getHandleIdentifier()))
 			.forEach(FileChangeCount::clear);
 	}
+	
+	@Override
+	public void dispose() {
+		ruleStatisticsSection.dispose();
+		statisticsSection.dispose();
+		super.dispose();
+	}
 
 }

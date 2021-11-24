@@ -18,4 +18,7 @@ public interface StatisticsSection {
 	default void updateForSelected() {
 	}
 
+	default void dispose() {
+	}
+
 }

@@ -34,6 +34,9 @@ public class RuleStatisticsSection {
 	private CLabel techDebtLabel;
 	private CLabel issuesFixedLabel;
 
+	private Image clockImage;
+	private Image inLoveImage;
+
 	protected RuleStatisticsSectionPageModel model;
 
 	public RuleStatisticsSection(RuleStatisticsSectionPageModel model) {
@@ -80,22 +83,35 @@ public class RuleStatisticsSection {
 		initTechDebtLabel(composite);
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		composite.addDisposeListener(e -> {
+			techDebtLabel.getImage()
+				.dispose();
+			issuesFixedLabel.getImage()
+				.dispose();
+
+		});
 	}
 
 	protected void initIssuesFixedLabel(Composite composite) {
 		issuesFixedLabel = new CLabel(composite, SWT.NONE);
 		issuesFixedLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		Image inLoveImage = ResourceHelper.createImage("icons/fa-bolt.png"); //$NON-NLS-1$
+		inLoveImage = ResourceHelper.createImage("icons/fa-bolt.png"); //$NON-NLS-1$
 		issuesFixedLabel.setImage(inLoveImage);
 	}
 
 	protected void initTechDebtLabel(Composite composite) {
 		techDebtLabel = new CLabel(composite, SWT.NONE);
 		techDebtLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		techDebtLabel.setImage(ResourceHelper.createImage("icons/fa-clock.png"));//$NON-NLS-1$
+		clockImage = ResourceHelper.createImage("icons/fa-clock.png");//$NON-NLS-1$
+		techDebtLabel.setImage(clockImage);
 	}
 
 	public RuleStatisticsSectionPageModel getModel() {
 		return this.model;
+	}
+
+	public void dispose() {
+		clockImage.dispose();
+		inLoveImage.dispose();
 	}
 }

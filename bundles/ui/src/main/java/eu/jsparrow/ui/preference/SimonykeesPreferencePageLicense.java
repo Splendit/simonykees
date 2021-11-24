@@ -154,6 +154,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		composite.addDisposeListener((DisposeEvent e) -> {
 			jSparrowImageActive.dispose();
 			jSparrowImageInactive.dispose();
+			expirationLabel.getFont().dispose();
 		});
 
 		composite.pack();

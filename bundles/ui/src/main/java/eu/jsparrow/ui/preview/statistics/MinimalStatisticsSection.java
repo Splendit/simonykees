@@ -52,7 +52,8 @@ public class MinimalStatisticsSection implements StatisticsSection {
 	public void initializeDataBindings() {
 		DataBindingContext bindingContext = new DataBindingContext();
 		IConverter convertRunDuration = IConverter.create(Long.class, String.class,
-				x -> String.format(Messages.MinimalStatisticsSection_runDuration, DurationFormatUtil.formatRunDuration((Long) x)));
+				x -> String.format(Messages.MinimalStatisticsSection_runDuration,
+						DurationFormatUtil.formatRunDuration((Long) x)));
 		IObservableValue<String> observeTextLabelRunDurationObserveWidget = WidgetProperties.text()
 			.observe(totalExecutionTime);
 		IObservableValue<Object> runDurationWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$
@@ -72,7 +73,8 @@ public class MinimalStatisticsSection implements StatisticsSection {
 				UpdateValueStrategy.create(convertTotalIssuesFixed));
 
 		IConverter convertTotalTimeSaved = IConverter.create(Duration.class, String.class, x -> String
-			.format(Messages.MinimalStatisticsSection_totalTimeSaved, DurationFormatUtil.formatTimeSaved((Duration) x)));
+			.format(Messages.MinimalStatisticsSection_totalTimeSaved,
+					DurationFormatUtil.formatTimeSaved((Duration) x)));
 		ISWTObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
 			.observe(totalHoursSaved);
 		IObservableValue<Object> hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("totalTimeSaved") //$NON-NLS-1$
@@ -104,6 +106,15 @@ public class MinimalStatisticsSection implements StatisticsSection {
 
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		composite.addDisposeListener(e -> {
+			totalExecutionTime.getImage()
+				.dispose();
+			totalIssuesFixed.getImage()
+				.dispose();
+			totalHoursSaved.getImage()
+				.dispose();
+		});
 	}
 
 	@Override
@@ -120,4 +131,13 @@ public class MinimalStatisticsSection implements StatisticsSection {
 		model.setTotalTimeSaved(timeSaved);
 	}
 
+	@Override
+	public void dispose() {
+		totalExecutionTime.getImage()
+			.dispose();
+		totalIssuesFixed.getImage()
+			.dispose();
+		totalHoursSaved.getImage()
+			.dispose();
+	}
 }

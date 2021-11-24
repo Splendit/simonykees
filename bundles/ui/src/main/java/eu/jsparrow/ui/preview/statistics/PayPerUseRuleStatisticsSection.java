@@ -64,5 +64,12 @@ public class PayPerUseRuleStatisticsSection extends RuleStatisticsSection {
 
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		composite.addDisposeListener(e -> usedCreditImage.dispose());
+	}
+	
+	@Override
+	public void dispose() {
+		super.dispose();
+		requiredCredit.getImage().dispose();
 	}
 }
