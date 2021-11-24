@@ -12,6 +12,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesSimpleJD
 	public void setUpVisitor() throws Exception {
 		addDependency("org.assertj", "assertj-core", "3.21.0");
 		fixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+		fixture.addImport("org.assertj.core.api.Assertions.atIndex", true, false);
 		setVisitor(new ChainAssertJAssertThatStatementsASTVisitor());
 	}
 

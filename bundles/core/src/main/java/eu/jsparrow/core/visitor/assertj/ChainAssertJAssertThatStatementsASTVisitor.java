@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -108,11 +109,19 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 			return Optional.empty();
 		}
 
-		IMethodBinding methodBinding = assumedAssertThatInvocation.resolveMethodBinding();
-		if (methodBinding == null) {
+		IMethodBinding assumedAssertThatMethodBinding = assumedAssertThatInvocation.resolveMethodBinding();
+		if (assumedAssertThatMethodBinding == null) {
 			return Optional.empty();
 		}
-		if (!ClassRelationUtil.isContentOfType(methodBinding.getDeclaringClass(), ORG_ASSERTJ_CORE_API_ASSERTIONS)) {
+		if (!ClassRelationUtil.isContentOfType(assumedAssertThatMethodBinding.getDeclaringClass(), ORG_ASSERTJ_CORE_API_ASSERTIONS)) {
+			return Optional.empty();
+		}
+		
+		ITypeBinding assertThatInvocationTypeBinding = assumedAssertThatInvocation.resolveTypeBinding();		
+		ITypeBinding methodInvocationTypeBinding = methodInvocation.resolveTypeBinding();
+		
+		if (!ClassRelationUtil.compareITypeBinding(assertThatInvocationTypeBinding,
+				methodInvocationTypeBinding)) {		
 			return Optional.empty();
 		}
 
