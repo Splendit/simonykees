@@ -50,8 +50,8 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 	public static final String ORG_ASSERTJ_CORE_API_ASSERTIONS = "org.assertj.core.api.Assertions"; //$NON-NLS-1$
 
 	@Override
-	public boolean visit(Block node) {
-		collectTransformationData(node).forEach(this::transform);
+	public boolean visit(Block block) {
+		collectTransformationData(block).forEach(data -> transform(block, data));
 		return true;
 	}
 
@@ -62,7 +62,7 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		while (i < statements.size()) {
 			Statement firstStatement = statements.get(i);
 			List<Statement> followingStatements = statements.subList(i + 1, statements.size());
-			TransformationData transformationData = findTransformationData(block, firstStatement,
+			TransformationData transformationData = findTransformationData(firstStatement,
 					followingStatements).orElse(null);
 			if (transformationData != null) {
 				i += transformationData.getAssertJAssertThatStatementsToRemove()
@@ -146,7 +146,7 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		return subsequentAssertionDataList;
 	}
 
-	private Optional<TransformationData> findTransformationData(Block block, Statement firstStatement,
+	private Optional<TransformationData> findTransformationData(Statement firstStatement,
 			List<Statement> followingStatements) {
 
 		AssertJAssertThatStatementData firstAssertJAssertThatStatementData = findAssertThatStatementData(
@@ -177,10 +177,10 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		statementsToRemove.addAll(subsequentStatementsToRemove);
 
 		return Optional
-			.of(createTransformationData(block, firstAssertJAssertThatStatementData, subsequentDataOnSameObject));
+			.of(createTransformationData(firstAssertJAssertThatStatementData, subsequentDataOnSameObject));
 	}
 
-	private TransformationData createTransformationData(Block block,
+	private TransformationData createTransformationData(
 			AssertJAssertThatStatementData firstAssertJAssertThatStatementData,
 			List<AssertJAssertThatStatementData> subsequentDataOnSameObject) {
 
@@ -201,7 +201,7 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 			.flatMap(List<MethodInvocation>::stream)
 			.collect(Collectors.toList());
 
-		return new TransformationData(block, firstAssertThatStatement, statementsToRemove, assertThatInvocation,
+		return new TransformationData(firstAssertThatStatement, statementsToRemove, assertThatInvocation,
 				invocationChainElementList);
 	}
 
@@ -221,12 +221,12 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		return chainElements;
 	}
 
-	private void transform(TransformationData data) {
+	private void transform(Block block, TransformationData data) {
 		MethodInvocation newChain = createNewMethodInvocationChain1(data.getAssertThatInvocation(),
 				data.getInvocationChainElementList());
 		AST ast = astRewrite.getAST();
 		ExpressionStatement newExpressionStatement = ast.newExpressionStatement(newChain);
-		ListRewrite listRewrite = astRewrite.getListRewrite(data.getBlock(), Block.STATEMENTS_PROPERTY);
+		ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
 		listRewrite.insertBefore(newExpressionStatement, data.getFirstAssertThatStatement(), null);
 		data.getAssertJAssertThatStatementsToRemove()
 			.forEach(statement -> astRewrite.remove(statement, null));
