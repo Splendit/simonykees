@@ -65,7 +65,8 @@ class FunctionalInterfaceResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("() -> {\n  System.out.println();\n}\n", event.getCodePreview()),
 				() -> assertEquals(34, event.getHighlightLength()),
 				() -> assertEquals(102, event.getOffset()),
-				() -> assertEquals(132, event.getLength()));
+				() -> assertEquals(132, event.getLength()),
+				() -> assertEquals(5, event.getWeightValue()));
 	}
 	
 	@Test

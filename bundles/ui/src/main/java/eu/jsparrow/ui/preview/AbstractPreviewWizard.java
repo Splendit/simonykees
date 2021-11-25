@@ -19,7 +19,7 @@ public abstract class AbstractPreviewWizard extends Wizard {
 
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
-	public AbstractPreviewWizard() {
+	protected AbstractPreviewWizard() {
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 	}
 

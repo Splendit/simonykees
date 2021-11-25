@@ -190,14 +190,14 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	 * Does NOT check license validity.
 	 * 
 	 * @return whether the type of the validation result is either
-	 *         {@link LicenseType#FLOATING} or {@link LicenseType#NODE_LOCKED}.
+	 *         {@link LicenseType#FLOATING}, {@link LicenseType#NODE_LOCKED}, or {@link LicenseType#PAY_PER_USE}.
 	 */
 	public boolean isProLicense() {
 		if (result == null) {
 			return false;
 		}
 		LicenseType type = result.getLicenseType();
-		return type == LicenseType.FLOATING || type == LicenseType.NODE_LOCKED;
+		return type == LicenseType.FLOATING || type == LicenseType.NODE_LOCKED || type == LicenseType.PAY_PER_USE;
 	}
 
 	@Override
@@ -221,7 +221,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 					NLS.bind(Messages.UpdateLicenseDialog_error_couldNotValidate, e.getMessage()));
 		}
 		String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
-		String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
+		String moduleNr = properties.getProperty("license.floatingModuleNr"); //$NON-NLS-1$
 
 		String licenseKey = key;
 		String endpoint = ""; //$NON-NLS-1$
@@ -251,6 +251,9 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 		}
 
+		if(validationResult.getLicenseType() == LicenseType.PAY_PER_USE) {
+			moduleNr = properties.getProperty("license.payPerUseModuleNr"); //$NON-NLS-1$
+		}
 		LicenseModel persitModel = factoryService.createNewModel(validationResult.getKey(), secret, productNr, moduleNr,
 				validationResult.getLicenseType(), name, validationResult.getExpirationDate());
 		if (endpointEncryption.isEncryptedKey(key)) {
@@ -464,5 +467,25 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	public void setShouldContinueWithSelectRules(boolean shouldContinue) {
 		shouldContinueWithSelectRules = shouldContinue;
+	}
+	
+	public void reserveQuantity(int credit) {
+		LicenseModel model = tryLoadModelFromPersistence();
+
+		Optional<String> encryptedEndpointOpt = loadEncryptedEndpointFromPersistence();
+
+		try {
+			String endpoint = ""; //$NON-NLS-1$
+			if (encryptedEndpointOpt.isPresent()) {
+				endpoint = endpointEncryption.decryptEndpoint(encryptedEndpointOpt.get());
+			}
+
+			licenseService.reserveQuantity(model, credit, endpoint);
+		} catch (ValidationException | EndpointEncryptionException e) {
+			logger.error("Failed to validate license", e); //$NON-NLS-1$
+			result = new LicenseValidationResult(model.getType(), "", false, //$NON-NLS-1$
+					NLS.bind(Messages.MessageDialog_licensingError_failedToValidate, e.getMessage()),
+					model.getExpirationDate());
+		}
 	}
 }

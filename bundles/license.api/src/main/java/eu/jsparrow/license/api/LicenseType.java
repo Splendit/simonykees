@@ -12,6 +12,7 @@ package eu.jsparrow.license.api;
 public enum LicenseType {
 	FLOATING,
 	NODE_LOCKED,
+	PAY_PER_USE,
 	DEMO,
 	NONE;
 }

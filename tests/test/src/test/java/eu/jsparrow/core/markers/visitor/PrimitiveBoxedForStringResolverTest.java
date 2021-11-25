@@ -50,7 +50,8 @@ class PrimitiveBoxedForStringResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("Integer.toString(4)", event.getCodePreview()),
 				() -> assertEquals(19, event.getHighlightLength()),
 				() -> assertEquals(106, event.getOffset()),
-				() -> assertEquals(25, event.getLength()));
+				() -> assertEquals(25, event.getLength()),
+				() -> assertEquals(5, event.getWeightValue()));
 	}
 	
 	@Test

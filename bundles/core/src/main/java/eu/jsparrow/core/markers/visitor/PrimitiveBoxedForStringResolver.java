@@ -12,8 +12,11 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.rule.RuleDescriptionFactory;
+import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
 import eu.jsparrow.core.visitor.impl.PrimitiveBoxedForStringASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RuleDescription;
 
 /**
  * A visitor for resolving one issue of type
@@ -27,9 +30,12 @@ public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTV
 	public static final String ID = PrimitiveBoxedForStringResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
+	private RuleDescription description;
 
 	public PrimitiveBoxedForStringResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
+		this.description = RuleDescriptionFactory
+			.findByRuleId(PrimitiveBoxedForStringRule.RULE_ID);
 	}
 
 	@Override
@@ -64,9 +70,10 @@ public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTV
 				.length();
 		}
 
+		int credit = description.getCredit();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.PrimitiveBoxedForStringResolver_name,
 				Messages.PrimitiveBoxedForStringResolver_message, javaElement, highlightLenght, node,
-				newNode);
+				newNode, credit);
 		addMarkerEvent(event);
 	}
 

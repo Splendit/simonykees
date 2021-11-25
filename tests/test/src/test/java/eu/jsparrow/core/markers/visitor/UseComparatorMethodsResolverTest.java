@@ -57,7 +57,8 @@ class UseComparatorMethodsResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("Comparator.naturalOrder()", event.getCodePreview()),
 				() -> assertEquals(25, event.getHighlightLength()),
 				() -> assertEquals(151, event.getOffset()),
-				() -> assertEquals(32, event.getLength()));
+				() -> assertEquals(32, event.getLength()),
+				() -> assertEquals(5, event.getWeightValue()));
 	}
 	
 	@Test

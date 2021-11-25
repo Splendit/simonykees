@@ -47,7 +47,6 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.ResourceHelper;
 
 /**
  * Lists all rules as checkboxes and a description for the currently selected
@@ -94,7 +93,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 
-	public AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
+	protected AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
 			AbstractSelectRulesWizardControler controler) {
 		super(Messages.SelectRulesWizardPage_page_name);
 		setTitle(Messages.SelectRulesWizardPage_title);

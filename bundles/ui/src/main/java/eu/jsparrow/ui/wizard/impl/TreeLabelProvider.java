@@ -35,6 +35,7 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 
 	private ResourceManager resourceManager;
 
+	private Image tickmarkGreenIconImage;
 	private Image greenFreeRuleImage;
 	private static final String F_GREEN_ICON_PATH = "icons/f-icon-green-14px.png"; //$NON-NLS-1$
 
@@ -44,7 +45,7 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 		IPath iPathTickMarkGreen = new Path(F_GREEN_ICON_PATH);
 		URL urlTickMarkGreen = FileLocator.find(bundle, iPathTickMarkGreen, new HashMap<>());
 		ImageDescriptor imageDescTickMarkGreen = ImageDescriptor.createFromURL(urlTickMarkGreen);
-		Image tickmarkGreenIconImage = imageDescTickMarkGreen.createImage();
+		tickmarkGreenIconImage = imageDescTickMarkGreen.createImage();
 		ImageData imageDataTickmarkGreen = tickmarkGreenIconImage.getImageData();
 		greenFreeRuleImage = new Image(Display.getCurrent(), imageDataTickmarkGreen);
 	}
@@ -105,6 +106,8 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 			resourceManager.dispose();
 			resourceManager = null;
 		}
+		greenFreeRuleImage.dispose();
+		tickmarkGreenIconImage.dispose();
 	}
 
 	protected ResourceManager getResourceManager() {

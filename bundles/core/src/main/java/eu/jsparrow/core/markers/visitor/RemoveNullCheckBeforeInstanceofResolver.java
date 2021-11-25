@@ -12,8 +12,11 @@ import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.rule.RuleDescriptionFactory;
+import eu.jsparrow.core.rule.impl.RemoveNullCheckBeforeInstanceofRule;
 import eu.jsparrow.core.visitor.impl.RemoveNullCheckBeforeInstanceofASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RuleDescription;
 
 /**
  * A visitor for resolving one issue of type
@@ -27,9 +30,12 @@ public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBefo
 	public static final String ID = RemoveNullCheckBeforeInstanceofResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
+	private RuleDescription description;
 
 	public RemoveNullCheckBeforeInstanceofResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
+		this.description = RuleDescriptionFactory
+				.findByRuleId(RemoveNullCheckBeforeInstanceofRule.RULE_ID);
 	}
 
 	@Override
@@ -53,9 +59,10 @@ public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBefo
 	@Override
 	public void addMarkerEvent(Expression leftOperand, InfixExpression infixExpression, Expression expression) {
 		ASTNode newNode = createRepresentingNode(infixExpression, expression);
+		int credit = description.getCredit();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.RemoveNullCheckBeforeInstanceofResolver_name,
 				Messages.RemoveNullCheckBeforeInstanceofResolver_message,
-				javaElement, 0, leftOperand, newNode);
+				javaElement, 0, leftOperand, newNode, credit);
 		addMarkerEvent(event);
 	}
 

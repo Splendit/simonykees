@@ -15,6 +15,7 @@ import eu.jsparrow.license.netlicensing.model.StatusDetail;
 import eu.jsparrow.license.netlicensing.validation.impl.response.Parser;
 import eu.jsparrow.license.netlicensing.validation.impl.response.model.FloatingResponse;
 import eu.jsparrow.license.netlicensing.validation.impl.response.model.MultiFeatureResponse;
+import eu.jsparrow.license.netlicensing.validation.impl.response.model.PayPerUseResponse;
 import eu.jsparrow.license.netlicensing.validation.impl.response.model.SubscriptionResponse;
 
 /**
@@ -44,16 +45,26 @@ public class ResponseEvaluator {
 		logger.debug("Evaluating validation result"); //$NON-NLS-1$
 		parser.parseValidationResult(response);
 
+		if(isPayPerUseLicense()) {
+			return evaluatePayPerUse();
+		}
 		SubscriptionResponse subscription = parser.getSubscription();
+		if (subscription != null) {
+			if (subscription.isValid()) {
+				return evaluateNonExpiredLicense();
+			}
+			return evaluateExpiredLicense();
 
-		if (subscription == null) {
-			throw new ValidationException(ExceptionMessages.Netlicensing_validationError_noSubscriptionReceived);
 		}
-
-		if (subscription.isValid()) {
-			return evaluateNonExpiredLicense();
+		throw new ValidationException(ExceptionMessages.Netlicensing_validationError_noSubscriptionReceived);
+	}
+	
+	private boolean isPayPerUseLicense() {
+		PayPerUseResponse payPerUse = parser.getPayPerUse();
+		if(payPerUse == null) {
+			return false;
 		}
-		return evaluateExpiredLicense();
+		return payPerUse.getRemainingQuantity() != null;
 	}
 
 	/**
@@ -74,6 +85,7 @@ public class ResponseEvaluator {
 	 *             derive the represented license type.
 	 */
 	private NetlicensingValidationResult evaluateExpiredLicense() throws ValidationException {
+
 		logger.debug("Evaluating expired license"); //$NON-NLS-1$
 		MultiFeatureResponse multiFeature = parser.getMultiFeature();
 		SubscriptionResponse subscription = parser.getSubscription();
@@ -140,6 +152,22 @@ public class ResponseEvaluator {
 				StatusDetail.FLOATING_OUT_OF_SESSIONS);
 	}
 
+	private NetlicensingValidationResult evaluatePayPerUse() {
+		logger.debug("Evaluating Pay-Per-Use license"); //$NON-NLS-1$
+		PayPerUseResponse payPerUse = parser.getPayPerUse();
+		StatusDetail status = payPerUse.isValid() ? StatusDetail.PAY_PER_USE : StatusDetail.PAY_PER_USE_OUT_OF_CREDIT;
+		ZonedDateTime offlineExpiration = ZonedDateTime.now()
+			.plusMinutes(OFFLINE_VALIDITY_DURATION_MINUTES);
+		return new NetlicensingValidationResult.Builder()
+			.withLicenseType(LicenseType.PAY_PER_USE)
+			.withKey(key)
+			.withValid(payPerUse.isValid())
+			.withDetail(status.getUserMessage())
+			.withOfflineExpirationTime(offlineExpiration)
+			.withCredit(payPerUse.getRemainingQuantity())
+			.build();
+	}
+
 	private NetlicensingValidationResult createValidationResult(LicenseType licenseType, boolean valid,
 			ZonedDateTime expireDate, StatusDetail statusInfo) {
 		return createValidationResult(licenseType, valid, expireDate, ZonedDateTime.now()
@@ -152,8 +180,14 @@ public class ResponseEvaluator {
 				"Creating validation result with type={}, valid={}, expireDate={}, offlineExpire={}, statusInfo={}", //$NON-NLS-1$
 				licenseType, valid, expireDate, offlineExpire, statusInfo);
 
-		return new NetlicensingValidationResult(licenseType, key, valid, statusInfo.getUserMessage(), expireDate,
-				offlineExpire);
+		return new NetlicensingValidationResult.Builder()
+			.withLicenseType(licenseType)
+			.withKey(key)
+			.withValid(valid)
+			.withDetail(statusInfo.getUserMessage())
+			.withExpirationDate(expireDate)
+			.withOfflineExpirationTime(offlineExpire)
+			.build();
 	}
 
 }
