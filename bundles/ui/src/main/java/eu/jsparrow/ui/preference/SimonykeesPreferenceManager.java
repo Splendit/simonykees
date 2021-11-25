@@ -11,6 +11,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
 import eu.jsparrow.ui.preference.profile.DefaultProfile;
 import eu.jsparrow.ui.preference.profile.EmptyProfile;
 import eu.jsparrow.ui.preference.profile.FreeRulesProfile;
@@ -268,6 +269,7 @@ public class SimonykeesPreferenceManager {
 				store.getDefaultString(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT));
 
 		store.setValue(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY, true);
+		store.setValue(SimonykeesPreferenceConstants.ACTIVE_MARKERS, getDefaultActiveMarkers());
 
 		profiles.clear();
 		defaultProfile = new DefaultProfile();
@@ -286,5 +288,36 @@ public class SimonykeesPreferenceManager {
 	public static void resetProfilesList() {
 		profiles.clear();
 		loadProfilesFromStore();
+	}
+	
+	public static List<String> getAllActiveMarkers() {
+		String value = store.getString(SimonykeesPreferenceConstants.ACTIVE_MARKERS);
+		return Arrays.asList(value.split(","));
+	}
+	
+	public static void setAllActiveMarkers(List<String>activeMarkers) {
+		String newValue = String.join(",", activeMarkers);
+		store.setValue(SimonykeesPreferenceConstants.ACTIVE_MARKERS, newValue);		
+	}
+	
+	public static String getDefaultActiveMarkers() {
+		DefaultActiveMarkers defaultMarkers = new DefaultActiveMarkers();
+		return String.join(",", defaultMarkers.getActiveMarkers());
+	}
+	
+	public static  void addActiveMarker(String marker) {
+		List<String> activeMarkers = new ArrayList<>(getAllActiveMarkers());
+		if(activeMarkers.contains(marker)) {
+			return;
+		}
+		activeMarkers.add(marker);
+		setAllActiveMarkers(activeMarkers);
+	}
+	
+	public static void removeActiveMarker(String marker) {
+		List<String> activeMarkers = new ArrayList<>(getAllActiveMarkers());
+		if(activeMarkers.remove(marker)) {
+			setAllActiveMarkers(activeMarkers);
+		}
 	}
 }
