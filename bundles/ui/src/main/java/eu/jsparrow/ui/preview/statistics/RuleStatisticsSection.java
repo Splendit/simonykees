@@ -83,13 +83,6 @@ public class RuleStatisticsSection {
 		initTechDebtLabel(composite);
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		composite.addDisposeListener(e -> {
-			techDebtLabel.getImage()
-				.dispose();
-			issuesFixedLabel.getImage()
-				.dispose();
-
-		});
 	}
 
 	protected void initIssuesFixedLabel(Composite composite) {

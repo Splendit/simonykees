@@ -106,15 +106,6 @@ public class MinimalStatisticsSection implements StatisticsSection {
 
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		composite.addDisposeListener(e -> {
-			totalExecutionTime.getImage()
-				.dispose();
-			totalIssuesFixed.getImage()
-				.dispose();
-			totalHoursSaved.getImage()
-				.dispose();
-		});
 	}
 
 	@Override

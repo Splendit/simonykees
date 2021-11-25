@@ -12,6 +12,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -60,6 +61,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	protected StatisticsSection statisticsSection;
 	protected StatisticsSection summaryPageStatisticsSection;
 	protected StatisticsSectionUpdater updater;
+	private Image windowIcon;
 	
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private StandaloneStatisticsMetadata statisticsMetadata;
@@ -80,7 +82,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.getActiveWorkbenchWindow()
 			.getShell();
 		setNeedsProgressMonitor(true);
-		org.eclipse.jface.window.Window.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
+		windowIcon = ResourceHelper.createImage(WINDOW_ICON);
+		org.eclipse.jface.window.Window.setDefaultImage(windowIcon);
 	}
 
 	@Override
@@ -298,6 +301,9 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public void dispose() {
 		refactoringPipeline.clearStates();
+		statisticsSection.dispose();
+		windowIcon.dispose();
+		summaryPageStatisticsSection.dispose();
 		super.dispose();
 	}
 

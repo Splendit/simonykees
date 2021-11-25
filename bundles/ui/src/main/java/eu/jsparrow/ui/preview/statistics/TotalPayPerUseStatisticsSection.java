@@ -12,6 +12,7 @@ import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -40,10 +41,15 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 
 	private RefactoringPipeline refactoringPipeline;
 	private CLabel totalExecutionTime;
+	private Image totalExecutionTimeImage;
 	private CLabel totalIssuesFixed;
+	private Image totalIssuesFixedImage;
 	private CLabel totalHoursSaved;
+	private Image totalHoursSavedImage;
 	private CLabel totalRequiredCredit;
+	private Image totalRequiredCreditImage;
 	private CLabel availableCredit;
+	private Image availableCreditImage;
 
 	private StatisticsSectionPageModel model;
 
@@ -117,39 +123,31 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 
 		totalExecutionTime = new CLabel(composite, SWT.NONE);
 		totalExecutionTime.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		totalExecutionTime.setImage(ResourceHelper.createImage("icons/fa-hourglass-half.png"));//$NON-NLS-1$
+		totalExecutionTimeImage = ResourceHelper.createImage("icons/fa-hourglass-half.png"); //$NON-NLS-1$
+		totalExecutionTime.setImage(totalExecutionTimeImage);
 
 		totalIssuesFixed = new CLabel(composite, SWT.NONE);
 		totalIssuesFixed.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		totalIssuesFixed.setImage(ResourceHelper.createImage("icons/fa-bolt.png"));//$NON-NLS-1$
+		totalIssuesFixedImage = ResourceHelper.createImage("icons/fa-bolt.png"); //$NON-NLS-1$
+		totalIssuesFixed.setImage(totalIssuesFixedImage);
 
 		totalHoursSaved = new CLabel(composite, SWT.NONE);
 		totalHoursSaved.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		totalHoursSaved.setImage(ResourceHelper.createImage("icons/fa-clock.png"));//$NON-NLS-1$
+		totalHoursSavedImage = ResourceHelper.createImage("icons/fa-clock.png"); //$NON-NLS-1$
+		totalHoursSaved.setImage(totalHoursSavedImage);
 
 		totalRequiredCredit = new CLabel(composite, SWT.NONE);
 		totalRequiredCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		totalRequiredCredit.setImage(ResourceHelper.createImage("icons/fa-bolt.png"));//$NON-NLS-1$
+		totalRequiredCreditImage = ResourceHelper.createImage("icons/fa-bolt.png"); //$NON-NLS-1$
+		totalRequiredCredit.setImage(totalRequiredCreditImage);
 
 		availableCredit = new CLabel(composite, SWT.NONE);
 		availableCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		availableCredit.setImage(ResourceHelper.createImage("icons/fa-clock.png"));//$NON-NLS-1$
+		availableCreditImage = ResourceHelper.createImage("icons/fa-clock.png"); //$NON-NLS-1$
+		availableCredit.setImage(availableCreditImage);
 
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		rootComposite.addDisposeListener(e -> {
-			totalExecutionTime.getImage()
-				.dispose();
-			totalIssuesFixed.getImage()
-				.dispose();
-			totalHoursSaved.getImage()
-				.dispose();
-			totalRequiredCredit.getImage()
-				.dispose();
-			availableCredit.getImage()
-				.dispose();
-		});
 	}
 
 	@Override
@@ -183,15 +181,10 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 
 	@Override
 	public void dispose() {
-		totalExecutionTime.getImage()
-			.dispose();
-		totalIssuesFixed.getImage()
-			.dispose();
-		totalHoursSaved.getImage()
-			.dispose();
-		totalRequiredCredit.getImage()
-			.dispose();
-		availableCredit.getImage()
-			.dispose();
+		totalExecutionTimeImage.dispose();
+		totalIssuesFixedImage.dispose();
+		totalHoursSavedImage.dispose();
+		totalRequiredCreditImage.dispose();
+		availableCreditImage.dispose();
 	}
 }
