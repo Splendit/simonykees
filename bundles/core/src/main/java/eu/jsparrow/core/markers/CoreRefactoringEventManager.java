@@ -45,6 +45,19 @@ public class CoreRefactoringEventManager implements RefactoringEventManager {
 		}
 	}
 
+
+	@Override
+	public void discoverRefactoringEvents(ICompilationUnit iCompilationUnit, List<String>markerIds) {
+		// FIXME remove the overload and fix tests. 
+		CompilationUnit compilationUnit = RefactoringUtil.parse(iCompilationUnit);
+		List<AbstractASTRewriteASTVisitor> resolvers = ResolverVisitorsFactory.getAllResolvers(markerIds, node -> true);
+		for (AbstractASTRewriteASTVisitor resolver : resolvers) {
+			final ASTRewrite astRewrite = ASTRewrite.create(compilationUnit.getAST());
+			resolver.setASTRewrite(astRewrite);
+			compilationUnit.accept(resolver);
+		}
+	}
+
 	@Override
 	public void resolve(ICompilationUnit iCompilationUnit, String resolverName, int offset) {
 		Predicate<ASTNode> positionChecker = node -> {

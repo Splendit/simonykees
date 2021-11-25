@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -69,6 +70,25 @@ public class ResolverVisitorsFactory {
 			RefactoringMarkerListener listener = RefactoringMarkers.getFor(name);
 			resolver.addMarkerListener(listener);
 			resolvers.add(resolver);
+		});
+		return resolvers;
+	}
+
+	public static Set<String> getAllMarkerIds() {
+		return registry.keySet();
+	}
+
+	public static List<AbstractASTRewriteASTVisitor> getAllResolvers(List<String> markerIds,
+			Predicate<ASTNode> checker) {
+		// FIXME remove the overload if not used.
+		List<AbstractASTRewriteASTVisitor> resolvers = new ArrayList<>();
+		registry.forEach((name, generatingFunction) -> {
+			if (markerIds.contains(name)) {
+				AbstractASTRewriteASTVisitor resolver = generatingFunction.apply(checker);
+				RefactoringMarkerListener listener = RefactoringMarkers.getFor(name);
+				resolver.addMarkerListener(listener);
+				resolvers.add(resolver);
+			}
 		});
 		return resolvers;
 	}
