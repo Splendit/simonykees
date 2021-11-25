@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -103,48 +102,48 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 			return Optional.empty();
 		}
 
-		List<SimpleName> simpleNameArguments = ASTNodeUtil.returnTypedList(assumedAssertThatInvocation.arguments(),
-				SimpleName.class);
-		if (simpleNameArguments.size() != 1) {
+		List<Expression> assertThatArguments = ASTNodeUtil.convertToTypedList(assumedAssertThatInvocation.arguments(),
+				Expression.class);
+		if (assertThatArguments.size() != 1) {
 			return Optional.empty();
 		}
+
+		Expression assertThatArgument = assertThatArguments.get(0);
 
 		IMethodBinding assumedAssertThatMethodBinding = assumedAssertThatInvocation.resolveMethodBinding();
 		if (assumedAssertThatMethodBinding == null) {
 			return Optional.empty();
 		}
-		if (!ClassRelationUtil.isContentOfType(assumedAssertThatMethodBinding.getDeclaringClass(), ORG_ASSERTJ_CORE_API_ASSERTIONS)) {
-			return Optional.empty();
-		}
-		
-		ITypeBinding assertThatInvocationTypeBinding = assumedAssertThatInvocation.resolveTypeBinding();		
-		ITypeBinding methodInvocationTypeBinding = methodInvocation.resolveTypeBinding();
-		
-		if (!ClassRelationUtil.compareITypeBinding(assertThatInvocationTypeBinding,
-				methodInvocationTypeBinding)) {		
+
+		if (!ClassRelationUtil.isContentOfType(assumedAssertThatMethodBinding.getDeclaringClass(),
+				ORG_ASSERTJ_CORE_API_ASSERTIONS)) {
 			return Optional.empty();
 		}
 
-		String assertThatArgumentIdentifier = simpleNameArguments.get(0)
-			.getIdentifier();
+		ITypeBinding assertThatInvocationTypeBinding = assumedAssertThatInvocation.resolveTypeBinding();
+		ITypeBinding methodInvocationTypeBinding = methodInvocation.resolveTypeBinding();
+
+		if (!ClassRelationUtil.compareITypeBinding(assertThatInvocationTypeBinding,
+				methodInvocationTypeBinding)) {
+			return Optional.empty();
+		}
 
 		AssertJAssertThatStatementData assertJAssertThatStatementData = new AssertJAssertThatStatementData(
-				assumedAssertThatInvocation, assertThatArgumentIdentifier, chainFollowingAssertThat,
+				assumedAssertThatInvocation, assertThatArgument, chainFollowingAssertThat,
 				expressionStatement);
 
 		return Optional.of(assertJAssertThatStatementData);
 	}
 
 	private List<AssertJAssertThatStatementData> findSubsequentAssertionDataOnSameObject(
-			String expectedArgumentIdentifier, List<Statement> statements) {
+			AssertThatArgumentMatcher argumentMatcher, List<Statement> statements) {
 
 		List<AssertJAssertThatStatementData> subsequentAssertionDataList = new ArrayList<>();
 		for (int i = 0; i < statements.size(); i++) {
 			Statement statement = statements.get(i);
 			AssertJAssertThatStatementData assertJAssertThatStatementData = findAssertThatStatementData(
 					statement)
-						.filter(data -> data.getAssertThatArgumentIdentifier()
-							.equals(expectedArgumentIdentifier))
+						.filter(argumentMatcher::isMatchingAssertThatArgument)
 						.orElse(null);
 			if (assertJAssertThatStatementData != null) {
 				subsequentAssertionDataList.add(assertJAssertThatStatementData);
@@ -164,10 +163,16 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 			return Optional.empty();
 		}
 
-		String expectedArgumentIdentifier = firstAssertJAssertThatStatementData
-			.getAssertThatArgumentIdentifier();
+		AssertThatArgumentMatcher argumentMatcher = AssertThatArgumentMatcher
+			.findAssertThatArgumentMatcher(firstAssertJAssertThatStatementData)
+			.orElse(null);
+
+		if (argumentMatcher == null) {
+			return Optional.empty();
+		}
+
 		List<AssertJAssertThatStatementData> subsequentDataOnSameObject = findSubsequentAssertionDataOnSameObject(
-				expectedArgumentIdentifier, followingStatements);
+				argumentMatcher, followingStatements);
 
 		if (subsequentDataOnSameObject.isEmpty()) {
 			return Optional.empty();
