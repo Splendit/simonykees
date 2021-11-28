@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
 /**
@@ -54,7 +55,15 @@ class AssertThatArgumentMatcher {
 
 		if (assertThatArgument.getNodeType() == ASTNode.FIELD_ACCESS) {
 			FieldAccess fieldAccess = (FieldAccess) assertThatArgument;
-			return createOptionalOf(expression -> astMatcher.match(fieldAccess, expression));
+			if (isSupportedFieldAccess(fieldAccess)) {
+				return createOptionalOf(expression -> astMatcher.match(fieldAccess, expression));
+			}
+			return Optional.empty();
+		}
+
+		if (assertThatArgument.getNodeType() == ASTNode.THIS_EXPRESSION) {
+			ThisExpression thisExpression = (ThisExpression) assertThatArgument;
+			return createOptionalOf(expression -> astMatcher.match(thisExpression, expression));
 		}
 
 		if (assertThatArgument.getNodeType() == ASTNode.SUPER_FIELD_ACCESS) {
@@ -83,6 +92,19 @@ class AssertThatArgumentMatcher {
 		}
 
 		return Optional.empty();
+	}
+
+	private static boolean isSupportedFieldAccess(FieldAccess fieldAccess) {
+		Expression fieldAccessExpression = fieldAccess.getExpression();
+
+		if (fieldAccessExpression != null) {
+			if (fieldAccessExpression.getNodeType() == ASTNode.FIELD_ACCESS) {
+				return isSupportedFieldAccess((FieldAccess) fieldAccessExpression);
+			}
+			return fieldAccessExpression.getNodeType() == ASTNode.THIS_EXPRESSION ||
+					fieldAccessExpression.getNodeType() == ASTNode.SUPER_FIELD_ACCESS;
+		}
+		return false;
 	}
 
 	private static Optional<AssertThatArgumentMatcher> createOptionalOf(
