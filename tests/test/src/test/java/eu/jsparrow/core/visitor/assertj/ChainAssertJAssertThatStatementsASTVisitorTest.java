@@ -1,84 +1,60 @@
 package eu.jsparrow.core.visitor.assertj;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
+import eu.jsparrow.common.UsesJDTUnitFixture;
 
 @SuppressWarnings("nls")
-public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesSimpleJDTUnitFixture {
+public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
 		addDependency("org.assertj", "assertj-core", "3.21.0");
-		fixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
-		fixture.addImport("org.assertj.core.api.Assertions.atIndex", true, false);
-		setVisitor(new ChainAssertJAssertThatStatementsASTVisitor());
+		setDefaultVisitor(new ChainAssertJAssertThatStatementsASTVisitor());
+	}
+
+	@AfterEach
+	public void tearDown() throws Exception {
+		fixtureProject.clear();
 	}
 
 	@Test
-	public void visit_AllAssertionsOnSameList_shouldTransform() throws Exception {
+	public void visit_AssertThatIsNotNullAndIsNotEmpty_shouldTransform() throws Exception {
 
-		fixture.addImport(java.util.Arrays.class.getName());
-		fixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.Arrays.class.getName());
 
-		String original = "" + //
-				"		List<String> stringList = Arrays.asList(\"String-1\", \"String-2\", \"String-3\", \"String-4\");\n"
+		String original = "" +
+				"	List<String> stringList = Arrays.asList(\"s1\", \"s2\");\n"
+				+ "\n"
+				+ "	public void testIsNotNullIsNotEmpty() {\n"
 				+ "		assertThat(stringList).isNotNull();\n"
 				+ "		assertThat(stringList).isNotEmpty();\n"
-				+ "		assertThat(stringList) //\n"
-				+ "				.contains(\"String-1\", atIndex(0))\n"
-				+ "				.contains(\"String-2\", atIndex(1))\n"
-				+ "				.contains(\"String-3\", atIndex(2))\n"
-				+ "				.contains(\"String-4\", atIndex(3));\n"
-				+ "		assertThat(stringList).containsAll(Arrays.asList(\"String-3\", \"String-4\"));";
+				+ "	}";
 
 		String expected = "" +
-				"		List<String> stringList = Arrays.asList(\"String-1\", \"String-2\", \"String-3\", \"String-4\");\n"
-				+ "		assertThat(stringList)"
-				+ "			.isNotNull()"
-				+ "			.isNotEmpty()"
-				+ "			.contains(\"String-1\", atIndex(0))"
-				+ "			.contains(\"String-2\", atIndex(1))"
-				+ "			.contains(\"String-3\", atIndex(2))\n"
-				+ "			.contains(\"String-4\", atIndex(3))"
-				+ "			.containsAll(Arrays.asList(\"String-3\", \"String-4\"));\n"
-				+ "";
+				"	List<String> stringList = Arrays.asList(\"s1\", \"s2\");\n"
+				+ "\n"
+				+ "	public void testIsNotNullIsNotEmpty() {\n"
+				+ "		assertThat(stringList).isNotNull().isNotEmpty();\n"
+				+ "	}";
 
 		assertChange(original, expected);
 	}
 
-	@Test
-	public void visit_AssertionsOnTwoDifferentLists_shouldNotTransform() throws Exception {
-
-		fixture.addImport(java.util.Arrays.class.getName());
-		fixture.addImport(java.util.List.class.getName());
-
-		String original = "" + //
-				"		List<String> stringList = Arrays.asList(\"\");\n"
-				+ "		List<String> stringList2 = Arrays.asList(\"String-1\", \"String-2\", \"String-3\", \"String-4\");\n"
-				+ "		assertThat(stringList).isNotNull();\n"
-				+ "		assertThat(stringList).isNotEmpty();\n"
-				+ "		assertThat(stringList2) //\n"
-				+ "				.contains(\"String-1\", atIndex(0)) //\n"
-				+ "				.contains(\"String-2\", atIndex(1)) //\n"
-				+ "				.contains(\"String-3\", atIndex(2)) //\n"
-				+ "				.contains(\"String-4\", atIndex(3));\n"
-				+ "		assertThat(stringList2).containsAll(Arrays.asList(\"String-3\", \"String-4\"));";
-
-		String expected = "" +
-				"		List<String> stringList = Arrays.asList(\"\");\n"
-				+ "		List<String> stringList2 = Arrays.asList(\"String-1\", \"String-2\", \"String-3\", \"String-4\");\n"
-				+ "		assertThat(stringList)\n"
-				+ "			.isNotNull()\n"
-				+ "			.isNotEmpty();\n"
-				+ "		assertThat(stringList2) //\n"
-				+ "				.contains(\"String-1\", atIndex(0))\n"
-				+ "				.contains(\"String-2\", atIndex(1))\n"
-				+ "				.contains(\"String-3\", atIndex(2))\n"
-				+ "				.contains(\"String-4\", atIndex(3))\n"
-				+ "				.containsAll(Arrays.asList(\"String-3\", \"String-4\"));";
-		
-		assertChange(original, expected);
-	}
+	// @Test
+	// public void visit__shouldTransform() throws Exception {
+	//
+	//
+	// String original = "" +
+	// "";
+	//
+	// String expected = "" +
+	// "";
+	//
+	// assertChange(original, expected);
+	// }
 }
