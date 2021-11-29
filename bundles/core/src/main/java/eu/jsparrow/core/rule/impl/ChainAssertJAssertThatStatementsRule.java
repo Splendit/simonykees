@@ -34,7 +34,7 @@ public class ChainAssertJAssertThatStatementsRule
 		this.ruleDescription = new RuleDescription(Messages.ChainAssertJAssertThatStatementsRule_name,
 				Messages.ChainAssertJAssertThatStatementsRule_description,
 				Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+				Arrays.asList(Tag.JAVA_1_8, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 	}
 
 	/**
@@ -57,7 +57,7 @@ public class ChainAssertJAssertThatStatementsRule
 
 	@Override
 	protected String provideRequiredJavaVersion() {
-		return JavaCore.VERSION_1_5;
+		return JavaCore.VERSION_1_8;
 	}
 
 	@Override

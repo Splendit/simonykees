@@ -63,7 +63,7 @@ public class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Chain AssertJ AssertThat Statements"));
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+				contains(Tag.JAVA_1_8, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
 				equalTo("This rule collects subsequent invocations of the method 'org.assertj.core.api.Assertions.assertThat'"
@@ -74,7 +74,7 @@ public class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		assertThat(rule.getRequiredJavaVersion(), equalTo("1.5"));
+		assertThat(rule.getRequiredJavaVersion(), equalTo("1.8"));
 	}
 
 	@Test
@@ -84,7 +84,7 @@ public class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 
 	@Test
 	void calculateEnabledForProjectShouldBeDisabledWithJava_1_5() {
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 
 		rule.calculateEnabledForProject(testProject);
 
@@ -92,11 +92,11 @@ public class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 	}
 
 	@Test
-	public void calculateEnabledForProjectShouldBeDisabledWithJava_1_4() throws Exception {
+	public void calculateEnabledForProjectShouldBeDisabledWithJava_1_7() throws Exception {
 		addToClasspath(testProject, Arrays
 			.asList(generateMavenEntryFromDepedencyString("org.assertj", "assertj-core", "3.21.0")));
 
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
 
 		rule.calculateEnabledForProject(testProject);
 
@@ -108,7 +108,7 @@ public class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 		addToClasspath(testProject, Arrays
 			.asList(generateMavenEntryFromDepedencyString("org.assertj", "assertj-core", "3.21.0")));
 
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 
 		rule.calculateEnabledForProject(testProject);
 
