@@ -137,23 +137,17 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 	}
 
 	@Test
-	public void visit_AssertThatOnElementsOfSameList_shouldNotTransform() throws Exception {
+	public void visit_NotSupportedInvocationChainElements_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
 		defaultFixture.addImport(java.util.Arrays.class.getName());
 
 		String original = "" +
-				"	private List<String> stringList = Arrays.asList(\"String-1\", \"String-2\", \"String-3\", \"String-4\");\n"
+				"	List<String> stringList = Arrays.asList(\"String-1\", \"String-2\", \"String-3\", \"String-4\");\n"
 				+ "\n"
-				+ "	public void assertThatOnDifferentListElements() {\n"
-				+ "		assertThat(stringList)\n"
-				+ "				.element(0)\n"
-				+ "				.asString()\n"
-				+ "				.contains(\"-1\");\n"
-				+ "		assertThat(stringList)\n"
-				+ "				.element(1)\n"
-				+ "				.asString()\n"
-				+ "				.contains(\"-2\");\n"
+				+ "	public void assertThatWithNotSupportedInvocationChainElements() {\n"
+				+ "		assertThat(stringList).element(1);\n"
+				+ "		assertThat(stringList).element(0);\n"
 				+ "	}";
 
 		assertNoChange(original);

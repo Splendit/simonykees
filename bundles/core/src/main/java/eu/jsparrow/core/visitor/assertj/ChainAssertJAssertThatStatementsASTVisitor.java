@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -120,11 +119,9 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 			return Optional.empty();
 		}
 
-		ITypeBinding assertThatInvocationTypeBinding = assumedAssertThatInvocation.resolveTypeBinding();
-		ITypeBinding methodInvocationTypeBinding = methodInvocation.resolveTypeBinding();
-
-		if (!ClassRelationUtil.compareITypeBinding(assertThatInvocationTypeBinding,
-				methodInvocationTypeBinding)) {
+		boolean allChainElementsSupported = chainFollowingAssertThat.stream()
+			.allMatch(this::isSupportedAssertion);
+		if (!allChainElementsSupported) {
 			return Optional.empty();
 		}
 
@@ -133,6 +130,31 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 				expressionStatement);
 
 		return Optional.of(assertJAssertThatStatementData);
+	}
+
+	private boolean isSupportedAssertion(MethodInvocation invocation) {
+		String methodName = invocation.getName()
+			.getIdentifier();
+		if (methodName.startsWith("is") //$NON-NLS-1$
+				|| methodName.startsWith("has") //$NON-NLS-1$
+				|| methodName.startsWith("contains") //$NON-NLS-1$
+				|| methodName.startsWith("can") //$NON-NLS-1$
+				|| methodName.startsWith("doesNot") //$NON-NLS-1$
+				|| "startsWith".equals(methodName) //$NON-NLS-1$
+				|| "endsWith".equals(methodName) //$NON-NLS-1$
+				|| "matches".equals(methodName) //$NON-NLS-1$
+
+		) {
+			IMethodBinding methodBinding = invocation.resolveMethodBinding();
+			if (methodBinding != null) {
+				String returnTypeQualifiedName = methodBinding.getMethodDeclaration()
+					.getReturnType()
+					.getQualifiedName();
+
+				return "SELF".equals(returnTypeQualifiedName); //$NON-NLS-1$
+			}
+		}
+		return false;
 	}
 
 	private List<AssertJAssertThatStatementData> findSubsequentAssertionDataOnSameObject(
