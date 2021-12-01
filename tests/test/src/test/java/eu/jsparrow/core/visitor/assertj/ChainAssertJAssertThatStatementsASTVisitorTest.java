@@ -3,6 +3,8 @@ package eu.jsparrow.core.visitor.assertj;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
@@ -295,20 +297,126 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 
 		assertChange(original, expected);
 	}
-	
-	
-//	@Test
-//	public void visit__shouldTransform() throws Exception {
-//		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat",
-//				true, false);
-//
-//		String original = "" +
-//				"";
-//
-//		String expected = "" +
-//				"";
-//
-//		assertChange(original, expected);
-//	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"hasSize(helloWorld.length())",
+			"startsWith(\"Hello\")",
+			"contains(\"llo W\")",
+			"endsWith(\"World!\")",
+			"doesNotContain(\"?\")",
+			"matches(\"Hello.*\")"
+	})
+	public void visit_AssertThatWithStringAsssertions_shouldTransform(String assertion) throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+
+		String original = "" +
+				"	private String helloWorld = \"Hello World!\";\n"
+				+ "\n"
+				+ "	public void assertThatWithStringAssertion() {\n"
+				+ "		assertThat(helloWorld).isNotNull();\n"
+				+ "		assertThat(helloWorld)." + assertion + ";\n"
+				+ "	}";
+
+		String expected = "" +
+				"	private String helloWorld = \"Hello World!\";\n"
+				+ "\n"
+				+ "	public void assertThatWithStringAssertion() {\n"
+				+ "		assertThat(helloWorld).isNotNull()." + assertion + ";\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"exists()",
+			"satisfies(File::isFile)",
+			"hasFileName(\"pom.xml\")",
+			"canRead()"
+	})
+	public void visit_AssertThatWithFileAsssertions_shouldTransform(String assertion) throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+
+		defaultFixture.addImport(java.io.File.class.getName());
+
+		String original = "" +
+				"	private File file = new File(\"pom.xml\");\n"
+				+ "\n"
+				+ "	public void assertThatWithStringAssertion() {\n"
+				+ "		assertThat(file).isNotNull();\n"
+				+ "		assertThat(file)." + assertion + ";\n"
+				+ "	}";
+
+		String expected = "" +
+				"	private File file = new File(\"pom.xml\");\n"
+				+ "\n"
+				+ "	public void assertThatWithStringAssertion() {\n"
+				+ "		assertThat(file).isNotNull()." + assertion + ";\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"allSatisfy(s -> assertThat(s).startsWith(\"s\"))",
+			"anySatisfy(s -> assertThat(s).isEqualTo(\"s1\"))",
+			"noneSatisfy(s -> assertThat(s).isEqualTo(\"s3\"))",
+			"allMatch(s -> s.startsWith(\"s\"))",
+			"anyMatch(s -> s.equals(\"s1\"))",
+			"noneMatch(s -> s.equals(\"s3\"))"
+	})
+	public void visit_AssertThatWithListAsssertions_shouldTransform(String assertion) throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+
+		String original = "" +
+				"	List<String> stringList = Arrays.asList(\"s1\", \"s2\");\n"
+				+ "\n"
+				+ "	public void assertThatWithListAssertion() {\n"
+				+ "		assertThat(stringList).isNotNull();\n"
+				+ "		assertThat(stringList)." + assertion + ";\n"
+				+ "	}";
+
+		String expected = "" +
+				"	List<String> stringList = Arrays.asList(\"s1\", \"s2\");\n"
+				+ "\n"
+				+ "	public void assertThatWithListAssertion() {\n"
+				+ "		assertThat(stringList).isNotNull()." + assertion + ";\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"are(startsWithXAndDash)",
+			"have(startsWithXAndDash)"
+	})
+	public void visit_AssertThatWithConditionAssertions_shouldTransform(String assertion) throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+		defaultFixture.addImport("org.assertj.core.api.Condition");
+
+		String original = "" +
+				"	Iterable<String> strings = Arrays.asList(\"x-1\", \"x-2\", \"x-3\");\n"
+				+ "	Condition<String> startsWithXAndDash = new Condition<>(s -> s.startsWith(\"x-\"), \"starts with x and dash\");\n"
+				+ "\n"
+				+ "	public void assertThatWithConditionAssertion() {\n"
+				+ "		assertThat(strings).isNotNull();\n"
+				+ "		assertThat(strings)." + assertion + ";\n"
+				+ "	}";
+
+		String expected = "" +
+				"	Iterable<String> strings = Arrays.asList(\"x-1\", \"x-2\", \"x-3\");\n"
+				+ "	Condition<String> startsWithXAndDash = new Condition<>(s -> s.startsWith(\"x-\"), \"starts with x and dash\");\n"
+				+ "\n"
+				+ "	public void assertThatWithConditionAssertion() {\n"
+				+ "		assertThat(strings).isNotNull()." + assertion + ";\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
 }
