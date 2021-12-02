@@ -1,14 +1,12 @@
 package eu.jsparrow.core.visitor.assertj;
 
 import static java.lang.String.format;
-import static org.junit.jupiter.params.provider.Arguments.of;
 
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
@@ -22,37 +20,26 @@ class ShiftAssertJDescriptionsBeforeAssertionsASTVisitorTest extends UsesSimpleJ
 		fixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 	}
 
-	private static Stream<Arguments> createBaseCases() {
-		final String original = "assertThat(\"\").isEqualTo(\"\").%s(\"Description\");";
-		final String expected = "assertThat(\"\").%s(\"Description\").isEqualTo(\"\");";
-		return Stream.of(
-				of(format(original, "as"), 						format(expected, "as")),
-				of(format(original, "describedAs"), 			format(expected, "describedAs")),
-				of(format(original, "withFailMessage"), 		format(expected, "withFailMessage")),
-				of(format(original, "overridingErrorMessage"), 	format(expected, "overridingErrorMessage")));
-	}
-
-	private static Stream<String> missingAssertions() {
-		final String original = "assertThat(\"\").%s(\"Description\");";
-		return Stream.of(
-				format(original, "as"),
-				format(original, "describedAs"),
-				format(original, "withFailMessage"),
-				format(original, "overridingErrorMessage"));
+	private static Stream<String> settingDescription() {
+		return Stream.of("as", "describedAs", "withFailMessage", "overridingErrorMessage");
 	}
 
 	@ParameterizedTest
-	@MethodSource("createBaseCases")
-	void visit_settingDescriptorAfterAssertion_shouldTransform(String original, String expected) throws Exception {
+	@MethodSource("settingDescription")
+	void visit_settingDescriptorAfterAssertion_shouldTransform(String methodName) throws Exception {
+		final String original = format("assertThat(\"\").isEqualTo(\"\").%s(\"Description\");", methodName);
+		final String expected = format("assertThat(\"\").%s(\"Description\").isEqualTo(\"\");", methodName);
 		assertChange(original, expected);
 	}
-	
+
 	@ParameterizedTest
-	@MethodSource("missingAssertions")
-	void visit_missingAssertion_shouldNotTransform(String original) throws Exception {
+	@MethodSource("settingDescription")
+	void visit_missingAssertion_shouldNotTransform(String methodName) throws Exception {
+		final String original = format("assertThat(\"\").%s(\"Description\");",
+				methodName);
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_missingExpression_shouldNotTransform() throws Exception {
 		String original = ""
@@ -65,19 +52,54 @@ class ShiftAssertJDescriptionsBeforeAssertionsASTVisitorTest extends UsesSimpleJ
 
 		assertNoChange(original);
 	}
-	
+
+	@Test
+	void visit_missingAssertJInvocationExpression_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "class Foo {\n"
+				+ "	void as(String val) {}\n"
+				+ "}\n"
+				+ "Foo foo = new Foo();\n"
+				+ "foo.as(\"\");";
+
+		assertNoChange(original);
+	}
+
 	@Test
 	void visit_settingMultipleDescriptors_shouldNotTransform() throws Exception {
 		final String original = "assertThat(\"\").as(\"Description\").as(\"Description\");";
 		assertNoChange(original);
 	}
-	
-	@Test
-	void visit_missingAssertJAssertionInvocation_shouldNotTransform() throws Exception {
+
+	@ParameterizedTest
+	@MethodSource("settingDescription")
+	void visit_settingDescriptionBetweenAssertions_shouldNotTransform(String methodName) throws Exception {
+		String original = String.format(""
+				+ "assertThat(\"\").isEqualTo(\"\").%s(\"Description\").isEqualTo(\"\");",
+				methodName);
+		assertNoChange(original);
+	}
+
+	@ParameterizedTest
+	@MethodSource("settingDescription")
+	void visit_settingDescriptionAfterEachAssertion_shouldTransform(String methodName) throws Exception {
+		String original = String.format(""
+				+ "assertThat(\"\").isEqualTo(\"\").%s(\"Description1\").isEqualTo(\"\").%s(\"Description2\");",
+				methodName, methodName);
+		String expected = String.format(""
+				+ "assertThat(\"\").isEqualTo(\"\").%s(\"Description1\").%s(\"Description2\").isEqualTo(\"\");",
+				methodName, methodName);
+		assertChange(original, expected);
+
+	}
+
+	@ParameterizedTest
+	@MethodSource("settingDescription")
+	void visit_missingAssertJAssertionInvocation_shouldNotTransform(String methodName) throws Exception {
 		fixture.addImport("org.assertj.core.api.AbstractStringAssert");
-		String original = ""
+		String original = String.format(""
 				+ "AbstractStringAssert<?> stringAssert = null;\n"
-				+ "stringAssert.as(\"Description\");";
+				+ "stringAssert.%s(\"Description\");", methodName);
 		assertNoChange(original);
 	}
 }
