@@ -88,14 +88,14 @@ public class RuleStatisticsSection {
 	protected void initIssuesFixedLabel(Composite composite) {
 		issuesFixedLabel = new CLabel(composite, SWT.NONE);
 		issuesFixedLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		inLoveImage = ResourceHelper.createImage("icons/fa-bolt.png"); //$NON-NLS-1$
+		inLoveImage = ResourceHelper.createImage("icons/fa-bolt-002.png"); //$NON-NLS-1$
 		issuesFixedLabel.setImage(inLoveImage);
 	}
 
 	protected void initTechDebtLabel(Composite composite) {
 		techDebtLabel = new CLabel(composite, SWT.NONE);
 		techDebtLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		clockImage = ResourceHelper.createImage("icons/fa-clock.png");//$NON-NLS-1$
+		clockImage = ResourceHelper.createImage("icons/fa-clock-002.png");//$NON-NLS-1$
 		techDebtLabel.setImage(clockImage);
 	}
 

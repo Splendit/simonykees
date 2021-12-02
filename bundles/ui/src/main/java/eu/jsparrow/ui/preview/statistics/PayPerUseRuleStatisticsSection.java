@@ -57,7 +57,7 @@ public class PayPerUseRuleStatisticsSection extends RuleStatisticsSection {
 
 		requiredCredit = new CLabel(composite, SWT.NONE);
 		requiredCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
-		Image usedCreditImage = ResourceHelper.createImage("icons/fa-bolt.png"); //$NON-NLS-1$
+		Image usedCreditImage = ResourceHelper.createImage("icons/jsparrow-coin.png"); //$NON-NLS-1$
 		requiredCredit.setImage(usedCreditImage);
 
 		super.initTechDebtLabel(composite);

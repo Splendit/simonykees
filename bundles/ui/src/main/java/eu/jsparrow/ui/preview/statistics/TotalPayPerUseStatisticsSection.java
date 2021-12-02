@@ -123,27 +123,27 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 
 		totalExecutionTime = new CLabel(composite, SWT.NONE);
 		totalExecutionTime.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		totalExecutionTimeImage = ResourceHelper.createImage("icons/fa-hourglass-half.png"); //$NON-NLS-1$
+		totalExecutionTimeImage = ResourceHelper.createImage("icons/fa-hourglass-half-002.png"); //$NON-NLS-1$
 		totalExecutionTime.setImage(totalExecutionTimeImage);
 
 		totalIssuesFixed = new CLabel(composite, SWT.NONE);
 		totalIssuesFixed.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		totalIssuesFixedImage = ResourceHelper.createImage("icons/fa-bolt.png"); //$NON-NLS-1$
+		totalIssuesFixedImage = ResourceHelper.createImage("icons/fa-bolt-002.png"); //$NON-NLS-1$
 		totalIssuesFixed.setImage(totalIssuesFixedImage);
 
 		totalHoursSaved = new CLabel(composite, SWT.NONE);
 		totalHoursSaved.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		totalHoursSavedImage = ResourceHelper.createImage("icons/fa-clock.png"); //$NON-NLS-1$
+		totalHoursSavedImage = ResourceHelper.createImage("icons/fa-clock-002.png"); //$NON-NLS-1$
 		totalHoursSaved.setImage(totalHoursSavedImage);
 
 		totalRequiredCredit = new CLabel(composite, SWT.NONE);
 		totalRequiredCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		totalRequiredCreditImage = ResourceHelper.createImage("icons/fa-bolt.png"); //$NON-NLS-1$
+		totalRequiredCreditImage = ResourceHelper.createImage("icons/jsparrow-coin.png"); //$NON-NLS-1$
 		totalRequiredCredit.setImage(totalRequiredCreditImage);
 
 		availableCredit = new CLabel(composite, SWT.NONE);
 		availableCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		availableCreditImage = ResourceHelper.createImage("icons/fa-clock.png"); //$NON-NLS-1$
+		availableCreditImage = ResourceHelper.createImage("icons/jsparrow-wallet.png"); //$NON-NLS-1$
 		availableCredit.setImage(availableCreditImage);
 
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);

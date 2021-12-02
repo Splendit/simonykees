@@ -94,15 +94,15 @@ public class MinimalStatisticsSection implements StatisticsSection {
 
 		totalExecutionTime = new CLabel(composite, SWT.NONE);
 		totalExecutionTime.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		totalExecutionTime.setImage(ResourceHelper.createImage("icons/fa-hourglass-half.png"));//$NON-NLS-1$
+		totalExecutionTime.setImage(ResourceHelper.createImage("icons/fa-hourglass-half-002.png"));//$NON-NLS-1$
 
 		totalIssuesFixed = new CLabel(composite, SWT.NONE);
 		totalIssuesFixed.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		totalIssuesFixed.setImage(ResourceHelper.createImage("icons/fa-bolt.png"));//$NON-NLS-1$
+		totalIssuesFixed.setImage(ResourceHelper.createImage("icons/fa-bolt-002.png"));//$NON-NLS-1$
 
 		totalHoursSaved = new CLabel(composite, SWT.NONE);
 		totalHoursSaved.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		totalHoursSaved.setImage(ResourceHelper.createImage("icons/fa-clock.png"));//$NON-NLS-1$
+		totalHoursSaved.setImage(ResourceHelper.createImage("icons/fa-clock-002.png"));//$NON-NLS-1$
 
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
