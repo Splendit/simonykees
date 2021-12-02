@@ -23,7 +23,7 @@ import eu.jsparrow.ui.util.ResourceHelper;
  */
 public class ConfigureProfileWizard extends Wizard {
 
-	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
+	private static final String WINDOW_ICON = "icons/jsparrow-marker.png"; //$NON-NLS-1$
 
 	private ConfigureProfileSelectRulesWIzardPageModel model;
 
