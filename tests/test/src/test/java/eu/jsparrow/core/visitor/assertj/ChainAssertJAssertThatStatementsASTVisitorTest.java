@@ -419,4 +419,31 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 
 		assertChange(original, expected);
 	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"rejects(\"a\", \"b\", \"c\")",
+			"accepts(\"s-1\", \"s-2\")"
+	})
+	public void visit_PredicateAssertions_shouldTransform(String assertion) throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+		defaultFixture.addImport(java.util.function.Predicate.class.getName());
+
+		String original = "" +
+				"	Predicate<String> stringPredicate = s -> s.contains(\"-\");\n"
+				+ "\n"
+				+ "	public void assertThatWithPredicateAssertion() {\n"
+				+ "		assertThat(stringPredicate).isNotNull();\n"
+				+ "		assertThat(stringPredicate)." + assertion + ";\n"
+				+ "	}";
+
+		String expected = "" +
+				"	Predicate<String> stringPredicate = s -> s.contains(\"-\");\n"
+				+ "\n"
+				+ "	public void assertThatWithPredicateAssertion() {\n"
+				+ "		assertThat(stringPredicate).isNotNull()." + assertion + ";\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
 }

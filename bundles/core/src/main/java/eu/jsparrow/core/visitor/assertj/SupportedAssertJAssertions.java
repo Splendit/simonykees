@@ -27,7 +27,9 @@ public class SupportedAssertJAssertions {
 			"exists", //$NON-NLS-1$
 			"satisfies", //$NON-NLS-1$
 			"are", //$NON-NLS-1$
-			"have"//$NON-NLS-1$
+			"have",//$NON-NLS-1$
+			"rejects",//$NON-NLS-1$
+			"accepts"//$NON-NLS-1$
 	));
 
 	public static boolean isSupportedAssertJAssertionMethodName(String methodName) {
