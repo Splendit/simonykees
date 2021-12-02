@@ -38,7 +38,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_AssertThatWithoutSubsequentChain_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat",
@@ -56,7 +56,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_MethodNameNotAssertThat_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -78,7 +78,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_AssertThatWithMultipleArguments_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.util.Arrays.class.getName());
@@ -152,7 +152,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_FirstAssertThatWithoutFollowing_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat",
@@ -169,14 +169,13 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_AssertThatOnCreateListInvocation_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat",
 				true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
 		defaultFixture.addImport(java.util.Arrays.class.getName());
-
 
 		String original = "" +
 				"	List<String> createList() {\n"
@@ -190,15 +189,14 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 
 		assertNoChange(original);
 	}
-	
-	
+
 	@Test
 	public void visit_AssertThatOnDifferentLists_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat",
 				true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
 		defaultFixture.addImport(java.util.Arrays.class.getName());
-		
+
 		String original = "" +
 				"	List<String> stringList1 = Arrays.asList(\"String-1\", \"String-2\", \"String-3\", \"String-4\");\n"
 				+ "	List<String> stringList2 = Arrays.asList(\"String-1\", \"String-2\", \"String-3\", \"String-4\");\n"
@@ -210,14 +208,23 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 
 		assertNoChange(original);
 	}
-	
-//	@Test
-//	public void visit__shouldNotTransform() throws Exception {
-//
-//
-//		String original = "" +
-//				"";
-//
-//		assertNoChange(original);
-//	}
+
+	@Test
+	public void visit_AssertThatOnIntValueOfNewIntWrapper_shouldNotTransform() throws Exception {
+
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+
+		String original = "" +
+				"	public void assertThatOnIntValueOfNewIntWrapper() {\n"
+				+ "\n"
+				+ "		assertThat(new IntWrapper().intValue).isEqualTo(0);\n"
+				+ "		assertThat(new IntWrapper().intValue).isGreaterThan(-1);\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	class IntWrapper {\n"
+				+ "		int intValue;\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
 }
