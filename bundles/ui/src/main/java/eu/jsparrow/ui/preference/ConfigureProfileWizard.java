@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.graphics.Image;
 
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
@@ -38,7 +39,8 @@ public class ConfigureProfileWizard extends Wizard {
 		this.rules = RulesContainer.getAllRules(false);
 		this.profileId = profileId;
 		this.isProfileSetAsDefault = isProfileSetAsDefault;
-		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
+		Image windowIcon = ResourceHelper.createImage(WINDOW_ICON);
+		org.eclipse.jface.window.Window.setDefaultImage(windowIcon);
 	}
 
 	@Override
@@ -90,5 +92,10 @@ public class ConfigureProfileWizard extends Wizard {
 		} else {
 			return super.canFinish();
 		}
+	}
+	
+	@Override
+	public void dispose() {
+		org.eclipse.jface.window.Window.getDefaultImage().dispose();
 	}
 }
