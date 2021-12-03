@@ -6,17 +6,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -47,6 +46,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	public static final String ORG_ASSERTJ_CORE_API_ASSERTIONS = "org.assertj.core.api.Assertions"; //$NON-NLS-1$
+	private final ASTMatcher astMatcher = new ASTMatcher();
 
 	@Override
 	public boolean visit(Block block) {
@@ -96,59 +96,16 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		MethodInvocation assumedAssertThatInvocation = invocationChainElements.get(0);
 		List<MethodInvocation> chainFollowingAssertThat = invocationChainElements.subList(1, chainElementsCount);
 
-		if (!"assertThat".equals(assumedAssertThatInvocation.getName() //$NON-NLS-1$
-			.getIdentifier())) {
-			return Optional.empty();
-		}
-
-		List<Expression> assertThatArguments = ASTNodeUtil.convertToTypedList(assumedAssertThatInvocation.arguments(),
-				Expression.class);
-		if (assertThatArguments.size() != 1) {
-			return Optional.empty();
-		}
-
-		Expression assertThatArgument = assertThatArguments.get(0);
-
-		IMethodBinding assumedAssertThatMethodBinding = assumedAssertThatInvocation.resolveMethodBinding();
-		if (assumedAssertThatMethodBinding == null) {
-			return Optional.empty();
-		}
-
-		if (!ClassRelationUtil.isContentOfType(assumedAssertThatMethodBinding.getDeclaringClass(),
-				ORG_ASSERTJ_CORE_API_ASSERTIONS)) {
-			return Optional.empty();
-		}
-
-		boolean allChainElementsSupported = chainFollowingAssertThat.stream()
-			.allMatch(SupportedAssertJAssertions::isSupportedAssertJAssertion);
-		if (!allChainElementsSupported) {
-			return Optional.empty();
-		}
-
 		AssertJAssertThatStatementData assertJAssertThatStatementData = new AssertJAssertThatStatementData(
-				assumedAssertThatInvocation, assertThatArgument, chainFollowingAssertThat,
-				expressionStatement);
+				assumedAssertThatInvocation, chainFollowingAssertThat, expressionStatement);
 
 		return Optional.of(assertJAssertThatStatementData);
 	}
 
-	private List<AssertJAssertThatStatementData> findSubsequentAssertionDataOnSameObject(
-			AssertThatArgumentMatcher argumentMatcher, List<Statement> statements) {
-
-		List<AssertJAssertThatStatementData> subsequentAssertionDataList = new ArrayList<>();
-		for (int i = 0; i < statements.size(); i++) {
-			Statement statement = statements.get(i);
-			AssertJAssertThatStatementData assertJAssertThatStatementData = findAssertThatStatementData(
-					statement)
-						.filter(argumentMatcher::isMatchingAssertThatArgument)
-						.orElse(null);
-			if (assertJAssertThatStatementData != null) {
-				subsequentAssertionDataList.add(assertJAssertThatStatementData);
-			} else {
-				break;
-			}
-		}
-		return subsequentAssertionDataList;
+	private boolean hasSupportedAssertionChain(AssertJAssertThatStatementData invocationChainStatementData) {
+		List<MethodInvocation> chainFollowingAssertThat = invocationChainStatementData.getChainFollowingAssertThat();
+		return chainFollowingAssertThat.stream()
+			.allMatch(SupportedAssertJAssertions::isSupportedAssertJAssertion);
 	}
 
 	private Optional<TransformationData> findTransformationData(Statement firstStatement,
@@ -159,33 +116,35 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		if (firstAssertJAssertThatStatementData == null) {
 			return Optional.empty();
 		}
-
-		AssertThatArgumentMatcher argumentMatcher = AssertThatArgumentMatcher
-			.findAssertThatArgumentMatcher(firstAssertJAssertThatStatementData)
+		MethodInvocation firstAssertThatInvocation = AssertThatInvocationAnalyzer
+			.findSupportedAssertThatInvocation(firstAssertJAssertThatStatementData)
 			.orElse(null);
-
-		if (argumentMatcher == null) {
+		if (firstAssertThatInvocation == null) {
+			return Optional.empty();
+		}
+		if (!hasSupportedAssertionChain(firstAssertJAssertThatStatementData)) {
 			return Optional.empty();
 		}
 
-		List<AssertJAssertThatStatementData> subsequentDataOnSameObject = findSubsequentAssertionDataOnSameObject(
-				argumentMatcher, followingStatements);
+		List<AssertJAssertThatStatementData> subsequentDataOnSameObject = new ArrayList<>();
+		for (int i = 0; i < followingStatements.size(); i++) {
+			Statement statement = followingStatements.get(i);
+			AssertJAssertThatStatementData assertJAssertThatStatementData = findAssertThatStatementData(
+					statement)
+						.filter(data -> this.astMatcher.match(
+								firstAssertThatInvocation, data.getAssertThatInvocation()))
+						.filter(this::hasSupportedAssertionChain)
+						.orElse(null);
+			if (assertJAssertThatStatementData != null) {
+				subsequentDataOnSameObject.add(assertJAssertThatStatementData);
+			} else {
+				break;
+			}
+		}
 
 		if (subsequentDataOnSameObject.isEmpty()) {
 			return Optional.empty();
 		}
-
-		ExpressionStatement firstAssertThatStatement = firstAssertJAssertThatStatementData
-			.getAssertThatStatement();
-
-		List<ExpressionStatement> statementsToRemove = new ArrayList<>();
-		statementsToRemove.add(firstAssertThatStatement);
-
-		List<ExpressionStatement> subsequentStatementsToRemove = subsequentDataOnSameObject.stream()
-			.map(AssertJAssertThatStatementData::getAssertThatStatement)
-			.collect(Collectors.toList());
-
-		statementsToRemove.addAll(subsequentStatementsToRemove);
 
 		return Optional
 			.of(createTransformationData(firstAssertJAssertThatStatementData, subsequentDataOnSameObject));

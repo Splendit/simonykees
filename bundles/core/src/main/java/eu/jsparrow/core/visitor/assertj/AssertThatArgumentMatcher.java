@@ -33,15 +33,11 @@ class AssertThatArgumentMatcher {
 		this.assertThatArgumentPredicate = assertThatArgumentPredicate;
 	}
 
-	boolean isMatchingAssertThatArgument(AssertJAssertThatStatementData ossertJAssertThatStatementData) {
-		Expression assertThatArgument = ossertJAssertThatStatementData.getAssertThatArgument();
+	boolean isMatchingAssertThatArgument(Expression assertThatArgument) {
 		return assertThatArgumentPredicate.test(assertThatArgument);
 	}
 
-	static Optional<AssertThatArgumentMatcher> findAssertThatArgumentMatcher(
-			AssertJAssertThatStatementData ossertJAssertThatStatementData) {
-
-		Expression assertThatArgument = ossertJAssertThatStatementData.getAssertThatArgument();
+	static Optional<AssertThatArgumentMatcher> findAssertThatArgumentMatcher(Expression assertThatArgument) {
 
 		if (assertThatArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
 			SimpleName simpleName = (SimpleName) assertThatArgument;
