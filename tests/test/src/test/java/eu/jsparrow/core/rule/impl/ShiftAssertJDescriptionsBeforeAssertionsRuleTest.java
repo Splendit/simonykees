@@ -40,7 +40,7 @@ class ShiftAssertJDescriptionsBeforeAssertionsRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Shift AssertJ Descriptions Before Assertions"));
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.CODING_CONVENTIONS));
+				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
 				equalTo("AssertJ Description only make senese to be invoked before the assertion itself. Otherwise it has no effect."));

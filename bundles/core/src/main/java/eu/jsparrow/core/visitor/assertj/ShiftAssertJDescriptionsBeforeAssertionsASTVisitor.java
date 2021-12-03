@@ -66,6 +66,7 @@ public class ShiftAssertJDescriptionsBeforeAssertionsASTVisitor extends Abstract
 
 		MethodInvocation swappedMethodInvcation = swap(assertJAssertion, methodInvocation);
 		astRewrite.replace(methodInvocation, swappedMethodInvcation, null);
+		onRewrite();
 		return true;
 	}
 
@@ -113,7 +114,6 @@ public class ShiftAssertJDescriptionsBeforeAssertionsASTVisitor extends Abstract
 			return false;
 		}
 		MethodInvocation methodInvocation = (MethodInvocation) expression;
-		// TODO: check the declaring type...just to be on the safe side.
 		SimpleName methodName = methodInvocation.getName();
 		String identifier = methodName.getIdentifier();
 		return assertJAssertionMethodsPrefix

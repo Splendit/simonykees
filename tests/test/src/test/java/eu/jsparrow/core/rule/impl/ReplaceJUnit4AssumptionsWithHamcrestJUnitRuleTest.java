@@ -48,7 +48,7 @@ class ReplaceJUnit4AssumptionsWithHamcrestJUnitRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace JUnit 4 Assumptions with Hamcrest JUnit"));
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_5, Tag.TESTING));
+				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
 				equalTo("This rule replaces the JUnit 4 assumptions 'assumeThat', 'asssumeNoException', and 'assumeNotNull' by the equivalent Hamcrest JUnit assumption 'MatcherAssume.assumeThat'."));

@@ -52,7 +52,7 @@ class UseDedicatedAssertionsRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Use Dedicated Assertions"));
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.CODING_CONVENTIONS));
+				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT, Tag.CODING_CONVENTIONS));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
 				equalTo("Replaces boolean assertions (e.g., 'assertTrue' and 'assertFalse') with the corresponding "

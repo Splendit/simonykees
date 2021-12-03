@@ -16,7 +16,7 @@ public class ShiftAssertJDescriptionsBeforeAssertionsRule extends RefactoringRul
 		this.id = "ShiftAssertJDescriptionsBeforeAssertions"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription("Shift AssertJ Descriptions Before Assertions",
 				"AssertJ Description only make senese to be invoked before the assertion itself. Otherwise it has no effect.", Duration.ofMinutes(5),
-				Tag.TESTING, Tag.CODING_CONVENTIONS);
+				Tag.JAVA_1_5, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS);
 	}
 	
 	@Override

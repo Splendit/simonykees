@@ -32,7 +32,7 @@ public class ReplaceJUnitTimeoutAnnotationPropertyRule
 		this.ruleDescription = new RuleDescription(
 				Messages.ReplaceJUnitTimeoutAnnotationPropertyRule_name,
 				Messages.ReplaceJUnitTimeoutAnnotationPropertyRule_description,
-				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.LAMBDA, Tag.READABILITY));
+				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY));
 	}
 
 	@Override
