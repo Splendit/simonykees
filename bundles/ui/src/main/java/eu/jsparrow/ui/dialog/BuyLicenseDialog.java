@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -98,6 +99,7 @@ public class BuyLicenseDialog extends Dialog {
 	 */
 	public BuyLicenseDialog(Shell parentShell) {
 		super(parentShell);
+
 		this.message = Messages.BuyLicenseDialog_TitleMessage_LicenseHasExpired;
 		bundle = Platform.getBundle(Activator.PLUGIN_ID);
 	}
@@ -160,7 +162,6 @@ public class BuyLicenseDialog extends Dialog {
 		link.setFont(boldFont);
 
 		createRatingForm(area);
-
 		return composite;
 	}
 
@@ -174,6 +175,13 @@ public class BuyLicenseDialog extends Dialog {
 			}
 		}
 		super.okPressed();
+	}
+
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		super.createButtonsForButtonBar(parent);
+		Button cancelButton = super.getButton(IDialogConstants.CANCEL_ID);
+		cancelButton.setText(Messages.BuyLicenseDialog_skipButtonLabel);
 	}
 
 	private void createRatingForm(Composite parent) {
