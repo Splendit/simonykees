@@ -301,9 +301,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public void dispose() {
 		refactoringPipeline.clearStates();
-		statisticsSection.dispose();
 		windowIcon.dispose();
-		summaryPageStatisticsSection.dispose();
 		super.dispose();
 	}
 

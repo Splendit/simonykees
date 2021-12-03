@@ -1,5 +1,9 @@
 package eu.jsparrow.ui.preview.statistics;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 
 /**
@@ -12,13 +16,11 @@ public interface StatisticsSection {
 	default void initializeDataBindings() {
 	}
 
-	default void createView(Composite rootComposite) {
+	default List<Image> createView(Composite rootComposite) {
+		return Collections.emptyList();
 	}
 
 	default void updateForSelected() {
-	}
-
-	default void dispose() {
 	}
 
 }

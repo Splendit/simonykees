@@ -1,6 +1,7 @@
 package eu.jsparrow.ui.preview.statistics;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -12,6 +13,7 @@ import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -84,7 +86,7 @@ public class MinimalStatisticsSection implements StatisticsSection {
 	}
 
 	@Override
-	public void createView(Composite rootComposite) {
+	public List<Image> createView(Composite rootComposite) {
 		Composite composite = new Composite(rootComposite, SWT.NONE);
 		GridLayout layout = new GridLayout(3, true);
 		layout.marginHeight = 0;
@@ -106,6 +108,7 @@ public class MinimalStatisticsSection implements StatisticsSection {
 
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		return Arrays.asList(totalExecutionTime.getImage(), totalIssuesFixed.getImage(), totalHoursSaved.getImage());
 	}
 
 	@Override
@@ -120,15 +123,5 @@ public class MinimalStatisticsSection implements StatisticsSection {
 			.reduce(Duration.ZERO, Duration::plus);
 		model.setTotalIssuesFixed(issuesFixedCount);
 		model.setTotalTimeSaved(timeSaved);
-	}
-
-	@Override
-	public void dispose() {
-		totalExecutionTime.getImage()
-			.dispose();
-		totalIssuesFixed.getImage()
-			.dispose();
-		totalHoursSaved.getImage()
-			.dispose();
 	}
 }
