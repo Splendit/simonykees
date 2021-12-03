@@ -25,7 +25,7 @@
 	<extension point="org.eclipse.ui.menus">
 		<menuContribution
 			locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=org.eclipse.jdt.ui.refactoring.menu">
-			<menu icon="icons/jsparrow-marker.png" id="jsparrow.menu"
+			<menu icon="icons/jsparrow-marker-003.png" id="jsparrow.menu"
 				label="%menu.label">
 				<visibleWhen>
 					<reference definitionId="eu.jsparrow.ui.filter.menuItemFilter">
@@ -41,7 +41,7 @@
 		</menuContribution>
 		<menuContribution
 			locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?endof=group.edit">
-			<menu icon="icons/jsparrow-marker.png" label="%menu.label">
+			<menu icon="icons/jsparrow-marker-003.png" label="%menu.label">
 				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler"
 					label="%command.label.select_rules_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler"
@@ -52,7 +52,7 @@
 		</menuContribution>
 		<menuContribution
 			locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.refactoring.menu">
-			<menu icon="icons/jsparrow-marker.png" label="%menu.label">
+			<menu icon="icons/jsparrow-marker-003.png" label="%menu.label">
 				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler"
 					label="%command.label.select_rules_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler"
@@ -90,7 +90,7 @@
 	<extension point="org.eclipse.ui.editors">
 		<editor
 			class="eu.jsparrow.ui.startup.WelcomeEditor"
-			icon="$nl$/icons/jsparrow-marker.png"
+			icon="$nl$/icons/jsparrow-marker-003.png"
 			id="ui.editors.jsparrow.WelcomeEditor"
 			name="jSparrow Dashboard">
 		</editor>
@@ -113,7 +113,7 @@
               label="jSparrow Dashboard">
            <command
                  commandId="eu.jsparrow.ui.handler.WelcomeHandler"
-                 icon="$nl$/icons/jsparrow-marker.png"
+                 icon="$nl$/icons/jsparrow-marker-003.png"
                  label="jSparrow Dashboard"
                  style="push">
            </command>
@@ -132,13 +132,13 @@
             contributesToHeader="true"
             highlightPreferenceKey="jsparrow.marker.highlight"
             highlightPreferenceValue="true"
-            icon="icons/jsparrow-marker-bulb.png"
+            icon="icons/jsparrow-marker-bulb-003.png"
             includeOnPreferencePage="true"
             label="jSparrow Refactor"
             overviewRulerPreferenceKey="jsparrow.marker.overview"
             overviewRulerPreferenceValue="false"
             presentationLayer="0"
-            quickFixIcon="icons/jsparrow-marker-bulb.png"
+            quickFixIcon="icons/jsparrow-marker-bulb-003.png"
             showInNextPrevDropdownToolbarAction="true"
             textPreferenceKey="jsparrow.marker.text"
             textPreferenceValue="true"
