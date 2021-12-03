@@ -51,9 +51,9 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private static final int LICENSE_LABEL_MAX_WIDTH = 370;
 
-	private static final String LOGO_PATH_ACTIVE = "icons/logo-jsparrow.png"; //$NON-NLS-1$
+	private static final String LOGO_PATH_ACTIVE = "icons/jsparrow-logo-003.png"; //$NON-NLS-1$
 
-	private static final String LOGO_PATH_INACTIVE = "icons/logo-jsparrow-002.png"; //$NON-NLS-1$
+	private static final String LOGO_PATH_INACTIVE = "icons/jsparrow-logo-inactive-003.png"; //$NON-NLS-1$
 
 	private static final String DATE_FORMAT_PATTERN = "MMMM dd, yyyy"; //$NON-NLS-1$
 
