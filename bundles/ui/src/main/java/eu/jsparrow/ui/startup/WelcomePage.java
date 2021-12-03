@@ -142,7 +142,7 @@ public class WelcomePage extends FormPage {
 		licenseButton.setLayoutData(buttonGridData);
 		licenseButton.setText(Messages.WelcomePage_buy_license_button);
 		createButtonListenerToOpenWebpage(licenseButton,
-				"https://order.shareit.com/cart/new?vendorid=200267175&PRODUCT%5B300770603%5D=1"); //$NON-NLS-1$
+				"https://jsparrow.io/pricing/"); //$NON-NLS-1$
 
 		Button marketplaceButton = new Button(gettingStartedGroup, SWT.PUSH);
 		marketplaceButton.setLayoutData(buttonGridData);
