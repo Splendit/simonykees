@@ -50,7 +50,7 @@ import eu.jsparrow.ui.util.ResourceHelper;
  */
 public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
-	private static final String WINDOW_ICON = "icons/jsparrow-marker.png"; //$NON-NLS-1$
+	private static final String WINDOW_ICON = "icons/jsparrow-marker-003.png"; //$NON-NLS-1$
 
 	private RefactoringPipeline refactoringPipeline;
 
