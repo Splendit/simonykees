@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.assertj;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +22,13 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  */
 class AssertThatInvocationAnalyzer {
 
+	private static final List<String> SUPPORTED_ASSERT_THAT_METHODS = Collections.unmodifiableList(Arrays.asList(
+			"assertThat", //$NON-NLS-1$
+			"assertThatCode", //$NON-NLS-1$
+			"assertThatThrownBy", //$NON-NLS-1$
+			"assertThatObject"//$NON-NLS-1$
+	));
+
 	static Optional<MethodInvocation> findSupportedAssertThatInvocation(
 			AssertJAssertThatStatementData firstAssertJAssertThatStatementData) {
 
@@ -27,22 +36,20 @@ class AssertThatInvocationAnalyzer {
 		String methodName = assumedAssertThatInvocation.getName()
 			.getIdentifier();
 
-		if (!methodName.startsWith("assertThat")) {//$NON-NLS-1$
+		if (!SUPPORTED_ASSERT_THAT_METHODS.contains(methodName)) {
 			return Optional.empty();
 		}
 
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(assumedAssertThatInvocation.arguments(),
 				Expression.class);
 
-		if (arguments.size() > 1) {
+		if (arguments.size() != 1) {
 			return Optional.empty();
 		}
 
-		if (arguments.size() == 1) {
-			Expression argument = arguments.get(0);
-			if (!isSupportedAssertThatArgumentStructure(argument)) {
-				return Optional.empty();
-			}
+		Expression argument = arguments.get(0);
+		if (!isSupportedAssertThatArgumentStructure(argument)) {
+			return Optional.empty();
 		}
 
 		IMethodBinding assumedAssertThatMethodBinding = assumedAssertThatInvocation.resolveMethodBinding();
