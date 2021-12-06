@@ -446,4 +446,128 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_AssertThatCode_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThatCode", true, false);
+		defaultFixture.addImport("org.assertj.core.api.ThrowableAssert.ThrowingCallable");
+
+		String original = "" +
+				"	ThrowingCallable throwingCallable = () -> {\n"
+				+ "		throw new Exception(\"Exception!\");\n"
+				+ "	};\n"
+				+ "\n"
+				+ "	public void assertThatCodeAssertion() {\n"
+				+ "\n"
+				+ "		assertThatCode(throwingCallable).isInstanceOf(Exception.class);\n"
+				+ "		assertThatCode(throwingCallable).hasMessageContaining(\"Exception\");\n"
+				+ "	}";
+
+		String expected = "" +
+				"	ThrowingCallable throwingCallable = () -> {\n"
+				+ "		throw new Exception(\"Exception!\");\n"
+				+ "	};\n"
+				+ "\n"
+				+ "	public void assertThatCodeAssertion() {\n"
+				+ "\n"
+				+ "		assertThatCode(throwingCallable).isInstanceOf(Exception.class).hasMessageContaining(\"Exception\");\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	public void visit_AssertThatThrownBy_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThatThrownBy", true, false);
+		defaultFixture.addImport("org.assertj.core.api.ThrowableAssert.ThrowingCallable");
+
+		String original = "" +
+				"	ThrowingCallable throwingCallable = () -> {\n"
+				+ "		throw new Exception(\"Exception!\");\n"
+				+ "	};\n"
+				+ "\n"
+				+ "	public void assertThatThrownByAssertion() {\n"
+				+ "		assertThatThrownBy(throwingCallable).isInstanceOf(Exception.class);\n"
+				+ "		assertThatThrownBy(throwingCallable).hasMessageContaining(\"Exception\");\n"
+				+ "	}";
+
+		String expected = "" +
+				"	ThrowingCallable throwingCallable = () -> {\n"
+				+ "		throw new Exception(\"Exception!\");\n"
+				+ "	};\n"
+				+ "\n"
+				+ "	public void assertThatThrownByAssertion() {\n"
+				+ "		assertThatThrownBy(throwingCallable).isInstanceOf(Exception.class).hasMessageContaining(\"Exception\");\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}	
+	
+	@Test
+	public void visit_AssertThatObject_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThatObject", true, false);
+
+		String original = "" +
+				"	Object o = new Object();\n"
+				+ "\n"
+				+ "	public void assertThatObjectAssertion() {\n"
+				+ "		assertThatObject(o).isNotNull();\n"
+				+ "		assertThatObject(o).isSameAs(o);\n"
+				+ "	}";
+
+		String expected = "" +
+				"	Object o = new Object();\n"
+				+ "\n"
+				+ "	public void assertThatObjectAssertion() {\n"
+				+ "		assertThatObject(o).isNotNull().isSameAs(o);\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	public void visit_AssertionsForClassTypes_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.AssertionsForClassTypes.assertThat", true, false);
+
+		String original = "" +
+				"	Integer xInteger = Integer.valueOf(0);\n"
+				+ "	\n"
+				+ "	public void assertThatAssertionsForClassTypes() {\n"
+				+ "		assertThat(xInteger).isZero();\n"
+				+ "		assertThat(xInteger).isNotEqualTo(1);\n"
+				+ "	}";
+
+		String expected = "" +
+				"	Integer xInteger = Integer.valueOf(0);\n"
+				+ "	\n"
+				+ "	public void assertThatAssertionsForClassTypes() {\n"
+				+ "		assertThat(xInteger).isZero().isNotEqualTo(1);\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}	
+	
+	@Test
+	public void visit_AssertionsForInterfaceTypes_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.AssertionsForInterfaceTypes.assertThat", true, false);
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+
+		String original = "" +
+				"	List<String> strings = Arrays.asList(\"s1\", \"s2\", \"s3\");\n"
+				+ "\n"
+				+ "	public void assertThatAssertionsForInterfaceTypes() {\n"
+				+ "		assertThat(strings).isNotNull();\n"
+				+ "		assertThat(strings).hasSize(3);\n"
+				+ "	}";
+
+		String expected = "" +
+				"	List<String> strings = Arrays.asList(\"s1\", \"s2\", \"s3\");\n"
+				+ "\n"
+				+ "	public void assertThatAssertionsForInterfaceTypes() {\n"
+				+ "		assertThat(strings).isNotNull().hasSize(3);\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
 }
