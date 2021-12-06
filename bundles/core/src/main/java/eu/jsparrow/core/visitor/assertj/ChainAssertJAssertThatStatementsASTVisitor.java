@@ -74,7 +74,7 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		return transformationDataList;
 	}
 
-	private Optional<AssertJAssertThatStatementData> findAssertThatStatementData(Statement statement) {
+	private Optional<InvocationChainData> findInvocationChainData(Statement statement) {
 
 		if (statement.getNodeType() != ASTNode.EXPRESSION_STATEMENT) {
 			return Optional.empty();
@@ -93,17 +93,15 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 			return Optional.empty();
 		}
 
-		MethodInvocation assumedAssertThatInvocation = invocationChainElements.get(0);
-		List<MethodInvocation> chainFollowingAssertThat = invocationChainElements.subList(1, chainElementsCount);
+		MethodInvocation leftMostInvocation = invocationChainElements.get(0);
+		List<MethodInvocation> subsequentInvocations = invocationChainElements.subList(1, chainElementsCount);
 
-		AssertJAssertThatStatementData assertJAssertThatStatementData = new AssertJAssertThatStatementData(
-				assumedAssertThatInvocation, chainFollowingAssertThat, expressionStatement);
-
-		return Optional.of(assertJAssertThatStatementData);
+		return Optional.of(new InvocationChainData(
+				leftMostInvocation, subsequentInvocations, expressionStatement));
 	}
 
-	private boolean hasSupportedAssertionChain(AssertJAssertThatStatementData invocationChainStatementData) {
-		List<MethodInvocation> chainFollowingAssertThat = invocationChainStatementData.getChainFollowingAssertThat();
+	private boolean hasSupportedAssertionChain(InvocationChainData invocationChainStatementData) {
+		List<MethodInvocation> chainFollowingAssertThat = invocationChainStatementData.getSubsequentInvocations();
 		return chainFollowingAssertThat.stream()
 			.allMatch(SupportedAssertJAssertions::isSupportedAssertJAssertion);
 	}
@@ -111,63 +109,62 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 	private Optional<TransformationData> findTransformationData(Statement firstStatement,
 			List<Statement> followingStatements) {
 
-		AssertJAssertThatStatementData firstAssertJAssertThatStatementData = findAssertThatStatementData(
+		InvocationChainData firstInvocationChain = findInvocationChainData(
 				firstStatement).orElse(null);
-		if (firstAssertJAssertThatStatementData == null) {
+		if (firstInvocationChain == null) {
 			return Optional.empty();
 		}
 		MethodInvocation firstAssertThatInvocation = AssertThatInvocationAnalyzer
-			.findSupportedAssertThatInvocation(firstAssertJAssertThatStatementData)
+			.findSupportedAssertThatInvocation(firstInvocationChain)
 			.orElse(null);
 		if (firstAssertThatInvocation == null) {
 			return Optional.empty();
 		}
-		if (!hasSupportedAssertionChain(firstAssertJAssertThatStatementData)) {
+		if (!hasSupportedAssertionChain(firstInvocationChain)) {
 			return Optional.empty();
 		}
 
-		List<AssertJAssertThatStatementData> subsequentDataOnSameObject = new ArrayList<>();
+		List<InvocationChainData> subsequentInvocationChains = new ArrayList<>();
 		for (int i = 0; i < followingStatements.size(); i++) {
 			Statement statement = followingStatements.get(i);
-			AssertJAssertThatStatementData assertJAssertThatStatementData = findAssertThatStatementData(
-					statement)
-						.filter(data -> this.astMatcher.match(
-								firstAssertThatInvocation, data.getAssertThatInvocation()))
-						.filter(this::hasSupportedAssertionChain)
-						.orElse(null);
-			if (assertJAssertThatStatementData != null) {
-				subsequentDataOnSameObject.add(assertJAssertThatStatementData);
+			InvocationChainData subsequentInvocationChain = findInvocationChainData(statement)
+				.filter(data -> this.astMatcher.match(
+						firstAssertThatInvocation, data.getLeftMostInvocation()))
+				.filter(this::hasSupportedAssertionChain)
+				.orElse(null);
+			if (subsequentInvocationChain != null) {
+				subsequentInvocationChains.add(subsequentInvocationChain);
 			} else {
 				break;
 			}
 		}
 
-		if (subsequentDataOnSameObject.isEmpty()) {
+		if (subsequentInvocationChains.isEmpty()) {
 			return Optional.empty();
 		}
 
 		return Optional
-			.of(createTransformationData(firstAssertJAssertThatStatementData, subsequentDataOnSameObject));
+			.of(createTransformationData(firstInvocationChain, subsequentInvocationChains));
 	}
 
 	private TransformationData createTransformationData(
-			AssertJAssertThatStatementData firstAssertJAssertThatStatementData,
-			List<AssertJAssertThatStatementData> subsequentDataOnSameObject) {
+			InvocationChainData firstAssertJAssertThatStatementData,
+			List<InvocationChainData> subsequentDataOnSameObject) {
 
 		ExpressionStatement firstAssertThatStatement = firstAssertJAssertThatStatementData
-			.getAssertThatStatement();
-		MethodInvocation assertThatInvocation = firstAssertJAssertThatStatementData.getAssertThatInvocation();
+			.getInvocationChainStatement();
+		MethodInvocation assertThatInvocation = firstAssertJAssertThatStatementData.getLeftMostInvocation();
 
-		List<AssertJAssertThatStatementData> listOfAllAssertThatData = new ArrayList<>();
+		List<InvocationChainData> listOfAllAssertThatData = new ArrayList<>();
 		listOfAllAssertThatData.add(firstAssertJAssertThatStatementData);
 		listOfAllAssertThatData.addAll(subsequentDataOnSameObject);
 
 		List<ExpressionStatement> statementsToRemove = listOfAllAssertThatData.stream()
-			.map(AssertJAssertThatStatementData::getAssertThatStatement)
+			.map(InvocationChainData::getInvocationChainStatement)
 			.collect(Collectors.toList());
 
 		List<MethodInvocation> invocationChainElementList = listOfAllAssertThatData.stream()
-			.map(AssertJAssertThatStatementData::getChainFollowingAssertThat)
+			.map(InvocationChainData::getSubsequentInvocations)
 			.flatMap(List<MethodInvocation>::stream)
 			.collect(Collectors.toList());
 

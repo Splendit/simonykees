@@ -30,9 +30,9 @@ class AssertThatInvocationAnalyzer {
 	));
 
 	static Optional<MethodInvocation> findSupportedAssertThatInvocation(
-			AssertJAssertThatStatementData firstAssertJAssertThatStatementData) {
+			InvocationChainData invocationChainData) {
 
-		MethodInvocation assumedAssertThatInvocation = firstAssertJAssertThatStatementData.getAssertThatInvocation();
+		MethodInvocation assumedAssertThatInvocation = invocationChainData.getLeftMostInvocation();
 		String methodName = assumedAssertThatInvocation.getName()
 			.getIdentifier();
 
