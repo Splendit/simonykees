@@ -19,26 +19,26 @@ import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag; 
 
-class ShiftAssertJDescriptionsBeforeAssertionsRuleTest extends SingleRuleTest {
+class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 
-	private ShiftAssertJDescriptionsBeforeAssertionsRule rule;
+	private ShiftAssertJDescriptionBeforeAssertionRule rule;
 	
 	@BeforeEach
 	void setUp() throws Exception {
-		rule = new ShiftAssertJDescriptionsBeforeAssertionsRule();
+		rule = new ShiftAssertJDescriptionBeforeAssertionRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 	
 	@Test
 	void test_ruleId() {
 		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ShiftAssertJDescriptionsBeforeAssertions"));
+		assertThat(ruleId, equalTo("ShiftAssertJDescriptionBeforeAssertions"));
 	}
 	
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Shift AssertJ Descriptions Before Assertions"));
+		assertThat(description.getName(), equalTo("Shift AssertJ Description Before Assertion"));
 		assertThat(description.getTags(),
 				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));

@@ -11,11 +11,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
-class ShiftAssertJDescriptionsBeforeAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class ShiftAssertJDescriptionBeforeAssertionASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		super.setVisitor(new ShiftAssertJDescriptionsBeforeAssertionsASTVisitor());
+		super.setVisitor(new ShiftAssertJDescriptionBeforeAssertionASTVisitor());
 		addDependency("org.assertj", "assertj-core", "3.21.0");
 		fixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 	}

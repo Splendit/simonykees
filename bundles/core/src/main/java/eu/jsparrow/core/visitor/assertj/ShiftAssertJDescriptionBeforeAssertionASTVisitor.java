@@ -18,7 +18,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
-public class ShiftAssertJDescriptionsBeforeAssertionsASTVisitor extends AbstractASTRewriteASTVisitor {
+public class ShiftAssertJDescriptionBeforeAssertionASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@SuppressWarnings("nls")
 	private List<String> descriptionSettingMethods = Arrays.asList("as", "describedAs", "withFailMessage",
