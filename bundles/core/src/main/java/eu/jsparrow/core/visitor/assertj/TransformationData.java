@@ -5,6 +5,14 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+/**
+ * Wrapper class storing all information that is necessary for the replacement
+ * of subsequent {@code assertThat} - invocation chains by one single invocation
+ * chains containing all assertions.
+ * 
+ * @since 4.6.0
+ *
+ */
 class TransformationData {
 	private final ExpressionStatement firstAssertThatStatement;
 	private final List<ExpressionStatement> assertJAssertThatStatementsToRemove;
@@ -34,5 +42,5 @@ class TransformationData {
 
 	List<MethodInvocation> getInvocationChainElementList() {
 		return invocationChainElementList;
-	}		
+	}
 }

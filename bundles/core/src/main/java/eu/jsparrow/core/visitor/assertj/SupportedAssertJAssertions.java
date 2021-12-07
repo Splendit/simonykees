@@ -7,6 +7,15 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+/**
+ * Helper class to find out whether a {@link MethodInvocation} represents an
+ * AssertJ-assertion carrying out an assertion without changing data.
+ * 
+ * @see #isSupportedAssertJAssertionMethodName(String)
+ * @see #isSupportedAssertJAssertion(MethodInvocation)
+ * 
+ * @since 4.6.0
+ */
 public class SupportedAssertJAssertions {
 
 	private static final List<String> SUPPORTED_ASSERTION_PREFIXES = Collections.unmodifiableList(Arrays.asList(
@@ -27,16 +36,26 @@ public class SupportedAssertJAssertions {
 			"exists", //$NON-NLS-1$
 			"satisfies", //$NON-NLS-1$
 			"are", //$NON-NLS-1$
-			"have",//$NON-NLS-1$
-			"rejects",//$NON-NLS-1$
+			"have", //$NON-NLS-1$
+			"rejects", //$NON-NLS-1$
 			"accepts"//$NON-NLS-1$
 	));
 
+	/**
+	 * @return true if the given method name represents a valid
+	 *         AssertJ-assertion like for example {@code isNotNull} or
+	 *         {@code isNotEmpty}, otherwise false.
+	 */
 	public static boolean isSupportedAssertJAssertionMethodName(String methodName) {
 		return SUPPORTED_ASSERTION_PREFIXES.stream()
 			.anyMatch(methodName::startsWith);
 	}
 
+	/**
+	 * @return true if the given method name represents a valid
+	 *         AssertJ-assertion like for example {@code isNotNull} or
+	 *         {@code isNotEmpty}, otherwise false.
+	 */
 	public static boolean isSupportedAssertJAssertion(MethodInvocation invocation) {
 		String methodName = invocation.getName()
 			.getIdentifier();

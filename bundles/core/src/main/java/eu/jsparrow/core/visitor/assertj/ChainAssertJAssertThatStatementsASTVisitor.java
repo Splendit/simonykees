@@ -49,11 +49,6 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 
 	@Override
 	public boolean visit(Block block) {
-		collectTransformationDataNEW(block).forEach(data -> transform(block, data));
-		return true;
-	}
-
-	private List<TransformationData> collectTransformationDataNEW(Block block) {
 		List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
 		List<TransformationData> transformationDataList = new ArrayList<>();
 		int i = 0;
@@ -68,39 +63,9 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 				i += 1;
 			}
 		}
-		return transformationDataList;
-	}
 
-	private Optional<InvocationChainData> findInvocationChainData(Statement statement) {
-
-		if (statement.getNodeType() != ASTNode.EXPRESSION_STATEMENT) {
-			return Optional.empty();
-		}
-		ExpressionStatement expressionStatement = (ExpressionStatement) statement;
-
-		Expression expression = expressionStatement.getExpression();
-		if (expression.getNodeType() != ASTNode.METHOD_INVOCATION) {
-			return Optional.empty();
-		}
-		MethodInvocation methodInvocation = (MethodInvocation) expression;
-		List<MethodInvocation> invocationChainElements = collectInvocationChainElements(methodInvocation);
-
-		int chainElementsCount = invocationChainElements.size();
-		if (chainElementsCount < 2) {
-			return Optional.empty();
-		}
-
-		MethodInvocation leftMostInvocation = invocationChainElements.get(0);
-		List<MethodInvocation> subsequentInvocations = invocationChainElements.subList(1, chainElementsCount);
-
-		return Optional.of(new InvocationChainData(
-				leftMostInvocation, subsequentInvocations, expressionStatement));
-	}
-
-	private boolean hasSupportedAssertionChain(InvocationChainData invocationChainStatementData) {
-		List<MethodInvocation> chainFollowingAssertThat = invocationChainStatementData.getSubsequentInvocations();
-		return chainFollowingAssertThat.stream()
-			.allMatch(SupportedAssertJAssertions::isSupportedAssertJAssertion);
+		transformationDataList.forEach(data -> transform(block, data));
+		return true;
 	}
 
 	private Optional<TransformationData> findTransformationData(List<Statement> statements) {
@@ -108,13 +73,13 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		for (int i = 0; i < statements.size(); i++) {
 			Predicate<InvocationChainData> assertThatPredicate;
 			if (invocationChainDataList.isEmpty()) {
-				assertThatPredicate = AssertThatInvocationAnalyzer::hasSupportedAssertThatInvocation;
+				assertThatPredicate = AssertThatInvocationChainAnalyzer::hasSupportedAssertThatInvocation;
 			} else {
 				assertThatPredicate = invocationChainDataList.get(0)::matchLeftMostInvocation;
 			}
 			InvocationChainData invocationChainData = findInvocationChainData(statements.get(i))
 				.filter(assertThatPredicate)
-				.filter(this::hasSupportedAssertionChain)
+				.filter(AssertThatInvocationChainAnalyzer::hasSupportedAssertionChain)
 				.orElse(null);
 			if (invocationChainData != null) {
 				invocationChainDataList.add(invocationChainData);
@@ -141,6 +106,32 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 
 		return Optional.of(new TransformationData(firstAssertThatStatement, statementsToRemove, assertThatInvocation,
 				invocationChainElementList));
+	}
+
+	private Optional<InvocationChainData> findInvocationChainData(Statement statement) {
+
+		if (statement.getNodeType() != ASTNode.EXPRESSION_STATEMENT) {
+			return Optional.empty();
+		}
+		ExpressionStatement expressionStatement = (ExpressionStatement) statement;
+
+		Expression expression = expressionStatement.getExpression();
+		if (expression.getNodeType() != ASTNode.METHOD_INVOCATION) {
+			return Optional.empty();
+		}
+		MethodInvocation methodInvocation = (MethodInvocation) expression;
+		List<MethodInvocation> invocationChainElements = collectInvocationChainElements(methodInvocation);
+
+		int chainElementsCount = invocationChainElements.size();
+		if (chainElementsCount < 2) {
+			return Optional.empty();
+		}
+
+		MethodInvocation leftMostInvocation = invocationChainElements.get(0);
+		List<MethodInvocation> subsequentInvocations = invocationChainElements.subList(1, chainElementsCount);
+
+		return Optional.of(new InvocationChainData(
+				leftMostInvocation, subsequentInvocations, expressionStatement));
 	}
 
 	private List<MethodInvocation> collectInvocationChainElements(MethodInvocation methodInvocation) {

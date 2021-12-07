@@ -15,11 +15,16 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
+ * Helper class to find out whether an instance of {@link InvocationChainData}
+ * represents a supported {@code assertThat} - invocation chain.
+ * 
+ * @see #hasSupportedAssertThatInvocation(InvocationChainData)
+ * @see #hasSupportedAssertionChain(InvocationChainData)
  * 
  * @since 4.6.0
  *
  */
-class AssertThatInvocationAnalyzer {
+class AssertThatInvocationChainAnalyzer {
 
 	private static final List<String> SUPPORTED_ASSERT_THAT_METHODS = Collections.unmodifiableList(Arrays.asList(
 			"assertThat", //$NON-NLS-1$
@@ -28,6 +33,11 @@ class AssertThatInvocationAnalyzer {
 			"assertThatObject"//$NON-NLS-1$
 	));
 
+	/**
+	 * @return true if the leftmost invocation of a given instance of
+	 *         {@link InvocationChainData} is a supported {@code assertThat} -
+	 *         invocation, otherwise false.
+	 */
 	static boolean hasSupportedAssertThatInvocation(
 			InvocationChainData invocationChainData) {
 
@@ -92,7 +102,17 @@ class AssertThatInvocationAnalyzer {
 		return false;
 	}
 
-	private AssertThatInvocationAnalyzer() {
+	/**
+	 * @return true if all assertions following the {@code assertThat} -
+	 *         invocation are supported, otherwise false.
+	 */
+	static boolean hasSupportedAssertionChain(InvocationChainData invocationChainData) {
+		List<MethodInvocation> chainFollowingAssertThat = invocationChainData.getSubsequentInvocations();
+		return chainFollowingAssertThat.stream()
+			.allMatch(SupportedAssertJAssertions::isSupportedAssertJAssertion);
+	}
+
+	private AssertThatInvocationChainAnalyzer() {
 		// private constructor to hide the implicit public one.
 	}
 }
