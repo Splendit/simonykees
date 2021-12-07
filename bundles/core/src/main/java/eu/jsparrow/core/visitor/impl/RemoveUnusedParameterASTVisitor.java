@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TagElement;
 
+import eu.jsparrow.core.markers.common.RemoveUnusedParameterEvent;
 import eu.jsparrow.core.visitor.sub.MethodInvocationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -34,7 +35,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @since 3.4.0
  *
  */
-public class RemoveUnusedParameterASTVisitor extends AbstractASTRewriteASTVisitor {
+public class RemoveUnusedParameterASTVisitor extends AbstractASTRewriteASTVisitor implements RemoveUnusedParameterEvent {
 
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
@@ -111,6 +112,7 @@ public class RemoveUnusedParameterASTVisitor extends AbstractASTRewriteASTVisito
 			.indexOf(parameter);
 
 		astRewrite.remove(parameter, null);
+		addMarkerEvent(parameter, methodDeclaration, parameterIndex);
 		for (MethodInvocation invocation : invocations) {
 			Expression invocationParameter = (Expression) invocation.arguments()
 				.get(parameterIndex);
