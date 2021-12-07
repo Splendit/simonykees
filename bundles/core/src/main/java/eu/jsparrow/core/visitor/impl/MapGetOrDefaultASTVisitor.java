@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import eu.jsparrow.core.markers.common.MapGetOrDefaultEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.util.OperatorUtil;
@@ -37,7 +38,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @since 3.4.0
  *
  */
-public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
+public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor implements MapGetOrDefaultEvent {
 
 	private static final List<String> MAPS_FORBIDING_NULL_VALUES = Arrays.asList(
 			java.util.jar.Attributes.class.getName(), java.util.concurrent.ConcurrentHashMap.class.getName(),
@@ -128,6 +129,7 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
 		getOrDefaultArgumetns.add(defaultCopy);
 		astRewrite.replace(methodInvocation, getOrDefault, null);
 		astRewrite.remove(followingStatement, null);
+		addMarkerEvent(methodInvocation, key, defaultValue);
 		onRewrite();
 
 		/*

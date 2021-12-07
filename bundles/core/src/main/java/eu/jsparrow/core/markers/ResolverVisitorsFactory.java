@@ -19,6 +19,7 @@ import eu.jsparrow.core.markers.visitor.IndexOfToContainsResolver;
 import eu.jsparrow.core.markers.visitor.InefficientConstructorResolver;
 import eu.jsparrow.core.markers.visitor.InsertBreakStatementInLoopsResolver;
 import eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver;
+import eu.jsparrow.core.markers.visitor.MapGetOrDefaultResolver;
 import eu.jsparrow.core.markers.visitor.PrimitiveBoxedForStringResolver;
 import eu.jsparrow.core.markers.visitor.PutIfAbsentResolver;
 import eu.jsparrow.core.markers.visitor.RemoveNullCheckBeforeInstanceofResolver;
@@ -62,6 +63,7 @@ public class ResolverVisitorsFactory {
 		map.put(DiamondOperatorResolver.ID, DiamondOperatorResolver::new);
 		map.put(IndexOfToContainsResolver.ID, IndexOfToContainsResolver::new);
 		map.put(InsertBreakStatementInLoopsResolver.ID, InsertBreakStatementInLoopsResolver::new);
+		map.put(MapGetOrDefaultResolver.ID, MapGetOrDefaultResolver::new);
 		return Collections.unmodifiableMap(map);
 	}
 
