@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
@@ -41,9 +40,9 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 	}
 
 	@Override
-	public boolean visit(MethodInvocation methodInvocation) {
-		if (positionChecker.test(methodInvocation)) {
-			super.visit(methodInvocation);
+	public boolean visit(EnhancedForStatement enhancedForStatement) {
+		if (positionChecker.test(enhancedForStatement)) {
+			super.visit(enhancedForStatement);
 		}
 		return false;
 	}

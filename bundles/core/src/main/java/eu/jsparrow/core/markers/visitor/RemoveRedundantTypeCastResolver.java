@@ -3,30 +3,30 @@ package eu.jsparrow.core.markers.visitor;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
-import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
-import eu.jsparrow.core.visitor.impl.RemoveNewStringConstructorASTVisitor;
+import eu.jsparrow.core.rule.impl.RemoveRedundantTypeCastRule;
+import eu.jsparrow.core.visitor.impl.RemoveRedundantTypeCastASTVisitor;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
-public class RemoveNewStringConstructorResolver extends RemoveNewStringConstructorASTVisitor {
+public class RemoveRedundantTypeCastResolver extends RemoveRedundantTypeCastASTVisitor {
 
-	public static final String ID = RemoveNewStringConstructorResolver.class.getName();
+	public static final String ID = RemoveRedundantTypeCastResolver.class.getName();
 
 	private Predicate<ASTNode> positionChecker;
 	private IJavaElement javaElement;
 	private RuleDescription description;
 
-	public RemoveNewStringConstructorResolver(Predicate<ASTNode> positionChecker) {
+	public RemoveRedundantTypeCastResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
-			.findByRuleId(RemoveNewStringConstructorRule.RULE_ID);
+			.findByRuleId(RemoveRedundantTypeCastRule.RULE_ID);
 	}
 
 	@Override
@@ -36,23 +36,25 @@ public class RemoveNewStringConstructorResolver extends RemoveNewStringConstruct
 	}
 
 	@Override
-	public boolean visit(ClassInstanceCreation classInstanceCreation) {
-		if (positionChecker.test(classInstanceCreation)) {
-			super.visit(classInstanceCreation);
+	public boolean visit(CastExpression castExpression) {
+		if (positionChecker.test(castExpression)) {
+			super.visit(castExpression);
 		}
 		return false;
 	}
 
 	@Override
-	public void addMarkerEvent(ClassInstanceCreation node, Expression replacement) {
+	public void addMarkerEvent(ASTNode node, ASTNode toBeReplaced) {
 		int credit = description.getCredit();
-		int highlightLength = replacement.getLength();
+		AST ast = node.getAST();
+		ASTNode newNode = ASTNode.copySubtree(ast, toBeReplaced);
+		int highlightLength = newNode.getLength();
 		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
 				description.getName(),
 				description.getDescription(),
 				javaElement,
 				highlightLength,
-				node, replacement, credit);
+				node, newNode, credit);
 		addMarkerEvent(event);
 	}
 }
