@@ -22,6 +22,7 @@ import eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver;
 import eu.jsparrow.core.markers.visitor.MapGetOrDefaultResolver;
 import eu.jsparrow.core.markers.visitor.PrimitiveBoxedForStringResolver;
 import eu.jsparrow.core.markers.visitor.PutIfAbsentResolver;
+import eu.jsparrow.core.markers.visitor.RemoveNewStringConstructorResolver;
 import eu.jsparrow.core.markers.visitor.RemoveNullCheckBeforeInstanceofResolver;
 import eu.jsparrow.core.markers.visitor.StringLiteralEqualityCheckResolver;
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
@@ -64,6 +65,7 @@ public class ResolverVisitorsFactory {
 		map.put(IndexOfToContainsResolver.ID, IndexOfToContainsResolver::new);
 		map.put(InsertBreakStatementInLoopsResolver.ID, InsertBreakStatementInLoopsResolver::new);
 		map.put(MapGetOrDefaultResolver.ID, MapGetOrDefaultResolver::new);
+		map.put(RemoveNewStringConstructorResolver.ID, RemoveNewStringConstructorResolver::new);
 		return Collections.unmodifiableMap(map);
 	}
 
