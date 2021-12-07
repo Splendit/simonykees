@@ -15,6 +15,7 @@ import eu.jsparrow.core.markers.visitor.CollectionRemoveAllResolver;
 import eu.jsparrow.core.markers.visitor.DiamondOperatorResolver;
 import eu.jsparrow.core.markers.visitor.EnumsWithoutEqualsResolver;
 import eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver;
+import eu.jsparrow.core.markers.visitor.IndexOfToContainsResolver;
 import eu.jsparrow.core.markers.visitor.InefficientConstructorResolver;
 import eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver;
 import eu.jsparrow.core.markers.visitor.PrimitiveBoxedForStringResolver;
@@ -58,6 +59,7 @@ public class ResolverVisitorsFactory {
 		map.put(AvoidConcatenationInLoggingStatementsResolver.ID, AvoidConcatenationInLoggingStatementsResolver::new);
 		map.put(CollectionRemoveAllResolver.ID, CollectionRemoveAllResolver::new);
 		map.put(DiamondOperatorResolver.ID, DiamondOperatorResolver::new);
+		map.put(IndexOfToContainsResolver.ID, IndexOfToContainsResolver::new);
 		return Collections.unmodifiableMap(map);
 	}
 
