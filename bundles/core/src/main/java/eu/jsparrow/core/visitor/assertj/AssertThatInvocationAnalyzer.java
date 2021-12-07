@@ -3,7 +3,6 @@ package eu.jsparrow.core.visitor.assertj;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
@@ -28,46 +27,6 @@ class AssertThatInvocationAnalyzer {
 			"assertThatThrownBy", //$NON-NLS-1$
 			"assertThatObject"//$NON-NLS-1$
 	));
-
-	static Optional<MethodInvocation> findSupportedAssertThatInvocation(
-			InvocationChainData invocationChainData) {
-
-		MethodInvocation assumedAssertThatInvocation = invocationChainData.getLeftMostInvocation();
-		String methodName = assumedAssertThatInvocation.getName()
-			.getIdentifier();
-
-		if (!SUPPORTED_ASSERT_THAT_METHODS.contains(methodName)) {
-			return Optional.empty();
-		}
-
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(assumedAssertThatInvocation.arguments(),
-				Expression.class);
-
-		if (arguments.size() != 1) {
-			return Optional.empty();
-		}
-
-		Expression argument = arguments.get(0);
-		if (!isSupportedAssertThatArgumentStructure(argument)) {
-			return Optional.empty();
-		}
-
-		IMethodBinding assumedAssertThatMethodBinding = assumedAssertThatInvocation.resolveMethodBinding();
-		if (assumedAssertThatMethodBinding == null) {
-			return Optional.empty();
-		}
-
-		ITypeBinding declaringClass = assumedAssertThatMethodBinding.getDeclaringClass();
-		if (ClassRelationUtil.isContentOfType(declaringClass,
-				"org.assertj.core.api.Assertions") //$NON-NLS-1$
-				|| ClassRelationUtil.isContentOfType(declaringClass,
-						"org.assertj.core.api.AssertionsForClassTypes") //$NON-NLS-1$
-				|| ClassRelationUtil.isContentOfType(declaringClass,
-						"org.assertj.core.api.AssertionsForInterfaceTypes")) { //$NON-NLS-1$
-			return Optional.of(assumedAssertThatInvocation);
-		}
-		return Optional.empty();
-	}
 
 	static boolean hasSupportedAssertThatInvocation(
 			InvocationChainData invocationChainData) {
