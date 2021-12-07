@@ -69,6 +69,43 @@ class AssertThatInvocationAnalyzer {
 		return Optional.empty();
 	}
 
+	static boolean hasSupportedAssertThatInvocation(
+			InvocationChainData invocationChainData) {
+
+		MethodInvocation assumedAssertThatInvocation = invocationChainData.getLeftMostInvocation();
+		String methodName = assumedAssertThatInvocation.getName()
+			.getIdentifier();
+
+		if (!SUPPORTED_ASSERT_THAT_METHODS.contains(methodName)) {
+			return false;
+		}
+
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(assumedAssertThatInvocation.arguments(),
+				Expression.class);
+
+		if (arguments.size() != 1) {
+			return false;
+		}
+
+		Expression argument = arguments.get(0);
+		if (!isSupportedAssertThatArgumentStructure(argument)) {
+			return false;
+		}
+
+		IMethodBinding assumedAssertThatMethodBinding = assumedAssertThatInvocation.resolveMethodBinding();
+		if (assumedAssertThatMethodBinding == null) {
+			return false;
+		}
+
+		ITypeBinding declaringClass = assumedAssertThatMethodBinding.getDeclaringClass();
+		return ClassRelationUtil.isContentOfType(declaringClass,
+				"org.assertj.core.api.Assertions") //$NON-NLS-1$
+				|| ClassRelationUtil.isContentOfType(declaringClass,
+						"org.assertj.core.api.AssertionsForClassTypes") //$NON-NLS-1$
+				|| ClassRelationUtil.isContentOfType(declaringClass,
+						"org.assertj.core.api.AssertionsForInterfaceTypes");//$NON-NLS-1$
+	}
+
 	static boolean isSupportedAssertThatArgumentStructure(Expression assertThatArgument) {
 
 		return assertThatArgument.getNodeType() == ASTNode.SIMPLE_NAME

@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.assertj;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -50,7 +51,7 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 
 	@Override
 	public boolean visit(Block block) {
-		collectTransformationData(block).forEach(data -> transform(block, data));
+		collectTransformationDataNEW(block).forEach(data -> transform(block, data));
 		return true;
 	}
 
@@ -63,6 +64,24 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 			List<Statement> followingStatements = statements.subList(i + 1, statements.size());
 			TransformationData transformationData = findTransformationData(firstStatement,
 					followingStatements).orElse(null);
+			if (transformationData != null) {
+				i += transformationData.getAssertJAssertThatStatementsToRemove()
+					.size();
+				transformationDataList.add(transformationData);
+			} else {
+				i += 1;
+			}
+		}
+		return transformationDataList;
+	}
+	
+	private List<TransformationData> collectTransformationDataNEW(Block block) {
+		List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
+		List<TransformationData> transformationDataList = new ArrayList<>();
+		int i = 0;
+		while (i < statements.size()) {
+			List<Statement> statementsSubList = statements.subList(i, statements.size());
+			TransformationData transformationData = findTransformationData(statementsSubList).orElse(null);
 			if (transformationData != null) {
 				i += transformationData.getAssertJAssertThatStatementsToRemove()
 					.size();
@@ -145,6 +164,46 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 
 		return Optional
 			.of(createTransformationData(firstInvocationChain, subsequentInvocationChains));
+	}
+
+	private Optional<TransformationData> findTransformationData(List<Statement> statements) {
+		List<InvocationChainData> invocationChainDataList = new ArrayList<>();
+		for (int i = 0; i < statements.size(); i++) {
+			Predicate<InvocationChainData> assertThatPredicate;
+			if (invocationChainDataList.isEmpty()) {
+				assertThatPredicate = AssertThatInvocationAnalyzer::hasSupportedAssertThatInvocation;
+			} else {
+				assertThatPredicate = invocationChainDataList.get(0)::matchLeftMostInvocation;
+			}
+			InvocationChainData invocationChainData = findInvocationChainData(statements.get(i))
+				.filter(assertThatPredicate)
+				.filter(this::hasSupportedAssertionChain)
+				.orElse(null);
+			if (invocationChainData != null) {
+				invocationChainDataList.add(invocationChainData);
+			} else {
+				break;
+			}
+		}
+		if (invocationChainDataList.size() < 2) {
+			return Optional.empty();
+		}
+
+		InvocationChainData firstInvocationChainData = invocationChainDataList.get(0);
+		ExpressionStatement firstAssertThatStatement = firstInvocationChainData.getInvocationChainStatement();
+		MethodInvocation assertThatInvocation = firstInvocationChainData.getLeftMostInvocation();
+
+		List<MethodInvocation> invocationChainElementList = invocationChainDataList.stream()
+			.map(InvocationChainData::getSubsequentInvocations)
+			.flatMap(List<MethodInvocation>::stream)
+			.collect(Collectors.toList());
+
+		List<ExpressionStatement> statementsToRemove = invocationChainDataList.stream()
+			.map(InvocationChainData::getInvocationChainStatement)
+			.collect(Collectors.toList());
+
+		return Optional.of(new TransformationData(firstAssertThatStatement, statementsToRemove, assertThatInvocation,
+				invocationChainElementList));
 	}
 
 	private TransformationData createTransformationData(
