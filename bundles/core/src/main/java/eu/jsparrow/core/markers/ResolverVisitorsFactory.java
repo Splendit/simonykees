@@ -10,6 +10,9 @@ import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import eu.jsparrow.core.markers.visitor.AvoidConcatenationInLoggingStatementsResolver;
+import eu.jsparrow.core.markers.visitor.CollectionRemoveAllResolver;
+import eu.jsparrow.core.markers.visitor.DiamondOperatorResolver;
 import eu.jsparrow.core.markers.visitor.EnumsWithoutEqualsResolver;
 import eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver;
 import eu.jsparrow.core.markers.visitor.InefficientConstructorResolver;
@@ -52,6 +55,9 @@ public class ResolverVisitorsFactory {
 		map.put(PrimitiveBoxedForStringResolver.ID, PrimitiveBoxedForStringResolver::new);
 		map.put(UseIsEmptyOnCollectionsResolver.ID, UseIsEmptyOnCollectionsResolver::new);
 		map.put(EnumsWithoutEqualsResolver.ID, EnumsWithoutEqualsResolver::new);
+		map.put(AvoidConcatenationInLoggingStatementsResolver.ID, AvoidConcatenationInLoggingStatementsResolver::new);
+		map.put(CollectionRemoveAllResolver.ID, CollectionRemoveAllResolver::new);
+		map.put(DiamondOperatorResolver.ID, DiamondOperatorResolver::new);
 		return Collections.unmodifiableMap(map);
 	}
 

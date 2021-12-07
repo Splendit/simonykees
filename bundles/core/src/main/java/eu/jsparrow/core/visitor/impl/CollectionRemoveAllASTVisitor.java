@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.markers.common.CollectionRemoveAllEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -27,7 +28,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @since 0.9.2
  *
  */
-public class CollectionRemoveAllASTVisitor extends AbstractASTRewriteASTVisitor {
+public class CollectionRemoveAllASTVisitor extends AbstractASTRewriteASTVisitor implements CollectionRemoveAllEvent {
 
 	private static final Logger logger = LoggerFactory.getLogger(CollectionRemoveAllASTVisitor.class);
 
@@ -43,7 +44,7 @@ public class CollectionRemoveAllASTVisitor extends AbstractASTRewriteASTVisitor 
 					.resolveTypeBinding(), Collections.singletonList(collectionFullyQualifiedName))) {
 
 			@SuppressWarnings("unchecked")
-			List<Expression> arguments = (List<Expression>) node.arguments();
+			List<Expression> arguments = node.arguments();
 			if (arguments.size() == 1 && arguments.get(0) instanceof SimpleName
 					&& astMatcher.match((SimpleName) arguments.get(0), node.getExpression())) {
 				logger.debug("replace statement"); //$NON-NLS-1$
@@ -54,6 +55,7 @@ public class CollectionRemoveAllASTVisitor extends AbstractASTRewriteASTVisitor 
 						(Expression) astRewrite.createMoveTarget(node.getExpression()), clear);
 				astRewrite.replace(node, newMI, null);
 				onRewrite();
+				addMarkerEvent(node);
 				saveComments(node);
 			}
 		}

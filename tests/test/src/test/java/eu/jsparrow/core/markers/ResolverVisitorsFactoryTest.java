@@ -18,7 +18,7 @@ class ResolverVisitorsFactoryTest {
 	@Test
 	void test_getAllResolvers_shouldReturnAllResolvers() {
 		List<AbstractASTRewriteASTVisitor> allResovlers = ResolverVisitorsFactory.getAllResolvers(node -> true);
-		assertEquals(10, allResovlers.size());
+		assertEquals(13, allResovlers.size());
 	}
 	
 	@Test
