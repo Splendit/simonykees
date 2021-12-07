@@ -27,6 +27,7 @@ import eu.jsparrow.core.markers.visitor.RemoveNullCheckBeforeInstanceofResolver;
 import eu.jsparrow.core.markers.visitor.RemoveRedundantTypeCastResolver;
 import eu.jsparrow.core.markers.visitor.RemoveUnusedParameterResolver;
 import eu.jsparrow.core.markers.visitor.StringLiteralEqualityCheckResolver;
+import eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver;
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
@@ -70,6 +71,7 @@ public class ResolverVisitorsFactory {
 		map.put(RemoveNewStringConstructorResolver.ID, RemoveNewStringConstructorResolver::new);
 		map.put(RemoveRedundantTypeCastResolver.ID, RemoveRedundantTypeCastResolver::new);
 		map.put(RemoveUnusedParameterResolver.ID, RemoveUnusedParameterResolver::new);
+		map.put(UseCollectionsSingletonListResolver.ID, UseCollectionsSingletonListResolver::new);
 		return Collections.unmodifiableMap(map);
 	}
 
