@@ -11,11 +11,13 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -63,15 +65,15 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 				i += 1;
 			}
 		}
-
 		transformationDataList.forEach(data -> transform(block, data));
 		return true;
 	}
 
 	private Optional<TransformationData> findTransformationData(List<Statement> statements) {
 		List<InvocationChainData> invocationChainDataList = new ArrayList<>();
+		Predicate<InvocationChainData> assertThatPredicate;
+		ITypeBinding firstChainTReturnType = null;
 		for (int i = 0; i < statements.size(); i++) {
-			Predicate<InvocationChainData> assertThatPredicate;
 			if (invocationChainDataList.isEmpty()) {
 				assertThatPredicate = AssertThatInvocationChainAnalyzer::hasSupportedAssertThatInvocation;
 			} else {
@@ -79,9 +81,22 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 			}
 			InvocationChainData invocationChainData = findInvocationChainData(statements.get(i))
 				.filter(assertThatPredicate)
-				.filter(AssertThatInvocationChainAnalyzer::hasSupportedAssertionChain)
+				.filter(AssertThatInvocationChainAnalyzer::hasSupportedAssertionMethodNames)
 				.orElse(null);
+
+			boolean addData = false;
 			if (invocationChainData != null) {
+				ITypeBinding assertionChainReturntype = AssertThatInvocationChainAnalyzer
+					.findSupportedAssertionReturnType(invocationChainData)
+					.orElse(null);
+				if (i == 0 && assertionChainReturntype != null) {
+					firstChainTReturnType = assertionChainReturntype;
+					addData = true;
+				} else {
+					addData =ClassRelationUtil.compareITypeBinding(firstChainTReturnType, assertionChainReturntype);
+				}
+			}
+			if (addData) {
 				invocationChainDataList.add(invocationChainData);
 			} else {
 				break;

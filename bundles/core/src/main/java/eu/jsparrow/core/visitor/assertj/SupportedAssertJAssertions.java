@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 /**
@@ -49,26 +48,6 @@ public class SupportedAssertJAssertions {
 	public static boolean isSupportedAssertJAssertionMethodName(String methodName) {
 		return SUPPORTED_ASSERTION_PREFIXES.stream()
 			.anyMatch(methodName::startsWith);
-	}
-
-	/**
-	 * @return true if the given method name represents a valid
-	 *         AssertJ-assertion like for example {@code isNotNull} or
-	 *         {@code isNotEmpty}, otherwise false.
-	 */
-	public static boolean isSupportedAssertJAssertion(MethodInvocation invocation) {
-		String methodName = invocation.getName()
-			.getIdentifier();
-		if (isSupportedAssertJAssertionMethodName(methodName)) {
-			IMethodBinding methodBinding = invocation.resolveMethodBinding();
-			if (methodBinding != null) {
-				String returnTypeQualifiedName = methodBinding.getMethodDeclaration()
-					.getReturnType()
-					.getQualifiedName();
-				return "SELF".equals(returnTypeQualifiedName); //$NON-NLS-1$
-			}
-		}
-		return false;
 	}
 
 	private SupportedAssertJAssertions() {

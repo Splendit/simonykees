@@ -3,6 +3,9 @@ package eu.jsparrow.core.visitor.assertj;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
@@ -10,6 +13,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -19,7 +23,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * represents a supported {@code assertThat} - invocation chain.
  * 
  * @see #hasSupportedAssertThatInvocation(InvocationChainData)
- * @see #hasSupportedAssertionChain(InvocationChainData)
+ * 
  * 
  * @since 4.6.0
  *
@@ -103,13 +107,40 @@ class AssertThatInvocationChainAnalyzer {
 	}
 
 	/**
-	 * @return true if all assertions following the {@code assertThat} -
-	 *         invocation are supported, otherwise false.
+	 * @return true if the names of all assertions following the
+	 *         {@code assertThat} - invocation are supported, otherwise false.
 	 */
-	static boolean hasSupportedAssertionChain(InvocationChainData invocationChainData) {
+	static boolean hasSupportedAssertionMethodNames(InvocationChainData invocationChainData) {
 		List<MethodInvocation> chainFollowingAssertThat = invocationChainData.getSubsequentInvocations();
 		return chainFollowingAssertThat.stream()
-			.allMatch(SupportedAssertJAssertions::isSupportedAssertJAssertion);
+			.map(MethodInvocation::getName)
+			.map(SimpleName::getIdentifier)
+			.allMatch(SupportedAssertJAssertions::isSupportedAssertJAssertionMethodName);
+	}
+
+	static Optional<ITypeBinding> findSupportedAssertionReturnType(InvocationChainData invocationChainData) {
+		List<ITypeBinding> assertionTypes = invocationChainData.getSubsequentInvocations()
+			.stream()
+			.map(MethodInvocation::resolveTypeBinding)
+			.collect(Collectors.toList());
+
+		Optional<ITypeBinding> returnValue = assertionTypes.stream()
+			.findFirst();
+
+		ITypeBinding firstTypeBinding = returnValue.orElse(null);
+		if (firstTypeBinding == null) {
+			return Optional.empty();
+		}
+		if (ClassRelationUtil.isContentOfType(firstTypeBinding, "void")) { //$NON-NLS-1$
+			return Optional.empty();
+		}
+		
+		for(int i = 1; i < assertionTypes.size(); i++) {
+			if(!ClassRelationUtil.compareITypeBinding(firstTypeBinding, assertionTypes.get(i))) {
+				return Optional.empty();
+			}			
+		}
+		return returnValue;
 	}
 
 	private AssertThatInvocationChainAnalyzer() {
