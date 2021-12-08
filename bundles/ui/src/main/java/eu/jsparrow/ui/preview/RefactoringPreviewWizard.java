@@ -50,7 +50,7 @@ import eu.jsparrow.ui.util.ResourceHelper;
  */
 public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
-	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
+	private static final String WINDOW_ICON = "icons/jsparrow-icon-16-003.png"; //$NON-NLS-1$
 
 	private RefactoringPipeline refactoringPipeline;
 
@@ -301,9 +301,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public void dispose() {
 		refactoringPipeline.clearStates();
-		statisticsSection.dispose();
 		windowIcon.dispose();
-		summaryPageStatisticsSection.dispose();
 		super.dispose();
 	}
 

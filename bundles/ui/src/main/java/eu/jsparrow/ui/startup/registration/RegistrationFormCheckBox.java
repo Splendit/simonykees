@@ -79,6 +79,9 @@ public class RegistrationFormCheckBox {
 		decoInvalid.setDescriptionText(Messages.RegistrationFormCheckBox_invalidDataText);
 		decoInvalid.setImage(scaledCloseRedIconImage);
 		decoInvalid.hide();
+		parent.addDisposeListener(e -> scaledCloseRedIconImage.dispose());
+		parent.addDisposeListener(e -> closeRedIconImage.dispose());
+		
 	}
 
 	public Button getCheckBox() {

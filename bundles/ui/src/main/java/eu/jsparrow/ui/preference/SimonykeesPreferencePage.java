@@ -162,7 +162,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 				Arrays.stream(fontData)
 					.forEach(fd -> fd.setStyle(fd.getStyle() | SWT.BOLD));
 				Font boldFont = new Font(font.getDevice(), fontData);
-
+				getControl().addDisposeListener(e -> boldFont.dispose());
 				item.setText(0, Character.toString((char) 0x2713)); // Unicode
 																	// 0x2713 =
 																	// '✓'
