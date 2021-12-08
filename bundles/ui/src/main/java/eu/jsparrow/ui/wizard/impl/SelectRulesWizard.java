@@ -61,7 +61,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
 
-	private static final String WINDOW_ICON = "icons/jsparrow-marker-003.png"; //$NON-NLS-1$
+	private static final String WINDOW_ICON = "icons/jsparrow-icon-16-003.png"; //$NON-NLS-1$
 
 	private SelectRulesWizardPageModel model;
 
