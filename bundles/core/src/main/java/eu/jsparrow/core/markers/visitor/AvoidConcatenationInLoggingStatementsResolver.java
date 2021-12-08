@@ -59,7 +59,7 @@ public class AvoidConcatenationInLoggingStatementsResolver extends AvoidConcaten
 				description.getDescription(),
 				javaElement,
 				highlightLength,
-				infixExpression, newNode, credit);
+				infixExpression.getParent(), newNode, credit);
 		addMarkerEvent(event);
 	}
 }

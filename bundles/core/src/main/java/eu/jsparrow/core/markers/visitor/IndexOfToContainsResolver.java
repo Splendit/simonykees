@@ -40,7 +40,7 @@ public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor {
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		if (positionChecker.test(methodInvocation)) {
+		if (positionChecker.test(methodInvocation.getParent())) {
 			super.visit(methodInvocation);
 		}
 		return false;
@@ -50,7 +50,7 @@ public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor {
 	public void addMarkerEvent(InfixExpression node, Expression methodExpression, Expression methodArgument) {
 		int credit = description.getCredit();
 		MethodInvocation newNode = createContainsInvocation(methodExpression, methodArgument);
-		int highlightLength = newNode.getLength();
+		int highlightLength = newNode.toString().length();
 		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
 				description.getName(),
 				description.getDescription(),
@@ -68,7 +68,7 @@ public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor {
 		PrefixExpression newNode = ast.newPrefixExpression();
 		newNode.setOperator(not);
 		newNode.setOperand(contains);
-		int highlightLength = newNode.getLength();
+		int highlightLength = newNode.toString().length();
 		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
 				description.getName(),
 				description.getDescription(),

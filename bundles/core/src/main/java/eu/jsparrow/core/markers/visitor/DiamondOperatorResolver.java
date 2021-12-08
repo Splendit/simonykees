@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -33,7 +34,7 @@ public class DiamondOperatorResolver extends DiamondOperatorASTVisitor {
 	private RuleDescription description;
 
 	public DiamondOperatorResolver(Predicate<ASTNode> positionChecker) {
-		super("1.8"); //$NON-NLS-1$
+		super(JavaCore.VERSION_1_8);
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 			.findByRuleId(DiamondOperatorRule.RULE_ID);
@@ -69,7 +70,7 @@ public class DiamondOperatorResolver extends DiamondOperatorASTVisitor {
 				description.getDescription(),
 				javaElement,
 				highlightLength,
-				parameterizedType, typeCopy, credit);
+				parameterizedType.getParent(), typeCopy, credit);
 		addMarkerEvent(event);
 
 	}

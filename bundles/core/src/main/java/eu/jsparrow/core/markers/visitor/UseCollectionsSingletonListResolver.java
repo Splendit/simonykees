@@ -52,7 +52,7 @@ public class UseCollectionsSingletonListResolver extends UseCollectionsSingleton
 				description.getDescription(),
 				javaElement,
 				highlightLength,
-				methodName, newNode, credit);
+				methodName.getParent(), newNode, credit);
 		addMarkerEvent(event);
 	}
 }

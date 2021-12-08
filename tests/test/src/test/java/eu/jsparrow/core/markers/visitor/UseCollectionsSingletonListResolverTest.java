@@ -58,8 +58,8 @@ class UseCollectionsSingletonListResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver", event.getResolver()),
 				() -> assertEquals("emptyList", event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
-				() -> assertEquals(167, event.getOffset()),
-				() -> assertEquals(6, event.getLength()),
+				() -> assertEquals(160, event.getOffset()),
+				() -> assertEquals(15, event.getLength()),
 				() -> assertEquals(2, event.getWeightValue()));
 	}
 	
