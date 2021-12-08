@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+import eu.jsparrow.core.markers.common.UseCollectionsSingletonListEvent;
 import eu.jsparrow.core.visitor.sub.UnusedImportsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -30,7 +31,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * 
  * @since 3.8.0
  */
-public class UseCollectionsSingletonListASTVisitor extends AbstractAddImportASTVisitor {
+public class UseCollectionsSingletonListASTVisitor extends AbstractAddImportASTVisitor implements UseCollectionsSingletonListEvent {
 
 	private static final String JAVA_UTIL_COLLECTIONS = java.util.Collections.class.getName();
 	private static final String AS_LIST = "asList"; //$NON-NLS-1$
@@ -125,6 +126,7 @@ public class UseCollectionsSingletonListASTVisitor extends AbstractAddImportASTV
 		astRewrite.replace(methodName, newMethodName, null);
 		replacedNames.add(methodName);
 		onRewrite();
+		addMarkerEvent(methodName, newMethodName);
 
 		return true;
 	}

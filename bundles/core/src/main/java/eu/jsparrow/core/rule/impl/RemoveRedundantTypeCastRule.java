@@ -19,9 +19,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class RemoveRedundantTypeCastRule extends RefactoringRuleImpl<RemoveRedundantTypeCastASTVisitor> {
 
+	public static final String RULE_ID = "RemoveRedundantTypeCast"; //$NON-NLS-1$
+
 	public RemoveRedundantTypeCastRule() {
 		this.visitorClass = RemoveRedundantTypeCastASTVisitor.class;
-		this.id = "RemoveRedundantTypeCast"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.RemoveRedundantTypeCastRule_name,
 				Messages.RemoveRedundantTypeCastRule_description,
 				Duration.ofMinutes(5),
