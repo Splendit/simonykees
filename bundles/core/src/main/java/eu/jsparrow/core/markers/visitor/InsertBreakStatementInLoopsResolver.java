@@ -59,7 +59,7 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 		newIfStatement.setThenStatement(newIfBodyBlock);
 		newForStatement.setBody(newIfStatement);
 		int credit = description.getCredit();
-		int highlightLength = newForStatement.getLength();
+		int highlightLength = newForStatement.getLength() + breakStatement.toString().length();
 		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
 				description.getName(),
 				description.getDescription(),
@@ -83,7 +83,7 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 		newIfStatement.setThenStatement(newIfBodyBlock);
 		newForStatement.setBody(newIfStatement);
 		int credit = description.getCredit();
-		int highlightLength = newForStatement.getLength();
+		int highlightLength = newForStatement.getLength() + breakStatement.toString().length();
 		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
 				description.getName(),
 				description.getDescription(),

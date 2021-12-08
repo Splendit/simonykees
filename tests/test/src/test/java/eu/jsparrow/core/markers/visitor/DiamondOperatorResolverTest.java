@@ -59,7 +59,7 @@ class DiamondOperatorResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals(description, event.getMessage()), 
 				() -> assertEquals("eu.jsparrow.core.markers.visitor.DiamondOperatorResolver", event.getResolver()),
 				() -> assertEquals("ArrayList<>", event.getCodePreview()),
-				() -> assertEquals(11, event.getHighlightLength()),
+				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(162, event.getOffset()),
 				() -> assertEquals(23, event.getLength()),
 				() -> assertEquals(1, event.getWeightValue()));

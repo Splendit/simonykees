@@ -63,8 +63,7 @@ public class DiamondOperatorResolver extends DiamondOperatorASTVisitor {
 		@SuppressWarnings("unchecked")
 		List<Type> typeArguments = typeCopy.typeArguments();
 		typeArguments.clear();
-		int highlightLength = typeCopy.toString()
-			.length();
+		int highlightLength = 0;
 		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
 				description.getName(),
 				description.getDescription(),
