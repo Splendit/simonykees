@@ -653,11 +653,13 @@ public class Messages extends NLS {
 	public static String WelcomeEditor_title;
 	public static String WelcomePage_buy_license_button;
 	public static String WelcomePage_customization_group;
+	public static String WelcomePage_getFreeRulesNow;
 	public static String WelcomePage_getting_started_group;
 	public static String WelcomePage_guidelines_button;
 	public static String WelcomePage_license_preferences_button;
 	public static String WelcomePage_market_place_button;
 	public static String WelcomePage_preferences_button;
+	public static String WelcomePage_starterRegistration;
 	public static String WelcomePage_title;
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;
