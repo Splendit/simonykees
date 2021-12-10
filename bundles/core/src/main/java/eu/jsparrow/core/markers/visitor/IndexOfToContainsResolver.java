@@ -12,13 +12,14 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.IndexOfToContainsRule;
 import eu.jsparrow.core.visitor.impl.IndexOfToContainsASTVisitor;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
-public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor {
+public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor implements Resolver {
 	
 	public static final String ID = IndexOfToContainsResolver.class.getName();
 
@@ -30,6 +31,11 @@ public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 			.findByRuleId(IndexOfToContainsRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

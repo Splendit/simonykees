@@ -9,13 +9,14 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
 import eu.jsparrow.core.visitor.impl.UseCollectionsSingletonListASTVisitor;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
-public class UseCollectionsSingletonListResolver extends UseCollectionsSingletonListASTVisitor {
+public class UseCollectionsSingletonListResolver extends UseCollectionsSingletonListASTVisitor implements Resolver {
 
 	public static final String ID = UseCollectionsSingletonListResolver.class.getName();
 
@@ -27,6 +28,11 @@ public class UseCollectionsSingletonListResolver extends UseCollectionsSingleton
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 			.findByRuleId(UseCollectionsSingletonListRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
 import eu.jsparrow.core.visitor.impl.LambdaToMethodReferenceASTVisitor;
@@ -28,7 +29,7 @@ import eu.jsparrow.rules.common.RuleDescription;
  * @since 4.0.0
  *
  */
-public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTVisitor {
+public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTVisitor implements Resolver {
 
 	public static final String ID = LambdaToMethodReferenceResolver.class.getName();
 
@@ -40,6 +41,11 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 				.findByRuleId(LambdaToMethodReferenceRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

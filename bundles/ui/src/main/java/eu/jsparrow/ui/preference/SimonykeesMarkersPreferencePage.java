@@ -1,16 +1,14 @@
 package eu.jsparrow.ui.preference;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -20,6 +18,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import eu.jsparrow.core.markers.ResolverVisitorsFactory;
+import eu.jsparrow.rules.common.RuleDescription;
 
 public class SimonykeesMarkersPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -36,17 +35,19 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		composite.setLayoutData(gd);
 		composite.setLayout(new GridLayout(1, true));
 		
-		Set<String> allMarkerIds = ResolverVisitorsFactory.getAllMarkerIds();
+		Map<String, RuleDescription> allMarkerDescriptions = ResolverVisitorsFactory.getAllMarkerDescriptions();
 		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
 		
-		for(String markerId : allMarkerIds) {
+		for(Map.Entry<String, RuleDescription> entry : allMarkerDescriptions.entrySet()) {
+			String markerId = entry.getKey();
+			RuleDescription description = entry.getValue();
 			Group group = new Group(composite, SWT.NONE);
-			group.setLayout(new GridLayout(2, true));
+			group.setLayout(new GridLayout(2, false));
 			group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			Button button = new Button(group, SWT.CHECK);
-			button.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 			button.setVisible(true);
-			
+
 			button.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -61,8 +62,8 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 			boolean selection = allActiveMarkers.contains(markerId);
 			button.setSelection(selection);
 			Label label = new Label(group, SWT.NONE);
-			label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			label.setText(markerId);
+			label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+			label.setText(description.getName());
 			label.setVisible(true);
 		}
 		

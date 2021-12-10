@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.visitor.impl.UseIsEmptyOnCollectionsASTVisitor;
@@ -27,7 +28,7 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
  * @since 4.0.0
  *
  */
-public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTVisitor {
+public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTVisitor implements Resolver {
 
 	public static final String ID = UseIsEmptyOnCollectionsResolver.class.getName();
 	private IJavaElement javaElement;
@@ -38,6 +39,11 @@ public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTV
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 				.findByRuleId(UseIsEmptyOnCollectionsRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

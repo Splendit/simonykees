@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.visitor.impl.StringLiteralEqualityCheckASTVisitor;
@@ -25,7 +26,7 @@ import eu.jsparrow.rules.common.RuleDescription;
  * @since 4.0.0
  *
  */
-public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityCheckASTVisitor {
+public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityCheckASTVisitor implements Resolver {
 
 	public static final String ID = StringLiteralEqualityCheckResolver.class.getName();
 	private IJavaElement javaElement;
@@ -36,6 +37,11 @@ public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityChe
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 				.findByRuleId(StringLiteralEqualityCheckRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

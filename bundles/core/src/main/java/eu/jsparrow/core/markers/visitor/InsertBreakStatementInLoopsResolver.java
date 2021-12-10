@@ -13,13 +13,14 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.InsertBreakStatementInLoopsRule;
 import eu.jsparrow.core.visitor.impl.InsertBreakStatementInLoopsASTVisitor;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
-public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInLoopsASTVisitor {
+public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInLoopsASTVisitor implements Resolver {
 
 	public static final String ID = InsertBreakStatementInLoopsResolver.class.getName();
 	
@@ -31,6 +32,11 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 			.findByRuleId(InsertBreakStatementInLoopsRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

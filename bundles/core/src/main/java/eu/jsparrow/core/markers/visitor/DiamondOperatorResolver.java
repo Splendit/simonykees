@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.Type;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.DiamondOperatorRule;
 import eu.jsparrow.core.visitor.impl.DiamondOperatorASTVisitor;
@@ -25,7 +26,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
  * @since 4.6.0
  *
  */
-public class DiamondOperatorResolver extends DiamondOperatorASTVisitor {
+public class DiamondOperatorResolver extends DiamondOperatorASTVisitor implements Resolver {
 
 	public static final String ID = DiamondOperatorResolver.class.getName();
 
@@ -38,6 +39,11 @@ public class DiamondOperatorResolver extends DiamondOperatorASTVisitor {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 			.findByRuleId(DiamondOperatorRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

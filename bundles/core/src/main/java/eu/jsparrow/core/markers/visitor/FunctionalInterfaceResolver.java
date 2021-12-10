@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.EnumsWithoutEqualsRule;
 import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
@@ -27,7 +28,7 @@ import eu.jsparrow.rules.common.RuleDescription;
  * @since 4.0.0
  *
  */
-public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
+public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor implements Resolver {
 
 	public static final String ID = FunctionalInterfaceResolver.class.getName();
 
@@ -38,6 +39,11 @@ public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 	public FunctionalInterfaceResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory.findByRuleId(EnumsWithoutEqualsRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

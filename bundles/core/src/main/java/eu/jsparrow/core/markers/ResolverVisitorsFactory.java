@@ -8,9 +8,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.markers.visitor.AvoidConcatenationInLoggingStatementsResolver;
 import eu.jsparrow.core.markers.visitor.CollectionRemoveAllResolver;
 import eu.jsparrow.core.markers.visitor.DiamondOperatorResolver;
@@ -31,6 +33,7 @@ import eu.jsparrow.core.markers.visitor.StringLiteralEqualityCheckResolver;
 import eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver;
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver;
+import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -93,9 +96,18 @@ public class ResolverVisitorsFactory {
 		});
 		return resolvers;
 	}
-
-	public static Set<String> getAllMarkerIds() {
-		return registry.keySet();
+	
+	public static Map<String, RuleDescription> getAllMarkerDescriptions() {
+		return registry
+		.entrySet()
+		.stream()
+		.collect(Collectors.toMap(Map.Entry::getKey, entry -> getDescription(entry.getValue())));
+	}
+	
+	private static RuleDescription getDescription(Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor> function) {
+		AbstractASTRewriteASTVisitor visitor = function.apply(node -> true);
+		Resolver resolver = (Resolver)visitor;
+		return resolver.getDescription();
 	}
 
 	public static List<AbstractASTRewriteASTVisitor> getAllResolvers(List<String> markerIds,
