@@ -19,10 +19,13 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class RemoveUnusedParameterRule extends RefactoringRuleImpl<RemoveUnusedParameterASTVisitor> {
 
+	public static final String RULE_ID = "RemoveUnusedParameter"; //$NON-NLS-1$
+
 	public RemoveUnusedParameterRule() {
 		this.visitorClass = RemoveUnusedParameterASTVisitor.class;
-		this.id = "RemoveUnusedParameter"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription(Messages.RemoveUnusedParameterRule_name, Messages.RemoveUnusedParameterRule_description,
+		this.id = RULE_ID;
+		this.ruleDescription = new RuleDescription(Messages.RemoveUnusedParameterRule_name,
+				Messages.RemoveUnusedParameterRule_description,
 				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
 	}
 

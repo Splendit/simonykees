@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.DiamondOperatorEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -38,7 +39,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 1.0
  *
  */
-public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
+public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor implements DiamondOperatorEvent {
 
 	private String compilerCompliance;
 
@@ -172,6 +173,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 			}
 			if (sameTypes) {
 				replaceWithDiamond(parameterizedType, rhsTypeArguments);
+				addMarkerEvent(parameterizedType, rhsTypeArguments);
 				onRewrite();
 			}
 		}

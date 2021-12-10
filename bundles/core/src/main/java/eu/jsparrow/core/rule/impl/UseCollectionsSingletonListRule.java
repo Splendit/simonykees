@@ -19,8 +19,9 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class UseCollectionsSingletonListRule extends RefactoringRuleImpl<UseCollectionsSingletonListASTVisitor> {
 
+	public static final String RULE_ID = "UseCollectionsSingletonList"; //$NON-NLS-1$
 	public UseCollectionsSingletonListRule() {
-		this.id = "UseCollectionsSingletonList"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.visitorClass = UseCollectionsSingletonListASTVisitor.class;
 		this.ruleDescription = new RuleDescription(Messages.UseCollectionsSingletonListRule_name,
 				Messages.UseCollectionsSingletonListRule_description, Duration.ofMinutes(2),

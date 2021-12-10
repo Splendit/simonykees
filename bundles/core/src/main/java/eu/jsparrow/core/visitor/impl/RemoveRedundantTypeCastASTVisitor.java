@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.core.markers.common.RemoveRedundantTypeCastEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -37,7 +38,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 3.15.0
  *
  */
-public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisitor {
+public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisitor implements RemoveRedundantTypeCastEvent {
 
 	@Override
 	public boolean visit(CastExpression castExpression) {
@@ -227,6 +228,7 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		ASTNode nodeToBeReplaced = getASTNodeToBeReplaced(typeCast);
 		ASTNode replacement = astRewrite.createCopyTarget(getASTNodeReplacement(typeCast));
 
+		addMarkerEvent(nodeToBeReplaced, getASTNodeReplacement(typeCast));
 		astRewrite.replace(nodeToBeReplaced, replacement, null);
 		onRewrite();
 

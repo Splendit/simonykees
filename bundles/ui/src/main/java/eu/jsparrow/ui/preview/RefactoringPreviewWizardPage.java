@@ -1,6 +1,7 @@
 package eu.jsparrow.ui.preview;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -74,6 +76,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private CheckboxTableViewer viewer;
 	private Map<ICompilationUnit, DocumentChange> changesForRule;
 	private RefactoringRule rule;
+	private List<Image>disposables = new ArrayList<>();
 
 
 	/*
@@ -179,8 +182,9 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		 * children
 		 */
 		sashForm.setWeights(1, 3);
-		getTotalStatisticsSection().ifPresent(statistics -> statistics.createView(container));
-
+		List<Image> images = getTotalStatisticsSection().map(statistics -> statistics.createView(container))
+				.orElse(Collections.emptyList());
+		disposables.addAll(images);
 		initializeDataBindings();
 	}
 
@@ -487,6 +491,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	@Override
 	public void dispose() {
 		ruleStatisticsSection.dispose();
+		disposables.forEach(Image::dispose);
+		disposables.clear();
 		super.dispose();
 	}
 
