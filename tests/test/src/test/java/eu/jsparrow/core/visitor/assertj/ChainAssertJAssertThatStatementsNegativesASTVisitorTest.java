@@ -227,4 +227,22 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 
 		assertNoChange(original);
 	}
+	
+	@Test
+	public void visit_AssertThatListIsNotNullAndIsNotEmpty_shouldTransform() throws Exception {
+
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+
+		String original = "" +
+				"	List<String> stringList = Arrays.asList(\"s1\", \"s2\");\n"
+				+ "\n"
+				+ "	public void testIsNotNullIsNotEmpty() {\n"
+				+ "		assertThat(stringList).isXXX();\n"
+				+ "		assertThat(stringList).isYYY();\n"
+				+ "	}";
+		
+		assertNoChange(original);
+	}
 }
