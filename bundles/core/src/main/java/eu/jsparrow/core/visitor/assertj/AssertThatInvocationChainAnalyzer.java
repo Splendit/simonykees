@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
@@ -186,7 +185,6 @@ class AssertThatInvocationChainAnalyzer {
 			InvocationChainData invocationChainData) {
 
 		List<MethodInvocation> subsequentInvocations = invocationChainData.getSubsequentInvocations();
-
 		ITypeBinding firstAssertionReturnType = null;
 		for (int i = 0; i < subsequentInvocations.size(); i++) {
 			MethodInvocation assertion = subsequentInvocations.get(i);
@@ -211,36 +209,21 @@ class AssertThatInvocationChainAnalyzer {
 		return true;
 	}
 
-	/**
-	 * @see ClassRelationUtil#compareITypeBinding(ITypeBinding[],
-	 *      ITypeBinding[])
-	 * 
-	 * @param firstTypeBinding
-	 *            the first {@link ITypeBinding} to be compared
-	 * @param secondTypeBinging
-	 *            the second {@link ITypeBinding} to be compared
-	 * @return whether or not the {@link ITypeBinding}s have the same qualified
-	 *         name
-	 */
-	public static boolean compareErasureTypeBinding(ITypeBinding firstTypeBinding, ITypeBinding secondTypeBinging) {
-		if (null == firstTypeBinding || null == secondTypeBinging) {
+	private static boolean compareErasureTypeBinding(ITypeBinding firstTypeBinding, ITypeBinding secondTypeBinding) {
+		if (null == firstTypeBinding || null == secondTypeBinding) {
 			return false;
 		}
-		String lhsTypeName = firstTypeBinding.getErasure()
-			.getQualifiedName();
-		String rhsTypeName = secondTypeBinging.getErasure()
-			.getQualifiedName();
-		lhsTypeName = getErasureQualifiedName(lhsTypeName);
-		rhsTypeName = getErasureQualifiedName(rhsTypeName);
-		return lhsTypeName.equals(rhsTypeName);
+		ITypeBinding lhsNonParameterizedTypeErasure = getNonParameterizedTypeErasure(firstTypeBinding);
+		ITypeBinding rhsNonParameterizedTypeErasure = getNonParameterizedTypeErasure(secondTypeBinding);
+		return ClassRelationUtil.compareITypeBinding(lhsNonParameterizedTypeErasure, rhsNonParameterizedTypeErasure);
 	}
 
-	private static String getErasureQualifiedName(String qualifiedName) {
-		int indexOfOpeningTriangle = qualifiedName.indexOf('<');
-		if (indexOfOpeningTriangle != -1) {
-			return qualifiedName.substring(0, indexOfOpeningTriangle);
+	private static ITypeBinding getNonParameterizedTypeErasure(ITypeBinding typeBinding) {
+		ITypeBinding erasure = typeBinding.getErasure();
+		while (erasure.isParameterizedType()) {
+			erasure = erasure.getErasure();
 		}
-		return qualifiedName;
+		return erasure;
 	}
 
 	private AssertThatInvocationChainAnalyzer() {
