@@ -53,8 +53,4 @@ class InvocationChainData {
 	List<MethodInvocation> getSubsequentInvocations() {
 		return subsequentInvocations;
 	}
-
-	boolean matchLeftMostInvocation(InvocationChainData other) {
-		return astMatcher.match(leftMostInvocation, other.leftMostInvocation);
-	}
 }

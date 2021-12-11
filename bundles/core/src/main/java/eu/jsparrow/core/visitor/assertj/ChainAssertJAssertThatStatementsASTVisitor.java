@@ -3,7 +3,6 @@ package eu.jsparrow.core.visitor.assertj;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -18,7 +17,6 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -70,60 +68,6 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		}
 		transformationDataList.forEach(data -> transform(block, data));
 		return true;
-	}
-
-	private Optional<TransformationData> findTransformationData(List<Statement> statements) {
-		List<InvocationChainData> invocationChainDataList = new ArrayList<>();
-		Predicate<InvocationChainData> assertThatPredicate;
-		ITypeBinding firstChainTReturnType = null;
-		for (int i = 0; i < statements.size(); i++) {
-			if (invocationChainDataList.isEmpty()) {
-				assertThatPredicate = AssertThatInvocationChainAnalyzer::hasSupportedAssertThatInvocation;
-			} else {
-				assertThatPredicate = invocationChainDataList.get(0)::matchLeftMostInvocation;
-			}
-			InvocationChainData invocationChainData = findInvocationChainData(statements.get(i))
-				.filter(assertThatPredicate)
-				.filter(AssertThatInvocationChainAnalyzer::hasSupportedAssertionMethodNames)
-				.orElse(null);
-
-			boolean addData = false;
-			if (invocationChainData != null) {
-				ITypeBinding assertionChainReturntype = AssertThatInvocationChainAnalyzer
-					.findSupportedAssertionReturnType(invocationChainData)
-					.orElse(null);
-				if (i == 0 && assertionChainReturntype != null) {
-					firstChainTReturnType = assertionChainReturntype;
-					addData = true;
-				} else {
-					addData = ClassRelationUtil.compareITypeBinding(firstChainTReturnType, assertionChainReturntype);
-				}
-			}
-			if (addData) {
-				invocationChainDataList.add(invocationChainData);
-			} else {
-				break;
-			}
-		}
-		if (invocationChainDataList.size() < 2) {
-			return Optional.empty();
-		}
-
-		InvocationChainData firstInvocationChainData = invocationChainDataList.get(0);
-		ExpressionStatement firstAssertThatStatement = firstInvocationChainData.getInvocationChainStatement();
-		MethodInvocation assertThatInvocation = firstInvocationChainData.getLeftMostInvocation();
-
-		List<MethodInvocation> invocationChainElementList = invocationChainDataList.stream()
-			.map(InvocationChainData::getSubsequentInvocations)
-			.flatMap(List<MethodInvocation>::stream)
-			.collect(Collectors.toList());
-
-		List<ExpressionStatement> statementsToRemove = invocationChainDataList.stream()
-			.map(InvocationChainData::getInvocationChainStatement)
-			.collect(Collectors.toList());
-
-		return Optional.of(new TransformationData(firstAssertThatStatement, statementsToRemove, assertThatInvocation,
-				invocationChainElementList));
 	}
 
 	private Optional<TransformationData> findTransformationData(Statement firstStatement,

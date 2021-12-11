@@ -22,7 +22,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * Helper class to find out whether an instance of {@link InvocationChainData}
  * represents a supported {@code assertThat} - invocation chain.
  * 
- * @see #hasSupportedAssertThatInvocation(InvocationChainData)
+ * 
  * 
  * 
  * @since 4.6.0
@@ -103,48 +103,6 @@ class AssertThatInvocationChainAnalyzer {
 
 	}
 
-	/**
-	 * @return true if the leftmost invocation of a given instance of
-	 *         {@link InvocationChainData} is a supported {@code assertThat} -
-	 *         invocation, otherwise false.
-	 */
-	static boolean hasSupportedAssertThatInvocation(
-			InvocationChainData invocationChainData) {
-
-		MethodInvocation assumedAssertThatInvocation = invocationChainData.getLeftMostInvocation();
-		String methodName = assumedAssertThatInvocation.getName()
-			.getIdentifier();
-
-		if (!SUPPORTED_ASSERT_THAT_METHODS.contains(methodName)) {
-			return false;
-		}
-
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(assumedAssertThatInvocation.arguments(),
-				Expression.class);
-
-		if (arguments.size() != 1) {
-			return false;
-		}
-
-		Expression argument = arguments.get(0);
-		if (!isSupportedAssertThatArgumentStructure(argument)) {
-			return false;
-		}
-
-		IMethodBinding assumedAssertThatMethodBinding = assumedAssertThatInvocation.resolveMethodBinding();
-		if (assumedAssertThatMethodBinding == null) {
-			return false;
-		}
-
-		ITypeBinding declaringClass = assumedAssertThatMethodBinding.getDeclaringClass();
-		return ClassRelationUtil.isContentOfType(declaringClass,
-				"org.assertj.core.api.Assertions") //$NON-NLS-1$
-				|| ClassRelationUtil.isContentOfType(declaringClass,
-						"org.assertj.core.api.AssertionsForClassTypes") //$NON-NLS-1$
-				|| ClassRelationUtil.isContentOfType(declaringClass,
-						"org.assertj.core.api.AssertionsForInterfaceTypes");//$NON-NLS-1$
-	}
-
 	static boolean isSupportedAssertThatArgumentStructure(Expression assertThatArgument) {
 
 		return assertThatArgument.getNodeType() == ASTNode.SIMPLE_NAME
@@ -199,24 +157,6 @@ class AssertThatInvocationChainAnalyzer {
 			.collect(Collectors.toList());
 	}
 
-	static Optional<ITypeBinding> findFirstAssertionReturnType(ITypeBinding assertThatReturnType,
-			MethodInvocation assumedFirstAssertion) {
-
-		IMethodBinding assumedFirstAssertionMethodBinding = assumedFirstAssertion.resolveMethodBinding();
-		if (assumedFirstAssertionMethodBinding == null) {
-			return Optional.empty();
-		}
-		ITypeBinding assumedFirstAssertionReturnType = assumedFirstAssertionMethodBinding.getReturnType();
-
-		ITypeBinding lhsNonParameterizedTypeErasure = getNonParameterizedTypeErasure(assertThatReturnType);
-		ITypeBinding rhsNonParameterizedTypeErasure = getNonParameterizedTypeErasure(assumedFirstAssertionReturnType);
-		if (!ClassRelationUtil.compareITypeBinding(lhsNonParameterizedTypeErasure, rhsNonParameterizedTypeErasure)) {
-			return Optional.empty();
-		}
-		return Optional.of(assumedFirstAssertionReturnType);
-
-	}
-
 	private static boolean analyzeFirstAssertionReturnType(ITypeBinding assertThatReturnType,
 			ITypeBinding assumedFirstAssertionReturnType) {
 
@@ -225,15 +165,13 @@ class AssertThatInvocationChainAnalyzer {
 		return ClassRelationUtil.compareITypeBinding(lhsNonParameterizedTypeErasure, rhsNonParameterizedTypeErasure);
 
 	}
-	
+
 	static boolean analyzeAssertionMethodReturnTypes(ITypeBinding expectedAssertionReturnType,
 			List<ITypeBinding> assertionReturnTypes) {
 
 		return assertionReturnTypes.stream()
 			.allMatch(returnType -> ClassRelationUtil.compareITypeBinding(returnType, expectedAssertionReturnType));
 	}
-
-
 
 	private static boolean compareErasureTypeBinding(ITypeBinding firstTypeBinding, ITypeBinding secondTypeBinding) {
 		if (null == firstTypeBinding || null == secondTypeBinding) {
