@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  */
 class InvocationChainData {
 
-	private static final ASTMatcher astMatcher = new ASTMatcher();
 	private final MethodInvocation leftMostInvocation;
 	private final List<MethodInvocation> subsequentInvocations;
 	private final ExpressionStatement invocationChainStatement;

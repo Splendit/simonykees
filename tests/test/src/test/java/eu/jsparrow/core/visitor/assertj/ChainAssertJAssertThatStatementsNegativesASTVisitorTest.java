@@ -137,17 +137,108 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 	}
 
 	@Test
-	public void visit_NotSupportedInvocationChainElements_shouldNotTransform() throws Exception {
+	public void visit_NotSupportedMethodElementInAllChains_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
 		defaultFixture.addImport(java.util.Arrays.class.getName());
 
 		String original = "" +
-				"	List<String> stringList = Arrays.asList(\"String-1\", \"String-2\", \"String-3\", \"String-4\");\n"
+				"	List<String> stringList = Arrays.asList(\"s1\", \"s2\");\n"
 				+ "\n"
-				+ "	public void assertThatWithNotSupportedInvocationChainElements() {\n"
-				+ "		assertThat(stringList).element(1);\n"
-				+ "		assertThat(stringList).element(0);\n"
+				+ "	public void notSupportedMethodElementInAllChains() {\n"
+				+ "		\n"
+				+ "		assertThat(stringList).element(0).isNotNull();\n"
+				+ "		assertThat(stringList).element(1).isNotNull();\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_NotSupportedMethodElementIn2ndChain_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+
+		String original = "" +
+				"	List<String> stringList = Arrays.asList(\"s1\");\n"
+				+ "\n"
+				+ "	public void subsequentAssertThatOnListEment() {\n"
+				+ "		assertThat(stringList).isNotEmpty();\n"
+				+ "		assertThat(stringList).element(0).isNotNull();\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	
+	@Test
+	public void visit_VoidMethodIn1stChain_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+
+		String original = "" +
+				"	List<String> stringList = Arrays.asList();\n"
+				+ "\n"
+				+ "	public void voidMethodIn1stChain() {\n"
+				+ "		assertThat(stringList).isNullOrEmpty();\n"
+				+ "		assertThat(stringList).contains();\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	
+	@Test
+	public void visit_VoidMethodIn2ndChain_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+
+		String original = "" +
+				"	List<String> stringList = Arrays.asList();\n"
+				+ "\n"
+				+ "	public void voidMethodIn2ndChain() {\n"
+				+ "		assertThat(stringList).contains();\n"
+				+ "		assertThat(stringList).isNullOrEmpty();;\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+	
+	
+	
+	@Test
+	public void visit_SubsequentVoidMethodIn1stChain_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+
+		String original = "" +
+				"	List<String> stringList = Arrays.asList();\n"
+				+ "\n"
+				+ "	public void subsequentVoidMethodIn1stChain() {\n"
+				+ "		assertThat(stringList).isNotNull().isNullOrEmpty();\n"
+				+ "		assertThat(stringList).contains();\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	
+	@Test
+	public void visit_SubsequentVoidMethodIn2ndChain_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+
+		String original = "" +
+				"	List<String> stringList = Arrays.asList();\n"
+				+ "\n"
+				+ "	public void subsequentVoidMethodIn2ndChain() {\n"
+				+ "		assertThat(stringList).contains();\n"
+				+ "		assertThat(stringList).isNotNull().isNullOrEmpty();\n"
 				+ "	}";
 
 		assertNoChange(original);
@@ -227,9 +318,9 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
-	public void visit_AssertThatListIsNotNullAndIsNotEmpty_shouldTransform() throws Exception {
+	public void visit_UnresolvedIsAssertions_shouldTransform() throws Exception {
 
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -242,7 +333,25 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 				+ "		assertThat(stringList).isXXX();\n"
 				+ "		assertThat(stringList).isYYY();\n"
 				+ "	}";
-		
+
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_UnresolvedIsAssertionIn2ndChain_shouldTransform() throws Exception {
+
+		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+
+		String original = "" +
+				"	List<String> stringList = Arrays.asList(\"s1\", \"s2\");\n"
+				+ "\n"
+				+ "	public void testIsNotNullIsNotEmpty() {\n"
+				+ "		assertThat(stringList).isNotNull();\n"
+				+ "		assertThat(stringList).isYYY();\n"
+				+ "	}";
+
 		assertNoChange(original);
 	}
 }

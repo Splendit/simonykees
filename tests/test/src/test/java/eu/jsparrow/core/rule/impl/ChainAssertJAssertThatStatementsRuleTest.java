@@ -24,6 +24,7 @@ import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
+@SuppressWarnings("nls")
 public class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE_ALWAYS_TRANSFORMED = "ChainAssertJAssertThatStatementsAlwaysTransformedRule.java";

@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
@@ -47,7 +46,6 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	public static final String ORG_ASSERTJ_CORE_API_ASSERTIONS = "org.assertj.core.api.Assertions"; //$NON-NLS-1$
-	private static final ASTMatcher astMatcher = new ASTMatcher();
 
 	@Override
 	public boolean visit(Block block) {
@@ -56,8 +54,9 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		int i = 0;
 		while (i < statements.size()) {
 			Statement firstStatement = statements.get(i);
-			List<Statement> subsequentStatements = statements.subList(i+1, statements.size());
-			TransformationData transformationData = findTransformationData(firstStatement, subsequentStatements).orElse(null);
+			List<Statement> subsequentStatements = statements.subList(i + 1, statements.size());
+			TransformationData transformationData = findTransformationData(firstStatement, subsequentStatements)
+				.orElse(null);
 			if (transformationData != null) {
 				i += transformationData.getAssertJAssertThatStatementsToRemove()
 					.size();
@@ -85,14 +84,12 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 			return Optional.empty();
 		}
 		MethodInvocation assertThatInvocation = assertThatInvocationData.getAssertThatInvocation();
-		ITypeBinding assertThatReturnType = assertThatInvocationData.getAssertthatReturnType();
 
 		List<InvocationChainData> subsequentInvocationChainDataList = new ArrayList<>();
 		for (int i = 0; i < subsequentStatements.size(); i++) {
 			InvocationChainData invocationChainData = findInvocationChainData(subsequentStatements.get(i))
-				.filter(data -> astMatcher.match(assertThatInvocation, data.getLeftMostInvocation()))
-				.filter(data -> AssertThatInvocationChainAnalyzer.hasSupportedAssertions(assertThatReturnType,
-						data))
+				.filter(data -> AssertThatInvocationChainAnalyzer
+					.analyzeSubsequentInvocationChain(assertThatInvocationData, data))
 				.orElse(null);
 
 			if (invocationChainData != null) {

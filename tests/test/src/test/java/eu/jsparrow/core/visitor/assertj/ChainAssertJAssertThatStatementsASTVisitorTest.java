@@ -446,7 +446,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	public void visit_AssertThatCode_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThatCode", true, false);
@@ -475,7 +475,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	public void visit_AssertThatThrownBy_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThatThrownBy", true, false);
@@ -501,8 +501,8 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 				+ "	}";
 
 		assertChange(original, expected);
-	}	
-	
+	}
+
 	@Test
 	public void visit_AssertThatObject_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThatObject", true, false);
@@ -524,7 +524,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	public void visit_AssertionsForClassTypes_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.AssertionsForClassTypes.assertThat", true, false);
@@ -545,8 +545,8 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 				+ "	}";
 
 		assertChange(original, expected);
-	}	
-	
+	}
+
 	@Test
 	public void visit_AssertionsForInterfaceTypes_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.AssertionsForInterfaceTypes.assertThat", true, false);
@@ -570,4 +570,53 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 
 		assertChange(original, expected);
 	}
+
+	@Test
+	public void visit_MoreThanTwoInvocationsIn1stChain_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.AssertionsForInterfaceTypes.assertThat", true, false);
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+		
+		String original = "" +
+				"	List<String> stringList = Arrays.asList(\"s1\", \"s2\");\n"
+				+ "\n"
+				+ "	public void testMoreThanTwoInvocationsIn1stChain() {\n"
+				+ "		assertThat(stringList).isNotNull().hasSize(2);\n"
+				+ "		assertThat(stringList).contains(\"s1\", \"s1\");\n"
+				+ "	}";
+
+		String expected = "" +
+				"	List<String> stringList = Arrays.asList(\"s1\", \"s2\");\n"
+				+ "\n"
+				+ "	public void testMoreThanTwoInvocationsIn1stChain() {\n"
+				+ "		assertThat(stringList).isNotNull().hasSize(2).contains(\"s1\", \"s1\");\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	public void visit_MoreThanTwoInvocationsIn2ndChain_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.assertj.core.api.AssertionsForInterfaceTypes.assertThat", true, false);
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+		
+		String original = "" +
+				"	List<String> stringList = Arrays.asList(\"s1\", \"s2\");\n"
+				+ "\n"
+				+ "	public void testMoreThanTwoInvocationsIn2ndChain() {\n"
+				+ "		assertThat(stringList).isNotNull();\n"
+				+ "		assertThat(stringList).hasSize(2).contains(\"s1\", \"s1\");\n"
+				+ "	}";
+
+		String expected = "" +
+				"	List<String> stringList = Arrays.asList(\"s1\", \"s2\");\n"
+				+ "\n"
+				+ "	public void testMoreThanTwoInvocationsIn2ndChain() {\n"
+				+ "		assertThat(stringList).isNotNull().hasSize(2).contains(\"s1\", \"s1\");\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
 }
