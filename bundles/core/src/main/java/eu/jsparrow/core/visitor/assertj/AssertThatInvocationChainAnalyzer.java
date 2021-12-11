@@ -3,7 +3,9 @@ package eu.jsparrow.core.visitor.assertj;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
@@ -35,7 +37,7 @@ class AssertThatInvocationChainAnalyzer {
 			"assertThatObject"//$NON-NLS-1$
 	));
 
-	static Optional<AssertThatInvocationData> findSupportedAssertThatInvocationData(
+	static Optional<FirstInvocationChainAnalysisResult> analyzeFirstInvocationChain(
 			InvocationChainData invocationChainData) {
 		MethodInvocation assumedAssertThatInvocation = invocationChainData.getLeftMostInvocation();
 		String methodName = assumedAssertThatInvocation.getName()
@@ -63,18 +65,42 @@ class AssertThatInvocationChainAnalyzer {
 		}
 
 		ITypeBinding declaringClass = assumedAssertThatMethodBinding.getDeclaringClass();
-		if (ClassRelationUtil.isContentOfType(declaringClass,
+		if (!ClassRelationUtil.isContentOfType(declaringClass,
 				"org.assertj.core.api.Assertions") //$NON-NLS-1$
-				|| ClassRelationUtil.isContentOfType(declaringClass,
+				&& !ClassRelationUtil.isContentOfType(declaringClass,
 						"org.assertj.core.api.AssertionsForClassTypes") //$NON-NLS-1$
-				|| ClassRelationUtil.isContentOfType(declaringClass,
+				&& !ClassRelationUtil.isContentOfType(declaringClass,
 						"org.assertj.core.api.AssertionsForInterfaceTypes")) {//$NON-NLS-1$
 
-			ITypeBinding assertThatReturnType = assumedAssertThatMethodBinding.getReturnType();
-			return Optional.of(new AssertThatInvocationData(assumedAssertThatInvocation, assertThatReturnType));
+			return Optional.empty();
 		}
 
-		return Optional.empty();
+		if (!hasSupportedAssertionMethodNames(invocationChainData)) {
+			return Optional.empty();
+		}
+
+		ITypeBinding assertThatReturnType = assumedAssertThatMethodBinding.getReturnType();
+		List<ITypeBinding> assumedAssertionReturnTypes = findAssumedAssertionReturnTypes(invocationChainData);
+		if (assumedAssertionReturnTypes.isEmpty()) {
+			return Optional.empty();
+		}
+
+		ITypeBinding assumedFirstAssertionReturnType = assumedAssertionReturnTypes.get(0);
+		List<ITypeBinding> assumedSubsequentAssertionReturnTypes = assumedAssertionReturnTypes.subList(1,
+				assumedAssertionReturnTypes.size());
+
+		if (!analyzeFirstAssertionReturnType(assertThatReturnType, assumedFirstAssertionReturnType)) {
+			return Optional.empty();
+		}
+
+		if (!analyzeAssertionMethodReturnTypes(assumedFirstAssertionReturnType,
+				assumedSubsequentAssertionReturnTypes)) {
+			return Optional.empty();
+		}
+
+		return Optional.of(new FirstInvocationChainAnalysisResult(assumedAssertThatInvocation, assertThatReturnType,
+				assumedFirstAssertionReturnType));
+
 	}
 
 	/**
@@ -158,6 +184,74 @@ class AssertThatInvocationChainAnalyzer {
 			.allMatch(SupportedAssertJAssertions::isSupportedAssertJAssertionMethodName);
 	}
 
+	private static List<ITypeBinding> findAssumedAssertionReturnTypes(InvocationChainData invocationChainData) {
+		List<IMethodBinding> assertionMethodBindings = invocationChainData.getSubsequentInvocations()
+			.stream()
+			.map(MethodInvocation::resolveMethodBinding)
+			.collect(Collectors.toList());
+
+		if (assertionMethodBindings.stream()
+			.anyMatch(Objects::isNull)) {
+			return Collections.emptyList();
+		}
+		return assertionMethodBindings.stream()
+			.map(IMethodBinding::getReturnType)
+			.collect(Collectors.toList());
+	}
+
+	static Optional<ITypeBinding> findFirstAssertionReturnType(ITypeBinding assertThatReturnType,
+			MethodInvocation assumedFirstAssertion) {
+
+		IMethodBinding assumedFirstAssertionMethodBinding = assumedFirstAssertion.resolveMethodBinding();
+		if (assumedFirstAssertionMethodBinding == null) {
+			return Optional.empty();
+		}
+		ITypeBinding assumedFirstAssertionReturnType = assumedFirstAssertionMethodBinding.getReturnType();
+
+		ITypeBinding lhsNonParameterizedTypeErasure = getNonParameterizedTypeErasure(assertThatReturnType);
+		ITypeBinding rhsNonParameterizedTypeErasure = getNonParameterizedTypeErasure(assumedFirstAssertionReturnType);
+		if (!ClassRelationUtil.compareITypeBinding(lhsNonParameterizedTypeErasure, rhsNonParameterizedTypeErasure)) {
+			return Optional.empty();
+		}
+		return Optional.of(assumedFirstAssertionReturnType);
+
+	}
+
+	private static boolean analyzeFirstAssertionReturnType(ITypeBinding assertThatReturnType,
+			ITypeBinding assumedFirstAssertionReturnType) {
+
+		ITypeBinding lhsNonParameterizedTypeErasure = getNonParameterizedTypeErasure(assertThatReturnType);
+		ITypeBinding rhsNonParameterizedTypeErasure = getNonParameterizedTypeErasure(assumedFirstAssertionReturnType);
+		return ClassRelationUtil.compareITypeBinding(lhsNonParameterizedTypeErasure, rhsNonParameterizedTypeErasure);
+
+	}
+	
+	static boolean analyzeAssertionMethodReturnTypes(ITypeBinding expectedAssertionReturnType,
+			List<ITypeBinding> assertionReturnTypes) {
+
+		return assertionReturnTypes.stream()
+			.allMatch(returnType -> ClassRelationUtil.compareITypeBinding(returnType, expectedAssertionReturnType));
+	}
+
+
+
+	private static boolean compareErasureTypeBinding(ITypeBinding firstTypeBinding, ITypeBinding secondTypeBinding) {
+		if (null == firstTypeBinding || null == secondTypeBinding) {
+			return false;
+		}
+		ITypeBinding lhsNonParameterizedTypeErasure = getNonParameterizedTypeErasure(firstTypeBinding);
+		ITypeBinding rhsNonParameterizedTypeErasure = getNonParameterizedTypeErasure(secondTypeBinding);
+		return ClassRelationUtil.compareITypeBinding(lhsNonParameterizedTypeErasure, rhsNonParameterizedTypeErasure);
+	}
+
+	private static ITypeBinding getNonParameterizedTypeErasure(ITypeBinding typeBinding) {
+		ITypeBinding erasure = typeBinding.getErasure();
+		while (erasure.isParameterizedType()) {
+			erasure = erasure.getErasure();
+		}
+		return erasure;
+	}
+
 	static Optional<ITypeBinding> findSupportedAssertionReturnType(InvocationChainData invocationChainData) {
 
 		List<MethodInvocation> subsequentInvocations = invocationChainData.getSubsequentInvocations();
@@ -207,23 +301,6 @@ class AssertThatInvocationChainAnalyzer {
 			}
 		}
 		return true;
-	}
-
-	private static boolean compareErasureTypeBinding(ITypeBinding firstTypeBinding, ITypeBinding secondTypeBinding) {
-		if (null == firstTypeBinding || null == secondTypeBinding) {
-			return false;
-		}
-		ITypeBinding lhsNonParameterizedTypeErasure = getNonParameterizedTypeErasure(firstTypeBinding);
-		ITypeBinding rhsNonParameterizedTypeErasure = getNonParameterizedTypeErasure(secondTypeBinding);
-		return ClassRelationUtil.compareITypeBinding(lhsNonParameterizedTypeErasure, rhsNonParameterizedTypeErasure);
-	}
-
-	private static ITypeBinding getNonParameterizedTypeErasure(ITypeBinding typeBinding) {
-		ITypeBinding erasure = typeBinding.getErasure();
-		while (erasure.isParameterizedType()) {
-			erasure = erasure.getErasure();
-		}
-		return erasure;
 	}
 
 	private AssertThatInvocationChainAnalyzer() {

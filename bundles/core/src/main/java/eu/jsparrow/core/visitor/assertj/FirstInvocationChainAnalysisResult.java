@@ -8,11 +8,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * invocation which may be followed by AssertJ assertions.
  *
  */
-public class AssertThatInvocationData {
+public class FirstInvocationChainAnalysisResult {
 	private final MethodInvocation assertThatInvocation;
 	private final ITypeBinding assertthatReturnType;
 
-	public AssertThatInvocationData(MethodInvocation assertThatInvocation, ITypeBinding assertthatReturnType) {
+	public FirstInvocationChainAnalysisResult(MethodInvocation assertThatInvocation, ITypeBinding assertthatReturnType, ITypeBinding findFirstAssertionReturnType) {
 		super();
 		this.assertThatInvocation = assertThatInvocation;
 		this.assertthatReturnType = assertthatReturnType;

@@ -126,15 +126,15 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 				invocationChainElementList));
 	}
 
-	Optional<TransformationData> findTransformationData(Statement firstStatement,
+	private Optional<TransformationData> findTransformationData(Statement firstStatement,
 			List<Statement> subsequentStatements) {
 
 		InvocationChainData firstInvocationChainData = findInvocationChainData(firstStatement).orElse(null);
 		if (firstInvocationChainData == null) {
 			return Optional.empty();
 		}
-		AssertThatInvocationData assertThatInvocationData = AssertThatInvocationChainAnalyzer
-			.findSupportedAssertThatInvocationData(firstInvocationChainData)
+		FirstInvocationChainAnalysisResult assertThatInvocationData = AssertThatInvocationChainAnalyzer
+			.analyzeFirstInvocationChain(firstInvocationChainData)
 			.orElse(null);
 
 		if (assertThatInvocationData == null) {
@@ -142,10 +142,6 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		}
 		MethodInvocation assertThatInvocation = assertThatInvocationData.getAssertThatInvocation();
 		ITypeBinding assertThatReturnType = assertThatInvocationData.getAssertthatReturnType();
-		if (!AssertThatInvocationChainAnalyzer.hasSupportedAssertions(assertThatReturnType,
-				firstInvocationChainData)) {
-			return Optional.empty();
-		}
 
 		List<InvocationChainData> subsequentInvocationChainDataList = new ArrayList<>();
 		for (int i = 0; i < subsequentStatements.size(); i++) {
