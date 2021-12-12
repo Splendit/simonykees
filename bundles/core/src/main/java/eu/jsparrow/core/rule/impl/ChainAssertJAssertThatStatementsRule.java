@@ -1,7 +1,5 @@
 package eu.jsparrow.core.rule.impl;
 
-import static eu.jsparrow.core.visitor.assertj.ChainAssertJAssertThatStatementsASTVisitor.ORG_ASSERTJ_CORE_API_ASSERTIONS;
-
 import java.time.Duration;
 import java.util.Arrays;
 
@@ -26,6 +24,7 @@ import eu.jsparrow.rules.common.exception.runtime.ITypeNotFoundRuntimeException;
  */
 public class ChainAssertJAssertThatStatementsRule
 		extends RefactoringRuleImpl<ChainAssertJAssertThatStatementsASTVisitor> {
+	
 	private static final Logger logger = LoggerFactory.getLogger(ChainAssertJAssertThatStatementsRule.class);
 
 	public ChainAssertJAssertThatStatementsRule() {
@@ -40,12 +39,11 @@ public class ChainAssertJAssertThatStatementsRule
 	/**
 	 * TODO: discuss
 	 */
-	@SuppressWarnings("nls")
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
 
 		try {
-			if (project.findType(ORG_ASSERTJ_CORE_API_ASSERTIONS) == null) { // $NON-NLS-1$
+			if (project.findType("org.assertj.core.api.Assertions") == null) {  //$NON-NLS-1$
 				return false;
 			}
 		} catch (JavaModelException e) {
