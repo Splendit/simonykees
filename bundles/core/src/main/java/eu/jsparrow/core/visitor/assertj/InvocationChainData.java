@@ -2,7 +2,6 @@ package eu.jsparrow.core.visitor.assertj;
 
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 

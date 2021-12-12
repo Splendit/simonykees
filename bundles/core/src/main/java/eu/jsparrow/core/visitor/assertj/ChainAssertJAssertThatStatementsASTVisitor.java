@@ -1,38 +1,47 @@
 package eu.jsparrow.core.visitor.assertj;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * 
- * This rule collects subsequent statements which contain invocations of
- * {@code org.assertj.core.api.Assertions.assertThat} where the argument of
- * {@code assertThat} must be the same object and replaces them by a statement
- * containing the corresponding invocation chain on the given object.
+ * This visitor collects consecutive AssertJ AsseertThat statements which target
+ * the same object and chains them together to a single invocation chain.
  * <p>
- * For example,
+ * AssertJ AsseertThat statements are introduced by an invocation of an
+ * {@code assertThat} method defined in {@code org.assertj.core.api.Assertions}
+ * and followed by AssertJ assertions.
+ * <p>
+ * For example, the two AssertJ AsseertThat statements
  * 
  * <pre>
  * assertThat(stringList).isNotNull();
  * assertThat(stringList).isNotEmpty();
  * </pre>
  * 
- * can be transformed to
+ * can be replaced by a single one like
  * 
  * <pre>
  * assertThat(stringList)
@@ -46,6 +55,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	public static final String ORG_ASSERTJ_CORE_API_ASSERTIONS = "org.assertj.core.api.Assertions"; //$NON-NLS-1$
+	private static final ASTMatcher astMatcher = new ASTMatcher();
 
 	@Override
 	public boolean visit(Block block) {
@@ -69,16 +79,15 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		return true;
 	}
 
-	private Optional<TransformationData> findTransformationData(Statement firstStatement,
+	private static Optional<TransformationData> findTransformationData(Statement firstStatement,
 			List<Statement> subsequentStatements) {
 
 		InvocationChainData firstInvocationChainData = findInvocationChainData(firstStatement).orElse(null);
 		if (firstInvocationChainData == null) {
 			return Optional.empty();
 		}
-		FirstInvocationChainAnalysisResult assertThatInvocationData = AssertThatInvocationChainAnalyzer
-			.analyzeFirstInvocationChain(firstInvocationChainData)
-			.orElse(null);
+		FirstInvocationChainAnalysisResult assertThatInvocationData = analyzeFirstInvocationChain(
+				firstInvocationChainData).orElse(null);
 
 		if (assertThatInvocationData == null) {
 			return Optional.empty();
@@ -88,8 +97,7 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		List<InvocationChainData> subsequentInvocationChainDataList = new ArrayList<>();
 		for (int i = 0; i < subsequentStatements.size(); i++) {
 			InvocationChainData invocationChainData = findInvocationChainData(subsequentStatements.get(i))
-				.filter(data -> AssertThatInvocationChainAnalyzer
-					.analyzeSubsequentInvocationChain(assertThatInvocationData, data))
+				.filter(data -> analyzeSubsequentInvocationChain(assertThatInvocationData, data))
 				.orElse(null);
 
 			if (invocationChainData != null) {
@@ -122,7 +130,7 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 					invocationChainElementList));
 	}
 
-	private Optional<InvocationChainData> findInvocationChainData(Statement statement) {
+	private static Optional<InvocationChainData> findInvocationChainData(Statement statement) {
 
 		if (statement.getNodeType() != ASTNode.EXPRESSION_STATEMENT) {
 			return Optional.empty();
@@ -148,7 +156,7 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 				leftMostInvocation, subsequentInvocations, expressionStatement));
 	}
 
-	private List<MethodInvocation> collectInvocationChainElements(MethodInvocation methodInvocation) {
+	private static List<MethodInvocation> collectInvocationChainElements(MethodInvocation methodInvocation) {
 		List<MethodInvocation> chainElements = new ArrayList<>();
 		chainElements.add(methodInvocation);
 		Expression expression = methodInvocation.getExpression();
@@ -162,6 +170,165 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 			}
 		}
 		return chainElements;
+	}
+
+	private static Optional<FirstInvocationChainAnalysisResult> analyzeFirstInvocationChain(
+			InvocationChainData invocationChainData) {
+		MethodInvocation assumedAssertThatInvocation = invocationChainData.getLeftMostInvocation();
+		String assumedAssertThatMethodName = assumedAssertThatInvocation.getName()
+			.getIdentifier();
+
+		if (!SupportedAssertJAssertions.isSupportedAssertJAsserThatMethodName(assumedAssertThatMethodName)) {
+			return Optional.empty();
+		}
+
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(assumedAssertThatInvocation.arguments(),
+				Expression.class);
+
+		if (arguments.size() != 1) {
+			return Optional.empty();
+		}
+
+		Expression argument = arguments.get(0);
+		if (!isSupportedAssertThatArgumentStructure(argument)) {
+			return Optional.empty();
+		}
+
+		IMethodBinding assumedAssertThatMethodBinding = assumedAssertThatInvocation.resolveMethodBinding();
+		if (assumedAssertThatMethodBinding == null) {
+			return Optional.empty();
+		}
+
+		ITypeBinding declaringClass = assumedAssertThatMethodBinding.getDeclaringClass();
+		if(!SupportedAssertJAssertions.isSupportedAssertionsType(declaringClass)) {
+			return Optional.empty();
+		}
+
+		if (!hasSupportedAssertionMethodNames(invocationChainData)) {
+			return Optional.empty();
+		}
+
+		ITypeBinding assertThatReturnType = assumedAssertThatMethodBinding.getReturnType();
+		List<ITypeBinding> assumedAssertionReturnTypes = findAssumedAssertionReturnTypes(invocationChainData);
+		if (assumedAssertionReturnTypes.isEmpty()) {
+			return Optional.empty();
+		}
+
+		ITypeBinding assumedFirstAssertionReturnType = assumedAssertionReturnTypes.get(0);
+		List<ITypeBinding> assumedSubsequentAssertionReturnTypes = assumedAssertionReturnTypes.subList(1,
+				assumedAssertionReturnTypes.size());
+
+		if (!analyzeFirstAssertionReturnType(assertThatReturnType, assumedFirstAssertionReturnType)) {
+			return Optional.empty();
+		}
+
+		if (!analyzeAssertionMethodReturnTypes(assumedFirstAssertionReturnType,
+				assumedSubsequentAssertionReturnTypes)) {
+			return Optional.empty();
+		}
+
+		return Optional
+			.of(new FirstInvocationChainAnalysisResult(assumedAssertThatInvocation, assumedFirstAssertionReturnType));
+
+	}
+
+	private static boolean isSupportedAssertThatArgumentStructure(Expression assertThatArgument) {
+
+		return assertThatArgument.getNodeType() == ASTNode.SIMPLE_NAME
+				|| assertThatArgument.getNodeType() == ASTNode.QUALIFIED_NAME
+				|| (assertThatArgument.getNodeType() == ASTNode.FIELD_ACCESS
+						&& isSupportedFieldAccess((FieldAccess) assertThatArgument))
+				|| assertThatArgument.getNodeType() == ASTNode.THIS_EXPRESSION
+				|| assertThatArgument.getNodeType() == ASTNode.SUPER_FIELD_ACCESS
+				|| assertThatArgument.getNodeType() == ASTNode.NUMBER_LITERAL
+				|| assertThatArgument.getNodeType() == ASTNode.CHARACTER_LITERAL
+				|| assertThatArgument.getNodeType() == ASTNode.STRING_LITERAL
+				|| assertThatArgument.getNodeType() == ASTNode.TYPE_LITERAL;
+	}
+
+	private static boolean isSupportedFieldAccess(FieldAccess fieldAccess) {
+		Expression fieldAccessExpression = fieldAccess.getExpression();
+
+		if (fieldAccessExpression != null) {
+			if (fieldAccessExpression.getNodeType() == ASTNode.FIELD_ACCESS) {
+				return isSupportedFieldAccess((FieldAccess) fieldAccessExpression);
+			}
+			return fieldAccessExpression.getNodeType() == ASTNode.THIS_EXPRESSION ||
+					fieldAccessExpression.getNodeType() == ASTNode.SUPER_FIELD_ACCESS;
+		}
+		return false;
+	}
+
+	private static boolean analyzeSubsequentInvocationChain(FirstInvocationChainAnalysisResult firstChainAnalysisResult,
+			InvocationChainData invocationChainData) {
+		MethodInvocation assertThatInvocation = firstChainAnalysisResult.getAssertThatInvocation();
+		if (!astMatcher.match(assertThatInvocation, invocationChainData.getLeftMostInvocation())) {
+			return false;
+		}
+		if (!hasSupportedAssertionMethodNames(invocationChainData)) {
+			return false;
+		}
+		ITypeBinding firstAssertionReturnType = firstChainAnalysisResult.getFirstAssertionReturnType();
+		List<ITypeBinding> assumedAssertionReturnTypes = findAssumedAssertionReturnTypes(invocationChainData);
+		if (assumedAssertionReturnTypes.isEmpty()) {
+			return false;
+		}
+		if (!analyzeAssertionMethodReturnTypes(firstAssertionReturnType,
+				assumedAssertionReturnTypes)) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * @return true if the names of all assertions following the
+	 *         {@code assertThat} - invocation are supported, otherwise false.
+	 */
+	private static boolean hasSupportedAssertionMethodNames(InvocationChainData invocationChainData) {
+		List<MethodInvocation> chainFollowingAssertThat = invocationChainData.getSubsequentInvocations();
+		return chainFollowingAssertThat.stream()
+			.map(MethodInvocation::getName)
+			.map(SimpleName::getIdentifier)
+			.allMatch(SupportedAssertJAssertions::isSupportedAssertJAssertionMethodName);
+	}
+
+	private static List<ITypeBinding> findAssumedAssertionReturnTypes(InvocationChainData invocationChainData) {
+		List<IMethodBinding> assertionMethodBindings = invocationChainData.getSubsequentInvocations()
+			.stream()
+			.map(MethodInvocation::resolveMethodBinding)
+			.collect(Collectors.toList());
+
+		if (assertionMethodBindings.stream()
+			.anyMatch(Objects::isNull)) {
+			return Collections.emptyList();
+		}
+		return assertionMethodBindings.stream()
+			.map(IMethodBinding::getReturnType)
+			.collect(Collectors.toList());
+	}
+
+	private static boolean analyzeFirstAssertionReturnType(ITypeBinding assertThatReturnType,
+			ITypeBinding assumedFirstAssertionReturnType) {
+
+		ITypeBinding lhsNonParameterizedTypeErasure = getNonParameterizedTypeErasure(assertThatReturnType);
+		ITypeBinding rhsNonParameterizedTypeErasure = getNonParameterizedTypeErasure(assumedFirstAssertionReturnType);
+		return ClassRelationUtil.compareITypeBinding(lhsNonParameterizedTypeErasure, rhsNonParameterizedTypeErasure);
+
+	}
+
+	private static boolean analyzeAssertionMethodReturnTypes(ITypeBinding expectedAssertionReturnType,
+			List<ITypeBinding> assertionReturnTypes) {
+
+		return assertionReturnTypes.stream()
+			.allMatch(returnType -> ClassRelationUtil.compareITypeBinding(returnType, expectedAssertionReturnType));
+	}
+
+	private static ITypeBinding getNonParameterizedTypeErasure(ITypeBinding typeBinding) {
+		ITypeBinding erasure = typeBinding.getErasure();
+		while (erasure.isParameterizedType()) {
+			erasure = erasure.getErasure();
+		}
+		return erasure;
 	}
 
 	private void transform(Block block, TransformationData data) {
