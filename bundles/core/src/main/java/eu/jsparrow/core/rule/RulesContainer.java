@@ -20,6 +20,7 @@ import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
 import eu.jsparrow.core.rule.impl.AvoidConcatenationInLoggingStatementsRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
 import eu.jsparrow.core.rule.impl.BufferedReaderLinesRule;
+import eu.jsparrow.core.rule.impl.ChainAssertJAssertThatStatementsRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.core.rule.impl.CollapseIfStatementsRule;
 import eu.jsparrow.core.rule.impl.CollectionRemoveAllRule;
@@ -212,6 +213,7 @@ public class RulesContainer {
 				new ReplaceJUnitAssertThatWithHamcrestRule(),
 				new ReplaceJUnit4AssumptionsWithJupiterRule(),
 				new ReplaceJUnit4AssumptionsWithHamcrestJUnitRule(),
+				new ChainAssertJAssertThatStatementsRule(),
 				new ShiftAssertJDescriptionBeforeAssertionRule(),
 
 				/*

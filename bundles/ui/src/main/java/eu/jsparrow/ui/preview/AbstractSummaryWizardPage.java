@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +26,7 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -66,6 +69,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 	protected TableViewer fileTableViewer;
 	protected TableViewer rulesPerFileTableViewer;
 	protected Text searchText;
+	private List<Image> disposables = new ArrayList<>();
 
 	protected T summaryWizardPageModel;
 
@@ -174,7 +178,8 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 	}
 
 	protected void addHeader() {
-		this.statisticsSection.createView(rootComposite);
+		List<Image> images = this.statisticsSection.createView(rootComposite);
+		this.disposables.addAll(images);
 	}
 
 	protected TableViewerColumn createSortableTableViewerColumn(TableViewer tableViewer, String title,
@@ -311,4 +316,8 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 		}
 	}
 
+	@Override
+	public void dispose() {
+		this.disposables.forEach(Image::dispose);
+	}
 }

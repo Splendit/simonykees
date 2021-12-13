@@ -78,6 +78,11 @@ public class RegistrationFormField {
 		Image closeRedIconImage = imageDescCloseRed.createImage();
 		ImageData imageDataCloseRed = closeRedIconImage.getImageData();
 		scaledCloseRedIconImage = new Image(parent.getDisplay(), imageDataCloseRed);
+		parent.addDisposeListener(e -> scaledCloseRedIconImage.dispose());
+		parent.addDisposeListener(e -> closeRedIconImage.dispose());
+		parent.addDisposeListener(e -> tickmarkGreenIconImage.dispose());
+		parent.addDisposeListener(e -> scaledTickmarkGreenIconImage.dispose());
+		
 
 		// set description and image
 		decoValid.setDescriptionText(Messages.RegistrationFormField_validDataText);

@@ -18,9 +18,10 @@ import eu.jsparrow.rules.common.Tag;
 public class AvoidConcatenationInLoggingStatementsRule
 		extends RefactoringRuleImpl<AvoidConcatenationInLoggingStatementsASTVisitor> {
 
+	public static final String RULE_ID = "AvoidConcatenationInLoggingStatements"; //$NON-NLS-1$
 	public AvoidConcatenationInLoggingStatementsRule() {
 		this.visitorClass = AvoidConcatenationInLoggingStatementsASTVisitor.class;
-		this.id = "AvoidConcatenationInLoggingStatements"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.AvoidConcatenationInLoggingStatementsRule_name,
 				Messages.AvoidConcatenationInLoggingStatementsRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_1, Tag.PERFORMANCE, Tag.CODING_CONVENTIONS, Tag.READABILITY, Tag.LOGGING));

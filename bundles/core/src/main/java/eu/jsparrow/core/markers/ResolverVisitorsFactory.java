@@ -10,14 +10,24 @@ import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import eu.jsparrow.core.markers.visitor.AvoidConcatenationInLoggingStatementsResolver;
+import eu.jsparrow.core.markers.visitor.CollectionRemoveAllResolver;
+import eu.jsparrow.core.markers.visitor.DiamondOperatorResolver;
 import eu.jsparrow.core.markers.visitor.EnumsWithoutEqualsResolver;
 import eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver;
+import eu.jsparrow.core.markers.visitor.IndexOfToContainsResolver;
 import eu.jsparrow.core.markers.visitor.InefficientConstructorResolver;
+import eu.jsparrow.core.markers.visitor.InsertBreakStatementInLoopsResolver;
 import eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver;
+import eu.jsparrow.core.markers.visitor.MapGetOrDefaultResolver;
 import eu.jsparrow.core.markers.visitor.PrimitiveBoxedForStringResolver;
 import eu.jsparrow.core.markers.visitor.PutIfAbsentResolver;
+import eu.jsparrow.core.markers.visitor.RemoveNewStringConstructorResolver;
 import eu.jsparrow.core.markers.visitor.RemoveNullCheckBeforeInstanceofResolver;
+import eu.jsparrow.core.markers.visitor.RemoveRedundantTypeCastResolver;
+import eu.jsparrow.core.markers.visitor.RemoveUnusedParameterResolver;
 import eu.jsparrow.core.markers.visitor.StringLiteralEqualityCheckResolver;
+import eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver;
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
@@ -52,6 +62,16 @@ public class ResolverVisitorsFactory {
 		map.put(PrimitiveBoxedForStringResolver.ID, PrimitiveBoxedForStringResolver::new);
 		map.put(UseIsEmptyOnCollectionsResolver.ID, UseIsEmptyOnCollectionsResolver::new);
 		map.put(EnumsWithoutEqualsResolver.ID, EnumsWithoutEqualsResolver::new);
+		map.put(AvoidConcatenationInLoggingStatementsResolver.ID, AvoidConcatenationInLoggingStatementsResolver::new);
+		map.put(CollectionRemoveAllResolver.ID, CollectionRemoveAllResolver::new);
+		map.put(DiamondOperatorResolver.ID, DiamondOperatorResolver::new);
+		map.put(IndexOfToContainsResolver.ID, IndexOfToContainsResolver::new);
+		map.put(InsertBreakStatementInLoopsResolver.ID, InsertBreakStatementInLoopsResolver::new);
+		map.put(MapGetOrDefaultResolver.ID, MapGetOrDefaultResolver::new);
+		map.put(RemoveNewStringConstructorResolver.ID, RemoveNewStringConstructorResolver::new);
+		map.put(RemoveRedundantTypeCastResolver.ID, RemoveRedundantTypeCastResolver::new);
+		map.put(RemoveUnusedParameterResolver.ID, RemoveUnusedParameterResolver::new);
+		map.put(UseCollectionsSingletonListResolver.ID, UseCollectionsSingletonListResolver::new);
 		return Collections.unmodifiableMap(map);
 	}
 
