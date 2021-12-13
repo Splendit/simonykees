@@ -25,12 +25,12 @@ public class ShiftAssertJDescriptionBeforeAssertionRule extends RefactoringRuleI
 		this.ruleDescription = new RuleDescription(Messages.ShiftAssertJDescriptionBeforeAssertionRule_name,
 				Messages.ShiftAssertJDescriptionBeforeAssertionRule_description, 
 				Duration.ofMinutes(5),
-				Tag.JAVA_1_5, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS);
+				Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS);
 	}
 	
 	@Override
 	protected String provideRequiredJavaVersion() {
-		return JavaCore.VERSION_1_5;
+		return JavaCore.VERSION_1_7;
 	}
 	
 	@Override

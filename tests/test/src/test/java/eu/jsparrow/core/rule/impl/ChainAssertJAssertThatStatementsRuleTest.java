@@ -24,7 +24,6 @@ import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-@SuppressWarnings("nls")
 class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE_ALWAYS_TRANSFORMED = "ChainAssertJAssertThatStatementsAlwaysTransformedRule.java";
@@ -64,7 +63,7 @@ class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Chain AssertJ AssertThat Statements"));
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_7, Tag.TESTING, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+				contains(Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
 				equalTo("This rule collects subsequent invocations of the method 'org.assertj.core.api.Assertions.assertThat'"

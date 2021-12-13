@@ -41,7 +41,7 @@ class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Shift AssertJ Description Before Assertion"));
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS));
+				contains(Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
 				equalTo("AssertJ provides methods for setting descriptions or error messages of assertions, e.g.: as, describedAs, withFailMessage, overridingErrorMessage. "
@@ -62,14 +62,14 @@ class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 	
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		assertThat(rule.getRequiredJavaVersion(), equalTo("1.5"));
+		assertThat(rule.getRequiredJavaVersion(), equalTo("1.7"));
 	}
 
 	@Test
 	void calculateEnabledForProject_ShouldBeDisabled() throws Exception {
 		addToClasspath(testProject, Arrays
 				.asList(generateMavenEntryFromDepedencyString("org.assertj", "assertj-core", "3.21.0")));
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
 
 		rule.calculateEnabledForProject(testProject);
 
@@ -80,7 +80,7 @@ class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 	void calculateEnabledForProject_ShouldBeEnabled() throws Exception {
 		addToClasspath(testProject, Arrays
 				.asList(generateMavenEntryFromDepedencyString("org.assertj", "assertj-core", "3.21.0")));
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
 
 		rule.calculateEnabledForProject(testProject);
 
@@ -89,7 +89,7 @@ class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 
 	@Test
 	void calculateEnabledForProject_missingDependency_ShouldBeEnabled() throws Exception {
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
 
 		rule.calculateEnabledForProject(testProject);
 
