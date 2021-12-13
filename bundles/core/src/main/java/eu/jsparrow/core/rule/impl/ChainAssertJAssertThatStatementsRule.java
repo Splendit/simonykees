@@ -24,7 +24,7 @@ import eu.jsparrow.rules.common.exception.runtime.ITypeNotFoundRuntimeException;
  */
 public class ChainAssertJAssertThatStatementsRule
 		extends RefactoringRuleImpl<ChainAssertJAssertThatStatementsASTVisitor> {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(ChainAssertJAssertThatStatementsRule.class);
 
 	public ChainAssertJAssertThatStatementsRule() {
@@ -40,7 +40,7 @@ public class ChainAssertJAssertThatStatementsRule
 	public boolean ruleSpecificImplementation(IJavaProject project) {
 
 		try {
-			if (project.findType("org.assertj.core.api.Assertions") == null) {  //$NON-NLS-1$
+			if (project.findType("org.assertj.core.api.Assertions") == null) { //$NON-NLS-1$
 				return false;
 			}
 		} catch (JavaModelException e) {
@@ -53,5 +53,10 @@ public class ChainAssertJAssertThatStatementsRule
 	@Override
 	protected String provideRequiredJavaVersion() {
 		return JavaCore.VERSION_1_7;
+	}
+
+	@Override
+	public String requiredLibraries() {
+		return "AssertJ"; //$NON-NLS-1$
 	}
 }

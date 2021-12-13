@@ -9,21 +9,21 @@ import org.junit.jupiter.params.provider.ValueSource;
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
 @SuppressWarnings("nls")
-public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitFixture {
+class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
-	public void setUpVisitor() throws Exception {
+	void setUpVisitor() throws Exception {
 		addDependency("org.assertj", "assertj-core", "3.21.0");
 		setDefaultVisitor(new ChainAssertJAssertThatStatementsASTVisitor());
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		fixtureProject.clear();
 	}
 
 	@Test
-	public void visit_AssertThatListIsNotNullAndIsNotEmpty_shouldTransform() throws Exception {
+	void visit_AssertThatListIsNotNullAndIsNotEmpty_shouldTransform() throws Exception {
 
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -48,7 +48,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertThatOnThisField_shouldTransform() throws Exception {
+	void visit_AssertThatOnThisField_shouldTransform() throws Exception {
 
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -73,7 +73,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertThatOnSuperField_shouldTransform() throws Exception {
+	void visit_AssertThatOnSuperField_shouldTransform() throws Exception {
 
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -106,7 +106,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertionsOnConstant_shouldTransform() throws Exception {
+	void visit_AssertionsOnConstant_shouldTransform() throws Exception {
 
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 
@@ -125,7 +125,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertThatOnThis_shouldTransform() throws Exception {
+	void visit_AssertThatOnThis_shouldTransform() throws Exception {
 
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 
@@ -148,7 +148,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertThatOnNumberLiteral_shouldTransform() throws Exception {
+	void visit_AssertThatOnNumberLiteral_shouldTransform() throws Exception {
 
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 
@@ -167,7 +167,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertThatOnCharatcerLiteral_shouldTransform() throws Exception {
+	void visit_AssertThatOnCharatcerLiteral_shouldTransform() throws Exception {
 
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 
@@ -186,7 +186,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertThatOnStringLiteral_shouldTransform() throws Exception {
+	void visit_AssertThatOnStringLiteral_shouldTransform() throws Exception {
 
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat",
 				true, false);
@@ -206,7 +206,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertThatOnTypeLiteral_shouldTransform() throws Exception {
+	void visit_AssertThatOnTypeLiteral_shouldTransform() throws Exception {
 
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat",
 				true, false);
@@ -226,7 +226,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertThatOnThisFieldAccessChain_shouldTransform() throws Exception {
+	void visit_AssertThatOnThisFieldAccessChain_shouldTransform() throws Exception {
 
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat",
 				true, false);
@@ -260,7 +260,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertThatOnSuperFieldAccessChain_shouldTransform() throws Exception {
+	void visit_AssertThatOnSuperFieldAccessChain_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat",
 				true, false);
 
@@ -307,7 +307,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 			"doesNotContain(\"?\")",
 			"matches(\"Hello.*\")"
 	})
-	public void visit_AssertThatWithStringAsssertions_shouldTransform(String assertion) throws Exception {
+	void visit_AssertThatWithStringAsssertions_shouldTransform(String assertion) throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 
 		String original = "" +
@@ -335,7 +335,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 			"hasFileName(\"pom.xml\")",
 			"canRead()"
 	})
-	public void visit_AssertThatWithFileAsssertions_shouldTransform(String assertion) throws Exception {
+	void visit_AssertThatWithFileAsssertions_shouldTransform(String assertion) throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 
 		defaultFixture.addImport(java.io.File.class.getName());
@@ -367,7 +367,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 			"anyMatch(s -> s.equals(\"s1\"))",
 			"noneMatch(s -> s.equals(\"s3\"))"
 	})
-	public void visit_AssertThatWithListAsssertions_shouldTransform(String assertion) throws Exception {
+	void visit_AssertThatWithListAsssertions_shouldTransform(String assertion) throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 
 		defaultFixture.addImport(java.util.Arrays.class.getName());
@@ -396,7 +396,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 			"are(startsWithXAndDash)",
 			"have(startsWithXAndDash)"
 	})
-	public void visit_AssertThatWithConditionAssertions_shouldTransform(String assertion) throws Exception {
+	void visit_AssertThatWithConditionAssertions_shouldTransform(String assertion) throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport("org.assertj.core.api.Condition");
 
@@ -425,7 +425,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 			"rejects(\"a\", \"b\", \"c\")",
 			"accepts(\"s-1\", \"s-2\")"
 	})
-	public void visit_PredicateAssertions_shouldTransform(String assertion) throws Exception {
+	void visit_PredicateAssertions_shouldTransform(String assertion) throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.function.Predicate.class.getName());
 
@@ -448,7 +448,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertThatCode_shouldTransform() throws Exception {
+	void visit_AssertThatCode_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThatCode", true, false);
 		defaultFixture.addImport("org.assertj.core.api.ThrowableAssert.ThrowingCallable");
 
@@ -477,7 +477,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertThatThrownBy_shouldTransform() throws Exception {
+	void visit_AssertThatThrownBy_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThatThrownBy", true, false);
 		defaultFixture.addImport("org.assertj.core.api.ThrowableAssert.ThrowingCallable");
 
@@ -504,7 +504,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertThatObject_shouldTransform() throws Exception {
+	void visit_AssertThatObject_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThatObject", true, false);
 
 		String original = "" +
@@ -526,7 +526,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertionsForClassTypes_shouldTransform() throws Exception {
+	void visit_AssertionsForClassTypes_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.AssertionsForClassTypes.assertThat", true, false);
 
 		String original = "" +
@@ -548,7 +548,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_AssertionsForInterfaceTypes_shouldTransform() throws Exception {
+	void visit_AssertionsForInterfaceTypes_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.AssertionsForInterfaceTypes.assertThat", true, false);
 		defaultFixture.addImport(java.util.Arrays.class.getName());
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -572,7 +572,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_MoreThanTwoInvocationsIn1stChain_shouldTransform() throws Exception {
+	void visit_MoreThanTwoInvocationsIn1stChain_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.AssertionsForInterfaceTypes.assertThat", true, false);
 		defaultFixture.addImport(java.util.Arrays.class.getName());
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -596,7 +596,7 @@ public class ChainAssertJAssertThatStatementsASTVisitorTest extends UsesJDTUnitF
 	}
 	
 	@Test
-	public void visit_MoreThanTwoInvocationsIn2ndChain_shouldTransform() throws Exception {
+	void visit_MoreThanTwoInvocationsIn2ndChain_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.AssertionsForInterfaceTypes.assertThat", true, false);
 		defaultFixture.addImport(java.util.Arrays.class.getName());
 		defaultFixture.addImport(java.util.List.class.getName());

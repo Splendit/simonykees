@@ -320,7 +320,7 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 	}
 
 	private void transform(Block block, TransformationData data) {
-		MethodInvocation newChain = createNewMethodInvocationChain1(data.getAssertThatInvocation(),
+		MethodInvocation newChain = createNewMethodInvocationChain(data.getAssertThatInvocation(),
 				data.getInvocationChainElementList());
 		AST ast = astRewrite.getAST();
 		ExpressionStatement newExpressionStatement = ast.newExpressionStatement(newChain);
@@ -331,29 +331,15 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		onRewrite();
 	}
 
-	private MethodInvocation createNewMethodInvocationChain1(MethodInvocation assertThatInvocation,
+	private MethodInvocation createNewMethodInvocationChain(MethodInvocation assertThatInvocation,
 			List<MethodInvocation> invocationChainElementList) {
 		MethodInvocation chain = (MethodInvocation) astRewrite.createCopyTarget(assertThatInvocation);
 		for (MethodInvocation chainElement : invocationChainElementList) {
-			MethodInvocation newMethodInvocation = copyMethodInvocationWithoutExpression(chainElement);
+			MethodInvocation newMethodInvocation = AssertionInvocationsUtil
+				.copyMethodInvocationWithoutExpression(chainElement, astRewrite);
 			newMethodInvocation.setExpression(chain);
 			chain = newMethodInvocation;
 		}
 		return chain;
-	}
-
-	@SuppressWarnings("unchecked")
-	private MethodInvocation copyMethodInvocationWithoutExpression(MethodInvocation methodInvocation) {
-		AST ast = astRewrite.getAST();
-		MethodInvocation newMethodInvocation = ast.newMethodInvocation();
-		newMethodInvocation.setName(ast.newSimpleName(methodInvocation.getName()
-			.getIdentifier()));
-
-		List<Expression> arguments = methodInvocation.arguments();
-		List<Expression> newArguments = newMethodInvocation.arguments();
-		arguments.stream()
-			.map(argument -> (Expression) astRewrite.createCopyTarget(argument))
-			.forEach(newArguments::add);
-		return newMethodInvocation;
 	}
 }

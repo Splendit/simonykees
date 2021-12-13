@@ -24,23 +24,23 @@ class AssertionInvocationsUtil {
 		MethodInvocation newMethodInvocation = ast.newMethodInvocation();
 		newMethodInvocation.setName(ast.newSimpleName(methodInvocation.getName()
 			.getIdentifier()));
-	
+
 		List<Expression> argumentCopies = ASTNodeUtil
 			.convertToTypedList(methodInvocation.arguments(), Expression.class)
 			.stream()
 			.map(argument -> (Expression) astRewrite.createCopyTarget(argument))
 			.collect(Collectors.toList());
-	
+
 		List<Expression> newArguments = newMethodInvocation.arguments();
 		newArguments.addAll(argumentCopies);
-	
+
 		List<Type> typeArgumentCopies = ASTNodeUtil.convertToTypedList(methodInvocation.typeArguments(), Type.class)
 			.stream()
 			.map(typeArgument -> (Type) astRewrite.createCopyTarget(typeArgument))
 			.collect(Collectors.toList());
 		List<Type> newTypeArguments = newMethodInvocation.typeArguments();
 		newTypeArguments.addAll(typeArgumentCopies);
-	
+
 		return newMethodInvocation;
 	}
 

@@ -7,21 +7,21 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
 @SuppressWarnings("nls")
-public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends UsesJDTUnitFixture {
+class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
-	public void setUpVisitor() throws Exception {
+	void setUpVisitor() throws Exception {
 		addDependency("org.assertj", "assertj-core", "3.21.0");
 		setDefaultVisitor(new ChainAssertJAssertThatStatementsASTVisitor());
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		fixtureProject.clear();
 	}
 
 	@Test
-	public void visit_ExpressionStatementNotWithInvocation_shouldNotTransform() throws Exception {
+	void visit_ExpressionStatementNotWithInvocation_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat",
 				true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -40,7 +40,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 	}
 
 	@Test
-	public void visit_AssertThatWithoutSubsequentChain_shouldNotTransform() throws Exception {
+	void visit_AssertThatWithoutSubsequentChain_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat",
 				true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -58,7 +58,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 	}
 
 	@Test
-	public void visit_MethodNameNotAssertThat_shouldNotTransform() throws Exception {
+	void visit_MethodNameNotAssertThat_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.util.List.class.getName());
 		defaultFixture.addImport(java.util.Arrays.class.getName());
 		defaultFixture.addImport("org.assertj.core.api.ListAssert");
@@ -80,7 +80,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 	}
 
 	@Test
-	public void visit_AssertThatWithMultipleArguments_shouldNotTransform() throws Exception {
+	void visit_AssertThatWithMultipleArguments_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.util.Arrays.class.getName());
 		defaultFixture.addImport("org.assertj.core.api.ListAssert");
 		defaultFixture.addImport("org.assertj.core.api.Assertions");
@@ -99,7 +99,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 	}
 
 	@Test
-	public void visit_AssertThatNotResolved_shouldNotTransform() throws Exception {
+	void visit_AssertThatNotResolved_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.util.List.class.getName());
 		defaultFixture.addImport(java.util.Arrays.class.getName());
 
@@ -115,7 +115,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 	}
 
 	@Test
-	public void visit_AssertThatNotDeclaredByAssertJAssertions_shouldNotTransform() throws Exception {
+	void visit_AssertThatNotDeclaredByAssertJAssertions_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.util.List.class.getName());
 		defaultFixture.addImport(java.util.Arrays.class.getName());
 		defaultFixture.addImport("org.assertj.core.api.ListAssert");
@@ -137,7 +137,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 	}
 
 	@Test
-	public void visit_NotSupportedMethodElementInAllChains_shouldNotTransform() throws Exception {
+	void visit_NotSupportedMethodElementInAllChains_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
 		defaultFixture.addImport(java.util.Arrays.class.getName());
@@ -153,9 +153,9 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
-	public void visit_NotSupportedMethodElementIn2ndChain_shouldNotTransform() throws Exception {
+	void visit_NotSupportedMethodElementIn2ndChain_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
 		defaultFixture.addImport(java.util.Arrays.class.getName());
@@ -171,9 +171,8 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 		assertNoChange(original);
 	}
 
-	
 	@Test
-	public void visit_VoidMethodIn1stChain_shouldNotTransform() throws Exception {
+	void visit_VoidMethodIn1stChain_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
 		defaultFixture.addImport(java.util.Arrays.class.getName());
@@ -189,9 +188,8 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 		assertNoChange(original);
 	}
 
-	
 	@Test
-	public void visit_VoidMethodIn2ndChain_shouldNotTransform() throws Exception {
+	void visit_VoidMethodIn2ndChain_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
 		defaultFixture.addImport(java.util.Arrays.class.getName());
@@ -206,11 +204,9 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 
 		assertNoChange(original);
 	}
-	
-	
-	
+
 	@Test
-	public void visit_SubsequentVoidMethodIn1stChain_shouldNotTransform() throws Exception {
+	void visit_SubsequentVoidMethodIn1stChain_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
 		defaultFixture.addImport(java.util.Arrays.class.getName());
@@ -226,9 +222,8 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 		assertNoChange(original);
 	}
 
-	
 	@Test
-	public void visit_SubsequentVoidMethodIn2ndChain_shouldNotTransform() throws Exception {
+	void visit_SubsequentVoidMethodIn2ndChain_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
 		defaultFixture.addImport(java.util.Arrays.class.getName());
@@ -245,7 +240,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 	}
 
 	@Test
-	public void visit_FirstAssertThatWithoutFollowing_shouldNotTransform() throws Exception {
+	void visit_FirstAssertThatWithoutFollowing_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat",
 				true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -262,7 +257,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 	}
 
 	@Test
-	public void visit_AssertThatOnCreateListInvocation_shouldNotTransform() throws Exception {
+	void visit_AssertThatOnCreateListInvocation_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat",
 				true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -282,7 +277,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 	}
 
 	@Test
-	public void visit_AssertThatOnDifferentLists_shouldNotTransform() throws Exception {
+	void visit_AssertThatOnDifferentLists_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat",
 				true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -301,7 +296,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 	}
 
 	@Test
-	public void visit_AssertThatOnIntValueOfNewIntWrapper_shouldNotTransform() throws Exception {
+	void visit_AssertThatOnIntValueOfNewIntWrapper_shouldNotTransform() throws Exception {
 
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 
@@ -320,7 +315,7 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 	}
 
 	@Test
-	public void visit_UnresolvedIsAssertions_shouldTransform() throws Exception {
+	void visit_UnresolvedIsAssertions_shouldTransform() throws Exception {
 
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -336,9 +331,9 @@ public class ChainAssertJAssertThatStatementsNegativesASTVisitorTest extends Use
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
-	public void visit_UnresolvedIsAssertionIn2ndChain_shouldTransform() throws Exception {
+	void visit_UnresolvedIsAssertionIn2ndChain_shouldTransform() throws Exception {
 
 		defaultFixture.addImport("org.assertj.core.api.Assertions.assertThat", true, false);
 		defaultFixture.addImport(java.util.List.class.getName());

@@ -25,7 +25,7 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 @SuppressWarnings("nls")
-public class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
+class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE_ALWAYS_TRANSFORMED = "ChainAssertJAssertThatStatementsAlwaysTransformedRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "chainAssertJAssertThat";
@@ -33,13 +33,13 @@ public class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 	private ChainAssertJAssertThatStatementsRule rule;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		rule = new ChainAssertJAssertThatStatementsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
 	@Test
-	public void testAlwaysTransformed() throws Exception {
+	void testAlwaysTransformed() throws Exception {
 		loadUtilities();
 
 		rule.calculateEnabledForProject(testProject);
@@ -88,7 +88,7 @@ public class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 	}
 
 	@Test
-	public void calculateEnabledForProjectShouldBeDisabledWithJava_1_6() throws Exception {
+	void calculateEnabledForProjectShouldBeDisabledWithJava_1_6() throws Exception {
 		addToClasspath(testProject, Arrays
 			.asList(generateMavenEntryFromDepedencyString("org.assertj", "assertj-core", "3.21.0")));
 
@@ -100,7 +100,7 @@ public class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 	}
 
 	@Test
-	public void calculateEnabledForProjectShouldBeEnabled() throws Exception {
+	void calculateEnabledForProjectShouldBeEnabled() throws Exception {
 		addToClasspath(testProject, Arrays
 			.asList(generateMavenEntryFromDepedencyString("org.assertj", "assertj-core", "3.21.0")));
 
@@ -109,5 +109,10 @@ public class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 		rule.calculateEnabledForProject(testProject);
 
 		assertTrue(rule.isEnabled());
+	}
+
+	@Test
+	void test_requiredLibraries() throws Exception {
+		assertThat(rule.requiredLibraries(), equalTo("AssertJ"));
 	}
 }
