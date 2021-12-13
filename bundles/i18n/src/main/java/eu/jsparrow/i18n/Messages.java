@@ -99,6 +99,8 @@ public class Messages extends NLS {
 	public static String StartDialog_wantMoreLabel;
 	public static String StartDialog_welcomeLabel;
 	public static String BrowserDialog_introTitle;
+	public static String ChainAssertJAssertThatStatementsRule_description;
+	public static String ChainAssertJAssertThatStatementsRule_name;
 	public static String CodeFormatterRule_description;
 	public static String CodeFormatterRule_name;
 	public static String CollapseIfStatementsRule_description;
