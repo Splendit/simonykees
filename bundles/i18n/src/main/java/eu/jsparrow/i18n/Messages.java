@@ -621,6 +621,8 @@ public class Messages extends NLS {
 	public static String UseComparatorMethodsRule_name;
 	public static String UseDedicatedAssertionsRule_description;
 	public static String UseDedicatedAssertionsRule_name;
+	public static String UseDedicatedAssertJAssertionsRule_description;
+	public static String UseDedicatedAssertJAssertionsRule_name;
 	public static String UseFilesBufferedReaderRule_description;
 	public static String UseFilesBufferedReaderRule_name;
 	public static String UseFilesBufferedWriterRule_description;
