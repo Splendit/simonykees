@@ -26,9 +26,6 @@ public class ShiftAssertJDescriptionBeforeAssertionASTVisitor extends AbstractAS
 
 	private static final String ORG_ASSERTJ_CORE_API_DESCRIPTABLE = "org.assertj.core.api.Descriptable"; //$NON-NLS-1$
 	private static final String ORG_ASSERTJ_CORE_API_ABSTRACT_ASSERT = "org.assertj.core.api.AbstractAssert"; //$NON-NLS-1$
-	@SuppressWarnings("nls")
-	private List<String> assertJAssertionMethodsPrefix = Arrays.asList("is", "contains", "has", "starts", "ends",
-			"matches"); // FIXME take them from SIM-2027
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
@@ -70,42 +67,12 @@ public class ShiftAssertJDescriptionBeforeAssertionASTVisitor extends AbstractAS
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	private MethodInvocation swap(MethodInvocation assertJAssertion, MethodInvocation methodInvocation) {
-		AST ast = methodInvocation.getAST();
-		MethodInvocation descSetting = ast.newMethodInvocation();
+		MethodInvocation descSetting = AssertionInvocationsUtil.copyMethodInvocationWithoutExpression(methodInvocation, astRewrite);
 		descSetting.setExpression((Expression) astRewrite.createCopyTarget(assertJAssertion.getExpression()));
-		descSetting.setName(ast.newSimpleName(methodInvocation.getName()
-			.getIdentifier()));
-		List<Expression> descArgs = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		for (Expression descArg : descArgs) {
-			Expression argCopy = (Expression) astRewrite.createCopyTarget(descArg);
-			descSetting.arguments()
-				.add(argCopy);
-		}
-		List<Type> descTypeArgs = ASTNodeUtil.convertToTypedList(methodInvocation.typeArguments(), Type.class);
-		for (Type decTypeArg : descTypeArgs) {
-			Type typeCopy = (Type) astRewrite.createCopyTarget(decTypeArg);
-			descSetting.typeArguments()
-				.add(typeCopy);
-		}
-
-		MethodInvocation swapped = ast.newMethodInvocation();
+		
+		MethodInvocation swapped = AssertionInvocationsUtil.copyMethodInvocationWithoutExpression(assertJAssertion, astRewrite);
 		swapped.setExpression(descSetting);
-		swapped.setName(ast.newSimpleName(assertJAssertion.getName()
-			.getIdentifier()));
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(assertJAssertion.arguments(), Expression.class);
-		for (Expression argument : arguments) {
-			Expression argCopy = (Expression) astRewrite.createCopyTarget(argument);
-			swapped.arguments()
-				.add(argCopy);
-		}
-		List<Type> types = ASTNodeUtil.convertToTypedList(assertJAssertion.typeArguments(), Type.class);
-		for (Type type : types) {
-			Type typeCopy = (Type) astRewrite.createCopyTarget(type);
-			swapped.typeArguments()
-				.add(typeCopy);
-		}
 		return swapped;
 	}
 
@@ -116,9 +83,7 @@ public class ShiftAssertJDescriptionBeforeAssertionASTVisitor extends AbstractAS
 		MethodInvocation methodInvocation = (MethodInvocation) expression;
 		SimpleName methodName = methodInvocation.getName();
 		String identifier = methodName.getIdentifier();
-		return assertJAssertionMethodsPrefix
-			.stream()
-			.anyMatch(identifier::startsWith);
+		return SupportedAssertJAssertions.isSupportedAssertJAssertionMethodName(identifier);
 	}
 
 }

@@ -95,6 +95,21 @@ class ShiftAssertJDescriptionBeforeAssertionASTVisitorTest extends UsesSimpleJDT
 
 	@ParameterizedTest
 	@MethodSource("settingDescription")
+	void visit_typeArguments_shouldTransform(String methodName) throws Exception {
+		String original = String.format(""
+				+ "assertThat(\"\").isEqualTo(\"\").%s(\"Description1\").isEqualTo(\"\").<String>%s(\"Description2\");"
+				+ "assertThat(\"\").isEqualTo(\"\").%s(\"Description1\").<String>isEqualTo(\"\").%s(\"Description2\");",
+				methodName, methodName, methodName, methodName);
+		String expected = String.format(""
+				+ "assertThat(\"\").isEqualTo(\"\").%s(\"Description1\").<String>%s(\"Description2\").isEqualTo(\"\");"
+				+ "assertThat(\"\").isEqualTo(\"\").%s(\"Description1\").%s(\"Description2\").<String>isEqualTo(\"\");",
+				methodName, methodName, methodName, methodName);
+		assertChange(original, expected);
+
+	}
+
+	@ParameterizedTest
+	@MethodSource("settingDescription")
 	void visit_missingAssertJAssertionInvocation_shouldNotTransform(String methodName) throws Exception {
 		fixture.addImport("org.assertj.core.api.AbstractStringAssert");
 		String original = String.format(""
