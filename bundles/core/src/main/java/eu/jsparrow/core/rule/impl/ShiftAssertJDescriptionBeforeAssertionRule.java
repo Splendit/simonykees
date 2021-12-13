@@ -15,7 +15,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.exception.runtime.ITypeNotFoundRuntimeException;
 
-public class ShiftAssertJDescriptionBeforeAssertionRule extends RefactoringRuleImpl<ShiftAssertJDescriptionBeforeAssertionASTVisitor> {
+/**
+ * @see ShiftAssertJDescriptionBeforeAssertionASTVisitor
+ * 
+ * @since 4.6.0
+ */
+public class ShiftAssertJDescriptionBeforeAssertionRule
+		extends RefactoringRuleImpl<ShiftAssertJDescriptionBeforeAssertionASTVisitor> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ShiftAssertJDescriptionBeforeAssertionRule.class);
 
@@ -23,16 +29,16 @@ public class ShiftAssertJDescriptionBeforeAssertionRule extends RefactoringRuleI
 		this.visitorClass = ShiftAssertJDescriptionBeforeAssertionASTVisitor.class;
 		this.id = "ShiftAssertJDescriptionBeforeAssertion"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.ShiftAssertJDescriptionBeforeAssertionRule_name,
-				Messages.ShiftAssertJDescriptionBeforeAssertionRule_description, 
+				Messages.ShiftAssertJDescriptionBeforeAssertionRule_description,
 				Duration.ofMinutes(5),
 				Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS);
 	}
-	
+
 	@Override
 	protected String provideRequiredJavaVersion() {
 		return JavaCore.VERSION_1_7;
 	}
-	
+
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
 		try {
@@ -48,7 +54,7 @@ public class ShiftAssertJDescriptionBeforeAssertionRule extends RefactoringRuleI
 		}
 		return true;
 	}
-	
+
 	@Override
 	public String requiredLibraries() {
 		return "AssertJ"; //$NON-NLS-1$
