@@ -33,12 +33,9 @@ public class ChainAssertJAssertThatStatementsRule
 		this.ruleDescription = new RuleDescription(Messages.ChainAssertJAssertThatStatementsRule_name,
 				Messages.ChainAssertJAssertThatStatementsRule_description,
 				Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_8, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+				Arrays.asList(Tag.JAVA_1_7, Tag.TESTING, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 	}
 
-	/**
-	 * TODO: discuss
-	 */
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
 
@@ -55,11 +52,6 @@ public class ChainAssertJAssertThatStatementsRule
 
 	@Override
 	protected String provideRequiredJavaVersion() {
-		return JavaCore.VERSION_1_8;
-	}
-
-	@Override
-	public String requiredLibraries() {
-		return "AssertJ fluent assertions 3.21.0 API"; //$NON-NLS-1$
+		return JavaCore.VERSION_1_7;
 	}
 }
