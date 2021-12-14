@@ -89,6 +89,7 @@ import eu.jsparrow.core.rule.impl.ReplaceStreamCollectByToListRule;
 import eu.jsparrow.core.rule.impl.ReplaceStringFormatByFormattedRule;
 import eu.jsparrow.core.rule.impl.ReuseRandomObjectsRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
+import eu.jsparrow.core.rule.impl.ShiftAssertJDescriptionBeforeAssertionRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
 import eu.jsparrow.core.rule.impl.StringBufferToBuilderRule;
 import eu.jsparrow.core.rule.impl.StringBuildingLoopRule;
@@ -213,6 +214,7 @@ public class RulesContainer {
 				new ReplaceJUnit4AssumptionsWithJupiterRule(),
 				new ReplaceJUnit4AssumptionsWithHamcrestJUnitRule(),
 				new ChainAssertJAssertThatStatementsRule(),
+				new ShiftAssertJDescriptionBeforeAssertionRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

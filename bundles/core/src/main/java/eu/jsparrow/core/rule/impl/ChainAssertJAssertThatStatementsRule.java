@@ -33,7 +33,7 @@ public class ChainAssertJAssertThatStatementsRule
 		this.ruleDescription = new RuleDescription(Messages.ChainAssertJAssertThatStatementsRule_name,
 				Messages.ChainAssertJAssertThatStatementsRule_description,
 				Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_7, Tag.TESTING, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+				Arrays.asList(Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 	}
 
 	@Override

@@ -63,7 +63,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace JUnit 3 Test Cases"));
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_5, Tag.TESTING));
+				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(15)));
 		assertThat(description.getDescription(),
 				equalTo("This rule migrates JUnit 3 tests to either JUnit JUpiter or JUnit 4 depending on the most up-to-date JUnit version available in the classpath."));
