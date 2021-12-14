@@ -1,5 +1,6 @@
 package eu.jsparrow.ui.preference;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,8 +23,11 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
 
 public class SimonykeesMarkersPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+
+	private final Map<String, Button> checkButtons = new HashMap<>();
 
 	@Override
 	public void init(IWorkbench workbench) {
@@ -57,9 +61,6 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		GridData contentGD = new GridData(GridData.FILL_HORIZONTAL);
 		content.setLayoutData(contentGD);
 		
-		
-
-		
 		for(Map.Entry<String, RuleDescription> entry : allMarkerDescriptions.entrySet()) {
 			String markerId = entry.getKey();
 			RuleDescription description = entry.getValue();
@@ -84,6 +85,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 			label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 			label.setText(description.getName());
 			label.setVisible(true);
+			checkButtons.put(markerId, button);
 		}
 		
 		scrolledComposite.setContent(content);
@@ -95,4 +97,19 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		return composite;
 	}
 
+	@Override
+	protected void performDefaults() {
+		super.performDefaults();
+		for(String marker : SimonykeesPreferenceManager.getAllActiveMarkers()) {
+			SimonykeesPreferenceManager.removeActiveMarker(marker);
+			Button button = checkButtons.get(marker);
+			button.setSelection(false);
+		}
+		DefaultActiveMarkers defaultMarkers = new DefaultActiveMarkers();
+		for (String marker : defaultMarkers.getActiveMarkers()) {
+			SimonykeesPreferenceManager.addActiveMarker(marker);
+			Button button = checkButtons.get(marker);
+			button.setSelection(true);
+		}		
+	}
 }
