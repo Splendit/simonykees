@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -79,40 +78,29 @@ public class ResolverVisitorsFactory {
 		return Collections.unmodifiableMap(map);
 	}
 
+	public static Map<String, RuleDescription> getAllMarkerDescriptions() {
+		return registry
+			.entrySet()
+			.stream()
+			.collect(Collectors.toMap(Map.Entry::getKey, entry -> getDescription(entry.getValue())));
+	}
+
+	private static RuleDescription getDescription(Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor> function) {
+		AbstractASTRewriteASTVisitor visitor = function.apply(node -> true);
+		Resolver resolver = (Resolver) visitor;
+		return resolver.getDescription();
+	}
+
 	/**
-	 * 
+	 * @param markerIds
+	 *            the list of activated markers
 	 * @param checker
 	 *            a predicate for testing the relevant nodes by their position
 	 *            in the compilation unit.
 	 * @return the list of all recorded resolvers.
 	 */
-	public static List<AbstractASTRewriteASTVisitor> getAllResolvers(Predicate<ASTNode> checker) {
-		List<AbstractASTRewriteASTVisitor> resolvers = new ArrayList<>();
-		registry.forEach((name, generatingFunction) -> {
-			AbstractASTRewriteASTVisitor resolver = generatingFunction.apply(checker);
-			RefactoringMarkerListener listener = RefactoringMarkers.getFor(name);
-			resolver.addMarkerListener(listener);
-			resolvers.add(resolver);
-		});
-		return resolvers;
-	}
-	
-	public static Map<String, RuleDescription> getAllMarkerDescriptions() {
-		return registry
-		.entrySet()
-		.stream()
-		.collect(Collectors.toMap(Map.Entry::getKey, entry -> getDescription(entry.getValue())));
-	}
-	
-	private static RuleDescription getDescription(Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor> function) {
-		AbstractASTRewriteASTVisitor visitor = function.apply(node -> true);
-		Resolver resolver = (Resolver)visitor;
-		return resolver.getDescription();
-	}
-
 	public static List<AbstractASTRewriteASTVisitor> getAllResolvers(List<String> markerIds,
 			Predicate<ASTNode> checker) {
-		// FIXME remove the overload if not used.
 		List<AbstractASTRewriteASTVisitor> resolvers = new ArrayList<>();
 		registry.forEach((name, generatingFunction) -> {
 			if (markerIds.contains(name)) {
