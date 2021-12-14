@@ -24,7 +24,7 @@ class LambdaToMethodReferenceResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		LambdaToMethodReferenceResolver visitor = new LambdaToMethodReferenceResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("LambdaToMethodReferenceResolver"));
 		setVisitor(visitor);
 		String original = "Predicate<String> isEmpty = (String s) -> s.isEmpty();";
 
@@ -36,7 +36,7 @@ class LambdaToMethodReferenceResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		LambdaToMethodReferenceResolver visitor = new LambdaToMethodReferenceResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("LambdaToMethodReferenceResolver"));
 		setVisitor(visitor);
 		String original = "Predicate<String> isEmpty = (String s) -> s.isEmpty();";
 		String expected = "Predicate<String> isEmpty = String::isEmpty;";
@@ -47,7 +47,7 @@ class LambdaToMethodReferenceResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Replace lambda expression with method reference", event.getName()),
 				() -> assertEquals("Simplify the lambda expression by using a method reference.", event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver", event.getResolver()),
+				() -> assertEquals("LambdaToMethodReferenceResolver", event.getResolver()),
 				() -> assertEquals("String::isEmpty", event.getCodePreview()),
 				() -> assertEquals(15, event.getHighlightLength()),
 				() -> assertEquals(154, event.getOffset()),
@@ -58,7 +58,7 @@ class LambdaToMethodReferenceResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		LambdaToMethodReferenceResolver visitor = new LambdaToMethodReferenceResolver(node -> node.getStartPosition() == 155);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("LambdaToMethodReferenceResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "Predicate<String> isEmpty = (String s) -> s.isEmpty();\n"

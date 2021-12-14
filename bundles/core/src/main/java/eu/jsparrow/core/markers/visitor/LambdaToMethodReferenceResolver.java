@@ -31,7 +31,7 @@ import eu.jsparrow.rules.common.RuleDescription;
  */
 public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTVisitor implements Resolver {
 
-	public static final String ID = LambdaToMethodReferenceResolver.class.getName();
+	public static final String ID = "LambdaToMethodReferenceResolver"; //$NON-NLS-1$
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;

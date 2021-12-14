@@ -28,7 +28,7 @@ import eu.jsparrow.rules.common.RuleDescription;
  */
 public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityCheckASTVisitor implements Resolver {
 
-	public static final String ID = StringLiteralEqualityCheckResolver.class.getName();
+	public static final String ID = "StringLiteralEqualityCheckResolver"; //$NON-NLS-1$
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;

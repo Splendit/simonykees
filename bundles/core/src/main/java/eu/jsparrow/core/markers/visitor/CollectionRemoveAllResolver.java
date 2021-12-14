@@ -26,7 +26,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
  */
 public class CollectionRemoveAllResolver extends CollectionRemoveAllASTVisitor implements Resolver {
 
-	public static final String ID = CollectionRemoveAllResolver.class.getName();
+	public static final String ID = "CollectionRemoveAllResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
 	private IJavaElement javaElement;

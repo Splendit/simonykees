@@ -30,7 +30,7 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
  */
 public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTVisitor implements Resolver {
 
-	public static final String ID = UseIsEmptyOnCollectionsResolver.class.getName();
+	public static final String ID = "UseIsEmptyOnCollectionsResolver"; //$NON-NLS-1$
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;

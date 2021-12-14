@@ -25,7 +25,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
  */
 public class AvoidConcatenationInLoggingStatementsResolver extends AvoidConcatenationInLoggingStatementsASTVisitor implements Resolver {
 
-	public static final String ID = AvoidConcatenationInLoggingStatementsResolver.class.getName();
+	public static final String ID = "AvoidConcatenationInLoggingStatementsResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
 	private IJavaElement javaElement;

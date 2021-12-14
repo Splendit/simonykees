@@ -28,7 +28,7 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
  */
 public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor implements Resolver {
 
-	public static final String ID = EnumsWithoutEqualsResolver.class.getName();
+	public static final String ID = "EnumsWithoutEqualsResolver"; //$NON-NLS-1$
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
