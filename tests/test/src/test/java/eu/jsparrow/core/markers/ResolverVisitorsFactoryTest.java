@@ -3,7 +3,7 @@ package eu.jsparrow.core.markers;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -18,8 +18,9 @@ class ResolverVisitorsFactoryTest {
 
 	@Test
 	void test_getAllResolvers_shouldReturnAllResolvers() {
+		List<String> allIds = new ArrayList<String>(ResolverVisitorsFactory.getAllMarkerDescriptions().keySet());
 		List<AbstractASTRewriteASTVisitor> allResovlers = ResolverVisitorsFactory
-			.getAllResolvers(Collections.singletonList(FunctionalInterfaceResolver.ID), node -> true);
+			.getAllResolvers(allIds, node -> true);
 		assertEquals(20, allResovlers.size());
 	}
 

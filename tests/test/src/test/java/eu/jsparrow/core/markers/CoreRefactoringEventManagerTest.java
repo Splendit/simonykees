@@ -41,7 +41,7 @@ class CoreRefactoringEventManagerTest extends UsesJDTUnitFixture {
 				+ "}";
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, method);
 		ICompilationUnit icu = defaultFixture.getICompilationUnit();
-		eventManager.discoverRefactoringEvents(icu,  Arrays.asList("eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver", "eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolve"));
+		eventManager.discoverRefactoringEvents(icu,  Arrays.asList("eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver", "eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver"));
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertEquals(2, events.size());
 		RefactoringMarkerEvent event = events.get(1);
