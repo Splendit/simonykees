@@ -25,7 +25,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
  */
 public class UseCollectionsSingletonListResolver extends UseCollectionsSingletonListASTVisitor implements Resolver {
 
-	public static final String ID = UseCollectionsSingletonListResolver.class.getName();
+	public static final String ID = "UseCollectionsSingletonListResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
 	private IJavaElement javaElement;

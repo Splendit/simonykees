@@ -25,7 +25,7 @@ class UseCollectionsSingletonListResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		UseCollectionsSingletonListResolver visitor = new UseCollectionsSingletonListResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("UseCollectionsSingletonListResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "List<String> strings = Arrays.asList();";
@@ -38,7 +38,7 @@ class UseCollectionsSingletonListResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		UseCollectionsSingletonListResolver visitor = new UseCollectionsSingletonListResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("UseCollectionsSingletonListResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "List<String> strings = Arrays.asList();";
@@ -55,7 +55,7 @@ class UseCollectionsSingletonListResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Use Collections Singleton List", event.getName()),
 				() -> assertEquals(description, event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver", event.getResolver()),
+				() -> assertEquals("UseCollectionsSingletonListResolver", event.getResolver()),
 				() -> assertEquals("emptyList", event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(160, event.getOffset()),
@@ -66,7 +66,7 @@ class UseCollectionsSingletonListResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		UseCollectionsSingletonListResolver visitor = new UseCollectionsSingletonListResolver(node -> node.getStartPosition() == 161);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("UseCollectionsSingletonListResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "List<String> strings = Arrays.asList();";

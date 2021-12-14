@@ -27,7 +27,7 @@ class ResolverVisitorsFactoryTest {
 	@Test
 	void test_getResolverByName_shouldReturnOneResolver() {
 		Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor> resovlerGenerator = ResolverVisitorsFactory
-			.getResolverGenerator(FunctionalInterfaceResolver.class.getName());
+			.getResolverGenerator("FunctionalInterfaceResolver");
 		AbstractASTRewriteASTVisitor resolver = resovlerGenerator.apply(node -> true);
 		assertTrue(resolver instanceof FunctionalInterfaceResolver);
 	}

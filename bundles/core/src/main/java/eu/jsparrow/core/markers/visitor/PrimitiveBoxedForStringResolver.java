@@ -28,7 +28,7 @@ import eu.jsparrow.rules.common.RuleDescription;
  */
 public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTVisitor implements Resolver {
 
-	public static final String ID = PrimitiveBoxedForStringResolver.class.getName();
+	public static final String ID = "PrimitiveBoxedForStringResolver"; //$NON-NLS-1$
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;

@@ -25,7 +25,7 @@ class IndexOfToContainsResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		IndexOfToContainsResolver visitor = new IndexOfToContainsResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.IndexOfToContainsResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("IndexOfToContainsResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "		List<String> l = new ArrayList<>();\n"
@@ -42,7 +42,7 @@ class IndexOfToContainsResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		IndexOfToContainsResolver visitor = new IndexOfToContainsResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.IndexOfToContainsResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("IndexOfToContainsResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "		List<String> l = new ArrayList<>();\n"
@@ -69,7 +69,7 @@ class IndexOfToContainsResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Replace indexOf() with contains()", event.getName()),
 				() -> assertEquals(description, event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.IndexOfToContainsResolver", event.getResolver()),
+				() -> assertEquals("IndexOfToContainsResolver", event.getResolver()),
 				() -> assertEquals("!l.contains(s)", event.getCodePreview()),
 				() -> assertEquals(14, event.getHighlightLength()),
 				() -> assertEquals(220, event.getOffset()),
@@ -80,7 +80,7 @@ class IndexOfToContainsResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		IndexOfToContainsResolver visitor = new IndexOfToContainsResolver(node -> node.getStartPosition() == 221);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.IndexOfToContainsResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("IndexOfToContainsResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "		List<String> l = new ArrayList<>();\n"

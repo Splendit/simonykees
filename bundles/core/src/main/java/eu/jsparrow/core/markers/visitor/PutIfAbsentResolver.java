@@ -30,7 +30,7 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
  */
 public class PutIfAbsentResolver extends PutIfAbsentASTVisitor implements Resolver {
 
-	public static final String ID = PutIfAbsentResolver.class.getName();
+	public static final String ID = "PutIfAbsentResolver"; //$NON-NLS-1$
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;

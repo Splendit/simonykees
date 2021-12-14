@@ -30,7 +30,7 @@ import eu.jsparrow.rules.common.RuleDescription;
  */
 public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor implements Resolver {
 
-	public static final String ID = FunctionalInterfaceResolver.class.getName();
+	public static final String ID = "FunctionalInterfaceResolver"; //$NON-NLS-1$
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
