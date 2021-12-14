@@ -292,17 +292,17 @@ public class SimonykeesPreferenceManager {
 	
 	public static List<String> getAllActiveMarkers() {
 		String value = store.getString(SimonykeesPreferenceConstants.ACTIVE_MARKERS);
-		return Arrays.asList(value.split(","));
+		return Arrays.asList(value.split(",")); //$NON-NLS-1$
 	}
 	
 	public static void setAllActiveMarkers(List<String>activeMarkers) {
-		String newValue = String.join(",", activeMarkers);
+		String newValue = String.join(",", activeMarkers); //$NON-NLS-1$
 		store.setValue(SimonykeesPreferenceConstants.ACTIVE_MARKERS, newValue);		
 	}
 	
 	public static String getDefaultActiveMarkers() {
 		DefaultActiveMarkers defaultMarkers = new DefaultActiveMarkers();
-		return String.join(",", defaultMarkers.getActiveMarkers());
+		return String.join(",", defaultMarkers.getActiveMarkers()); //$NON-NLS-1$
 	}
 	
 	public static  void addActiveMarker(String marker) {
