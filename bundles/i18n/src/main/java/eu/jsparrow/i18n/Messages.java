@@ -99,6 +99,8 @@ public class Messages extends NLS {
 	public static String StartDialog_wantMoreLabel;
 	public static String StartDialog_welcomeLabel;
 	public static String BrowserDialog_introTitle;
+	public static String ChainAssertJAssertThatStatementsRule_description;
+	public static String ChainAssertJAssertThatStatementsRule_name;
 	public static String CodeFormatterRule_description;
 	public static String CodeFormatterRule_name;
 	public static String CollapseIfStatementsRule_description;
@@ -496,6 +498,8 @@ public class Messages extends NLS {
 	public static String SelectRulesWizard_warning_no_refactorings;
 	public static String SerialVersionUidRule_description;
 	public static String SerialVersionUidRule_name;
+	public static String ShiftAssertJDescriptionBeforeAssertionRule_description;
+	public static String ShiftAssertJDescriptionBeforeAssertionRule_name;
 	public static String SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText;
 	public static String SimonykeesMessageDialog_bugreport_email;
 	public static String SimonykeesMessageDialog_default_error_message;

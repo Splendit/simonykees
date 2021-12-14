@@ -37,7 +37,7 @@ public class ReplaceJUnitExpectedExceptionRule
 		this.ruleDescription = new RuleDescription(
 				Messages.ReplaceExpectedExceptionRule_name,
 				Messages.ReplaceExpectedExceptionRule_description,
-				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.LAMBDA, Tag.READABILITY));
+				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY));
 	}
 
 	@Override

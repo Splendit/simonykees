@@ -36,7 +36,7 @@ public class UseDedicatedAssertionsRule
 		this.ruleDescription = new RuleDescription(
 				Messages.UseDedicatedAssertionsRule_name,
 				Messages.UseDedicatedAssertionsRule_description,
-				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.CODING_CONVENTIONS));
+				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT, Tag.CODING_CONVENTIONS));
 	}
 
 	@Override

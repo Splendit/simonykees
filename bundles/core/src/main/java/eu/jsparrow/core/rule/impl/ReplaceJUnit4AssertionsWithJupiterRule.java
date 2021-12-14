@@ -34,7 +34,7 @@ public class ReplaceJUnit4AssertionsWithJupiterRule
 		this.ruleDescription = new RuleDescription(
 				Messages.ReplaceJUnit4AssertWithJupiterRule_name, 
 				Messages.ReplaceJUnit4AssertWithJupiterRule_description,
-				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING));
+				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.JUNIT));
 	}
 
 	@Override
