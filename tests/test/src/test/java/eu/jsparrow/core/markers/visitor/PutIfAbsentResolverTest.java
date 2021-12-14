@@ -25,7 +25,7 @@ class PutIfAbsentResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		PutIfAbsentResolver visitor = new PutIfAbsentResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.PutIfAbsentResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("PutIfAbsentResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "Map<Integer, Integer> map = new HashMap<>();\n"
@@ -40,7 +40,7 @@ class PutIfAbsentResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		PutIfAbsentResolver visitor = new PutIfAbsentResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.PutIfAbsentResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("PutIfAbsentResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "Map<Integer, Integer> map = new HashMap<>();\n"
@@ -57,7 +57,7 @@ class PutIfAbsentResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Replace put(..) with putIfAbsent(..)", event.getName()),
 				() -> assertEquals("Use the Java 8 API that allows for conditionally adding entries to a map.", event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.PutIfAbsentResolver", event.getResolver()),
+				() -> assertEquals("PutIfAbsentResolver", event.getResolver()),
 				() -> assertEquals("map.putIfAbsent(1,2);\n", event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(229, event.getOffset()),
@@ -68,7 +68,7 @@ class PutIfAbsentResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		PutIfAbsentResolver visitor = new PutIfAbsentResolver(node -> node.getStartPosition() == 230);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.PutIfAbsentResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("PutIfAbsentResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "Map<Integer, Integer> map = new HashMap<>();\n"

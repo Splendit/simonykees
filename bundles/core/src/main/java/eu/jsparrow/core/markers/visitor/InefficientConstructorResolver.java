@@ -31,7 +31,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class InefficientConstructorResolver extends InefficientConstructorASTVisitor implements Resolver {
 
-	public static final String ID = InefficientConstructorResolver.class.getName();
+	public static final String ID = "InefficientConstructorResolver"; //$NON-NLS-1$
 	private RuleDescription description;
 
 	private IJavaElement javaElement;

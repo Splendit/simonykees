@@ -125,4 +125,12 @@ public class ResolverVisitorsFactory {
 	public static Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor> getResolverGenerator(String resolverName) {
 		return registry.getOrDefault(resolverName, p -> null);
 	}
+
+	/**
+	 * 
+	 * @return the unsorted list of all registered resolver ids.
+	 */
+	public static List<String> getAllResolverIds() {
+		return new ArrayList<>(registry.keySet());
+	}
 }

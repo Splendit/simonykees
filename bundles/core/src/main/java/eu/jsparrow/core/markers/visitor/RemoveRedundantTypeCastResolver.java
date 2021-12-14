@@ -25,7 +25,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
  */
 public class RemoveRedundantTypeCastResolver extends RemoveRedundantTypeCastASTVisitor implements Resolver {
 
-	public static final String ID = RemoveRedundantTypeCastResolver.class.getName();
+	public static final String ID = "RemoveRedundantTypeCastResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
 	private IJavaElement javaElement;

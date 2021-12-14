@@ -35,7 +35,7 @@ class AvoidConcatenationInLoggingStatementsResolverTest extends UsesSimpleJDTUni
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		AvoidConcatenationInLoggingStatementsResolver visitor = new AvoidConcatenationInLoggingStatementsResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.AvoidConcatenationInLoggingStatementsResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("AvoidConcatenationInLoggingStatementsResolver"));
 		setVisitor(visitor);
 		String original = "" +
 				"final Logger logger = LoggerFactory.getLogger(getClass().getName());\n" +
@@ -49,7 +49,7 @@ class AvoidConcatenationInLoggingStatementsResolverTest extends UsesSimpleJDTUni
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		AvoidConcatenationInLoggingStatementsResolver visitor = new AvoidConcatenationInLoggingStatementsResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("UseCollectionsSingletonListResolver"));
 		setVisitor(visitor);
 		String original = "" +
 				"final Logger logger = LoggerFactory.getLogger(getClass().getName());\n" +
@@ -66,7 +66,7 @@ class AvoidConcatenationInLoggingStatementsResolverTest extends UsesSimpleJDTUni
 		assertAll(
 				() -> assertEquals("Avoid Concatenation in Logging Statements", event.getName()),
 				() -> assertEquals(description, event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.AvoidConcatenationInLoggingStatementsResolver", event.getResolver()),
+				() -> assertEquals("AvoidConcatenationInLoggingStatementsResolver", event.getResolver()),
 				() -> assertEquals("\"s: {} i: {} bd: {} c: {}\"", event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(278, event.getOffset()),
@@ -77,7 +77,7 @@ class AvoidConcatenationInLoggingStatementsResolverTest extends UsesSimpleJDTUni
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		AvoidConcatenationInLoggingStatementsResolver visitor = new AvoidConcatenationInLoggingStatementsResolver(node -> node.getStartPosition() == 279);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.AvoidConcatenationInLoggingStatementsResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("AvoidConcatenationInLoggingStatementsResolver"));
 		setVisitor(visitor);
 		String original = "" +
 				"final Logger logger = LoggerFactory.getLogger(getClass().getName());\n" +

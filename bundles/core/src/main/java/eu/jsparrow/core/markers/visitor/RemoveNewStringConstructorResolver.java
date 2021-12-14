@@ -25,7 +25,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
  */
 public class RemoveNewStringConstructorResolver extends RemoveNewStringConstructorASTVisitor implements Resolver {
 
-	public static final String ID = RemoveNewStringConstructorResolver.class.getName();
+	public static final String ID = "RemoveNewStringConstructorResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
 	private IJavaElement javaElement;

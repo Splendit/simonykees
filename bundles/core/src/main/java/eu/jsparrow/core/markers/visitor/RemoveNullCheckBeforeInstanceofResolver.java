@@ -28,7 +28,7 @@ import eu.jsparrow.rules.common.RuleDescription;
  */
 public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBeforeInstanceofASTVisitor implements Resolver {
 
-	public static final String ID = RemoveNullCheckBeforeInstanceofResolver.class.getName();
+	public static final String ID = "RemoveNullCheckBeforeInstanceofResolver"; //$NON-NLS-1$
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;
