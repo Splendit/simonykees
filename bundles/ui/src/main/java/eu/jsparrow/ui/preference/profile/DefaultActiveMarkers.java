@@ -4,6 +4,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Represents the list of the default active jSparrow Markers
+ * 
+ * @since 4.6.0
+ *
+ */
 public class DefaultActiveMarkers {
 
 	private List<String> activeMarkers;

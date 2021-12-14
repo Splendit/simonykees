@@ -19,6 +19,13 @@ import eu.jsparrow.core.visitor.impl.IndexOfToContainsASTVisitor;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link IndexOfToContainsASTVisitor}.
+ * 
+ * @since 4.6.0
+ *
+ */
 public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor implements Resolver {
 	
 	public static final String ID = IndexOfToContainsResolver.class.getName();

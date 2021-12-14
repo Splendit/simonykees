@@ -16,6 +16,13 @@ import eu.jsparrow.core.visitor.impl.RemoveNewStringConstructorASTVisitor;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link RemoveNewStringConstructorASTVisitor}.
+ * 
+ * @since 4.6.0
+ *
+ */
 public class RemoveNewStringConstructorResolver extends RemoveNewStringConstructorASTVisitor implements Resolver {
 
 	public static final String ID = RemoveNewStringConstructorResolver.class.getName();

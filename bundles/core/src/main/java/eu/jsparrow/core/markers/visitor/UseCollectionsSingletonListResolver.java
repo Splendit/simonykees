@@ -16,6 +16,13 @@ import eu.jsparrow.core.visitor.impl.UseCollectionsSingletonListASTVisitor;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link UseCollectionsSingletonListASTVisitor}.
+ * 
+ * @since 4.6.0
+ *
+ */
 public class UseCollectionsSingletonListResolver extends UseCollectionsSingletonListASTVisitor implements Resolver {
 
 	public static final String ID = UseCollectionsSingletonListResolver.class.getName();

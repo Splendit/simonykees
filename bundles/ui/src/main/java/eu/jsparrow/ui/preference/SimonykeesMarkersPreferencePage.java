@@ -25,6 +25,12 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
 
+/**
+ * A preference page for activating and deactivating jSparrow Markers.
+ * 
+ * @since 4.6.0
+ *
+ */
 public class SimonykeesMarkersPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	private final Map<String, Button> checkButtons = new HashMap<>();
@@ -41,27 +47,27 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		GridData gd = new GridData(SWT.LEFT, SWT.CENTER, true, true);
 		composite.setLayoutData(gd);
 		composite.setLayout(new GridLayout(1, true));
-		
+
 		Group group = new Group(composite, SWT.NONE);
 		group.setText(Messages.SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText);
 		group.setLayout(new GridLayout(1, false));
 		GridData groupLayoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		groupLayoutData.heightHint = 400;
 		group.setLayoutData(groupLayoutData);
-		
+
 		Map<String, RuleDescription> allMarkerDescriptions = ResolverVisitorsFactory.getAllMarkerDescriptions();
 		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
-		
+
 		ScrolledComposite scrolledComposite = new ScrolledComposite(group, SWT.V_SCROLL);
 		scrolledComposite.setLayout(new GridLayout(1, false));
 		scrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		Composite content = new Composite(scrolledComposite, SWT.NONE);
 		content.setLayout(new GridLayout(2, false));
 		GridData contentGD = new GridData(GridData.FILL_HORIZONTAL);
 		content.setLayoutData(contentGD);
-		
-		for(Map.Entry<String, RuleDescription> entry : allMarkerDescriptions.entrySet()) {
+
+		for (Map.Entry<String, RuleDescription> entry : allMarkerDescriptions.entrySet()) {
 			String markerId = entry.getKey();
 			RuleDescription description = entry.getValue();
 			Button button = new Button(content, SWT.CHECK);
@@ -72,7 +78,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					Button source = (Button) e.getSource();
-					if(source.getSelection()) {
+					if (source.getSelection()) {
 						SimonykeesPreferenceManager.addActiveMarker(markerId);
 					} else {
 						SimonykeesPreferenceManager.removeActiveMarker(markerId);
@@ -87,20 +93,20 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 			label.setVisible(true);
 			checkButtons.put(markerId, button);
 		}
-		
+
 		scrolledComposite.setContent(content);
 		scrolledComposite.setExpandHorizontal(true);
 		scrolledComposite.setExpandVertical(true);
 		Point point = content.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		scrolledComposite.setMinSize(point);
-		
+
 		return composite;
 	}
 
 	@Override
 	protected void performDefaults() {
 		super.performDefaults();
-		for(String marker : SimonykeesPreferenceManager.getAllActiveMarkers()) {
+		for (String marker : SimonykeesPreferenceManager.getAllActiveMarkers()) {
 			SimonykeesPreferenceManager.removeActiveMarker(marker);
 			Button button = checkButtons.get(marker);
 			button.setSelection(false);
@@ -110,6 +116,6 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 			SimonykeesPreferenceManager.addActiveMarker(marker);
 			Button button = checkButtons.get(marker);
 			button.setSelection(true);
-		}		
+		}
 	}
 }

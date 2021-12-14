@@ -18,6 +18,13 @@ import eu.jsparrow.core.visitor.impl.MapGetOrDefaultASTVisitor;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link MapGetOrDefaultASTVisitor}.
+ * 
+ * @since 4.6.0
+ *
+ */
 public class MapGetOrDefaultResolver extends MapGetOrDefaultASTVisitor implements Resolver {
 	public static final String ID = MapGetOrDefaultResolver.class.getName();
 
@@ -49,7 +56,7 @@ public class MapGetOrDefaultResolver extends MapGetOrDefaultASTVisitor implement
 		}
 		return false;
 	}
-	
+
 	@Override
 	public void addMarkerEvent(MethodInvocation methodInvocation, Expression key, Expression defaultValue) {
 		AST ast = methodInvocation.getAST();
@@ -63,7 +70,7 @@ public class MapGetOrDefaultResolver extends MapGetOrDefaultASTVisitor implement
 		List<Expression> getOrDefaultArgumetns = getOrDefault.arguments();
 		getOrDefaultArgumetns.add(keyCopy);
 		getOrDefaultArgumetns.add(defaultCopy);
-		
+
 		int credit = description.getCredit();
 		int highlightLength = getOrDefault.getLength();
 		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,

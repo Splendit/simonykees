@@ -16,6 +16,13 @@ import eu.jsparrow.core.visitor.impl.RemoveRedundantTypeCastASTVisitor;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link RemoveRedundantTypeCastASTVisitor}.
+ * 
+ * @since 4.6.0
+ *
+ */
 public class RemoveRedundantTypeCastResolver extends RemoveRedundantTypeCastASTVisitor implements Resolver {
 
 	public static final String ID = RemoveRedundantTypeCastResolver.class.getName();
