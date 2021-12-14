@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.RemoveNullCheckBeforeInstanceofRule;
 import eu.jsparrow.core.visitor.impl.RemoveNullCheckBeforeInstanceofASTVisitor;
@@ -25,7 +26,7 @@ import eu.jsparrow.rules.common.RuleDescription;
  * @since 4.0.0
  *
  */
-public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBeforeInstanceofASTVisitor {
+public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBeforeInstanceofASTVisitor implements Resolver {
 
 	public static final String ID = RemoveNullCheckBeforeInstanceofResolver.class.getName();
 	private IJavaElement javaElement;
@@ -36,6 +37,11 @@ public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBefo
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 				.findByRuleId(RemoveNullCheckBeforeInstanceofRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

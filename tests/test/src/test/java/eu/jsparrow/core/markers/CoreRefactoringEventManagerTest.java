@@ -4,6 +4,7 @@ import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -40,7 +41,7 @@ class CoreRefactoringEventManagerTest extends UsesJDTUnitFixture {
 				+ "}";
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, method);
 		ICompilationUnit icu = defaultFixture.getICompilationUnit();
-		eventManager.discoverRefactoringEvents(icu);
+		eventManager.discoverRefactoringEvents(icu,  Arrays.asList("eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver", "eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver"));
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertEquals(2, events.size());
 		RefactoringMarkerEvent event = events.get(1);

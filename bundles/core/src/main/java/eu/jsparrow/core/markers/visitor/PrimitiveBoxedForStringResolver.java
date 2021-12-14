@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
 import eu.jsparrow.core.visitor.impl.PrimitiveBoxedForStringASTVisitor;
@@ -25,7 +26,7 @@ import eu.jsparrow.rules.common.RuleDescription;
  * @since 4.0.0
  *
  */
-public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTVisitor {
+public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTVisitor implements Resolver {
 
 	public static final String ID = PrimitiveBoxedForStringResolver.class.getName();
 	private IJavaElement javaElement;
@@ -36,6 +37,11 @@ public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTV
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 			.findByRuleId(PrimitiveBoxedForStringRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

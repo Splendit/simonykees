@@ -11,13 +11,21 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
 import eu.jsparrow.core.visitor.impl.RemoveUnusedParameterASTVisitor;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
-public class RemoveUnusedParameterResolver extends RemoveUnusedParameterASTVisitor {
+/**
+ * A visitor for resolving one issue of type
+ * {@link RemoveUnusedParameterASTVisitor}.
+ * 
+ * @since 4.6.0
+ *
+ */
+public class RemoveUnusedParameterResolver extends RemoveUnusedParameterASTVisitor implements Resolver {
 
 	public static final String ID = RemoveUnusedParameterResolver.class.getName();
 
@@ -29,6 +37,11 @@ public class RemoveUnusedParameterResolver extends RemoveUnusedParameterASTVisit
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 			.findByRuleId(RemoveUnusedParameterRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

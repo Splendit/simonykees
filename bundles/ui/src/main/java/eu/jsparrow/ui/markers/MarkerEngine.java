@@ -18,6 +18,7 @@ import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
+import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -142,7 +143,8 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 		if(!valid) {
 			return;
 		}
-		eventGenerator.discoverRefactoringEvents(cu);
+		List<String> activeMarkerIds = SimonykeesPreferenceManager.getAllActiveMarkers();
+		eventGenerator.discoverRefactoringEvents(cu, activeMarkerIds);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		if (oldEvents.equals(events)) {
 			return;

@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.AvoidConcatenationInLoggingStatementsRule;
 import eu.jsparrow.core.visitor.impl.AvoidConcatenationInLoggingStatementsASTVisitor;
@@ -22,7 +23,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
  * @since 4.6.0
  *
  */
-public class AvoidConcatenationInLoggingStatementsResolver extends AvoidConcatenationInLoggingStatementsASTVisitor {
+public class AvoidConcatenationInLoggingStatementsResolver extends AvoidConcatenationInLoggingStatementsASTVisitor implements Resolver {
 
 	public static final String ID = AvoidConcatenationInLoggingStatementsResolver.class.getName();
 
@@ -34,6 +35,11 @@ public class AvoidConcatenationInLoggingStatementsResolver extends AvoidConcaten
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 			.findByRuleId(AvoidConcatenationInLoggingStatementsRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

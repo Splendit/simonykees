@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.CollectionRemoveAllRule;
 import eu.jsparrow.core.visitor.impl.CollectionRemoveAllASTVisitor;
@@ -23,7 +24,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
  * @since 4.6.0
  *
  */
-public class CollectionRemoveAllResolver extends CollectionRemoveAllASTVisitor {
+public class CollectionRemoveAllResolver extends CollectionRemoveAllASTVisitor implements Resolver {
 
 	public static final String ID = CollectionRemoveAllResolver.class.getName();
 
@@ -37,6 +38,11 @@ public class CollectionRemoveAllResolver extends CollectionRemoveAllASTVisitor {
 			.findByRuleId(CollectionRemoveAllRule.RULE_ID);
 	}
 
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
+	}
+	
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		javaElement = compilationUnit.getJavaElement();

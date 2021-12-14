@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.constants.ReservedNames;
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.InefficientConstructorRule;
 import eu.jsparrow.core.visitor.impl.InefficientConstructorASTVisitor;
@@ -28,7 +29,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 4.0.0
  *
  */
-public class InefficientConstructorResolver extends InefficientConstructorASTVisitor {
+public class InefficientConstructorResolver extends InefficientConstructorASTVisitor implements Resolver {
 
 	public static final String ID = InefficientConstructorResolver.class.getName();
 	private RuleDescription description;
@@ -40,6 +41,11 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 			.findByRuleId(InefficientConstructorRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

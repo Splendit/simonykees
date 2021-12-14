@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.UseComparatorMethodsRule;
 import eu.jsparrow.core.visitor.impl.comparatormethods.UseComparatorMethodsASTVisitor;
@@ -22,7 +23,7 @@ import eu.jsparrow.rules.common.RuleDescription;
  * @since 4.0.0
  *
  */
-public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor {
+public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor implements Resolver {
 
 	public static final String ID = UseComparatorMethodsResolver.class.getName();
 	private IJavaElement javaElement;
@@ -33,6 +34,11 @@ public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 				.findByRuleId(UseComparatorMethodsRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

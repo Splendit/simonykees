@@ -9,13 +9,21 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.RemoveRedundantTypeCastRule;
 import eu.jsparrow.core.visitor.impl.RemoveRedundantTypeCastASTVisitor;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
-public class RemoveRedundantTypeCastResolver extends RemoveRedundantTypeCastASTVisitor {
+/**
+ * A visitor for resolving one issue of type
+ * {@link RemoveRedundantTypeCastASTVisitor}.
+ * 
+ * @since 4.6.0
+ *
+ */
+public class RemoveRedundantTypeCastResolver extends RemoveRedundantTypeCastASTVisitor implements Resolver {
 
 	public static final String ID = RemoveRedundantTypeCastResolver.class.getName();
 
@@ -27,6 +35,11 @@ public class RemoveRedundantTypeCastResolver extends RemoveRedundantTypeCastASTV
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 			.findByRuleId(RemoveRedundantTypeCastRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

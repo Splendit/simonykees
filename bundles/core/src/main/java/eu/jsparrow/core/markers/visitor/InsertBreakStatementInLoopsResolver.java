@@ -13,16 +13,24 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.InsertBreakStatementInLoopsRule;
 import eu.jsparrow.core.visitor.impl.InsertBreakStatementInLoopsASTVisitor;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
-public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInLoopsASTVisitor {
+/**
+ * A visitor for resolving one issue of type
+ * {@link InsertBreakStatementInLoopsASTVisitor}.
+ * 
+ * @author arditymeri
+ *
+ */
+public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInLoopsASTVisitor implements Resolver {
 
 	public static final String ID = InsertBreakStatementInLoopsResolver.class.getName();
-	
+
 	private Predicate<ASTNode> positionChecker;
 	private IJavaElement javaElement;
 	private RuleDescription description;
@@ -31,6 +39,11 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 			.findByRuleId(InsertBreakStatementInLoopsRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override
@@ -46,7 +59,7 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 		}
 		return false;
 	}
-	
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public void addMarkerEvent(EnhancedForStatement forStatement, IfStatement ifStatement, Block ifBodyBlock) {
@@ -55,11 +68,13 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 		IfStatement newIfStatement = (IfStatement) ASTNode.copySubtree(ast, ifStatement);
 		Block newIfBodyBlock = (Block) ASTNode.copySubtree(ast, ifBodyBlock);
 		BreakStatement breakStatement = ast.newBreakStatement();
-		newIfBodyBlock.statements().add(breakStatement);
+		newIfBodyBlock.statements()
+			.add(breakStatement);
 		newIfStatement.setThenStatement(newIfBodyBlock);
 		newForStatement.setBody(newIfStatement);
 		int credit = description.getCredit();
-		int highlightLength = newForStatement.getLength() + breakStatement.toString().length();
+		int highlightLength = newForStatement.getLength() + breakStatement.toString()
+			.length();
 		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
 				description.getName(),
 				description.getDescription(),
@@ -71,19 +86,23 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void addMarkerEvent(EnhancedForStatement forStatement, IfStatement ifStatement, ExpressionStatement thenStatement) {
+	public void addMarkerEvent(EnhancedForStatement forStatement, IfStatement ifStatement,
+			ExpressionStatement thenStatement) {
 		AST ast = forStatement.getAST();
 		EnhancedForStatement newForStatement = (EnhancedForStatement) ASTNode.copySubtree(ast, forStatement);
 		IfStatement newIfStatement = (IfStatement) ASTNode.copySubtree(ast, ifStatement);
 		Block newIfBodyBlock = ast.newBlock();
-		ExpressionStatement newThenStatement = (ExpressionStatement) ASTNode.copySubtree(ast, thenStatement);		
+		ExpressionStatement newThenStatement = (ExpressionStatement) ASTNode.copySubtree(ast, thenStatement);
 		BreakStatement breakStatement = ast.newBreakStatement();
-		newIfBodyBlock.statements().add(newThenStatement);
-		newIfBodyBlock.statements().add(breakStatement);
+		newIfBodyBlock.statements()
+			.add(newThenStatement);
+		newIfBodyBlock.statements()
+			.add(breakStatement);
 		newIfStatement.setThenStatement(newIfBodyBlock);
 		newForStatement.setBody(newIfStatement);
 		int credit = description.getCredit();
-		int highlightLength = newForStatement.getLength() + breakStatement.toString().length();
+		int highlightLength = newForStatement.getLength() + breakStatement.toString()
+			.length();
 		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
 				description.getName(),
 				description.getDescription(),

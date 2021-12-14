@@ -9,13 +9,21 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
 import eu.jsparrow.core.visitor.impl.RemoveNewStringConstructorASTVisitor;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
-public class RemoveNewStringConstructorResolver extends RemoveNewStringConstructorASTVisitor {
+/**
+ * A visitor for resolving one issue of type
+ * {@link RemoveNewStringConstructorASTVisitor}.
+ * 
+ * @since 4.6.0
+ *
+ */
+public class RemoveNewStringConstructorResolver extends RemoveNewStringConstructorASTVisitor implements Resolver {
 
 	public static final String ID = RemoveNewStringConstructorResolver.class.getName();
 
@@ -27,6 +35,11 @@ public class RemoveNewStringConstructorResolver extends RemoveNewStringConstruct
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 			.findByRuleId(RemoveNewStringConstructorRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

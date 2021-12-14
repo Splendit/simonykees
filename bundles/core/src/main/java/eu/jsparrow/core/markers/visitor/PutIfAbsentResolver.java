@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.visitor.impl.PutIfAbsentASTVisitor;
@@ -27,7 +28,7 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
  * @since 4.0.0
  *
  */
-public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
+public class PutIfAbsentResolver extends PutIfAbsentASTVisitor implements Resolver {
 
 	public static final String ID = PutIfAbsentResolver.class.getName();
 	private IJavaElement javaElement;
@@ -38,6 +39,11 @@ public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
 				.findByRuleId(PutIfAbsentRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override

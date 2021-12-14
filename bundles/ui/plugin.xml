@@ -78,6 +78,9 @@
 		<page category="eu.jsparrow.ui.preference.ProfilePreferencePage"
 			class="eu.jsparrow.ui.preference.SimonykeesPreferencePageLicense" id="eu.jsparrow.ui.preference.ProfilePreferencePageLicense"
 			name="%preferencePageLicense.name" />
+		<page category="eu.jsparrow.ui.preference.ProfilePreferencePage"
+			class="eu.jsparrow.ui.preference.SimonykeesMarkersPreferencePage" id="eu.jsparrow.ui.preference.MarkersPreferencePage"
+			name="%markersPreferencePage.name" />
 	</extension>
 	<extension point="org.eclipse.core.runtime.preferences">
 		<initializer
