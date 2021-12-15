@@ -1,6 +1,10 @@
 package eu.jsparrow.ui.markers;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ElementChangedEvent;
@@ -13,9 +17,14 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ide.ResourceUtil;
 
+import eu.jsparrow.core.markers.ResolverVisitorsFactory;
+import eu.jsparrow.license.api.LicenseType;
+import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
+import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * An engine for creating and clearing jSparrow markers based on the generated
@@ -129,10 +138,44 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 		}
 	}
 
+	private List<String> filterWithSufficientCredit(LicenseValidationResult validationResult,
+			List<String> allActiveMarkerIds) {
+		int availableCredit = validationResult.getCredit()
+			.orElse(0);
+		if(availableCredit <= 0) {
+			return Collections.emptyList();
+		}
+		List<String> filtered = ResolverVisitorsFactory.getAllMarkerDescriptions()
+			.entrySet()
+			.stream()
+			.filter(entry -> entry.getValue()
+				.getCredit() <= availableCredit)
+			.map(Map.Entry::getKey)
+			.collect(Collectors.toList());
+		return allActiveMarkerIds.stream()
+			.filter(filtered::contains)
+			.collect(Collectors.toList());
+
+	}
+
 	private void handleParentSourceReference(ICompilationUnit cu) {
 		List<RefactoringMarkerEvent> oldEvents = RefactoringMarkers.getAllEvents();
 		RefactoringMarkers.clear();
-		eventGenerator.discoverRefactoringEvents(cu);
+		LicenseUtil licenseUtil = LicenseUtil.get();
+		LicenseValidationResult validationResult = licenseUtil.getValidationResult();
+		LicenseType type = validationResult.getLicenseType();
+		boolean valid = LicenseType.DEMO != type && validationResult.isValid();
+		if (!valid) {
+			return;
+		}
+		List<String> activeMarkerIds = SimonykeesPreferenceManager.getAllActiveMarkers();
+		if (type == LicenseType.PAY_PER_USE) {
+			List<String> filteredByCredit = filterWithSufficientCredit(validationResult, activeMarkerIds);
+			eventGenerator.discoverRefactoringEvents(cu, filteredByCredit);
+		} else {
+			eventGenerator.discoverRefactoringEvents(cu, activeMarkerIds);
+		}
+
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		if (oldEvents.equals(events)) {
 			return;

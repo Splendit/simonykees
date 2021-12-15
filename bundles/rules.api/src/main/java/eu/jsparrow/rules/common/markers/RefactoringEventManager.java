@@ -1,5 +1,7 @@
 package eu.jsparrow.rules.common.markers;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 
 /**
@@ -16,8 +18,10 @@ public interface RefactoringEventManager {
 	 * 
 	 * @param iCompilationUnit
 	 *            the source to find jSparrow markers for.
+	 * @param markerIds
+	 *            the list of activated markers
 	 */
-	void discoverRefactoringEvents(ICompilationUnit iCompilationUnit);
+	void discoverRefactoringEvents(ICompilationUnit iCompilationUnit, List<String> markerIds);
 
 	/**
 	 * Resolves one jSparrow marker in the given {@link ICompilationUnit}.

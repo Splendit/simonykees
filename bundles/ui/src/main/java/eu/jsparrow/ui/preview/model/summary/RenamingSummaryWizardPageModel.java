@@ -89,12 +89,10 @@ public class RenamingSummaryWizardPageModel extends AbstractSummaryWizardPageMod
 			JavaAccessModifier modifier) {
 		return metaDataList.stream()
 			.filter(md -> modifier.equals(md.getFieldModifier()))
-			.flatMap(metaData -> {
-				return metaData.getTargetICompilationUnits()
-					.stream()
-					.filter(icu -> !icu.getElementName()
-						.equals(metaData.getClassDeclarationName()));
-			})
+			.flatMap(metaData -> metaData.getTargetICompilationUnits()
+				.stream()
+				.filter(icu -> !icu.getElementName()
+					.equals(metaData.getClassDeclarationName())))
 			.filter(md -> compilationUnitName.equals(md.getElementName()))
 			.count();
 	}

@@ -36,5 +36,7 @@ public class SimonykeesPreferenceInitializer extends AbstractPreferenceInitializ
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.DISABLE_REGISTER_SUGGESTION, false);
 
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY, true);
+		preferenceStore.setDefault(SimonykeesPreferenceConstants.ACTIVE_MARKERS,
+				SimonykeesPreferenceManager.getDefaultActiveMarkers());
 	}
 }

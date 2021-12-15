@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
+import eu.jsparrow.core.markers.common.RemoveNewStringConstructorEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -21,7 +22,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTVisitor {
+public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTVisitor implements RemoveNewStringConstructorEvent {
 
 	private static final String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
 
@@ -82,6 +83,7 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTV
 			} while (arguments != null);
 			if (replacement != null) {
 				astRewrite.replace(node, replacement, null);
+				addMarkerEvent(node, replacement);
 				getCommentRewriter().saveCommentsInParentStatement(node);
 				onRewrite();
 			}

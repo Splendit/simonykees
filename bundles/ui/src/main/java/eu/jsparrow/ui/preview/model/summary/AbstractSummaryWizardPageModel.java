@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.statistic.DurationFormatUtil;
-import eu.jsparrow.core.statistic.StopWatchUtil;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
@@ -23,49 +22,19 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 
 	protected final RefactoringPipeline refactoringPipeline;
 
-	private Long runDuration;
-
-	private Integer issuesFixed;
-
-	private Duration timeSaved;
-
 	private IObservableList<RuleTimesModel> ruleTimes = new WritableList<>();
 
 	private RefactoringPreviewWizardModel wizardModel;
 
-	public AbstractSummaryWizardPageModel(RefactoringPipeline refactoringPipeline,
+	protected AbstractSummaryWizardPageModel(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel) {
 		this.refactoringPipeline = refactoringPipeline;
 		this.wizardModel = wizardModel;
 		initialize();
 	}
 
-	public Long getRunDuration() {
-		return runDuration;
-	}
-
-	public void setRunDuration(Long runDuration) {
-		firePropertyChange("runDuration", this.runDuration, this.runDuration = runDuration); //$NON-NLS-1$
-	}
-
 	public IObservableList<RuleTimesModel> getRuleTimes() {
 		return ruleTimes;
-	}
-
-	public Integer getIssuesFixed() {
-		return this.issuesFixed;
-	}
-
-	public void setIssuesFixed(Integer issuesFixed) {
-		firePropertyChange("issuesFixed", this.issuesFixed, this.issuesFixed = issuesFixed); //$NON-NLS-1$
-	}
-
-	public Duration getTimeSaved() {
-		return timeSaved;
-	}
-
-	public void setTimeSaved(Duration timeSaved) {
-		firePropertyChange("timeSaved", this.timeSaved, this.timeSaved = timeSaved); //$NON-NLS-1$
 	}
 
 	// Needed because we don't have full databinding/models yet, so we need to
@@ -73,22 +42,10 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 	public void updateData() {
 		// Fields depend on contents of RuleTimes list, so we update that first!
 		updateRuleTimes();
-		updateTimeSaved();
-		updateIssuesFixed();
 	}
 
 	protected void initialize() {
-
 		addRuleTimes();
-
-		/*
-		 * Set initial values to something big so labels have enough size This
-		 * is easiert hat resizing/layouting labels dynamically based on their
-		 * contents
-		 */
-		setRunDuration(StopWatchUtil.getTime());
-		setIssuesFixed(99999);
-		setTimeSaved(Duration.ofSeconds(999999999));
 	}
 
 	private void addRuleTimes() {
@@ -138,20 +95,6 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 			.stream()
 			.allMatch(rule -> null == state.getChangeIfPresent(rule));
 		return !noChangePresent;
-	}
-
-	private void updateIssuesFixed() {
-		int totalIssuesFixed = ruleTimes.stream()
-			.mapToInt(RuleTimesModel::getTimes)
-			.sum();
-		setIssuesFixed(totalIssuesFixed);
-	}
-
-	private void updateTimeSaved() {
-		Duration totalTimeSaved = ruleTimes.stream()
-			.map(RuleTimesModel::getTimeSavedDuration)
-			.reduce(Duration.ZERO, Duration::plus);
-		setTimeSaved(totalTimeSaved);
 	}
 
 	private void updateRuleTimes() {

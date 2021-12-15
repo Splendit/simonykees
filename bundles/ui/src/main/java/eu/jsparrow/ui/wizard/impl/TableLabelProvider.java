@@ -29,6 +29,7 @@ import eu.jsparrow.ui.util.LicenseUtil;
 public class TableLabelProvider extends BaseLabelProvider implements ITableLabelProvider {
 
 	private Image greenFreeRuleImage;
+	private Image tickmarkGreenIconImage;
 	private static final String F_GREEN_ICON_PATH = "icons/f-icon-green-14px.png"; //$NON-NLS-1$
 
 	public TableLabelProvider() {
@@ -37,7 +38,7 @@ public class TableLabelProvider extends BaseLabelProvider implements ITableLabel
 		IPath iPathTickMarkGreen = new Path(F_GREEN_ICON_PATH);
 		URL urlTickMarkGreen = FileLocator.find(bundle, iPathTickMarkGreen, new HashMap<>());
 		ImageDescriptor imageDescTickMarkGreen = ImageDescriptor.createFromURL(urlTickMarkGreen);
-		Image tickmarkGreenIconImage = imageDescTickMarkGreen.createImage();
+		tickmarkGreenIconImage = imageDescTickMarkGreen.createImage();
 		ImageData imageDataTickmarkGreen = tickmarkGreenIconImage.getImageData();
 		greenFreeRuleImage = new Image(Display.getCurrent(), imageDataTickmarkGreen);
 	}
@@ -66,6 +67,12 @@ public class TableLabelProvider extends BaseLabelProvider implements ITableLabel
 			return ExceptionMessages.TableLabelProvider_not_supported;
 		}
 
+	}
+	
+	@Override
+	public void dispose() {
+		greenFreeRuleImage.dispose();
+		tickmarkGreenIconImage.dispose();
 	}
 
 }

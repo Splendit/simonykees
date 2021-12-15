@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -71,7 +72,7 @@ public class BuyLicenseDialog extends Dialog {
 
 	private static final Logger logger = LoggerFactory.getLogger(BuyLicenseDialog.class);
 
-	private static final String LOGO_PATH_INACTIVE = "icons/jSparrow_inactive_icon_100.png"; //$NON-NLS-1$
+	private static final String LOGO_PATH_INACTIVE = "icons/jsparrow-logo-inactive-003.png"; //$NON-NLS-1$
 
 	private static final String IMG_SAD_ICON = "icons/sad.png"; //$NON-NLS-1$
 	private static final String IMG_EVEN_ICON = "icons/even.png"; //$NON-NLS-1$
@@ -98,6 +99,7 @@ public class BuyLicenseDialog extends Dialog {
 	 */
 	public BuyLicenseDialog(Shell parentShell) {
 		super(parentShell);
+
 		this.message = Messages.BuyLicenseDialog_TitleMessage_LicenseHasExpired;
 		bundle = Platform.getBundle(Activator.PLUGIN_ID);
 	}
@@ -124,11 +126,13 @@ public class BuyLicenseDialog extends Dialog {
 		FontDescriptor boldFontDescription = FontDescriptor.createFrom(font)
 			.setStyle(SWT.BOLD);
 		Font boldFont = boldFontDescription.createFont(composite.getDisplay());
+		composite.addDisposeListener(e -> boldFont.dispose());
 
 		IPath iPathInactive = new Path(LOGO_PATH_INACTIVE);
 		URL urlInactive = FileLocator.find(bundle, iPathInactive, new HashMap<>());
 		ImageDescriptor imageDescInactive = ImageDescriptor.createFromURL(urlInactive);
 		Image jSparrowImageInactive = imageDescInactive.createImage();
+		composite.addDisposeListener(e -> jSparrowImageInactive.dispose());
 
 		Label logoLabel = new Label(titleContainer, SWT.NONE);
 		logoLabel.setImage(jSparrowImageInactive);
@@ -160,7 +164,6 @@ public class BuyLicenseDialog extends Dialog {
 		link.setFont(boldFont);
 
 		createRatingForm(area);
-
 		return composite;
 	}
 
@@ -174,6 +177,13 @@ public class BuyLicenseDialog extends Dialog {
 			}
 		}
 		super.okPressed();
+	}
+
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		super.createButtonsForButtonBar(parent);
+		Button cancelButton = super.getButton(IDialogConstants.CANCEL_ID);
+		cancelButton.setText(Messages.BuyLicenseDialog_skipButtonLabel);
 	}
 
 	private void createRatingForm(Composite parent) {
@@ -201,6 +211,7 @@ public class BuyLicenseDialog extends Dialog {
 		URL urlSad = FileLocator.find(bundle, iPathSad, new HashMap<>());
 		ImageDescriptor imageDescSad = ImageDescriptor.createFromURL(urlSad);
 		Image sadImage = imageDescSad.createImage();
+		parent.addDisposeListener(e -> sadImage.dispose());
 		Button sadButton = new Button(buttonsComposite, SWT.RADIO);
 		sadButton.setImage(sadImage);
 		sadButton.addSelectionListener(new SelectionAdapter() {
@@ -215,6 +226,7 @@ public class BuyLicenseDialog extends Dialog {
 		URL urlEven = FileLocator.find(bundle, iPathEven, new HashMap<>());
 		ImageDescriptor imageDescEven = ImageDescriptor.createFromURL(urlEven);
 		Image evenImage = imageDescEven.createImage();
+		parent.addDisposeListener(e -> evenImage.dispose());
 		Button evenButton = new Button(buttonsComposite, SWT.RADIO);
 		evenButton.setImage(evenImage);
 		evenButton.addSelectionListener(new SelectionAdapter() {
@@ -229,6 +241,7 @@ public class BuyLicenseDialog extends Dialog {
 		URL urlHappy = FileLocator.find(bundle, iPathHappy, new HashMap<>());
 		ImageDescriptor imageDescHappy = ImageDescriptor.createFromURL(urlHappy);
 		Image happyImage = imageDescHappy.createImage();
+		parent.addDisposeListener(e -> happyImage.dispose());
 		Button happyButton = new Button(buttonsComposite, SWT.RADIO);
 		happyButton.setImage(happyImage);
 		happyButton.addSelectionListener(new SelectionAdapter() {
@@ -243,6 +256,7 @@ public class BuyLicenseDialog extends Dialog {
 		URL urlInLove = FileLocator.find(bundle, iPathInLove, new HashMap<>());
 		ImageDescriptor imageDescInLove = ImageDescriptor.createFromURL(urlInLove);
 		Image inLoveImage = imageDescInLove.createImage();
+		parent.addDisposeListener(e -> inLoveImage.dispose());
 		Button inLoveButton = new Button(buttonsComposite, SWT.RADIO);
 		inLoveButton.setImage(inLoveImage);
 		inLoveButton.addSelectionListener(new SelectionAdapter() {
@@ -277,7 +291,6 @@ public class BuyLicenseDialog extends Dialog {
 			Rectangle r1 = t.getClientArea();
 			Rectangle r2 = t.computeTrim(r1.x, r1.y, r1.width, r1.height);
 			Point p = t.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-			// t.getHorizontalBar().setVisible(r2.width <= p.x);
 			t.getVerticalBar()
 				.setVisible(r2.height <= p.y);
 			if (event.type == SWT.Modify) {
@@ -350,7 +363,7 @@ public class BuyLicenseDialog extends Dialog {
 		URL obj = new URL(googleFormUrl);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
-		// add reuqest header
+		// add request header
 		con.setRequestMethod("POST"); //$NON-NLS-1$
 
 		String urlParameters = ""; //$NON-NLS-1$
@@ -358,12 +371,15 @@ public class BuyLicenseDialog extends Dialog {
 			urlParameters += "entry.1585752170=" + ratingText; //$NON-NLS-1$
 		}
 		if (!reasonForNotBuying.isEmpty()) {
+			StringBuilder sb = new StringBuilder();
 			for (String reason : reasonForNotBuying) {
 				if (!StringUtils.isEmpty(urlParameters)) {
-					urlParameters += "&"; //$NON-NLS-1$
+					sb.append("&"); //$NON-NLS-1$
 				}
-				urlParameters += "entry.808545363=" + reason; //$NON-NLS-1$
+				sb.append("entry.808545363="); //$NON-NLS-1$
+				sb.append(reason);
 			}
+			urlParameters += sb.toString();
 		}
 		if (!StringUtils.isEmpty(feedbackText)) {
 			if (!StringUtils.isEmpty(urlParameters)) {

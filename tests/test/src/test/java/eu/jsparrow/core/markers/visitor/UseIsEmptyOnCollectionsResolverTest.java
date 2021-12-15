@@ -17,14 +17,13 @@ class UseIsEmptyOnCollectionsResolverTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		fixture.addImport(java.util.Comparator.class.getName());
 		RefactoringMarkers.clear();
 	}
 	
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		UseIsEmptyOnCollectionsResolver visitor = new UseIsEmptyOnCollectionsResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("UseIsEmptyOnCollectionsResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "String s = \"\";\n"
@@ -38,7 +37,7 @@ class UseIsEmptyOnCollectionsResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		UseIsEmptyOnCollectionsResolver visitor = new UseIsEmptyOnCollectionsResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("UseIsEmptyOnCollectionsResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "String s = \"\";\n"
@@ -53,17 +52,18 @@ class UseIsEmptyOnCollectionsResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Replace Equality Check with isEmpty()", event.getName()),
 				() -> assertEquals("Use isEmpty() on Strings, Maps, and Collections.", event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver", event.getResolver()),
+				() -> assertEquals("UseIsEmptyOnCollectionsResolver", event.getResolver()),
 				() -> assertEquals("if (s.isEmpty()) {\n}\n", event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
-				() -> assertEquals(145, event.getOffset()),
-				() -> assertEquals(15, event.getLength()));
+				() -> assertEquals(116, event.getOffset()),
+				() -> assertEquals(15, event.getLength()),
+				() -> assertEquals(2, event.getWeightValue()));
 	}
 	
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
-		UseIsEmptyOnCollectionsResolver visitor = new UseIsEmptyOnCollectionsResolver(node -> node.getStartPosition() == 146);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver"));
+		UseIsEmptyOnCollectionsResolver visitor = new UseIsEmptyOnCollectionsResolver(node -> node.getStartPosition() == 116);
+		visitor.addMarkerListener(RefactoringMarkers.getFor("UseIsEmptyOnCollectionsResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "String s = \"\";\n"

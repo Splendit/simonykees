@@ -12,6 +12,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -22,13 +23,20 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.license.api.LicenseType;
+import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.exception.SimonykeesException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
+import eu.jsparrow.ui.preview.statistics.RuleStatisticsSection;
+import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
+import eu.jsparrow.ui.preview.statistics.StatisticsSectionUpdater;
+import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
 
 /**
@@ -42,7 +50,7 @@ import eu.jsparrow.ui.util.ResourceHelper;
  */
 public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
-	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
+	private static final String WINDOW_ICON = "icons/jsparrow-icon-16-003.png"; //$NON-NLS-1$
 
 	private RefactoringPipeline refactoringPipeline;
 
@@ -50,9 +58,14 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	private RefactoringPreviewWizardModel model;
 	protected RefactoringSummaryWizardPage summaryPage;
+	protected StatisticsSection statisticsSection;
+	protected StatisticsSection summaryPageStatisticsSection;
+	protected StatisticsSectionUpdater updater;
+	private Image windowIcon;
 	
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private StandaloneStatisticsMetadata statisticsMetadata;
+	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline, StandaloneStatisticsMetadata standaloneStatisticsMetadata) {
 		this(refactoringPipeline);
@@ -61,12 +74,16 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
+		this.statisticsSection = StatisticsSectionFactory.createStatisticsSection(refactoringPipeline);
+		this.summaryPageStatisticsSection = StatisticsSectionFactory.createStatisticsSectionForSummaryPage(refactoringPipeline);
+		this.updater = new StatisticsSectionUpdater(statisticsSection, summaryPageStatisticsSection);
 		this.refactoringPipeline = refactoringPipeline;
 		this.shell = PlatformUI.getWorkbench()
 			.getActiveWorkbenchWindow()
 			.getShell();
 		setNeedsProgressMonitor(true);
-		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
+		windowIcon = ResourceHelper.createImage(WINDOW_ICON);
+		org.eclipse.jface.window.Window.setDefaultImage(windowIcon);
 	}
 
 	@Override
@@ -85,12 +102,15 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		 * First summary page is created to collect all initial source from
 		 * working copies
 		 */
+		
 		model = new RefactoringPreviewWizardModel();
 		refactoringPipeline.getRules()
 			.forEach(rule -> {
 				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
 				if (!changes.isEmpty()) {
-					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish());
+					RuleStatisticsSection ruleStats = StatisticsSectionFactory.createRuleStatisticsSection(rule);
+					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish(), ruleStats, updater);
+					previewPage.setTotalStatisticsSection(statisticsSection);
 					addPage(previewPage);
 				}
 			});
@@ -98,11 +118,11 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.size() == 1
 				&& refactoringPipeline.getRules()
 					.get(0) instanceof StandardLoggerRule)) {
-			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsMetadata);
+			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsMetadata, summaryPageStatisticsSection);
 			addPage(summaryPage);
 		}
 	}
-
+	
 	@Override
 	public void updateViewsOnNavigation(IWizardPage page) {
 		if (page instanceof RefactoringPreviewWizardPage) {
@@ -119,6 +139,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 				 * the view with current updated values
 				 */
 				((RefactoringPreviewWizardPage) page).populateViews(false);
+				statisticsSection.updateForSelected();
 			}
 		}
 	}
@@ -131,7 +152,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 *            on which are changes
 	 */
 	private void startRecalculationRunnable(RefactoringPreviewWizardPage page) {
-		IRunnableWithProgress job = recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
+		IRunnableWithProgress job = recalculateRulesAndClearChanges(page);
 
 		if (null != job) {
 			try {
@@ -157,6 +178,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		return monitor -> {
 			try {
 				refactoringPipeline.doAdditionalRefactoring(page.getUnselectedChange(), page.getRule(), monitor);
+				this.statisticsSection.updateForSelected();
+				this.summaryPageStatisticsSection.updateForSelected();
 				if (monitor.isCanceled()) {
 					refactoringPipeline.clearStates();
 				}
@@ -188,7 +211,13 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		if (licenseUtil.isFreeLicense()) {
 			return licenseUtil.isActiveRegistration()  && containsOnlyFreeRules();
 		}
-		return super.canFinish();
+		
+		LicenseValidationResult result = licenseUtil.getValidationResult();
+		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
+			return super.canFinish();
+		}
+		boolean enoughCredit =  payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
+		return enoughCredit && super.canFinish();
 	}
 
 	private boolean containsOnlyFreeRules() {
@@ -220,6 +249,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 			try {
 				refactoringPipeline.commitRefactoring();
+				int sum = payPerUseCalculator.findTotalRequiredCredit(refactoringPipeline.getRules());
+				licenseUtil.reserveQuantity(sum);
 				Activator.setRunning(false);
 			} catch (RefactoringException e) {
 				synchronizeWithUIShowError(e);
@@ -270,6 +301,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public void dispose() {
 		refactoringPipeline.clearStates();
+		windowIcon.dispose();
 		super.dispose();
 	}
 

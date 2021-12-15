@@ -22,10 +22,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class PutIfAbsentRule extends RefactoringRuleImpl<PutIfAbsentASTVisitor> {
 
+	public static final String RULE_ID = "PutIfAbsent"; //$NON-NLS-1$
 	public PutIfAbsentRule() {
 		super();
 		this.visitorClass = PutIfAbsentASTVisitor.class;
-		this.id = "PutIfAbsent"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.PutIfAbsentRule_name, Messages.PutIfAbsentRule_description,
 				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_8, Tag.OLD_LANGUAGE_CONSTRUCTS));
 	}

@@ -60,4 +60,10 @@ public interface RefactoringMarkerEvent {
 	 */
 	IJavaElement getJavaElement();
 
+	/**
+	 *  
+	 * @return the credit to consider in pay-per-use license model
+	 */
+	int getWeightValue();
+
 }
