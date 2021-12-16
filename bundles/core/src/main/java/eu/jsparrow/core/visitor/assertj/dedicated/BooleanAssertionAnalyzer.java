@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import static org.eclipse.jdt.core.dom.InfixExpression.Operator.*;
@@ -48,7 +49,12 @@ class BooleanAssertionAnalyzer {
 		tmpMap.put("allMatch", "allMatch"); // Stream
 		tmpMap.put("anyMatch", "anyMatch"); // Stream
 		tmpMap.put("noneMatch", "noneMatch"); // Stream
-		
+		//
+		tmpMap.put("exists", "exists"); // File
+		tmpMap.put("isFile", "isFile"); // File
+		tmpMap.put("isDirectory", "isDirectory"); // File
+		// tmpMap.put("isHidden", "isHidden"); // File -- not supported
+		tmpMap.put("canRead", "canRead"); // File
 
 		ASSERTION_NAME_REPLACEMENTS = Collections.unmodifiableMap(tmpMap);
 
@@ -118,30 +124,41 @@ class BooleanAssertionAnalyzer {
 		Expression newAssertThatArgument = invocationAsAssertThatArgument.getExpression();
 		if (newAssertThatArgument == null) {
 			return Optional.empty();
-		}
+		}		
+	
 		String methodName = invocationAsAssertThatArgument.getName()
 			.getIdentifier();
-		String newMethodName;
+		String newAssertionName;
 
 		if (assertionMethodName.equals(IS_FALSE)) {
-			newMethodName = ASSERTION_NAME_NEGATED_REPLACEMENTS.get(methodName);
+			newAssertionName = ASSERTION_NAME_NEGATED_REPLACEMENTS.get(methodName);
 		} else {
-			newMethodName = ASSERTION_NAME_REPLACEMENTS.get(methodName);
+			newAssertionName = ASSERTION_NAME_REPLACEMENTS.get(methodName);
 		}
-		if (newMethodName == null) {
+		if (newAssertionName == null) {
 			return Optional.empty();
 		}
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(invocationAsAssertThatArgument.arguments(),
+		
+		List<Expression> newAssertionArguments = ASTNodeUtil.convertToTypedList(invocationAsAssertThatArgument.arguments(),
 				Expression.class);
 
-		if (arguments.size() > 1) {
+		if (newAssertionArguments.size() > 1) {
 			return Optional.empty();
 		}
+		
+		IMethodBinding assertThatArgumentMethodBinding = invocationAsAssertThatArgument.resolveMethodBinding();
+		if(assertThatArgumentMethodBinding == null) {
+			return Optional.empty();
+		}		
+		
+		if(!SupportedTypesForAssertions.isSupportedTypeForAsseertion(assertThatArgumentMethodBinding.getDeclaringClass())) {
+			return Optional.empty();
+		}	
 
 		MethodInvocationData assertThatData = createNewAssertThatData(assertThat, newAssertThatArgument);
 
-		MethodInvocationData newAssertionData = new MethodInvocationData(newMethodName);
-		newAssertionData.setArguments(arguments);
+		MethodInvocationData newAssertionData = new MethodInvocationData(newAssertionName);
+		newAssertionData.setArguments(newAssertionArguments);
 
 		DedicatedAssertionData dedicatedAssertionData = new DedicatedAssertionData(assertThatData, newAssertionData);
 
