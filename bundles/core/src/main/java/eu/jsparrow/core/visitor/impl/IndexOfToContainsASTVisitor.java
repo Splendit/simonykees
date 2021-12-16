@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 
+import eu.jsparrow.core.markers.common.IndexOfToContainsEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -106,7 +107,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 2.1.1
  *
  */
-public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
+public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor implements IndexOfToContainsEvent {
 
 	private static final String PRIMITIVE_INT_QUALIFIED_NAME = "int"; //$NON-NLS-1$
 	private static final String INTEGER_QUALIFIED_NAME = java.lang.Integer.class.getName();
@@ -288,8 +289,10 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 				notExpression.setOperand(containsMethodInvocation);
 
 				astRewrite.replace(infixExpression, notExpression, null);
+				addMarkerEvent(infixExpression, leftExpression, methodArgument, PrefixExpression.Operator.NOT);
 			} else {
 				astRewrite.replace(infixExpression, containsMethodInvocation, null);
+				addMarkerEvent(infixExpression, leftExpression, methodArgument);
 			}
 
 		}

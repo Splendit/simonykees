@@ -1,6 +1,7 @@
 package eu.jsparrow.license.api;
 
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 import eu.jsparrow.license.api.util.AnnotationToStringBuilder;
 import eu.jsparrow.license.api.util.Shorten;
@@ -13,10 +14,11 @@ public class LicenseValidationResult {
 	private boolean valid;
 	private String detail;
 	private LicenseType licenseType;
-	
+	protected Integer credit;
+
 	@Shorten
 	private String key;
-	
+
 	private ZonedDateTime expirationDate;
 
 	public LicenseValidationResult(LicenseType licenseType, String key, boolean valid, String detail,
@@ -50,6 +52,10 @@ public class LicenseValidationResult {
 
 	public ZonedDateTime getExpirationDate() {
 		return this.expirationDate;
+	}
+
+	public Optional<Integer> getCredit() {
+		return Optional.ofNullable(this.credit);
 	}
 
 	@Override

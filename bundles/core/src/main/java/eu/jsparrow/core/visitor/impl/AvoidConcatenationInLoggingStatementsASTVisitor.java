@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.AvoidConcatenationInLoggingStatementsEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -59,7 +60,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * 
  *        Implemented in SIM-1744 (see ticket for additional comments).
  */
-public class AvoidConcatenationInLoggingStatementsASTVisitor extends AbstractASTRewriteASTVisitor {
+public class AvoidConcatenationInLoggingStatementsASTVisitor extends AbstractASTRewriteASTVisitor implements AvoidConcatenationInLoggingStatementsEvent {
 
 	@SuppressWarnings("nls")
 	private static final List<String> LOGGER_TYPES = Collections.unmodifiableList(
@@ -138,6 +139,7 @@ public class AvoidConcatenationInLoggingStatementsASTVisitor extends AbstractAST
 		}
 
 		astRewrite.replace(infix, newNode, null);
+		addMarkerEvent(infix, newNode);
 
 		ListRewrite listRewriter = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
 

@@ -19,12 +19,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class UseIsEmptyOnCollectionsRule extends RefactoringRuleImpl<UseIsEmptyOnCollectionsASTVisitor> {
 
-	public static final String USE_IS_EMPTY_ON_COLLECTIONS_RULE_ID = "UseIsEmptyOnCollections"; //$NON-NLS-1$
+	public static final String RULE_ID = "UseIsEmptyOnCollections"; //$NON-NLS-1$
 
 	public UseIsEmptyOnCollectionsRule() {
 		super();
 		this.visitorClass = UseIsEmptyOnCollectionsASTVisitor.class;
-		this.id = USE_IS_EMPTY_ON_COLLECTIONS_RULE_ID;
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.UseIsEmptyOnCollectionsRule_name,
 				Messages.UseIsEmptyOnCollectionsRule_description, Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_6,
 						Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS, Tag.READABILITY, Tag.FREE));

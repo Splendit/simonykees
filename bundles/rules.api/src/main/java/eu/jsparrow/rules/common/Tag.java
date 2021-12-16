@@ -44,7 +44,9 @@ public enum Tag {
 	FREE("free"),
 	LOGGING("logging"),
 	IO_OPERATIONS("io operations"), 
-	TESTING("testing");
+	TESTING("testing"),
+	JUNIT("junit"),
+	ASSERTJ("assertj");
 
 	private List<String> tagName;
 

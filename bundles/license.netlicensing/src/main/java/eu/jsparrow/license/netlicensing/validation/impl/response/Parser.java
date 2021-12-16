@@ -29,9 +29,11 @@ public class Parser {
 	private SubscriptionResponse subscription;
 	private FloatingResponse floating;
 	private MultiFeatureResponse multiFeature;
+	private PayPerUseResponse payPerUse;
 
 	public void parseValidationResult(ValidationResult validationResult) {
 		logger.debug("Parsing validation result"); //$NON-NLS-1$
+		payPerUse = extractModels(validationResult, PayPerUseResponse.LICENSING_MODEL, this::buildPayPerUse);
 		subscription = extractModels(validationResult, SubscriptionResponse.LICENSING_MODEL, this::buildSubscription);
 		multiFeature = extractModels(validationResult, MultiFeatureResponse.LICENSING_MODEL, this::buildMultiFeature);
 		floating = extractModels(validationResult, FloatingResponse.LICENSING_MODEL, this::buildFloating);
@@ -57,6 +59,24 @@ public class Parser {
 		Composition model = properties.get(LICENSING_MODEL_KEY);
 		String value = model.getValue();
 		return licensingModel.equals(value);
+	}
+
+	public PayPerUseResponse buildPayPerUse(Map<String, Composition> properties) {
+
+		if (!properties.containsKey(NetlicensingResponse.VALID_KEY)) {
+			return null;
+		}
+		Composition validComposition = properties.get(NetlicensingResponse.VALID_KEY);
+		boolean valid = Boolean.parseBoolean(validComposition.getValue());
+
+		if (!properties.containsKey(PayPerUseResponse.REMAINING_QUANTITY_KEY)) {
+			return new PayPerUseResponse(valid);
+		}
+
+		Composition remainingQuantityComposition = properties.get(PayPerUseResponse.REMAINING_QUANTITY_KEY);
+		Integer remainingQuantity = Integer.parseInt(remainingQuantityComposition.getValue());
+
+		return new PayPerUseResponse(remainingQuantity, valid);
 	}
 
 	public SubscriptionResponse buildSubscription(Map<String, Composition> properties) {
@@ -115,6 +135,10 @@ public class Parser {
 		}
 
 		return new MultiFeatureResponse(feature, valid);
+	}
+
+	public PayPerUseResponse getPayPerUse() {
+		return payPerUse;
 	}
 
 	public SubscriptionResponse getSubscription() {

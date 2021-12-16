@@ -20,12 +20,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class StringLiteralEqualityCheckRule extends RefactoringRuleImpl<StringLiteralEqualityCheckASTVisitor> {
 
-	public static final String STRING_LITERAL_EQUALITY_CHECK_RULE_ID = "StringLiteralEqualityCheck"; //$NON-NLS-1$
+	public static final String RULE_ID = "StringLiteralEqualityCheck"; //$NON-NLS-1$
 
 	public StringLiteralEqualityCheckRule() {
 		super();
 		this.visitorClass = StringLiteralEqualityCheckASTVisitor.class;
-		this.id = STRING_LITERAL_EQUALITY_CHECK_RULE_ID;
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.StringLiteralEqualityCheckRule_name,
 				Messages.StringLiteralEqualityCheckRule_description, Duration.ofMinutes(10),
 				Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.FREE));

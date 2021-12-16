@@ -35,9 +35,9 @@ public class CoreRefactoringEventManager implements RefactoringEventManager {
 	private static final Logger logger = LoggerFactory.getLogger(CoreRefactoringEventManager.class);
 
 	@Override
-	public void discoverRefactoringEvents(ICompilationUnit iCompilationUnit) {
+	public void discoverRefactoringEvents(ICompilationUnit iCompilationUnit, List<String>markerIds) {
 		CompilationUnit compilationUnit = RefactoringUtil.parse(iCompilationUnit);
-		List<AbstractASTRewriteASTVisitor> resolvers = ResolverVisitorsFactory.getAllResolvers(node -> true);
+		List<AbstractASTRewriteASTVisitor> resolvers = ResolverVisitorsFactory.getAllResolvers(markerIds, node -> true);
 		for (AbstractASTRewriteASTVisitor resolver : resolvers) {
 			final ASTRewrite astRewrite = ASTRewrite.create(compilationUnit.getAST());
 			resolver.setASTRewrite(astRewrite);

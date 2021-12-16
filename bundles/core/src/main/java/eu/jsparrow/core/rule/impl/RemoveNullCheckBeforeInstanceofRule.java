@@ -19,11 +19,11 @@ import eu.jsparrow.rules.common.Tag;
 public class RemoveNullCheckBeforeInstanceofRule
 		extends RefactoringRuleImpl<RemoveNullCheckBeforeInstanceofASTVisitor> {
 
-	public static final String REMOVE_NULL_CHECKS_BEFORE_INSTANCE_OF_RULE_ID = "RemoveNullCheckBeforeInstanceof"; //$NON-NLS-1$
+	public static final String RULE_ID = "RemoveNullCheckBeforeInstanceof"; //$NON-NLS-1$
 
 	public RemoveNullCheckBeforeInstanceofRule() {
 		this.visitorClass = RemoveNullCheckBeforeInstanceofASTVisitor.class;
-		this.id = REMOVE_NULL_CHECKS_BEFORE_INSTANCE_OF_RULE_ID;
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.RemoveNullCheckBeforeInstanceofRule_name,
 				Messages.RemoveNullCheckBeforeInstanceofRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS, Tag.FREE));

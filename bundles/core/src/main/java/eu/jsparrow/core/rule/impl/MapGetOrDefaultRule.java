@@ -18,11 +18,13 @@ import eu.jsparrow.rules.common.Tag;
  *
  */
 public class MapGetOrDefaultRule extends RefactoringRuleImpl<MapGetOrDefaultASTVisitor> {
-	
+
+	public static final String RULE_ID = "MapGetOrDefault"; //$NON-NLS-1$
+
 	public MapGetOrDefaultRule() {
 		this.visitorClass = MapGetOrDefaultASTVisitor.class;
-		this.id = "MapGetOrDefault"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription(Messages.MapGetOrDefaultRule_name, 
+		this.id = RULE_ID;
+		this.ruleDescription = new RuleDescription(Messages.MapGetOrDefaultRule_name,
 				Messages.MapGetOrDefaultRule_description,
 				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_8, Tag.OLD_LANGUAGE_CONSTRUCTS));
 	}

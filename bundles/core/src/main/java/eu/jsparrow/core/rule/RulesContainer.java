@@ -20,6 +20,7 @@ import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
 import eu.jsparrow.core.rule.impl.AvoidConcatenationInLoggingStatementsRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
 import eu.jsparrow.core.rule.impl.BufferedReaderLinesRule;
+import eu.jsparrow.core.rule.impl.ChainAssertJAssertThatStatementsRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.core.rule.impl.CollapseIfStatementsRule;
 import eu.jsparrow.core.rule.impl.CollectionRemoveAllRule;
@@ -88,6 +89,7 @@ import eu.jsparrow.core.rule.impl.ReplaceStreamCollectByToListRule;
 import eu.jsparrow.core.rule.impl.ReplaceStringFormatByFormattedRule;
 import eu.jsparrow.core.rule.impl.ReuseRandomObjectsRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
+import eu.jsparrow.core.rule.impl.ShiftAssertJDescriptionBeforeAssertionRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
 import eu.jsparrow.core.rule.impl.StringBufferToBuilderRule;
 import eu.jsparrow.core.rule.impl.StringBuildingLoopRule;
@@ -211,6 +213,8 @@ public class RulesContainer {
 				new ReplaceJUnitAssertThatWithHamcrestRule(),
 				new ReplaceJUnit4AssumptionsWithJupiterRule(),
 				new ReplaceJUnit4AssumptionsWithHamcrestJUnitRule(),
+				new ChainAssertJAssertThatStatementsRule(),
+				new ShiftAssertJDescriptionBeforeAssertionRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

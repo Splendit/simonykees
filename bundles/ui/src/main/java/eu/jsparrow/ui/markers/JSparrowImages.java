@@ -20,7 +20,7 @@ import eu.jsparrow.ui.Activator;
  */
 public final class JSparrowImages {
 
-	public static final Image JSPARROW_ACTIVE_16 = createImage("icons/jSparrow_bulb_bottomRight_icon_16.png"); //$NON-NLS-1$
+	public static final Image JSPARROW_ACTIVE_16 = createImage("icons/jsparrow-marker-bulb-003.png"); //$NON-NLS-1$
 
 	private JSparrowImages() {
 		/*
