@@ -10,7 +10,7 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
  * to a Subscription Product Module of a NetLicensing' {@link ValidationResult}.
  * 
  * @see <a href=
- *      "https://www.labs64.de/confluence/pages/viewpage.action?pageId=11010234">Subscription
+ *      "https://netlicensing.io/wiki/subscription">Subscription
  *      License Model</a>
  *
  */

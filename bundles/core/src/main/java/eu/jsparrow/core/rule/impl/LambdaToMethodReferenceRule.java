@@ -20,12 +20,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class LambdaToMethodReferenceRule extends RefactoringRuleImpl<LambdaToMethodReferenceASTVisitor> {
 
-	public static final String LAMBDA_TO_METHOD_REFERENCE_RULE_ID = "LambdaToMethodReference"; //$NON-NLS-1$
+	public static final String RULE_ID = "LambdaToMethodReference"; //$NON-NLS-1$
 
 	public LambdaToMethodReferenceRule() {
 		super();
 		this.visitorClass = LambdaToMethodReferenceASTVisitor.class;
-		this.id = LAMBDA_TO_METHOD_REFERENCE_RULE_ID;
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.LambdaToMethodReferenceRule_name,
 				Messages.LambdaToMethodReferenceRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.FREE));

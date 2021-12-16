@@ -18,6 +18,7 @@ public class SimonykeesPreferenceConstants {
 	public static final String RULE_RULE_DELIMITER = "~";
 	public static final String PROFILE_ID_CURRENT = PROFILE_PREFIX + "currentId";
 	public static final String PROFILE_LIST = PROFILE_PREFIX + "list";
+	public static final String ACTIVE_MARKERS = "activeMarkers";
 
 	private SimonykeesPreferenceConstants() {
 		// private constructor to hide the implicit default constructor

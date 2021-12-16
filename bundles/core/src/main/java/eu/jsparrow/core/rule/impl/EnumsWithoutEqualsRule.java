@@ -19,12 +19,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class EnumsWithoutEqualsRule extends RefactoringRuleImpl<EnumsWithoutEqualsASTVisitor> {
 
-	public static final String ENUMS_WITHOUT_EQUALS_RULE_ID = "EnumsWithoutEquals"; //$NON-NLS-1$
+	public static final String RULE_ID = "EnumsWithoutEquals"; //$NON-NLS-1$
 
 	public EnumsWithoutEqualsRule() {
 		super();
 		this.visitorClass = EnumsWithoutEqualsASTVisitor.class;
-		this.id = ENUMS_WITHOUT_EQUALS_RULE_ID;
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.EnumsWithoutEqualsRule_name,
 				Messages.EnumsWithoutEqualsRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS, Tag.FREE));

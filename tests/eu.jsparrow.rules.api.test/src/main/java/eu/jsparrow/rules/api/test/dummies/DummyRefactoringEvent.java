@@ -52,4 +52,9 @@ public class DummyRefactoringEvent implements RefactoringMarkerEvent {
 		return 0;
 	}
 
+	@Override
+	public int getWeightValue() {
+		return 0;
+	}
+
 }

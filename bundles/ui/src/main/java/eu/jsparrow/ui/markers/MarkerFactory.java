@@ -1,6 +1,7 @@
 package eu.jsparrow.ui.markers;
 
 import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.CODE_PREVIEW_KEY;
+import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.WEIGHT_VALUE_KEY;
 import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.HIGHLIGHT_LENGTH_KEY;
 import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.NAME_KEY;
 import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.RESOLVER_KEY;
@@ -51,6 +52,7 @@ public class MarkerFactory {
 		int length = event.getLength();
 		int highlightLength = event.getHighlightLength();
 		String codePreview = event.getCodePreview();
+		int weight = event.getWeightValue();
 		String[] markerAttributeKeys = {
 				RESOLVER_KEY, NAME_KEY,
 				IMarker.MESSAGE,
@@ -59,6 +61,7 @@ public class MarkerFactory {
 				HIGHLIGHT_LENGTH_KEY,
 				JSPARROW_MARKER_COLOR_KEY,
 				CODE_PREVIEW_KEY,
+				WEIGHT_VALUE_KEY,
 				IMarker.SOURCE_ID };
 		Object[] attributeValues = {
 				resolver,
@@ -69,6 +72,7 @@ public class MarkerFactory {
 				Integer.valueOf(highlightLength),
 				markerColor,
 				codePreview,
+				weight,
 				Activator.PLUGIN_ID };
 		try {
 			createWithProperties(resource, markerAttributeKeys, attributeValues);

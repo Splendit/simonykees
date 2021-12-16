@@ -20,9 +20,10 @@ import eu.jsparrow.rules.common.Tag;
 public class UseComparatorMethodsRule
 		extends RefactoringRuleImpl<UseComparatorMethodsASTVisitor> {
 
+	public static final String RULE_ID = "UseComparatorMethods"; //$NON-NLS-1$
 	public UseComparatorMethodsRule() {
 		this.visitorClass = UseComparatorMethodsASTVisitor.class;
-		this.id = "UseComparatorMethods"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.UseComparatorMethodsRule_name,
 				Messages.UseComparatorMethodsRule_description,
 				Duration.ofMinutes(5),

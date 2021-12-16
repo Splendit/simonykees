@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.InsertBreakStatementInLoopsEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -33,7 +34,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 3.9.0
  *
  */
-public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteASTVisitor {
+public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteASTVisitor implements InsertBreakStatementInLoopsEvent {
 
 	@SuppressWarnings("nls")
 	private List<String> safeCollectionMethods = Collections
@@ -70,6 +71,7 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 			BreakStatement breakStatement = ast.newBreakStatement();
 			ListRewrite listRewrite = astRewrite.getListRewrite(ifBodyBlock, Block.STATEMENTS_PROPERTY);
 			listRewrite.insertLast(breakStatement, null);
+			addMarkerEvent(forStatement, ifStatement, ifBodyBlock);
 			onRewrite();
 		} else if (thenStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
 			ExpressionStatement expressionStatement = (ExpressionStatement) thenStatement;
@@ -87,6 +89,7 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 			statements.add(expressionStatementCopy);
 			statements.add(breakStatement);
 			astRewrite.replace(thenStatement, newBlock, null);
+			addMarkerEvent(forStatement, ifStatement, expressionStatement);
 			onRewrite();
 		}
 

@@ -20,10 +20,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class FunctionalInterfaceRule extends RefactoringRuleImpl<FunctionalInterfaceASTVisitor> {
 
+	public static final String RULE_ID = "FunctionalInterface"; //$NON-NLS-1$
 	public FunctionalInterfaceRule() {
 		super();
 		this.visitorClass = FunctionalInterfaceASTVisitor.class;
-		this.id = "FunctionalInterface"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.FunctionalInterfaceRule_name,
 				Messages.FunctionalInterfaceRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_8, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.LAMBDA));
