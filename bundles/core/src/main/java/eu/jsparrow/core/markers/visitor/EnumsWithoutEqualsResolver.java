@@ -11,8 +11,12 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
+import eu.jsparrow.core.rule.RuleDescriptionFactory;
+import eu.jsparrow.core.rule.impl.EnumsWithoutEqualsRule;
 import eu.jsparrow.core.visitor.impl.EnumsWithoutEqualsASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 
 /**
@@ -22,15 +26,22 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
  * @since 4.0.0
  *
  */
-public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor {
+public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor implements Resolver {
 
-	public static final String ID = EnumsWithoutEqualsResolver.class.getName();
+	public static final String ID = "EnumsWithoutEqualsResolver"; //$NON-NLS-1$
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
+	private RuleDescription description;
 
 	public EnumsWithoutEqualsResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
+		this.description = RuleDescriptionFactory.findByRuleId(EnumsWithoutEqualsRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override
@@ -54,11 +65,13 @@ public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor {
 		Expression representingNode = createRepresentingNode(expression, argument, newOperator);
 		int highlightLength = representingNode.toString()
 			.length();
+		int credit = description.getCredit();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.EnumsWithoutEqualsResolver_name,
 				Messages.EnumsWithoutEqualsResolver_message,
 				javaElement,
 				highlightLength, replacedNode,
-				representingNode);
+				representingNode,
+				credit);
 		addMarkerEvent(event);
 
 	}

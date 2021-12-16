@@ -32,7 +32,7 @@ public class ReplaceJUnitAssertThatWithHamcrestRule
 		this.ruleDescription = new RuleDescription(
 				Messages.ReplaceJUnitAssertThatWithHamcrestRule_name,
 				Messages.ReplaceJUnitAssertThatWithHamcrestRule_description,
-				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_5, Tag.TESTING));
+				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT));
 	}
 
 	@Override

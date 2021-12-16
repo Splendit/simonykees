@@ -40,10 +40,13 @@ public class NetlicensingValidationParametersFactory {
 		ValidationParameters parameters;
 		String secret = model.getSecret();
 		if (LicenseType.FLOATING == type) {
-			logger.debug("License type is floating"); //$NON-NLS-1$
+			logger.debug("Creating validation parameters for floating license"); //$NON-NLS-1$
 			parameters = createFloatingParameters(model, ACTION_CHECK_OUT_VALUE);
+		} else if (LicenseType.PAY_PER_USE == type) {
+			logger.debug("Creating validation parameters for pay-per-use license"); //$NON-NLS-1$
+			parameters = createPayPerUseReserveParameters(model, 0);
 		} else {
-			logger.debug("License type is node-locked"); //$NON-NLS-1$
+			logger.debug("Creating validation parameters for node-locked license"); //$NON-NLS-1$
 			parameters = createNodeLockedParameters(secret);
 		}
 		parameters.setProductNumber(model.getProductNr());
@@ -106,4 +109,13 @@ public class NetlicensingValidationParametersFactory {
 		return parameters;
 	}
 
+	public ValidationParameters createPayPerUseReserveParameters(NetlicensingLicenseModel model, int quantity) {
+		ValidationParameters parameters = new ValidationParameters();
+		HashMap<String, String> params = new HashMap<>();
+		params.put("reserveQuantity", Integer.toString(quantity)); //$NON-NLS-1$
+		parameters.setProductModuleValidationParameters(model.getModuleNr(), params);
+		parameters.setProductNumber(model.getProductNr());
+		parameters.setLicenseeName(model.getName());
+		return parameters;
+	}
 }

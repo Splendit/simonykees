@@ -55,7 +55,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfigureRenameFieldsRuleWizard.class);
 
-	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
+	private static final String WINDOW_ICON = "icons/jsparrow-icon-16-003.png"; //$NON-NLS-1$
 	private static final int SUMMARY_BUTTON_ID = 9;
 
 	private ConfigureRenameFieldsRuleWizardPageModel model;

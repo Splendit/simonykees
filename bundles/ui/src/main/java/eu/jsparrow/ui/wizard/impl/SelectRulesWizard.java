@@ -24,6 +24,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -60,7 +61,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
 
-	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
+	private static final String WINDOW_ICON = "icons/jsparrow-icon-16-003.png"; //$NON-NLS-1$
 
 	private SelectRulesWizardPageModel model;
 
@@ -69,6 +70,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 	private RefactoringPipeline refactoringPipeline;
 	private StandaloneStatisticsMetadata statisticsMetadata;
+	private Image windowIcon;
 
 	public SelectRulesWizard(Collection<IJavaProject> javaProjects, RefactoringPipeline refactoringPipeline,
 			List<RefactoringRule> rules) {
@@ -77,7 +79,8 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		this.refactoringPipeline = refactoringPipeline;
 		this.rules = rules;
 		setNeedsProgressMonitor(true);
-		Window.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
+		windowIcon = ResourceHelper.createImage(WINDOW_ICON);
+		Window.setDefaultImage(windowIcon);
 	}
 
 	@Override
@@ -392,5 +395,11 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		for (ICompilationUnit compilationUnit : compilationUnits) {
 			addCompilationUnit(result, compilationUnit);
 		}
+	}
+
+	@Override
+	public void dispose() {
+		windowIcon.dispose();
+		super.dispose();
 	}
 }

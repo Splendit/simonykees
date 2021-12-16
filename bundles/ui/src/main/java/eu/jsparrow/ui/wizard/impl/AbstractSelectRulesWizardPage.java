@@ -39,7 +39,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 
 import eu.jsparrow.core.statistic.RuleDocumentationURLGeneratorUtil;
 import eu.jsparrow.i18n.Messages;
@@ -47,7 +49,6 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.ResourceHelper;
 
 /**
  * Lists all rules as checkboxes and a description for the currently selected
@@ -94,7 +95,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 
-	public AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
+	protected AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
 			AbstractSelectRulesWizardControler controler) {
 		super(Messages.SelectRulesWizardPage_page_name);
 		setTitle(Messages.SelectRulesWizardPage_title);
@@ -498,12 +499,20 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		FontData data = descriptionStyledText.getFont()
 			.getFontData()[0];
-		Consumer<StyleRange> h1 = style -> style.font = new Font(getShell().getDisplay(), data.getName(),
-				data.getHeight() * 3 / 2, data.getStyle());
-		Consumer<StyleRange> h2 = style -> style.font = new Font(getShell().getDisplay(), data.getName(),
-				data.getHeight(), data.getStyle());
-		Consumer<StyleRange> bold = style -> style.font = new Font(getShell().getDisplay(), data.getName(),
-				data.getHeight(), SWT.BOLD);
+		Shell shell = getShell();
+		Display display = shell.getDisplay();
+		Consumer<StyleRange> h1 = style -> {
+			style.font = new Font(display, data.getName(), data.getHeight() * 3 / 2, data.getStyle());
+			shell.addDisposeListener(e -> style.font.dispose());
+		};
+		Consumer<StyleRange> h2 = style -> {
+			style.font = new Font(display, data.getName(), data.getHeight(), data.getStyle());
+			shell.addDisposeListener(e -> style.font.dispose());
+		};
+		Consumer<StyleRange> bold = style -> {
+			style.font = new Font(display, data.getName(), data.getHeight(), SWT.BOLD);
+			shell.addDisposeListener(e -> style.font.dispose());
+		};
 
 		Consumer<StyleRange> blue = style -> style.foreground = getShell().getDisplay()
 			.getSystemColor(SWT.COLOR_BLUE);

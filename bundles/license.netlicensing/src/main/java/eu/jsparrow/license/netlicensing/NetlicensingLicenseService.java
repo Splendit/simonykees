@@ -55,4 +55,10 @@ public class NetlicensingLicenseService implements LicenseService {
 		return true;
 	}
 
+	@Override
+	public void reserveQuantity(LicenseModel model, int quantity, String endpoint) throws ValidationException {
+		logger.debug("Reserving quantity {} on {}", quantity, model);
+		LicenseValidation validation = validationFactory.create(model, endpoint);
+		validation.reserveQuantity(quantity);
+	}
 }
