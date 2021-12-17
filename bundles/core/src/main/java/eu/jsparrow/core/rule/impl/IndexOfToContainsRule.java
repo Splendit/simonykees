@@ -19,10 +19,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class IndexOfToContainsRule extends RefactoringRuleImpl<IndexOfToContainsASTVisitor> {
 
+	public static final String RULE_ID = "IndexOfToContains"; //$NON-NLS-1$
 	public IndexOfToContainsRule() {
 		super();
 		this.visitorClass = IndexOfToContainsASTVisitor.class;
-		this.id = "IndexOfToContains"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.IndexOfToContainsRule_name,
 				Messages.IndexOfToContainsRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_5, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));

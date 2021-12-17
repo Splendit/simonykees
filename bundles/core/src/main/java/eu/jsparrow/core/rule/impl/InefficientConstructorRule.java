@@ -19,12 +19,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class InefficientConstructorRule extends RefactoringRuleImpl<InefficientConstructorASTVisitor> {
 
-	public static final String INEFFICIENT_CONSTRUCTOR_RULE_ID = "InefficientConstructor"; //$NON-NLS-1$
+	public static final String RULE_ID = "InefficientConstructor"; //$NON-NLS-1$
 
 	public InefficientConstructorRule() {
 		super();
 		this.visitorClass = InefficientConstructorASTVisitor.class;
-		this.id = INEFFICIENT_CONSTRUCTOR_RULE_ID;
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.InefficientConstructorRule_name,
 				Messages.InefficientConstructorRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE, Tag.CODING_CONVENTIONS, Tag.FREE ));

@@ -35,6 +35,7 @@ import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Bundle;
 
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -50,9 +51,9 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private static final int LICENSE_LABEL_MAX_WIDTH = 370;
 
-	private static final String LOGO_PATH_ACTIVE = "icons/jSparrow_FIN_2_scaled.png"; //$NON-NLS-1$
+	private static final String LOGO_PATH_ACTIVE = "icons/jsparrow-logo-003.png"; //$NON-NLS-1$
 
-	private static final String LOGO_PATH_INACTIVE = "icons/jSparrow_FIN_3_scaled.png"; //$NON-NLS-1$
+	private static final String LOGO_PATH_INACTIVE = "icons/jsparrow-logo-inactive-003.png"; //$NON-NLS-1$
 
 	private static final String DATE_FORMAT_PATTERN = "MMMM dd, yyyy"; //$NON-NLS-1$
 
@@ -153,6 +154,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		composite.addDisposeListener((DisposeEvent e) -> {
 			jSparrowImageActive.dispose();
 			jSparrowImageInactive.dispose();
+			expirationLabel.getFont().dispose();
 		});
 
 		composite.pack();
@@ -190,10 +192,19 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 					: Messages.SimonykeesPreferencePageLicense_jsparrow_free;
 		}
 
+		LicenseType licenseType = result.getLicenseType();
+		if (licenseType == LicenseType.PAY_PER_USE) {
+			Integer availableCredit = result.getCredit()
+				.orElse(0);
+			return String.format(Messages.SimonykeesPreferencePageLicense_jsparrow_pay_per_use_available_credit,
+					result.getKey(), availableCredit);
+		}
+
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
 		ZonedDateTime expireDate = result.getExpirationDate();
 		String formattedExpireDate = expireDate.format(formatter);
-		return String.format(Messages.SimonykeesPreferencePageLicense_jsparrow_pro_valid_until, result.getKey(), formattedExpireDate);
+		return String.format(Messages.SimonykeesPreferencePageLicense_jsparrow_pro_valid_until, result.getKey(),
+				formattedExpireDate);
 	}
 
 	@Override

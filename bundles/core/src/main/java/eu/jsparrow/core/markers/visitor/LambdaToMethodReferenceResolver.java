@@ -15,8 +15,12 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.markers.common.Resolver;
+import eu.jsparrow.core.rule.RuleDescriptionFactory;
+import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
 import eu.jsparrow.core.visitor.impl.LambdaToMethodReferenceASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RuleDescription;
 
 /**
  * A visitor for resolving one issue of type
@@ -25,15 +29,23 @@ import eu.jsparrow.i18n.Messages;
  * @since 4.0.0
  *
  */
-public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTVisitor {
+public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTVisitor implements Resolver {
 
-	public static final String ID = LambdaToMethodReferenceResolver.class.getName();
+	public static final String ID = "LambdaToMethodReferenceResolver"; //$NON-NLS-1$
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
+	private RuleDescription description;
 
 	public LambdaToMethodReferenceResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
+		this.description = RuleDescriptionFactory
+				.findByRuleId(LambdaToMethodReferenceRule.RULE_ID);
+	}
+
+	@Override
+	public RuleDescription getDescription() {
+		return this.description;
 	}
 
 	@Override
@@ -55,9 +67,10 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 		ExpressionMethodReference newNode = createNodeRepresentation(refExpression, name);
 		int highlightLenght = newNode.toString()
 			.length();
+		int credit = description.getCredit();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.LambdaToMethodReferenceResolver_name,
 				Messages.LambdaToMethodReferenceResolver_message,
-				javaElement, highlightLenght, lambdaExpressionNode, newNode);
+				javaElement, highlightLenght, lambdaExpressionNode, newNode, credit);
 		addMarkerEvent(event);
 	}
 
@@ -66,9 +79,10 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 		CreationReference newNode = createNodeRepresentation(classInstanceCreationType);
 		int highlightLenght = newNode.toString()
 			.length();
+		int credit = description.getCredit();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.LambdaToMethodReferenceResolver_name,
 				Messages.LambdaToMethodReferenceResolver_message, javaElement, highlightLenght,
-				lambdaExpressionNode, newNode);
+				lambdaExpressionNode, newNode, credit);
 		addMarkerEvent(event);
 	}
 
@@ -77,9 +91,10 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 		TypeMethodReference newNode = createRepresentingNode(representingType, methodName);
 		int highlightLenght = newNode.toString()
 			.length();
+		int credit = description.getCredit();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.LambdaToMethodReferenceResolver_name,
 				Messages.LambdaToMethodReferenceResolver_message, javaElement,
-				highlightLenght, lambdaExpressionNode, newNode);
+				highlightLenght, lambdaExpressionNode, newNode, credit);
 		addMarkerEvent(event);
 
 	}

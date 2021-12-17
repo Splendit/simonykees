@@ -19,10 +19,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class RemoveNewStringConstructorRule extends RefactoringRuleImpl<RemoveNewStringConstructorASTVisitor> {
 
+	public static final String RULE_ID = "RemoveNewStringConstructor"; //$NON-NLS-1$
 	public RemoveNewStringConstructorRule() {
 		super();
 		this.visitorClass = RemoveNewStringConstructorASTVisitor.class;
-		this.id = "RemoveNewStringConstructor"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.RemoveNewStringConstructorRule_name,
 				Messages.RemoveNewStringConstructorRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE));

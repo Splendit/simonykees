@@ -10,7 +10,7 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
  * to a Floating Product Module of a NetLicensing' {@link ValidationResult}.
  * 
  * @see <a href=
- *      "https://www.labs64.de/confluence/display/NLICPUB/Floating">Floating
+ *      "https://netlicensing.io/wiki/floating">Floating
  *      License Model</a>
  *
  */

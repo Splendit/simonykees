@@ -24,12 +24,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class OverrideAnnotationRule extends RefactoringRuleImpl<OverrideAnnotationRuleASTVisitor> {
 
-	public static final String OVERRIDE_ANNOTATION_RULE_ID = "OverrideAnnotation"; //$NON-NLS-1$
+	public static final String RULE_ID = "OverrideAnnotation"; //$NON-NLS-1$
 
 	public OverrideAnnotationRule() {
 		super();
 		this.visitorClass = OverrideAnnotationRuleASTVisitor.class;
-		this.id = OVERRIDE_ANNOTATION_RULE_ID;
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.OverrideAnnotationRule_name,
 				Messages.OverrideAnnotationRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_6, Tag.READABILITY, Tag.CODING_CONVENTIONS, Tag.FREE));

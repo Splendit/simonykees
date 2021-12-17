@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>tests</artifactId>
-		<version>4.6.0-SNAPSHOT</version>
+		<version>4.7.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>eu.jsparrow.sample</artifactId>
@@ -76,6 +76,12 @@
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-junit</artifactId>
 			<version>1.0.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.21.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -373,6 +379,16 @@
 						</goals>
 						<configuration>
 							<artifact>org.hamcrest:hamcrest-core:1.3</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>assertj-3.21.0</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.assertj:assertj-core:3.21.0</artifact>
 						</configuration>
 					</execution>
 				</executions>

@@ -4,6 +4,7 @@ import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -40,7 +41,7 @@ class CoreRefactoringEventManagerTest extends UsesJDTUnitFixture {
 				+ "}";
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, method);
 		ICompilationUnit icu = defaultFixture.getICompilationUnit();
-		eventManager.discoverRefactoringEvents(icu);
+		eventManager.discoverRefactoringEvents(icu,  Arrays.asList("LambdaToMethodReferenceResolver", "UseComparatorMethodsResolver"));
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertEquals(2, events.size());
 		RefactoringMarkerEvent event = events.get(0);
@@ -48,14 +49,15 @@ class CoreRefactoringEventManagerTest extends UsesJDTUnitFixture {
 				()-> assertEquals("Use predefined comparator", event.getName()),
 				()-> assertEquals(136, event.getOffset()),
 				()-> assertEquals(32, event.getLength()),
-				()-> assertEquals("eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver", event.getResolver()),
+				()-> assertEquals("UseComparatorMethodsResolver", event.getResolver()),
 				()-> assertEquals("Comparator.naturalOrder()", event.getCodePreview()),
-				()-> assertEquals("Lambda expression can be replaced with predefined comparator", event.getMessage()));
+				()-> assertEquals("Lambda expression can be replaced with predefined comparator", event.getMessage()),
+				()-> assertEquals(5, event.getWeightValue()));
 		
 		RefactoringMarkerEvent event2 = events.get(1);
 		assertAll(
 				()-> assertEquals("Replace lambda expression with method reference", event2.getName()),
-				()-> assertEquals("eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver", event2.getResolver()),
+				()-> assertEquals("LambdaToMethodReferenceResolver", event2.getResolver()),
 				()-> assertEquals("Simplify the lambda expression by using a method reference.", event2.getMessage()));
 	}
 
@@ -78,7 +80,7 @@ class CoreRefactoringEventManagerTest extends UsesJDTUnitFixture {
 		/*
 		 * Just count the offset. Or run discoverEvents to figure it out. 
 		 */
-		eventManager.resolve(icu, "eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver", 136);
+		eventManager.resolve(icu, "UseComparatorMethodsResolver", 136);
 		
 		String newSource = icu.getSource();
 		assertMatch(
@@ -107,7 +109,7 @@ class CoreRefactoringEventManagerTest extends UsesJDTUnitFixture {
 		/*
 		 * Just count the offset. Or run discoverEvents to figure it out. 
 		 */
-		eventManager.resolve(icu, "eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver", 136);
+		eventManager.resolve(icu, "UseComparatorMethodsResolver", 136);
 		
 		String newSource = icu.getSource();
 

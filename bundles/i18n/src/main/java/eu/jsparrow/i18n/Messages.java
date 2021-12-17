@@ -78,6 +78,7 @@ public class Messages extends NLS {
 	public static String BuyLicenseDialog_reason6;
 	public static String BuyLicenseDialog_reason7;
 	public static String BuyLicenseDialog_reasonsLabel;
+	public static String BuyLicenseDialog_skipButtonLabel;
 	public static String BuyLicenseDialog_TitleMessage_LicenseHasExpired;
 	public static String StartDialog_alwaysShowIntroText;
 	public static String StartDialog_appreciationLabel;
@@ -98,6 +99,8 @@ public class Messages extends NLS {
 	public static String StartDialog_wantMoreLabel;
 	public static String StartDialog_welcomeLabel;
 	public static String BrowserDialog_introTitle;
+	public static String ChainAssertJAssertThatStatementsRule_description;
+	public static String ChainAssertJAssertThatStatementsRule_name;
 	public static String CodeFormatterRule_description;
 	public static String CodeFormatterRule_name;
 	public static String CollapseIfStatementsRule_description;
@@ -172,6 +175,9 @@ public class Messages extends NLS {
 	public static String MavenProjectImporter_startImport;
 	public static String MessageDialog_licensingError_failedToLoad;
 	public static String MessageDialog_licensingError_failedToValidate;
+	public static String MinimalStatisticsSection_runDuration;
+	public static String MinimalStatisticsSection_totalIssuesFixed;
+	public static String MinimalStatisticsSection_totalTimeSaved;
 	public static String ReplaceJUnit3TestCasesRule_description;
 	public static String ReplaceJUnit3TestCasesRule_name;
 	public static String ReplaceJUnit4AnnotationsWithJupiterRule_description;
@@ -295,6 +301,7 @@ public class Messages extends NLS {
 	public static String MultiVariableDeclarationLineRule_description;
 	public static String Java5Profile_profileName;
 	public static String Java7Profile_profileName;
+	public static String JSparrowMarkerResolution_reserving_payPerUseCredit;
 	public static String Netlicensing_persistenceError_failedtoLoad;
 	public static String Netlicensing_persistenceError_failedToSave;
 	public static String Netlicensing_validationResult_freeLicenseExpired0;
@@ -310,6 +317,7 @@ public class Messages extends NLS {
 	public static String OrganiseImportsRule_name;
 	public static String OverrideAnnotationRule_description;
 	public static String OverrideAnnotationRule_name;
+	public static String PayPerUseRuleStatisticsSection_usedCredit;
 	public static String PrimitiveBoxedForStringResolver_message;
 	public static String PrimitiveBoxedForStringResolver_name;
 	public static String PrimitiveBoxedForStringRule_description;
@@ -490,6 +498,9 @@ public class Messages extends NLS {
 	public static String SelectRulesWizard_warning_no_refactorings;
 	public static String SerialVersionUidRule_description;
 	public static String SerialVersionUidRule_name;
+	public static String ShiftAssertJDescriptionBeforeAssertionRule_description;
+	public static String ShiftAssertJDescriptionBeforeAssertionRule_name;
+	public static String SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText;
 	public static String SimonykeesMessageDialog_bugreport_email;
 	public static String SimonykeesMessageDialog_default_error_message;
 	public static String SimonykeesMessageDialog_open_browser_error_message;
@@ -526,6 +537,7 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_useProfileOptionRadioGroupTitle;
 	public static String SimonykeesPreferencePage_useProfileOptionSelectedProfile;
 	public static String SimonykeesPreferencePageLicense_jsparrow_free;
+	public static String SimonykeesPreferencePageLicense_jsparrow_pay_per_use_available_credit;
 	public static String SimonykeesPreferencePageLicense_jsparrow_pro_valid_until;
 	public static String SimonykeesPreferencePageLicense_jsparrow_starter;
 	public static String SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow;
@@ -556,6 +568,8 @@ public class Messages extends NLS {
 	public static String StandardLoggerRule_name;
 	public static String StatementLambdaToExpressionRule_description;
 	public static String StatementLambdaToExpressionRule_name;
+	public static String StatusDetail_PAY_PER_USE_outOfCredit;
+	public static String StatusDetail_PAY_PER_USE_REGISTERED;
 	public static String StringBufferToBuilderRule_description;
 	public static String StringBufferToBuilderRule_name;
 	public static String StringBuildingLoopRule_description;
@@ -585,6 +599,11 @@ public class Messages extends NLS {
 	public static String SummaryWizardPage_TimesApplied;
 	public static String SummaryWizardPage_TimeSaved;
 	public static String SummaryWizardPageModel_IssuesFixed;
+	public static String TotalPayPerUseStatisticsSection_availableCredit;
+	public static String TotalPayPerUseStatisticsSection_requiredCredit;
+	public static String TotalPayPerUseStatisticsSection_runDuration;
+	public static String TotalPayPerUseStatisticsSection_totalIssuesFixed;
+	public static String TotalPayPerUseStatisticsSection_totalTimeSaved;
 	public static String TryWithResourceRule_description;
 	public static String TryWithResourceRule_name;
 	public static String UpdateLicenseDialog_error_couldNotSave;
@@ -639,11 +658,13 @@ public class Messages extends NLS {
 	public static String WelcomeEditor_title;
 	public static String WelcomePage_buy_license_button;
 	public static String WelcomePage_customization_group;
+	public static String WelcomePage_getFreeRulesNow;
 	public static String WelcomePage_getting_started_group;
 	public static String WelcomePage_guidelines_button;
 	public static String WelcomePage_license_preferences_button;
 	public static String WelcomePage_market_place_button;
 	public static String WelcomePage_preferences_button;
+	public static String WelcomePage_starterRegistration;
 	public static String WelcomePage_title;
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;

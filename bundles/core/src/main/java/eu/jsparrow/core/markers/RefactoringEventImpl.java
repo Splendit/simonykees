@@ -24,10 +24,11 @@ public class RefactoringEventImpl implements RefactoringMarkerEvent {
 	private IJavaElement iJavaElement;
 	private String codePreview;
 	private String resolver;
+	private int weightValue = 1;
 
 	public RefactoringEventImpl(String resolver, String name, String message, IJavaElement iJavaElement,
 			int highlightLenght,
-			ASTNode original, ASTNode replacement) {
+			ASTNode original, ASTNode replacement, int weightValue) {
 		this.resolver = resolver;
 		this.name = name;
 		this.offset = original.getStartPosition();
@@ -36,6 +37,7 @@ public class RefactoringEventImpl implements RefactoringMarkerEvent {
 		this.codePreview = replacement.toString();
 		this.message = message;
 		this.iJavaElement = iJavaElement;
+		this.weightValue = weightValue;
 	}
 
 	@Override
@@ -79,9 +81,15 @@ public class RefactoringEventImpl implements RefactoringMarkerEvent {
 	}
 
 	@Override
+	public int getWeightValue() {
+		return this.weightValue;
+	}
+
+	@Override
 	public int hashCode() {
 		String elementName = iJavaElement == null ? "" : iJavaElement.getElementName(); //$NON-NLS-1$
-		return Objects.hash(codePreview, elementName, length, message, name, offset, resolver);
+		return Objects.hash(codePreview, highlightLength, elementName, length, message, name, offset, resolver,
+				weightValue);
 	}
 
 	@Override
@@ -94,20 +102,19 @@ public class RefactoringEventImpl implements RefactoringMarkerEvent {
 		}
 		RefactoringEventImpl other = (RefactoringEventImpl) obj;
 		String elementName = iJavaElement == null ? "" : iJavaElement.getElementName(); //$NON-NLS-1$
-		String otherElString = other.iJavaElement == null ? "" : other.iJavaElement.getElementName(); //$NON-NLS-1$
-		return Objects.equals(codePreview, other.codePreview)
-				&& Objects.equals(elementName, otherElString)
-				&& length == other.length
-				&& Objects.equals(message, other.message) && Objects.equals(name, other.name)
-				&& highlightLength == other.highlightLength && offset == other.offset
-				&& Objects.equals(resolver, other.resolver);
+		String otherElementName = other.iJavaElement == null ? "" : other.iJavaElement.getElementName(); //$NON-NLS-1$
+		return Objects.equals(codePreview, other.codePreview) && highlightLength == other.highlightLength
+				&& Objects.equals(elementName, otherElementName) && length == other.length
+				&& Objects.equals(message, other.message) && Objects.equals(name, other.name) && offset == other.offset
+				&& Objects.equals(resolver, other.resolver) && weightValue == other.weightValue;
 	}
 
 	@Override
 	public String toString() {
+		String elementName = iJavaElement == null ? "" : iJavaElement.getElementName(); //$NON-NLS-1$
 		return String.format(
-				"RefactoringEventImpl [offset=%s, length=%s, highlightLength=%s, name=%s, message=%s, iJavaElement=%s, codePreview=%s, resolver=%s]", //$NON-NLS-1$
-				offset, length, highlightLength, name, message, iJavaElement.getElementName(), codePreview, resolver);
+				"RefactoringEventImpl [offset=%s, length=%s, highlightLength=%s, name=%s, message=%s, iJavaElement=%s, codePreview=%s, resolver=%s, weightValue=%s]", //$NON-NLS-1$
+				offset, length, highlightLength, name, message, elementName, codePreview, resolver, weightValue);
 	}
 
 }

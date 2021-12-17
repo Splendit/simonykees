@@ -2,14 +2,14 @@
 <feature
       id="eu.jsparrow.3rd.party.feature"
       label="jSparrow Third-party Dependencies"
-      version="4.6.0.qualifier"
+      version="4.7.0.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
 
    <description url="https://jsparrow.github.io/">
       %description
    </description>
 
-   <copyright url="https://jsparrow.eu/jsparrow-software-download-terms/">
+   <copyright url="https://jsparrow.io/wp-content/uploads/Software-download-terms.pdf">
       %copyright
    </copyright>
 

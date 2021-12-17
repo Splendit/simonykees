@@ -99,6 +99,7 @@ public class WelcomePage extends FormPage {
 		FontDescriptor titleFontDescription = FontDescriptor.createFrom(font)
 			.setHeight(fontData.getHeight() * 2);
 		Font titleFont = titleFontDescription.createFont(title.getDisplay());
+		title.addDisposeListener(e -> titleFont.dispose());
 
 		titleLabel.setFont(titleFont);
 		titleLabel.setText(Messages.WelcomePage_title);
@@ -142,7 +143,7 @@ public class WelcomePage extends FormPage {
 		licenseButton.setLayoutData(buttonGridData);
 		licenseButton.setText(Messages.WelcomePage_buy_license_button);
 		createButtonListenerToOpenWebpage(licenseButton,
-				"https://order.shareit.com/cart/new?vendorid=200267175&PRODUCT%5B300770603%5D=1"); //$NON-NLS-1$
+				"https://jsparrow.io/pricing/"); //$NON-NLS-1$
 
 		Button marketplaceButton = new Button(gettingStartedGroup, SWT.PUSH);
 		marketplaceButton.setLayoutData(buttonGridData);
@@ -176,7 +177,7 @@ public class WelcomePage extends FormPage {
 				&& !LicenseUtil.get()
 					.isActiveRegistration()) {
 			Group freemiumGroup = new Group(rightComposite, SWT.NONE);
-			freemiumGroup.setText("jSparrow Starter Registration");
+			freemiumGroup.setText(Messages.WelcomePage_starterRegistration);
 			groupGridData = new GridData(GridData.FILL_HORIZONTAL);
 			groupGridData.heightHint = 52;
 			groupGridData.horizontalIndent = 5;
@@ -185,7 +186,7 @@ public class WelcomePage extends FormPage {
 			freemiumGroup.setLayout(new GridLayout(1, false));
 			Button freemiumRegistrationButton = new Button(freemiumGroup, SWT.PUSH);
 			freemiumRegistrationButton.setLayoutData(buttonGridData);
-			freemiumRegistrationButton.setText("Get FREE Rules Now");
+			freemiumRegistrationButton.setText(Messages.WelcomePage_getFreeRulesNow);
 			freemiumRegistrationButton.addSelectionListener(new SelectionAdapter() {
 
 				@Override

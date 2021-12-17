@@ -7,11 +7,17 @@ import eu.jsparrow.license.netlicensing.validation.impl.NetlicensingValidationRe
 public class NetlicensingValidationResultFactory {
 
 	public static NetlicensingValidationResult create() {
-		return new NetlicensingValidationResult(null, null, false, null, null);
+		return new NetlicensingValidationResult.Builder()
+				.withValid(false)
+				.build();
 	}
 
 	public static NetlicensingValidationResult create(ZonedDateTime expiration) {
-		return new NetlicensingValidationResult(null, null, false, null, expiration);
+		
+		return new NetlicensingValidationResult.Builder()
+				.withValid(false)
+				.withOfflineExpirationTime(expiration)
+				.build();
 	}
 
 }
