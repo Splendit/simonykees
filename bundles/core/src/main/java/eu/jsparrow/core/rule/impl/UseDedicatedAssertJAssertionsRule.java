@@ -41,33 +41,17 @@ public class UseDedicatedAssertJAssertionsRule
 	}
 
 	@Override
-	public boolean ruleSpecificImplementation(IJavaProject project) {
-
-		try {
-			if (project.findType("org.assertj.core.api.Assertions") == null) { //$NON-NLS-1$
-				return false;
-			}
-		} catch (JavaModelException e) {
-			logger.error(e.getMessage(), new ITypeNotFoundRuntimeException());
-			return false;
-		}
-		return true;
-	}
-
-	@Override
 	protected String provideRequiredJavaVersion() {
 		return JavaCore.VERSION_1_8;
 	}
 
 	@Override
 	public String requiredLibraries() {
-		return "AssertJ fluent assertions 3.21.0 API"; //$NON-NLS-1$
+		return "AssertJ [3.20.2, 3.21.x]"; //$NON-NLS-1$
 	}
 
-	// @Override
-	// TODO: discuss
-	// Rule does not work in runtime eclipse if this method is used ...	
-	public boolean ruleSpecificImplementation_NOT_USED(IJavaProject project) {
+	@Override
+	public boolean ruleSpecificImplementation(IJavaProject project) {
 		Predicate<Version> assertJVersionComparator = version -> version.compareTo(Version.parseVersion("3.20.2")) >= 0
 				&& version.compareTo(Version.parseVersion("3.21.9")) <= 0;
 
