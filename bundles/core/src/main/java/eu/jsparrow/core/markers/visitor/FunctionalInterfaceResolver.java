@@ -20,6 +20,7 @@ import eu.jsparrow.core.rule.impl.FunctionalInterfaceRule;
 import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
 /**
  * A visitor for resolving one issue of type
@@ -64,13 +65,25 @@ public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor i
 	public void addMarkerEvent(ClassInstanceCreation classInstanceCreation, List<SingleVariableDeclaration> parameters,
 			Block block) {
 		LambdaExpression representingNode = createRepresentingNode(parameters, block);
-		int highlightLenght = representingNode.toString()
+		int highlightLength = representingNode.toString()
 			.length();
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.FunctionalInterfaceResolver_name,
-				Messages.FunctionalInterfaceResolver_message, javaElement,
-				highlightLenght, classInstanceCreation,
-				representingNode, credit);
+		int offset = classInstanceCreation.getStartPosition();
+		int length = classInstanceCreation.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(classInstanceCreation.getStartPosition());
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.FunctionalInterfaceResolver_name)
+			.withMessage(Messages.FunctionalInterfaceResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(representingNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 

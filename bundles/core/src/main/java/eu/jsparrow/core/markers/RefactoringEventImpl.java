@@ -3,7 +3,6 @@ package eu.jsparrow.core.markers;
 import java.util.Objects;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.dom.ASTNode;
 
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
@@ -25,20 +24,7 @@ public class RefactoringEventImpl implements RefactoringMarkerEvent {
 	private String codePreview;
 	private String resolver;
 	private int weightValue = 1;
-
-	public RefactoringEventImpl(String resolver, String name, String message, IJavaElement iJavaElement,
-			int highlightLenght,
-			ASTNode original, ASTNode replacement, int weightValue) {
-		this.resolver = resolver;
-		this.name = name;
-		this.offset = original.getStartPosition();
-		this.length = original.getLength();
-		this.highlightLength = highlightLenght;
-		this.codePreview = replacement.toString();
-		this.message = message;
-		this.iJavaElement = iJavaElement;
-		this.weightValue = weightValue;
-	}
+	private int lineNumber;
 
 	@Override
 	public int getOffset() {
@@ -86,10 +72,15 @@ public class RefactoringEventImpl implements RefactoringMarkerEvent {
 	}
 
 	@Override
+	public int getLineNumber() {
+		return this.lineNumber;
+	}
+
+	@Override
 	public int hashCode() {
 		String elementName = iJavaElement == null ? "" : iJavaElement.getElementName(); //$NON-NLS-1$
 		return Objects.hash(codePreview, highlightLength, elementName, length, message, name, offset, resolver,
-				weightValue);
+				lineNumber, weightValue);
 	}
 
 	@Override
@@ -105,6 +96,7 @@ public class RefactoringEventImpl implements RefactoringMarkerEvent {
 		String otherElementName = other.iJavaElement == null ? "" : other.iJavaElement.getElementName(); //$NON-NLS-1$
 		return Objects.equals(codePreview, other.codePreview) && highlightLength == other.highlightLength
 				&& Objects.equals(elementName, otherElementName) && length == other.length
+				&& lineNumber == other.lineNumber
 				&& Objects.equals(message, other.message) && Objects.equals(name, other.name) && offset == other.offset
 				&& Objects.equals(resolver, other.resolver) && weightValue == other.weightValue;
 	}
@@ -113,8 +105,86 @@ public class RefactoringEventImpl implements RefactoringMarkerEvent {
 	public String toString() {
 		String elementName = iJavaElement == null ? "" : iJavaElement.getElementName(); //$NON-NLS-1$
 		return String.format(
-				"RefactoringEventImpl [offset=%s, length=%s, highlightLength=%s, name=%s, message=%s, iJavaElement=%s, codePreview=%s, resolver=%s, weightValue=%s]", //$NON-NLS-1$
-				offset, length, highlightLength, name, message, elementName, codePreview, resolver, weightValue);
+				"RefactoringEventImpl [offset=%s, length=%s, highlightLength=%s, name=%s, message=%s, iJavaElement=%s, codePreview=%s, resolver=%s, lineNumber=%s, weightValue=%s]", //$NON-NLS-1$
+				offset, length, highlightLength, name, message, elementName, codePreview, resolver, lineNumber,
+				weightValue);
 	}
 
+	public static class Builder {
+		private int offset;
+		private int length;
+		private int highlightLength;
+		private String name;
+		private String message;
+		private IJavaElement iJavaElement;
+		private String codePreview;
+		private String resolver;
+		private int weightValue = 1;
+		private int lineNumber;
+
+		public Builder withOffset(int offset) {
+			this.offset = offset;
+			return this;
+		}
+
+		public Builder withLength(int length) {
+			this.length = length;
+			return this;
+		}
+
+		public Builder withHighlightLength(int highlightLength) {
+			this.highlightLength = highlightLength;
+			return this;
+		}
+
+		public Builder withName(String name) {
+			this.name = name;
+			return this;
+		}
+
+		public Builder withMessage(String message) {
+			this.message = message;
+			return this;
+		}
+
+		public Builder withIJavaElement(IJavaElement iJavaElement) {
+			this.iJavaElement = iJavaElement;
+			return this;
+		}
+
+		public Builder withCodePreview(String codePreview) {
+			this.codePreview = codePreview;
+			return this;
+		}
+
+		public Builder withResolver(String resolver) {
+			this.resolver = resolver;
+			return this;
+		}
+
+		public Builder withWeightValue(int weightValue) {
+			this.weightValue = weightValue;
+			return this;
+		}
+
+		public Builder withLineNumber(int lineNumber) {
+			this.lineNumber = lineNumber;
+			return this;
+		}
+
+		public RefactoringEventImpl build() {
+			RefactoringEventImpl result = new RefactoringEventImpl();
+			result.offset = offset;
+			result.length = length;
+			result.highlightLength = highlightLength;
+			result.name = name;
+			result.message = message;
+			result.iJavaElement = iJavaElement;
+			result.codePreview = codePreview;
+			result.resolver = resolver;
+			result.weightValue = weightValue;
+			result.lineNumber = lineNumber;
+			return result;
+		}
+	}
 }

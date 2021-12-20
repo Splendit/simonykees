@@ -18,6 +18,7 @@ import eu.jsparrow.core.visitor.impl.EnumsWithoutEqualsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
 /**
  * A visitor for resolving one issue of type
@@ -66,12 +67,22 @@ public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor imp
 		int highlightLength = representingNode.toString()
 			.length();
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.EnumsWithoutEqualsResolver_name,
-				Messages.EnumsWithoutEqualsResolver_message,
-				javaElement,
-				highlightLength, replacedNode,
-				representingNode,
-				credit);
+		int offset = replacedNode.getStartPosition();
+		int length = replacedNode.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(replacedNode.getStartPosition());
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.EnumsWithoutEqualsResolver_name)
+			.withMessage(Messages.EnumsWithoutEqualsResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(representingNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 
 	}

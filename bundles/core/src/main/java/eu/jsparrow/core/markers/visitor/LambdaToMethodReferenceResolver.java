@@ -21,6 +21,7 @@ import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
 import eu.jsparrow.core.visitor.impl.LambdaToMethodReferenceASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
 /**
  * A visitor for resolving one issue of type
@@ -40,7 +41,7 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 	public LambdaToMethodReferenceResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
-				.findByRuleId(LambdaToMethodReferenceRule.RULE_ID);
+			.findByRuleId(LambdaToMethodReferenceRule.RULE_ID);
 	}
 
 	@Override
@@ -65,36 +66,75 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 	@Override
 	public void addMarkerEvent(LambdaExpression lambdaExpressionNode, Expression refExpression, SimpleName name) {
 		ExpressionMethodReference newNode = createNodeRepresentation(refExpression, name);
-		int highlightLenght = newNode.toString()
+		int highlightLength = newNode.toString()
 			.length();
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.LambdaToMethodReferenceResolver_name,
-				Messages.LambdaToMethodReferenceResolver_message,
-				javaElement, highlightLenght, lambdaExpressionNode, newNode, credit);
+		int offset = lambdaExpressionNode.getStartPosition();
+		int length = lambdaExpressionNode.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(lambdaExpressionNode.getStartPosition());
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.LambdaToMethodReferenceResolver_name)
+			.withMessage(Messages.LambdaToMethodReferenceResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 
 	@Override
 	public void addMarkerEvent(LambdaExpression lambdaExpressionNode, Type classInstanceCreationType) {
 		CreationReference newNode = createNodeRepresentation(classInstanceCreationType);
-		int highlightLenght = newNode.toString()
+		int highlightLength = newNode.toString()
 			.length();
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.LambdaToMethodReferenceResolver_name,
-				Messages.LambdaToMethodReferenceResolver_message, javaElement, highlightLenght,
-				lambdaExpressionNode, newNode, credit);
+		int offset = lambdaExpressionNode.getStartPosition();
+		int length = lambdaExpressionNode.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(lambdaExpressionNode.getStartPosition());
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.LambdaToMethodReferenceResolver_name)
+			.withMessage(Messages.LambdaToMethodReferenceResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 
 	@Override
 	public void addMarkerEvent(LambdaExpression lambdaExpressionNode, Type representingType, SimpleName methodName) {
 		TypeMethodReference newNode = createRepresentingNode(representingType, methodName);
-		int highlightLenght = newNode.toString()
+		int highlightLength = newNode.toString()
 			.length();
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.LambdaToMethodReferenceResolver_name,
-				Messages.LambdaToMethodReferenceResolver_message, javaElement,
-				highlightLenght, lambdaExpressionNode, newNode, credit);
+		int offset = lambdaExpressionNode.getStartPosition();
+		int length = lambdaExpressionNode.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(lambdaExpressionNode.getStartPosition());
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.LambdaToMethodReferenceResolver_name)
+			.withMessage(Messages.LambdaToMethodReferenceResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 
 	}

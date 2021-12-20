@@ -70,12 +70,23 @@ public class DiamondOperatorResolver extends DiamondOperatorASTVisitor implement
 		List<Type> typeArguments = typeCopy.typeArguments();
 		typeArguments.clear();
 		int highlightLength = 0;
-		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
-				description.getName(),
-				description.getDescription(),
-				javaElement,
-				highlightLength,
-				parameterizedType.getParent(), typeCopy, credit);
+		ASTNode original = parameterizedType.getParent();
+		int offset = original.getStartPosition();
+		int length = original.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(parameterizedType.getStartPosition());
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(description.getName())
+			.withMessage(description.getDescription())
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(typeCopy.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 
 	}

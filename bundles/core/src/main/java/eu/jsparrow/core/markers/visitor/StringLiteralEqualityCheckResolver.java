@@ -18,6 +18,7 @@ import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.visitor.impl.StringLiteralEqualityCheckASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
 /**
  * A visitor for resolving one issue of type
@@ -36,7 +37,7 @@ public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityChe
 	public StringLiteralEqualityCheckResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
-				.findByRuleId(StringLiteralEqualityCheckRule.RULE_ID);
+			.findByRuleId(StringLiteralEqualityCheckRule.RULE_ID);
 	}
 
 	@Override
@@ -62,9 +63,22 @@ public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityChe
 	public void addMarkerEvent(StringLiteral stringLiteral, Expression expression) {
 		MethodInvocation newNode = createRepresentingNode(expression, stringLiteral);
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.StringLiteralEqualityCheckResolver_name,
-				Messages.StringLiteralEqualityCheckResolver_message,
-				javaElement, 0, stringLiteral, newNode, credit);
+		int offset = stringLiteral.getStartPosition();
+		int length = stringLiteral.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(stringLiteral.getStartPosition());
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.StringLiteralEqualityCheckResolver_name)
+			.withMessage(Messages.StringLiteralEqualityCheckResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(0)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 

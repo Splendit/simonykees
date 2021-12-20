@@ -60,12 +60,23 @@ public class UseCollectionsSingletonListResolver extends UseCollectionsSingleton
 	public void addMarkerEvent(SimpleName methodName, SimpleName newNode) {
 		int credit = description.getCredit();
 		int highlightLength = newNode.getLength();
-		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
-				description.getName(),
-				description.getDescription(),
-				javaElement,
-				highlightLength,
-				methodName.getParent(), newNode, credit);
+		ASTNode original = methodName.getParent();
+		int offset = original.getStartPosition();
+		int length = original.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(original.getStartPosition());
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(description.getName())
+			.withMessage(description.getDescription())
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 }

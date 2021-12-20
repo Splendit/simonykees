@@ -21,6 +21,7 @@ import eu.jsparrow.core.visitor.impl.PutIfAbsentASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
 /**
  * A visitor for resolving one issue of type {@link PutIfAbsentASTVisitor}.
@@ -64,9 +65,22 @@ public class PutIfAbsentResolver extends PutIfAbsentASTVisitor implements Resolv
 	public void addMarkerEvent(MethodInvocation methodInvocation) {
 		ExpressionStatement newNode = createRepresentingNode(methodInvocation);
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.PutIfAbsentResolver_name,
-				Messages.PutIfAbsentResolver_message,
-				javaElement, 0, methodInvocation, newNode, credit);
+		int offset = methodInvocation.getStartPosition();
+		int length = methodInvocation.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(methodInvocation.getStartPosition());
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.PutIfAbsentResolver_name)
+			.withMessage(Messages.PutIfAbsentResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(0)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 

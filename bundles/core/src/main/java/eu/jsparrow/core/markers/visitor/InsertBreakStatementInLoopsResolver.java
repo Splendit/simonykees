@@ -75,12 +75,22 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 		int credit = description.getCredit();
 		int highlightLength = newForStatement.getLength() + breakStatement.toString()
 			.length();
-		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
-				description.getName(),
-				description.getDescription(),
-				javaElement,
-				highlightLength,
-				forStatement, newForStatement, credit);
+		int offset = forStatement.getStartPosition();
+		int length = forStatement.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(forStatement.getStartPosition());
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(description.getName())
+			.withMessage(description.getDescription())
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(newForStatement.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 
@@ -103,12 +113,22 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 		int credit = description.getCredit();
 		int highlightLength = newForStatement.getLength() + breakStatement.toString()
 			.length();
-		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
-				description.getName(),
-				description.getDescription(),
-				javaElement,
-				highlightLength,
-				forStatement, newForStatement, credit);
+		int offset = forStatement.getStartPosition();
+		int length = forStatement.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(forStatement.getStartPosition());
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(description.getName())
+			.withMessage(description.getDescription())
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(newForStatement.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 }

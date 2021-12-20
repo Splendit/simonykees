@@ -15,6 +15,7 @@ import eu.jsparrow.core.rule.impl.UseComparatorMethodsRule;
 import eu.jsparrow.core.visitor.impl.comparatormethods.UseComparatorMethodsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
 /**
  * A visitor for resolving one issue of type
@@ -57,12 +58,25 @@ public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor
 
 	@Override
 	public void addMarkerEvent(LambdaExpression lambda, MethodInvocation lambdaReplacement) {
-		int highlightLenght = lambdaReplacement.toString()
+		int highlightLength = lambdaReplacement.toString()
 			.length();
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.UseComparatorMethodsResolver_name,
-				Messages.UseComparatorMethodsResolver_message, javaElement,
-				highlightLenght, lambda, lambdaReplacement, credit);
+		int offset = lambda.getStartPosition();
+		int length = lambda.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(lambda.getStartPosition());
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.UseComparatorMethodsResolver_name)
+			.withMessage(Messages.UseComparatorMethodsResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(lambdaReplacement.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 }

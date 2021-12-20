@@ -18,6 +18,7 @@ import eu.jsparrow.core.rule.impl.RemoveNullCheckBeforeInstanceofRule;
 import eu.jsparrow.core.visitor.impl.RemoveNullCheckBeforeInstanceofASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
 /**
  * A visitor for resolving one issue of type
@@ -66,9 +67,22 @@ public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBefo
 	public void addMarkerEvent(Expression leftOperand, InfixExpression infixExpression, Expression expression) {
 		ASTNode newNode = createRepresentingNode(infixExpression, expression);
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.RemoveNullCheckBeforeInstanceofResolver_name,
-				Messages.RemoveNullCheckBeforeInstanceofResolver_message,
-				javaElement, 0, leftOperand, newNode, credit);
+		int offset = leftOperand.getStartPosition();
+		int length = leftOperand.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(leftOperand.getStartPosition());
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.RemoveNullCheckBeforeInstanceofResolver_name)
+			.withMessage(Messages.RemoveNullCheckBeforeInstanceofResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(0)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 
