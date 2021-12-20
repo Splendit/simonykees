@@ -161,6 +161,7 @@ public class Messages extends NLS {
 	public static String MakeFiledsAndVariablesFinalRule_name;
 	public static String MapGetOrDefaultRule_description;
 	public static String MapGetOrDefaultRule_name;
+	public static String MarkerFactory_locationPrefix;
 	public static String MavenProjectImporter_collectingProjectInfo;
 	public static String MavenProjectImporter_createingJavaProjects;
 	public static String MavenProjectImporter_creatingSingleJavaProject;

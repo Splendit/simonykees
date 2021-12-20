@@ -57,6 +57,7 @@ class UseIsEmptyOnCollectionsResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(116, event.getOffset()),
 				() -> assertEquals(15, event.getLength()),
+				() -> assertEquals(7, event.getLineNumber()),
 				() -> assertEquals(2, event.getWeightValue()));
 	}
 	

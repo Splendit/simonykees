@@ -57,6 +57,7 @@ class RemoveRedundantTypeCastResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals(12, event.getHighlightLength()),
 				() -> assertEquals(89, event.getOffset()),
 				() -> assertEquals(23, event.getLength()),
+				() -> assertEquals(6, event.getLineNumber()),
 				() -> assertEquals(5, event.getWeightValue()));
 	}
 

@@ -64,6 +64,7 @@ class CollectionRemoveAllResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(214, event.getOffset()),
 				() -> assertEquals(20, event.getLength()),
+				() -> assertEquals(10, event.getLineNumber()),
 				() -> assertEquals(2, event.getWeightValue()));
 	}
 
