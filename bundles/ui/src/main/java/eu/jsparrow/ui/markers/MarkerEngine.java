@@ -1,10 +1,6 @@
 package eu.jsparrow.ui.markers;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ElementChangedEvent;
@@ -12,20 +8,16 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ide.ResourceUtil;
 
-import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
-import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
-import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -44,10 +36,12 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 	private static final String JAVA_EXTENSION = "java"; //$NON-NLS-1$
 	private MarkerFactory markerFactory;
 	private RefactoringEventManager eventGenerator;
+	private MarkerIdProvider resolverIdProvider;
 
-	public MarkerEngine(MarkerFactory markerFactory, RefactoringEventManager eventGenerator) {
+	public MarkerEngine(MarkerFactory markerFactory, RefactoringEventManager eventGenerator, MarkerIdProvider resolverIdProvider) {
 		this.markerFactory = markerFactory;
 		this.eventGenerator = eventGenerator;
+		this.resolverIdProvider = resolverIdProvider;
 	}
 
 	@Override
@@ -140,29 +134,7 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 		}
 	}
 
-	private List<String> filterWithSufficientCredit(LicenseValidationResult validationResult,
-			List<String> allActiveMarkerIds) {
-		int availableCredit = validationResult.getCredit()
-			.orElse(0);
-		if(availableCredit <= 0) {
-			return Collections.emptyList();
-		}
-		List<String> filtered = ResolverVisitorsFactory.getAllMarkerDescriptions()
-			.entrySet()
-			.stream()
-			.filter(entry -> entry.getValue()
-				.getCredit() <= availableCredit)
-			.map(Map.Entry::getKey)
-			.collect(Collectors.toList());
-		return allActiveMarkerIds.stream()
-			.filter(filtered::contains)
-			.collect(Collectors.toList());
-
-	}
-
 	private void handleParentSourceReference(ICompilationUnit cu) {
-		Map<String, RefactoringRule> resolverToRule = ResolverToRuleMap.get();
-		List<String> satisfiedRequirementIds = findMarkersWithSatisfiedRequirements(cu, resolverToRule);
 		List<RefactoringMarkerEvent> oldEvents = RefactoringMarkers.getAllEvents();
 		RefactoringMarkers.clear();
 		LicenseUtil licenseUtil = LicenseUtil.get();
@@ -172,16 +144,14 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 		if (!valid) {
 			return;
 		}
-		
-		List<String> activeMarkerIds = SimonykeesPreferenceManager.getAllActiveMarkers()
-				.stream()
-				.filter(satisfiedRequirementIds::contains)
-				.collect(Collectors.toList());
+		List<String> availableMarkerIds = resolverIdProvider.findAvailableFor(cu);
 		if (type == LicenseType.PAY_PER_USE) {
-			List<String> filteredByCredit = filterWithSufficientCredit(validationResult, activeMarkerIds);
+			int availableCredit = validationResult.getCredit()
+					.orElse(0);
+			List<String> filteredByCredit = resolverIdProvider.filterWithSufficientCredit(availableCredit, availableMarkerIds);
 			eventGenerator.discoverRefactoringEvents(cu, filteredByCredit);
 		} else {
-			eventGenerator.discoverRefactoringEvents(cu, activeMarkerIds);
+			eventGenerator.discoverRefactoringEvents(cu, availableMarkerIds);
 		}
 
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
@@ -196,20 +166,5 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 			}
 		});
 		job.schedule();
-	}
-
-	private List<String> findMarkersWithSatisfiedRequirements(ICompilationUnit cu,
-			Map<String, RefactoringRule> resolverToRule) {
-		List<String> result = new ArrayList<>();
-		IJavaProject project = cu.getJavaProject();
-		for (Map.Entry<String, RefactoringRule> entry : resolverToRule.entrySet()) {
-			String resolverId = entry.getKey();
-			RefactoringRule rule = entry.getValue();
-			rule.calculateEnabledForProject(project);
-			if(rule.isEnabled()) {
-				result.add(resolverId);
-			}
-		}
-		return Collections.unmodifiableList(result);
 	}
 }
