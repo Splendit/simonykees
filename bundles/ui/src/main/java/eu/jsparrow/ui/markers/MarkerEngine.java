@@ -1,9 +1,9 @@
 package eu.jsparrow.ui.markers;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IResource;
@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -20,6 +21,7 @@ import org.eclipse.ui.ide.ResourceUtil;
 import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
@@ -159,6 +161,8 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 	}
 
 	private void handleParentSourceReference(ICompilationUnit cu) {
+		Map<String, RefactoringRule> resolverToRule = ResolverToRuleMap.get();
+		List<String> satisfiedRequirementIds = findMarkersWithSatisfiedRequirements(cu, resolverToRule);
 		List<RefactoringMarkerEvent> oldEvents = RefactoringMarkers.getAllEvents();
 		RefactoringMarkers.clear();
 		LicenseUtil licenseUtil = LicenseUtil.get();
@@ -168,7 +172,11 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 		if (!valid) {
 			return;
 		}
-		List<String> activeMarkerIds = SimonykeesPreferenceManager.getAllActiveMarkers();
+		
+		List<String> activeMarkerIds = SimonykeesPreferenceManager.getAllActiveMarkers()
+				.stream()
+				.filter(satisfiedRequirementIds::contains)
+				.collect(Collectors.toList());
 		if (type == LicenseType.PAY_PER_USE) {
 			List<String> filteredByCredit = filterWithSufficientCredit(validationResult, activeMarkerIds);
 			eventGenerator.discoverRefactoringEvents(cu, filteredByCredit);
@@ -188,5 +196,20 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 			}
 		});
 		job.schedule();
+	}
+
+	private List<String> findMarkersWithSatisfiedRequirements(ICompilationUnit cu,
+			Map<String, RefactoringRule> resolverToRule) {
+		List<String> result = new ArrayList<>();
+		IJavaProject project = cu.getJavaProject();
+		for (Map.Entry<String, RefactoringRule> entry : resolverToRule.entrySet()) {
+			String resolverId = entry.getKey();
+			RefactoringRule rule = entry.getValue();
+			rule.calculateEnabledForProject(project);
+			if(rule.isEnabled()) {
+				result.add(resolverId);
+			}
+		}
+		return Collections.unmodifiableList(result);
 	}
 }

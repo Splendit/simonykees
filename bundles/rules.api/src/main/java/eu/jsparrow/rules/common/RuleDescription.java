@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -84,5 +85,23 @@ public class RuleDescription {
 		int remediation = (int)remediationCost.toMinutes();
 		return remediationPriceMapping.get(remediation);
 		
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(description, name, remediationCost, tags);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof RuleDescription)) {
+			return false;
+		}
+		RuleDescription other = (RuleDescription) obj;
+		return Objects.equals(description, other.description) && Objects.equals(name, other.name)
+				&& Objects.equals(remediationCost, other.remediationCost) && Objects.equals(tags, other.tags);
 	}
 }
