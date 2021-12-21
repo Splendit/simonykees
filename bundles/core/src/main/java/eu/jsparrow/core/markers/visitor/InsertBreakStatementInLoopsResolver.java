@@ -32,7 +32,6 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 	public static final String ID = "InsertBreakStatementInLoopsResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
-	private IJavaElement javaElement;
 	private RuleDescription description;
 
 	public InsertBreakStatementInLoopsResolver(Predicate<ASTNode> positionChecker) {
@@ -46,11 +45,6 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 		return this.description;
 	}
 
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
-	}
 
 	@Override
 	public boolean visit(EnhancedForStatement enhancedForStatement) {
@@ -75,12 +69,23 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 		int credit = description.getCredit();
 		int highlightLength = newForStatement.getLength() + breakStatement.toString()
 			.length();
-		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
-				description.getName(),
-				description.getDescription(),
-				javaElement,
-				highlightLength,
-				forStatement, newForStatement, credit);
+		int offset = forStatement.getStartPosition();
+		int length = forStatement.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(forStatement.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(description.getName())
+			.withMessage(description.getDescription())
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(newForStatement.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 
@@ -103,12 +108,23 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 		int credit = description.getCredit();
 		int highlightLength = newForStatement.getLength() + breakStatement.toString()
 			.length();
-		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
-				description.getName(),
-				description.getDescription(),
-				javaElement,
-				highlightLength,
-				forStatement, newForStatement, credit);
+		int offset = forStatement.getStartPosition();
+		int length = forStatement.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(forStatement.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(description.getName())
+			.withMessage(description.getDescription())
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(newForStatement.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 }

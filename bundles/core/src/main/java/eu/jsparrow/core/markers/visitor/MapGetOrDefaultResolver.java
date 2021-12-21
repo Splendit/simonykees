@@ -29,7 +29,6 @@ public class MapGetOrDefaultResolver extends MapGetOrDefaultASTVisitor implement
 	public static final String ID = "MapGetOrDefaultResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
-	private IJavaElement javaElement;
 	private RuleDescription description;
 
 	public MapGetOrDefaultResolver(Predicate<ASTNode> positionChecker) {
@@ -41,12 +40,6 @@ public class MapGetOrDefaultResolver extends MapGetOrDefaultASTVisitor implement
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -73,12 +66,23 @@ public class MapGetOrDefaultResolver extends MapGetOrDefaultASTVisitor implement
 
 		int credit = description.getCredit();
 		int highlightLength = getOrDefault.getLength();
-		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
-				description.getName(),
-				description.getDescription(),
-				javaElement,
-				highlightLength,
-				methodInvocation, getOrDefault, credit);
+		int offset = methodInvocation.getStartPosition();
+		int length = methodInvocation.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(methodInvocation.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(description.getName())
+			.withMessage(description.getDescription())
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(getOrDefault.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 }

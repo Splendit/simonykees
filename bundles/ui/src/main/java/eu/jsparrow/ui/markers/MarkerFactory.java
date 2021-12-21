@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.ui.Activator;
 
@@ -53,11 +54,15 @@ public class MarkerFactory {
 		int highlightLength = event.getHighlightLength();
 		String codePreview = event.getCodePreview();
 		int weight = event.getWeightValue();
+		int lineNumber = event.getLineNumber();
+		String location = String.format(Messages.MarkerFactory_locationPrefix, lineNumber);
 		String[] markerAttributeKeys = {
 				RESOLVER_KEY, NAME_KEY,
 				IMarker.MESSAGE,
 				IMarker.CHAR_START,
 				IMarker.CHAR_END,
+				IMarker.LINE_NUMBER,
+				IMarker.LOCATION,
 				HIGHLIGHT_LENGTH_KEY,
 				JSPARROW_MARKER_COLOR_KEY,
 				CODE_PREVIEW_KEY,
@@ -69,6 +74,8 @@ public class MarkerFactory {
 				message,
 				Integer.valueOf(offset),
 				Integer.valueOf(offset + length),
+				Integer.valueOf(lineNumber),
+				location,
 				Integer.valueOf(highlightLength),
 				markerColor,
 				codePreview,

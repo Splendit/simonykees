@@ -20,6 +20,7 @@ import eu.jsparrow.core.rule.impl.InefficientConstructorRule;
 import eu.jsparrow.core.visitor.impl.InefficientConstructorASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -33,8 +34,6 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 
 	public static final String ID = "InefficientConstructorResolver"; //$NON-NLS-1$
 	private RuleDescription description;
-
-	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
 	public InefficientConstructorResolver(Predicate<ASTNode> positionChecker) {
@@ -46,12 +45,6 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		this.javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -80,10 +73,23 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 			Expression replaceParameter) {
 		MethodInvocation newNode = createRepresentingNode(node, replaceParameter);
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.InefficientConstructorResolver_name,
-				Messages.InefficientConstructorResolver_message,
-				javaElement, 0, refactorCandidateParameter,
-				newNode, credit);
+		int offset = node.getStartPosition();
+		int length = node.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(node.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+				.withResolver(ID)
+				.withName(Messages.InefficientConstructorResolver_name)
+				.withMessage(Messages.InefficientConstructorResolver_message)
+				.withIJavaElement(javaElement)
+				.withHighlightLength(0)
+				.withOffset(offset)
+				.withCodePreview(newNode.toString())
+				.withLength(length)
+				.withWeightValue(credit)
+				.withLineNumber(lineNumber)
+				.build();
 		addMarkerEvent(event);
 	}
 
@@ -91,13 +97,26 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 	public void addMarkerEvent(ClassInstanceCreation node, SimpleName refactorPrimitiveType,
 			Expression refactorCandidateParameter) {
 		MethodInvocation newNode = createRepresentingNode(refactorPrimitiveType, refactorCandidateParameter);
-		int highlightLenght = newNode.toString()
+		int highlightLength = newNode.toString()
 			.length();
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.InefficientConstructorResolver_name,
-				Messages.InefficientConstructorResolver_message,
-				javaElement, highlightLenght, node,
-				newNode, credit);
+		int offset = node.getStartPosition();
+		int length = node.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(node.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.InefficientConstructorResolver_name)
+			.withMessage(Messages.InefficientConstructorResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 

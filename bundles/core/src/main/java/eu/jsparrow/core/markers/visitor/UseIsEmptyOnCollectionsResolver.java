@@ -20,6 +20,7 @@ import eu.jsparrow.core.visitor.impl.UseIsEmptyOnCollectionsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
 /**
  * A visitor for resolving one issue of type
@@ -31,7 +32,6 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
 public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTVisitor implements Resolver {
 
 	public static final String ID = "UseIsEmptyOnCollectionsResolver"; //$NON-NLS-1$
-	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;
 
@@ -47,12 +47,6 @@ public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTV
 	}
 
 	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
-	}
-
-	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		if (positionChecker.test(methodInvocation.getParent())) {
 			return super.visit(methodInvocation);
@@ -64,9 +58,23 @@ public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTV
 	public void addMarkerEvent(InfixExpression parent, Expression varExpression) {
 		ASTNode newNode = createRepresentationNode(parent, varExpression);
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.UseIsEmptyOnCollectionsResolver_name,
-				Messages.UseIsEmptyOnCollectionsResolver_message,
-				javaElement, 0, parent, newNode, credit);
+		int offset = parent.getStartPosition();
+		int length = parent.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(parent.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.UseIsEmptyOnCollectionsResolver_name)
+			.withMessage(Messages.UseIsEmptyOnCollectionsResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(0)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 

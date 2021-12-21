@@ -23,12 +23,12 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
  * @since 4.6.0
  *
  */
-public class AvoidConcatenationInLoggingStatementsResolver extends AvoidConcatenationInLoggingStatementsASTVisitor implements Resolver {
+public class AvoidConcatenationInLoggingStatementsResolver extends AvoidConcatenationInLoggingStatementsASTVisitor
+		implements Resolver {
 
 	public static final String ID = "AvoidConcatenationInLoggingStatementsResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
-	private IJavaElement javaElement;
 	private RuleDescription description;
 
 	public AvoidConcatenationInLoggingStatementsResolver(Predicate<ASTNode> positionChecker) {
@@ -43,12 +43,6 @@ public class AvoidConcatenationInLoggingStatementsResolver extends AvoidConcaten
 	}
 
 	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
-	}
-
-	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		if (positionChecker.test(methodInvocation)) {
 			super.visit(methodInvocation);
@@ -60,12 +54,24 @@ public class AvoidConcatenationInLoggingStatementsResolver extends AvoidConcaten
 	public void addMarkerEvent(InfixExpression infixExpression, ASTNode newNode) {
 		int credit = description.getCredit();
 		int highlightLength = newNode.getLength();
-		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
-				description.getName(),
-				description.getDescription(),
-				javaElement,
-				highlightLength,
-				infixExpression.getParent(), newNode, credit);
+		ASTNode original = infixExpression.getParent();
+		int offset = original.getStartPosition();
+		int length = original.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(infixExpression.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(description.getName())
+			.withMessage(description.getDescription())
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 }

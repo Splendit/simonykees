@@ -57,4 +57,8 @@ public class DummyRefactoringEvent implements RefactoringMarkerEvent {
 		return 0;
 	}
 
+	@Override 
+	public int getLineNumber() {
+		return 0;
+	}
 }

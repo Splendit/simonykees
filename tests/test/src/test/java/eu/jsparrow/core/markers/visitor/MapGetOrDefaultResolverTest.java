@@ -86,6 +86,7 @@ class MapGetOrDefaultResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(226, event.getOffset()),
 				() -> assertEquals(14, event.getLength()),
+				() -> assertEquals(8, event.getLineNumber()),
 				() -> assertEquals(2, event.getWeightValue()));
 	}
 	

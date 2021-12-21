@@ -58,6 +58,7 @@ class RemoveNewStringConstructorResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals(15, event.getHighlightLength()),
 				() -> assertEquals(108, event.getOffset()),
 				() -> assertEquals(27, event.getLength()),
+				() -> assertEquals(6, event.getLineNumber()),
 				() -> assertEquals(5, event.getWeightValue()));
 	}
 

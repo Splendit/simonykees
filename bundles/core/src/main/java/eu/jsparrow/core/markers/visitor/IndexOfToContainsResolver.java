@@ -27,11 +27,10 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
  *
  */
 public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor implements Resolver {
-	
+
 	public static final String ID = "IndexOfToContainsResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
-	private IJavaElement javaElement;
 	private RuleDescription description;
 
 	public IndexOfToContainsResolver(Predicate<ASTNode> positionChecker) {
@@ -46,12 +45,6 @@ public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor imple
 	}
 
 	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
-	}
-
-	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		if (positionChecker.test(methodInvocation.getParent())) {
 			super.visit(methodInvocation);
@@ -63,41 +56,67 @@ public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor imple
 	public void addMarkerEvent(InfixExpression node, Expression methodExpression, Expression methodArgument) {
 		int credit = description.getCredit();
 		MethodInvocation newNode = createContainsInvocation(methodExpression, methodArgument);
-		int highlightLength = newNode.toString().length();
-		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
-				description.getName(),
-				description.getDescription(),
-				javaElement,
-				highlightLength,
-				node, newNode, credit);
+		int highlightLength = newNode.toString()
+			.length();
+		int offset = node.getStartPosition();
+		int length = node.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(node.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(description.getName())
+			.withMessage(description.getDescription())
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
-	
+
 	@Override
-	public void addMarkerEvent(InfixExpression node, Expression methodExpression, Expression methodArgument, PrefixExpression.Operator not) {
+	public void addMarkerEvent(InfixExpression node, Expression methodExpression, Expression methodArgument,
+			PrefixExpression.Operator not) {
 		int credit = description.getCredit();
 		MethodInvocation contains = createContainsInvocation(methodExpression, methodArgument);
 		AST ast = node.getAST();
 		PrefixExpression newNode = ast.newPrefixExpression();
 		newNode.setOperator(not);
 		newNode.setOperand(contains);
-		int highlightLength = newNode.toString().length();
-		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
-				description.getName(),
-				description.getDescription(),
-				javaElement,
-				highlightLength,
-				node, newNode, credit);
+		int highlightLength = newNode.toString()
+			.length();
+		int offset = node.getStartPosition();
+		int length = node.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(node.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(description.getName())
+			.withMessage(description.getDescription())
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private MethodInvocation createContainsInvocation(Expression methodExpression, Expression methodArgument) {
 		AST ast = methodExpression.getAST();
 		MethodInvocation contains = ast.newMethodInvocation();
 		contains.setName(ast.newSimpleName("contains")); //$NON-NLS-1$
-		contains.setExpression((Expression)ASTNode.copySubtree(ast, methodExpression));
-		contains.arguments().add((Expression)ASTNode.copySubtree(ast, methodArgument));
+		contains.setExpression((Expression) ASTNode.copySubtree(ast, methodExpression));
+		contains.arguments()
+			.add((Expression) ASTNode.copySubtree(ast, methodArgument));
 		return contains;
 	}
 

@@ -29,7 +29,6 @@ public class CollectionRemoveAllResolver extends CollectionRemoveAllASTVisitor i
 	public static final String ID = "CollectionRemoveAllResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
-	private IJavaElement javaElement;
 	private RuleDescription description;
 
 	public CollectionRemoveAllResolver(Predicate<ASTNode> positionChecker) {
@@ -41,12 +40,6 @@ public class CollectionRemoveAllResolver extends CollectionRemoveAllASTVisitor i
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-	
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -65,12 +58,23 @@ public class CollectionRemoveAllResolver extends CollectionRemoveAllASTVisitor i
 		newNode.setName(ast.newSimpleName("clear")); //$NON-NLS-1$
 		newNode.setExpression((Expression) ASTNode.copySubtree(ast, node.getExpression()));
 		int highlightLength = newNode.getLength();
-		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
-				description.getName(),
-				description.getDescription(),
-				javaElement,
-				highlightLength,
-				node, newNode, credit);
+		int offset = node.getStartPosition();
+		int length = node.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(node.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(description.getName())
+			.withMessage(description.getDescription())
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 }
