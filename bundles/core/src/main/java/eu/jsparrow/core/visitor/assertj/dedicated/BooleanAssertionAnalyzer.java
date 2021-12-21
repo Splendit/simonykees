@@ -54,7 +54,15 @@ class BooleanAssertionAnalyzer {
 		tmpMap.put("isFile", "isFile"); // File
 		tmpMap.put("isDirectory", "isDirectory"); // File
 		// tmpMap.put("isHidden", "isHidden"); // File -- not supported
+		tmpMap.put("isAbsolute", "isAbsolute"); // Path
 		tmpMap.put("canRead", "canRead"); // File
+		tmpMap.put("after", "isAfter"); // Date
+		tmpMap.put("before", "isBefore"); // Date
+		tmpMap.put("isAfter", "isAfter"); // Instant
+		tmpMap.put("isBefore", "isBefore"); // Instant
+		//tmpMap.put("isLeapYear", "isLeapYear"); // LocalDate -- invalid transformation
+		//tmpMap.put("isSupported", "isSupported"); // LocalDate
+
 
 		ASSERTION_NAME_REPLACEMENTS = Collections.unmodifiableMap(tmpMap);
 

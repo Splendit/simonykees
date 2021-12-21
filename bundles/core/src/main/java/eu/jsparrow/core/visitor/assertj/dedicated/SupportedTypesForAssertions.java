@@ -32,6 +32,8 @@ public class SupportedTypesForAssertions {
 			java.lang.Double.class,
 			//
 			java.lang.String.class,
+			java.lang.StringBuffer.class,
+			java.lang.StringBuilder.class,
 			java.lang.CharSequence.class,
 			java.lang.Iterable.class,
 			//
@@ -43,6 +45,18 @@ public class SupportedTypesForAssertions {
 			java.io.InputStream.class,
 			java.nio.file.Path.class,
 			//
+			java.math.BigInteger.class,
+			java.math.BigDecimal.class,
+			//
+			java.time.Instant.class,
+			java.time.LocalDate.class,
+			java.time.LocalDateTime.class,
+			java.time.LocalTime.class,
+			java.time.OffsetDateTime.class,
+			java.time.OffsetTime.class,
+			java.time.ZonedDateTime.class,
+			java.time.Period.class,
+			//
 			java.util.Date.class,
 			java.util.Optional.class,
 			java.util.OptionalDouble.class,
@@ -50,6 +64,8 @@ public class SupportedTypesForAssertions {
 			java.util.OptionalLong.class,
 			java.util.Map.class,
 			java.util.Iterator.class,
+			//
+			java.util.function.Predicate.class,
 			//
 			java.util.stream.Stream.class,
 			java.util.stream.IntStream.class,
