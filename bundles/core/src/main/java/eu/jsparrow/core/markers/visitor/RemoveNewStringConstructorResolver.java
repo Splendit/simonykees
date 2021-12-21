@@ -28,7 +28,6 @@ public class RemoveNewStringConstructorResolver extends RemoveNewStringConstruct
 	public static final String ID = "RemoveNewStringConstructorResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
-	private IJavaElement javaElement;
 	private RuleDescription description;
 
 	public RemoveNewStringConstructorResolver(Predicate<ASTNode> positionChecker) {
@@ -40,12 +39,6 @@ public class RemoveNewStringConstructorResolver extends RemoveNewStringConstruct
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -64,6 +57,7 @@ public class RemoveNewStringConstructorResolver extends RemoveNewStringConstruct
 		int length = node.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(node.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(description.getName())

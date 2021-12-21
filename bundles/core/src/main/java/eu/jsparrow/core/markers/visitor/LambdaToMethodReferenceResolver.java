@@ -34,7 +34,6 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 
 	public static final String ID = "LambdaToMethodReferenceResolver"; //$NON-NLS-1$
 
-	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;
 
@@ -49,11 +48,6 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 		return this.description;
 	}
 
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
-	}
 
 	@Override
 	public boolean visit(LambdaExpression lambdaExpressionNode) {
@@ -73,6 +67,7 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 		int length = lambdaExpressionNode.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(lambdaExpressionNode.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(Messages.LambdaToMethodReferenceResolver_name)
@@ -98,6 +93,7 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 		int length = lambdaExpressionNode.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(lambdaExpressionNode.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(Messages.LambdaToMethodReferenceResolver_name)
@@ -123,6 +119,7 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 		int length = lambdaExpressionNode.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(lambdaExpressionNode.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(Messages.LambdaToMethodReferenceResolver_name)

@@ -31,7 +31,6 @@ public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor imp
 
 	public static final String ID = "EnumsWithoutEqualsResolver"; //$NON-NLS-1$
 
-	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;
 
@@ -43,12 +42,6 @@ public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor imp
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		this.javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -71,6 +64,7 @@ public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor imp
 		int length = replacedNode.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(replacedNode.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(Messages.EnumsWithoutEqualsResolver_name)

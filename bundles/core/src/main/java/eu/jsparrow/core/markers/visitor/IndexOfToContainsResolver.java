@@ -31,7 +31,6 @@ public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor imple
 	public static final String ID = "IndexOfToContainsResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
-	private IJavaElement javaElement;
 	private RuleDescription description;
 
 	public IndexOfToContainsResolver(Predicate<ASTNode> positionChecker) {
@@ -43,12 +42,6 @@ public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor imple
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -69,6 +62,7 @@ public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor imple
 		int length = node.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(node.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(description.getName())
@@ -99,6 +93,7 @@ public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor imple
 		int length = node.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(node.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(description.getName())

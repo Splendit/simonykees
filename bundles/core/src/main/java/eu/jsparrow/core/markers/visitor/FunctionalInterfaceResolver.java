@@ -33,7 +33,6 @@ public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor i
 
 	public static final String ID = "FunctionalInterfaceResolver"; //$NON-NLS-1$
 
-	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;
 
@@ -45,12 +44,6 @@ public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor i
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -72,6 +65,7 @@ public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor i
 		int length = classInstanceCreation.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(classInstanceCreation.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(Messages.FunctionalInterfaceResolver_name)

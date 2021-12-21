@@ -30,7 +30,6 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTVisitor implements Resolver {
 
 	public static final String ID = "PrimitiveBoxedForStringResolver"; //$NON-NLS-1$
-	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;
 
@@ -43,12 +42,6 @@ public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTV
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -81,6 +74,7 @@ public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTV
 		int length = node.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(node.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(Messages.PrimitiveBoxedForStringResolver_name)

@@ -34,8 +34,6 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 
 	public static final String ID = "InefficientConstructorResolver"; //$NON-NLS-1$
 	private RuleDescription description;
-
-	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
 	public InefficientConstructorResolver(Predicate<ASTNode> positionChecker) {
@@ -47,12 +45,6 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		this.javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -85,6 +77,7 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 		int length = node.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(node.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 				.withResolver(ID)
 				.withName(Messages.InefficientConstructorResolver_name)
@@ -111,6 +104,7 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 		int length = node.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(node.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(Messages.InefficientConstructorResolver_name)

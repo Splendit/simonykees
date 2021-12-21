@@ -29,7 +29,6 @@ public class AvoidConcatenationInLoggingStatementsResolver extends AvoidConcaten
 	public static final String ID = "AvoidConcatenationInLoggingStatementsResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
-	private IJavaElement javaElement;
 	private RuleDescription description;
 
 	public AvoidConcatenationInLoggingStatementsResolver(Predicate<ASTNode> positionChecker) {
@@ -41,12 +40,6 @@ public class AvoidConcatenationInLoggingStatementsResolver extends AvoidConcaten
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -66,6 +59,7 @@ public class AvoidConcatenationInLoggingStatementsResolver extends AvoidConcaten
 		int length = original.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(infixExpression.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(description.getName())

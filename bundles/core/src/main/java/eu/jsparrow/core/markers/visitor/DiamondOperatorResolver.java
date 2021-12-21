@@ -31,7 +31,6 @@ public class DiamondOperatorResolver extends DiamondOperatorASTVisitor implement
 	public static final String ID = "DiamondOperatorResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
-	private IJavaElement javaElement;
 	private RuleDescription description;
 
 	public DiamondOperatorResolver(Predicate<ASTNode> positionChecker) {
@@ -46,11 +45,6 @@ public class DiamondOperatorResolver extends DiamondOperatorASTVisitor implement
 		return this.description;
 	}
 
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
-	}
 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
@@ -75,6 +69,7 @@ public class DiamondOperatorResolver extends DiamondOperatorASTVisitor implement
 		int length = original.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(parameterizedType.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(description.getName())

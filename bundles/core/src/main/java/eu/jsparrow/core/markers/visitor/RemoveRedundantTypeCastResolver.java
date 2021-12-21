@@ -28,7 +28,6 @@ public class RemoveRedundantTypeCastResolver extends RemoveRedundantTypeCastASTV
 	public static final String ID = "RemoveRedundantTypeCastResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
-	private IJavaElement javaElement;
 	private RuleDescription description;
 
 	public RemoveRedundantTypeCastResolver(Predicate<ASTNode> positionChecker) {
@@ -40,12 +39,6 @@ public class RemoveRedundantTypeCastResolver extends RemoveRedundantTypeCastASTV
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -66,6 +59,7 @@ public class RemoveRedundantTypeCastResolver extends RemoveRedundantTypeCastASTV
 		int length = node.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(node.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(description.getName())

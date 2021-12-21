@@ -28,7 +28,6 @@ public class UseCollectionsSingletonListResolver extends UseCollectionsSingleton
 	public static final String ID = "UseCollectionsSingletonListResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
-	private IJavaElement javaElement;
 	private RuleDescription description;
 
 	public UseCollectionsSingletonListResolver(Predicate<ASTNode> positionChecker) {
@@ -40,12 +39,6 @@ public class UseCollectionsSingletonListResolver extends UseCollectionsSingleton
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -65,6 +58,7 @@ public class UseCollectionsSingletonListResolver extends UseCollectionsSingleton
 		int length = original.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(original.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(description.getName())

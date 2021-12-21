@@ -30,7 +30,6 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityCheckASTVisitor implements Resolver {
 
 	public static final String ID = "StringLiteralEqualityCheckResolver"; //$NON-NLS-1$
-	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;
 
@@ -43,12 +42,6 @@ public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityChe
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -67,6 +60,7 @@ public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityChe
 		int length = stringLiteral.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(stringLiteral.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(Messages.StringLiteralEqualityCheckResolver_name)

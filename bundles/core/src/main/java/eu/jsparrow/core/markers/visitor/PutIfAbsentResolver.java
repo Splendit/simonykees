@@ -32,7 +32,6 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 public class PutIfAbsentResolver extends PutIfAbsentASTVisitor implements Resolver {
 
 	public static final String ID = "PutIfAbsentResolver"; //$NON-NLS-1$
-	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;
 
@@ -45,12 +44,6 @@ public class PutIfAbsentResolver extends PutIfAbsentASTVisitor implements Resolv
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -69,6 +62,7 @@ public class PutIfAbsentResolver extends PutIfAbsentASTVisitor implements Resolv
 		int length = methodInvocation.getLength();
 		CompilationUnit cu = getCompilationUnit();
 		int lineNumber = cu.getLineNumber(methodInvocation.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
 			.withName(Messages.PutIfAbsentResolver_name)
