@@ -34,7 +34,8 @@ public class MarkerIdProvider {
 	 * @param compilationUnit
 	 *            the compilation unit to be analyzed
 	 * @return the active marker IDs that satisfy the rule requirements for the
-	 *         given {@link ICompilationUnit}. The active markers are retrieved from the preference store. 
+	 *         given {@link ICompilationUnit}. The active markers are retrieved
+	 *         from the preference store.
 	 */
 	public List<String> findAvailableFor(ICompilationUnit compilationUnit) {
 		Map<String, RefactoringRule> resolverToRule = ResolverToRuleMap.get();

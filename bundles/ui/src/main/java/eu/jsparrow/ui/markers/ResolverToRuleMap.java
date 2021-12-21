@@ -11,6 +11,12 @@ import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.RuleDescription;
 
+/**
+ * A map from jSparrow Marker IDs to their corresponding refactoring rule.
+ * 
+ * @since 4.7.0
+ *
+ */
 public class ResolverToRuleMap {
 
 	private static final Map<String, RefactoringRule> registry = initResolverToRule();
