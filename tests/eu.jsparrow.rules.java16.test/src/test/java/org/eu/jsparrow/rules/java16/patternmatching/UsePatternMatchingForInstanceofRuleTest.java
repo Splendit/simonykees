@@ -1,4 +1,4 @@
-package org.eu.jsparrow.rules.java16;
+package org.eu.jsparrow.rules.java16.patternmatching;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -16,7 +16,7 @@ import eu.jsparrow.common.SingleRuleTest;
 import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
-import eu.jsparrow.rules.java16.UsePatternMatchingForInstanceofRule;
+import eu.jsparrow.rules.java16.patternmatching.UsePatternMatchingForInstanceofRule;
 
 class UsePatternMatchingForInstanceofRuleTest extends SingleRuleTest {
 
