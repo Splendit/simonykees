@@ -1,4 +1,4 @@
-package eu.jsparrow.rules.java16;
+package eu.jsparrow.rules.java16.patternmatching;
 
 import java.util.Collections;
 import java.util.List;
