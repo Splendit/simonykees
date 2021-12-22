@@ -12,6 +12,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link UseJavaRecordsASTVisitor}.
+ * 
+ * @since 4.7.0
+ *
+ */
 public class UseJavaRecordsResolver extends UseJavaRecordsASTVisitor implements Resolver {
 	public static final String ID = "UseJavaRecordsResolver"; //$NON-NLS-1$
 
@@ -37,9 +44,9 @@ public class UseJavaRecordsResolver extends UseJavaRecordsASTVisitor implements 
 	}
 
 	@Override
-	public void addMarkerEvent(ASTNode switchStatement, ASTNode newNode) {
+	public void addMarkerEvent(TypeDeclaration switchStatement) {
 		int credit = description.getCredit();
-		int highlightLength = newNode.getLength();
+		int highlightLength = 0;
 		int offset = switchStatement.getStartPosition();
 		int length = switchStatement.getLength();
 		CompilationUnit cu = getCompilationUnit();

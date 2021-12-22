@@ -5,7 +5,6 @@ import java.util.function.Predicate;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 
 import eu.jsparrow.rules.common.RefactoringEventImpl;
@@ -13,6 +12,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link UseSwitchExpressionASTVisitor}.
+ * 
+ * @since 4.7.0
+ *
+ */
 public class UseSwitchExpressionResolver extends UseSwitchExpressionASTVisitor implements Resolver {
 
 	public static final String ID = "UseSwitchExpressionResolver"; //$NON-NLS-1$
@@ -39,9 +45,9 @@ public class UseSwitchExpressionResolver extends UseSwitchExpressionASTVisitor i
 	}
 
 	@Override
-	public void addMarkerEvent(SwitchStatement switchStatement, Statement newNode) {
+	public void addMarkerEvent(SwitchStatement switchStatement) {
 		int credit = description.getCredit();
-		int highlightLength = newNode.getLength();
+		int highlightLength = 0;
 		int offset = switchStatement.getStartPosition();
 		int length = switchStatement.getLength();
 		CompilationUnit cu = getCompilationUnit();

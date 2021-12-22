@@ -206,7 +206,7 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor imple
 			recordDeclaration.setJavadoc((Javadoc) astRewrite.createMoveTarget(javaDoc));
 		}
 		astRewrite.replace(typeDeclarationToReplace, recordDeclaration, null);
-		addMarkerEvent(typeDeclarationToReplace, recordDeclaration);
+		addMarkerEvent(typeDeclarationToReplace);
 		onRewrite();
 	}
 }

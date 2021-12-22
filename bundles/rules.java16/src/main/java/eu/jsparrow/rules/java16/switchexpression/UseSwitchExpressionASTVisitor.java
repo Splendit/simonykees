@@ -89,7 +89,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		if (!hasDefaultClause) {
 			SwitchStatement newSwitchStatement = createSwitchStatement(ast, switchHeaderExpression, clauses);
 			astRewrite.replace(switchStatement, newSwitchStatement, null);
-			addMarkerEvent(switchStatement, newSwitchStatement);
+			addMarkerEvent(switchStatement);
 			onRewrite();
 			return true;
 		}
@@ -103,12 +103,12 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			ReturnStatement newReturnStatement = ast.newReturnStatement();
 			newReturnStatement.setExpression(newSwitchExpression);
 			astRewrite.replace(switchStatement, newReturnStatement, null);
-			addMarkerEvent(switchStatement, newReturnStatement);
+			addMarkerEvent(switchStatement);
 			onRewrite();
 		} else {
 			SwitchStatement newSwitchStatement = createSwitchStatement(ast, switchHeaderExpression, clauses);
 			astRewrite.replace(switchStatement, newSwitchStatement, null);
-			addMarkerEvent(switchStatement, newSwitchStatement);
+			addMarkerEvent(switchStatement);
 			
 			onRewrite();
 		}

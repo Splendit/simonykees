@@ -54,7 +54,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 4.2.0
  * 
  */
-public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewriteASTVisitor {
+public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewriteASTVisitor implements UsePatternMatchingForInstanceofEvent {
 
 	@Override
 	public boolean visit(InstanceofExpression instanceOf) {
@@ -225,6 +225,7 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 		patternInstanceOf.setRightOperand(singleVarDecl);
 		astRewrite.replace(instanceOf, patternInstanceOf, null);
 		astRewrite.remove(declarationNodeToRemove, null);
+		addMarkerEvent(instanceOf, patternInstanceOfName);
 		onRewrite();
 	}
 }

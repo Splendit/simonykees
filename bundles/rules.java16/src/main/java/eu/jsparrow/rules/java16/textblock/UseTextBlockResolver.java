@@ -13,8 +13,14 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type {@link UseTextBlockASTVisitor}.
+ * 
+ * @since 4.7.0
+ *
+ */
 public class UseTextBlockResolver extends UseTextBlockASTVisitor
-	 implements Resolver {
+		implements Resolver {
 
 	public static final String ID = "UseTextBlockResolver"; //$NON-NLS-1$
 
