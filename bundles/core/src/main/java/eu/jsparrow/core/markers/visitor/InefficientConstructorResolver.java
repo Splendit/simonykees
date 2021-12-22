@@ -13,14 +13,14 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.constants.ReservedNames;
-import eu.jsparrow.core.markers.RefactoringEventImpl;
-import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.InefficientConstructorRule;
 import eu.jsparrow.core.visitor.impl.InefficientConstructorASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
+import eu.jsparrow.rules.common.markers.Resolver;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**

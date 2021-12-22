@@ -35,6 +35,7 @@ import eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
+import eu.jsparrow.rules.common.markers.Resolver;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
