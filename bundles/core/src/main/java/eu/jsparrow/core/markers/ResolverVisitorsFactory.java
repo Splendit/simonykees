@@ -1,6 +1,7 @@
 package eu.jsparrow.core.markers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -10,8 +11,14 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 
-import eu.jsparrow.core.markers.common.Resolver;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 import eu.jsparrow.core.markers.visitor.AvoidConcatenationInLoggingStatementsResolver;
 import eu.jsparrow.core.markers.visitor.CollectionRemoveAllResolver;
 import eu.jsparrow.core.markers.visitor.DiamondOperatorResolver;
@@ -32,11 +39,13 @@ import eu.jsparrow.core.markers.visitor.StringLiteralEqualityCheckResolver;
 import eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver;
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver;
+import eu.jsparrow.rules.api.MarkerService;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 import eu.jsparrow.rules.common.markers.Resolver;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+
 
 /**
  * A registry for jSparrow marker resolvers implemented in this module.
@@ -46,6 +55,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  */
 public class ResolverVisitorsFactory {
 
+	private static final Logger logger = LoggerFactory.getLogger(ResolverVisitorsFactory.class);
 	private static final Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> registry = initRegistry();
 
 	private ResolverVisitorsFactory() {
@@ -76,7 +86,30 @@ public class ResolverVisitorsFactory {
 		map.put(RemoveRedundantTypeCastResolver.ID, RemoveRedundantTypeCastResolver::new);
 		map.put(RemoveUnusedParameterResolver.ID, RemoveUnusedParameterResolver::new);
 		map.put(UseCollectionsSingletonListResolver.ID, UseCollectionsSingletonListResolver::new);
+		
+		List<MarkerService> markerServices = getExternalRuleServices();
+		markerServices.stream()
+			.map(MarkerService::loadGeneratingFunctions)
+			.forEach(map::putAll);
+		
 		return Collections.unmodifiableMap(map);
+	}
+	
+	private static List<MarkerService> getExternalRuleServices() {
+		BundleContext bundleContext = FrameworkUtil.getBundle(ResolverVisitorsFactory.class)
+			.getBundleContext();
+		ServiceReference<?>[] serviceReferences = null;
+		try {
+			serviceReferences = bundleContext.getServiceReferences(MarkerService.class.getName(), null);
+		} catch (InvalidSyntaxException e) {
+			logger.error("Failed to load external markers due to bad filterexpression.", e); //$NON-NLS-1$
+		}
+		// BundleContext returns null if no services are found,
+		return serviceReferences == null ? Collections.emptyList()
+				: Arrays.asList(serviceReferences)
+					.stream()
+					.map(x -> (MarkerService) bundleContext.getService(x))
+					.collect(Collectors.toList());
 	}
 
 	public static Map<String, RuleDescription> getAllMarkerDescriptions() {
