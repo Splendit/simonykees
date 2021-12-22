@@ -11,6 +11,8 @@ import org.osgi.service.component.annotations.Component;
 
 import eu.jsparrow.rules.api.MarkerService;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.java16.javarecords.UseJavaRecordsResolver;
+import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionResolver;
 import eu.jsparrow.rules.java16.textblock.UseTextBlockResolver;
 
 @Component
@@ -26,6 +28,8 @@ public class Java16MarkersServiceImpl implements MarkerService {
 	private static Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> initMap() {
 		Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> map = new HashMap<>();
 		map.put(UseTextBlockResolver.ID, UseTextBlockResolver::new);
+		map.put(UseSwitchExpressionResolver.ID, UseSwitchExpressionResolver::new);
+		map.put(UseJavaRecordsResolver.ID, UseJavaRecordsResolver::new);
 		return Collections.unmodifiableMap(map);
 	}
 

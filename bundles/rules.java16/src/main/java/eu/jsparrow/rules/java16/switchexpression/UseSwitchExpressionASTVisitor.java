@@ -69,7 +69,7 @@ import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
  * @since 4.3.0
  *
  */
-public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor {
+public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor implements UseSwitchExpressionEvent {
 
 	@Override
 	public boolean visit(SwitchStatement switchStatement) {
@@ -89,6 +89,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		if (!hasDefaultClause) {
 			SwitchStatement newSwitchStatement = createSwitchStatement(ast, switchHeaderExpression, clauses);
 			astRewrite.replace(switchStatement, newSwitchStatement, null);
+			addMarkerEvent(switchStatement, newSwitchStatement);
 			onRewrite();
 			return true;
 		}
@@ -102,10 +103,13 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			ReturnStatement newReturnStatement = ast.newReturnStatement();
 			newReturnStatement.setExpression(newSwitchExpression);
 			astRewrite.replace(switchStatement, newReturnStatement, null);
+			addMarkerEvent(switchStatement, newReturnStatement);
 			onRewrite();
 		} else {
 			SwitchStatement newSwitchStatement = createSwitchStatement(ast, switchHeaderExpression, clauses);
 			astRewrite.replace(switchStatement, newSwitchStatement, null);
+			addMarkerEvent(switchStatement, newSwitchStatement);
+			
 			onRewrite();
 		}
 		CommentRewriter commentRewriter = getCommentRewriter();

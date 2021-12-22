@@ -50,7 +50,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 4.5.0
  *
  */
-public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
+public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor implements UseJavaRecordsEvent {
 
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
@@ -206,6 +206,7 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 			recordDeclaration.setJavadoc((Javadoc) astRewrite.createMoveTarget(javaDoc));
 		}
 		astRewrite.replace(typeDeclarationToReplace, recordDeclaration, null);
+		addMarkerEvent(typeDeclarationToReplace, recordDeclaration);
 		onRewrite();
 	}
 }
