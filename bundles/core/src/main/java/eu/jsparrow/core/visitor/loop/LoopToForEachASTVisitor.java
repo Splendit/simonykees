@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
+import eu.jsparrow.core.markers.common.ForToForEachEvent;
 import eu.jsparrow.core.visitor.renaming.JavaReservedKeyWords;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -54,7 +55,7 @@ import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
  *            type of the target loop statement, expected to be either a
  *            ({@link ForStatement} or a {@link WhileStatement}).
  */
-public abstract class LoopToForEachASTVisitor<T extends Statement> extends AbstractAddImportASTVisitor {
+public abstract class LoopToForEachASTVisitor<T extends Statement> extends AbstractAddImportASTVisitor implements ForToForEachEvent<T> {
 
 	protected static final String ITERATOR_FULLY_QUALIFIED_NAME = java.util.Iterator.class.getName();
 	protected static final String ITERABLE_FULLY_QUALIFIED_NAME = java.lang.Iterable.class.getName();
@@ -356,6 +357,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		getCommentRewriter().saveLeadingComment(loop);
 		getCommentRewriter().saveBeforeStatement(loop, getHeaderComments(loop));
 		onRewrite();
+		addMarkerEvent(loop, loopBody, iterableNode, iteratorDecl);
 	}
 
 	private void removeDeclarationFragment(ASTNode remove) {
