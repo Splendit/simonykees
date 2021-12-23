@@ -13,8 +13,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
 /**
- * A visitor for resolving one issue of type
- * {@link UseJavaRecordsASTVisitor}.
+ * A visitor for resolving one issue of type {@link UseJavaRecordsASTVisitor}.
  * 
  * @since 4.7.0
  *
@@ -40,7 +39,7 @@ public class UseJavaRecordsResolver extends UseJavaRecordsASTVisitor implements 
 		if (positionChecker.test(typeDeclaration)) {
 			super.visit(typeDeclaration);
 		}
-		return  true;
+		return true;
 	}
 
 	@Override

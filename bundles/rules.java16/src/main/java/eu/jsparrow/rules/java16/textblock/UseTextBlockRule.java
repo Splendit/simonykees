@@ -25,6 +25,7 @@ public class UseTextBlockRule
 		extends RefactoringRuleImpl<UseTextBlockASTVisitor> {
 
 	public static final String RULE_ID = "UseTextBlock"; //$NON-NLS-1$
+
 	public UseTextBlockRule() {
 		this.visitorClass = UseTextBlockASTVisitor.class;
 		this.id = RULE_ID;

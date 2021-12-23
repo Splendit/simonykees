@@ -17,7 +17,9 @@ public interface UseSwitchExpressionEvent {
 	 * Creates an instance of {@link RefactoringEventImplt} and records it as a
 	 * {@link RefactoringMarkerEvent}. The default implementation is empty.
 	 * 
-	 * @param switchStatement the original switch statement to be replaced by a switch expression. 
+	 * @param switchStatement
+	 *            the original switch statement to be replaced by a switch
+	 *            expression.
 	 */
 	default void addMarkerEvent(SwitchStatement switchStatement) {
 	}
