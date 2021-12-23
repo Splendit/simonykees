@@ -8,13 +8,13 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import eu.jsparrow.core.markers.RefactoringEventImpl;
-import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.RemoveRedundantTypeCastRule;
 import eu.jsparrow.core.visitor.impl.RemoveRedundantTypeCastASTVisitor;
+import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
+import eu.jsparrow.rules.common.markers.Resolver;
 
 /**
  * A visitor for resolving one issue of type

@@ -10,13 +10,13 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-import eu.jsparrow.core.markers.RefactoringEventImpl;
-import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.MapGetOrDefaultRule;
 import eu.jsparrow.core.visitor.impl.MapGetOrDefaultASTVisitor;
+import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
+import eu.jsparrow.rules.common.markers.Resolver;
 
 /**
  * A visitor for resolving one issue of type

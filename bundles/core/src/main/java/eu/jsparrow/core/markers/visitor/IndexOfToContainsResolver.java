@@ -11,13 +11,13 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 
-import eu.jsparrow.core.markers.RefactoringEventImpl;
-import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.IndexOfToContainsRule;
 import eu.jsparrow.core.visitor.impl.IndexOfToContainsASTVisitor;
+import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
+import eu.jsparrow.rules.common.markers.Resolver;
 
 /**
  * A visitor for resolving one issue of type

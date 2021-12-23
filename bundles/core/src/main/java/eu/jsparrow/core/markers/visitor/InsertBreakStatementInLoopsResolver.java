@@ -12,13 +12,13 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 
-import eu.jsparrow.core.markers.RefactoringEventImpl;
-import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.InsertBreakStatementInLoopsRule;
 import eu.jsparrow.core.visitor.impl.InsertBreakStatementInLoopsASTVisitor;
+import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
+import eu.jsparrow.rules.common.markers.Resolver;
 
 /**
  * A visitor for resolving one issue of type

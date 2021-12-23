@@ -1,39 +1,35 @@
-package eu.jsparrow.core.markers.visitor;
+package eu.jsparrow.rules.java16.textblock;
 
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.TextBlock;
 
-import eu.jsparrow.core.rule.RuleDescriptionFactory;
-import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
-import eu.jsparrow.core.visitor.impl.UseCollectionsSingletonListASTVisitor;
 import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
 /**
- * A visitor for resolving one issue of type
- * {@link UseCollectionsSingletonListASTVisitor}.
+ * A visitor for resolving one issue of type {@link UseTextBlockASTVisitor}.
  * 
- * @since 4.6.0
+ * @since 4.7.0
  *
  */
-public class UseCollectionsSingletonListResolver extends UseCollectionsSingletonListASTVisitor implements Resolver {
+public class UseTextBlockResolver extends UseTextBlockASTVisitor
+		implements Resolver {
 
-	public static final String ID = "UseCollectionsSingletonListResolver"; //$NON-NLS-1$
+	public static final String ID = "UseTextBlockResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;
 
-	public UseCollectionsSingletonListResolver(Predicate<ASTNode> positionChecker) {
+	public UseTextBlockResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
-		this.description = RuleDescriptionFactory
-			.findByRuleId(UseCollectionsSingletonListRule.RULE_ID);
+		this.description = new UseTextBlockRule().getRuleDescription();
 	}
 
 	@Override
@@ -42,22 +38,21 @@ public class UseCollectionsSingletonListResolver extends UseCollectionsSingleton
 	}
 
 	@Override
-	public boolean visit(MethodInvocation methodInvocation) {
-		if (positionChecker.test(methodInvocation)) {
-			super.visit(methodInvocation);
+	public boolean visit(InfixExpression infixExpression) {
+		if (positionChecker.test(infixExpression)) {
+			super.visit(infixExpression);
 		}
 		return false;
 	}
 
 	@Override
-	public void addMarkerEvent(SimpleName methodName, SimpleName newNode) {
+	public void addMarkerEvent(InfixExpression infixExpression, TextBlock newNode) {
 		int credit = description.getCredit();
 		int highlightLength = newNode.getLength();
-		ASTNode original = methodName.getParent();
-		int offset = original.getStartPosition();
-		int length = original.getLength();
+		int offset = infixExpression.getStartPosition();
+		int length = infixExpression.getLength();
 		CompilationUnit cu = getCompilationUnit();
-		int lineNumber = cu.getLineNumber(original.getStartPosition());
+		int lineNumber = cu.getLineNumber(infixExpression.getStartPosition());
 		IJavaElement javaElement = cu.getJavaElement();
 		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
 			.withResolver(ID)
