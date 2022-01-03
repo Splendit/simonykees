@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import static org.eclipse.jdt.core.dom.InfixExpression.Operator.*;
@@ -18,12 +19,17 @@ import eu.jsparrow.core.visitor.junit.dedicated.NotOperandUnwrapper;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 @SuppressWarnings("nls")
-class BooleanAssertionAnalyzer {
+class ReplaceBooleanAssertionsByDedicatedAssertionsAnalyzer {
 
-	private static final String IS_FALSE = "isFalse";
-	private static final String IS_TRUE = "isTrue";
+	static final String IS_FALSE = "isFalse";
+	static final String IS_TRUE = "isTrue";
 	private static final Map<String, String> ASSERTION_NAME_REPLACEMENTS;
 	private static final Map<String, String> ASSERTION_NAME_NEGATED_REPLACEMENTS;
+
+	private static final BooleanStringAssertionsAnalyzer STRING_ASSERTIONS_ANALYZER = new BooleanStringAssertionsAnalyzer();
+	private static final BooleanIterableAssertionsAnalyzer ITERABLE_ASSERTIONS_ANALYZER = new BooleanIterableAssertionsAnalyzer();
+	private static final BooleanMapAssertionsAnalyzer MAP_ASSERTIONS_ANALYZER = new BooleanMapAssertionsAnalyzer();
+	private static final BooleanObjectAssertionsAnalyzer OBJECT_ASSERTIONS_ANALYZER = new BooleanObjectAssertionsAnalyzer();
 
 	private static final Map<InfixExpression.Operator, InfixExpression.Operator> INFIX_OPERATOR_NEGATIONS;
 
@@ -60,9 +66,9 @@ class BooleanAssertionAnalyzer {
 		tmpMap.put("before", "isBefore"); // Date
 		tmpMap.put("isAfter", "isAfter"); // Instant
 		tmpMap.put("isBefore", "isBefore"); // Instant
-		//tmpMap.put("isLeapYear", "isLeapYear"); // LocalDate -- invalid transformation
-		//tmpMap.put("isSupported", "isSupported"); // LocalDate
-
+		// tmpMap.put("isLeapYear", "isLeapYear"); // LocalDate -- invalid
+		// transformation
+		// tmpMap.put("isSupported", "isSupported"); // LocalDate
 
 		ASSERTION_NAME_REPLACEMENTS = Collections.unmodifiableMap(tmpMap);
 
@@ -77,6 +83,7 @@ class BooleanAssertionAnalyzer {
 		tmpMap.put("matches", "doesNotMatch");
 		tmpMap.put("isEmpty", "isNotEmpty");
 		tmpMap.put("isBlank", "isNotBlank");
+		tmpMap.put("exists", "doesNotExist"); // File
 		ASSERTION_NAME_NEGATED_REPLACEMENTS = Collections.unmodifiableMap(tmpMap);
 
 		Map<InfixExpression.Operator, InfixExpression.Operator> tmpOperatorMap = new HashMap<>();
@@ -132,36 +139,46 @@ class BooleanAssertionAnalyzer {
 		Expression newAssertThatArgument = invocationAsAssertThatArgument.getExpression();
 		if (newAssertThatArgument == null) {
 			return Optional.empty();
-		}		
-	
-		String methodName = invocationAsAssertThatArgument.getName()
-			.getIdentifier();
-		String newAssertionName;
-
-		if (assertionMethodName.equals(IS_FALSE)) {
-			newAssertionName = ASSERTION_NAME_NEGATED_REPLACEMENTS.get(methodName);
-		} else {
-			newAssertionName = ASSERTION_NAME_REPLACEMENTS.get(methodName);
 		}
-		if (newAssertionName == null) {
-			return Optional.empty();
-		}
-		
-		List<Expression> newAssertionArguments = ASTNodeUtil.convertToTypedList(invocationAsAssertThatArgument.arguments(),
+		List<Expression> newAssertionArguments = ASTNodeUtil.convertToTypedList(
+				invocationAsAssertThatArgument.arguments(),
 				Expression.class);
 
 		if (newAssertionArguments.size() > 1) {
 			return Optional.empty();
 		}
-		
+
+		ITypeBinding newAssertThatArgumentTypeBinding = newAssertThatArgument.resolveTypeBinding();
+		if (newAssertThatArgumentTypeBinding == null) {
+			return Optional.empty();
+		}
+
 		IMethodBinding assertThatArgumentMethodBinding = invocationAsAssertThatArgument.resolveMethodBinding();
-		if(assertThatArgumentMethodBinding == null) {
+		if (assertThatArgumentMethodBinding == null) {
 			return Optional.empty();
-		}		
-		
-		if(!SupportedTypesForAssertions.isSupportedTypeForAsseertion(assertThatArgumentMethodBinding.getDeclaringClass())) {
+		}
+
+		String newAssertionName = findNewAssertionName(assertionMethodName, newAssertThatArgumentTypeBinding,
+				assertThatArgumentMethodBinding).orElse(null);
+
+		if (newAssertionName == null) {
+			if (!SupportedTypesForAssertions
+				.isSupportedTypeForAsseertion(assertThatArgumentMethodBinding.getDeclaringClass())) {
+				return Optional.empty();
+			}
+			String methodName = invocationAsAssertThatArgument.getName()
+				.getIdentifier();
+
+			if (assertionMethodName.equals(IS_FALSE)) {
+				newAssertionName = ASSERTION_NAME_NEGATED_REPLACEMENTS.get(methodName);
+			} else {
+				newAssertionName = ASSERTION_NAME_REPLACEMENTS.get(methodName);
+			}
+		}
+
+		if (newAssertionName == null) {
 			return Optional.empty();
-		}	
+		}
 
 		MethodInvocationData assertThatData = createNewAssertThatData(assertThat, newAssertThatArgument);
 
@@ -171,6 +188,36 @@ class BooleanAssertionAnalyzer {
 		DedicatedAssertionData dedicatedAssertionData = new DedicatedAssertionData(assertThatData, newAssertionData);
 
 		return Optional.of(dedicatedAssertionData);
+	}
+
+	private static Optional<String> findNewAssertionName(String assertionMethodName,
+			ITypeBinding newAssertThatArgumentTypeBinding, IMethodBinding assertThatArgumentMethodBinding) {
+
+		Optional<String> optionalNewAssertionName = STRING_ASSERTIONS_ANALYZER
+			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding,
+					assertionMethodName);
+		if (optionalNewAssertionName.isPresent()) {
+			return optionalNewAssertionName;
+		}
+
+		optionalNewAssertionName = ITERABLE_ASSERTIONS_ANALYZER
+			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding,
+					assertionMethodName);
+
+		if (optionalNewAssertionName.isPresent()) {
+			return optionalNewAssertionName;
+		}
+
+		optionalNewAssertionName = MAP_ASSERTIONS_ANALYZER
+			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding,
+					assertionMethodName);
+
+		if (optionalNewAssertionName.isPresent()) {
+			return optionalNewAssertionName;
+		}
+
+		return OBJECT_ASSERTIONS_ANALYZER.findAssertJAssertionName(assertThatArgumentMethodBinding,
+				newAssertThatArgumentTypeBinding, assertionMethodName);
 	}
 
 	private static MethodInvocationData createNewAssertThatData(MethodInvocation assertThat,

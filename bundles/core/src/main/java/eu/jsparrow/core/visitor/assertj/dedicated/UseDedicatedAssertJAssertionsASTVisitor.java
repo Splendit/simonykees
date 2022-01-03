@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,8 +52,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 	}
 
 	private Optional<DedicatedAssertionData> findDedicatedAssertionData(MethodInvocation node) {
-		// common to all visitors - Begin
-		// this piece of code could be pulled up into an abstract parent class
+
 		if (node.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return Optional.empty();
 		}
@@ -84,19 +82,8 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 				!SupportedAssertJAssertions.isSupportedAssertionsType(assertThatMethodBinding.getDeclaringClass())) {
 			return Optional.empty();
 		}
-		// common to all visitors - End
-		
-		// this could be an abstract method of the abstract parent class
-		return findTransformationData(assumedAssertThatInvocation, assertThatArgument, node);
-	}
 
-	/**
-	 * this could be a protected abstract method of the abstract parent class
-	 */
-	private Optional<DedicatedAssertionData> findTransformationData(MethodInvocation assumedAssertThatInvocation,
-			Expression assertThatArgument, MethodInvocation node) {
-
-		return BooleanAssertionAnalyzer
+		return ReplaceBooleanAssertionsByDedicatedAssertionsAnalyzer
 			.analyzeBooleanAssertion(assumedAssertThatInvocation, assertThatArgument, node);
 	}
 

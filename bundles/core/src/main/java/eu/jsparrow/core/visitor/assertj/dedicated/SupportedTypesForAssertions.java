@@ -20,7 +20,7 @@ public class SupportedTypesForAssertions {
 	private static final String JAVA_UTIL = "java.util"; //$NON-NLS-1$
 
 	private static final List<String> SUPPORTED_TYPES_FOR_ASSERTIONS = Collections.unmodifiableList(Stream.of(
-			java.lang.Object.class,
+			// java.lang.Object.class, // BooleanObjectAssertionsAnalyzer
 			// wrapper types for primitives
 			java.lang.Boolean.class,
 			java.lang.Character.class,
@@ -31,11 +31,11 @@ public class SupportedTypesForAssertions {
 			java.lang.Float.class,
 			java.lang.Double.class,
 			//
-			java.lang.String.class,
+			// java.lang.String.class, // BooleanStringAssertionsAnalyzer
 			java.lang.StringBuffer.class,
 			java.lang.StringBuilder.class,
 			java.lang.CharSequence.class,
-			java.lang.Iterable.class,
+			// java.lang.Iterable.class, // BooleanIterableAssertionsAnalyzer
 			//
 			java.lang.Class.class,
 			java.lang.Exception.class,
@@ -62,7 +62,7 @@ public class SupportedTypesForAssertions {
 			java.util.OptionalDouble.class,
 			java.util.OptionalInt.class,
 			java.util.OptionalLong.class,
-			java.util.Map.class,
+			// java.util.Map.class, // BooleanMapAssertionsAnalyzer
 			java.util.Iterator.class,
 			//
 			java.util.function.Predicate.class,
@@ -84,8 +84,10 @@ public class SupportedTypesForAssertions {
 
 		return packageName.equals(JAVA_UTIL)
 				&& ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
-						Arrays.asList(java.lang.Iterable.class.getName(), java.util.Iterator.class.getName(),
-								java.util.Map.class.getName()));
+						Arrays.asList(java.util.Iterator.class.getName()
+								// , java.lang.Iterable.class.getName() // BooleanIterableAssertionsAnalyzer
+								// , java.util.Map.class.getName() //BooleanMapAssertionsAnalyzer
+						));
 
 	}
 

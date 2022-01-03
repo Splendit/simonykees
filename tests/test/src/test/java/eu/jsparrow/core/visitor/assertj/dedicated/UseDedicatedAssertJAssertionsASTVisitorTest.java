@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.assertj.dedicated;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -29,7 +30,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				Arguments.of("isEmpty()", "isEmpty()"),
 				Arguments.of("isBlank()", "isBlank()"));
 	}
-	
+
 	public static Stream<Arguments> stringMethodIsFalse() throws Exception {
 		return Stream.of(
 				Arguments.of("equals(\"str-1\")", "isNotEqualTo(\"str-1\")"),
@@ -41,6 +42,41 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				Arguments.of("isBlank()", "isNotBlank()"));
 	}
 
+	public static Stream<Arguments> listMethodIsTrue() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(stringList)", "isEqualTo(stringList)"),
+				Arguments.of("contains(\"str-1\")", "contains(\"str-1\")"),
+				Arguments.of("containsAll(Arrays.asList(\"str-1\", \"str-2\"))",
+						"containsAll(Arrays.asList(\"str-1\", \"str-2\"))"),
+				Arguments.of("isEmpty()", "isEmpty()"));
+	}
+
+	public static Stream<Arguments> listMethodIsFalse() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(stringList)", "isNotEqualTo(stringList)"),
+				Arguments.of("contains(\"str-1\")", "doesNotContain(\"str-1\")"),
+				Arguments.of("isEmpty()", "isNotEmpty()"));
+	}
+
+	public static Stream<Arguments> mapMethodIsTrue() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(map)", "isEqualTo(map)"),
+				Arguments.of("containsKey(\"key-1\")", "containsKey(\"key-1\")"),
+				Arguments.of("containsValue(\"value-1\")",
+						"containsValue(\"value-1\")"),
+				Arguments.of("isEmpty()", "isEmpty()"));
+	}
+
+	public static Stream<Arguments> mapMethodIsFalse() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(new HashMap<>())", "isNotEqualTo(new HashMap<>())") ,
+				Arguments.of("containsKey(\"key-1\")",
+						"doesNotContainKey(\"key-1\")"),
+				Arguments.of("containsValue(\"value-1\")",
+						"doesNotContainValue(\"value-1\")"),
+				Arguments.of("isEmpty()", "isNotEmpty()")
+		);
+	}
 
 	@ParameterizedTest
 	@MethodSource("stringMethodIsTrue")
@@ -61,11 +97,11 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
+
 	@ParameterizedTest
 	@MethodSource("stringMethodIsFalse")
 	void visit_AssertThatStringMethodIsFalse_shouldTransform(String originalInvocation, String expectedInvocation)
-			throws Exception {		
+			throws Exception {
 
 		String original = String.format(
 				"" +
@@ -81,12 +117,11 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
-	
+
 	@ParameterizedTest
 	@MethodSource("stringMethodIsFalse")
 	void visit_AssertThatNegatedStringMethodIsTrue_shouldTransform(String originalInvocation, String expectedInvocation)
-			throws Exception {		
+			throws Exception {
 
 		String original = String.format(
 				"" +
@@ -102,7 +137,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
+
 	@ParameterizedTest
 	@MethodSource("stringMethodIsTrue")
 	void visit_AssertThatNegatedStringMethodIsFalse_shouldTransform(String originalInvocation,
@@ -124,4 +159,110 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		assertChange(original, expected);
 	}
 
+	@ParameterizedTest
+	@MethodSource("listMethodIsTrue")
+	void visit_AssertThatListMethodIsTrue_shouldTransform(String originalInvocation, String expectedInvocation)
+			throws Exception {
+		fixture.addImport(java.util.Arrays.class.getName());
+		fixture.addImport(java.util.List.class.getName());
+
+		String original = String.format(
+				"" +
+						"		List<String> stringList = Arrays.asList(\"str-1\", \"str-2\", \"str-3\");\n" +
+						"		assertThat(stringList.%s).isTrue();",
+				originalInvocation);
+
+		String expected = String.format(
+				"" +
+						"		List<String> stringList = Arrays.asList(\"str-1\", \"str-2\", \"str-3\");\n" +
+						"		assertThat(stringList).%s;",
+				expectedInvocation);
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@MethodSource("listMethodIsFalse")
+	void visit_AssertThatListMethodIsFalse_shouldTransform(String originalInvocation, String expectedInvocation)
+			throws Exception {
+		fixture.addImport(java.util.Arrays.class.getName());
+		fixture.addImport(java.util.List.class.getName());
+
+		String original = String.format(
+				"" +
+						"		List<String> stringList = Arrays.asList(\"str-1\", \"str-2\", \"str-3\");\n" +
+						"		assertThat(stringList.%s).isFalse();",
+				originalInvocation);
+
+		String expected = String.format(
+				"" +
+						"		List<String> stringList = Arrays.asList(\"str-1\", \"str-2\", \"str-3\");\n" +
+						"		assertThat(stringList).%s;",
+				expectedInvocation);
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_AssertThatListContainsAllIsFalse_shouldNotTransform()
+			throws Exception {
+		fixture.addImport(java.util.Arrays.class.getName());
+		fixture.addImport(java.util.List.class.getName());
+
+		String original = "" +
+				"		List<String> stringList = Arrays.asList(\"str-1\", \"str-2\");\n"
+				+ "		assertThat(stringList.containsAll(Arrays.asList(\"str-1\", \"str-3\"))).isFalse();";
+
+		assertNoChange(original);
+	}
+
+	@ParameterizedTest
+	@MethodSource("mapMethodIsTrue")
+	void visit_AssertThatMapMethodIsTrue_shouldTransform(String originalInvocation, String expectedInvocation)
+			throws Exception {
+
+		fixture.addImport(java.util.HashMap.class.getName());
+		fixture.addImport(java.util.Map.class.getName());
+
+		String original = String.format(
+				"" +
+						"		Map<String, String> map = new HashMap<>();\n"
+						+ "		map.put(\"key-1\", \"value-1\");\n"
+						+ "		assertThat(map.%s).isTrue();",
+				originalInvocation);
+
+		String expected = String.format(
+				"" +
+						"		Map<String, String> map = new HashMap<>();\n"
+						+ "		map.put(\"key-1\", \"value-1\");\n"
+						+ "		assertThat(map).%s;",
+				expectedInvocation);
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@MethodSource("mapMethodIsFalse")
+	void visit_AssertThatMapMethodIsFalse_shouldTransform(String originalInvocation, String expectedInvocation)
+			throws Exception {
+
+		fixture.addImport(java.util.HashMap.class.getName());
+		fixture.addImport(java.util.Map.class.getName());
+
+		String original = String.format(
+				"" +
+						"		Map<String, String> map = new HashMap<>();\n"
+						+ "		map.put(\"key-1\", \"value-1\");\n"
+						+ "		assertThat(map.%s).isFalse();",
+				originalInvocation);
+
+		String expected = String.format(
+				"" +
+						"		Map<String, String> map = new HashMap<>();\n"
+						+ "		map.put(\"key-1\", \"value-1\");\n"
+						+ "		assertThat(map).%s;",
+				expectedInvocation);
+
+		assertChange(original, expected);
+	}
 }
