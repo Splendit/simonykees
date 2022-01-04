@@ -82,7 +82,7 @@ class ForToForEachResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		ForToForEachResolver visitor = new ForToForEachResolver(node -> node.getStartPosition() == 163);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("CollectionRemoveAllResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("ForToForEachResolver"));
 		setVisitor(visitor);
 		String original = "" +
 				"		String[] ms = {};\n" +
