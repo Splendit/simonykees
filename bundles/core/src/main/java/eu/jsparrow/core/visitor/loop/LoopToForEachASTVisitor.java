@@ -357,7 +357,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		getCommentRewriter().saveLeadingComment(loop);
 		getCommentRewriter().saveBeforeStatement(loop, getHeaderComments(loop));
 		onRewrite();
-		addMarkerEvent(loop, loopBody, iterableNode, iteratorDecl);
+		addMarkerEvent(loop, iterableNode, iteratorDecl);
 	}
 
 	private void removeDeclarationFragment(ASTNode remove) {

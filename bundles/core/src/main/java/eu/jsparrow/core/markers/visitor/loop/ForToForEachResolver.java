@@ -3,11 +3,8 @@ package eu.jsparrow.core.markers.visitor.loop;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.EnhancedForStatement;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -18,7 +15,6 @@ import eu.jsparrow.core.rule.impl.ForToForEachRule;
 import eu.jsparrow.core.visitor.loop.fortoforeach.ForToForEachASTVisitor;
 import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
-import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
@@ -49,16 +45,13 @@ public class ForToForEachResolver extends ForToForEachASTVisitor implements Reso
 	}
 
 	@Override
-	public void addMarkerEvent(ForStatement loop, Statement loopBody, SimpleName iterableNode,
+	public void addMarkerEvent(ForStatement loop, SimpleName iterableNode,
 			SingleVariableDeclaration iteratorDecl) {
 		int credit = description.getCredit();
-		AST ast = loop.getAST();
-		EnhancedForStatement newFor = NodeBuilder.newEnhancedForStatement(ast,
-				(Statement) ASTNode.copySubtree(ast, loopBody),
-				(Expression) ASTNode.copySubtree(ast, iterableNode), 
-				(SingleVariableDeclaration) ASTNode.copySubtree(ast, iteratorDecl));
+		String codeRepresentation = String.format("for (%s : %s) {%n \t...%n}", iteratorDecl.toString(), iterableNode.toString()); //$NON-NLS-1$
 		
-		int highlightLength = newFor.getLength();
+		
+		int highlightLength = 0;
 		int offset = loop.getStartPosition();
 		int length = loop.getLength();
 		CompilationUnit cu = getCompilationUnit();
@@ -71,7 +64,7 @@ public class ForToForEachResolver extends ForToForEachASTVisitor implements Reso
 			.withIJavaElement(javaElement)
 			.withHighlightLength(highlightLength)
 			.withOffset(offset)
-			.withCodePreview(newFor.toString())
+			.withCodePreview(codeRepresentation)
 			.withLength(length)
 			.withWeightValue(credit)
 			.withLineNumber(lineNumber)
