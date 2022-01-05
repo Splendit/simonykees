@@ -39,6 +39,7 @@ import eu.jsparrow.core.markers.visitor.StringLiteralEqualityCheckResolver;
 import eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver;
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver;
+import eu.jsparrow.core.markers.visitor.UseStringJoinResolver;
 import eu.jsparrow.core.markers.visitor.loop.ForToForEachResolver;
 import eu.jsparrow.core.markers.visitor.loop.StringBuildingLoopResolver;
 import eu.jsparrow.core.markers.visitor.loop.WhileToForEachResolver;
@@ -92,6 +93,7 @@ public class ResolverVisitorsFactory {
 		map.put(ForToForEachResolver.ID, ForToForEachResolver::new);
 		map.put(WhileToForEachResolver.ID, WhileToForEachResolver::new);
 		map.put(StringBuildingLoopResolver.ID, StringBuildingLoopResolver::new);
+		map.put(UseStringJoinResolver.ID, UseStringJoinResolver::new);
 		
 		List<MarkerService> markerServices = getExternalRuleServices();
 		markerServices.stream()
