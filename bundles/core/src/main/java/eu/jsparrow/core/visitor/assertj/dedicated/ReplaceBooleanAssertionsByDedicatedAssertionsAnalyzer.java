@@ -26,11 +26,6 @@ class ReplaceBooleanAssertionsByDedicatedAssertionsAnalyzer {
 	private static final Map<String, String> ASSERTION_NAME_REPLACEMENTS;
 	private static final Map<String, String> ASSERTION_NAME_NEGATED_REPLACEMENTS;
 
-	private static final BooleanStringAssertionsAnalyzer STRING_ASSERTIONS_ANALYZER = new BooleanStringAssertionsAnalyzer();
-	private static final BooleanIterableAssertionsAnalyzer ITERABLE_ASSERTIONS_ANALYZER = new BooleanIterableAssertionsAnalyzer();
-	private static final BooleanMapAssertionsAnalyzer MAP_ASSERTIONS_ANALYZER = new BooleanMapAssertionsAnalyzer();
-	private static final BooleanObjectAssertionsAnalyzer OBJECT_ASSERTIONS_ANALYZER = new BooleanObjectAssertionsAnalyzer();
-
 	private static final Map<InfixExpression.Operator, InfixExpression.Operator> INFIX_OPERATOR_NEGATIONS;
 
 	static {
@@ -158,8 +153,10 @@ class ReplaceBooleanAssertionsByDedicatedAssertionsAnalyzer {
 			return Optional.empty();
 		}
 
-		String newAssertionName = findNewAssertionName(assertionMethodName, newAssertThatArgumentTypeBinding,
-				assertThatArgumentMethodBinding).orElse(null);
+		String newAssertionName = BooleanAssertionsAnalyzer
+			.findNewAssertionName(assertionMethodName, newAssertThatArgumentTypeBinding,
+					assertThatArgumentMethodBinding)
+			.orElse(null);
 
 		if (newAssertionName == null) {
 			if (!SupportedTypesForAssertions
@@ -188,36 +185,6 @@ class ReplaceBooleanAssertionsByDedicatedAssertionsAnalyzer {
 		DedicatedAssertionData dedicatedAssertionData = new DedicatedAssertionData(assertThatData, newAssertionData);
 
 		return Optional.of(dedicatedAssertionData);
-	}
-
-	private static Optional<String> findNewAssertionName(String assertionMethodName,
-			ITypeBinding newAssertThatArgumentTypeBinding, IMethodBinding assertThatArgumentMethodBinding) {
-
-		Optional<String> optionalNewAssertionName = STRING_ASSERTIONS_ANALYZER
-			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding,
-					assertionMethodName);
-		if (optionalNewAssertionName.isPresent()) {
-			return optionalNewAssertionName;
-		}
-
-		optionalNewAssertionName = ITERABLE_ASSERTIONS_ANALYZER
-			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding,
-					assertionMethodName);
-
-		if (optionalNewAssertionName.isPresent()) {
-			return optionalNewAssertionName;
-		}
-
-		optionalNewAssertionName = MAP_ASSERTIONS_ANALYZER
-			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding,
-					assertionMethodName);
-
-		if (optionalNewAssertionName.isPresent()) {
-			return optionalNewAssertionName;
-		}
-
-		return OBJECT_ASSERTIONS_ANALYZER.findAssertJAssertionName(assertThatArgumentMethodBinding,
-				newAssertThatArgumentTypeBinding, assertionMethodName);
 	}
 
 	private static MethodInvocationData createNewAssertThatData(MethodInvocation assertThat,

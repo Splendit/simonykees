@@ -16,5 +16,4 @@ class DedicatedAssertionData {
 	public MethodInvocationData getNewAssertionData() {
 		return newAssertionData;
 	}
-
 }

@@ -41,5 +41,4 @@ public class CopyMethodInvocation {
 	private CopyMethodInvocation() {
 		// hiding implicit default constructor
 	}
-
 }
