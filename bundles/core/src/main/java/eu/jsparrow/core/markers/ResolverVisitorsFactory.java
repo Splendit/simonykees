@@ -44,6 +44,7 @@ import eu.jsparrow.core.markers.visitor.loop.ForToForEachResolver;
 import eu.jsparrow.core.markers.visitor.loop.StringBuildingLoopResolver;
 import eu.jsparrow.core.markers.visitor.loop.WhileToForEachResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.MultiCatchResolver;
+import eu.jsparrow.core.markers.visitor.trycatch.TryWithResourceResolver;
 import eu.jsparrow.rules.api.MarkerService;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
@@ -96,6 +97,7 @@ public class ResolverVisitorsFactory {
 		map.put(StringBuildingLoopResolver.ID, StringBuildingLoopResolver::new);
 		map.put(UseStringJoinResolver.ID, UseStringJoinResolver::new);
 		map.put(MultiCatchResolver.ID, MultiCatchResolver::new);
+		map.put(TryWithResourceResolver.ID, TryWithResourceResolver::new);
 		
 		
 		List<MarkerService> markerServices = getExternalRuleServices();
