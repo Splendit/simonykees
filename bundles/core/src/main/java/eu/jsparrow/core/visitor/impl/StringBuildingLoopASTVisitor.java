@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.StringBuildingLoopEvent;
 import eu.jsparrow.core.visitor.loop.stream.AbstractEnhancedForLoopToStreamASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -118,7 +119,7 @@ import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
  * @since 2.1.1
  *
  */
-public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStreamASTVisitor {
+public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStreamASTVisitor implements StringBuildingLoopEvent {
 
 	private static final String COLLECTORS_QUALIFIED_NAME = java.util.stream.Collectors.class.getName();
 	private static final String ARRAYS_QUALIFIED_NAME = java.util.Arrays.class.getName();
@@ -258,6 +259,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 		astRewrite.replace(loopNode, newStatement, null);
 		getCommentRewriter().saveRelatedComments(loopNode);
+		addMarkerEvent(loopNode);
 		onRewrite();
 	}
 
@@ -302,6 +304,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 			}
 
 			blockRewrite.insertAfter(expressionStatement, loopNode, null);
+			addMarkerEvent(loopNode);
 			onRewrite();
 		}
 	}
@@ -723,6 +726,10 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 					Collections.singletonList(Number.class.getName()));
 		}
 		return false;
+	}
+	
+	protected void updateJavaVersion(String javaVersion) {
+		this.javaVersion = javaVersion;
 	}
 
 	/**
