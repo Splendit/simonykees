@@ -43,7 +43,7 @@ public class SupportedTypesForAssertions {
 			//
 			java.io.File.class,
 			java.io.InputStream.class,
-			java.nio.file.Path.class,
+			// java.nio.file.Path.class,
 			//
 			java.math.BigInteger.class,
 			java.math.BigDecimal.class,

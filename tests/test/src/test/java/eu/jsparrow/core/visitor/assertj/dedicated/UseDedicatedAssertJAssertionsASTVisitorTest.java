@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
@@ -69,13 +70,12 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 	public static Stream<Arguments> mapMethodIsFalse() throws Exception {
 		return Stream.of(
-				Arguments.of("equals(new HashMap<>())", "isNotEqualTo(new HashMap<>())") ,
+				Arguments.of("equals(new HashMap<>())", "isNotEqualTo(new HashMap<>())"),
 				Arguments.of("containsKey(\"key-1\")",
 						"doesNotContainKey(\"key-1\")"),
 				Arguments.of("containsValue(\"value-1\")",
 						"doesNotContainValue(\"value-1\")"),
-				Arguments.of("isEmpty()", "isNotEmpty()")
-		);
+				Arguments.of("isEmpty()", "isNotEmpty()"));
 	}
 
 	@ParameterizedTest
@@ -264,5 +264,53 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				expectedInvocation);
 
 		assertChange(original, expected);
+	}
+
+	public static Stream<Arguments> pathMethodIsTrue() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(path)", "isEqualTo(path)"),
+				Arguments.of("isAbsolute()", "isAbsolute()"),
+				Arguments.of("startsWith(Path.of(\"/home/gregor/\"))", "startsWith(Path.of(\"/home/gregor/\"))"),
+				Arguments.of("endsWith(Path.of(\"pom.xml\"))", "endsWith(Path.of(\"pom.xml\"))"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("pathMethodIsTrue")
+	void visit_AssertThatPathMethodIsTrue_shouldTransform(String originalInvocation, String expectedInvocation)
+			throws Exception {
+
+		fixture.addImport(java.nio.file.Path.class.getName());
+		String pathVariableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
+
+		String original = String.format("" +
+				"		%s\n" +
+				"		assertThat(path.%s).isTrue();",
+				pathVariableDeclaration, originalInvocation);
+
+		String expected = String.format("" +
+				"		%s\n" +
+				"		assertThat(path).%s;",
+				pathVariableDeclaration, expectedInvocation);
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"startsWith(\"/home/gregor/\")",
+			"endsWith(\"pom.xml\")"
+	})
+	void visit_AssertThatPathMethodIsTrue_shouldNotTransform(String originalInvocation)
+			throws Exception {
+
+		fixture.addImport(java.nio.file.Path.class.getName());
+		String pathVariableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
+
+		String original = String.format("" +
+				"		%s\n" +
+				"		assertThat(path.%s).isTrue();",
+				pathVariableDeclaration, originalInvocation);
+
+		assertNoChange(original);
 	}
 }

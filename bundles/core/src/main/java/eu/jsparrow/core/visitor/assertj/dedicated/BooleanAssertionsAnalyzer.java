@@ -15,8 +15,10 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 @SuppressWarnings("nls")
 class BooleanAssertionsAnalyzer {
 
-	private static final String EQUALS = "equals"; //$NON-NLS-1$
-	private static final String JAVA_UTIL = "java.util"; //$NON-NLS-1$
+	private static final String ENDS_WITH = "endsWith";
+	private static final String STARTS_WITH = "startsWith";
+	private static final String EQUALS = "equals";
+	private static final String JAVA_UTIL = "java.util";
 
 	private static final BooleanAssertionsAnalyzer STRING_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
 			BooleanAssertionsAnalyzer::isString, createStringAssertionsMapping());
@@ -24,6 +26,8 @@ class BooleanAssertionsAnalyzer {
 			BooleanAssertionsAnalyzer::isSupportedIterableType, createIterableAssertionsMapping());
 	private static final BooleanAssertionsAnalyzer MAP_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
 			BooleanAssertionsAnalyzer::isSupportedMapType, createMapAssertionsMapping());
+	private static final BooleanAssertionsAnalyzer PATH_ASSERTIONS_ANALYZER = createAnalyzerForPathMethodIsTrue();
+
 	private static final BooleanAssertionsAnalyzer OBJECT_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
 			BooleanAssertionsAnalyzer::isObject, new HashMap<>());
 
@@ -46,9 +50,9 @@ class BooleanAssertionsAnalyzer {
 	private static Map<String, String> createStringAssertionsMapping() {
 		Map<String, String> map = new HashMap<>();
 		map.put("equalsIgnoreCase", "isEqualToIgnoringCase");
-		map.put("startsWith", "startsWith");
+		map.put(STARTS_WITH, STARTS_WITH);
 		map.put("contains", "contains");
-		map.put("endsWith", "endsWith");
+		map.put(ENDS_WITH, ENDS_WITH);
 		map.put("matches", "matches");
 		map.put("isEmpty", "isEmpty");
 		map.put("isBlank", "isBlank");
@@ -58,9 +62,9 @@ class BooleanAssertionsAnalyzer {
 	private static Map<String, String> createNegatedStringAssertionsMapping() {
 		Map<String, String> map = new HashMap<>();
 		map.put("equalsIgnoreCase", "isNotEqualToIgnoringCase");
-		map.put("startsWith", "doesNotStartWith");
+		map.put(STARTS_WITH, "doesNotStartWith");
 		map.put("contains", "doesNotContain");
-		map.put("endsWith", "doesNotEndWith");
+		map.put(ENDS_WITH, "doesNotEndWith");
 		map.put("matches", "doesNotMatch");
 		map.put("isEmpty", "isNotEmpty");
 		map.put("isBlank", "isNotBlank");
@@ -126,6 +130,18 @@ class BooleanAssertionsAnalyzer {
 		return ClassRelationUtil.isContentOfType(typeBinding, Object.class.getName());
 	}
 
+	static boolean isPath(ITypeBinding typeBinding) {
+		return ClassRelationUtil.isContentOfType(typeBinding, java.nio.file.Path.class.getName());
+	}
+
+	private static Map<String, String> createPathAssertionsMapping() {
+		Map<String, String> map = new HashMap<>();
+		map.put("isAbsolute", "isAbsolute");
+		map.put(STARTS_WITH, STARTS_WITH);
+		map.put(ENDS_WITH, ENDS_WITH);
+		return map;
+	}
+
 	static Optional<String> findNewAssertionNameForIsTrue(String assertionMethodName,
 			ITypeBinding newAssertThatArgumentTypeBinding, IMethodBinding assertThatArgumentMethodBinding) {
 
@@ -144,6 +160,13 @@ class BooleanAssertionsAnalyzer {
 
 		optionalNewAssertionName = MAP_ASSERTIONS_ANALYZER
 			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
+
+		if (optionalNewAssertionName.isPresent()) {
+			return optionalNewAssertionName;
+		}
+
+		optionalNewAssertionName = PATH_ASSERTIONS_ANALYZER.findAssertJAssertionName(assertThatArgumentMethodBinding,
+				newAssertThatArgumentTypeBinding);
 
 		if (optionalNewAssertionName.isPresent()) {
 			return optionalNewAssertionName;
@@ -188,6 +211,19 @@ class BooleanAssertionsAnalyzer {
 		tmpMap.put(EQUALS, "isEqualTo"); //$NON-NLS-1$
 		tmpMap.putAll(mapToAssertJAssertions);
 		return new BooleanAssertionsAnalyzer(supportedTypeBindingPredicate, Collections.unmodifiableMap(tmpMap));
+	}
+
+	private static BooleanAssertionsAnalyzer createAnalyzerForPathMethodIsTrue() {
+
+		Map<String, String> tmpMap = new HashMap<>();
+		tmpMap.put(EQUALS, "isEqualTo"); //$NON-NLS-1$
+		tmpMap.putAll(createPathAssertionsMapping());
+		return new BooleanAssertionsAnalyzer(BooleanAssertionsAnalyzer::isPath, Collections.unmodifiableMap(tmpMap)) {
+			@Override
+			protected boolean analyzeMethodBinding(IMethodBinding methodBinding) {
+				return super.analyzeMethodBinding(methodBinding) && analyzePathMethodParameter(methodBinding);
+			}
+		};
 	}
 
 	private static BooleanAssertionsAnalyzer createAnalyzerForIsFalse(
@@ -237,5 +273,16 @@ class BooleanAssertionsAnalyzer {
 			return false;
 		}
 		return ClassRelationUtil.isContentOfType(parameterTypes[0], Object.class.getName());
+	}
+
+	private static boolean analyzePathMethodParameter(IMethodBinding methodBinding) {
+
+		String methodName = methodBinding.getName();
+		if (methodName.equals(STARTS_WITH) || (methodName.equals(ENDS_WITH))) {
+			ITypeBinding[] parameterTypes = methodBinding.getMethodDeclaration()
+				.getParameterTypes();
+			return parameterTypes.length == 1 && isPath(parameterTypes[0]);
+		}
+		return true;
 	}
 }
