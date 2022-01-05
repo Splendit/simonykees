@@ -1,7 +1,5 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
-import static eu.jsparrow.core.visitor.assertj.dedicated.ReplaceBooleanAssertionsByDedicatedAssertionsAnalyzer.IS_FALSE;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,27 +18,25 @@ class BooleanAssertionsAnalyzer {
 	private static final String EQUALS = "equals"; //$NON-NLS-1$
 	private static final String JAVA_UTIL = "java.util"; //$NON-NLS-1$
 
-	private static final BooleanAssertionsAnalyzer STRING_ASSERTIONS_ANALYZER = new BooleanAssertionsAnalyzer(
-			BooleanAssertionsAnalyzer::isString,
-			createStringAssertionsMapping(),
-			createNegatedStringAssertionsMapping());
+	private static final BooleanAssertionsAnalyzer STRING_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
+			BooleanAssertionsAnalyzer::isString, createStringAssertionsMapping());
+	private static final BooleanAssertionsAnalyzer ITERABLE_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
+			BooleanAssertionsAnalyzer::isSupportedIterableType, createIterableAssertionsMapping());
+	private static final BooleanAssertionsAnalyzer MAP_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
+			BooleanAssertionsAnalyzer::isSupportedMapType, createMapAssertionsMapping());
+	private static final BooleanAssertionsAnalyzer OBJECT_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
+			BooleanAssertionsAnalyzer::isObject, new HashMap<>());
 
-	private static final BooleanAssertionsAnalyzer ITERABLE_ASSERTIONS_ANALYZER = new BooleanAssertionsAnalyzer(
-			BooleanAssertionsAnalyzer::isSupportedIterableType,
-			createIterableAssertionsMapping(),
-			createNegatedIterableAssertionsMapping());
-
-	private static final BooleanAssertionsAnalyzer MAP_ASSERTIONS_ANALYZER = new BooleanAssertionsAnalyzer(
-			BooleanAssertionsAnalyzer::isSupportedMapType,
-			createMapAssertionsMapping(),
-			createNegatedMapAssertionsMapping());
-
-	private static final BooleanAssertionsAnalyzer OBJECT_ASSERTIONS_ANALYZER = new BooleanAssertionsAnalyzer(
-			BooleanAssertionsAnalyzer::isObject,
-			new HashMap<>(), new HashMap<>());
+	private static final BooleanAssertionsAnalyzer NEGATED_STRING_ASSERTIONS_ANALYZER = createAnalyzerForIsFalse(
+			BooleanAssertionsAnalyzer::isString, createNegatedStringAssertionsMapping());
+	private static final BooleanAssertionsAnalyzer NEGATED_ITERABLE_ASSERTIONS_ANALYZER = createAnalyzerForIsFalse(
+			BooleanAssertionsAnalyzer::isSupportedIterableType, createNegatedIterableAssertionsMapping());
+	private static final BooleanAssertionsAnalyzer NEGATED_MAP_ASSERTIONS_ANALYZER = createAnalyzerForIsFalse(
+			BooleanAssertionsAnalyzer::isSupportedMapType, createNegatedMapAssertionsMapping());
+	private static final BooleanAssertionsAnalyzer NEGATED_OBJECT_ASSERTIONS_ANALYZER = createAnalyzerForIsFalse(
+			BooleanAssertionsAnalyzer::isObject, new HashMap<>());
 
 	private final Map<String, String> mapToAssertJAssertions;
-	private final Map<String, String> mapToNegatedAssertJAssertions;
 	private final Predicate<ITypeBinding> supportedTypeBindingPredicate;
 
 	static boolean isString(ITypeBinding typeBinding) {
@@ -130,56 +126,88 @@ class BooleanAssertionsAnalyzer {
 		return ClassRelationUtil.isContentOfType(typeBinding, Object.class.getName());
 	}
 
-	static Optional<String> findNewAssertionName(String assertionMethodName,
+	static Optional<String> findNewAssertionNameForIsTrue(String assertionMethodName,
 			ITypeBinding newAssertThatArgumentTypeBinding, IMethodBinding assertThatArgumentMethodBinding) {
 
 		Optional<String> optionalNewAssertionName = STRING_ASSERTIONS_ANALYZER
-			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding,
-					assertionMethodName);
+			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
 		if (optionalNewAssertionName.isPresent()) {
 			return optionalNewAssertionName;
 		}
 
 		optionalNewAssertionName = ITERABLE_ASSERTIONS_ANALYZER
-			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding,
-					assertionMethodName);
+			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
 
 		if (optionalNewAssertionName.isPresent()) {
 			return optionalNewAssertionName;
 		}
 
 		optionalNewAssertionName = MAP_ASSERTIONS_ANALYZER
-			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding,
-					assertionMethodName);
+			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
 
 		if (optionalNewAssertionName.isPresent()) {
 			return optionalNewAssertionName;
 		}
 
 		return OBJECT_ASSERTIONS_ANALYZER.findAssertJAssertionName(assertThatArgumentMethodBinding,
-				newAssertThatArgumentTypeBinding, assertionMethodName);
+				newAssertThatArgumentTypeBinding);
 	}
 
-	protected BooleanAssertionsAnalyzer(Predicate<ITypeBinding> supportedTypeBindingPredicate,
-			Map<String, String> mapToAssertJAssertions,
-			Map<String, String> mapToNegatedAssertJAssertions) {
+	static Optional<String> findNewAssertionNameForIsFalse(String assertionMethodName,
+			ITypeBinding newAssertThatArgumentTypeBinding, IMethodBinding assertThatArgumentMethodBinding) {
 
-		this.supportedTypeBindingPredicate = supportedTypeBindingPredicate;
+		Optional<String> optionalNewAssertionName = NEGATED_STRING_ASSERTIONS_ANALYZER
+			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
+		if (optionalNewAssertionName.isPresent()) {
+			return optionalNewAssertionName;
+		}
+
+		optionalNewAssertionName = NEGATED_ITERABLE_ASSERTIONS_ANALYZER
+			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
+
+		if (optionalNewAssertionName.isPresent()) {
+			return optionalNewAssertionName;
+		}
+
+		optionalNewAssertionName = NEGATED_MAP_ASSERTIONS_ANALYZER
+			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
+
+		if (optionalNewAssertionName.isPresent()) {
+			return optionalNewAssertionName;
+		}
+
+		return NEGATED_OBJECT_ASSERTIONS_ANALYZER.findAssertJAssertionName(assertThatArgumentMethodBinding,
+				newAssertThatArgumentTypeBinding);
+	}
+
+	private static BooleanAssertionsAnalyzer createAnalyzerForIsTrue(
+			Predicate<ITypeBinding> supportedTypeBindingPredicate,
+			Map<String, String> mapToAssertJAssertions) {
 
 		Map<String, String> tmpMap = new HashMap<>();
 		tmpMap.put(EQUALS, "isEqualTo"); //$NON-NLS-1$
 		tmpMap.putAll(mapToAssertJAssertions);
-		this.mapToAssertJAssertions = Collections.unmodifiableMap(tmpMap);
+		return new BooleanAssertionsAnalyzer(supportedTypeBindingPredicate, Collections.unmodifiableMap(tmpMap));
+	}
 
-		Map<String, String> tmpNegatedMap = new HashMap<>();
-		tmpNegatedMap.put(EQUALS, "isNotEqualTo"); //$NON-NLS-1$
-		tmpNegatedMap.putAll(mapToNegatedAssertJAssertions);
-		this.mapToNegatedAssertJAssertions = Collections.unmodifiableMap(tmpNegatedMap);
+	private static BooleanAssertionsAnalyzer createAnalyzerForIsFalse(
+			Predicate<ITypeBinding> supportedTypeBindingPredicate,
+			Map<String, String> mapToAssertJAssertions) {
 
+		Map<String, String> tmpMap = new HashMap<>();
+		tmpMap.put(EQUALS, "isNotEqualTo"); //$NON-NLS-1$
+		tmpMap.putAll(mapToAssertJAssertions);
+		return new BooleanAssertionsAnalyzer(supportedTypeBindingPredicate, Collections.unmodifiableMap(tmpMap));
+	}
+
+	private BooleanAssertionsAnalyzer(Predicate<ITypeBinding> supportedTypeBindingPredicate,
+			Map<String, String> mapToAssertJAssertions) {
+		this.supportedTypeBindingPredicate = supportedTypeBindingPredicate;
+		this.mapToAssertJAssertions = mapToAssertJAssertions;
 	}
 
 	Optional<String> findAssertJAssertionName(IMethodBinding methodBinding,
-			ITypeBinding invocationExpressionTypeBinding, String assertionName) {
+			ITypeBinding invocationExpressionTypeBinding) {
 
 		if (!supportedTypeBindingPredicate.test(invocationExpressionTypeBinding)) {
 			return Optional.empty();
@@ -190,11 +218,8 @@ class BooleanAssertionsAnalyzer {
 		}
 
 		String methodName = methodBinding.getName();
-		if (assertionName.equals(IS_FALSE)) {
-			return Optional.ofNullable(mapToNegatedAssertJAssertions.get(methodName));
-		} else {
-			return Optional.ofNullable(mapToAssertJAssertions.get(methodName));
-		}
+		return Optional.ofNullable(mapToAssertJAssertions.get(methodName));
+
 	}
 
 	protected boolean analyzeMethodBinding(IMethodBinding methodBinding) {

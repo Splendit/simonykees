@@ -152,11 +152,18 @@ class ReplaceBooleanAssertionsByDedicatedAssertionsAnalyzer {
 		if (assertThatArgumentMethodBinding == null) {
 			return Optional.empty();
 		}
-
-		String newAssertionName = BooleanAssertionsAnalyzer
-			.findNewAssertionName(assertionMethodName, newAssertThatArgumentTypeBinding,
-					assertThatArgumentMethodBinding)
-			.orElse(null);
+		String newAssertionName;
+		if (assertionMethodName.equals(IS_FALSE)) {
+			newAssertionName = BooleanAssertionsAnalyzer
+				.findNewAssertionNameForIsFalse(assertionMethodName, newAssertThatArgumentTypeBinding,
+						assertThatArgumentMethodBinding)
+				.orElse(null);
+		} else {
+			newAssertionName = BooleanAssertionsAnalyzer
+				.findNewAssertionNameForIsTrue(assertionMethodName, newAssertThatArgumentTypeBinding,
+						assertThatArgumentMethodBinding)
+				.orElse(null);
+		}
 
 		if (newAssertionName == null) {
 			if (!SupportedTypesForAssertions
