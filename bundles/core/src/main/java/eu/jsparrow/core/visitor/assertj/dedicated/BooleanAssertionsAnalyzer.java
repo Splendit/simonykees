@@ -3,9 +3,12 @@ package eu.jsparrow.core.visitor.assertj.dedicated;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -20,6 +23,55 @@ class BooleanAssertionsAnalyzer {
 	private static final String EQUALS = "equals";
 	private static final String JAVA_UTIL = "java.util";
 
+	private static final List<String> OTHER_TYPES_FOR_ASSERTIONS = Collections.unmodifiableList(Stream.of(
+
+			java.lang.Boolean.class,
+			java.lang.Character.class,
+			java.lang.Byte.class,
+			java.lang.Short.class,
+			java.lang.Integer.class,
+			java.lang.Long.class,
+			java.lang.Float.class,
+			java.lang.Double.class,
+			//
+			java.lang.StringBuffer.class,
+			java.lang.StringBuilder.class,
+			java.lang.CharSequence.class,
+			//
+			java.lang.Class.class,
+			java.lang.Exception.class,
+			java.lang.Throwable.class,
+			//
+			java.io.File.class,
+			java.io.InputStream.class,
+			//
+			java.math.BigInteger.class,
+			java.math.BigDecimal.class,
+			//
+			java.time.Instant.class,
+			java.time.LocalDate.class,
+			java.time.LocalDateTime.class,
+			java.time.LocalTime.class,
+			java.time.OffsetDateTime.class,
+			java.time.OffsetTime.class,
+			java.time.ZonedDateTime.class,
+			java.time.Period.class,
+			//
+			java.util.Date.class,
+			java.util.Optional.class,
+			java.util.OptionalDouble.class,
+			java.util.OptionalInt.class,
+			java.util.OptionalLong.class,
+			java.util.Iterator.class,
+			//
+			java.util.function.Predicate.class,
+			//
+			java.util.stream.Stream.class,
+			java.util.stream.IntStream.class,
+			java.util.stream.LongStream.class)
+		.map(Class::getName)
+		.collect(Collectors.toList()));
+
 	private static final BooleanAssertionsAnalyzer STRING_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
 			BooleanAssertionsAnalyzer::isString, createStringAssertionsMapping());
 	private static final BooleanAssertionsAnalyzer ITERABLE_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
@@ -31,6 +83,9 @@ class BooleanAssertionsAnalyzer {
 	private static final BooleanAssertionsAnalyzer OBJECT_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
 			BooleanAssertionsAnalyzer::isObject, new HashMap<>());
 
+	private static final BooleanAssertionsAnalyzer OTHER_TYPES_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
+			BooleanAssertionsAnalyzer::isOtherSupportedTypeForAsseertion, createOtherAssertionsMapping());
+
 	private static final BooleanAssertionsAnalyzer NEGATED_STRING_ASSERTIONS_ANALYZER = createAnalyzerForIsFalse(
 			BooleanAssertionsAnalyzer::isString, createNegatedStringAssertionsMapping());
 	private static final BooleanAssertionsAnalyzer NEGATED_ITERABLE_ASSERTIONS_ANALYZER = createAnalyzerForIsFalse(
@@ -40,8 +95,19 @@ class BooleanAssertionsAnalyzer {
 	private static final BooleanAssertionsAnalyzer NEGATED_OBJECT_ASSERTIONS_ANALYZER = createAnalyzerForIsFalse(
 			BooleanAssertionsAnalyzer::isObject, new HashMap<>());
 
+	private static final BooleanAssertionsAnalyzer NEGATED_OTHER_TYPES_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
+			BooleanAssertionsAnalyzer::isOtherSupportedTypeForAsseertion, createNegatedOtherAssertionsMapping());
+
 	private final Map<String, String> mapToAssertJAssertions;
 	private final Predicate<ITypeBinding> supportedTypeBindingPredicate;
+
+	private static Map<String, String> createNegatedOtherAssertionsMapping() {
+		Map<String, String> tmpMap;
+		tmpMap = new HashMap<>();
+		tmpMap.put("equals", "isNotEqualTo");
+		tmpMap.put("exists", "doesNotExist"); // File
+		return tmpMap;
+	}
 
 	static boolean isString(ITypeBinding typeBinding) {
 		return ClassRelationUtil.isContentOfType(typeBinding, String.class.getName());
@@ -126,10 +192,6 @@ class BooleanAssertionsAnalyzer {
 		return map;
 	}
 
-	static boolean isObject(ITypeBinding typeBinding) {
-		return ClassRelationUtil.isContentOfType(typeBinding, Object.class.getName());
-	}
-
 	static boolean isPath(ITypeBinding typeBinding) {
 		return ClassRelationUtil.isContentOfType(typeBinding, java.nio.file.Path.class.getName());
 	}
@@ -142,8 +204,56 @@ class BooleanAssertionsAnalyzer {
 		return map;
 	}
 
-	static Optional<String> findNewAssertionNameForIsTrue(String assertionMethodName,
-			ITypeBinding newAssertThatArgumentTypeBinding, IMethodBinding assertThatArgumentMethodBinding) {
+	static boolean isObject(ITypeBinding typeBinding) {
+		return ClassRelationUtil.isContentOfType(typeBinding, Object.class.getName());
+	}
+
+	public static boolean isOtherSupportedTypeForAsseertion(ITypeBinding typeBinding) {
+
+		if (ClassRelationUtil.isContentOfTypes(typeBinding, OTHER_TYPES_FOR_ASSERTIONS)) {
+			return true;
+		}
+
+		String packageName = typeBinding.getPackage()
+			.getName();
+
+		return packageName.equals(JAVA_UTIL)
+				&& ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
+						Arrays.asList(java.util.Iterator.class.getName()
+						// , java.lang.Iterable.class.getName() //
+						// BooleanIterableAssertionsAnalyzer
+						// , java.util.Map.class.getName()
+						// //BooleanMapAssertionsAnalyzer
+						));
+
+	}
+
+	private static Map<String, String> createOtherAssertionsMapping() {
+		Map<String, String> tmpMap = new HashMap<>();
+		tmpMap.put("equals", "isEqualTo");
+		tmpMap.put("hasNext", "hasNext"); // Iterator
+		tmpMap.put("allMatch", "allMatch"); // Stream
+		tmpMap.put("anyMatch", "anyMatch"); // Stream
+		tmpMap.put("noneMatch", "noneMatch"); // Stream
+		//
+		tmpMap.put("exists", "exists"); // File
+		tmpMap.put("isFile", "isFile"); // File
+		tmpMap.put("isDirectory", "isDirectory"); // File
+		// tmpMap.put("isHidden", "isHidden"); // File -- not supported
+		tmpMap.put("isAbsolute", "isAbsolute"); // Path
+		tmpMap.put("canRead", "canRead"); // File
+		tmpMap.put("after", "isAfter"); // Date
+		tmpMap.put("before", "isBefore"); // Date
+		tmpMap.put("isAfter", "isAfter"); // Instant
+		tmpMap.put("isBefore", "isBefore"); // Instant
+		// tmpMap.put("isLeapYear", "isLeapYear"); // LocalDate -- invalid
+		// transformation
+		// tmpMap.put("isSupported", "isSupported"); // LocalDate
+		return tmpMap;
+	}
+
+	static Optional<String> findNewAssertionNameForIsTrue(ITypeBinding newAssertThatArgumentTypeBinding,
+			IMethodBinding assertThatArgumentMethodBinding) {
 
 		Optional<String> optionalNewAssertionName = STRING_ASSERTIONS_ANALYZER
 			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
@@ -172,12 +282,19 @@ class BooleanAssertionsAnalyzer {
 			return optionalNewAssertionName;
 		}
 
+		optionalNewAssertionName = OTHER_TYPES_ASSERTIONS_ANALYZER
+			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
+
+		if (optionalNewAssertionName.isPresent()) {
+			return optionalNewAssertionName;
+		}
+
 		return OBJECT_ASSERTIONS_ANALYZER.findAssertJAssertionName(assertThatArgumentMethodBinding,
 				newAssertThatArgumentTypeBinding);
 	}
 
-	static Optional<String> findNewAssertionNameForIsFalse(String assertionMethodName,
-			ITypeBinding newAssertThatArgumentTypeBinding, IMethodBinding assertThatArgumentMethodBinding) {
+	static Optional<String> findNewAssertionNameForIsFalse(ITypeBinding newAssertThatArgumentTypeBinding,
+			IMethodBinding assertThatArgumentMethodBinding) {
 
 		Optional<String> optionalNewAssertionName = NEGATED_STRING_ASSERTIONS_ANALYZER
 			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
@@ -193,6 +310,13 @@ class BooleanAssertionsAnalyzer {
 		}
 
 		optionalNewAssertionName = NEGATED_MAP_ASSERTIONS_ANALYZER
+			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
+
+		if (optionalNewAssertionName.isPresent()) {
+			return optionalNewAssertionName;
+		}
+
+		optionalNewAssertionName = NEGATED_OTHER_TYPES_ASSERTIONS_ANALYZER
 			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
 
 		if (optionalNewAssertionName.isPresent()) {

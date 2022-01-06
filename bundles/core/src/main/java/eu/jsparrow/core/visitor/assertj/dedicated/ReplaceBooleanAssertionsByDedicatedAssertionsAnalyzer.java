@@ -23,64 +23,9 @@ class ReplaceBooleanAssertionsByDedicatedAssertionsAnalyzer {
 
 	static final String IS_FALSE = "isFalse";
 	static final String IS_TRUE = "isTrue";
-	private static final Map<String, String> ASSERTION_NAME_REPLACEMENTS;
-	private static final Map<String, String> ASSERTION_NAME_NEGATED_REPLACEMENTS;
-
 	private static final Map<InfixExpression.Operator, InfixExpression.Operator> INFIX_OPERATOR_NEGATIONS;
 
 	static {
-		Map<String, String> tmpMap = new HashMap<>();
-		tmpMap.put("equals", "isEqualTo");
-		tmpMap.put("equalsIgnoreCase", "isEqualToIgnoringCase");
-		tmpMap.put("startsWith", "startsWith");
-		tmpMap.put("contains", "contains");
-		tmpMap.put("containsAll", "containsAll");
-		tmpMap.put("containsKey", "containsKey");
-		tmpMap.put("containsValue", "containsValue");
-		tmpMap.put("endsWith", "endsWith");
-		tmpMap.put("matches", "matches");
-		tmpMap.put("isEmpty", "isEmpty");
-		tmpMap.put("isBlank", "isBlank");
-		tmpMap.put("hasNext", "hasNext"); // Iterator
-		// tmpMap.put("hasPrevious", "hasPrevious"); // ListIterator invalid!!!
-		// ??? tmpMap.put("hasMoreElements", "hasMoreElements"); // Enumeration
-		// isPresent // Optional
-		// after // Date
-		// before // Date
-		tmpMap.put("allMatch", "allMatch"); // Stream
-		tmpMap.put("anyMatch", "anyMatch"); // Stream
-		tmpMap.put("noneMatch", "noneMatch"); // Stream
-		//
-		tmpMap.put("exists", "exists"); // File
-		tmpMap.put("isFile", "isFile"); // File
-		tmpMap.put("isDirectory", "isDirectory"); // File
-		// tmpMap.put("isHidden", "isHidden"); // File -- not supported
-		tmpMap.put("isAbsolute", "isAbsolute"); // Path
-		tmpMap.put("canRead", "canRead"); // File
-		tmpMap.put("after", "isAfter"); // Date
-		tmpMap.put("before", "isBefore"); // Date
-		tmpMap.put("isAfter", "isAfter"); // Instant
-		tmpMap.put("isBefore", "isBefore"); // Instant
-		// tmpMap.put("isLeapYear", "isLeapYear"); // LocalDate -- invalid
-		// transformation
-		// tmpMap.put("isSupported", "isSupported"); // LocalDate
-
-		ASSERTION_NAME_REPLACEMENTS = Collections.unmodifiableMap(tmpMap);
-
-		tmpMap = new HashMap<>();
-		tmpMap.put("equals", "isNotEqualTo");
-		tmpMap.put("equalsIgnoreCase", "isNotEqualToIgnoringCase");
-		tmpMap.put("startsWith", "doesNotStartWith");
-		tmpMap.put("contains", "doesNotContain");
-		tmpMap.put("containsKey", "doesNotContainKey");
-		tmpMap.put("containsValue", "doesNotContainValue");
-		tmpMap.put("endsWith", "doesNotEndWith");
-		tmpMap.put("matches", "doesNotMatch");
-		tmpMap.put("isEmpty", "isNotEmpty");
-		tmpMap.put("isBlank", "isNotBlank");
-		tmpMap.put("exists", "doesNotExist"); // File
-		ASSERTION_NAME_NEGATED_REPLACEMENTS = Collections.unmodifiableMap(tmpMap);
-
 		Map<InfixExpression.Operator, InfixExpression.Operator> tmpOperatorMap = new HashMap<>();
 
 		tmpOperatorMap.put(EQUALS, NOT_EQUALS);
@@ -155,29 +100,12 @@ class ReplaceBooleanAssertionsByDedicatedAssertionsAnalyzer {
 		String newAssertionName;
 		if (assertionMethodName.equals(IS_FALSE)) {
 			newAssertionName = BooleanAssertionsAnalyzer
-				.findNewAssertionNameForIsFalse(assertionMethodName, newAssertThatArgumentTypeBinding,
-						assertThatArgumentMethodBinding)
+				.findNewAssertionNameForIsFalse(newAssertThatArgumentTypeBinding, assertThatArgumentMethodBinding)
 				.orElse(null);
 		} else {
 			newAssertionName = BooleanAssertionsAnalyzer
-				.findNewAssertionNameForIsTrue(assertionMethodName, newAssertThatArgumentTypeBinding,
-						assertThatArgumentMethodBinding)
+				.findNewAssertionNameForIsTrue(newAssertThatArgumentTypeBinding, assertThatArgumentMethodBinding)
 				.orElse(null);
-		}
-
-		if (newAssertionName == null) {
-			if (!SupportedTypesForAssertions
-				.isSupportedTypeForAsseertion(assertThatArgumentMethodBinding.getDeclaringClass())) {
-				return Optional.empty();
-			}
-			String methodName = invocationAsAssertThatArgument.getName()
-				.getIdentifier();
-
-			if (assertionMethodName.equals(IS_FALSE)) {
-				newAssertionName = ASSERTION_NAME_NEGATED_REPLACEMENTS.get(methodName);
-			} else {
-				newAssertionName = ASSERTION_NAME_REPLACEMENTS.get(methodName);
-			}
 		}
 
 		if (newAssertionName == null) {
