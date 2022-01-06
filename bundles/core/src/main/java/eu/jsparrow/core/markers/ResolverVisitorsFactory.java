@@ -41,6 +41,7 @@ import eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver;
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver;
 import eu.jsparrow.core.markers.visitor.UseStringJoinResolver;
+import eu.jsparrow.core.markers.visitor.factory.methods.CollectionsFactoryMethodsResolver;
 import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachCollectResolver;
 import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachIfWrapperToFilterResolver;
 import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachMapResolver;
@@ -105,6 +106,7 @@ public class ResolverVisitorsFactory {
 		map.put(LambdaForEachIfWrapperToFilterResolver.ID, LambdaForEachIfWrapperToFilterResolver::new);
 		map.put(LambdaForEachMapResolver.ID, LambdaForEachMapResolver::new);
 		map.put(LambdaForEachCollectResolver.ID, LambdaForEachCollectResolver::new);
+		map.put(CollectionsFactoryMethodsResolver.ID, CollectionsFactoryMethodsResolver::new);
 
 		List<MarkerService> markerServices = getExternalRuleServices();
 		markerServices.stream()
