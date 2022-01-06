@@ -41,6 +41,9 @@ import eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver;
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver;
 import eu.jsparrow.core.markers.visitor.UseStringJoinResolver;
+import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachCollectResolver;
+import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachIfWrapperToFilterResolver;
+import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachMapResolver;
 import eu.jsparrow.core.markers.visitor.loop.ForToForEachResolver;
 import eu.jsparrow.core.markers.visitor.loop.StringBuildingLoopResolver;
 import eu.jsparrow.core.markers.visitor.loop.WhileToForEachResolver;
@@ -52,7 +55,6 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 import eu.jsparrow.rules.common.markers.Resolver;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
-
 
 /**
  * A registry for jSparrow marker resolvers implemented in this module.
@@ -100,16 +102,18 @@ public class ResolverVisitorsFactory {
 		map.put(MultiCatchResolver.ID, MultiCatchResolver::new);
 		map.put(TryWithResourceResolver.ID, TryWithResourceResolver::new);
 		map.put(UseArraysStreamResolver.ID, UseArraysStreamResolver::new);
-		
-		
+		map.put(LambdaForEachIfWrapperToFilterResolver.ID, LambdaForEachIfWrapperToFilterResolver::new);
+		map.put(LambdaForEachMapResolver.ID, LambdaForEachMapResolver::new);
+		map.put(LambdaForEachCollectResolver.ID, LambdaForEachCollectResolver::new);
+
 		List<MarkerService> markerServices = getExternalRuleServices();
 		markerServices.stream()
 			.map(MarkerService::loadGeneratingFunctions)
 			.forEach(map::putAll);
-		
+
 		return Collections.unmodifiableMap(map);
 	}
-	
+
 	private static List<MarkerService> getExternalRuleServices() {
 		BundleContext bundleContext = FrameworkUtil.getBundle(ResolverVisitorsFactory.class)
 			.getBundleContext();

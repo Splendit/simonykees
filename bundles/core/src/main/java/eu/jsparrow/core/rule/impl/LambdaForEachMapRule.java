@@ -20,10 +20,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class LambdaForEachMapRule extends RefactoringRuleImpl<LambdaForEachMapASTVisitor> {
 
+	public static final String RULE_ID = "LambdaForEachMap"; //$NON-NLS-1$
+
 	public LambdaForEachMapRule() {
 		super();
 		this.visitorClass = LambdaForEachMapASTVisitor.class;
-		this.id = "LambdaForEachMap"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.LambdaForEachMapRule_name,
 				Messages.LambdaForEachMapRule_description, Duration.ofMinutes(15),
 				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP));
