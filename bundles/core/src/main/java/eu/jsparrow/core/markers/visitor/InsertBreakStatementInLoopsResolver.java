@@ -24,7 +24,7 @@ import eu.jsparrow.rules.common.markers.Resolver;
  * A visitor for resolving one issue of type
  * {@link InsertBreakStatementInLoopsASTVisitor}.
  * 
- * @author arditymeri
+ * @since 4.6.0
  *
  */
 public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInLoopsASTVisitor implements Resolver {
@@ -44,7 +44,6 @@ public class InsertBreakStatementInLoopsResolver extends InsertBreakStatementInL
 	public RuleDescription getDescription() {
 		return this.description;
 	}
-
 
 	@Override
 	public boolean visit(EnhancedForStatement enhancedForStatement) {

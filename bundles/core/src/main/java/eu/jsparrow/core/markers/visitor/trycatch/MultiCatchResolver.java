@@ -15,6 +15,12 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type {@link MultiCatchASTVisitor}.
+ * 
+ * @since 4.7.0
+ *
+ */
 public class MultiCatchResolver extends MultiCatchASTVisitor implements Resolver {
 
 	public static final String ID = "MultiCatchResolver"; //$NON-NLS-1$

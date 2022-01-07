@@ -18,8 +18,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link CollectionsFactoryMethodsASTVisitor}.
+ * 
+ * @since 4.7.0
+ */
 public class CollectionsFactoryMethodsResolver extends CollectionsFactoryMethodsASTVisitor implements Resolver {
-
 
 	public static final String ID = "CollectionsFactoryMethodsResolver"; //$NON-NLS-1$
 
@@ -79,7 +84,7 @@ public class CollectionsFactoryMethodsResolver extends CollectionsFactoryMethods
 		newMethodInvocation.setExpression(ast.newSimpleName(expressionTypeName));
 		@SuppressWarnings("unchecked")
 		List<Expression> arguments = newMethodInvocation.arguments();
-		for(Expression element : elements) {
+		for (Expression element : elements) {
 			Expression argument = (Expression) ASTNode.copySubtree(ast, element);
 			arguments.add(argument);
 		}

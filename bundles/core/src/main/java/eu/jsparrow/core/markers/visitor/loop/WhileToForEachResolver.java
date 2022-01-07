@@ -18,8 +18,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
 /**
- * A visitor for resolving one issue of type
- * {@link WhileToForEachASTVisitor}.
+ * A visitor for resolving one issue of type {@link WhileToForEachASTVisitor}.
  * 
  * @since 4.7.0
  *

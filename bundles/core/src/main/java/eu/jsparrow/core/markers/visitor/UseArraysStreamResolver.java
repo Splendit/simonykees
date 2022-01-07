@@ -23,6 +23,12 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type {@link UseArraysStreamASTVisitor}.
+ * 
+ * @since 4.7.0
+ *
+ */
 public class UseArraysStreamResolver extends UseArraysStreamASTVisitor implements Resolver {
 	public static final String ID = "UseArraysStreamResolver"; //$NON-NLS-1$
 
@@ -47,7 +53,7 @@ public class UseArraysStreamResolver extends UseArraysStreamASTVisitor implement
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void addMarkerEvent(MethodInvocation parent, List<Expression> arguments) {
 		int credit = description.getCredit();
@@ -99,7 +105,6 @@ public class UseArraysStreamResolver extends UseArraysStreamASTVisitor implement
 		addMarkerEvent(event);
 	}
 
-
 	@SuppressWarnings("unchecked")
 	private MethodInvocation createRepresentingNode(MethodInvocation parent, List<Expression> arguments, String name,
 			Expression experssion) {
@@ -115,16 +120,17 @@ public class UseArraysStreamResolver extends UseArraysStreamASTVisitor implement
 			.forEach(initializerExpressions::add);
 		arrayCreation.setInitializer(initializer);
 		Expression streamExpression;
-		if(experssion == null) {
+		if (experssion == null) {
 			streamExpression = ast.newSimpleName("Arrays"); //$NON-NLS-1$
 		} else {
 			streamExpression = (Expression) ASTNode.copySubtree(ast, experssion);
 		}
-		
+
 		MethodInvocation stream = ast.newMethodInvocation();
 		stream.setName(ast.newSimpleName("stream")); //$NON-NLS-1$
 		stream.setExpression(streamExpression);
-		stream.arguments().add(arrayCreation);
+		stream.arguments()
+			.add(arrayCreation);
 		return stream;
 	}
 
@@ -134,8 +140,9 @@ public class UseArraysStreamResolver extends UseArraysStreamASTVisitor implement
 		MethodInvocation of = ast.newMethodInvocation();
 		of.setName(ast.newSimpleName("of")); //$NON-NLS-1$
 		of.setExpression(ast.newSimpleName("Stream")); //$NON-NLS-1$
-		for(Expression argument : arguments) {
-			of.arguments().add((Expression)ASTNode.copySubtree(ast, argument));
+		for (Expression argument : arguments) {
+			of.arguments()
+				.add((Expression) ASTNode.copySubtree(ast, argument));
 		}
 		return of;
 	}

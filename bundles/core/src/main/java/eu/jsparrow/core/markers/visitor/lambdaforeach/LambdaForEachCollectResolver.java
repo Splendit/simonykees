@@ -15,6 +15,12 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link LambdaForEachCollectASTVisitor}.
+ * 
+ * @since 4.7.0
+ */
 public class LambdaForEachCollectResolver extends LambdaForEachCollectASTVisitor implements Resolver {
 
 	public static final String ID = "LambdaForEachCollectResolver"; //$NON-NLS-1$

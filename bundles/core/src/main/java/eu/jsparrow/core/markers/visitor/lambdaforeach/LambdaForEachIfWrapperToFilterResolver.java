@@ -21,6 +21,13 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link LambdaForEachIfWrapperToFilterASTVisitor}.
+ * 
+ * @since 4.7.0
+ *
+ */
 public class LambdaForEachIfWrapperToFilterResolver extends LambdaForEachIfWrapperToFilterASTVisitor
 		implements Resolver {
 

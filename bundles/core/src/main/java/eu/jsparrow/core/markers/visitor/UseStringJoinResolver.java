@@ -20,6 +20,12 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type {@link UseStringJoinASTVisitor}.
+ * 
+ * @since 4.7.0
+ *
+ */
 public class UseStringJoinResolver extends UseStringJoinASTVisitor implements Resolver {
 
 	public static final String ID = "UseStringJoinResolver"; //$NON-NLS-1$
@@ -48,7 +54,7 @@ public class UseStringJoinResolver extends UseStringJoinASTVisitor implements Re
 
 	@Override
 	public void addMarkerEvent(MethodInvocation parentMethod, Expression collection, List<Expression> joinArguments) {
-		
+
 		int credit = description.getCredit();
 		MethodInvocation newNode = createRepresentingNode(parentMethod, collection, joinArguments);
 		int highlightLength = 0;
@@ -72,7 +78,8 @@ public class UseStringJoinResolver extends UseStringJoinASTVisitor implements Re
 		addMarkerEvent(event);
 	}
 
-	private MethodInvocation createRepresentingNode(MethodInvocation parentMethod, Expression collection, List<Expression> joinArguments) {
+	private MethodInvocation createRepresentingNode(MethodInvocation parentMethod, Expression collection,
+			List<Expression> joinArguments) {
 		AST ast = parentMethod.getAST();
 		SimpleName expression = ast.newSimpleName("String"); //$NON-NLS-1$
 		SimpleName name = ast.newSimpleName("join"); //$NON-NLS-1$
