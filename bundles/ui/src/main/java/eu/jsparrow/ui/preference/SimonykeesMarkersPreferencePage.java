@@ -84,23 +84,23 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 
 
         // Lists' Purpose: store objects to calculate which ones are empty and needs to be disposed
-        List<TreeItem> treeCategoryItems = new ArrayList<TreeItem>();        
-        List<Composite> treeCategoryComposites = new ArrayList<Composite>();
-        List<TreeEditor> treeCategoryEditors = new ArrayList<TreeEditor>();
-        List<Button> treeCategoryButtons = new ArrayList<Button>();
+        List<TreeItem> treeCategoryItems = new ArrayList<>();        
+        List<Composite> treeCategoryComposites = new ArrayList<>();
+        List<TreeEditor> treeCategoryEditors = new ArrayList<>();
+        List<Button> treeCategoryButtons = new ArrayList<>();
         
-        List<ArrayList> treeCategoryMarkerIdsArr = new ArrayList<ArrayList>();
-        List<ArrayList> treeItemButtonsArr = new ArrayList<ArrayList>();
+        List<List<String>> treeCategoryMarkerIdsArr = new ArrayList<>();
+        List<List<Button>> treeItemButtonsArr = new ArrayList<>();
         /*  
          * e.g. treeItemButtonsArr is an ArrayList that will store ArrayLists<buttons> for each treeCategory
          * Purpose: if a checkbox for one treeCategory is selected -> only check all buttons within this treeCategory
          */
         
         // Get the names of tags
-        List<String> tagNames = new ArrayList<String>();
-		for(int i = 0; i < Tag.getAllTags().length; i++) {			
+        List<String> tagNames = new ArrayList<>();
+		for(int i = 0; i < Tag.getAllTags().length; i++) {
 			// Skip the Minimum Java versions
-			if(Tag.getAllTags()[i].matches(".*\\d.*") == false){				 //$NON-NLS-1$
+			if(!Tag.getAllTags()[i].matches(".*\\d.*")) { //$NON-NLS-1$
 				String thisTag = Tag.getAllTags()[i];
 				tagNames.add(thisTag);
 			}
@@ -130,7 +130,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
     		
             Label label = new Label(composite, 0);
             label.setLayoutData(new GridData(SWT.LEFT, SWT.DEFAULT, false, false));
-            label.setText( tagNames.get(i)); 
+            label.setText(tagNames.get(i));
             label.setVisible(true);
             
             editor.setEditor(composite, item);
@@ -139,8 +139,8 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
             treeCategoryComposites.add(composite);
             treeCategoryEditors.add(editor);
             treeCategoryButtons.add(button);
-            treeCategoryMarkerIdsArr.add(new ArrayList<String>());
-            treeItemButtonsArr.add(new ArrayList<Button>());
+            treeCategoryMarkerIdsArr.add(new ArrayList<>());
+            treeItemButtonsArr.add(new ArrayList<>());
        
 
         }
@@ -152,13 +152,16 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
         tree.addTreeListener(new TreeListener() {
 			@Override
 			public void treeCollapsed(TreeEvent e) {
+				/*
+				 * No action taken on collapse
+				 */
 			}
 
 			@Override
 			public void treeExpanded(TreeEvent e) {
-				for( TreeItem item : treeCategoryItems ) {
+				for(TreeItem item : treeCategoryItems) {
 					// collapse all on expand
-				   if(item.isDisposed() == false) item.setExpanded(false);
+				   if(!item.isDisposed()) item.setExpanded(false);
 				}
 			}
           });
@@ -172,7 +175,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 	        for(int i = 0; i < tagNames.size(); i++) {
 	        	for(int j = 0; j < tags.size(); j++) {
 	        		// Put marker into the treeCategory that in name equals its 2nd tag
-	        		if(Tag.getTagForName(tagNames.get(i)).toString() == tags.get(j).toString()) {        		
+	        		if(Tag.getTagForName(tagNames.get(i)) == tags.get(j)) {        		
 		                TreeItem item = new TreeItem(treeCategoryItems.get(i), SWT.NONE);
 		                
 		                // add UI through editor
@@ -270,8 +273,8 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
         		
         		// check if every items in a treeCategory -was- selected
         		for(int j = 0; j < sizeButtonsInCategory; j++) {
-		    		Button button = (Button) treeItemButtonsArr.get(buttonIndex).get(j);
-					Button buttonCategory = (Button)  treeCategoryButtons.get(i);
+		    		Button button = treeItemButtonsArr.get(buttonIndex).get(j);
+					Button buttonCategory = treeCategoryButtons.get(i);
 		    		if(button.getSelection()) countCheckedButtonsInCategory++;
 		    		if(countCheckedButtonsInCategory == sizeButtonsInCategory) buttonCategory.setSelection(true);
         		}
@@ -287,8 +290,8 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
         		    	 */
 
         		    	for(int j = 0; j < sizeButtonsInCategory; j++) {
-        		    		String markerId = treeCategoryMarkerIdsArr.get(buttonIndex).get(j).toString();
-        		    		Button button = (Button) treeItemButtonsArr.get(buttonIndex).get(j);
+        		    		String markerId = treeCategoryMarkerIdsArr.get(buttonIndex).get(j);
+        		    		Button button = treeItemButtonsArr.get(buttonIndex).get(j);
 	    					if (source.getSelection()) {
 	    						button.setSelection(true);
 	    						addActiveMarker(markerId);
@@ -326,7 +329,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		SimonykeesPreferenceManager.removeActiveMarker(markerId);
 	}
 	
-	protected void addSwitchButton(Composite composite, String name, boolean turn, List<ArrayList> markerIdsArr, List<Button> categoryButtons,List<ArrayList> buttonsArr) {
+	protected void addSwitchButton(Composite composite, String name, boolean turn, List<List<String>> markerIdsArr, List<Button> categoryButtons, List<List<Button>> buttonsArr) {
 		Button thisButton = new Button(composite, SWT.PUSH);
 		thisButton.setLayoutData(new GridData(SWT.DEFAULT, SWT.DEFAULT, false, false));
 		thisButton.setText(name); 
@@ -336,22 +339,23 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 				// On switch click -> Loop treeCategories (disposed items are still in ArrayList)
 				for(int i = 0; i < markerIdsArr.size(); i++) {
 					//Skip empty treeCategories
-					if(markerIdsArr.get(i).size() != 0) {      
-						// Loop markerIds in each treeCategory to (de)select them all
-						for(int j = 0; j < markerIdsArr.get(i).size(); j++) {     
-							String markerId = markerIdsArr.get(i).get(j).toString();
-							Button buttonCategory = (Button) categoryButtons.get(i);
-							Button button = (Button) buttonsArr.get(i).get(j);
-							buttonCategory.setSelection(turn);
-							button.setSelection(turn);
-							if(turn){
-								SimonykeesPreferenceManager.addActiveMarker(markerId);
-							}else {
-								SimonykeesPreferenceManager.removeActiveMarker(markerId);
-							}
-							checkButtons.put(markerId, button);
+					List<String> currentMarkerIds = markerIdsArr.get(i);
+					// Loop markerIds in each treeCategory to (de)select them all
+					for(int j = 0; j < currentMarkerIds.size(); j++) {     
+						String currentMarkerId = currentMarkerIds.get(j);
+						String markerId = currentMarkerId;
+						Button buttonCategory = categoryButtons.get(i);
+						Button button = buttonsArr.get(i).get(j);
+						buttonCategory.setSelection(turn);
+						button.setSelection(turn);
+						if(turn){
+							SimonykeesPreferenceManager.addActiveMarker(markerId);
+						}else {
+							SimonykeesPreferenceManager.removeActiveMarker(markerId);
 						}
+						checkButtons.put(markerId, button);
 					}
+
 				}
 			}
 		});
