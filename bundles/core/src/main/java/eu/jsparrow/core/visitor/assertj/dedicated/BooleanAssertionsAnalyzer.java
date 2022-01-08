@@ -42,7 +42,6 @@ class BooleanAssertionsAnalyzer {
 			java.lang.Exception.class,
 			java.lang.Throwable.class,
 			//
-			java.io.File.class,
 			java.io.InputStream.class,
 			//
 			java.math.BigInteger.class,
@@ -76,6 +75,7 @@ class BooleanAssertionsAnalyzer {
 	private static final BooleanAssertionsAnalyzer ITERABLE_ASSERTIONS_ANALYZER = createIterableAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer MAP_ASSERTIONS_ANALYZER = createMapAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer PATH_ASSERTIONS_ANALYZER = createPathAssertionsAnalyzer();
+	private static final BooleanAssertionsAnalyzer FILE_ASSERTIONS_ANALYZER = createFileAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer OBJECT_ASSERTIONS_ANALYZER = createObjectAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer OTHER_TYPES_ASSERTIONS_ANALYZER = createOtherTypesAssertionsAnalyzer();
 
@@ -130,12 +130,12 @@ class BooleanAssertionsAnalyzer {
 
 	private static BooleanAssertionsAnalyzer createPathAssertionsAnalyzer() {
 
-		Map<String, String> map1 = new HashMap<>();
-		map1.put("isAbsolute", "isAbsolute");
-		map1.put(STARTS_WITH, STARTS_WITH);
-		map1.put(ENDS_WITH, ENDS_WITH);
-		Map<String, String> map = map1;
+		Map<String, String> map = new HashMap<>();
+		map.put("isAbsolute", "isAbsolute");
+		map.put(STARTS_WITH, STARTS_WITH);
+		map.put(ENDS_WITH, ENDS_WITH);
 		HashMap<String, String> negatedMap = new HashMap<>();
+		negatedMap.put("isAbsolute", "isRelative");
 		return new BooleanAssertionsAnalyzer(BooleanAssertionsAnalyzer::isPath, map, negatedMap) {
 			@Override
 			protected boolean analyzeMethodBinding(IMethodBinding methodBinding) {
@@ -155,6 +155,25 @@ class BooleanAssertionsAnalyzer {
 		};
 	}
 
+	private static BooleanAssertionsAnalyzer createFileAssertionsAnalyzer() {
+
+		Map<String, String> map = new HashMap<>();
+		map.put("exists", "exists"); // File
+		map.put("isFile", "isFile"); // File
+		map.put("isDirectory", "isDirectory"); // File
+		// map.put("isHidden", "isHidden"); // File -- not supported
+		map.put("isAbsolute", "isAbsolute"); // Path
+		map.put("canRead", "canRead"); // File
+		map.put("canWrite", "canWrite"); // File
+		// map.put("canExecute", "canExecute"); // File -- not supported
+		HashMap<String, String> negatedMap = new HashMap<>();
+		negatedMap.put("isAbsolute", "isRelative");
+		negatedMap.put("exists", "doesNotExist"); // File
+
+		return new BooleanAssertionsAnalyzer(BooleanAssertionsAnalyzer::isFile, map, negatedMap);
+
+	}
+
 	private static BooleanAssertionsAnalyzer createObjectAssertionsAnalyzer() {
 		return new BooleanAssertionsAnalyzer(
 				BooleanAssertionsAnalyzer::isObject, new HashMap<>(), new HashMap<>());
@@ -168,12 +187,6 @@ class BooleanAssertionsAnalyzer {
 		tmpMap.put("anyMatch", "anyMatch"); // Stream
 		tmpMap.put("noneMatch", "noneMatch"); // Stream
 		//
-		tmpMap.put("exists", "exists"); // File
-		tmpMap.put("isFile", "isFile"); // File
-		tmpMap.put("isDirectory", "isDirectory"); // File
-		// tmpMap.put("isHidden", "isHidden"); // File -- not supported
-		tmpMap.put("isAbsolute", "isAbsolute"); // Path
-		tmpMap.put("canRead", "canRead"); // File
 		tmpMap.put("after", "isAfter"); // Date
 		tmpMap.put("before", "isBefore"); // Date
 		tmpMap.put("isAfter", "isAfter"); // Instant
@@ -182,7 +195,6 @@ class BooleanAssertionsAnalyzer {
 		Map<String, String> tmpMap1;
 		tmpMap1 = new HashMap<>();
 		tmpMap1.put("equals", "isNotEqualTo");
-		tmpMap1.put("exists", "doesNotExist"); // File
 		Map<String, String> negatedMap = tmpMap1;
 		return new BooleanAssertionsAnalyzer(BooleanAssertionsAnalyzer::isOtherSupportedTypeForAsseertion, map,
 				negatedMap);
@@ -220,6 +232,10 @@ class BooleanAssertionsAnalyzer {
 		return ClassRelationUtil.isContentOfType(typeBinding, java.nio.file.Path.class.getName());
 	}
 
+	static boolean isFile(ITypeBinding typeBinding) {
+		return ClassRelationUtil.isContentOfType(typeBinding, java.io.File.class.getName());
+	}
+
 	static boolean isObject(ITypeBinding typeBinding) {
 		return ClassRelationUtil.isContentOfType(typeBinding, Object.class.getName());
 	}
@@ -252,6 +268,9 @@ class BooleanAssertionsAnalyzer {
 		}
 		if (PATH_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
 			return Optional.of(PATH_ASSERTIONS_ANALYZER);
+		}
+		if (FILE_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
+			return Optional.of(FILE_ASSERTIONS_ANALYZER);
 		}
 		if (OTHER_TYPES_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
 			return Optional.of(OTHER_TYPES_ASSERTIONS_ANALYZER);

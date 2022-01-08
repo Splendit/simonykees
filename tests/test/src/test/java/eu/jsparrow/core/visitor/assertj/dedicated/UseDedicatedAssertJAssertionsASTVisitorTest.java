@@ -295,6 +295,33 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		assertChange(original, expected);
 	}
 
+	public static Stream<Arguments> pathMethodIsFalse() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(path)", "isNotEqualTo(path)"),
+				Arguments.of("isAbsolute()", "isRelative()"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("pathMethodIsFalse")
+	void visit_AssertThatPathMethodIsFalse_shouldTransform(String originalInvocation, String expectedInvocation)
+			throws Exception {
+
+		fixture.addImport(java.nio.file.Path.class.getName());
+		String pathVariableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
+
+		String original = String.format("" +
+				"		%s\n" +
+				"		assertThat(path.%s).isFalse();",
+				pathVariableDeclaration, originalInvocation);
+
+		String expected = String.format("" +
+				"		%s\n" +
+				"		assertThat(path).%s;",
+				pathVariableDeclaration, expectedInvocation);
+
+		assertChange(original, expected);
+	}
+
 	@ParameterizedTest
 	@ValueSource(strings = {
 			"startsWith(\"/home/gregor/\")",
@@ -313,4 +340,126 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertNoChange(original);
 	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"startsWith(Path.of(\"/home/gregor-1/\"))",
+			"endsWith(Path.of(\"pom-1.xml\"))"
+	})
+	void visit_AssertThatPathMethodIsFalse_shouldNotTransform(String originalInvocation)
+			throws Exception {
+
+		fixture.addImport(java.nio.file.Path.class.getName());
+		String pathVariableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
+
+		String original = String.format("" +
+				"		%s\n" +
+				"		assertThat(path.%s).isFalse();",
+				pathVariableDeclaration, originalInvocation);
+
+		assertNoChange(original);
+	}
+
+	public static Stream<Arguments> fileMethodIsTrue() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(file)", "isEqualTo(file)"),
+				Arguments.of("exists()", "exists()"),
+				Arguments.of("isFile()", "isFile()"),
+				Arguments.of("isDirectory()", "isDirectory()"),
+				Arguments.of("isAbsolute()", "isAbsolute()"),
+				Arguments.of("canRead()", "canRead()"),
+				Arguments.of("canWrite()", "canWrite()"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("fileMethodIsTrue")
+	void visit_AssertThatFileMethodIsTrue_shouldTransform(String originalInvocation, String expectedInvocation)
+			throws Exception {
+
+		fixture.addImport(java.io.File.class.getName());
+		String fileVariableDeclaration = "File file = new File(\"pom.xml\");";
+
+		String original = String.format("" +
+				"		%s\n" +
+				"		assertThat(file.%s).isTrue();",
+				fileVariableDeclaration, originalInvocation);
+
+		String expected = String.format("" +
+				"		%s\n" +
+				"		assertThat(file).%s;",
+				fileVariableDeclaration, expectedInvocation);
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"canExecute()",
+			"isHidden()"
+	})
+	void visit_AssertThatFileMethodIsTrue_shouldNotTransform(String originalInvocation)
+			throws Exception {
+
+		fixture.addImport(java.io.File.class.getName());
+		String fileVariableDeclaration = "File file = new File(\"pom.xml\");";
+
+		String original = String.format("" +
+				"		%s\n" +
+				"		assertThat(file.%s).isTrue();",
+				fileVariableDeclaration, originalInvocation);
+
+		assertNoChange(original);
+	}
+
+	public static Stream<Arguments> fileMethodIsFalse() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(file)", "isNotEqualTo(file)"),
+				Arguments.of("exists()", "doesNotExist()"),
+				Arguments.of("isAbsolute()", "isRelative()"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("fileMethodIsFalse")
+	void visit_AssertThatFileMethodIsFalse_shouldTransform(String originalInvocation, String expectedInvocation)
+			throws Exception {
+
+		fixture.addImport(java.io.File.class.getName());
+		String fileVariableDeclaration = "File file = new File(\"pom.xml\");";
+
+		String original = String.format("" +
+				"		%s\n" +
+				"		assertThat(file.%s).isFalse();",
+				fileVariableDeclaration, originalInvocation);
+
+		String expected = String.format("" +
+				"		%s\n" +
+				"		assertThat(file).%s;",
+				fileVariableDeclaration, expectedInvocation);
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"isFile()",
+			"isDirectory()",
+			"canRead()",
+			"canWrite()",
+			"canExecute()",
+			"isHidden()"
+	})
+	void visit_AssertThatFileMethodIsFalse_shouldNotTransform(String originalInvocation)
+			throws Exception {
+
+		fixture.addImport(java.io.File.class.getName());
+		String fileVariableDeclaration = "File file = new File(\"pom.xml\");";
+
+		String original = String.format("" +
+				"		%s\n" +
+				"		assertThat(file.%s).isFalse();",
+				fileVariableDeclaration, originalInvocation);
+
+		assertNoChange(original);
+	}
+
 }
