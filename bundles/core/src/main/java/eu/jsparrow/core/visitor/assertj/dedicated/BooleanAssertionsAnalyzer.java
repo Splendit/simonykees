@@ -72,48 +72,18 @@ class BooleanAssertionsAnalyzer {
 		.map(Class::getName)
 		.collect(Collectors.toList()));
 
-	private static final BooleanAssertionsAnalyzer STRING_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
-			BooleanAssertionsAnalyzer::isString, createStringAssertionsMapping());
-	private static final BooleanAssertionsAnalyzer ITERABLE_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
-			BooleanAssertionsAnalyzer::isSupportedIterableType, createIterableAssertionsMapping());
-	private static final BooleanAssertionsAnalyzer MAP_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
-			BooleanAssertionsAnalyzer::isSupportedMapType, createMapAssertionsMapping());
-	private static final BooleanAssertionsAnalyzer PATH_ASSERTIONS_ANALYZER = createAnalyzerForPathMethodIsTrue();
-
-	private static final BooleanAssertionsAnalyzer OBJECT_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
-			BooleanAssertionsAnalyzer::isObject, new HashMap<>());
-
-	private static final BooleanAssertionsAnalyzer OTHER_TYPES_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
-			BooleanAssertionsAnalyzer::isOtherSupportedTypeForAsseertion, createOtherAssertionsMapping());
-
-	private static final BooleanAssertionsAnalyzer NEGATED_STRING_ASSERTIONS_ANALYZER = createAnalyzerForIsFalse(
-			BooleanAssertionsAnalyzer::isString, createNegatedStringAssertionsMapping());
-	private static final BooleanAssertionsAnalyzer NEGATED_ITERABLE_ASSERTIONS_ANALYZER = createAnalyzerForIsFalse(
-			BooleanAssertionsAnalyzer::isSupportedIterableType, createNegatedIterableAssertionsMapping());
-	private static final BooleanAssertionsAnalyzer NEGATED_MAP_ASSERTIONS_ANALYZER = createAnalyzerForIsFalse(
-			BooleanAssertionsAnalyzer::isSupportedMapType, createNegatedMapAssertionsMapping());
-	private static final BooleanAssertionsAnalyzer NEGATED_OBJECT_ASSERTIONS_ANALYZER = createAnalyzerForIsFalse(
-			BooleanAssertionsAnalyzer::isObject, new HashMap<>());
-
-	private static final BooleanAssertionsAnalyzer NEGATED_OTHER_TYPES_ASSERTIONS_ANALYZER = createAnalyzerForIsTrue(
-			BooleanAssertionsAnalyzer::isOtherSupportedTypeForAsseertion, createNegatedOtherAssertionsMapping());
+	private static final BooleanAssertionsAnalyzer STRING_ASSERTIONS_ANALYZER = createStringAssertionsAnalyzer();
+	private static final BooleanAssertionsAnalyzer ITERABLE_ASSERTIONS_ANALYZER = createIterableAssertionsAnalyzer();
+	private static final BooleanAssertionsAnalyzer MAP_ASSERTIONS_ANALYZER = createMapAssertionsAnalyzer();
+	private static final BooleanAssertionsAnalyzer PATH_ASSERTIONS_ANALYZER = createPathAssertionsAnalyzer();
+	private static final BooleanAssertionsAnalyzer OBJECT_ASSERTIONS_ANALYZER = createObjectAssertionsAnalyzer();
+	private static final BooleanAssertionsAnalyzer OTHER_TYPES_ASSERTIONS_ANALYZER = createOtherTypesAssertionsAnalyzer();
 
 	private final Map<String, String> mapToAssertJAssertions;
+	private final Map<String, String> mapToNegatedAssertJAssertions;
 	private final Predicate<ITypeBinding> supportedTypeBindingPredicate;
 
-	private static Map<String, String> createNegatedOtherAssertionsMapping() {
-		Map<String, String> tmpMap;
-		tmpMap = new HashMap<>();
-		tmpMap.put("equals", "isNotEqualTo");
-		tmpMap.put("exists", "doesNotExist"); // File
-		return tmpMap;
-	}
-
-	static boolean isString(ITypeBinding typeBinding) {
-		return ClassRelationUtil.isContentOfType(typeBinding, String.class.getName());
-	}
-
-	private static Map<String, String> createStringAssertionsMapping() {
+	private static BooleanAssertionsAnalyzer createStringAssertionsAnalyzer() {
 		Map<String, String> map = new HashMap<>();
 		map.put("equalsIgnoreCase", "isEqualToIgnoringCase");
 		map.put(STARTS_WITH, STARTS_WITH);
@@ -122,113 +92,75 @@ class BooleanAssertionsAnalyzer {
 		map.put("matches", "matches");
 		map.put("isEmpty", "isEmpty");
 		map.put("isBlank", "isBlank");
-		return map;
+		Map<String, String> negatedMap = new HashMap<>();
+		negatedMap.put("equalsIgnoreCase", "isNotEqualToIgnoringCase");
+		negatedMap.put(STARTS_WITH, "doesNotStartWith");
+		negatedMap.put("contains", "doesNotContain");
+		negatedMap.put(ENDS_WITH, "doesNotEndWith");
+		negatedMap.put("matches", "doesNotMatch");
+		negatedMap.put("isEmpty", "isNotEmpty");
+		negatedMap.put("isBlank", "isNotBlank");
+		return new BooleanAssertionsAnalyzer(BooleanAssertionsAnalyzer::isString, map, negatedMap);
 	}
 
-	private static Map<String, String> createNegatedStringAssertionsMapping() {
-		Map<String, String> map = new HashMap<>();
-		map.put("equalsIgnoreCase", "isNotEqualToIgnoringCase");
-		map.put(STARTS_WITH, "doesNotStartWith");
-		map.put("contains", "doesNotContain");
-		map.put(ENDS_WITH, "doesNotEndWith");
-		map.put("matches", "doesNotMatch");
-		map.put("isEmpty", "isNotEmpty");
-		map.put("isBlank", "isNotBlank");
-		return map;
-	}
-
-	static boolean isSupportedIterableType(ITypeBinding typeBinding) {
-		if (ClassRelationUtil.isContentOfType(typeBinding, java.lang.Iterable.class.getName())) {
-			return true;
-		}
-
-		String packageName = typeBinding.getPackage()
-			.getName();
-		return packageName.equals(JAVA_UTIL)
-				&& ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
-						Arrays.asList(java.lang.Iterable.class.getName()));
-	}
-
-	private static Map<String, String> createNegatedIterableAssertionsMapping() {
-		Map<String, String> map = new HashMap<>();
-		map.put("contains", "doesNotContain");
-		map.put("isEmpty", "isNotEmpty");
-		return map;
-	}
-
-	private static Map<String, String> createIterableAssertionsMapping() {
+	private static BooleanAssertionsAnalyzer createIterableAssertionsAnalyzer() {
 		Map<String, String> map = new HashMap<>();
 		map.put("contains", "contains");
 		map.put("containsAll", "containsAll");
 		map.put("isEmpty", "isEmpty");
-		return map;
+		Map<String, String> negatedMap = new HashMap<>();
+		negatedMap.put("contains", "doesNotContain");
+		negatedMap.put("isEmpty", "isNotEmpty");
+		return new BooleanAssertionsAnalyzer(BooleanAssertionsAnalyzer::isSupportedIterableType, map, negatedMap);
 	}
 
-	static boolean isSupportedMapType(ITypeBinding typeBinding) {
-		if (ClassRelationUtil.isContentOfType(typeBinding, java.util.Map.class.getName())) {
-			return true;
-		}
-
-		String packageName = typeBinding.getPackage()
-			.getName();
-		return packageName.equals(JAVA_UTIL)
-				&& ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
-						Arrays.asList(java.util.Map.class.getName()));
+	private static BooleanAssertionsAnalyzer createMapAssertionsAnalyzer() {
+		Map<String, String> map1 = new HashMap<>();
+		map1.put("containsKey", "containsKey");
+		map1.put("containsValue", "containsValue");
+		map1.put("isEmpty", "isEmpty");
+		Map<String, String> map = map1;
+		Map<String, String> map2 = new HashMap<>();
+		map2.put("containsKey", "doesNotContainKey");
+		map2.put("containsValue", "doesNotContainValue");
+		map2.put("isEmpty", "isNotEmpty");
+		Map<String, String> negatedMap = map2;
+		return new BooleanAssertionsAnalyzer(BooleanAssertionsAnalyzer::isSupportedMapType, map, negatedMap);
 	}
 
-	private static Map<String, String> createNegatedMapAssertionsMapping() {
-		Map<String, String> map = new HashMap<>();
-		map.put("containsKey", "doesNotContainKey");
-		map.put("containsValue", "doesNotContainValue");
-		map.put("isEmpty", "isNotEmpty");
-		return map;
+	private static BooleanAssertionsAnalyzer createPathAssertionsAnalyzer() {
+
+		Map<String, String> map1 = new HashMap<>();
+		map1.put("isAbsolute", "isAbsolute");
+		map1.put(STARTS_WITH, STARTS_WITH);
+		map1.put(ENDS_WITH, ENDS_WITH);
+		Map<String, String> map = map1;
+		HashMap<String, String> negatedMap = new HashMap<>();
+		return new BooleanAssertionsAnalyzer(BooleanAssertionsAnalyzer::isPath, map, negatedMap) {
+			@Override
+			protected boolean analyzeMethodBinding(IMethodBinding methodBinding) {
+				return super.analyzeMethodBinding(methodBinding) && analyzePathMethodParameter(methodBinding);
+			}
+
+			private boolean analyzePathMethodParameter(IMethodBinding methodBinding) {
+
+				String methodName = methodBinding.getName();
+				if (methodName.equals(STARTS_WITH) || (methodName.equals(ENDS_WITH))) {
+					ITypeBinding[] parameterTypes = methodBinding.getMethodDeclaration()
+						.getParameterTypes();
+					return parameterTypes.length == 1 && isPath(parameterTypes[0]);
+				}
+				return true;
+			}
+		};
 	}
 
-	private static Map<String, String> createMapAssertionsMapping() {
-		Map<String, String> map = new HashMap<>();
-		map.put("containsKey", "containsKey");
-		map.put("containsValue", "containsValue");
-		map.put("isEmpty", "isEmpty");
-		return map;
+	private static BooleanAssertionsAnalyzer createObjectAssertionsAnalyzer() {
+		return new BooleanAssertionsAnalyzer(
+				BooleanAssertionsAnalyzer::isObject, new HashMap<>(), new HashMap<>());
 	}
 
-	static boolean isPath(ITypeBinding typeBinding) {
-		return ClassRelationUtil.isContentOfType(typeBinding, java.nio.file.Path.class.getName());
-	}
-
-	private static Map<String, String> createPathAssertionsMapping() {
-		Map<String, String> map = new HashMap<>();
-		map.put("isAbsolute", "isAbsolute");
-		map.put(STARTS_WITH, STARTS_WITH);
-		map.put(ENDS_WITH, ENDS_WITH);
-		return map;
-	}
-
-	static boolean isObject(ITypeBinding typeBinding) {
-		return ClassRelationUtil.isContentOfType(typeBinding, Object.class.getName());
-	}
-
-	public static boolean isOtherSupportedTypeForAsseertion(ITypeBinding typeBinding) {
-
-		if (ClassRelationUtil.isContentOfTypes(typeBinding, OTHER_TYPES_FOR_ASSERTIONS)) {
-			return true;
-		}
-
-		String packageName = typeBinding.getPackage()
-			.getName();
-
-		return packageName.equals(JAVA_UTIL)
-				&& ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
-						Arrays.asList(java.util.Iterator.class.getName()
-						// , java.lang.Iterable.class.getName() //
-						// BooleanIterableAssertionsAnalyzer
-						// , java.util.Map.class.getName()
-						// //BooleanMapAssertionsAnalyzer
-						));
-
-	}
-
-	private static Map<String, String> createOtherAssertionsMapping() {
+	private static BooleanAssertionsAnalyzer createOtherTypesAssertionsAnalyzer() {
 		Map<String, String> tmpMap = new HashMap<>();
 		tmpMap.put("equals", "isEqualTo");
 		tmpMap.put("hasNext", "hasNext"); // Iterator
@@ -246,132 +178,128 @@ class BooleanAssertionsAnalyzer {
 		tmpMap.put("before", "isBefore"); // Date
 		tmpMap.put("isAfter", "isAfter"); // Instant
 		tmpMap.put("isBefore", "isBefore"); // Instant
-		// tmpMap.put("isLeapYear", "isLeapYear"); // LocalDate -- invalid
-		// transformation
-		// tmpMap.put("isSupported", "isSupported"); // LocalDate
-		return tmpMap;
+		Map<String, String> map = tmpMap;
+		Map<String, String> tmpMap1;
+		tmpMap1 = new HashMap<>();
+		tmpMap1.put("equals", "isNotEqualTo");
+		tmpMap1.put("exists", "doesNotExist"); // File
+		Map<String, String> negatedMap = tmpMap1;
+		return new BooleanAssertionsAnalyzer(BooleanAssertionsAnalyzer::isOtherSupportedTypeForAsseertion, map,
+				negatedMap);
+	}
+
+	static boolean isString(ITypeBinding typeBinding) {
+		return ClassRelationUtil.isContentOfType(typeBinding, String.class.getName());
+	}
+
+	static boolean isSupportedIterableType(ITypeBinding typeBinding) {
+		if (ClassRelationUtil.isContentOfType(typeBinding, java.lang.Iterable.class.getName())) {
+			return true;
+		}
+
+		String packageName = typeBinding.getPackage()
+			.getName();
+		return packageName.equals(JAVA_UTIL)
+				&& ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
+						Arrays.asList(java.lang.Iterable.class.getName()));
+	}
+
+	static boolean isSupportedMapType(ITypeBinding typeBinding) {
+		if (ClassRelationUtil.isContentOfType(typeBinding, java.util.Map.class.getName())) {
+			return true;
+		}
+
+		String packageName = typeBinding.getPackage()
+			.getName();
+		return packageName.equals(JAVA_UTIL)
+				&& ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
+						Arrays.asList(java.util.Map.class.getName()));
+	}
+
+	static boolean isPath(ITypeBinding typeBinding) {
+		return ClassRelationUtil.isContentOfType(typeBinding, java.nio.file.Path.class.getName());
+	}
+
+	static boolean isObject(ITypeBinding typeBinding) {
+		return ClassRelationUtil.isContentOfType(typeBinding, Object.class.getName());
+	}
+
+	public static boolean isOtherSupportedTypeForAsseertion(ITypeBinding typeBinding) {
+
+		if (ClassRelationUtil.isContentOfTypes(typeBinding, OTHER_TYPES_FOR_ASSERTIONS)) {
+			return true;
+		}
+
+		String packageName = typeBinding.getPackage()
+			.getName();
+
+		return packageName.equals(JAVA_UTIL)
+				&& ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
+						Arrays.asList(java.util.Iterator.class.getName()));
+
+	}
+
+	static Optional<BooleanAssertionsAnalyzer> findAnalyzer(ITypeBinding newAssertThatArgumentTypeBinding) {
+
+		if (STRING_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
+			return Optional.of(STRING_ASSERTIONS_ANALYZER);
+		}
+		if (ITERABLE_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
+			return Optional.of(ITERABLE_ASSERTIONS_ANALYZER);
+		}
+		if (MAP_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
+			return Optional.of(MAP_ASSERTIONS_ANALYZER);
+		}
+		if (PATH_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
+			return Optional.of(PATH_ASSERTIONS_ANALYZER);
+		}
+		if (OTHER_TYPES_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
+			return Optional.of(OTHER_TYPES_ASSERTIONS_ANALYZER);
+		}
+		if (OBJECT_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
+			return Optional.of(OBJECT_ASSERTIONS_ANALYZER);
+		}
+		return Optional.empty();
 	}
 
 	static Optional<String> findNewAssertionNameForIsTrue(ITypeBinding newAssertThatArgumentTypeBinding,
 			IMethodBinding assertThatArgumentMethodBinding) {
 
-		Optional<String> optionalNewAssertionName = STRING_ASSERTIONS_ANALYZER
-			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
-		if (optionalNewAssertionName.isPresent()) {
-			return optionalNewAssertionName;
+		BooleanAssertionsAnalyzer analyzer = findAnalyzer(newAssertThatArgumentTypeBinding).orElse(null);
+		if (analyzer != null) {
+			return analyzer.findAssertJAssertionName(assertThatArgumentMethodBinding);
 		}
-
-		optionalNewAssertionName = ITERABLE_ASSERTIONS_ANALYZER
-			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
-
-		if (optionalNewAssertionName.isPresent()) {
-			return optionalNewAssertionName;
-		}
-
-		optionalNewAssertionName = MAP_ASSERTIONS_ANALYZER
-			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
-
-		if (optionalNewAssertionName.isPresent()) {
-			return optionalNewAssertionName;
-		}
-
-		optionalNewAssertionName = PATH_ASSERTIONS_ANALYZER.findAssertJAssertionName(assertThatArgumentMethodBinding,
-				newAssertThatArgumentTypeBinding);
-
-		if (optionalNewAssertionName.isPresent()) {
-			return optionalNewAssertionName;
-		}
-
-		optionalNewAssertionName = OTHER_TYPES_ASSERTIONS_ANALYZER
-			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
-
-		if (optionalNewAssertionName.isPresent()) {
-			return optionalNewAssertionName;
-		}
-
-		return OBJECT_ASSERTIONS_ANALYZER.findAssertJAssertionName(assertThatArgumentMethodBinding,
-				newAssertThatArgumentTypeBinding);
+		return Optional.empty();
 	}
 
 	static Optional<String> findNewAssertionNameForIsFalse(ITypeBinding newAssertThatArgumentTypeBinding,
 			IMethodBinding assertThatArgumentMethodBinding) {
 
-		Optional<String> optionalNewAssertionName = NEGATED_STRING_ASSERTIONS_ANALYZER
-			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
-		if (optionalNewAssertionName.isPresent()) {
-			return optionalNewAssertionName;
+		BooleanAssertionsAnalyzer analyzer = findAnalyzer(newAssertThatArgumentTypeBinding).orElse(null);
+		if (analyzer != null) {
+			return analyzer.findNegatedAssertJAssertionName(assertThatArgumentMethodBinding);
 		}
+		return Optional.empty();
 
-		optionalNewAssertionName = NEGATED_ITERABLE_ASSERTIONS_ANALYZER
-			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
-
-		if (optionalNewAssertionName.isPresent()) {
-			return optionalNewAssertionName;
-		}
-
-		optionalNewAssertionName = NEGATED_MAP_ASSERTIONS_ANALYZER
-			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
-
-		if (optionalNewAssertionName.isPresent()) {
-			return optionalNewAssertionName;
-		}
-
-		optionalNewAssertionName = NEGATED_OTHER_TYPES_ASSERTIONS_ANALYZER
-			.findAssertJAssertionName(assertThatArgumentMethodBinding, newAssertThatArgumentTypeBinding);
-
-		if (optionalNewAssertionName.isPresent()) {
-			return optionalNewAssertionName;
-		}
-
-		return NEGATED_OBJECT_ASSERTIONS_ANALYZER.findAssertJAssertionName(assertThatArgumentMethodBinding,
-				newAssertThatArgumentTypeBinding);
-	}
-
-	private static BooleanAssertionsAnalyzer createAnalyzerForIsTrue(
-			Predicate<ITypeBinding> supportedTypeBindingPredicate,
-			Map<String, String> mapToAssertJAssertions) {
-
-		Map<String, String> tmpMap = new HashMap<>();
-		tmpMap.put(EQUALS, "isEqualTo"); //$NON-NLS-1$
-		tmpMap.putAll(mapToAssertJAssertions);
-		return new BooleanAssertionsAnalyzer(supportedTypeBindingPredicate, Collections.unmodifiableMap(tmpMap));
-	}
-
-	private static BooleanAssertionsAnalyzer createAnalyzerForPathMethodIsTrue() {
-
-		Map<String, String> tmpMap = new HashMap<>();
-		tmpMap.put(EQUALS, "isEqualTo"); //$NON-NLS-1$
-		tmpMap.putAll(createPathAssertionsMapping());
-		return new BooleanAssertionsAnalyzer(BooleanAssertionsAnalyzer::isPath, Collections.unmodifiableMap(tmpMap)) {
-			@Override
-			protected boolean analyzeMethodBinding(IMethodBinding methodBinding) {
-				return super.analyzeMethodBinding(methodBinding) && analyzePathMethodParameter(methodBinding);
-			}
-		};
-	}
-
-	private static BooleanAssertionsAnalyzer createAnalyzerForIsFalse(
-			Predicate<ITypeBinding> supportedTypeBindingPredicate,
-			Map<String, String> mapToAssertJAssertions) {
-
-		Map<String, String> tmpMap = new HashMap<>();
-		tmpMap.put(EQUALS, "isNotEqualTo"); //$NON-NLS-1$
-		tmpMap.putAll(mapToAssertJAssertions);
-		return new BooleanAssertionsAnalyzer(supportedTypeBindingPredicate, Collections.unmodifiableMap(tmpMap));
 	}
 
 	private BooleanAssertionsAnalyzer(Predicate<ITypeBinding> supportedTypeBindingPredicate,
-			Map<String, String> mapToAssertJAssertions) {
+			Map<String, String> mapToAssertJAssertions,
+			Map<String, String> mapToNegatedAssertJAssertions) {
 		this.supportedTypeBindingPredicate = supportedTypeBindingPredicate;
-		this.mapToAssertJAssertions = mapToAssertJAssertions;
+
+		Map<String, String> tmpMap = new HashMap<>();
+		tmpMap.put(EQUALS, "isEqualTo"); //$NON-NLS-1$
+		tmpMap.putAll(mapToAssertJAssertions);
+		this.mapToAssertJAssertions = Collections.unmodifiableMap(tmpMap);
+
+		tmpMap = new HashMap<>();
+		tmpMap.put(EQUALS, "isNotEqualTo"); //$NON-NLS-1$
+		tmpMap.putAll(mapToNegatedAssertJAssertions);
+		this.mapToNegatedAssertJAssertions = Collections.unmodifiableMap(tmpMap);
 	}
 
-	Optional<String> findAssertJAssertionName(IMethodBinding methodBinding,
-			ITypeBinding invocationExpressionTypeBinding) {
-
-		if (!supportedTypeBindingPredicate.test(invocationExpressionTypeBinding)) {
-			return Optional.empty();
-		}
+	Optional<String> findAssertJAssertionName(IMethodBinding methodBinding) {
 
 		if (!analyzeMethodBinding(methodBinding)) {
 			return Optional.empty();
@@ -379,6 +307,17 @@ class BooleanAssertionsAnalyzer {
 
 		String methodName = methodBinding.getName();
 		return Optional.ofNullable(mapToAssertJAssertions.get(methodName));
+
+	}
+
+	Optional<String> findNegatedAssertJAssertionName(IMethodBinding methodBinding) {
+
+		if (!analyzeMethodBinding(methodBinding)) {
+			return Optional.empty();
+		}
+
+		String methodName = methodBinding.getName();
+		return Optional.ofNullable(mapToNegatedAssertJAssertions.get(methodName));
 
 	}
 
@@ -399,14 +338,8 @@ class BooleanAssertionsAnalyzer {
 		return ClassRelationUtil.isContentOfType(parameterTypes[0], Object.class.getName());
 	}
 
-	private static boolean analyzePathMethodParameter(IMethodBinding methodBinding) {
-
-		String methodName = methodBinding.getName();
-		if (methodName.equals(STARTS_WITH) || (methodName.equals(ENDS_WITH))) {
-			ITypeBinding[] parameterTypes = methodBinding.getMethodDeclaration()
-				.getParameterTypes();
-			return parameterTypes.length == 1 && isPath(parameterTypes[0]);
-		}
-		return true;
+	boolean isSupportedForType(ITypeBinding typeBinding) {
+		return supportedTypeBindingPredicate.test(typeBinding);
 	}
+
 }
