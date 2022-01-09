@@ -57,10 +57,6 @@ class BooleanAssertionsAnalyzer {
 			java.time.Period.class,
 			//
 			java.util.Date.class,
-			java.util.Optional.class,
-			java.util.OptionalDouble.class,
-			java.util.OptionalInt.class,
-			java.util.OptionalLong.class,
 			java.util.Iterator.class,
 			//
 			java.util.function.Predicate.class,
@@ -71,11 +67,21 @@ class BooleanAssertionsAnalyzer {
 		.map(Class::getName)
 		.collect(Collectors.toList()));
 
+	private static final List<String> OPTIONAL_TYPES = Collections.unmodifiableList(Stream.of(
+			java.util.Optional.class,
+			java.util.OptionalDouble.class,
+			java.util.OptionalInt.class,
+			java.util.OptionalLong.class)
+		.map(Class::getName)
+		.collect(Collectors.toList()));
+
 	private static final BooleanAssertionsAnalyzer STRING_ASSERTIONS_ANALYZER = createStringAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer ITERABLE_ASSERTIONS_ANALYZER = createIterableAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer MAP_ASSERTIONS_ANALYZER = createMapAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer PATH_ASSERTIONS_ANALYZER = createPathAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer FILE_ASSERTIONS_ANALYZER = createFileAssertionsAnalyzer();
+	private static final BooleanAssertionsAnalyzer OPTIONAL_ASSERTIONS_ANALYZER = createOptionalAssertionsAnalyzer();
+
 	private static final BooleanAssertionsAnalyzer OBJECT_ASSERTIONS_ANALYZER = createObjectAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer OTHER_TYPES_ASSERTIONS_ANALYZER = createOtherTypesAssertionsAnalyzer();
 
@@ -174,6 +180,16 @@ class BooleanAssertionsAnalyzer {
 
 	}
 
+	private static BooleanAssertionsAnalyzer createOptionalAssertionsAnalyzer() {
+		Map<String, String> map = new HashMap<>();
+		map.put("isEmpty", "isEmpty");
+		map.put("isPresent", "isPresent");
+		Map<String, String> negatedMap = new HashMap<>();
+		negatedMap.put("isEmpty", "isPresent");
+		negatedMap.put("isPresent", "isEmpty");
+		return new BooleanAssertionsAnalyzer(BooleanAssertionsAnalyzer::isOptional, map, negatedMap);
+	}
+
 	private static BooleanAssertionsAnalyzer createObjectAssertionsAnalyzer() {
 		return new BooleanAssertionsAnalyzer(
 				BooleanAssertionsAnalyzer::isObject, new HashMap<>(), new HashMap<>());
@@ -236,6 +252,10 @@ class BooleanAssertionsAnalyzer {
 		return ClassRelationUtil.isContentOfType(typeBinding, java.io.File.class.getName());
 	}
 
+	static boolean isOptional(ITypeBinding typeBinding) {
+		return ClassRelationUtil.isContentOfTypes(typeBinding, OPTIONAL_TYPES);
+	}
+
 	static boolean isObject(ITypeBinding typeBinding) {
 		return ClassRelationUtil.isContentOfType(typeBinding, Object.class.getName());
 	}
@@ -271,6 +291,9 @@ class BooleanAssertionsAnalyzer {
 		}
 		if (FILE_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
 			return Optional.of(FILE_ASSERTIONS_ANALYZER);
+		}
+		if (OPTIONAL_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
+			return Optional.of(OPTIONAL_ASSERTIONS_ANALYZER);
 		}
 		if (OTHER_TYPES_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
 			return Optional.of(OTHER_TYPES_ASSERTIONS_ANALYZER);

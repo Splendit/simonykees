@@ -14,6 +14,9 @@ import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 @SuppressWarnings("nls")
 class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
+	private static final String IS_TRUE = "isTrue()";
+	private static final String IS_FALSE = "isFalse()";
+
 	@BeforeEach
 	void setUp() throws Exception {
 		setVisitor(new UseDedicatedAssertJAssertionsASTVisitor());
@@ -462,4 +465,37 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		assertNoChange(original);
 	}
 
+	public static Stream<Arguments> assertionsOnOptionalMethods() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(optional)", "isEqualTo(optional)", IS_TRUE),
+				Arguments.of("isPresent()", "isPresent()", IS_TRUE),
+				Arguments.of("isEmpty()", "isEmpty()", IS_TRUE),
+				Arguments.of("equals(optional)", "isNotEqualTo(optional)", IS_FALSE),
+				Arguments.of("isPresent()", "isEmpty()", IS_FALSE),
+				Arguments.of("isEmpty()", "isPresent()", IS_FALSE));
+	}
+
+	@ParameterizedTest
+	@MethodSource("assertionsOnOptionalMethods")
+	void visit_AssertionsWithOptionalMethods_shouldTransform(String originalInvocation, String expectedInvocation,
+			String booleanAssertion)
+			throws Exception {
+
+		fixture.addImport(java.util.Optional.class.getName());
+
+		String optionalVariableDeclaration = "Optional<String> optional = Optional.of(\"Hello World!\");";
+		String original = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(optional.%s).%s;",
+				optionalVariableDeclaration, originalInvocation, booleanAssertion);
+
+		String expected = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(optional).%s;",
+				optionalVariableDeclaration, expectedInvocation);
+
+		assertChange(original, expected);
+	}
 }
