@@ -498,4 +498,111 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
+
+	public static Stream<Arguments> assertionsOnDateMethods() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(new Date(currentTimeMillis))", "isEqualTo(new Date(currentTimeMillis))", IS_TRUE),
+				Arguments.of("before(new Date(currentTimeMillis + 1000))",
+						"isBefore(new Date(currentTimeMillis + 1000))", IS_TRUE),
+				Arguments.of("after(new Date(currentTimeMillis - 1000))", "isAfter(new Date(currentTimeMillis - 1000))",
+						IS_TRUE),
+				Arguments.of("equals(new Date(currentTimeMillis + 1000))",
+						"isNotEqualTo(new Date(currentTimeMillis + 1000))", IS_FALSE),
+				Arguments.of("before(new Date(currentTimeMillis - 1000))",
+						"isAfterOrEqualTo(new Date(currentTimeMillis - 1000))", IS_FALSE),
+				Arguments.of("after(new Date(currentTimeMillis + 1000))",
+						"isBeforeOrEqualTo(new Date(currentTimeMillis + 1000))", IS_FALSE));
+	}
+
+	@ParameterizedTest
+	@MethodSource("assertionsOnDateMethods")
+	void visit_AssertionsWithDateMethods_shouldTransform(String originalInvocation, String expectedInvocation,
+			String booleanAssertion)
+			throws Exception {
+
+		fixture.addImport(java.util.Date.class.getName());
+
+		String dateVariableDeclaration = ""
+				+ "		long currentTimeMillis = System.currentTimeMillis();\n"
+				+ "		Date date = new Date(currentTimeMillis);";
+
+		String original = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(date.%s).%s;",
+				dateVariableDeclaration, originalInvocation, booleanAssertion);
+
+		String expected = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(date).%s;",
+				dateVariableDeclaration, expectedInvocation);
+
+		assertChange(original, expected);
+	}
+
+	public static Stream<Arguments> assertionsOnLocalDateMethods() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(LocalDate.of(2020, 11, 1))", "isEqualTo(LocalDate.of(2020, 11, 1))", IS_TRUE),
+				Arguments.of("isBefore(LocalDate.of(2020, 12, 1))", "isBefore(LocalDate.of(2020, 12, 1))", IS_TRUE),
+				Arguments.of("isAfter(LocalDate.of(2020, 10, 1))", "isAfter(LocalDate.of(2020, 10, 1))", IS_TRUE),
+				Arguments.of("equals(LocalDate.of(2020, 10, 1))", "isNotEqualTo(LocalDate.of(2020, 10, 1))", IS_FALSE),
+				Arguments.of("isBefore(LocalDate.of(2020, 10, 1))", "isAfterOrEqualTo(LocalDate.of(2020, 10, 1))",
+						IS_FALSE),
+				Arguments.of("isAfter(LocalDate.of(2020, 12, 1))", "isBeforeOrEqualTo(LocalDate.of(2020, 12, 1))",
+						IS_FALSE));
+	}
+
+	@ParameterizedTest
+	@MethodSource("assertionsOnLocalDateMethods")
+	void visit_AssertionsWithLocalDateMethods_shouldTransform(String originalInvocation, String expectedInvocation,
+			String booleanAssertion)
+			throws Exception {
+
+		fixture.addImport(java.time.LocalDate.class.getName());
+
+		String localDateVariableDclaration = "LocalDate locatDate = LocalDate.of(2020, 11, 1);";
+		String original = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(locatDate.%s).%s;",
+				localDateVariableDclaration, originalInvocation, booleanAssertion);
+
+		String expected = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(locatDate).%s;",
+				localDateVariableDclaration, expectedInvocation);
+
+		assertChange(original, expected);
+	}
+
+	public static Stream<Arguments> assertionsOnLocalDateMethods_notTransforming() throws Exception {
+		return Stream.of(
+				Arguments.of("isLeapYear()", IS_TRUE),
+				Arguments.of("isSupported(ChronoField.YEAR)", IS_TRUE),
+				Arguments.of("isSupported(ChronoUnit.YEARS)", IS_TRUE),
+				Arguments.of("isLeapYear()", IS_FALSE),
+				Arguments.of("isSupported(ChronoField.SECOND_OF_MINUTE)", IS_FALSE),
+				Arguments.of("isSupported(ChronoUnit.SECONDS)", IS_FALSE));
+	}
+
+	@ParameterizedTest
+	@MethodSource("assertionsOnLocalDateMethods_notTransforming")
+	void visit_AssertionsWithLocalDateMethods_shouldNotTransform(String originalInvocation, String booleanAssertion)
+			throws Exception {
+
+		fixture.addImport(java.time.LocalDate.class.getName());
+		fixture.addImport(java.time.temporal.ChronoField.class.getName());
+		fixture.addImport(java.time.temporal.ChronoUnit.class.getName());
+
+		String localDateVariableDclaration = "LocalDate locatDate = LocalDate.of(2020, 11, 1);";
+		String original = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(locatDate.%s).%s;",
+				localDateVariableDclaration, originalInvocation, booleanAssertion);
+
+		assertNoChange(original);
+	}
 }
