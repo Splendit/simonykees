@@ -641,9 +641,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
-	
-	
+
 	public static Stream<Arguments> assertionsOnDoubleStreamMethods() throws Exception {
 		return Stream.of(
 				Arguments.of("equals(doubleStream)", "isEqualTo(doubleStream)", IS_TRUE),
@@ -679,9 +677,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
-	
-	
+
 	public static Stream<Arguments> assertionsOnIteratorMethods() throws Exception {
 		return Stream.of(
 				Arguments.of("equals(iterator)", "isEqualTo(iterator)", IS_TRUE),
@@ -714,13 +710,13 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
+
 	public static Stream<Arguments> assertionsOnObjectEqualsMethod() throws Exception {
 		return Stream.of(
 				Arguments.of("equals(o)", "isEqualTo(o)", IS_TRUE),
 				Arguments.of("equals(o)", "isNotEqualTo(o)", IS_FALSE));
 	}
-	
+
 	@ParameterizedTest
 	@MethodSource("assertionsOnObjectEqualsMethod")
 	void visit_AssertionsWithObjectEqualsMethod_shouldTransform(String originalInvocation, String expectedInvocation,
@@ -739,6 +735,65 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 						"		%s\n" +
 						"		assertThat(o).%s;",
 				dateVariableDeclaration, expectedInvocation);
+
+		assertChange(original, expected);
+	}
+
+	public static Stream<Arguments> assertionsOnPredicateTestIsTrue() throws Exception {
+		return Stream.of(
+				Arguments.of("Predicate", "Predicate<String>", "s -> s.isEmpty()", "\"\""),
+				Arguments.of("IntPredicate", "IntPredicate", "i -> i > 0", "1"),
+				Arguments.of("LongPredicate", "LongPredicate", "i -> i > 0L", "1L"),
+				Arguments.of("DoublePredicate", "DoublePredicate", "i -> i > 0.0", "1.0"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("assertionsOnPredicateTestIsTrue")
+	void visit_AssertionsWithPredicateTestIsTrue_shouldTransform(String className, String predicateType, String lambda,
+			String valueUnderTest) throws Exception {
+
+		fixture.addImport("java.util.function." + className);
+		String original = String.format(
+				"" +
+						"		%s predicate = %s;" +
+						"		assertThat(predicate.test(%s)).isTrue();",
+				predicateType, lambda, valueUnderTest);
+
+		String expected = String.format(
+				"" +
+						"		%s predicate = %s;" +
+						"		assertThat(predicate).accepts(%s);",
+				predicateType, lambda, valueUnderTest);
+
+		assertChange(original, expected);
+	}
+	
+	
+	public static Stream<Arguments> assertionsOnPredicateTestIsFalse() throws Exception {
+		return Stream.of(
+				Arguments.of("Predicate", "Predicate<String>", "s -> s.isEmpty()", "\"not-empty\""),
+				Arguments.of("IntPredicate", "IntPredicate", "i -> i > 0", "0"),
+				Arguments.of("LongPredicate", "LongPredicate", "i -> i > 0L", "0L"),
+				Arguments.of("DoublePredicate", "DoublePredicate", "i -> i > 0.0", "0.0"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("assertionsOnPredicateTestIsFalse")
+	void visit_AssertionsWithPredicateTestIsFalse_shouldTransform(String className, String predicateType, String lambda,
+			String valueUnderTest) throws Exception {
+
+		fixture.addImport("java.util.function." + className);
+		String original = String.format(
+				"" +
+						"		%s predicate = %s;" +
+						"		assertThat(predicate.test(%s)).isFalse();",
+				predicateType, lambda, valueUnderTest);
+
+		String expected = String.format(
+				"" +
+						"		%s predicate = %s;" +
+						"		assertThat(predicate).rejects(%s);",
+				predicateType, lambda, valueUnderTest);
 
 		assertChange(original, expected);
 	}

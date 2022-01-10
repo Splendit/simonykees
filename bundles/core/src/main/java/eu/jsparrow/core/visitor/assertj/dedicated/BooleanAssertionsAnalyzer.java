@@ -32,6 +32,7 @@ class BooleanAssertionsAnalyzer {
 	private static final BooleanAssertionsAnalyzer DATE_AND_TIME_ASSERTIONS_ANALYZER = createDateAndTimeAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer STREAM_ASSERTIONS_ANALYZER = createStreamAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer ITERATOR_ASSERTIONS_ANALYZER = createIteratorTypesAssertionsAnalyzer();
+	private static final BooleanAssertionsAnalyzer PREDICATE_ASSERTIONS_ANALYZER = createPredicateAssertionsAnalyzer();
 
 	private static final BooleanAssertionsAnalyzer OTHER_TYPES_ASSERTIONS_ANALYZER = createOtherTypesAssertionsAnalyzer();
 
@@ -200,6 +201,20 @@ class BooleanAssertionsAnalyzer {
 				negatedMap);
 	}
 
+	private static BooleanAssertionsAnalyzer createPredicateAssertionsAnalyzer() {
+		Map<String, String> map = new HashMap<>();
+		map.put("test", "accepts");
+		Map<String, String> negatedMap = new HashMap<>();
+		negatedMap.put("test", "rejects");
+		return new BooleanAssertionsAnalyzer(
+				getTypeBindingPredicate(
+						java.util.function.DoublePredicate.class,
+						java.util.function.IntPredicate.class,
+						java.util.function.LongPredicate.class,
+						java.util.function.Predicate.class),
+				map, negatedMap);
+	}
+
 	private static BooleanAssertionsAnalyzer createOtherTypesAssertionsAnalyzer() {
 		return new BooleanAssertionsAnalyzer(getTypeBindingPredicate(
 				java.lang.Object.class,
@@ -225,9 +240,7 @@ class BooleanAssertionsAnalyzer {
 				java.math.BigInteger.class,
 				java.math.BigDecimal.class,
 				//
-				java.time.Period.class,
-				//
-				java.util.function.Predicate.class),
+				java.time.Period.class),
 				new HashMap<>(), new HashMap<>());
 	}
 
@@ -307,6 +320,9 @@ class BooleanAssertionsAnalyzer {
 		}
 		if (ITERATOR_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
 			return Optional.of(ITERATOR_ASSERTIONS_ANALYZER);
+		}
+		if (PREDICATE_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
+			return Optional.of(PREDICATE_ASSERTIONS_ANALYZER);
 		}
 		if (OTHER_TYPES_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
 			return Optional.of(OTHER_TYPES_ASSERTIONS_ANALYZER);
