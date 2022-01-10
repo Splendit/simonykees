@@ -714,4 +714,32 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
+	
+	public static Stream<Arguments> assertionsOnObjectEqualsMethod() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(o)", "isEqualTo(o)", IS_TRUE),
+				Arguments.of("equals(o)", "isNotEqualTo(o)", IS_FALSE));
+	}
+	
+	@ParameterizedTest
+	@MethodSource("assertionsOnObjectEqualsMethod")
+	void visit_AssertionsWithObjectEqualsMethod_shouldTransform(String originalInvocation, String expectedInvocation,
+			String booleanAssertion)
+			throws Exception {
+
+		String dateVariableDeclaration = "Object o = new Object();";
+		String original = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(o.%s).%s;",
+				dateVariableDeclaration, originalInvocation, booleanAssertion);
+
+		String expected = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(o).%s;",
+				dateVariableDeclaration, expectedInvocation);
+
+		assertChange(original, expected);
+	}
 }

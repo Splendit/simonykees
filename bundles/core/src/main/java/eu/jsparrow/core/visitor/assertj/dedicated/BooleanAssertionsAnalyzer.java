@@ -23,36 +23,6 @@ class BooleanAssertionsAnalyzer {
 	private static final String EQUALS = "equals";
 	private static final String JAVA_UTIL = "java.util";
 
-	private static final List<String> OTHER_TYPES_FOR_ASSERTIONS = Collections.unmodifiableList(Stream.of(
-
-			java.lang.Boolean.class,
-			java.lang.Character.class,
-			java.lang.Byte.class,
-			java.lang.Short.class,
-			java.lang.Integer.class,
-			java.lang.Long.class,
-			java.lang.Float.class,
-			java.lang.Double.class,
-			//
-			java.lang.StringBuffer.class,
-			java.lang.StringBuilder.class,
-			java.lang.CharSequence.class,
-			//
-			java.lang.Class.class,
-			java.lang.Exception.class,
-			java.lang.Throwable.class,
-			//
-			java.io.InputStream.class,
-			//
-			java.math.BigInteger.class,
-			java.math.BigDecimal.class,
-			//
-			java.time.Period.class,
-			//
-			java.util.function.Predicate.class)
-		.map(Class::getName)
-		.collect(Collectors.toList()));
-
 	private static final BooleanAssertionsAnalyzer STRING_ASSERTIONS_ANALYZER = createStringAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer ITERABLE_ASSERTIONS_ANALYZER = createIterableAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer MAP_ASSERTIONS_ANALYZER = createMapAssertionsAnalyzer();
@@ -63,7 +33,6 @@ class BooleanAssertionsAnalyzer {
 	private static final BooleanAssertionsAnalyzer STREAM_ASSERTIONS_ANALYZER = createStreamAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer ITERATOR_ASSERTIONS_ANALYZER = createIteratorTypesAssertionsAnalyzer();
 
-	private static final BooleanAssertionsAnalyzer OBJECT_ASSERTIONS_ANALYZER = createObjectAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer OTHER_TYPES_ASSERTIONS_ANALYZER = createOtherTypesAssertionsAnalyzer();
 
 	private final Map<String, String> mapToAssertJAssertions;
@@ -224,29 +193,42 @@ class BooleanAssertionsAnalyzer {
 
 	private static BooleanAssertionsAnalyzer createIteratorTypesAssertionsAnalyzer() {
 		Map<String, String> map = new HashMap<>();
-		map.put("hasNext", "hasNext"); // Iterator
+		map.put("hasNext", "hasNext");
 		Map<String, String> negatedMap = new HashMap<>();
-		negatedMap.put("hasNext", "isExhausted"); // Iterator
+		negatedMap.put("hasNext", "isExhausted");
 		return new BooleanAssertionsAnalyzer(BooleanAssertionsAnalyzer::isSupportedIteratorTypeForAssertion, map,
 				negatedMap);
 	}
 
-	private static BooleanAssertionsAnalyzer createObjectAssertionsAnalyzer() {
-		return new BooleanAssertionsAnalyzer(
-				getTypeBindingPredicate(java.lang.Object.class), new HashMap<>(), new HashMap<>());
-	}
-
 	private static BooleanAssertionsAnalyzer createOtherTypesAssertionsAnalyzer() {
-		Map<String, String> tmpMap = new HashMap<>();
-		tmpMap.put("equals", "isEqualTo");
-		//
-		Map<String, String> map = tmpMap;
-		Map<String, String> tmpMap1;
-		tmpMap1 = new HashMap<>();
-		tmpMap1.put("equals", "isNotEqualTo");
-		Map<String, String> negatedMap = tmpMap1;
-		return new BooleanAssertionsAnalyzer(BooleanAssertionsAnalyzer::isOtherSupportedTypeForAsseertion, map,
-				negatedMap);
+		return new BooleanAssertionsAnalyzer(getTypeBindingPredicate(
+				java.lang.Object.class,
+				java.lang.Boolean.class,
+				java.lang.Character.class,
+				java.lang.Byte.class,
+				java.lang.Short.class,
+				java.lang.Integer.class,
+				java.lang.Long.class,
+				java.lang.Float.class,
+				java.lang.Double.class,
+				//
+				java.lang.StringBuffer.class,
+				java.lang.StringBuilder.class,
+				java.lang.CharSequence.class,
+				//
+				java.lang.Class.class,
+				java.lang.Exception.class,
+				java.lang.Throwable.class,
+				//
+				java.io.InputStream.class,
+				//
+				java.math.BigInteger.class,
+				java.math.BigDecimal.class,
+				//
+				java.time.Period.class,
+				//
+				java.util.function.Predicate.class),
+				new HashMap<>(), new HashMap<>());
 	}
 
 	static Predicate<ITypeBinding> getTypeBindingPredicate(Class<?>... classes) {
@@ -297,12 +279,6 @@ class BooleanAssertionsAnalyzer {
 
 	}
 
-	public static boolean isOtherSupportedTypeForAsseertion(ITypeBinding typeBinding) {
-
-		return ClassRelationUtil.isContentOfTypes(typeBinding, OTHER_TYPES_FOR_ASSERTIONS);
-
-	}
-
 	static Optional<BooleanAssertionsAnalyzer> findAnalyzer(ITypeBinding newAssertThatArgumentTypeBinding) {
 
 		if (STRING_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
@@ -334,9 +310,6 @@ class BooleanAssertionsAnalyzer {
 		}
 		if (OTHER_TYPES_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
 			return Optional.of(OTHER_TYPES_ASSERTIONS_ANALYZER);
-		}
-		if (OBJECT_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
-			return Optional.of(OBJECT_ASSERTIONS_ANALYZER);
 		}
 		return Optional.empty();
 	}
