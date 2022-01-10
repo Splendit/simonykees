@@ -49,8 +49,6 @@ class BooleanAssertionsAnalyzer {
 			//
 			java.time.Period.class,
 			//
-			java.util.Iterator.class,
-			//
 			java.util.function.Predicate.class)
 		.map(Class::getName)
 		.collect(Collectors.toList()));
@@ -63,6 +61,7 @@ class BooleanAssertionsAnalyzer {
 	private static final BooleanAssertionsAnalyzer OPTIONAL_ASSERTIONS_ANALYZER = createOptionalAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer DATE_AND_TIME_ASSERTIONS_ANALYZER = createDateAndTimeAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer STREAM_ASSERTIONS_ANALYZER = createStreamAssertionsAnalyzer();
+	private static final BooleanAssertionsAnalyzer ITERATOR_ASSERTIONS_ANALYZER = createIteratorTypesAssertionsAnalyzer();
 
 	private static final BooleanAssertionsAnalyzer OBJECT_ASSERTIONS_ANALYZER = createObjectAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer OTHER_TYPES_ASSERTIONS_ANALYZER = createOtherTypesAssertionsAnalyzer();
@@ -223,6 +222,15 @@ class BooleanAssertionsAnalyzer {
 				map, negatedMap);
 	}
 
+	private static BooleanAssertionsAnalyzer createIteratorTypesAssertionsAnalyzer() {
+		Map<String, String> map = new HashMap<>();
+		map.put("hasNext", "hasNext"); // Iterator
+		Map<String, String> negatedMap = new HashMap<>();
+		negatedMap.put("hasNext", "isExhausted"); // Iterator
+		return new BooleanAssertionsAnalyzer(BooleanAssertionsAnalyzer::isSupportedIteratorTypeForAssertion, map,
+				negatedMap);
+	}
+
 	private static BooleanAssertionsAnalyzer createObjectAssertionsAnalyzer() {
 		return new BooleanAssertionsAnalyzer(
 				getTypeBindingPredicate(java.lang.Object.class), new HashMap<>(), new HashMap<>());
@@ -231,7 +239,6 @@ class BooleanAssertionsAnalyzer {
 	private static BooleanAssertionsAnalyzer createOtherTypesAssertionsAnalyzer() {
 		Map<String, String> tmpMap = new HashMap<>();
 		tmpMap.put("equals", "isEqualTo");
-		tmpMap.put("hasNext", "hasNext"); // Iterator
 		//
 		Map<String, String> map = tmpMap;
 		Map<String, String> tmpMap1;
@@ -276,18 +283,23 @@ class BooleanAssertionsAnalyzer {
 						Arrays.asList(java.util.Map.class.getName()));
 	}
 
-	public static boolean isOtherSupportedTypeForAsseertion(ITypeBinding typeBinding) {
+	public static boolean isSupportedIteratorTypeForAssertion(ITypeBinding typeBinding) {
 
-		if (ClassRelationUtil.isContentOfTypes(typeBinding, OTHER_TYPES_FOR_ASSERTIONS)) {
+		if (ClassRelationUtil.isContentOfType(typeBinding, java.util.Iterator.class.getName())) {
 			return true;
 		}
-
 		String packageName = typeBinding.getPackage()
 			.getName();
 
 		return packageName.equals(JAVA_UTIL)
 				&& ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
 						Arrays.asList(java.util.Iterator.class.getName()));
+
+	}
+
+	public static boolean isOtherSupportedTypeForAsseertion(ITypeBinding typeBinding) {
+
+		return ClassRelationUtil.isContentOfTypes(typeBinding, OTHER_TYPES_FOR_ASSERTIONS);
 
 	}
 
@@ -316,6 +328,9 @@ class BooleanAssertionsAnalyzer {
 		}
 		if (STREAM_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
 			return Optional.of(STREAM_ASSERTIONS_ANALYZER);
+		}
+		if (ITERATOR_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
+			return Optional.of(ITERATOR_ASSERTIONS_ANALYZER);
 		}
 		if (OTHER_TYPES_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
 			return Optional.of(OTHER_TYPES_ASSERTIONS_ANALYZER);

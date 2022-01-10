@@ -679,4 +679,39 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
+	
+	
+	
+	public static Stream<Arguments> assertionsOnIteratorMethods() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(iterator)", "isEqualTo(iterator)", IS_TRUE),
+				Arguments.of("hasNext()", "hasNext()", IS_TRUE),
+				Arguments.of("equals(iterator)", "isNotEqualTo(iterator)", IS_FALSE),
+				Arguments.of("hasNext()", "isExhausted()", IS_FALSE));
+	}
+
+	@ParameterizedTest
+	@MethodSource("assertionsOnIteratorMethods")
+	void visit_AssertionsWithIteratorMethods_shouldTransform(String originalInvocation, String expectedInvocation,
+			String booleanAssertion)
+			throws Exception {
+
+		fixture.addImport(java.util.Arrays.class.getName());
+		fixture.addImport(java.util.Iterator.class.getName());
+
+		String dateVariableDeclaration = "Iterator<String> iterator = Arrays.asList(\"str-1\", \"str-2\").listIterator();";
+		String original = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(iterator.%s).%s;",
+				dateVariableDeclaration, originalInvocation, booleanAssertion);
+
+		String expected = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(iterator).%s;",
+				dateVariableDeclaration, expectedInvocation);
+
+		assertChange(original, expected);
+	}
 }
