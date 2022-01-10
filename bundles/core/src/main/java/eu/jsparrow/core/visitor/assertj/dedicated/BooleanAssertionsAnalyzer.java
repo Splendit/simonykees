@@ -51,11 +51,7 @@ class BooleanAssertionsAnalyzer {
 			//
 			java.util.Iterator.class,
 			//
-			java.util.function.Predicate.class,
-			//
-			java.util.stream.Stream.class,
-			java.util.stream.IntStream.class,
-			java.util.stream.LongStream.class)
+			java.util.function.Predicate.class)
 		.map(Class::getName)
 		.collect(Collectors.toList()));
 
@@ -66,6 +62,7 @@ class BooleanAssertionsAnalyzer {
 	private static final BooleanAssertionsAnalyzer FILE_ASSERTIONS_ANALYZER = createFileAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer OPTIONAL_ASSERTIONS_ANALYZER = createOptionalAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer DATE_AND_TIME_ASSERTIONS_ANALYZER = createDateAndTimeAssertionsAnalyzer();
+	private static final BooleanAssertionsAnalyzer STREAM_ASSERTIONS_ANALYZER = createStreamAssertionsAnalyzer();
 
 	private static final BooleanAssertionsAnalyzer OBJECT_ASSERTIONS_ANALYZER = createObjectAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer OTHER_TYPES_ASSERTIONS_ANALYZER = createOtherTypesAssertionsAnalyzer();
@@ -208,6 +205,24 @@ class BooleanAssertionsAnalyzer {
 				map, negatedMap);
 	}
 
+	private static BooleanAssertionsAnalyzer createStreamAssertionsAnalyzer() {
+		Map<String, String> map = new HashMap<>();
+		map.put("allMatch", "allMatch");
+		map.put("anyMatch", "anyMatch");
+		map.put("noneMatch", "noneMatch");
+		Map<String, String> negatedMap = new HashMap<>();
+		negatedMap.put("anyMatch", "noneMatch");
+		negatedMap.put("noneMatch", "anyMatch");
+
+		return new BooleanAssertionsAnalyzer(
+				getTypeBindingPredicate(
+						java.util.stream.Stream.class,
+						java.util.stream.IntStream.class,
+						java.util.stream.LongStream.class,
+						java.util.stream.DoubleStream.class),
+				map, negatedMap);
+	}
+
 	private static BooleanAssertionsAnalyzer createObjectAssertionsAnalyzer() {
 		return new BooleanAssertionsAnalyzer(
 				getTypeBindingPredicate(java.lang.Object.class), new HashMap<>(), new HashMap<>());
@@ -217,9 +232,6 @@ class BooleanAssertionsAnalyzer {
 		Map<String, String> tmpMap = new HashMap<>();
 		tmpMap.put("equals", "isEqualTo");
 		tmpMap.put("hasNext", "hasNext"); // Iterator
-		tmpMap.put("allMatch", "allMatch"); // Stream
-		tmpMap.put("anyMatch", "anyMatch"); // Stream
-		tmpMap.put("noneMatch", "noneMatch"); // Stream
 		//
 		Map<String, String> map = tmpMap;
 		Map<String, String> tmpMap1;
@@ -301,6 +313,9 @@ class BooleanAssertionsAnalyzer {
 		}
 		if (DATE_AND_TIME_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
 			return Optional.of(DATE_AND_TIME_ASSERTIONS_ANALYZER);
+		}
+		if (STREAM_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
+			return Optional.of(STREAM_ASSERTIONS_ANALYZER);
 		}
 		if (OTHER_TYPES_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
 			return Optional.of(OTHER_TYPES_ASSERTIONS_ANALYZER);

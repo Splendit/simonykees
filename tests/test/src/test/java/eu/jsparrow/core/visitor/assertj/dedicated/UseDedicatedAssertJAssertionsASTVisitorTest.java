@@ -605,4 +605,78 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertNoChange(original);
 	}
+
+	public static Stream<Arguments> assertionsOnStreamMethods() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(stringStream)", "isEqualTo(stringStream)", IS_TRUE),
+				Arguments.of("allMatch(s -> !s.isEmpty())", "allMatch(s -> !s.isEmpty())", IS_TRUE),
+				Arguments.of("anyMatch(\"str-1\"::equals)", "anyMatch(\"str-1\"::equals)", IS_TRUE),
+				Arguments.of("noneMatch(\"str-5\"::equals)", "noneMatch(\"str-5\"::equals)", IS_TRUE),
+				Arguments.of("equals(Stream.of(\"str-1\", \"str-3\"))", "isNotEqualTo(Stream.of(\"str-1\", \"str-3\"))",
+						IS_FALSE),
+				Arguments.of("anyMatch(\"str-3\"::equals)", "noneMatch(\"str-3\"::equals)", IS_FALSE),
+				Arguments.of("noneMatch(\"str-1\"::equals)", "anyMatch(\"str-1\"::equals)", IS_FALSE));
+	}
+
+	@ParameterizedTest
+	@MethodSource("assertionsOnStreamMethods")
+	void visit_AssertionsWithStreamMethods_shouldTransform(String originalInvocation, String expectedInvocation,
+			String booleanAssertion)
+			throws Exception {
+
+		fixture.addImport(java.util.stream.Stream.class.getName());
+
+		String dateVariableDeclaration = "Stream<String> stringStream = Stream.of(\"str-1\", \"str-2\");";
+		String original = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(stringStream.%s).%s;",
+				dateVariableDeclaration, originalInvocation, booleanAssertion);
+
+		String expected = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(stringStream).%s;",
+				dateVariableDeclaration, expectedInvocation);
+
+		assertChange(original, expected);
+	}
+	
+	
+	
+	public static Stream<Arguments> assertionsOnDoubleStreamMethods() throws Exception {
+		return Stream.of(
+				Arguments.of("equals(doubleStream)", "isEqualTo(doubleStream)", IS_TRUE),
+				Arguments.of("allMatch(i -> i > 0)", "allMatch(i -> i > 0)", IS_TRUE),
+				Arguments.of("anyMatch(i -> i == 1)", "anyMatch(i -> i == 1)", IS_TRUE),
+				Arguments.of("noneMatch(i -> i == 2)", "noneMatch(i -> i == 2)", IS_TRUE),
+				Arguments.of("equals(DoubleStream.of(1.0, 3.0))", "isNotEqualTo(DoubleStream.of(1.0, 3.0))",
+						IS_FALSE),
+				Arguments.of("anyMatch(i -> i == 2)", "noneMatch(i -> i == 2)", IS_FALSE),
+				Arguments.of("noneMatch(i -> i == 1)", "anyMatch(i -> i == 1)", IS_FALSE));
+	}
+
+	@ParameterizedTest
+	@MethodSource("assertionsOnDoubleStreamMethods")
+	void visit_AssertionsWithDoubleStreamMethods_shouldTransform(String originalInvocation, String expectedInvocation,
+			String booleanAssertion)
+			throws Exception {
+
+		fixture.addImport(java.util.stream.DoubleStream.class.getName());
+
+		String dateVariableDeclaration = "DoubleStream doubleStream = DoubleStream.of(1.0, 3.0);";
+		String original = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(doubleStream.%s).%s;",
+				dateVariableDeclaration, originalInvocation, booleanAssertion);
+
+		String expected = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(doubleStream).%s;",
+				dateVariableDeclaration, expectedInvocation);
+
+		assertChange(original, expected);
+	}
 }
