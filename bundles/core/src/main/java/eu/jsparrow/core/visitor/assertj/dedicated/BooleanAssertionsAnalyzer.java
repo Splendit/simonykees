@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -33,6 +34,7 @@ class BooleanAssertionsAnalyzer {
 	private static final BooleanAssertionsAnalyzer STREAM_ASSERTIONS_ANALYZER = createStreamAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer ITERATOR_ASSERTIONS_ANALYZER = createIteratorTypesAssertionsAnalyzer();
 	private static final BooleanAssertionsAnalyzer PREDICATE_ASSERTIONS_ANALYZER = createPredicateAssertionsAnalyzer();
+	private static final BooleanAssertionsAnalyzer ARRAY_ASSERTIONS_ANALYZER = createArrayAssertionsAnalyzer();
 
 	private static final BooleanAssertionsAnalyzer OTHER_TYPES_ASSERTIONS_ANALYZER = createOtherTypesAssertionsAnalyzer();
 
@@ -215,6 +217,10 @@ class BooleanAssertionsAnalyzer {
 				map, negatedMap);
 	}
 
+	private static BooleanAssertionsAnalyzer createArrayAssertionsAnalyzer() {
+		return new BooleanAssertionsAnalyzer(getSupportedArrayTypePredicate(), new HashMap<>(), new HashMap<>());
+	}
+
 	private static BooleanAssertionsAnalyzer createOtherTypesAssertionsAnalyzer() {
 		return new BooleanAssertionsAnalyzer(getTypeBindingPredicate(
 				java.lang.Object.class,
@@ -254,12 +260,43 @@ class BooleanAssertionsAnalyzer {
 		return typeBinding -> ClassRelationUtil.isContentOfTypes(typeBinding, classNamesList);
 	}
 
+	static Predicate<ITypeBinding> getSupportedArrayTypePredicate() {
+		List<String> supportedArrayComponentTypes = Stream.of(
+				byte.class,
+				char.class,
+				short.class,
+				int.class,
+				long.class,
+				float.class,
+				double.class,
+				Short.class,
+				Integer.class,
+				Long.class,
+				Byte.class,
+				Character.class,
+				Float.class,
+				Double.class,
+				Object.class)
+			.map(Class::getName)
+			.collect(Collectors.toList());
+
+		return typeBinding -> typeBinding.getDimensions() == 1 &&
+				ClassRelationUtil.isContentOfTypes(typeBinding.getComponentType(), supportedArrayComponentTypes)
+				||
+				typeBinding.getDimensions() == 2 &&
+						ClassRelationUtil.isContentOfTypes(typeBinding.getComponentType()
+							.getComponentType(), supportedArrayComponentTypes);
+	}
+
 	static boolean isSupportedIterableType(ITypeBinding typeBinding) {
 		if (ClassRelationUtil.isContentOfType(typeBinding, java.lang.Iterable.class.getName())) {
 			return true;
 		}
-
-		String packageName = typeBinding.getPackage()
+		IPackageBinding packageBinding = typeBinding.getPackage();
+		if(packageBinding == null) {
+			return false;
+		}
+		String packageName = packageBinding
 			.getName();
 		return packageName.equals(JAVA_UTIL)
 				&& ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
@@ -270,8 +307,11 @@ class BooleanAssertionsAnalyzer {
 		if (ClassRelationUtil.isContentOfType(typeBinding, java.util.Map.class.getName())) {
 			return true;
 		}
-
-		String packageName = typeBinding.getPackage()
+		IPackageBinding packageBinding = typeBinding.getPackage();
+		if(packageBinding == null) {
+			return false;
+		}
+		String packageName = packageBinding
 			.getName();
 		return packageName.equals(JAVA_UTIL)
 				&& ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
@@ -283,9 +323,12 @@ class BooleanAssertionsAnalyzer {
 		if (ClassRelationUtil.isContentOfType(typeBinding, java.util.Iterator.class.getName())) {
 			return true;
 		}
-		String packageName = typeBinding.getPackage()
+		IPackageBinding packageBinding = typeBinding.getPackage();
+		if(packageBinding == null) {
+			return false;
+		}
+		String packageName = packageBinding
 			.getName();
-
 		return packageName.equals(JAVA_UTIL)
 				&& ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
 						Arrays.asList(java.util.Iterator.class.getName()));
@@ -323,6 +366,9 @@ class BooleanAssertionsAnalyzer {
 		}
 		if (PREDICATE_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
 			return Optional.of(PREDICATE_ASSERTIONS_ANALYZER);
+		}
+		if (ARRAY_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
+			return Optional.of(ARRAY_ASSERTIONS_ANALYZER);
 		}
 		if (OTHER_TYPES_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
 			return Optional.of(OTHER_TYPES_ASSERTIONS_ANALYZER);

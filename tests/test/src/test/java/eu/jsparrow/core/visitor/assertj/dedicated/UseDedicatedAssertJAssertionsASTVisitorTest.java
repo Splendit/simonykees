@@ -767,8 +767,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
-	
+
 	public static Stream<Arguments> assertionsOnPredicateTestIsFalse() throws Exception {
 		return Stream.of(
 				Arguments.of("Predicate", "Predicate<String>", "s -> s.isEmpty()", "\"not-empty\""),
@@ -796,5 +795,98 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				predicateType, lambda, valueUnderTest);
 
 		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"byte",
+			"char",
+			"short",
+			"int",
+			"long",
+			"float",
+			"double",
+			"int",
+			"Short",
+			"Integer",
+			"Long",
+			"Byte",
+			"Character",
+			"Float",
+			"Double",
+			"Object"
+	})
+	void visit_OneDimensionalArrayEqualsOtherIsTrue_shouldTransform(String componentType) throws Exception {
+
+		String original = String.format(
+				"" +
+						"		%s[] array = new %s[0];\n" +
+						"		assertThat(array.equals(array)).isTrue();",
+				componentType, componentType);
+
+		String expected = String.format(
+				"" +
+						"		%s[] array = new %s[0];\n" +
+						"		assertThat(array).isEqualTo(array);",
+				componentType, componentType);
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"int",
+			"Integer",
+			"Object"
+	})
+	void visit_TwoDimensionalArrayEqualsOtherIsTrue_shouldTransform(String componentType) throws Exception {
+
+		String original = String.format(
+				"" +
+						"		%s[][] array = new %s[0][0];\n" +
+						"		assertThat(array.equals(array)).isTrue();",
+				componentType, componentType);
+
+		String expected = String.format(
+				"" +
+						"		%s[][] array = new %s[0][0];\n" +
+						"		assertThat(array).isEqualTo(array);",
+				componentType, componentType);
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"int",
+			"Integer",
+			"Object"
+	})
+	void visit_ThreeDimensionalArrayEqualsOtherIsTrue_shouldNotTransform(String componentType) throws Exception {
+
+		String original = String.format(
+				"" +
+						"		%s[][][] array = new %s[0][0][0];\n" +
+						"		assertThat(array.equals(array)).isTrue();",
+				componentType, componentType);
+
+		assertNoChange(original);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"boolean",
+			"Boolean",
+			"String"
+	})
+	void visit_Unsupported1DArrayEqualsOtherIsTrue_shouldNotTransform(String componentType) throws Exception {
+
+		String original = String.format(
+				"" +
+						"		%s[] array = new %s[0];\n" +
+						"		assertThat(array.equals(array)).isTrue();",
+				componentType, componentType);
+
+		assertNoChange(original);
 	}
 }
