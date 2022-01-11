@@ -22,12 +22,13 @@ import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
  */
 public class StringBuildingLoopRule extends RefactoringRuleImpl<StringBuildingLoopASTVisitor> {
 
+	public static final String RULE_ID = "StringBuildingLoop"; //$NON-NLS-1$
 	private String javaVersion;
 
 	public StringBuildingLoopRule() {
 		super();
 		this.visitorClass = StringBuildingLoopASTVisitor.class;
-		this.id = "StringBuildingLoop"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.StringBuildingLoopRule_name,
 				Messages.StringBuildingLoopRule_description, Duration.ofMinutes(10),
 				Arrays.asList(Tag.JAVA_1_5, Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP));

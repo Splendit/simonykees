@@ -18,9 +18,10 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class UseStringJoinRule extends RefactoringRuleImpl<UseStringJoinASTVisitor> {
 
+	public static final String RULE_ID = "UseStringJoin"; //$NON-NLS-1$
 	public UseStringJoinRule() {
 		this.visitorClass = UseStringJoinASTVisitor.class;
-		this.id = "UseStringJoin"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.UseStringJoinRule_name,
 				Messages.UseStringJoinRule_description, Duration.ofMinutes(5),
 				Tag.STRING_MANIPULATION, Tag.PERFORMANCE);

@@ -19,10 +19,10 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class EnhancedForLoopToStreamForEachRule extends RefactoringRuleImpl<EnhancedForLoopToStreamForEachASTVisitor> {
 
+	public static final String RULE_ID = "EnhancedForLoopToStreamForEach"; //$NON-NLS-1$ 
 	public EnhancedForLoopToStreamForEachRule() {
-		super();
 		this.visitorClass = EnhancedForLoopToStreamForEachASTVisitor.class;
-		this.id = "EnhancedForLoopToStreamForEach"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.EnhancedForLoopToStreamForEachRule_name,
 				Messages.EnhancedForLoopToStreamForEachRule_description, Duration.ofMinutes(15),
 				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP));

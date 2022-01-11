@@ -24,9 +24,11 @@ import eu.jsparrow.rules.common.Tag;
 public class ReplaceStreamCollectByToListRule
 		extends RefactoringRuleImpl<ReplaceStreamCollectByToListASTVisitor> {
 
+	public static final String RULE_ID = "ReplaceStreamCollectByToList"; //$NON-NLS-1$
+
 	public ReplaceStreamCollectByToListRule() {
 		this.visitorClass = ReplaceStreamCollectByToListASTVisitor.class;
-		this.id = "ReplaceStreamCollectByToList"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.ReplaceStreamCollectByToListRule_name,
 				Messages.ReplaceStreamCollectByToListRule_description,
 				Duration.ofMinutes(2),
