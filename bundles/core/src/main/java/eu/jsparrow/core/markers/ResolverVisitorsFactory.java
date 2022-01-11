@@ -15,9 +15,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.markers.visitor.AvoidConcatenationInLoggingStatementsResolver;
 import eu.jsparrow.core.markers.visitor.CollectionRemoveAllResolver;
@@ -48,6 +47,12 @@ import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachMapResolver;
 import eu.jsparrow.core.markers.visitor.loop.ForToForEachResolver;
 import eu.jsparrow.core.markers.visitor.loop.StringBuildingLoopResolver;
 import eu.jsparrow.core.markers.visitor.loop.WhileToForEachResolver;
+import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamAnyMatchResolver;
+import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamFindFirstResolver;
+import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamForEachResolver;
+import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamSumResolver;
+import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamTakeWhileResolver;
+import eu.jsparrow.core.markers.visitor.stream.tolist.ReplaceStreamCollectByToListResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.MultiCatchResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.TryWithResourceResolver;
 import eu.jsparrow.rules.api.MarkerService;
@@ -107,6 +112,12 @@ public class ResolverVisitorsFactory {
 		map.put(LambdaForEachMapResolver.ID, LambdaForEachMapResolver::new);
 		map.put(LambdaForEachCollectResolver.ID, LambdaForEachCollectResolver::new);
 		map.put(CollectionsFactoryMethodsResolver.ID, CollectionsFactoryMethodsResolver::new);
+		map.put(ReplaceStreamCollectByToListResolver.ID, ReplaceStreamCollectByToListResolver::new);
+		map.put(EnhancedForLoopToStreamAnyMatchResolver.ID, EnhancedForLoopToStreamAnyMatchResolver::new);
+		map.put(EnhancedForLoopToStreamFindFirstResolver.ID, EnhancedForLoopToStreamFindFirstResolver::new);
+		map.put(EnhancedForLoopToStreamForEachResolver.ID, EnhancedForLoopToStreamForEachResolver::new);
+		map.put(EnhancedForLoopToStreamSumResolver.ID, EnhancedForLoopToStreamSumResolver::new);
+		map.put(EnhancedForLoopToStreamTakeWhileResolver.ID, EnhancedForLoopToStreamTakeWhileResolver::new);
 
 		List<MarkerService> markerServices = getExternalRuleServices();
 		markerServices.stream()

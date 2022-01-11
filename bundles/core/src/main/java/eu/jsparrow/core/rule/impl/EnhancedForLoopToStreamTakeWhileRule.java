@@ -19,10 +19,12 @@ import eu.jsparrow.rules.common.Tag;
  *
  */
 public class EnhancedForLoopToStreamTakeWhileRule extends RefactoringRuleImpl<EnhancedForLoopToStreamTakeWhileASTVisitor> {
-	
+
+	public static final String RULE_ID = "EnhancedForLoopToStreamTakeWhile"; //$NON-NLS-1$
+
 	public EnhancedForLoopToStreamTakeWhileRule() {
 		this.visitorClass = EnhancedForLoopToStreamTakeWhileASTVisitor.class;
-		this.id = "EnhancedForLoopToStreamTakeWhile"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.EnhancedForLoopToStreamTakeWhileRule_name,
 				Messages.EnhancedForLoopToStreamTakeWhileRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_9, Tag.LOOP, Tag.LAMBDA));

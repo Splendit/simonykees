@@ -21,10 +21,12 @@ import eu.jsparrow.rules.common.Tag;
 public class EnhancedForLoopToStreamAnyMatchRule
 		extends RefactoringRuleImpl<EnhancedForLoopToStreamAnyMatchASTVisitor> {
 
+	public static final String RULE_ID = "EnhancedForLoopToStreamAnyMatch"; //$NON-NLS-1$
+
 	public EnhancedForLoopToStreamAnyMatchRule() {
 		super();
 		this.visitorClass = EnhancedForLoopToStreamAnyMatchASTVisitor.class;
-		this.id = "EnhancedForLoopToStreamAnyMatch"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.EnhancedForLoopToStreamAnyMatchRule_name,
 				Messages.EnhancedForLoopToStreamAnyMatchRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP));

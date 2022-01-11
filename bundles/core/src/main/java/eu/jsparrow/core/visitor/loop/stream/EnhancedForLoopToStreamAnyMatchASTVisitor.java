@@ -235,6 +235,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 		astRewrite.replace(followingReturnStatement.getExpression(), methodInvocation, null);
 		astRewrite.remove(enhancedForStatement, null);
 		getCommentRewriter().saveRelatedComments(enhancedForStatement);
+		addMarkerEvent(enhancedForStatement);
 		onRewrite();
 	}
 
@@ -249,6 +250,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 		astRewrite.replace(initializer, methodInvocation, null);
 		replaceLoopWithFragment(enhancedForStatement, declarationFragment);
 		getCommentRewriter().saveRelatedComments(enhancedForStatement);
+		addMarkerEvent(enhancedForStatement);
 		onRewrite();
 	}
 
