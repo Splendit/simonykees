@@ -889,4 +889,111 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertNoChange(original);
 	}
+
+	public static Stream<Arguments> assertionsOnInfixOperationsWithObject() throws Exception {
+		return Stream.of(
+				Arguments.of("o == o", IS_TRUE, "isSameAs(o)"),
+				Arguments.of("o != o", IS_TRUE, "isNotSameAs(o)"),
+				Arguments.of("o == o", IS_FALSE, "isNotSameAs(o)"),
+				Arguments.of("o != o", IS_FALSE, "isSameAs(o)"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("assertionsOnInfixOperationsWithObject")
+	void visit_InfixOperationWithObject_shouldTransform(String infixOperation, String booleanAssertion,
+			String newAssertion) throws Exception {
+
+		String original = String.format("" +
+				"		Object o = new Object();\n"
+				+ "		assertThat(%s).%s;",
+				infixOperation, booleanAssertion);
+
+		String expected = String.format("" +
+				"		Object o = new Object();\n"
+				+ "		assertThat(o).%s;",
+				newAssertion);
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"assertThat(o1 != null).isTrue()",
+			"assertThat(null != o1).isTrue()",
+			"assertThat(o1 == null).isFalse()",
+			"assertThat(null == o1).isFalse()"
+	})
+	void visit_ObjectIsNotNull_shouldTransform(String originalInvocation) throws Exception {
+		String original = String.format("" +
+				"		Object o1 = new Object();\n" +
+				"		%s;",
+				originalInvocation);
+
+		String expected = "" +
+				"		Object o1 = new Object();\n"
+				+ "		assertThat(o1).isNotNull();";
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"assertThat(o1 == null).isTrue()",
+			"assertThat(null == o1).isTrue()",
+			"assertThat(o1 != null).isFalse()",
+			"assertThat(null != o1).isFalse()"
+	})
+	void visit_ObjectIsNull_shouldTransform(String originalInvocation) throws Exception {
+		String original = String.format("" +
+				"		Object o1 = null;\n" +
+				"		%s;",
+				originalInvocation);
+
+		String expected = "" +
+				"		Object o1 = null;\n"
+				+ "		assertThat(o1).isNull();";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_NullIsNull_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		assertThat(null == null).isTrue();";
+
+		assertNoChange(original);
+	}
+
+	public static Stream<Arguments> assertionsOnInfixOperationsWithInt() throws Exception {
+		return Stream.of(
+				Arguments.of("x == 10", IS_TRUE, "isEqualTo(10)"),
+				Arguments.of("x != 11", IS_TRUE, "isNotEqualTo(11)"),
+				Arguments.of("x < 11", IS_TRUE, "isLessThan(11)"),
+				Arguments.of("x <= 11", IS_TRUE, "isLessThanOrEqualTo(11)"),
+				Arguments.of("x > 9", IS_TRUE, "isGreaterThan(9)"),
+				Arguments.of("x >= 9", IS_TRUE, "isGreaterThanOrEqualTo(9)"),
+				Arguments.of("x != 10", IS_FALSE, "isEqualTo(10)"),
+				Arguments.of("x == 11", IS_FALSE, "isNotEqualTo(11)"),
+				Arguments.of("x < 9", IS_FALSE, "isGreaterThanOrEqualTo(9)"),
+				Arguments.of("x <= 9", IS_FALSE, "isGreaterThan(9)"),
+				Arguments.of("x > 11", IS_FALSE, "isLessThanOrEqualTo(11)"),
+				Arguments.of("x >= 11", IS_FALSE, "isLessThan(11)"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("assertionsOnInfixOperationsWithInt")
+	void visit_InfixOperationWithInt_shouldTransform(String infixOperation, String booleanAssertion,
+			String newAssertion) throws Exception {
+
+		String original = String.format("" +
+				"		int x = 10;\n"
+				+ "		assertThat(%s).%s;",
+				infixOperation, booleanAssertion);
+
+		String expected = String.format("" +
+				"		int x = 10;\n"
+				+ "		assertThat(x).%s;",
+				newAssertion);
+
+		assertChange(original, expected);
+	}
 }

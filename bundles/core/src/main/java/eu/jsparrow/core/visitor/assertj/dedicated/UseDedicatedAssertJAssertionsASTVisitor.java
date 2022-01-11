@@ -20,11 +20,13 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.visitor.assertj.SupportedAssertJAssertions;
 import eu.jsparrow.core.visitor.junit.dedicated.NotOperandUnwrapper;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -48,23 +50,35 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  *
  */
 public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteASTVisitor {
-	
+
+	private static final String ASSERT_THAT = "assertThat";//$NON-NLS-1$
 	static final String IS_FALSE = "isFalse"; //$NON-NLS-1$
 	static final String IS_TRUE = "isTrue"; //$NON-NLS-1$
-	private static final Map<InfixExpression.Operator, InfixExpression.Operator> INFIX_OPERATOR_NEGATIONS;
+	private static final Map<Operator, Operator> INFIX_OPERATOR_NEGATIONS_MAP;
+
+	private static final Map<Operator, String> PRIMITIVE_INFIX_TO_METHOD_NAME_MAP;
 
 	static {
-		Map<InfixExpression.Operator, InfixExpression.Operator> tmpOperatorMap = new HashMap<>();
+		Map<Operator, Operator> tmpOperatorNegationMap = new HashMap<>();
 
-		tmpOperatorMap.put(EQUALS, NOT_EQUALS);
-		tmpOperatorMap.put(NOT_EQUALS, EQUALS);
-		tmpOperatorMap.put(LESS, GREATER_EQUALS);
-		tmpOperatorMap.put(LESS_EQUALS, GREATER);
-		tmpOperatorMap.put(GREATER, LESS_EQUALS);
-		tmpOperatorMap.put(GREATER_EQUALS, LESS);
-		INFIX_OPERATOR_NEGATIONS = Collections.unmodifiableMap(tmpOperatorMap);
+		tmpOperatorNegationMap.put(EQUALS, NOT_EQUALS);
+		tmpOperatorNegationMap.put(NOT_EQUALS, EQUALS);
+		tmpOperatorNegationMap.put(LESS, GREATER_EQUALS);
+		tmpOperatorNegationMap.put(LESS_EQUALS, GREATER);
+		tmpOperatorNegationMap.put(GREATER, LESS_EQUALS);
+		tmpOperatorNegationMap.put(GREATER_EQUALS, LESS);
+		INFIX_OPERATOR_NEGATIONS_MAP = Collections.unmodifiableMap(tmpOperatorNegationMap);
+
+		Map<Operator, String> tmpMethodNameMap = new HashMap<>();
+		tmpMethodNameMap.put(EQUALS, "isEqualTo"); //$NON-NLS-1$
+		tmpMethodNameMap.put(NOT_EQUALS, "isNotEqualTo"); //$NON-NLS-1$
+		tmpMethodNameMap.put(LESS, "isLessThan"); //$NON-NLS-1$
+		tmpMethodNameMap.put(LESS_EQUALS, "isLessThanOrEqualTo"); //$NON-NLS-1$
+		tmpMethodNameMap.put(GREATER, "isGreaterThan"); //$NON-NLS-1$
+		tmpMethodNameMap.put(GREATER_EQUALS, "isGreaterThanOrEqualTo"); //$NON-NLS-1$
+		PRIMITIVE_INFIX_TO_METHOD_NAME_MAP = Collections.unmodifiableMap(tmpMethodNameMap);
+
 	}
-
 
 	@Override
 	public boolean visit(MethodInvocation node) {
@@ -84,43 +98,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 
 	private Optional<DedicatedAssertionData> findDedicatedAssertionData(MethodInvocation node) {
 
-		if (node.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return Optional.empty();
-		}
-
-		Expression invocationExpression = node.getExpression();
-		if (invocationExpression == null || invocationExpression.getNodeType() != ASTNode.METHOD_INVOCATION) {
-			return Optional.empty();
-		}
-
-		MethodInvocation assumedAssertThatInvocation = (MethodInvocation) invocationExpression;
-		List<Expression> assertThatArguments = ASTNodeUtil.convertToTypedList(assumedAssertThatInvocation.arguments(),
-				Expression.class);
-
-		if (assertThatArguments.size() != 1) {
-			return Optional.empty();
-		}
-		Expression assertThatArgument = assertThatArguments.get(0);
-
-		if (!SupportedAssertJAssertions.isSupportedAssertJAsserThatMethodName(assumedAssertThatInvocation.getName()
-			.getIdentifier())) {
-			return Optional.empty();
-		}
-
-		IMethodBinding assertThatMethodBinding = assumedAssertThatInvocation.resolveMethodBinding();
-
-		if (assertThatMethodBinding == null ||
-				!SupportedAssertJAssertions.isSupportedAssertionsType(assertThatMethodBinding.getDeclaringClass())) {
-			return Optional.empty();
-		}
-
-		return analyzeBooleanAssertion(assumedAssertThatInvocation, assertThatArgument, node);
-	}
-	
-	private Optional<DedicatedAssertionData> analyzeBooleanAssertion(MethodInvocation assertThatInvocation,
-			Expression assertThatArgument, MethodInvocation assumedAssertionInvocation) {
-
-		String assertionName = assumedAssertionInvocation
+		String assertionName = node
 			.getName()
 			.getIdentifier();
 
@@ -128,32 +106,65 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			return Optional.empty();
 		}
 
+		if (node.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			return Optional.empty();
+		}
+
+		MethodInvocation assertThatInvocation = findAssertThatInvocationAsExpression(node).orElse(null);
+		if (assertThatInvocation == null) {
+			return Optional.empty();
+		}
+
+		List<Expression> assertThatArguments = ASTNodeUtil.convertToTypedList(assertThatInvocation.arguments(),
+				Expression.class);
+
+		if (assertThatArguments.size() != 1) {
+			return Optional.empty();
+		}
+		Expression assertThatArgument = assertThatArguments.get(0);
 		NotOperandUnwrapper notOperandUnwrapper = new NotOperandUnwrapper(assertThatArgument);
 		if (assertionName.equals(IS_FALSE) ^ notOperandUnwrapper.isNegationByNot()) {
 			assertionName = IS_FALSE;
 		} else {
 			assertionName = IS_TRUE;
 		}
-
 		Expression unwrappedAssertThatArgument = notOperandUnwrapper.getUnwrappedOperand();
 
 		if (unwrappedAssertThatArgument.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation invocationAsAssertThatArgument = (MethodInvocation) unwrappedAssertThatArgument;
-			return analyzeBooleanAssertion(assertThatInvocation, invocationAsAssertThatArgument,
+			return analyzeBooleanAssertionWithMethodInvocation(assertThatInvocation, invocationAsAssertThatArgument,
 					assertionName);
-
 		}
+
 		if (unwrappedAssertThatArgument.getNodeType() == ASTNode.INFIX_EXPRESSION) {
-			InfixExpression infixExpression = (InfixExpression) unwrappedAssertThatArgument;
+			return analyzeBooleanAssertionWithInfixOperation(assertThatInvocation,
+					(InfixExpression) unwrappedAssertThatArgument, assertionName);
 
-		} else {
-			return Optional.empty();
 		}
-
 		return Optional.empty();
+
 	}
 
-	private Optional<DedicatedAssertionData> analyzeBooleanAssertion(MethodInvocation assertThat,
+	private Optional<MethodInvocation> findAssertThatInvocationAsExpression(MethodInvocation booleanAssertion) {
+		Expression invocationExpression = booleanAssertion.getExpression();
+		if (invocationExpression == null || invocationExpression.getNodeType() != ASTNode.METHOD_INVOCATION) {
+			return Optional.empty();
+		}
+		MethodInvocation assumedAssertThatInvocation = (MethodInvocation) invocationExpression;
+		if (!ASSERT_THAT.equals(assumedAssertThatInvocation.getName()
+			.getIdentifier())) {
+			return Optional.empty();
+		}
+		IMethodBinding assertThatMethodBinding = assumedAssertThatInvocation.resolveMethodBinding();
+
+		if (assertThatMethodBinding == null ||
+				!SupportedAssertJAssertions.isSupportedAssertionsType(assertThatMethodBinding.getDeclaringClass())) {
+			return Optional.empty();
+		}
+		return Optional.of(assumedAssertThatInvocation);
+	}
+
+	private Optional<DedicatedAssertionData> analyzeBooleanAssertionWithMethodInvocation(MethodInvocation assertThat,
 			MethodInvocation invocationAsAssertThatArgument, String assertionMethodName) {
 
 		Expression newAssertThatArgument = invocationAsAssertThatArgument.getExpression();
@@ -191,15 +202,87 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		if (newAssertionName == null) {
 			return Optional.empty();
 		}
-
 		MethodInvocationData assertThatData = createNewAssertThatData(assertThat, newAssertThatArgument);
-
 		MethodInvocationData newAssertionData = new MethodInvocationData(newAssertionName);
 		newAssertionData.setArguments(newAssertionArguments);
-
 		DedicatedAssertionData dedicatedAssertionData = new DedicatedAssertionData(assertThatData, newAssertionData);
 
 		return Optional.of(dedicatedAssertionData);
+	}
+
+	private Optional<DedicatedAssertionData> analyzeBooleanAssertionWithInfixOperation(MethodInvocation assertThat,
+			InfixExpression infixExpressionAsAssertThatArgument, String assertionMethodName) {
+		Expression leftOperand = infixExpressionAsAssertThatArgument.getLeftOperand();
+		Expression rightOperand = infixExpressionAsAssertThatArgument.getRightOperand();
+		Operator infixOperator = infixExpressionAsAssertThatArgument.getOperator();
+		if (assertionMethodName.equals(IS_FALSE)) {
+			infixOperator = INFIX_OPERATOR_NEGATIONS_MAP.get(infixOperator);
+		}
+		if (leftOperand.getNodeType() == ASTNode.NULL_LITERAL) {
+			if (rightOperand.getNodeType() == ASTNode.NULL_LITERAL) {
+				return Optional.empty();
+			}
+			return analyzeBooleanAssertionWithInfixOperationWithNullLiteral(assertThat, rightOperand, infixOperator);
+		}
+
+		if (rightOperand.getNodeType() == ASTNode.NULL_LITERAL) {
+			return analyzeBooleanAssertionWithInfixOperationWithNullLiteral(assertThat, leftOperand, infixOperator);
+		}
+
+		ITypeBinding leftOperandType = leftOperand.resolveTypeBinding();
+		ITypeBinding rightOperandType = rightOperand.resolveTypeBinding();
+		if (leftOperandType == null || rightOperandType == null) {
+			return Optional.empty();
+		}
+
+		if (!ClassRelationUtil.compareITypeBinding(leftOperandType, rightOperandType)) {
+			return Optional.empty();
+		}
+
+		if (!BooleanAssertionsAnalyzer.isSupportedForInfixOrInstanceOf(leftOperandType)) {
+			return Optional.empty();
+		}
+
+		String newAssertionMethodName = null;
+		if (rightOperandType.isPrimitive()) {
+			newAssertionMethodName = PRIMITIVE_INFIX_TO_METHOD_NAME_MAP.get(infixOperator);
+		} else if (infixOperator == EQUALS) {
+			newAssertionMethodName = "isSameAs"; //$NON-NLS-1$
+		} else if (infixOperator == NOT_EQUALS) {
+			newAssertionMethodName = "isNotSameAs"; //$NON-NLS-1$
+		}
+		if (newAssertionMethodName == null) {
+			return Optional.empty();
+		}
+
+		MethodInvocationData assertThatData = createNewAssertThatData(assertThat, leftOperand);
+		MethodInvocationData newAssertionData = new MethodInvocationData(newAssertionMethodName);
+		newAssertionData.setArguments(Arrays.asList(rightOperand));
+		DedicatedAssertionData dedicatedAssertionData = new DedicatedAssertionData(assertThatData, newAssertionData);
+
+		return Optional.of(dedicatedAssertionData);
+
+	}
+
+	private Optional<DedicatedAssertionData> analyzeBooleanAssertionWithInfixOperationWithNullLiteral(
+			MethodInvocation assertThat, Expression newAssertThatArgument, Operator infixOperator) {
+		ITypeBinding newAssertThatArgumentType = newAssertThatArgument.resolveTypeBinding();
+		if (!BooleanAssertionsAnalyzer.isSupportedForInfixOrInstanceOf(newAssertThatArgumentType)) {
+			return Optional.empty();
+		}
+
+		if (infixOperator == EQUALS) {
+			MethodInvocationData assertThatData = createNewAssertThatData(assertThat, newAssertThatArgument);
+			MethodInvocationData newAssertionData = new MethodInvocationData("isNull"); //$NON-NLS-1$
+			return Optional.of(new DedicatedAssertionData(assertThatData, newAssertionData));
+
+		} else if (infixOperator == NOT_EQUALS) {
+			MethodInvocationData assertThatData = createNewAssertThatData(assertThat, newAssertThatArgument);
+			MethodInvocationData newAssertionData = new MethodInvocationData("isNotNull"); //$NON-NLS-1$
+			return Optional.of(new DedicatedAssertionData(assertThatData, newAssertionData));
+
+		}
+		return Optional.empty();
 	}
 
 	private MethodInvocationData createNewAssertThatData(MethodInvocation assertThat,
@@ -212,21 +295,4 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		newAssertThatData.setArguments(newAssertThatArguments);
 		return newAssertThatData;
 	}
-
-	private Optional<InfixExpression.Operator> findSupportedInfixOperator(InfixExpression infixExpression,
-			String assertionName) {
-		InfixExpression.Operator operator = infixExpression.getOperator();
-
-		if (assertionName.equals(IS_FALSE)) {
-			return Optional.ofNullable(INFIX_OPERATOR_NEGATIONS.get(operator));
-		}
-
-		if (INFIX_OPERATOR_NEGATIONS.keySet()
-			.contains(operator)) {
-			return Optional.of(operator);
-		}
-
-		return Optional.empty();
-	}
-
 }

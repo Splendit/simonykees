@@ -293,7 +293,7 @@ class BooleanAssertionsAnalyzer {
 			return true;
 		}
 		IPackageBinding packageBinding = typeBinding.getPackage();
-		if(packageBinding == null) {
+		if (packageBinding == null) {
 			return false;
 		}
 		String packageName = packageBinding
@@ -308,7 +308,7 @@ class BooleanAssertionsAnalyzer {
 			return true;
 		}
 		IPackageBinding packageBinding = typeBinding.getPackage();
-		if(packageBinding == null) {
+		if (packageBinding == null) {
 			return false;
 		}
 		String packageName = packageBinding
@@ -324,7 +324,7 @@ class BooleanAssertionsAnalyzer {
 			return true;
 		}
 		IPackageBinding packageBinding = typeBinding.getPackage();
-		if(packageBinding == null) {
+		if (packageBinding == null) {
 			return false;
 		}
 		String packageName = packageBinding
@@ -395,6 +395,15 @@ class BooleanAssertionsAnalyzer {
 		}
 		return Optional.empty();
 
+	}
+
+	static boolean isSupportedForInfixOrInstanceOf(ITypeBinding newAssertThatArgumentTypeBinding) {
+		if (newAssertThatArgumentTypeBinding.isPrimitive()) {
+			return true;
+		}
+		BooleanAssertionsAnalyzer analyzerForReferenceType = findAnalyzer(newAssertThatArgumentTypeBinding)
+			.orElse(null);
+		return analyzerForReferenceType != null;
 	}
 
 	private BooleanAssertionsAnalyzer(Predicate<ITypeBinding> supportedTypeBindingPredicate,
