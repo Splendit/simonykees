@@ -283,17 +283,17 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 			throws Exception {
 
 		fixture.addImport(java.nio.file.Path.class.getName());
-		String pathVariableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
+		String variableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
 
 		String original = String.format("" +
 				"		%s\n" +
 				"		assertThat(path.%s).isTrue();",
-				pathVariableDeclaration, originalInvocation);
+				variableDeclaration, originalInvocation);
 
 		String expected = String.format("" +
 				"		%s\n" +
 				"		assertThat(path).%s;",
-				pathVariableDeclaration, expectedInvocation);
+				variableDeclaration, expectedInvocation);
 
 		assertChange(original, expected);
 	}
@@ -310,17 +310,17 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 			throws Exception {
 
 		fixture.addImport(java.nio.file.Path.class.getName());
-		String pathVariableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
+		String variableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
 
 		String original = String.format("" +
 				"		%s\n" +
 				"		assertThat(path.%s).isFalse();",
-				pathVariableDeclaration, originalInvocation);
+				variableDeclaration, originalInvocation);
 
 		String expected = String.format("" +
 				"		%s\n" +
 				"		assertThat(path).%s;",
-				pathVariableDeclaration, expectedInvocation);
+				variableDeclaration, expectedInvocation);
 
 		assertChange(original, expected);
 	}
@@ -334,12 +334,12 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 			throws Exception {
 
 		fixture.addImport(java.nio.file.Path.class.getName());
-		String pathVariableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
+		String variableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
 
 		String original = String.format("" +
 				"		%s\n" +
 				"		assertThat(path.%s).isTrue();",
-				pathVariableDeclaration, originalInvocation);
+				variableDeclaration, originalInvocation);
 
 		assertNoChange(original);
 	}
@@ -353,12 +353,12 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 			throws Exception {
 
 		fixture.addImport(java.nio.file.Path.class.getName());
-		String pathVariableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
+		String variableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
 
 		String original = String.format("" +
 				"		%s\n" +
 				"		assertThat(path.%s).isFalse();",
-				pathVariableDeclaration, originalInvocation);
+				variableDeclaration, originalInvocation);
 
 		assertNoChange(original);
 	}
@@ -380,17 +380,17 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 			throws Exception {
 
 		fixture.addImport(java.io.File.class.getName());
-		String fileVariableDeclaration = "File file = new File(\"pom.xml\");";
+		String variableDeclaration = "File file = new File(\"pom.xml\");";
 
 		String original = String.format("" +
 				"		%s\n" +
 				"		assertThat(file.%s).isTrue();",
-				fileVariableDeclaration, originalInvocation);
+				variableDeclaration, originalInvocation);
 
 		String expected = String.format("" +
 				"		%s\n" +
 				"		assertThat(file).%s;",
-				fileVariableDeclaration, expectedInvocation);
+				variableDeclaration, expectedInvocation);
 
 		assertChange(original, expected);
 	}
@@ -404,12 +404,12 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 			throws Exception {
 
 		fixture.addImport(java.io.File.class.getName());
-		String fileVariableDeclaration = "File file = new File(\"pom.xml\");";
+		String variableDeclaration = "File file = new File(\"pom.xml\");";
 
 		String original = String.format("" +
 				"		%s\n" +
 				"		assertThat(file.%s).isTrue();",
-				fileVariableDeclaration, originalInvocation);
+				variableDeclaration, originalInvocation);
 
 		assertNoChange(original);
 	}
@@ -427,17 +427,17 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 			throws Exception {
 
 		fixture.addImport(java.io.File.class.getName());
-		String fileVariableDeclaration = "File file = new File(\"pom.xml\");";
+		String variableDeclaration = "File file = new File(\"pom.xml\");";
 
 		String original = String.format("" +
 				"		%s\n" +
 				"		assertThat(file.%s).isFalse();",
-				fileVariableDeclaration, originalInvocation);
+				variableDeclaration, originalInvocation);
 
 		String expected = String.format("" +
 				"		%s\n" +
 				"		assertThat(file).%s;",
-				fileVariableDeclaration, expectedInvocation);
+				variableDeclaration, expectedInvocation);
 
 		assertChange(original, expected);
 	}
@@ -455,12 +455,12 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 			throws Exception {
 
 		fixture.addImport(java.io.File.class.getName());
-		String fileVariableDeclaration = "File file = new File(\"pom.xml\");";
+		String variableDeclaration = "File file = new File(\"pom.xml\");";
 
 		String original = String.format("" +
 				"		%s\n" +
 				"		assertThat(file.%s).isFalse();",
-				fileVariableDeclaration, originalInvocation);
+				variableDeclaration, originalInvocation);
 
 		assertNoChange(original);
 	}
@@ -483,18 +483,18 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		fixture.addImport(java.util.Optional.class.getName());
 
-		String optionalVariableDeclaration = "Optional<String> optional = Optional.of(\"Hello World!\");";
+		String variableDeclaration = "Optional<String> optional = Optional.of(\"Hello World!\");";
 		String original = String.format(
 				"" +
 						"		%s\n" +
 						"		assertThat(optional.%s).%s;",
-				optionalVariableDeclaration, originalInvocation, booleanAssertion);
+				variableDeclaration, originalInvocation, booleanAssertion);
 
 		String expected = String.format(
 				"" +
 						"		%s\n" +
 						"		assertThat(optional).%s;",
-				optionalVariableDeclaration, expectedInvocation);
+				variableDeclaration, expectedInvocation);
 
 		assertChange(original, expected);
 	}
@@ -522,7 +522,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		fixture.addImport(java.util.Date.class.getName());
 
-		String dateVariableDeclaration = ""
+		String variableDeclaration = ""
 				+ "		long currentTimeMillis = System.currentTimeMillis();\n"
 				+ "		Date date = new Date(currentTimeMillis);";
 
@@ -530,13 +530,13 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				"" +
 						"		%s\n" +
 						"		assertThat(date.%s).%s;",
-				dateVariableDeclaration, originalInvocation, booleanAssertion);
+				variableDeclaration, originalInvocation, booleanAssertion);
 
 		String expected = String.format(
 				"" +
 						"		%s\n" +
 						"		assertThat(date).%s;",
-				dateVariableDeclaration, expectedInvocation);
+				variableDeclaration, expectedInvocation);
 
 		assertChange(original, expected);
 	}
@@ -561,18 +561,18 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		fixture.addImport(java.time.LocalDate.class.getName());
 
-		String localDateVariableDclaration = "LocalDate locatDate = LocalDate.of(2020, 11, 1);";
+		String variableDeclaration = "LocalDate locatDate = LocalDate.of(2020, 11, 1);";
 		String original = String.format(
 				"" +
 						"		%s\n" +
 						"		assertThat(locatDate.%s).%s;",
-				localDateVariableDclaration, originalInvocation, booleanAssertion);
+				variableDeclaration, originalInvocation, booleanAssertion);
 
 		String expected = String.format(
 				"" +
 						"		%s\n" +
 						"		assertThat(locatDate).%s;",
-				localDateVariableDclaration, expectedInvocation);
+				variableDeclaration, expectedInvocation);
 
 		assertChange(original, expected);
 	}
@@ -596,12 +596,12 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		fixture.addImport(java.time.temporal.ChronoField.class.getName());
 		fixture.addImport(java.time.temporal.ChronoUnit.class.getName());
 
-		String localDateVariableDclaration = "LocalDate locatDate = LocalDate.of(2020, 11, 1);";
+		String variableDeclaration = "LocalDate locatDate = LocalDate.of(2020, 11, 1);";
 		String original = String.format(
 				"" +
 						"		%s\n" +
 						"		assertThat(locatDate.%s).%s;",
-				localDateVariableDclaration, originalInvocation, booleanAssertion);
+				variableDeclaration, originalInvocation, booleanAssertion);
 
 		assertNoChange(original);
 	}
@@ -626,18 +626,18 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		fixture.addImport(java.util.stream.Stream.class.getName());
 
-		String dateVariableDeclaration = "Stream<String> stringStream = Stream.of(\"str-1\", \"str-2\");";
+		String variableDeclaration = "Stream<String> stringStream = Stream.of(\"str-1\", \"str-2\");";
 		String original = String.format(
 				"" +
 						"		%s\n" +
 						"		assertThat(stringStream.%s).%s;",
-				dateVariableDeclaration, originalInvocation, booleanAssertion);
+				variableDeclaration, originalInvocation, booleanAssertion);
 
 		String expected = String.format(
 				"" +
 						"		%s\n" +
 						"		assertThat(stringStream).%s;",
-				dateVariableDeclaration, expectedInvocation);
+				variableDeclaration, expectedInvocation);
 
 		assertChange(original, expected);
 	}
@@ -662,18 +662,18 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		fixture.addImport(java.util.stream.DoubleStream.class.getName());
 
-		String dateVariableDeclaration = "DoubleStream doubleStream = DoubleStream.of(1.0, 3.0);";
+		String variableDeclaration = "DoubleStream doubleStream = DoubleStream.of(1.0, 3.0);";
 		String original = String.format(
 				"" +
 						"		%s\n" +
 						"		assertThat(doubleStream.%s).%s;",
-				dateVariableDeclaration, originalInvocation, booleanAssertion);
+				variableDeclaration, originalInvocation, booleanAssertion);
 
 		String expected = String.format(
 				"" +
 						"		%s\n" +
 						"		assertThat(doubleStream).%s;",
-				dateVariableDeclaration, expectedInvocation);
+				variableDeclaration, expectedInvocation);
 
 		assertChange(original, expected);
 	}
@@ -695,18 +695,18 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		fixture.addImport(java.util.Arrays.class.getName());
 		fixture.addImport(java.util.Iterator.class.getName());
 
-		String dateVariableDeclaration = "Iterator<String> iterator = Arrays.asList(\"str-1\", \"str-2\").listIterator();";
+		String variableDeclaration = "Iterator<String> iterator = Arrays.asList(\"str-1\", \"str-2\").listIterator();";
 		String original = String.format(
 				"" +
 						"		%s\n" +
 						"		assertThat(iterator.%s).%s;",
-				dateVariableDeclaration, originalInvocation, booleanAssertion);
+				variableDeclaration, originalInvocation, booleanAssertion);
 
 		String expected = String.format(
 				"" +
 						"		%s\n" +
 						"		assertThat(iterator).%s;",
-				dateVariableDeclaration, expectedInvocation);
+				variableDeclaration, expectedInvocation);
 
 		assertChange(original, expected);
 	}
@@ -723,18 +723,18 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 			String booleanAssertion)
 			throws Exception {
 
-		String dateVariableDeclaration = "Object o = new Object();";
+		String variableDeclaration = "Object o = new Object();";
 		String original = String.format(
 				"" +
 						"		%s\n" +
 						"		assertThat(o.%s).%s;",
-				dateVariableDeclaration, originalInvocation, booleanAssertion);
+				variableDeclaration, originalInvocation, booleanAssertion);
 
 		String expected = String.format(
 				"" +
 						"		%s\n" +
 						"		assertThat(o).%s;",
-				dateVariableDeclaration, expectedInvocation);
+				variableDeclaration, expectedInvocation);
 
 		assertChange(original, expected);
 	}
@@ -992,6 +992,33 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		String expected = String.format("" +
 				"		int x = 10;\n"
 				+ "		assertThat(x).%s;",
+				newAssertion);
+
+		assertChange(original, expected);
+	}
+	
+	
+	public static Stream<Arguments> assertionsOnInfixOperationsWith1DIntArray() throws Exception {
+		return Stream.of(
+				Arguments.of("intArray == intArray", IS_TRUE, "isSameAs(intArray)"),
+				Arguments.of("intArray != new int[0]", IS_TRUE, "isNotSameAs(new int[0])"),
+				Arguments.of("intArray != intArray", IS_FALSE, "isSameAs(intArray)"),
+				Arguments.of("intArray == new int[0]", IS_FALSE, "isNotSameAs(new int[0])"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("assertionsOnInfixOperationsWith1DIntArray")
+	void visit_InfixOperationWith1DIntArray_shouldTransform(String infixOperation, String booleanAssertion,
+			String newAssertion) throws Exception {
+
+		String original = String.format("" +
+				"		int[] intArray = new int[0];\n"
+				+ "		assertThat(%s).%s;",
+				infixOperation, booleanAssertion);
+
+		String expected = String.format("" +
+				"		int[] intArray = new int[0];\n"
+				+ "		assertThat(intArray).%s;",
 				newAssertion);
 
 		assertChange(original, expected);
