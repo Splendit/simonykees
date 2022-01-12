@@ -996,8 +996,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
-	
+
 	public static Stream<Arguments> assertionsOnInfixOperationsWith1DIntArray() throws Exception {
 		return Stream.of(
 				Arguments.of("intArray == intArray", IS_TRUE, "isSameAs(intArray)"),
@@ -1022,5 +1021,28 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				newAssertion);
 
 		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_instanceofIsTrue_shouldTransform() throws Exception {
+		String original = String.format("" +
+				"		Object o = new Object();\n"
+				+ "		assertThat(o instanceof Object).isTrue();");
+
+		String expected = String.format("" +
+				"		Object o = new Object();\n"
+				+ "		assertThat(o).isInstanceOf(Object.class);");
+
+		assertChange(original, expected);
+	}
+	
+	
+	@Test
+	void visit_instanceofIsFalse_shouldTransform() throws Exception {
+		String original = String.format("" +
+				"		Object o = null;\n"
+				+ "		assertThat(o instanceof Object).isFalse();");
+
+		assertNoChange(original);
 	}
 }

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -21,7 +22,11 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 
 import eu.jsparrow.core.visitor.assertj.SupportedAssertJAssertions;
 import eu.jsparrow.core.visitor.junit.dedicated.NotOperandUnwrapper;
@@ -82,17 +87,32 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 
 	@Override
 	public boolean visit(MethodInvocation node) {
+		DedicatedAssertionData data = findDedicatedAssertionData(node).orElse(null);
+		if (data != null) {
+			MethodInvocationData newAssertionData = data.getNewAssertionData()
+				.orElse(null);
+			SimpleType instanceofRightOperand = data.getInstanceofRightOperand()
+				.orElse(null);
 
-		findDedicatedAssertionData(node).ifPresent(data -> {
-			MethodInvocation newAssertion = CopyMethodInvocation
-				.createNewMethodInvocation(data.getNewAssertionData(), astRewrite);
-			MethodInvocation newAssertThat = CopyMethodInvocation
-				.createNewMethodInvocation(data.getNewAssertThatData(), astRewrite);
-			newAssertion.setExpression(newAssertThat);
-			astRewrite.replace(node, newAssertion, null);
-			onRewrite();
-		});
+			if (newAssertionData != null) {
+				MethodInvocation newAssertion = CopyMethodInvocation
+					.createNewMethodInvocation(newAssertionData, astRewrite);
+				MethodInvocation newAssertThat = CopyMethodInvocation
+					.createNewMethodInvocation(data.getNewAssertThatData(), astRewrite);
+				newAssertion.setExpression(newAssertThat);
+				astRewrite.replace(node, newAssertion, null);
+				onRewrite();
 
+			} else if (instanceofRightOperand != null) {
+				MethodInvocation newAssertion = createIsInstanceofInvocation(instanceofRightOperand);
+				MethodInvocation newAssertThat = CopyMethodInvocation
+					.createNewMethodInvocation(data.getNewAssertThatData(), astRewrite);
+				newAssertion.setExpression(newAssertThat);
+				astRewrite.replace(node, newAssertion, null);
+				onRewrite();
+			}
+
+		}
 		return true;
 	}
 
@@ -140,6 +160,12 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			return analyzeBooleanAssertionWithInfixOperation(assertThatInvocation,
 					(InfixExpression) unwrappedAssertThatArgument, assertionName);
 
+		}
+
+		if (unwrappedAssertThatArgument.getNodeType() == ASTNode.INSTANCEOF_EXPRESSION) {
+			InstanceofExpression instanceofExpression = (InstanceofExpression) unwrappedAssertThatArgument;
+			return analyzeBooleanAssertionWithInstanceofOperation(assertThatInvocation,
+					instanceofExpression, assertionName);
 		}
 		return Optional.empty();
 
@@ -280,9 +306,32 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			MethodInvocationData assertThatData = createNewAssertThatData(assertThat, newAssertThatArgument);
 			MethodInvocationData newAssertionData = new MethodInvocationData("isNotNull"); //$NON-NLS-1$
 			return Optional.of(new DedicatedAssertionData(assertThatData, newAssertionData));
-
 		}
 		return Optional.empty();
+	}
+
+	private Optional<DedicatedAssertionData> analyzeBooleanAssertionWithInstanceofOperation(
+			MethodInvocation assertThat, InstanceofExpression instanceofExpression, String assertionName) {
+		if (assertionName.equals(IS_FALSE)) {
+			return Optional.empty();
+		}
+		Expression leftOperand = instanceofExpression.getLeftOperand();
+		Type rightOperand = instanceofExpression.getRightOperand();
+		if (rightOperand.getNodeType() != ASTNode.SIMPLE_TYPE) {
+			return Optional.empty();
+		}
+		SimpleType simpleType = (SimpleType) rightOperand;
+
+		ITypeBinding leftOperandType = leftOperand.resolveTypeBinding();
+		if (leftOperandType == null) {
+			return Optional.empty();
+		}
+		if (!BooleanAssertionsAnalyzer.isSupportedForInfixOrInstanceOf(leftOperandType)) {
+			return Optional.empty();
+		}
+
+		MethodInvocationData assertThatData = createNewAssertThatData(assertThat, leftOperand);
+		return Optional.of(new DedicatedAssertionData(assertThatData, simpleType));
 	}
 
 	private MethodInvocationData createNewAssertThatData(MethodInvocation assertThat,
@@ -295,4 +344,18 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		newAssertThatData.setArguments(newAssertThatArguments);
 		return newAssertThatData;
 	}
+
+	@SuppressWarnings("unchecked")
+	private MethodInvocation createIsInstanceofInvocation(SimpleType instanceofRightOperand) {
+		AST ast = astRewrite.getAST();
+		MethodInvocation newAssertion = ast.newMethodInvocation();
+		newAssertion.setName(ast.newSimpleName("isInstanceOf")); //$NON-NLS-1$
+		SimpleType simpleTypeCopy = (SimpleType) astRewrite.createCopyTarget(instanceofRightOperand);
+		TypeLiteral newAssertionArgument = ast.newTypeLiteral();
+		newAssertionArgument.setType(simpleTypeCopy);
+		newAssertion.arguments()
+			.add(newAssertionArgument);
+		return newAssertion;
+	}
+
 }
