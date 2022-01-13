@@ -216,11 +216,11 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		}
 		String newAssertionName;
 		if (assertionMethodName.equals(IS_FALSE)) {
-			newAssertionName = BooleanAssertionsAnalyzer
+			newAssertionName = BooleanAssertionOnInvocationAnalyzer
 				.findNewAssertionNameForIsFalse(newAssertThatArgumentTypeBinding, assertThatArgumentMethodBinding)
 				.orElse(null);
 		} else {
-			newAssertionName = BooleanAssertionsAnalyzer
+			newAssertionName = BooleanAssertionOnInvocationAnalyzer
 				.findNewAssertionNameForIsTrue(newAssertThatArgumentTypeBinding, assertThatArgumentMethodBinding)
 				.orElse(null);
 		}
@@ -265,7 +265,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			return Optional.empty();
 		}
 
-		if (!BooleanAssertionsAnalyzer.isSupportedForInfixOrInstanceOf(leftOperandType)) {
+		if (!BooleanAssertionOnInvocationAnalyzer.isSupportedForInfixOrInstanceOf(leftOperandType)) {
 			return Optional.empty();
 		}
 
@@ -293,7 +293,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 	private Optional<DedicatedAssertionData> analyzeBooleanAssertionWithInfixOperationWithNullLiteral(
 			MethodInvocation assertThat, Expression newAssertThatArgument, Operator infixOperator) {
 		ITypeBinding newAssertThatArgumentType = newAssertThatArgument.resolveTypeBinding();
-		if (!BooleanAssertionsAnalyzer.isSupportedForInfixOrInstanceOf(newAssertThatArgumentType)) {
+		if (!BooleanAssertionOnInvocationAnalyzer.isSupportedForInfixOrInstanceOf(newAssertThatArgumentType)) {
 			return Optional.empty();
 		}
 
@@ -326,7 +326,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		if (leftOperandType == null) {
 			return Optional.empty();
 		}
-		if (!BooleanAssertionsAnalyzer.isSupportedForInfixOrInstanceOf(leftOperandType)) {
+		if (!BooleanAssertionOnInvocationAnalyzer.isSupportedForInfixOrInstanceOf(leftOperandType)) {
 			return Optional.empty();
 		}
 
