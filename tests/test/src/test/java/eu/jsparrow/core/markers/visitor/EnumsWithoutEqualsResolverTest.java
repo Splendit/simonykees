@@ -24,7 +24,7 @@ class EnumsWithoutEqualsResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		EnumsWithoutEqualsResolver visitor = new EnumsWithoutEqualsResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.EnumsWithoutEqualsResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("EnumsWithoutEqualsResolver"));
 		setVisitor(visitor);
 		String original = "RoundingMode roundingMode = RoundingMode.UP; if(roundingMode.equals(RoundingMode.UP)){}";
 
@@ -36,7 +36,7 @@ class EnumsWithoutEqualsResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		EnumsWithoutEqualsResolver visitor = new EnumsWithoutEqualsResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.EnumsWithoutEqualsResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("EnumsWithoutEqualsResolver"));
 		setVisitor(visitor);
 		String original = "RoundingMode roundingMode = RoundingMode.UP; if(roundingMode.equals(RoundingMode.UP)){}";
 		String expected = "RoundingMode roundingMode = RoundingMode.UP; if(roundingMode == RoundingMode.UP){}";
@@ -47,18 +47,19 @@ class EnumsWithoutEqualsResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Replace equals() on Enum constants", event.getName()),
 				() -> assertEquals("Replace occurrences of equals() on Enum constants with an identity comparison (==).", event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.EnumsWithoutEqualsResolver", event.getResolver()),
+				() -> assertEquals("EnumsWithoutEqualsResolver", event.getResolver()),
 				() -> assertEquals("roundingMode == RoundingMode.UP", event.getCodePreview()),
 				() -> assertEquals(31, event.getHighlightLength()),
 				() -> assertEquals(177, event.getOffset()),
 				() -> assertEquals(36, event.getLength()),
+				() -> assertEquals(8, event.getLineNumber()),
 				() -> assertEquals(5, event.getWeightValue()));
 	}
 	
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		EnumsWithoutEqualsResolver visitor = new EnumsWithoutEqualsResolver(node -> node.getStartPosition() == 178);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.EnumsWithoutEqualsResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("EnumsWithoutEqualsResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "RoundingMode roundingMode = RoundingMode.UP; if(roundingMode.equals(RoundingMode.UP)){}"

@@ -19,10 +19,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class WhileToForEachRule extends RefactoringRuleImpl<WhileToForEachASTVisitor> {
 
+	public static final String RULE_ID = "WhileToForEach"; //$NON-NLS-1$
 	public WhileToForEachRule() {
 		super();
 		this.visitorClass = WhileToForEachASTVisitor.class;
-		this.id = "WhileToForEach"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.WhileToForEachRule_name,
 				Messages.WhileToForEachRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_5, Tag.LOOP, Tag.OLD_LANGUAGE_CONSTRUCTS));

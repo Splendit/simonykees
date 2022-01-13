@@ -11,13 +11,14 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
-import eu.jsparrow.core.markers.RefactoringEventImpl;
-import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
 import eu.jsparrow.core.visitor.impl.PrimitiveBoxedForStringASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
+import eu.jsparrow.rules.common.markers.Resolver;
 
 /**
  * A visitor for resolving one issue of type
@@ -28,8 +29,7 @@ import eu.jsparrow.rules.common.RuleDescription;
  */
 public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTVisitor implements Resolver {
 
-	public static final String ID = PrimitiveBoxedForStringResolver.class.getName();
-	private IJavaElement javaElement;
+	public static final String ID = "PrimitiveBoxedForStringResolver"; //$NON-NLS-1$
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;
 
@@ -42,12 +42,6 @@ public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTV
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -70,16 +64,29 @@ public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTV
 	public void addMarkerEvent(ASTNode node, Expression refactorCandidateExpression, SimpleName name,
 			SimpleName refactorPrimitiveType) {
 		MethodInvocation newNode = createRepresentingNode(refactorCandidateExpression, name, refactorPrimitiveType);
-		int highlightLenght = 0;
+		int highlightLength = 0;
 		if (node.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			highlightLenght = newNode.toString()
+			highlightLength = newNode.toString()
 				.length();
 		}
-
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.PrimitiveBoxedForStringResolver_name,
-				Messages.PrimitiveBoxedForStringResolver_message, javaElement, highlightLenght, node,
-				newNode, credit);
+		int offset = node.getStartPosition();
+		int length = node.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(node.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.PrimitiveBoxedForStringResolver_name)
+			.withMessage(Messages.PrimitiveBoxedForStringResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 

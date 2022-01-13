@@ -105,13 +105,17 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		for (String marker : SimonykeesPreferenceManager.getAllActiveMarkers()) {
 			SimonykeesPreferenceManager.removeActiveMarker(marker);
 			Button button = checkButtons.get(marker);
-			button.setSelection(false);
+			if(button != null) {
+				button.setSelection(false);
+			}
 		}
 		DefaultActiveMarkers defaultMarkers = new DefaultActiveMarkers();
 		for (String marker : defaultMarkers.getActiveMarkers()) {
 			SimonykeesPreferenceManager.addActiveMarker(marker);
 			Button button = checkButtons.get(marker);
-			button.setSelection(true);
+			if(button != null) {
+				button.setSelection(true);
+			}
 		}
 	}
 }

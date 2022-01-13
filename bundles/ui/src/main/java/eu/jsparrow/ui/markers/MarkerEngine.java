@@ -18,7 +18,6 @@ import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
-import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -37,10 +36,12 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 	private static final String JAVA_EXTENSION = "java"; //$NON-NLS-1$
 	private MarkerFactory markerFactory;
 	private RefactoringEventManager eventGenerator;
+	private MarkerIdProvider resolverIdProvider;
 
-	public MarkerEngine(MarkerFactory markerFactory, RefactoringEventManager eventGenerator) {
+	public MarkerEngine(MarkerFactory markerFactory, RefactoringEventManager eventGenerator, MarkerIdProvider resolverIdProvider) {
 		this.markerFactory = markerFactory;
 		this.eventGenerator = eventGenerator;
+		this.resolverIdProvider = resolverIdProvider;
 	}
 
 	@Override
@@ -140,11 +141,19 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 		LicenseValidationResult validationResult = licenseUtil.getValidationResult();
 		LicenseType type = validationResult.getLicenseType();
 		boolean valid = LicenseType.DEMO != type && validationResult.isValid();
-		if(!valid) {
+		if (!valid) {
 			return;
 		}
-		List<String> activeMarkerIds = SimonykeesPreferenceManager.getAllActiveMarkers();
-		eventGenerator.discoverRefactoringEvents(cu, activeMarkerIds);
+		List<String> availableMarkerIds = resolverIdProvider.findAvailableFor(cu);
+		if (type == LicenseType.PAY_PER_USE) {
+			int availableCredit = validationResult.getCredit()
+					.orElse(0);
+			List<String> filteredByCredit = resolverIdProvider.filterWithSufficientCredit(availableCredit, availableMarkerIds);
+			eventGenerator.discoverRefactoringEvents(cu, filteredByCredit);
+		} else {
+			eventGenerator.discoverRefactoringEvents(cu, availableMarkerIds);
+		}
+
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		if (oldEvents.equals(events)) {
 			return;

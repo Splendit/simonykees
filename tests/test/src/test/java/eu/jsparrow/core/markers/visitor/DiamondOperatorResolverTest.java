@@ -25,7 +25,7 @@ class DiamondOperatorResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		DiamondOperatorResolver visitor = new DiamondOperatorResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.DiamondOperatorResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("DiamondOperatorResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+  "List<String> values = new ArrayList<String>();";
@@ -38,7 +38,7 @@ class DiamondOperatorResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		DiamondOperatorResolver visitor = new DiamondOperatorResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.DiamondOperatorResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("DiamondOperatorResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+  "List<String> values = new ArrayList<String>();";
@@ -57,11 +57,12 @@ class DiamondOperatorResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Remove Explicit Type Argument", event.getName()),
 				() -> assertEquals(description, event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.DiamondOperatorResolver", event.getResolver()),
+				() -> assertEquals("DiamondOperatorResolver", event.getResolver()),
 				() -> assertEquals("ArrayList<>", event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(162, event.getOffset()),
 				() -> assertEquals(23, event.getLength()),
+				() -> assertEquals(8, event.getLineNumber()),
 				() -> assertEquals(1, event.getWeightValue()));
 	}
 

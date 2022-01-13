@@ -30,7 +30,7 @@ class UseComparatorMethodsResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		UseComparatorMethodsResolver visitor = new UseComparatorMethodsResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("UseComparatorMethodsResolver"));
 		setVisitor(visitor);
 		String original = "Comparator<Integer> comparator = (lhs, rhs) -> lhs.compareTo(rhs);";
 
@@ -42,7 +42,7 @@ class UseComparatorMethodsResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		UseComparatorMethodsResolver visitor = new UseComparatorMethodsResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("UseComparatorMethodsResolver"));
 		setVisitor(visitor);
 		String original = "Comparator<Integer> comparator = (lhs, rhs) -> lhs.compareTo(rhs);";
 		String expected = "Comparator<Integer> comparator = Comparator.naturalOrder();";
@@ -53,18 +53,19 @@ class UseComparatorMethodsResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Use predefined comparator", event.getName()),
 				() -> assertEquals("Lambda expression can be replaced with predefined comparator", event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver", event.getResolver()),
+				() -> assertEquals("UseComparatorMethodsResolver", event.getResolver()),
 				() -> assertEquals("Comparator.naturalOrder()", event.getCodePreview()),
 				() -> assertEquals(25, event.getHighlightLength()),
 				() -> assertEquals(151, event.getOffset()),
 				() -> assertEquals(32, event.getLength()),
+				() -> assertEquals(7, event.getLineNumber()),
 				() -> assertEquals(5, event.getWeightValue()));
 	}
 	
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		UseComparatorMethodsResolver visitor = new UseComparatorMethodsResolver(node -> node.getStartPosition() >= 151 && node.getStartPosition() <= 183);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("UseComparatorMethodsResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "Comparator<Integer> comparator = (lhs, rhs) -> lhs.compareTo(rhs);\n"

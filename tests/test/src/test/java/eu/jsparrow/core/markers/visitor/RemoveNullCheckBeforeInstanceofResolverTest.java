@@ -23,7 +23,7 @@ class RemoveNullCheckBeforeInstanceofResolverTest extends UsesSimpleJDTUnitFixtu
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		RemoveNullCheckBeforeInstanceofResolver visitor = new RemoveNullCheckBeforeInstanceofResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.RemoveNullCheckBeforeInstanceofResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("RemoveNullCheckBeforeInstanceofResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "Object name = new Object();\n"
@@ -38,7 +38,7 @@ class RemoveNullCheckBeforeInstanceofResolverTest extends UsesSimpleJDTUnitFixtu
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		RemoveNullCheckBeforeInstanceofResolver visitor = new RemoveNullCheckBeforeInstanceofResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.RemoveNullCheckBeforeInstanceofResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("RemoveNullCheckBeforeInstanceofResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "Object name = new Object();\n"
@@ -57,20 +57,21 @@ class RemoveNullCheckBeforeInstanceofResolverTest extends UsesSimpleJDTUnitFixtu
 		assertAll(
 				() -> assertEquals("Remove Null-Checks Before Instanceof", event.getName()),
 				() -> assertEquals("null is not an instance of anything, therefore the null-check is redundant.", event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.RemoveNullCheckBeforeInstanceofResolver", event.getResolver()),
+				() -> assertEquals("RemoveNullCheckBeforeInstanceofResolver", event.getResolver()),
 				() -> assertEquals("if (name instanceof String) {\n"
 						+ "  System.out.println(name);\n"
 						+ "}\n", event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(129, event.getOffset()),
 				() -> assertEquals(12, event.getLength()),
+				() -> assertEquals(7, event.getLineNumber()),
 				() -> assertEquals(5, event.getWeightValue()));
 	}
 	
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		RemoveNullCheckBeforeInstanceofResolver visitor = new RemoveNullCheckBeforeInstanceofResolver(node -> node.getStartPosition() == 151);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.RemoveNullCheckBeforeInstanceofResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("RemoveNullCheckBeforeInstanceofResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "Object name = new Object(), value = new Object();\n"

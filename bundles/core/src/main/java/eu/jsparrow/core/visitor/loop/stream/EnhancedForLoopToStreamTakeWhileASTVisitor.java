@@ -99,6 +99,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 				ifStatement, body);
 		astRewrite.replace(enhancedForStatement, streamStatement, null);
 		saveComments(enhancedForStatement, loopExpression, ifStatement);
+		addMarkerEvent(enhancedForStatement);
 		onRewrite();
 
 		return true;

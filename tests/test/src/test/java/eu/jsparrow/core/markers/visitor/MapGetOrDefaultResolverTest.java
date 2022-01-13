@@ -34,7 +34,7 @@ class MapGetOrDefaultResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		MapGetOrDefaultResolver visitor = new MapGetOrDefaultResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.MapGetOrDefaultResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("MapGetOrDefaultResolver"));
 		setVisitor(visitor);
 		String original = "" +
 				"		ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();\n" + 
@@ -51,7 +51,7 @@ class MapGetOrDefaultResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		MapGetOrDefaultResolver visitor = new MapGetOrDefaultResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.MapGetOrDefaultResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("MapGetOrDefaultResolver"));
 		setVisitor(visitor);
 		String original = "" +
 				"		ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();\n" + 
@@ -81,18 +81,19 @@ class MapGetOrDefaultResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Replace Map::get by Map::getOrDefault", event.getName()),
 				() -> assertEquals(description, event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.MapGetOrDefaultResolver", event.getResolver()),
+				() -> assertEquals("MapGetOrDefaultResolver", event.getResolver()),
 				() -> assertEquals("map.getOrDefault(\"key\",\"default\")", event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(226, event.getOffset()),
 				() -> assertEquals(14, event.getLength()),
+				() -> assertEquals(8, event.getLineNumber()),
 				() -> assertEquals(2, event.getWeightValue()));
 	}
 	
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		MapGetOrDefaultResolver visitor = new MapGetOrDefaultResolver(node -> node.getStartPosition() == 227);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.MapGetOrDefaultResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("MapGetOrDefaultResolver"));
 		setVisitor(visitor);
 		String original = "" +
 				"		ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();\n" + 

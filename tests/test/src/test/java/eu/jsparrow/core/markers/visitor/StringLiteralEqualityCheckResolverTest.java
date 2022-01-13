@@ -23,7 +23,7 @@ class StringLiteralEqualityCheckResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		StringLiteralEqualityCheckResolver visitor = new StringLiteralEqualityCheckResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.StringLiteralEqualityCheckResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("StringLiteralEqualityCheckResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "String value = \"\";\n"
@@ -38,7 +38,7 @@ class StringLiteralEqualityCheckResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		StringLiteralEqualityCheckResolver visitor = new StringLiteralEqualityCheckResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.StringLiteralEqualityCheckResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("StringLiteralEqualityCheckResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "String value = \"\";\n"
@@ -57,18 +57,19 @@ class StringLiteralEqualityCheckResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Reorder String equality check", event.getName()),
 				() -> assertEquals("To avoid NullPointerExceptions, String literals should be placed on the left side when checking for equality.", event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.StringLiteralEqualityCheckResolver", event.getResolver()),
+				() -> assertEquals("StringLiteralEqualityCheckResolver", event.getResolver()),
 				() -> assertEquals("\"\".equals(value)", event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(133, event.getOffset()),
 				() -> assertEquals(2, event.getLength()),
+				() -> assertEquals(7, event.getLineNumber()),
 				() -> assertEquals(10, event.getWeightValue()));
 	}
 	
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		StringLiteralEqualityCheckResolver visitor = new StringLiteralEqualityCheckResolver(node -> node.getStartPosition() == 133);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.RemoveNullCheckBeforeInstanceofResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("RemoveNullCheckBeforeInstanceofResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "String value = \"\";\n"

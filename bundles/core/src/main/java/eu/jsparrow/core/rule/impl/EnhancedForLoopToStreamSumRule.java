@@ -19,10 +19,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class EnhancedForLoopToStreamSumRule extends RefactoringRuleImpl<EnhancedForLoopToStreamSumASTVisitor> {
 
+	public static final String RULE_ID = "EnhancedForLoopToStreamSum"; //$NON-NLS-1$
+
 	public EnhancedForLoopToStreamSumRule() {
 		super();
 		this.visitorClass = EnhancedForLoopToStreamSumASTVisitor.class;
-		this.id = "EnhancedForLoopToStreamSum"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.EnhancedForLoopToStreamSumRule_name,
 				Messages.EnhancedForLoopToStreamSumRule_description, Duration.ofMinutes(10),
 				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP));

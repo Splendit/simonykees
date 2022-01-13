@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.LambdaForEachIfWrapperToFilterEvent;
 import eu.jsparrow.core.visitor.utils.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
@@ -32,7 +33,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @author Matthias Webhofer
  * @since 1.2
  */
-public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForEachASTVisitor {
+public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForEachASTVisitor implements LambdaForEachIfWrapperToFilterEvent {
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
@@ -138,6 +139,7 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 							// rewrite the AST
 							astRewrite.replace(methodInvocationNode, forEachMethodInvocation, null);
 							saveComments(methodInvocationNode, lambdaExpression, block, ifStatement);
+							addMarkerEvent(methodInvocationNode, ifStatementExpression, variableDeclaration);
 							onRewrite();
 						}
 					}

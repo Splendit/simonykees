@@ -25,7 +25,7 @@ class CollectionRemoveAllResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		CollectionRemoveAllResolver visitor = new CollectionRemoveAllResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.CollectionRemoveAllResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("CollectionRemoveAllResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+  "List<String> list = new ArrayList<>();\n"
@@ -40,7 +40,7 @@ class CollectionRemoveAllResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		CollectionRemoveAllResolver visitor = new CollectionRemoveAllResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.CollectionRemoveAllResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("CollectionRemoveAllResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "List<String> list = new ArrayList<>();\n"
@@ -59,18 +59,19 @@ class CollectionRemoveAllResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Replace removeAll() with clear()", event.getName()),
 				() -> assertEquals(description, event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.CollectionRemoveAllResolver", event.getResolver()),
+				() -> assertEquals("CollectionRemoveAllResolver", event.getResolver()),
 				() -> assertEquals("list.clear()", event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(214, event.getOffset()),
 				() -> assertEquals(20, event.getLength()),
+				() -> assertEquals(10, event.getLineNumber()),
 				() -> assertEquals(2, event.getWeightValue()));
 	}
 
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		CollectionRemoveAllResolver visitor = new CollectionRemoveAllResolver(node -> node.getStartPosition() == 215);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.CollectionRemoveAllResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("CollectionRemoveAllResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "List<String> list = new ArrayList<>();\n"

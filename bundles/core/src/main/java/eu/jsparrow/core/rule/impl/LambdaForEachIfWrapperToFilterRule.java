@@ -19,10 +19,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class LambdaForEachIfWrapperToFilterRule extends RefactoringRuleImpl<LambdaForEachIfWrapperToFilterASTVisitor> {
 
+	public static final String RULE_ID = "LambdaForEachIfWrapperToFilter"; //$NON-NLS-1$
+
 	public LambdaForEachIfWrapperToFilterRule() {
 		super();
 		this.visitorClass = LambdaForEachIfWrapperToFilterASTVisitor.class;
-		this.id = "LambdaForEachIfWrapperToFilter"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.LambdaForEachIfWrapperToFilterRule_name,
 				Messages.LambdaForEachIfWrapperToFilterRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP));

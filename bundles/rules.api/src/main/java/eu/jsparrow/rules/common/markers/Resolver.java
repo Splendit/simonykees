@@ -1,4 +1,4 @@
-package eu.jsparrow.core.markers.common;
+package eu.jsparrow.rules.common.markers;
 
 import eu.jsparrow.rules.common.RuleDescription;
 

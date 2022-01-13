@@ -23,7 +23,7 @@ class PrimitiveBoxedForStringResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		PrimitiveBoxedForStringResolver visitor = new PrimitiveBoxedForStringResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.PrimitiveBoxedForStringResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("PrimitiveBoxedForStringResolver"));
 		setVisitor(visitor);
 		String original = "String myValue = new Integer(4).toString();";
 
@@ -35,7 +35,7 @@ class PrimitiveBoxedForStringResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		PrimitiveBoxedForStringResolver visitor = new PrimitiveBoxedForStringResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.PrimitiveBoxedForStringResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("PrimitiveBoxedForStringResolver"));
 		setVisitor(visitor);
 		String original = "String myValue = new Integer(4).toString();";
 		String expected = "String myValue = Integer.toString(4);";
@@ -46,18 +46,19 @@ class PrimitiveBoxedForStringResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Remove boxing for String conversions", event.getName()),
 				() -> assertEquals("Avoid constructing boxed primitives by using the factory method toString", event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.PrimitiveBoxedForStringResolver", event.getResolver()),
+				() -> assertEquals("PrimitiveBoxedForStringResolver", event.getResolver()),
 				() -> assertEquals("Integer.toString(4)", event.getCodePreview()),
 				() -> assertEquals(19, event.getHighlightLength()),
 				() -> assertEquals(106, event.getOffset()),
 				() -> assertEquals(25, event.getLength()),
+				() -> assertEquals(6, event.getLineNumber()),
 				() -> assertEquals(5, event.getWeightValue()));
 	}
 	
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		PrimitiveBoxedForStringResolver visitor = new PrimitiveBoxedForStringResolver(node -> node.getStartPosition() == 106);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.PrimitiveBoxedForStringResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("PrimitiveBoxedForStringResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "String myValue = new Integer(4).toString();\n"
@@ -73,7 +74,7 @@ class PrimitiveBoxedForStringResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_resolveMarkers2_shouldResolveOne() throws Exception {
 		PrimitiveBoxedForStringResolver visitor = new PrimitiveBoxedForStringResolver(node -> node.getStartPosition() == 106);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.PrimitiveBoxedForStringResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("PrimitiveBoxedForStringResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "String myValue = \"\" + 5;\n"

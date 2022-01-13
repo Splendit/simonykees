@@ -23,7 +23,7 @@ class InefficientConstructorResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		InefficientConstructorResolver visitor = new InefficientConstructorResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.InefficientConstructorResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("InefficientConstructorResolver"));
 		setVisitor(visitor);
 		String original = "Integer i = new Integer(1);";
 
@@ -35,7 +35,7 @@ class InefficientConstructorResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		InefficientConstructorResolver visitor = new InefficientConstructorResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.InefficientConstructorResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("InefficientConstructorResolver"));
 		setVisitor(visitor);
 		String original = "Integer i = new Integer(1);";
 		String expected = "Integer i = Integer.valueOf(1);";
@@ -46,11 +46,12 @@ class InefficientConstructorResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Replace inefficient constructors with valueOf()", event.getName()),
 				() -> assertEquals("The factory method valueOf() is generally a better choice as it is likely to yield significantly better space and time performance.", event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.InefficientConstructorResolver", event.getResolver()),
+				() -> assertEquals("InefficientConstructorResolver", event.getResolver()),
 				() -> assertEquals("Integer.valueOf(1)", event.getCodePreview()),
 				() -> assertEquals(18, event.getHighlightLength()),
 				() -> assertEquals(101, event.getOffset()),
 				() -> assertEquals(14, event.getLength()),
+				() -> assertEquals(6, event.getLineNumber()),
 				() -> assertEquals(5, event.getWeightValue()));
 	}
 	
@@ -58,7 +59,7 @@ class InefficientConstructorResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration2_shouldGenerateNoMarkerEvent() throws Exception {
 		InefficientConstructorResolver visitor = new InefficientConstructorResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.InefficientConstructorResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("InefficientConstructorResolver"));
 		setVisitor(visitor);
 		String original = "Boolean i = Boolean.valueOf();";
 		assertNoChange(original);
@@ -69,7 +70,7 @@ class InefficientConstructorResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		InefficientConstructorResolver visitor = new InefficientConstructorResolver(node -> node.getStartPosition() == 102);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.InefficientConstructorResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("InefficientConstructorResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "Integer i1 = new Integer(1);\n"
@@ -85,7 +86,7 @@ class InefficientConstructorResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_resolveMarkers2_shouldResolveOne() throws Exception {
 		InefficientConstructorResolver visitor = new InefficientConstructorResolver(node -> node.getStartPosition() == 121);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.InefficientConstructorResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("InefficientConstructorResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "Boolean value = Boolean.valueOf(\"true\");\n"

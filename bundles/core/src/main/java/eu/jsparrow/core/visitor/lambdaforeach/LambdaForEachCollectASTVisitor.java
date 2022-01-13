@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.LambdaForEachCollectEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
@@ -56,7 +57,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * @since 1.2
  *
  */
-public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisitor {
+public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisitor implements LambdaForEachCollectEvent {
 
 	private static final String ADD_METHOD_NAME = "add"; //$NON-NLS-1$
 	private static final String JAVA_UTIL_STREAM_COLLECTORS = java.util.stream.Collectors.class.getName();
@@ -107,7 +108,7 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 						Expression targetDecl = createTargetExpression(methodInvocation, collection);
 						astRewrite.replace(methodInvocation, targetDecl, null);
 						getCommentRewriter().saveCommentsInParentStatement(lambdaExpression);
-						
+						addMarkerEvent(methodInvocation);
 						onRewrite();
 					}
 				}

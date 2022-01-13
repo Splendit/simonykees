@@ -158,6 +158,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 					.newExpressionStatement(forEachMethodInvocation);
 				astRewrite.replace(enhancedForStatementNode, expressionStatement, null);
 				saveComments(enhancedForStatementNode);
+				addMarkerEvent(enhancedForStatementNode);
 				onRewrite();
 			}
 		}

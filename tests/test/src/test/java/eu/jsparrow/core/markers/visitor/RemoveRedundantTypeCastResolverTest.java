@@ -23,7 +23,7 @@ class RemoveRedundantTypeCastResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		RemoveRedundantTypeCastResolver visitor = new RemoveRedundantTypeCastResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.RemoveRedundantTypeCastResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("RemoveRedundantTypeCastResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+  "((String)\"HelloWorld\").charAt(0);";
@@ -36,7 +36,7 @@ class RemoveRedundantTypeCastResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		RemoveRedundantTypeCastResolver visitor = new RemoveRedundantTypeCastResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.RemoveRedundantTypeCastResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("RemoveRedundantTypeCastResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+  "((String)\"HelloWorld\").charAt(0);";
@@ -52,18 +52,19 @@ class RemoveRedundantTypeCastResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Remove Redundant Type Casts", event.getName()),
 				() -> assertEquals(description, event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.RemoveRedundantTypeCastResolver", event.getResolver()),
+				() -> assertEquals("RemoveRedundantTypeCastResolver", event.getResolver()),
 				() -> assertEquals("\"HelloWorld\"", event.getCodePreview()),
 				() -> assertEquals(12, event.getHighlightLength()),
 				() -> assertEquals(89, event.getOffset()),
 				() -> assertEquals(23, event.getLength()),
+				() -> assertEquals(6, event.getLineNumber()),
 				() -> assertEquals(5, event.getWeightValue()));
 	}
 
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		RemoveRedundantTypeCastResolver visitor = new RemoveRedundantTypeCastResolver(node -> node.getStartPosition() == 90);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.RemoveRedundantTypeCastResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("RemoveRedundantTypeCastResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+  "((String)\"HelloWorld\").charAt(0);";

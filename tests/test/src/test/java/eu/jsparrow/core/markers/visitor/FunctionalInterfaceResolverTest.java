@@ -23,7 +23,7 @@ class FunctionalInterfaceResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		FunctionalInterfaceResolver visitor = new FunctionalInterfaceResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("FunctionalInterfaceResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "Runnable r = new Runnable() {\n"
@@ -41,7 +41,7 @@ class FunctionalInterfaceResolverTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		FunctionalInterfaceResolver visitor = new FunctionalInterfaceResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("FunctionalInterfaceResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "Runnable r = new Runnable() {\n"
@@ -61,18 +61,19 @@ class FunctionalInterfaceResolverTest extends UsesSimpleJDTUnitFixture {
 		assertAll(
 				() -> assertEquals("Replace with Lambda Expression", event.getName()),
 				() -> assertEquals("Anonymous class can be replaced by lambda expression", event.getMessage()), 
-				() -> assertEquals("eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver", event.getResolver()),
+				() -> assertEquals("FunctionalInterfaceResolver", event.getResolver()),
 				() -> assertEquals("() -> {\n  System.out.println();\n}\n", event.getCodePreview()),
 				() -> assertEquals(34, event.getHighlightLength()),
 				() -> assertEquals(102, event.getOffset()),
 				() -> assertEquals(132, event.getLength()),
+				() -> assertEquals(6, event.getLineNumber()),
 				() -> assertEquals(5, event.getWeightValue()));
 	}
 	
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
 		FunctionalInterfaceResolver visitor = new FunctionalInterfaceResolver(node -> node.getStartPosition() == 102);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("FunctionalInterfaceResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "Runnable r = new Runnable() {\n"
