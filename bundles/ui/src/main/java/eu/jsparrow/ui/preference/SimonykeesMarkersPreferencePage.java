@@ -66,13 +66,13 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 
 		TreeWrapper treeWrapper = new TreeWrapper(content);
 		treeWrapper.init(allActiveMarkers, allMarkerDescriptions);
-		
-		
-        // Method to minimize repetitive lines of code
-        // Perhaps switch is the wrong term...
-		addSwitchButton(mainComposite, "Deselect All", false, treeWrapper); //$NON-NLS-1$
-		addSwitchButton(mainComposite, "Select All", true, treeWrapper); //$NON-NLS-1$
-		
+
+		Composite bulbActionsComposite = new Composite(mainComposite, SWT.NONE);
+		bulbActionsComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		bulbActionsComposite.setLayout(new GridLayout(2, false));
+		addButton(bulbActionsComposite, Messages.SimonykeesMarkersPreferencePage_enableAll, true, treeWrapper);
+		addButton(bulbActionsComposite, Messages.SimonykeesMarkersPreferencePage_disableAll, false, treeWrapper);
+
 		scrolledComposite.setContent(content);
 		scrolledComposite.setExpandHorizontal(true);
 		scrolledComposite.setExpandVertical(true);
@@ -91,7 +91,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		SimonykeesPreferenceManager.removeActiveMarker(markerId);
 	}
 	
-	protected void addSwitchButton(Composite composite, String name, boolean turn, TreeWrapper treeWrapper) {
+	protected void addButton(Composite composite, String name, boolean turn, TreeWrapper treeWrapper) {
 		Button thisButton = new Button(composite, SWT.PUSH);
 		thisButton.setLayoutData(new GridData(SWT.DEFAULT, SWT.DEFAULT, false, false));
 		thisButton.setText(name); 

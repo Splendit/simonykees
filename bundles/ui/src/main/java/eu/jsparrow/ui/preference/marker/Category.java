@@ -134,8 +134,10 @@ public class Category {
 	}
 
 	public void setCategorySelection(boolean selection) {
-		button.setSelection(selection);
-    	updateCategoryEntriesSelection(selection);
+		if(!categoryEntries.isEmpty()) {
+			button.setSelection(selection);
+	    	updateCategoryEntriesSelection(selection);
+		}
 	}
 
 	private void updateCategoryEntriesSelection(boolean selection) {
