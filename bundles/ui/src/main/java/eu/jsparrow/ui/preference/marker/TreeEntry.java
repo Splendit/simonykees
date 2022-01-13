@@ -22,6 +22,12 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 
+/**
+ * Represents a leaf in the jSparrow Markers Preference page tree-view.
+ * 
+ * @since 4.7.0
+ *
+ */
 public class TreeEntry {
 
 	private String markerId;
@@ -47,7 +53,7 @@ public class TreeEntry {
 	public boolean isSelected() {
 		return button.getSelection();
 	}
-	
+
 	public void setSelection(boolean selection) {
 		button.setSelection(selection);
 	}
@@ -90,10 +96,10 @@ public class TreeEntry {
 		});
 
 		String allTags = tags.stream()
-				.map(Tag::toString)
-				.map(String::toLowerCase)
-				.sorted(Comparator.reverseOrder())
-				.collect(Collectors.joining(", ")); //$NON-NLS-1$
+			.map(Tag::toString)
+			.map(String::toLowerCase)
+			.sorted(Comparator.reverseOrder())
+			.collect(Collectors.joining(", ")); //$NON-NLS-1$
 		Label label = new Label(composite, SWT.NONE);
 		label.setLayoutData(new GridData(SWT.RIGHT, SWT.DEFAULT, false, false));
 		label.setText(allTags);
@@ -125,17 +131,25 @@ public class TreeEntry {
 			}
 		});
 	}
-	
+
+	/**
+	 * Modifies the preference store and updates checks button for this jSparrow
+	 * Marker.
+	 */
 	public void setEnabled() {
 		setSelection(true);
 		enable();
 	}
-	
+
+	/**
+	 * Modifies the preference store and updates unchecks button for this
+	 * jSparrow Marker.
+	 */
 	public void setDisabled() {
 		setSelection(false);
 		disable();
 	}
-	
+
 	private void disable() {
 		SimonykeesPreferenceManager.removeActiveMarker(markerId);
 		treeWrapper.setSelectionByMarkerId(markerId, false);

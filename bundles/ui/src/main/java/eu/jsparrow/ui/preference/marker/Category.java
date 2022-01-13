@@ -24,6 +24,12 @@ import org.eclipse.swt.widgets.TreeItem;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
+/**
+ * Represents a category in the jSparrow Markers Preference Page tree-view.
+ * 
+ * @since 4.7.0
+ *
+ */
 public class Category {
 
 	private TreeWrapper treeWrapper;
@@ -70,7 +76,8 @@ public class Category {
 
 	public void initCategoryEntries(Map<String, RuleDescription> categoryMarkerDescriptions) {
 		List<TreeEntry> entries = new ArrayList<>();
-		Comparator<String> comparator = Comparator.comparing(key -> categoryMarkerDescriptions.get(key).getName());
+		Comparator<String> comparator = Comparator.comparing(key -> categoryMarkerDescriptions.get(key)
+			.getName());
 		SortedSet<String> sortedIds = new TreeSet<>(comparator);
 		sortedIds.addAll(categoryMarkerDescriptions.keySet());
 		for (String id : sortedIds) {
@@ -128,7 +135,6 @@ public class Category {
 				button.setGrayed(false);
 			}
 		}
-
 	}
 
 	public void setSelectionByMarker(String markerId, boolean selection) {

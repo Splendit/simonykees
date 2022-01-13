@@ -20,6 +20,13 @@ import org.eclipse.swt.widgets.TreeItem;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
+/**
+ * A wrapper for {@link Tree}. Use dof the tree-view in jSparrow Markers
+ * preference page.
+ * 
+ * @since 4.7.0
+ *
+ */
 public class TreeWrapper {
 	private Tree tree;
 	private Composite parent;
@@ -44,20 +51,20 @@ public class TreeWrapper {
 			category.initCategory();
 			categories.add(category);
 		}
-		
+
 		Category java16 = new Category(this, "java 16", allActiveMarkers); //$NON-NLS-1$
 		java16.initCategory();
 		categories.add(java16);
-		
+
 		List<TreeItem> treeCategoryItems = categories.stream()
-				.map(Category::getTreeItem)
-				.collect(Collectors.toList());
-		
-        Menu menu = new Menu(tree);
-        tree.setMenu(menu);
-        
-        // add expand listener
-        tree.addTreeListener(new TreeListener() {
+			.map(Category::getTreeItem)
+			.collect(Collectors.toList());
+
+		Menu menu = new Menu(tree);
+		tree.setMenu(menu);
+
+		// add expand listener
+		tree.addTreeListener(new TreeListener() {
 			@Override
 			public void treeCollapsed(TreeEvent e) {
 				/*
@@ -68,19 +75,22 @@ public class TreeWrapper {
 			@Override
 			public void treeExpanded(TreeEvent e) {
 
-				for(TreeItem item : treeCategoryItems) {
+				for (TreeItem item : treeCategoryItems) {
 					// collapse all on expand
-				   if(!item.isDisposed()) item.setExpanded(false);
+					if (!item.isDisposed())
+						item.setExpanded(false);
 				}
 			}
-          });
-        
+		});
+
 		for (Category category : categories) {
-			if("java 16".equalsIgnoreCase(category.getTag())) { //$NON-NLS-1$
-				Map<String, RuleDescription> categoryMarkerDescriptions = findByJavaVersion(allMarkerDescriptions, Arrays.asList(12, 13, 14, 15, 16));
+			if ("java 16".equalsIgnoreCase(category.getTag())) { //$NON-NLS-1$
+				Map<String, RuleDescription> categoryMarkerDescriptions = findByJavaVersion(allMarkerDescriptions,
+						Arrays.asList(12, 13, 14, 15, 16));
 				category.initCategoryEntries(categoryMarkerDescriptions);
 			} else {
-				Map<String, RuleDescription> categoryMarkerDescriptions = findByTag(allMarkerDescriptions, category.getTag());
+				Map<String, RuleDescription> categoryMarkerDescriptions = findByTag(allMarkerDescriptions,
+						category.getTag());
 				category.initCategoryEntries(categoryMarkerDescriptions);
 			}
 		}
@@ -98,19 +108,20 @@ public class TreeWrapper {
 		}
 		return map;
 	}
-	
-	private Map<String, RuleDescription> findByJavaVersion(Map<String, RuleDescription> allMarkerDescriptions, List<Integer>versions) {
+
+	private Map<String, RuleDescription> findByJavaVersion(Map<String, RuleDescription> allMarkerDescriptions,
+			List<Integer> versions) {
 		Map<String, RuleDescription> map = new HashMap<>();
 		for (Map.Entry<String, RuleDescription> entry : allMarkerDescriptions.entrySet()) {
 			RuleDescription description = entry.getValue();
-			
+
 			for (Tag ruleTag : description.getTags()) {
-				 boolean matched = ruleTag.getTagNames()
-				 .stream()
-				 .filter(StringUtils::isNumeric)
-				 .map(Integer::parseInt)
-				 .anyMatch(versions::contains);
-				if(matched) {
+				boolean matched = ruleTag.getTagNames()
+					.stream()
+					.filter(StringUtils::isNumeric)
+					.map(Integer::parseInt)
+					.anyMatch(versions::contains);
+				if (matched) {
 					map.put(entry.getKey(), description);
 				}
 			}
@@ -122,20 +133,39 @@ public class TreeWrapper {
 		return tree;
 	}
 
+	/**
+	 * Modifies the selection in the tree view of all entries matching the given
+	 * marker id and their corresponding categories. Does NOT modify the
+	 * preference store.
+	 * 
+	 * @param markerId
+	 *            a given marker id
+	 * @param selection
+	 *            the selection value.
+	 */
 	public void setSelectionByMarkerId(String markerId, boolean selection) {
 		for (Category category : categories) {
 			category.setSelectionByMarker(markerId, selection);
 		}
 	}
-	
+
+	/**
+	 * Enables or disables the marker with the given ID. Also modifies the
+	 * selection in the tree-view accordingly.
+	 * 
+	 * @param markerId
+	 *            the given marker id.
+	 * @param selection
+	 *            a flag whether to enable or disable the corresponding marker.
+	 */
 	public void setEnabledByMarkerId(String markerId, boolean selection) {
 		for (Category category : categories) {
 			category.setEnabledByMarker(markerId, selection);
 		}
 	}
-	
+
 	public void bulkUpdateAllCategories(boolean selection) {
-		for(Category category : categories) {
+		for (Category category : categories) {
 			category.setCategorySelection(selection);
 		}
 	}

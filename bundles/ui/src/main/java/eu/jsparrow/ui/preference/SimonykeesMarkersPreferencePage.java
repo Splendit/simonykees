@@ -49,16 +49,16 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		group.setText(Messages.SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText);
 		group.setLayout(new GridLayout(1, false));
 		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		Map<String, RuleDescription> allMarkerDescriptions = ResolverVisitorsFactory.getAllMarkerDescriptions();
 		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
-				
+
 		GridData groupLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		groupLayoutData.heightHint = 400;
 		ScrolledComposite scrolledComposite = new ScrolledComposite(group, SWT.V_SCROLL);
 		scrolledComposite.setLayout(new GridLayout(1, false));
 		scrolledComposite.setLayoutData(groupLayoutData);
-		
+
 		Composite content = new Composite(scrolledComposite, SWT.NONE);
 		content.setLayout(new GridLayout(1, false));
 		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -80,7 +80,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 
 		return mainComposite;
 	}
-	
+
 	protected void addActiveMarker(String markerId) {
 		SimonykeesPreferenceManager.addActiveMarker(markerId);
 	}
@@ -88,18 +88,18 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 	protected void removeActiveMarker(String markerId) {
 		SimonykeesPreferenceManager.removeActiveMarker(markerId);
 	}
-	
+
 	protected void addButton(Composite composite, String name, boolean turn, TreeWrapper treeWrapper) {
 		Button thisButton = new Button(composite, SWT.PUSH);
 		thisButton.setLayoutData(new GridData(SWT.DEFAULT, SWT.DEFAULT, false, false));
-		thisButton.setText(name); 
+		thisButton.setText(name);
 		thisButton.addListener(SWT.MouseDown, event -> treeWrapper.bulkUpdateAllCategories(turn));
 	}
 
 	@Override
 	protected void performDefaults() {
 		super.performDefaults();
-		if(treeWrapper != null) {
+		if (treeWrapper != null) {
 			treeWrapper.bulkUpdateAllCategories(false);
 			DefaultActiveMarkers defaultMarkers = new DefaultActiveMarkers();
 			for (String marker : defaultMarkers.getActiveMarkers()) {
