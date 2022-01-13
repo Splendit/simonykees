@@ -75,45 +75,46 @@ public class Category {
 			entries.add(treeEntry);
 		}
 		this.categoryEntries = Collections.unmodifiableList(entries);
-		
-    	if(categoryEntries.isEmpty()) {
-    		item.dispose();
-    		composite.dispose();
-    		editor.dispose();
-    	} else {
-    		
-    		// check if every items in a treeCategory -was- selected
-    		updateCategorySelection();
-    		
-    		// add listeners to remaining treeCategoryButtons
-    		button.addSelectionListener(new SelectionAdapter() {
-    		    @Override
-    		    public void widgetSelected(SelectionEvent e) {
-    		    	Button source = (Button) e.getSource();
-    		    	
-    		    	/* If click -> loop how many markers exist in treeCategory
-    		    	 * Then (de)select all marker's adjacent buttons
-    		    	 */
-    		    	updateCategoryEntriesSelection(source.getSelection());
-    		    }
-    		});
-    	}
+
+		if (categoryEntries.isEmpty()) {
+			item.dispose();
+			composite.dispose();
+			editor.dispose();
+		} else {
+
+			// check if every items in a treeCategory -was- selected
+			updateCategorySelection();
+
+			// add listeners to remaining treeCategoryButtons
+			button.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					Button source = (Button) e.getSource();
+
+					/*
+					 * If click -> loop how many markers exist in treeCategory
+					 * Then (de)select all marker's adjacent buttons
+					 */
+					updateCategoryEntriesSelection(source.getSelection());
+				}
+			});
+		}
 	}
 
 	private void updateCategorySelection() {
-		if(categoryEntries.isEmpty()) {
+		if (categoryEntries.isEmpty()) {
 			return;
 		}
 		boolean allChecked = categoryEntries.stream()
-				.allMatch(TreeEntry::isSelected);
+			.allMatch(TreeEntry::isSelected);
 
 		if (allChecked) {
 			button.setSelection(true);
 			button.setGrayed(false);
 		} else {
 			boolean someChecked = categoryEntries.stream()
-					.anyMatch(TreeEntry::isSelected);
-			if(someChecked) {
+				.anyMatch(TreeEntry::isSelected);
+			if (someChecked) {
 				button.setSelection(true);
 				button.setGrayed(true);
 			} else {
@@ -121,12 +122,12 @@ public class Category {
 				button.setGrayed(false);
 			}
 		}
-		
+
 	}
 
 	public void setSelectionByMarker(String markerId, boolean selection) {
-		for(TreeEntry treeEntry : categoryEntries) {
-			if(markerId.equals(treeEntry.getMarkerId())) {
+		for (TreeEntry treeEntry : categoryEntries) {
+			if (markerId.equals(treeEntry.getMarkerId())) {
 				treeEntry.setSelection(selection);
 			}
 		}
@@ -134,24 +135,37 @@ public class Category {
 	}
 
 	public void setCategorySelection(boolean selection) {
-		if(!categoryEntries.isEmpty()) {
+		if (!categoryEntries.isEmpty()) {
 			button.setSelection(selection);
-	    	updateCategoryEntriesSelection(selection);
+			updateCategoryEntriesSelection(selection);
 		}
 	}
 
+	public void setEnabledByMarker(String markerId, boolean selection) {
+		for (TreeEntry treeEntry : categoryEntries) {
+			if (markerId.equals(treeEntry.getMarkerId())) {
+				if (selection) {
+					treeEntry.setEnabled();
+				} else {
+					treeEntry.setDisabled();
+				}
+			}
+		}
+		updateCategorySelection();
+	}
+
 	private void updateCategoryEntriesSelection(boolean selection) {
-		if(selection) {
-    		categoryEntries.forEach(TreeEntry::select);
-    	} else {
-    		categoryEntries.forEach(TreeEntry::unselect);
-    	}
+		if (selection) {
+			categoryEntries.forEach(TreeEntry::setEnabled);
+		} else {
+			categoryEntries.forEach(TreeEntry::setDisabled);
+		}
 	}
 
 	public String getTag() {
 		return tag;
 	}
-	
+
 	public TreeItem getTreeItem() {
 		return item;
 	}

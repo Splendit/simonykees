@@ -120,24 +120,24 @@ public class TreeEntry {
 		});
 	}
 	
-	public void select() {
+	public void setEnabled() {
 		setSelection(true);
 		enable();
 	}
 	
-	public void unselect() {
+	public void setDisabled() {
 		setSelection(false);
 		disable();
 	}
 	
 	private void disable() {
 		SimonykeesPreferenceManager.removeActiveMarker(markerId);
-		treeWrapper.setSelectByMarkerId(markerId, false);
+		treeWrapper.setSelectionByMarkerId(markerId, false);
 	}
 
 	private void enable() {
 		SimonykeesPreferenceManager.addActiveMarker(markerId);
-		treeWrapper.setSelectByMarkerId(markerId, true);
+		treeWrapper.setSelectionByMarkerId(markerId, true);
 	}
 
 }

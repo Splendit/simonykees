@@ -1,6 +1,5 @@
 package eu.jsparrow.ui.preference;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +30,7 @@ import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
  */
 public class SimonykeesMarkersPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	private final Map<String, Button> checkButtons = new HashMap<>();
+	private TreeWrapper treeWrapper;
 
 	@Override
 	public void init(IWorkbench workbench) {
@@ -64,14 +63,14 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		content.setLayout(new GridLayout(1, false));
 		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		TreeWrapper treeWrapper = new TreeWrapper(content);
+		treeWrapper = new TreeWrapper(content);
 		treeWrapper.init(allActiveMarkers, allMarkerDescriptions);
 
-		Composite bulbActionsComposite = new Composite(mainComposite, SWT.NONE);
-		bulbActionsComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-		bulbActionsComposite.setLayout(new GridLayout(2, false));
-		addButton(bulbActionsComposite, Messages.SimonykeesMarkersPreferencePage_enableAll, true, treeWrapper);
-		addButton(bulbActionsComposite, Messages.SimonykeesMarkersPreferencePage_disableAll, false, treeWrapper);
+		Composite bulkActionsComposite = new Composite(mainComposite, SWT.NONE);
+		bulkActionsComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		bulkActionsComposite.setLayout(new GridLayout(2, false));
+		addButton(bulkActionsComposite, Messages.SimonykeesMarkersPreferencePage_enableAll, true, treeWrapper);
+		addButton(bulkActionsComposite, Messages.SimonykeesMarkersPreferencePage_disableAll, false, treeWrapper);
 
 		scrolledComposite.setContent(content);
 		scrolledComposite.setExpandHorizontal(true);
@@ -84,9 +83,8 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 	
 	protected void addActiveMarker(String markerId) {
 		SimonykeesPreferenceManager.addActiveMarker(markerId);
-		
-		//Trying to figure out how to select all markers with the same ID
 	}
+
 	protected void removeActiveMarker(String markerId) {
 		SimonykeesPreferenceManager.removeActiveMarker(markerId);
 	}
@@ -95,26 +93,17 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		Button thisButton = new Button(composite, SWT.PUSH);
 		thisButton.setLayoutData(new GridData(SWT.DEFAULT, SWT.DEFAULT, false, false));
 		thisButton.setText(name); 
-		// On switch click -> Loop treeCategories (disposed items are still in ArrayList)
-		thisButton.addListener(SWT.MouseDown, event -> treeWrapper.updateAllCategoriesSelection(turn));
+		thisButton.addListener(SWT.MouseDown, event -> treeWrapper.bulkUpdateAllCategories(turn));
 	}
 
 	@Override
 	protected void performDefaults() {
 		super.performDefaults();
-		for (String marker : SimonykeesPreferenceManager.getAllActiveMarkers()) {
-			SimonykeesPreferenceManager.removeActiveMarker(marker);
-			Button button = checkButtons.get(marker);
-			if(button != null) {
-				button.setSelection(false);
-			}
-		}
-		DefaultActiveMarkers defaultMarkers = new DefaultActiveMarkers();
-		for (String marker : defaultMarkers.getActiveMarkers()) {
-			SimonykeesPreferenceManager.addActiveMarker(marker);
-			Button button = checkButtons.get(marker);
-			if(button != null) {
-				button.setSelection(true);
+		if(treeWrapper != null) {
+			treeWrapper.bulkUpdateAllCategories(false);
+			DefaultActiveMarkers defaultMarkers = new DefaultActiveMarkers();
+			for (String marker : defaultMarkers.getActiveMarkers()) {
+				treeWrapper.setEnabledByMarkerId(marker, true);
 			}
 		}
 	}

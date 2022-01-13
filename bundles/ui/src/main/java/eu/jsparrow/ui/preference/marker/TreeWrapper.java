@@ -93,13 +93,19 @@ public class TreeWrapper {
 		return tree;
 	}
 
-	public void setSelectByMarkerId(String markerId, boolean selection) {
+	public void setSelectionByMarkerId(String markerId, boolean selection) {
 		for (Category category : categories) {
 			category.setSelectionByMarker(markerId, selection);
 		}
 	}
 	
-	public void updateAllCategoriesSelection(boolean selection) {
+	public void setEnabledByMarkerId(String markerId, boolean selection) {
+		for (Category category : categories) {
+			category.setEnabledByMarker(markerId, selection);
+		}
+	}
+	
+	public void bulkUpdateAllCategories(boolean selection) {
 		for(Category category : categories) {
 			category.setCategorySelection(selection);
 		}
