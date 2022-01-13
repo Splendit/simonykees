@@ -45,6 +45,10 @@ public class TreeWrapper {
 			categories.add(category);
 		}
 		
+		Category java16 = new Category(this, "java 16", allActiveMarkers); //$NON-NLS-1$
+		java16.initCategory();
+		categories.add(java16);
+		
 		List<TreeItem> treeCategoryItems = categories.stream()
 				.map(Category::getTreeItem)
 				.collect(Collectors.toList());
@@ -72,10 +76,14 @@ public class TreeWrapper {
           });
         
 		for (Category category : categories) {
-			Map<String, RuleDescription> categoryMarkerDescriptions = findByTag(allMarkerDescriptions, category.getTag());
-			category.initCategoryEntries(categoryMarkerDescriptions);
+			if("java 16".equalsIgnoreCase(category.getTag())) { //$NON-NLS-1$
+				Map<String, RuleDescription> categoryMarkerDescriptions = findByJavaVersion(allMarkerDescriptions, Arrays.asList(12, 13, 14, 15, 16));
+				category.initCategoryEntries(categoryMarkerDescriptions);
+			} else {
+				Map<String, RuleDescription> categoryMarkerDescriptions = findByTag(allMarkerDescriptions, category.getTag());
+				category.initCategoryEntries(categoryMarkerDescriptions);
+			}
 		}
-
 	}
 
 	private Map<String, RuleDescription> findByTag(Map<String, RuleDescription> allMarkerDescriptions, String tag) {
@@ -84,6 +92,25 @@ public class TreeWrapper {
 			RuleDescription description = entry.getValue();
 			for (Tag ruleTag : description.getTags()) {
 				if (Tag.getTagForName(tag) == ruleTag) {
+					map.put(entry.getKey(), description);
+				}
+			}
+		}
+		return map;
+	}
+	
+	private Map<String, RuleDescription> findByJavaVersion(Map<String, RuleDescription> allMarkerDescriptions, List<Integer>versions) {
+		Map<String, RuleDescription> map = new HashMap<>();
+		for (Map.Entry<String, RuleDescription> entry : allMarkerDescriptions.entrySet()) {
+			RuleDescription description = entry.getValue();
+			
+			for (Tag ruleTag : description.getTags()) {
+				 boolean matched = ruleTag.getTagNames()
+				 .stream()
+				 .filter(StringUtils::isNumeric)
+				 .map(Integer::parseInt)
+				 .anyMatch(versions::contains);
+				if(matched) {
 					map.put(entry.getKey(), description);
 				}
 			}

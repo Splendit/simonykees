@@ -1,6 +1,8 @@
 package eu.jsparrow.ui.preference.marker;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TreeEditor;
@@ -78,16 +80,20 @@ public class TreeEntry {
 		// the shaft is missing its arrow
 		Label shaft = new Label(composite, 0);
 		GridData shaftGD = new GridData(SWT.FILL, SWT.DEFAULT, false, false);
-		shaftGD.widthHint = 100;
+		shaftGD.widthHint = 10;
 		shaft.setLayoutData(shaftGD);
 		shaft.setVisible(false);
 
 		shaft.addPaintListener((PaintEvent e) -> {
-			e.gc.drawLine(0, 8, 100, 8);
+			e.gc.drawLine(0, 8, 10, 8);
 			e.gc.dispose();
 		});
 
-		String allTags = tags.toString();
+		String allTags = tags.stream()
+				.map(Tag::toString)
+				.map(String::toLowerCase)
+				.sorted(Comparator.reverseOrder())
+				.collect(Collectors.joining(", ")); //$NON-NLS-1$
 		Label label = new Label(composite, SWT.NONE);
 		label.setLayoutData(new GridData(SWT.RIGHT, SWT.DEFAULT, false, false));
 		label.setText(allTags);
