@@ -2,9 +2,13 @@ package eu.jsparrow.ui.preference.marker;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TreeEditor;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -58,7 +62,7 @@ public class Category {
 
 		Label label = new Label(composite, 0);
 		label.setLayoutData(new GridData(SWT.LEFT, SWT.DEFAULT, false, false));
-		label.setText(tag);
+		label.setText(StringUtils.capitalize(tag));
 		label.setVisible(true);
 
 		editor.setEditor(composite, item);
@@ -66,12 +70,14 @@ public class Category {
 
 	public void initCategoryEntries(Map<String, RuleDescription> categoryMarkerDescriptions) {
 		List<TreeEntry> entries = new ArrayList<>();
-		for (Map.Entry<String, RuleDescription> entry : categoryMarkerDescriptions.entrySet()) {
-			String markerId = entry.getKey();
-			RuleDescription description = entry.getValue();
+		Comparator<String> comparator = Comparator.comparing(key -> categoryMarkerDescriptions.get(key).getName());
+		SortedSet<String> sortedIds = new TreeSet<>(comparator);
+		sortedIds.addAll(categoryMarkerDescriptions.keySet());
+		for (String id : sortedIds) {
+			RuleDescription description = categoryMarkerDescriptions.get(id);
 			List<Tag> tags = description.getTags();
-			boolean selected = allActiveMarkers.contains(markerId);
-			TreeEntry treeEntry = new TreeEntry(markerId, selected, description, tags, treeWrapper, item);
+			boolean selected = allActiveMarkers.contains(id);
+			TreeEntry treeEntry = new TreeEntry(id, selected, description, tags, treeWrapper, item);
 			entries.add(treeEntry);
 		}
 		this.categoryEntries = Collections.unmodifiableList(entries);
@@ -127,7 +133,7 @@ public class Category {
 
 	public void setSelectionByMarker(String markerId, boolean selection) {
 		for (TreeEntry treeEntry : categoryEntries) {
-			if (markerId.equals(treeEntry.getMarkerId())) {
+			if (markerId.equalsIgnoreCase(treeEntry.getMarkerId())) {
 				treeEntry.setSelection(selection);
 			}
 		}
@@ -143,7 +149,7 @@ public class Category {
 
 	public void setEnabledByMarker(String markerId, boolean selection) {
 		for (TreeEntry treeEntry : categoryEntries) {
-			if (markerId.equals(treeEntry.getMarkerId())) {
+			if (markerId.equalsIgnoreCase(treeEntry.getMarkerId())) {
 				if (selection) {
 					treeEntry.setEnabled();
 				} else {

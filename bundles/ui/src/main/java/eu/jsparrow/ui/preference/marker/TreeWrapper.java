@@ -36,6 +36,8 @@ public class TreeWrapper {
 
 		List<String> tags = Arrays.stream(Tag.getAllTags())
 			.filter(StringUtils::isAlpha)
+			.filter(tag -> !"free".equalsIgnoreCase(tag)) //$NON-NLS-1$
+			.sorted()
 			.collect(Collectors.toList());
 		for (String tag : tags) {
 			Category category = new Category(this, tag, allActiveMarkers);
