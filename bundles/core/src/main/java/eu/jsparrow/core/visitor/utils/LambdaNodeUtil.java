@@ -75,6 +75,7 @@ public class LambdaNodeUtil {
 	/**
 	 * Inserts the modifier to the parameter of the lambda expression if it has
 	 * only one parameter represented with a {@link SingleVariableDeclaration}.
+	 * Avoids duplicating modifiers.
 	 * 
 	 * @param lambdaExpression
 	 *            a node representing a lambda expression
@@ -89,9 +90,15 @@ public class LambdaNodeUtil {
 					SingleVariableDeclaration.class);
 			if (params.size() == 1) {
 				SingleVariableDeclaration param = params.get(0);
-				ListRewrite paramRewriter = astRewrite.getListRewrite(param,
-						SingleVariableDeclaration.MODIFIERS2_PROPERTY);
-				paramRewriter.insertFirst(astRewrite.createCopyTarget(modifier), null);
+				boolean alreadyPresent = ASTNodeUtil.convertToTypedList(param.modifiers(), Modifier.class)
+					.stream()
+					.map(Modifier::getKeyword)
+					.anyMatch(key -> key.equals(modifier.getKeyword()));
+				if (!alreadyPresent) {
+					ListRewrite paramRewriter = astRewrite.getListRewrite(param,
+							SingleVariableDeclaration.MODIFIERS2_PROPERTY);
+					paramRewriter.insertFirst(astRewrite.createCopyTarget(modifier), null);
+				}
 			}
 		}
 	}
@@ -193,7 +200,8 @@ public class LambdaNodeUtil {
 			@SuppressWarnings("unchecked")
 			List<Expression> arguments = methodInvocation.arguments();
 			int index = arguments.indexOf(lambdaExpression);
-			contextTypeBinding = MethodDeclarationUtils.findFormalParameterType(methodInvocation, index).orElse(null);
+			contextTypeBinding = MethodDeclarationUtils.findFormalParameterType(methodInvocation, index)
+				.orElse(null);
 		} else if (locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
 			ReturnStatement returnStatement = (ReturnStatement) lambdaExpression.getParent();
 			contextTypeBinding = MethodDeclarationUtils.findExpectedReturnType(returnStatement);
