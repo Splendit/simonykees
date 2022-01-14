@@ -9,6 +9,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+/**
+ * Creates a new {@link MethodInvocation} by copying the data stored in the
+ * given instance of {@link MethodInvocationData}
+ *
+ */
 public class CopyMethodInvocation {
 
 	@SuppressWarnings("unchecked")

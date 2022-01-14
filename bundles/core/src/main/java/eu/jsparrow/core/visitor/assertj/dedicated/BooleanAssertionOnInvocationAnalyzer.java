@@ -14,15 +14,41 @@ import static eu.jsparrow.core.visitor.assertj.dedicated.SupportedAssertJAssertT
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * This helper class analyzes method invocations which are used as argument of
+ * an AssertJ assertThat invocation in connection with the boolean assertion
+ * {@code isTrue} or isFalse and provides the informations for a corresponding
+ * dedicated assertion.
+ * 
+ * For example:
+ * 
+ * For the AssertJ assertion
+ * 
+ * <pre>
+ * assertThat(string.equals("Hello World!")).isTrue();
+ * </pre>
+ * 
+ * the argument {@code string.equals("Hello World!")} is analyzed. The new
+ * AssertJ assertThat argument will be {@code string} and the new dedicated
+ * assertion will be {@code isEqualTo("Hello World!")}, resulting in
+ * 
+ * <pre>
+ * assertThat(string).isEqualTo("Hello World!");
+ * </pre>
+ */
 @SuppressWarnings("nls")
 class BooleanAssertionOnInvocationAnalyzer {
 
@@ -202,7 +228,53 @@ class BooleanAssertionOnInvocationAnalyzer {
 		return new BooleanAssertionOnInvocationAnalyzer(IS_OTHER_SUPPORTED_TYPE, new HashMap<>(), new HashMap<>());
 	}
 
-	static Optional<BooleanAssertionOnInvocationAnalyzer> findAnalyzer(ITypeBinding newAssertThatArgumentTypeBinding) {
+	static Optional<NewAssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithMethodInvocation(
+			MethodInvocation assertThat,
+			MethodInvocation invocationAsAssertThatArgument, String assertionMethodName) {
+
+		Expression newAssertThatArgument = invocationAsAssertThatArgument.getExpression();
+		if (newAssertThatArgument == null) {
+			return Optional.empty();
+		}
+		List<Expression> newAssertionArguments = ASTNodeUtil.convertToTypedList(
+				invocationAsAssertThatArgument.arguments(),
+				Expression.class);
+
+		if (newAssertionArguments.size() > 1) {
+			return Optional.empty();
+		}
+
+		ITypeBinding newAssertThatArgumentTypeBinding = newAssertThatArgument.resolveTypeBinding();
+		if (newAssertThatArgumentTypeBinding == null) {
+			return Optional.empty();
+		}
+
+		IMethodBinding assertThatArgumentMethodBinding = invocationAsAssertThatArgument.resolveMethodBinding();
+		if (assertThatArgumentMethodBinding == null) {
+			return Optional.empty();
+		}
+
+		BooleanAssertionOnInvocationAnalyzer analyzer = findAnalyzer(newAssertThatArgumentTypeBinding).orElse(null);
+		if (analyzer != null) {
+			MethodInvocationData newAssertionData = analyzer
+				.findDedicatedAssertJAssertionData(assertThatArgumentMethodBinding, newAssertionArguments,
+						assertionMethodName)
+				.orElse(null);
+			if (newAssertionData != null) {
+				MethodInvocationData assertThatData = MethodInvocationData.createNewAssertThatData(assertThat,
+						newAssertThatArgument);
+				NewAssertJAssertThatWithAssertionData dedicatedAssertionData = new NewAssertJAssertThatWithAssertionData(
+						assertThatData,
+						newAssertionData);
+
+				return Optional.of(dedicatedAssertionData);
+			}
+		}
+		return Optional.empty();
+	}
+
+	private static Optional<BooleanAssertionOnInvocationAnalyzer> findAnalyzer(
+			ITypeBinding newAssertThatArgumentTypeBinding) {
 
 		if (STRING_ASSERTIONS_ANALYZER.isSupportedForType(newAssertThatArgumentTypeBinding)) {
 			return Optional.of(STRING_ASSERTIONS_ANALYZER);
@@ -243,36 +315,6 @@ class BooleanAssertionOnInvocationAnalyzer {
 		return Optional.empty();
 	}
 
-	static Optional<String> findNewAssertionNameForIsTrue(ITypeBinding newAssertThatArgumentTypeBinding,
-			IMethodBinding assertThatArgumentMethodBinding) {
-
-		BooleanAssertionOnInvocationAnalyzer analyzer = findAnalyzer(newAssertThatArgumentTypeBinding).orElse(null);
-		if (analyzer != null) {
-			return analyzer.findAssertJAssertionName(assertThatArgumentMethodBinding);
-		}
-		return Optional.empty();
-	}
-
-	static Optional<String> findNewAssertionNameForIsFalse(ITypeBinding newAssertThatArgumentTypeBinding,
-			IMethodBinding assertThatArgumentMethodBinding) {
-
-		BooleanAssertionOnInvocationAnalyzer analyzer = findAnalyzer(newAssertThatArgumentTypeBinding).orElse(null);
-		if (analyzer != null) {
-			return analyzer.findNegatedAssertJAssertionName(assertThatArgumentMethodBinding);
-		}
-		return Optional.empty();
-
-	}
-
-	static boolean isSupportedForInfixOrInstanceOf(ITypeBinding newAssertThatArgumentTypeBinding) {
-		if (newAssertThatArgumentTypeBinding.isPrimitive()) {
-			return true;
-		}
-		BooleanAssertionOnInvocationAnalyzer analyzerForReferenceType = findAnalyzer(newAssertThatArgumentTypeBinding)
-			.orElse(null);
-		return analyzerForReferenceType != null;
-	}
-
 	private BooleanAssertionOnInvocationAnalyzer(Predicate<ITypeBinding> supportedTypeBindingPredicate,
 			Map<String, String> mapToAssertJAssertions,
 			Map<String, String> mapToNegatedAssertJAssertions) {
@@ -289,25 +331,26 @@ class BooleanAssertionOnInvocationAnalyzer {
 		this.mapToNegatedAssertJAssertions = Collections.unmodifiableMap(tmpMap);
 	}
 
-	Optional<String> findAssertJAssertionName(IMethodBinding methodBinding) {
+	private Optional<MethodInvocationData> findDedicatedAssertJAssertionData(IMethodBinding methodBinding,
+			List<Expression> newAssertionArguments, String booleanAssertion) {
 
 		if (!analyzeMethodBinding(methodBinding)) {
 			return Optional.empty();
 		}
 
 		String methodName = methodBinding.getName();
-		return Optional.ofNullable(mapToAssertJAssertions.get(methodName));
-
-	}
-
-	Optional<String> findNegatedAssertJAssertionName(IMethodBinding methodBinding) {
-
-		if (!analyzeMethodBinding(methodBinding)) {
-			return Optional.empty();
+		String newAssertionName;
+		if (booleanAssertion.equals(UseDedicatedAssertJAssertionsASTVisitor.IS_FALSE)) {
+			newAssertionName = mapToNegatedAssertJAssertions.get(methodName);
+		} else {
+			newAssertionName = mapToAssertJAssertions.get(methodName);
 		}
-
-		String methodName = methodBinding.getName();
-		return Optional.ofNullable(mapToNegatedAssertJAssertions.get(methodName));
+		if (newAssertionName != null) {
+			MethodInvocationData dedicatedAssertionData = new MethodInvocationData(newAssertionName);
+			dedicatedAssertionData.setArguments(newAssertionArguments);
+			return Optional.of(dedicatedAssertionData);
+		}
+		return Optional.empty();
 
 	}
 

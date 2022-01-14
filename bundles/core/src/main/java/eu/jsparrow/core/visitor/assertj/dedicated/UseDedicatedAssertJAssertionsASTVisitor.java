@@ -7,6 +7,8 @@ import static org.eclipse.jdt.core.dom.InfixExpression.Operator.LESS;
 import static org.eclipse.jdt.core.dom.InfixExpression.Operator.LESS_EQUALS;
 import static org.eclipse.jdt.core.dom.InfixExpression.Operator.NOT_EQUALS;
 
+import static eu.jsparrow.core.visitor.assertj.dedicated.BooleanAssertionOnInvocationAnalyzer.analyzeBooleanAssertionWithMethodInvocation;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,7 +89,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-		DedicatedAssertionData data = findDedicatedAssertionData(node).orElse(null);
+		NewAssertJAssertThatWithAssertionData data = findDedicatedAssertionData(node).orElse(null);
 		if (data != null) {
 			MethodInvocationData newAssertionData = data.getNewAssertionData()
 				.orElse(null);
@@ -116,7 +118,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		return true;
 	}
 
-	private Optional<DedicatedAssertionData> findDedicatedAssertionData(MethodInvocation node) {
+	private Optional<NewAssertJAssertThatWithAssertionData> findDedicatedAssertionData(MethodInvocation node) {
 
 		String assertionName = node
 			.getName()
@@ -190,53 +192,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		return Optional.of(assumedAssertThatInvocation);
 	}
 
-	private Optional<DedicatedAssertionData> analyzeBooleanAssertionWithMethodInvocation(MethodInvocation assertThat,
-			MethodInvocation invocationAsAssertThatArgument, String assertionMethodName) {
-
-		Expression newAssertThatArgument = invocationAsAssertThatArgument.getExpression();
-		if (newAssertThatArgument == null) {
-			return Optional.empty();
-		}
-		List<Expression> newAssertionArguments = ASTNodeUtil.convertToTypedList(
-				invocationAsAssertThatArgument.arguments(),
-				Expression.class);
-
-		if (newAssertionArguments.size() > 1) {
-			return Optional.empty();
-		}
-
-		ITypeBinding newAssertThatArgumentTypeBinding = newAssertThatArgument.resolveTypeBinding();
-		if (newAssertThatArgumentTypeBinding == null) {
-			return Optional.empty();
-		}
-
-		IMethodBinding assertThatArgumentMethodBinding = invocationAsAssertThatArgument.resolveMethodBinding();
-		if (assertThatArgumentMethodBinding == null) {
-			return Optional.empty();
-		}
-		String newAssertionName;
-		if (assertionMethodName.equals(IS_FALSE)) {
-			newAssertionName = BooleanAssertionOnInvocationAnalyzer
-				.findNewAssertionNameForIsFalse(newAssertThatArgumentTypeBinding, assertThatArgumentMethodBinding)
-				.orElse(null);
-		} else {
-			newAssertionName = BooleanAssertionOnInvocationAnalyzer
-				.findNewAssertionNameForIsTrue(newAssertThatArgumentTypeBinding, assertThatArgumentMethodBinding)
-				.orElse(null);
-		}
-
-		if (newAssertionName == null) {
-			return Optional.empty();
-		}
-		MethodInvocationData assertThatData = createNewAssertThatData(assertThat, newAssertThatArgument);
-		MethodInvocationData newAssertionData = new MethodInvocationData(newAssertionName);
-		newAssertionData.setArguments(newAssertionArguments);
-		DedicatedAssertionData dedicatedAssertionData = new DedicatedAssertionData(assertThatData, newAssertionData);
-
-		return Optional.of(dedicatedAssertionData);
-	}
-
-	private Optional<DedicatedAssertionData> analyzeBooleanAssertionWithInfixOperation(MethodInvocation assertThat,
+	private Optional<NewAssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithInfixOperation(MethodInvocation assertThat,
 			InfixExpression infixExpressionAsAssertThatArgument, String assertionMethodName) {
 		Expression leftOperand = infixExpressionAsAssertThatArgument.getLeftOperand();
 		Expression rightOperand = infixExpressionAsAssertThatArgument.getRightOperand();
@@ -265,7 +221,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			return Optional.empty();
 		}
 
-		if (!BooleanAssertionOnInvocationAnalyzer.isSupportedForInfixOrInstanceOf(leftOperandType)) {
+		if (!SupportedAssertJAssertThatArgumentTypes.isSupportedAssertThatArgumentType(leftOperandType)) {
 			return Optional.empty();
 		}
 
@@ -281,36 +237,38 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			return Optional.empty();
 		}
 
-		MethodInvocationData assertThatData = createNewAssertThatData(assertThat, leftOperand);
+		MethodInvocationData assertThatData = MethodInvocationData.createNewAssertThatData(assertThat, leftOperand);
 		MethodInvocationData newAssertionData = new MethodInvocationData(newAssertionMethodName);
 		newAssertionData.setArguments(Arrays.asList(rightOperand));
-		DedicatedAssertionData dedicatedAssertionData = new DedicatedAssertionData(assertThatData, newAssertionData);
+		NewAssertJAssertThatWithAssertionData dedicatedAssertionData = new NewAssertJAssertThatWithAssertionData(assertThatData, newAssertionData);
 
 		return Optional.of(dedicatedAssertionData);
 
 	}
 
-	private Optional<DedicatedAssertionData> analyzeBooleanAssertionWithInfixOperationWithNullLiteral(
+	private Optional<NewAssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithInfixOperationWithNullLiteral(
 			MethodInvocation assertThat, Expression newAssertThatArgument, Operator infixOperator) {
 		ITypeBinding newAssertThatArgumentType = newAssertThatArgument.resolveTypeBinding();
-		if (!BooleanAssertionOnInvocationAnalyzer.isSupportedForInfixOrInstanceOf(newAssertThatArgumentType)) {
+		if (!SupportedAssertJAssertThatArgumentTypes.isSupportedAssertThatArgumentType(newAssertThatArgumentType)) {
 			return Optional.empty();
 		}
 
 		if (infixOperator == EQUALS) {
-			MethodInvocationData assertThatData = createNewAssertThatData(assertThat, newAssertThatArgument);
+			MethodInvocationData assertThatData = MethodInvocationData.createNewAssertThatData(assertThat,
+					newAssertThatArgument);
 			MethodInvocationData newAssertionData = new MethodInvocationData("isNull"); //$NON-NLS-1$
-			return Optional.of(new DedicatedAssertionData(assertThatData, newAssertionData));
+			return Optional.of(new NewAssertJAssertThatWithAssertionData(assertThatData, newAssertionData));
 
 		} else if (infixOperator == NOT_EQUALS) {
-			MethodInvocationData assertThatData = createNewAssertThatData(assertThat, newAssertThatArgument);
+			MethodInvocationData assertThatData = MethodInvocationData.createNewAssertThatData(assertThat,
+					newAssertThatArgument);
 			MethodInvocationData newAssertionData = new MethodInvocationData("isNotNull"); //$NON-NLS-1$
-			return Optional.of(new DedicatedAssertionData(assertThatData, newAssertionData));
+			return Optional.of(new NewAssertJAssertThatWithAssertionData(assertThatData, newAssertionData));
 		}
 		return Optional.empty();
 	}
 
-	private Optional<DedicatedAssertionData> analyzeBooleanAssertionWithInstanceofOperation(
+	private Optional<NewAssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithInstanceofOperation(
 			MethodInvocation assertThat, InstanceofExpression instanceofExpression, String assertionName) {
 		if (assertionName.equals(IS_FALSE)) {
 			return Optional.empty();
@@ -326,23 +284,12 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		if (leftOperandType == null) {
 			return Optional.empty();
 		}
-		if (!BooleanAssertionOnInvocationAnalyzer.isSupportedForInfixOrInstanceOf(leftOperandType)) {
+		if (!SupportedAssertJAssertThatArgumentTypes.isSupportedAssertThatArgumentType(leftOperandType)) {
 			return Optional.empty();
 		}
 
-		MethodInvocationData assertThatData = createNewAssertThatData(assertThat, leftOperand);
-		return Optional.of(new DedicatedAssertionData(assertThatData, simpleType));
-	}
-
-	private MethodInvocationData createNewAssertThatData(MethodInvocation assertThat,
-			Expression newAssertThatArgument) {
-		String newAssertThaIdentifier = assertThat.getName()
-			.getIdentifier();
-		MethodInvocationData newAssertThatData = new MethodInvocationData(newAssertThaIdentifier);
-		newAssertThatData.setExpression(assertThat.getExpression());
-		List<Expression> newAssertThatArguments = Arrays.asList(newAssertThatArgument);
-		newAssertThatData.setArguments(newAssertThatArguments);
-		return newAssertThatData;
+		MethodInvocationData assertThatData = MethodInvocationData.createNewAssertThatData(assertThat, leftOperand);
+		return Optional.of(new NewAssertJAssertThatWithAssertionData(assertThatData, simpleType));
 	}
 
 	@SuppressWarnings("unchecked")

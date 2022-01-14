@@ -14,11 +14,13 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * Defines groups of types which are supported for being used as argument for
- * the overloaded static methods 'assertThat' defined in one of the classes
+ * the overloaded static {@code assertThat} methods defined in one of the
+ * classes defined in {@code org.assertj.core.api}. Each group of type is
+ * represented by a {@link Predicate} on a {@link ITypeBinding}.
  * <ul>
- * <li>{@code org.assertj.core.api.Assertions}</li>
- * <li>{@code org.assertj.core.api.AssertionsForClassTypes}</li>
- * <li>{@code org.assertj.core.api.AssertionsForInterfaceTypes}</li>
+ * <li>{@code Assertions}</li>
+ * <li>{@code AssertionsForClassTypes}</li>
+ * <li>{@code AssertionsForInterfaceTypes}</li>
  * </ul>
  */
 public class SupportedAssertJAssertThatArgumentTypes {
@@ -93,9 +95,10 @@ public class SupportedAssertJAssertThatArgumentTypes {
 				IS_PATH,
 				IS_SUPPORTED_TEMPORAL_TYPE, // getTypeBindingPredicate(
 				IS_OTHER_SUPPORTED_TYPE));
-	
+
 	static boolean isSupportedAssertThatArgumentType(ITypeBinding typeBinding) {
-		return typeBinding.isPrimitive() || ALL_SUPPORTED_REFERENZ_TYPE_PREDICATES.stream().anyMatch(predicate -> predicate.test(typeBinding));
+		return typeBinding.isPrimitive() || ALL_SUPPORTED_REFERENZ_TYPE_PREDICATES.stream()
+			.anyMatch(predicate -> predicate.test(typeBinding));
 	}
 
 	static boolean isSupportedIterableType(ITypeBinding typeBinding) {
