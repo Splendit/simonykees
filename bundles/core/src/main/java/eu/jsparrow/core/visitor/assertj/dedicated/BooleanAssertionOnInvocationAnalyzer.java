@@ -1,16 +1,7 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
-import static eu.jsparrow.core.visitor.assertj.dedicated.SupportedAssertJAssertThatArgumentTypes.IS_FILE;
-import static eu.jsparrow.core.visitor.assertj.dedicated.SupportedAssertJAssertThatArgumentTypes.IS_OPTIONAL;
-import static eu.jsparrow.core.visitor.assertj.dedicated.SupportedAssertJAssertThatArgumentTypes.IS_OTHER_SUPPORTED_TYPE;
-import static eu.jsparrow.core.visitor.assertj.dedicated.SupportedAssertJAssertThatArgumentTypes.IS_PATH;
-import static eu.jsparrow.core.visitor.assertj.dedicated.SupportedAssertJAssertThatArgumentTypes.IS_PREDICATE;
-import static eu.jsparrow.core.visitor.assertj.dedicated.SupportedAssertJAssertThatArgumentTypes.IS_STREAM;
-import static eu.jsparrow.core.visitor.assertj.dedicated.SupportedAssertJAssertThatArgumentTypes.IS_STRING;
-import static eu.jsparrow.core.visitor.assertj.dedicated.SupportedAssertJAssertThatArgumentTypes.IS_SUPPORTED_ARRAY_TYPE;
-import static eu.jsparrow.core.visitor.assertj.dedicated.SupportedAssertJAssertThatArgumentTypes.IS_SUPPORTED_ITERABLE;
-import static eu.jsparrow.core.visitor.assertj.dedicated.SupportedAssertJAssertThatArgumentTypes.IS_SUPPORTED_MAP_TYPE;
-import static eu.jsparrow.core.visitor.assertj.dedicated.SupportedAssertJAssertThatArgumentTypes.IS_SUPPORTED_TEMPORAL_TYPE;
+import static eu.jsparrow.core.visitor.assertj.dedicated.Constants.*;
+import static eu.jsparrow.core.visitor.assertj.dedicated.SupportedAssertJAssertThatArgumentTypes.*;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,13 +40,9 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * assertThat(string).isEqualTo("Hello World!");
  * </pre>
  */
-@SuppressWarnings("nls")
 class BooleanAssertionOnInvocationAnalyzer {
 
 	private static final Predicate<ITypeBinding> IS_SUPPORTED_ITERATOR_TYPE = SupportedAssertJAssertThatArgumentTypes::isSupportedIteratorTypeForAssertion;
-	private static final String ENDS_WITH = "endsWith";
-	private static final String STARTS_WITH = "startsWith";
-	private static final String EQUALS = "equals";
 
 	private static final BooleanAssertionOnInvocationAnalyzer STRING_ASSERTIONS_ANALYZER = createStringAssertionsAnalyzer();
 	private static final BooleanAssertionOnInvocationAnalyzer ITERABLE_ASSERTIONS_ANALYZER = createIterableAssertionsAnalyzer();
@@ -77,45 +64,45 @@ class BooleanAssertionOnInvocationAnalyzer {
 
 	private static BooleanAssertionOnInvocationAnalyzer createStringAssertionsAnalyzer() {
 		Map<String, String> map = new HashMap<>();
-		map.put("equalsIgnoreCase", "isEqualToIgnoringCase");
+		map.put(EQUALS_IGNORE_CASE, IS_EQUAL_TO_IGNORING_CASE);
 		map.put(STARTS_WITH, STARTS_WITH);
-		map.put("contains", "contains");
+		map.put(CONTAINS, CONTAINS);
 		map.put(ENDS_WITH, ENDS_WITH);
-		map.put("matches", "matches");
-		map.put("isEmpty", "isEmpty");
-		map.put("isBlank", "isBlank");
+		map.put(MATCHES, MATCHES);
+		map.put(IS_EMPTY, IS_EMPTY);
+		map.put(IS_BLANK, IS_BLANK);
 		Map<String, String> negatedMap = new HashMap<>();
-		negatedMap.put("equalsIgnoreCase", "isNotEqualToIgnoringCase");
-		negatedMap.put(STARTS_WITH, "doesNotStartWith");
-		negatedMap.put("contains", "doesNotContain");
-		negatedMap.put(ENDS_WITH, "doesNotEndWith");
-		negatedMap.put("matches", "doesNotMatch");
-		negatedMap.put("isEmpty", "isNotEmpty");
-		negatedMap.put("isBlank", "isNotBlank");
+		negatedMap.put(EQUALS_IGNORE_CASE, IS_NOT_EQUAL_TO_IGNORING_CASE);
+		negatedMap.put(STARTS_WITH, DOES_NOT_START_WITH);
+		negatedMap.put(CONTAINS, DOES_NOT_CONTAIN);
+		negatedMap.put(ENDS_WITH, DOES_NOT_END_WITH);
+		negatedMap.put(MATCHES, DOES_NOT_MATCH);
+		negatedMap.put(IS_EMPTY, IS_NOT_EMPTY);
+		negatedMap.put(IS_BLANK, IS_NOT_BLANK);
 		return new BooleanAssertionOnInvocationAnalyzer(IS_STRING, map, negatedMap);
 	}
 
 	private static BooleanAssertionOnInvocationAnalyzer createIterableAssertionsAnalyzer() {
 		Map<String, String> map = new HashMap<>();
-		map.put("contains", "contains");
-		map.put("containsAll", "containsAll");
-		map.put("isEmpty", "isEmpty");
+		map.put(CONTAINS, CONTAINS);
+		map.put(CONTAINS_ALL, CONTAINS_ALL);
+		map.put(IS_EMPTY, IS_EMPTY);
 		Map<String, String> negatedMap = new HashMap<>();
-		negatedMap.put("contains", "doesNotContain");
-		negatedMap.put("isEmpty", "isNotEmpty");
+		negatedMap.put(CONTAINS, DOES_NOT_CONTAIN);
+		negatedMap.put(IS_EMPTY, IS_NOT_EMPTY);
 		return new BooleanAssertionOnInvocationAnalyzer(IS_SUPPORTED_ITERABLE, map, negatedMap);
 	}
 
 	private static BooleanAssertionOnInvocationAnalyzer createMapAssertionsAnalyzer() {
 		Map<String, String> map1 = new HashMap<>();
-		map1.put("containsKey", "containsKey");
-		map1.put("containsValue", "containsValue");
-		map1.put("isEmpty", "isEmpty");
+		map1.put(CONTAINS_KEY, CONTAINS_KEY);
+		map1.put(CONTAINS_VALUE, CONTAINS_VALUE);
+		map1.put(IS_EMPTY, IS_EMPTY);
 		Map<String, String> map = map1;
 		Map<String, String> map2 = new HashMap<>();
-		map2.put("containsKey", "doesNotContainKey");
-		map2.put("containsValue", "doesNotContainValue");
-		map2.put("isEmpty", "isNotEmpty");
+		map2.put(CONTAINS_KEY, DOES_NOT_CONTAIN_KEY);
+		map2.put(CONTAINS_VALUE, DOES_NOT_CONTAIN_VALUE);
+		map2.put(IS_EMPTY, IS_NOT_EMPTY);
 		Map<String, String> negatedMap = map2;
 		return new BooleanAssertionOnInvocationAnalyzer(IS_SUPPORTED_MAP_TYPE, map, negatedMap);
 	}
@@ -123,11 +110,11 @@ class BooleanAssertionOnInvocationAnalyzer {
 	private static BooleanAssertionOnInvocationAnalyzer createPathAssertionsAnalyzer() {
 
 		Map<String, String> map = new HashMap<>();
-		map.put("isAbsolute", "isAbsolute");
+		map.put(IS_ABSOLUTE, IS_ABSOLUTE);
 		map.put(STARTS_WITH, STARTS_WITH);
 		map.put(ENDS_WITH, ENDS_WITH);
 		HashMap<String, String> negatedMap = new HashMap<>();
-		negatedMap.put("isAbsolute", "isRelative");
+		negatedMap.put(IS_ABSOLUTE, IS_RELATIVE);
 
 		return new BooleanAssertionOnInvocationAnalyzer(IS_PATH, map, negatedMap) {
 			@Override
@@ -152,71 +139,71 @@ class BooleanAssertionOnInvocationAnalyzer {
 	private static BooleanAssertionOnInvocationAnalyzer createFileAssertionsAnalyzer() {
 
 		Map<String, String> map = new HashMap<>();
-		map.put("exists", "exists"); // File
-		map.put("isFile", "isFile"); // File
-		map.put("isDirectory", "isDirectory"); // File
+		map.put(EXISTS, EXISTS); // File
+		map.put(Constants.IS_FILE, Constants.IS_FILE); // File
+		map.put(IS_DIRECTORY, IS_DIRECTORY); // File
 		// map.put("isHidden", "isHidden"); // File -- not supported
-		map.put("isAbsolute", "isAbsolute"); // Path
-		map.put("canRead", "canRead"); // File
-		map.put("canWrite", "canWrite"); // File
+		map.put(IS_ABSOLUTE, IS_ABSOLUTE); // Path
+		map.put(CAN_READ, CAN_READ); // File
+		map.put(CAN_WRITE, CAN_WRITE); // File
 		// map.put("canExecute", "canExecute"); // File -- not supported
 		HashMap<String, String> negatedMap = new HashMap<>();
-		negatedMap.put("isAbsolute", "isRelative");
-		negatedMap.put("exists", "doesNotExist"); // File
-		return new BooleanAssertionOnInvocationAnalyzer(IS_FILE, map, negatedMap);
+		negatedMap.put(IS_ABSOLUTE, IS_RELATIVE);
+		negatedMap.put(EXISTS, DOES_NOT_EXIST); // File
+		return new BooleanAssertionOnInvocationAnalyzer(SupportedAssertJAssertThatArgumentTypes.IS_FILE, map, negatedMap);
 
 	}
 
 	private static BooleanAssertionOnInvocationAnalyzer createOptionalAssertionsAnalyzer() {
 		Map<String, String> map = new HashMap<>();
-		map.put("isEmpty", "isEmpty");
-		map.put("isPresent", "isPresent");
+		map.put(IS_EMPTY, IS_EMPTY);
+		map.put(IS_PRESENT, IS_PRESENT);
 		Map<String, String> negatedMap = new HashMap<>();
-		negatedMap.put("isEmpty", "isPresent");
-		negatedMap.put("isPresent", "isEmpty");
+		negatedMap.put(IS_EMPTY, IS_PRESENT);
+		negatedMap.put(IS_PRESENT, IS_EMPTY);
 		return new BooleanAssertionOnInvocationAnalyzer(IS_OPTIONAL, map, negatedMap);
 	}
 
 	private static BooleanAssertionOnInvocationAnalyzer createDateAndTimeAssertionsAnalyzer() {
 		Map<String, String> map = new HashMap<>();
-		map.put("after", "isAfter");
-		map.put("before", "isBefore");
-		map.put("isAfter", "isAfter");
-		map.put("isBefore", "isBefore");
+		map.put(AFTER, IS_AFTER);
+		map.put(BEFORE, IS_BEFORE);
+		map.put(IS_AFTER, IS_AFTER);
+		map.put(IS_BEFORE, IS_BEFORE);
 		// map.put("isSupported", "isSupported"); not supported
 		Map<String, String> negatedMap = new HashMap<>();
-		negatedMap.put("after", "isBeforeOrEqualTo");
-		negatedMap.put("before", "isAfterOrEqualTo");
-		negatedMap.put("isAfter", "isBeforeOrEqualTo");
-		negatedMap.put("isBefore", "isAfterOrEqualTo");
+		negatedMap.put(AFTER, IS_BEFORE_OR_EQUAL_TO);
+		negatedMap.put(BEFORE, IS_AFTER_OR_EQUAL_TO);
+		negatedMap.put(IS_AFTER, IS_BEFORE_OR_EQUAL_TO);
+		negatedMap.put(IS_BEFORE, IS_AFTER_OR_EQUAL_TO);
 
 		return new BooleanAssertionOnInvocationAnalyzer(IS_SUPPORTED_TEMPORAL_TYPE, map, negatedMap);
 	}
 
 	private static BooleanAssertionOnInvocationAnalyzer createStreamAssertionsAnalyzer() {
 		Map<String, String> map = new HashMap<>();
-		map.put("allMatch", "allMatch");
-		map.put("anyMatch", "anyMatch");
-		map.put("noneMatch", "noneMatch");
+		map.put(ALL_MATCH, ALL_MATCH);
+		map.put(ANY_MATCH, ANY_MATCH);
+		map.put(NONE_MATCH, NONE_MATCH);
 		Map<String, String> negatedMap = new HashMap<>();
-		negatedMap.put("anyMatch", "noneMatch");
-		negatedMap.put("noneMatch", "anyMatch");
+		negatedMap.put(ANY_MATCH, NONE_MATCH);
+		negatedMap.put(NONE_MATCH, ANY_MATCH);
 		return new BooleanAssertionOnInvocationAnalyzer(IS_STREAM, map, negatedMap);
 	}
 
 	private static BooleanAssertionOnInvocationAnalyzer createIteratorTypesAssertionsAnalyzer() {
 		Map<String, String> map = new HashMap<>();
-		map.put("hasNext", "hasNext");
+		map.put(HAS_NEXT, HAS_NEXT);
 		Map<String, String> negatedMap = new HashMap<>();
-		negatedMap.put("hasNext", "isExhausted");
+		negatedMap.put(HAS_NEXT, IS_EXHAUSTED);
 		return new BooleanAssertionOnInvocationAnalyzer(IS_SUPPORTED_ITERATOR_TYPE, map, negatedMap);
 	}
 
 	private static BooleanAssertionOnInvocationAnalyzer createPredicateAssertionsAnalyzer() {
 		Map<String, String> map = new HashMap<>();
-		map.put("test", "accepts");
+		map.put(TEST, ACCEPTS);
 		Map<String, String> negatedMap = new HashMap<>();
-		negatedMap.put("test", "rejects");
+		negatedMap.put(TEST, REJECTS);
 		return new BooleanAssertionOnInvocationAnalyzer(IS_PREDICATE, map, negatedMap);
 	}
 
@@ -321,12 +308,12 @@ class BooleanAssertionOnInvocationAnalyzer {
 		this.supportedTypeBindingPredicate = supportedTypeBindingPredicate;
 
 		Map<String, String> tmpMap = new HashMap<>();
-		tmpMap.put(EQUALS, "isEqualTo"); //$NON-NLS-1$
+		tmpMap.put(OBJECT_EQUALS, IS_EQUAL_TO);
 		tmpMap.putAll(mapToAssertJAssertions);
 		this.mapToAssertJAssertions = Collections.unmodifiableMap(tmpMap);
 
 		tmpMap = new HashMap<>();
-		tmpMap.put(EQUALS, "isNotEqualTo"); //$NON-NLS-1$
+		tmpMap.put(OBJECT_EQUALS, IS_NOT_EQUAL_TO);
 		tmpMap.putAll(mapToNegatedAssertJAssertions);
 		this.mapToNegatedAssertJAssertions = Collections.unmodifiableMap(tmpMap);
 	}
@@ -360,7 +347,7 @@ class BooleanAssertionOnInvocationAnalyzer {
 
 	private static boolean analyzeEqualsMethodParameters(IMethodBinding methodBinding) {
 		String methodName = methodBinding.getName();
-		if (!methodName.equals(EQUALS)) {
+		if (!methodName.equals(OBJECT_EQUALS)) {
 			return true;
 		}
 		ITypeBinding[] parameterTypes = methodBinding.getMethodDeclaration()
