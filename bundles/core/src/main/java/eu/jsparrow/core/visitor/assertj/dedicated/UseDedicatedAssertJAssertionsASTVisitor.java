@@ -163,7 +163,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		}
 		return Optional.of(assumedAssertThatInvocation);
 	}
-	
+
 	private static Optional<NewAssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithMethodInvocation(
 			MethodInvocation assertThat,
 			MethodInvocation invocationAsAssertThatArgument, String assertionMethodName) {
@@ -190,7 +190,9 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			return Optional.empty();
 		}
 
-		BooleanAssertionOnInvocationAnalyzer analyzer = BooleanAssertionOnInvocationAnalyzerFactory.findAnalyzer(newAssertThatArgumentTypeBinding).orElse(null);
+		BooleanAssertionOnInvocationAnalyzer analyzer = BooleanAssertionOnInvocationAnalyzerFactory
+			.findAnalyzer(newAssertThatArgumentTypeBinding)
+			.orElse(null);
 		if (analyzer != null) {
 			MethodInvocationData newAssertionData = analyzer
 				.findDedicatedAssertJAssertionData(assertThatArgumentMethodBinding, newAssertionArguments,
@@ -314,8 +316,8 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 	private void transform(MethodInvocation node, AssertThatInstanceOfAnalysisData data) {
 		SimpleType instanceofRightOperand = data.getInstanceofRightOperand();
 		MethodInvocation newAssertion = createIsInstanceofInvocation(instanceofRightOperand);
-		MethodInvocation newAssertThat = CopyMethodInvocation
-			.createNewMethodInvocation(data.getNewAssertThatData(), astRewrite);
+		MethodInvocationData newAssertThatData = data.getNewAssertThatData();
+		MethodInvocation newAssertThat = newAssertThatData.createNewMethodInvocation(astRewrite);
 		newAssertion.setExpression(newAssertThat);
 		astRewrite.replace(node, newAssertion, null);
 		onRewrite();
@@ -323,10 +325,9 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 
 	private void transform(MethodInvocation node, NewAssertJAssertThatWithAssertionData data) {
 		MethodInvocationData newAssertionData = data.getNewAssertionData();
-		MethodInvocation newAssertion = CopyMethodInvocation
-			.createNewMethodInvocation(newAssertionData, astRewrite);
-		MethodInvocation newAssertThat = CopyMethodInvocation
-			.createNewMethodInvocation(data.getNewAssertThatData(), astRewrite);
+		MethodInvocation newAssertion = newAssertionData.createNewMethodInvocation(astRewrite);
+		MethodInvocationData newAssertThatData = data.getNewAssertThatData();
+		MethodInvocation newAssertThat = newAssertThatData.createNewMethodInvocation(astRewrite);
 		newAssertion.setExpression(newAssertThat);
 		astRewrite.replace(node, newAssertion, null);
 		onRewrite();

@@ -4,10 +4,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 /**
  * Container for all structural data belonging to a method invocation:
@@ -84,4 +87,31 @@ public class MethodInvocationData {
 	public Optional<Expression> getExpression() {
 		return Optional.ofNullable(expression);
 	}
+
+	@SuppressWarnings("unchecked")
+	public MethodInvocation createNewMethodInvocation(ASTRewrite astRewrite) {
+		AST ast = astRewrite.getAST();
+		MethodInvocation newMethodInvocation = ast.newMethodInvocation();
+		newMethodInvocation.setName(ast.newSimpleName(getMethodName()));
+
+		List<Type> newTpeArguments = getTypeArguments()
+			.stream()
+			.map(typeArgument -> (Type) astRewrite.createCopyTarget(typeArgument))
+			.collect(Collectors.toList());
+		newMethodInvocation.typeArguments()
+			.addAll(newTpeArguments);
+
+		List<Expression> newArguments = getArguments()
+			.stream()
+			.map(argument -> (Expression) astRewrite.createCopyTarget(argument))
+			.collect(Collectors.toList());
+		newMethodInvocation.arguments()
+			.addAll(newArguments);
+
+		getExpression()
+			.ifPresent(expression -> newMethodInvocation
+				.setExpression((Expression) astRewrite.createCopyTarget(expression)));
+		return newMethodInvocation;
+	}
+
 }
