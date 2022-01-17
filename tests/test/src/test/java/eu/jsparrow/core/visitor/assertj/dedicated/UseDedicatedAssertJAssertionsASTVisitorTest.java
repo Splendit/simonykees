@@ -219,6 +219,35 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		assertNoChange(original);
 	}
 
+	@Test
+	void visit_AssertthatIterableEqualsIsTrue_shouldTransform()
+			throws Exception {
+		
+		fixture.addImport(java.util.Arrays.class.getName());
+		String original = "" +
+				"		Iterable<String> iterable = Arrays.asList(\"str-1\", \"str-2\");\n"
+				+ "		assertThat(iterable.equals(iterable)).isTrue();";
+		String expected = "" +
+				"		Iterable<String> iterable = Arrays.asList(\"str-1\", \"str-2\");\n"
+				+ "		assertThat(iterable).isEqualTo(iterable);";
+		
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_AssertthatIterableEqualsIsFalse_shouldTransform()
+			throws Exception {
+		fixture.addImport(java.util.Arrays.class.getName());
+		String original = "" +
+				"		Iterable<String> iterable = Arrays.asList(\"str-1\", \"str-2\");\n"
+				+ "		assertThat(iterable.equals(Arrays.asList())).isFalse();";
+		String expected = "" +
+				"		Iterable<String> iterable = Arrays.asList(\"str-1\", \"str-2\");\n"
+				+ "		assertThat(iterable).isNotEqualTo(Arrays.asList());";
+		
+		assertChange(original, expected);
+	}
+
 	@ParameterizedTest
 	@MethodSource("mapMethodIsTrue")
 	void visit_AssertThatMapMethodIsTrue_shouldTransform(String originalInvocation, String expectedInvocation)
@@ -237,6 +266,31 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		String expected = String.format(
 				"" +
 						"		Map<String, String> map = new HashMap<>();\n"
+						+ "		map.put(\"key-1\", \"value-1\");\n"
+						+ "		assertThat(map).%s;",
+				expectedInvocation);
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@MethodSource("mapMethodIsTrue")
+	void visit_AssertThatHashMapMethodIsTrue_shouldTransform(String originalInvocation, String expectedInvocation)
+			throws Exception {
+
+		fixture.addImport(java.util.HashMap.class.getName());
+		fixture.addImport(java.util.Map.class.getName());
+
+		String original = String.format(
+				"" +
+						"		HashMap<String, String> map = new HashMap<>();\n"
+						+ "		map.put(\"key-1\", \"value-1\");\n"
+						+ "		assertThat(map.%s).isTrue();",
+				originalInvocation);
+
+		String expected = String.format(
+				"" +
+						"		HashMap<String, String> map = new HashMap<>();\n"
 						+ "		map.put(\"key-1\", \"value-1\");\n"
 						+ "		assertThat(map).%s;",
 				expectedInvocation);
@@ -710,6 +764,32 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
+	
+	
+	@ParameterizedTest
+	@MethodSource("assertionsOnIteratorMethods")
+	void visit_AssertionsWithListIteratorMethods_shouldTransform(String originalInvocation, String expectedInvocation,
+			String booleanAssertion)
+			throws Exception {
+
+		fixture.addImport(java.util.Arrays.class.getName());
+		fixture.addImport(java.util.ListIterator.class.getName());
+
+		String variableDeclaration = "ListIterator<String> iterator = Arrays.asList(\"str-1\", \"str-2\").listIterator();";
+		String original = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(iterator.%s).%s;",
+				variableDeclaration, originalInvocation, booleanAssertion);
+
+		String expected = String.format(
+				"" +
+						"		%s\n" +
+						"		assertThat(iterator).%s;",
+				variableDeclaration, expectedInvocation);
+
+		assertChange(original, expected);
+	}
 
 	public static Stream<Arguments> assertionsOnObjectEqualsMethod() throws Exception {
 		return Stream.of(
@@ -1035,8 +1115,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
-	
+
 	@Test
 	void visit_instanceofIsFalse_shouldTransform() throws Exception {
 		String original = String.format("" +
