@@ -1,13 +1,14 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
 /**
+ * Relevant method names for {@link BooleanAssertionOnInvocationAnalyzer}.
  * 
  * @since 4.7.0
  *
  */
 @SuppressWarnings("nls")
 public class Constants {
-	
+
 	/*
 	 * String methods
 	 */
@@ -26,7 +27,7 @@ public class Constants {
 	public static final String IS_NOT_EQUAL_TO_IGNORING_CASE = "isNotEqualToIgnoringCase";
 	public static final String MATCHES = "matches";
 	public static final String STARTS_WITH = "startsWith";
-	
+
 	/*
 	 * Iterable
 	 */
@@ -39,13 +40,13 @@ public class Constants {
 	public static final String CONTAINS_KEY = "containsKey";
 	public static final String DOES_NOT_CONTAIN_KEY = "doesNotContainKey";
 	public static final String DOES_NOT_CONTAIN_VALUE = "doesNotContainValue";
-	
+
 	/*
 	 * Path
 	 */
 	public static final String IS_ABSOLUTE = "isAbsolute";
 	public static final String IS_RELATIVE = "isRelative";
-	
+
 	/*
 	 * File
 	 */
@@ -55,7 +56,6 @@ public class Constants {
 	public static final String EXISTS = "exists";
 	public static final String IS_DIRECTORY = "isDirectory";
 	public static final String IS_FILE = "isFile";
-
 
 	/*
 	 * Date
@@ -75,7 +75,7 @@ public class Constants {
 	public static final String NONE_MATCH = "noneMatch";
 
 	/*
-	 * Iterator 
+	 * Iterator
 	 */
 	public static final String IS_EXHAUSTED = "isExhausted";
 	public static final String HAS_NEXT = "hasNext";
@@ -84,23 +84,19 @@ public class Constants {
 	 * Optional
 	 */
 	public static final String IS_PRESENT = "isPresent";
-	
+
 	/*
 	 * Predicate
 	 */
 	public static final String ACCEPTS = "accepts";
 	public static final String REJECTS = "rejects";
 	public static final String TEST = "test";
-	
 
 	public static final String OBJECT_EQUALS = "equals";
 	public static final String JAVA_UTIL = "java.util";
 	public static final String IS_EQUAL_TO = "isEqualTo";
 	public static final String IS_NOT_EQUAL_TO = "isNotEqualTo";
-	
-	
 
-	
 	private Constants() {
 		/*
 		 * Hide default constructor.

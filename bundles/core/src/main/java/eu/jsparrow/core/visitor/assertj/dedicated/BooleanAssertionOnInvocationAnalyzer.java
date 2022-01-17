@@ -39,6 +39,9 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * <pre>
  * assertThat(string).isEqualTo("Hello World!");
  * </pre>
+ * 
+ * @since 4.7.0
+ * 
  */
 class BooleanAssertionOnInvocationAnalyzer {
 

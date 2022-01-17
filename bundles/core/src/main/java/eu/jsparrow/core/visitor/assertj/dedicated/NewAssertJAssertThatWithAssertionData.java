@@ -12,7 +12,8 @@ import org.eclipse.jdt.core.dom.SimpleType;
  * assertThat(string).isEqualTo("Hello World!");
  * </pre>
  * 
- *
+ * @since 4.7.0
+ * 
  */
 class NewAssertJAssertThatWithAssertionData {
 	private final MethodInvocationData newAssertThatData;

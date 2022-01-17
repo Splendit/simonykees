@@ -12,6 +12,8 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 /**
  * Creates a new {@link MethodInvocation} by copying the data stored in the
  * given instance of {@link MethodInvocationData}
+ * 
+ * @since 4.7.0
  *
  */
 public class CopyMethodInvocation {

@@ -17,7 +17,8 @@ import org.eclipse.jdt.core.dom.Type;
  * <li>optional arguments</li>
  * <li>an optional method invocation expression</li>
  * </ul>
- *
+ * 
+ * @since 4.7.0
  */
 public class MethodInvocationData {
 

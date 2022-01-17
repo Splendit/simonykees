@@ -192,7 +192,8 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		return Optional.of(assumedAssertThatInvocation);
 	}
 
-	private Optional<NewAssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithInfixOperation(MethodInvocation assertThat,
+	private Optional<NewAssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithInfixOperation(
+			MethodInvocation assertThat,
 			InfixExpression infixExpressionAsAssertThatArgument, String assertionMethodName) {
 		Expression leftOperand = infixExpressionAsAssertThatArgument.getLeftOperand();
 		Expression rightOperand = infixExpressionAsAssertThatArgument.getRightOperand();
@@ -240,7 +241,8 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		MethodInvocationData assertThatData = MethodInvocationData.createNewAssertThatData(assertThat, leftOperand);
 		MethodInvocationData newAssertionData = new MethodInvocationData(newAssertionMethodName);
 		newAssertionData.setArguments(Arrays.asList(rightOperand));
-		NewAssertJAssertThatWithAssertionData dedicatedAssertionData = new NewAssertJAssertThatWithAssertionData(assertThatData, newAssertionData);
+		NewAssertJAssertThatWithAssertionData dedicatedAssertionData = new NewAssertJAssertThatWithAssertionData(
+				assertThatData, newAssertionData);
 
 		return Optional.of(dedicatedAssertionData);
 

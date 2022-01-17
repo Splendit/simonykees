@@ -22,6 +22,9 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * <li>{@code AssertionsForClassTypes}</li>
  * <li>{@code AssertionsForInterfaceTypes}</li>
  * </ul>
+ * 
+ * @since 4.7.0
+ * 
  */
 public class SupportedAssertJAssertThatArgumentTypes {
 	private static final String JAVA_UTIL = "java.util"; //$NON-NLS-1$
