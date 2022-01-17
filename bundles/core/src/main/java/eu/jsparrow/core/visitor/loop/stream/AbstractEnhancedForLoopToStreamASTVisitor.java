@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import eu.jsparrow.core.markers.common.EnhancedForLoopToStreamEvent;
 import eu.jsparrow.core.visitor.lambdaforeach.AbstractLambdaForEachASTVisitor;
 import eu.jsparrow.core.visitor.sub.EffectivelyFinalVisitor;
 import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
@@ -40,7 +41,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * @since 2.1.1
  *
  */
-public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends AbstractLambdaForEachASTVisitor {
+public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends AbstractLambdaForEachASTVisitor implements EnhancedForLoopToStreamEvent {
 
 	/**
 	 * Checks whether the type binding is a raw type, capture, wildcard or a

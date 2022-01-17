@@ -20,10 +20,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class MultiCatchRule extends RefactoringRuleImpl<MultiCatchASTVisitor> {
 
+	public static final String RULE_ID = "MultiCatch"; //$NON-NLS-1$
 	public MultiCatchRule() {
 		super();
 		this.visitorClass = MultiCatchASTVisitor.class;
-		this.id = "MultiCatch"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.MultiCatchRule_name, Messages.MultiCatchRule_description,
 				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
 	}

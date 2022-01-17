@@ -52,6 +52,7 @@ class LambdaToMethodReferenceResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals(15, event.getHighlightLength()),
 				() -> assertEquals(154, event.getOffset()),
 				() -> assertEquals(25, event.getLength()),
+				() -> assertEquals(7, event.getLineNumber()),
 				() -> assertEquals(2, event.getWeightValue()));
 	}
 	

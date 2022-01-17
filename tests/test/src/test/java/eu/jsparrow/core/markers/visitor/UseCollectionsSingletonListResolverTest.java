@@ -60,6 +60,7 @@ class UseCollectionsSingletonListResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(160, event.getOffset()),
 				() -> assertEquals(15, event.getLength()),
+				() -> assertEquals(8, event.getLineNumber()),
 				() -> assertEquals(2, event.getWeightValue()));
 	}
 	

@@ -19,9 +19,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class CollectionsFactoryMethodsRule extends RefactoringRuleImpl<CollectionsFactoryMethodsASTVisitor> {
 
+	public static final String RULE_ID = "CollectionsFactoryMethods"; //$NON-NLS-1$
+
 	public CollectionsFactoryMethodsRule() {
 		this.visitorClass = CollectionsFactoryMethodsASTVisitor.class;
-		this.id = "CollectionsFactoryMethods"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.CollectionsFactoryMethodsRule_name,
 				Messages.CollectionsFactoryMethodsRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_9, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));

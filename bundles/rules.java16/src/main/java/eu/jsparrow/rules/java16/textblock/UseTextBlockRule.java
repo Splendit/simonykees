@@ -24,9 +24,11 @@ import eu.jsparrow.rules.common.Tag;
 public class UseTextBlockRule
 		extends RefactoringRuleImpl<UseTextBlockASTVisitor> {
 
+	public static final String RULE_ID = "UseTextBlock"; //$NON-NLS-1$
+
 	public UseTextBlockRule() {
 		this.visitorClass = UseTextBlockASTVisitor.class;
-		this.id = "UseTextBlock"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.UseTextBlockRule_name,
 				Messages.UseTextBlockRule_description,
 				Duration.ofMinutes(5),

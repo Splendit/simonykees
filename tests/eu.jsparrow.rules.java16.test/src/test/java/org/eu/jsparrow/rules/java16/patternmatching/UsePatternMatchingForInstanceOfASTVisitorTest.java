@@ -1,4 +1,4 @@
-package org.eu.jsparrow.rules.java16;
+package org.eu.jsparrow.rules.java16.patternmatching;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.AfterEach;
@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
-import eu.jsparrow.rules.java16.UsePatternMatchingForInstanceofASTVisitor;
+import eu.jsparrow.rules.java16.patternmatching.UsePatternMatchingForInstanceofASTVisitor;
 
 @SuppressWarnings("nls")
 public class UsePatternMatchingForInstanceOfASTVisitorTest extends UsesJDTUnitFixture {

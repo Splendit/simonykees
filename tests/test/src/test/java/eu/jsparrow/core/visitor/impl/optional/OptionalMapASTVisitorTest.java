@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.optional.OptionalMapASTVisitor;
 
-@SuppressWarnings("nls")
-public class OptionalMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class OptionalMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void beforeEach() throws Exception {
@@ -16,7 +15,7 @@ public class OptionalMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void test_baseCase_shouldTransform() throws Exception {
+	void test_baseCase_shouldTransform() throws Exception {
 		String original = "" +
 				"		Optional<String> optional = Optional.of(\"value\");\n" +
 				"		optional.ifPresent(value -> {\n" +
@@ -33,7 +32,7 @@ public class OptionalMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void test_multipleRemainingStatements_shouldTransform() throws Exception {
+	void test_multipleRemainingStatements_shouldTransform() throws Exception {
 		String original = "" +
 				"		Optional<String> optional = Optional.of(\"value\");\n" +
 				"		optional.ifPresent(value -> {\n" +
@@ -52,7 +51,7 @@ public class OptionalMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void test_multipleExtractedStatements_shouldTransform() throws Exception {
+	void test_multipleExtractedStatements_shouldTransform() throws Exception {
 		String original = "" +
 				"		Optional<String> optional = Optional.of(\"value\");\n" +
 				"		optional.ifPresent(value -> {\n" +
@@ -71,7 +70,7 @@ public class OptionalMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void test_primitiveTypes_shouldTransform() throws Exception {
+	void test_primitiveTypes_shouldTransform() throws Exception {
 		String original = "" +
 				"		Optional<String> optional = Optional.of(\"value\");\n" +
 				"		optional.ifPresent(value -> {\n" +
@@ -92,7 +91,7 @@ public class OptionalMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void test_usingParameterType_shouldTransform() throws Exception {
+	void test_usingParameterType_shouldTransform() throws Exception {
 		String original = "" +
 				"		Optional<String> optional = Optional.of(\"value\");\n" +
 				"		optional.ifPresent((String value) -> {\n" +
@@ -109,7 +108,7 @@ public class OptionalMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	// Negative test cases
 
 	@Test
-	public void test_nonExtractableBody_shouldNotTransform() throws Exception {
+	void test_nonExtractableBody_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		Optional<String> optional = Optional.of(\"value\");\n" +
 				"		optional.ifPresent(value -> {\n" +
@@ -120,7 +119,7 @@ public class OptionalMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void test_singleStatementLambdaBlock_shouldNotTransform() throws Exception {
+	void test_singleStatementLambdaBlock_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		Optional<String> optional = Optional.of(\"value\");\n" +
 				"		optional.ifPresent(value -> {\n" +
@@ -128,5 +127,22 @@ public class OptionalMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"				System.out.print(value);\n" +
 				"			}\n" +
 				"		});");
+	}
+	
+	@Test
+	void test_duplicatedFinalModifier_shouldTransform() throws Exception {
+		String original = "" +
+				"		Optional<String> optional = Optional.of(\"value\");\n" +
+				"		optional.ifPresent((final String value) -> {\n" +
+				"			final String test = value.replace(\"t\", \"o\");\n" +
+				"			System.out.print(test);\n" +
+				"		});";
+		String expected = "" +
+				"		Optional<String> optional = Optional.of(\"value\");\n" +
+				"		optional\n" +
+				"			.map((final String value) -> value.replace(\"t\", \"o\"))\n" +
+				"			.ifPresent((final String test) -> System.out.print(test));";
+
+		assertChange(original, expected);
 	}
 }

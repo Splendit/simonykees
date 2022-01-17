@@ -74,6 +74,7 @@ class IndexOfToContainsResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals(14, event.getHighlightLength()),
 				() -> assertEquals(220, event.getOffset()),
 				() -> assertEquals(18, event.getLength()),
+				() -> assertEquals(10, event.getLineNumber()),
 				() -> assertEquals(2, event.getWeightValue()));
 	}
 	

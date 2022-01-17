@@ -304,7 +304,7 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 				for (Object attribute : attributes.keySet()) {
 					Name key = (Name) attribute;
 					String keyword = key.toString();
-					if ("Implementation-Version".equals(keyword)) { //$NON-NLS-1$
+					if ("Implementation-Version".equals(keyword) || "Bundle-Version".equals(keyword)) { //$NON-NLS-1$ //$NON-NLS-2$
 						String actualVersion = attributes.getValue(key);
 						try {
 							return LibrariesVersionUtil.satisfies(actualVersion, versionComparator);

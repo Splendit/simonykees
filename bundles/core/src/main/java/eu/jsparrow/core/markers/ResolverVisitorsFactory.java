@@ -1,6 +1,7 @@
 package eu.jsparrow.core.markers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -10,8 +11,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.markers.visitor.AvoidConcatenationInLoggingStatementsResolver;
 import eu.jsparrow.core.markers.visitor.CollectionRemoveAllResolver;
 import eu.jsparrow.core.markers.visitor.DiamondOperatorResolver;
@@ -29,12 +35,31 @@ import eu.jsparrow.core.markers.visitor.RemoveNullCheckBeforeInstanceofResolver;
 import eu.jsparrow.core.markers.visitor.RemoveRedundantTypeCastResolver;
 import eu.jsparrow.core.markers.visitor.RemoveUnusedParameterResolver;
 import eu.jsparrow.core.markers.visitor.StringLiteralEqualityCheckResolver;
+import eu.jsparrow.core.markers.visitor.UseArraysStreamResolver;
 import eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver;
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver;
+import eu.jsparrow.core.markers.visitor.UseStringJoinResolver;
+import eu.jsparrow.core.markers.visitor.factory.methods.CollectionsFactoryMethodsResolver;
+import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachCollectResolver;
+import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachIfWrapperToFilterResolver;
+import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachMapResolver;
+import eu.jsparrow.core.markers.visitor.loop.ForToForEachResolver;
+import eu.jsparrow.core.markers.visitor.loop.StringBuildingLoopResolver;
+import eu.jsparrow.core.markers.visitor.loop.WhileToForEachResolver;
+import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamAnyMatchResolver;
+import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamFindFirstResolver;
+import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamForEachResolver;
+import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamSumResolver;
+import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamTakeWhileResolver;
+import eu.jsparrow.core.markers.visitor.stream.tolist.ReplaceStreamCollectByToListResolver;
+import eu.jsparrow.core.markers.visitor.trycatch.MultiCatchResolver;
+import eu.jsparrow.core.markers.visitor.trycatch.TryWithResourceResolver;
+import eu.jsparrow.rules.api.MarkerService;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
+import eu.jsparrow.rules.common.markers.Resolver;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -45,6 +70,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  */
 public class ResolverVisitorsFactory {
 
+	private static final Logger logger = LoggerFactory.getLogger(ResolverVisitorsFactory.class);
 	private static final Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> registry = initRegistry();
 
 	private ResolverVisitorsFactory() {
@@ -75,7 +101,47 @@ public class ResolverVisitorsFactory {
 		map.put(RemoveRedundantTypeCastResolver.ID, RemoveRedundantTypeCastResolver::new);
 		map.put(RemoveUnusedParameterResolver.ID, RemoveUnusedParameterResolver::new);
 		map.put(UseCollectionsSingletonListResolver.ID, UseCollectionsSingletonListResolver::new);
+		map.put(ForToForEachResolver.ID, ForToForEachResolver::new);
+		map.put(WhileToForEachResolver.ID, WhileToForEachResolver::new);
+		map.put(StringBuildingLoopResolver.ID, StringBuildingLoopResolver::new);
+		map.put(UseStringJoinResolver.ID, UseStringJoinResolver::new);
+		map.put(MultiCatchResolver.ID, MultiCatchResolver::new);
+		map.put(TryWithResourceResolver.ID, TryWithResourceResolver::new);
+		map.put(UseArraysStreamResolver.ID, UseArraysStreamResolver::new);
+		map.put(LambdaForEachIfWrapperToFilterResolver.ID, LambdaForEachIfWrapperToFilterResolver::new);
+		map.put(LambdaForEachMapResolver.ID, LambdaForEachMapResolver::new);
+		map.put(LambdaForEachCollectResolver.ID, LambdaForEachCollectResolver::new);
+		map.put(CollectionsFactoryMethodsResolver.ID, CollectionsFactoryMethodsResolver::new);
+		map.put(ReplaceStreamCollectByToListResolver.ID, ReplaceStreamCollectByToListResolver::new);
+		map.put(EnhancedForLoopToStreamAnyMatchResolver.ID, EnhancedForLoopToStreamAnyMatchResolver::new);
+		map.put(EnhancedForLoopToStreamFindFirstResolver.ID, EnhancedForLoopToStreamFindFirstResolver::new);
+		map.put(EnhancedForLoopToStreamForEachResolver.ID, EnhancedForLoopToStreamForEachResolver::new);
+		map.put(EnhancedForLoopToStreamSumResolver.ID, EnhancedForLoopToStreamSumResolver::new);
+		map.put(EnhancedForLoopToStreamTakeWhileResolver.ID, EnhancedForLoopToStreamTakeWhileResolver::new);
+
+		List<MarkerService> markerServices = getExternalRuleServices();
+		markerServices.stream()
+			.map(MarkerService::loadGeneratingFunctions)
+			.forEach(map::putAll);
+
 		return Collections.unmodifiableMap(map);
+	}
+
+	private static List<MarkerService> getExternalRuleServices() {
+		BundleContext bundleContext = FrameworkUtil.getBundle(ResolverVisitorsFactory.class)
+			.getBundleContext();
+		ServiceReference<?>[] serviceReferences = null;
+		try {
+			serviceReferences = bundleContext.getServiceReferences(MarkerService.class.getName(), null);
+		} catch (InvalidSyntaxException e) {
+			logger.error("Failed to load external markers due to bad filterexpression.", e); //$NON-NLS-1$
+		}
+		// BundleContext returns null if no services are found,
+		return serviceReferences == null ? Collections.emptyList()
+				: Arrays.asList(serviceReferences)
+					.stream()
+					.map(x -> (MarkerService) bundleContext.getService(x))
+					.collect(Collectors.toList());
 	}
 
 	public static Map<String, RuleDescription> getAllMarkerDescriptions() {

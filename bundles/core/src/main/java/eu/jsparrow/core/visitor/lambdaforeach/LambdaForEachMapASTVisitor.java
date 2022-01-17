@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.LambdaForEachMapEvent;
 import eu.jsparrow.core.visitor.sub.LambdaExpressionBodyAnalyzer;
 import eu.jsparrow.core.visitor.utils.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -60,7 +61,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 1.2
  *
  */
-public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor {
+public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor implements LambdaForEachMapEvent {
 
 	private List<Statement> replacedStatements = new ArrayList<>();
 
@@ -151,6 +152,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		 */
 		astRewrite.replace(parameter, newForEachParamName, null);
 		LambdaNodeUtil.saveComments(getCommentRewriter(), analyzer,findParentStatement(methodInvocation));
+		addMarkerEvent(methodInvocation);
 		onRewrite();
 
 		/*

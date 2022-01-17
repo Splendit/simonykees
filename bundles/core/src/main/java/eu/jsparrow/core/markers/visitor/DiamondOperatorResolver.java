@@ -12,13 +12,13 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.Type;
 
-import eu.jsparrow.core.markers.RefactoringEventImpl;
-import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.DiamondOperatorRule;
 import eu.jsparrow.core.visitor.impl.DiamondOperatorASTVisitor;
+import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
+import eu.jsparrow.rules.common.markers.Resolver;
 
 /**
  * A visitor for resolving one issue of type {@link DiamondOperatorASTVisitor}.
@@ -31,7 +31,6 @@ public class DiamondOperatorResolver extends DiamondOperatorASTVisitor implement
 	public static final String ID = "DiamondOperatorResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
-	private IJavaElement javaElement;
 	private RuleDescription description;
 
 	public DiamondOperatorResolver(Predicate<ASTNode> positionChecker) {
@@ -46,11 +45,6 @@ public class DiamondOperatorResolver extends DiamondOperatorASTVisitor implement
 		return this.description;
 	}
 
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
-	}
 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
@@ -70,12 +64,24 @@ public class DiamondOperatorResolver extends DiamondOperatorASTVisitor implement
 		List<Type> typeArguments = typeCopy.typeArguments();
 		typeArguments.clear();
 		int highlightLength = 0;
-		RefactoringMarkerEvent event = new RefactoringEventImpl(ID,
-				description.getName(),
-				description.getDescription(),
-				javaElement,
-				highlightLength,
-				parameterizedType.getParent(), typeCopy, credit);
+		ASTNode original = parameterizedType.getParent();
+		int offset = original.getStartPosition();
+		int length = original.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(parameterizedType.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(description.getName())
+			.withMessage(description.getDescription())
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(typeCopy.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 
 	}
