@@ -50,7 +50,7 @@ class BooleanAssertionOnInvocationAnalyzer {
 	private static final BooleanAssertionOnInvocationAnalyzer STRING_ASSERTIONS_ANALYZER = createStringAssertionsAnalyzer();
 	private static final BooleanAssertionOnInvocationAnalyzer ITERABLE_ASSERTIONS_ANALYZER = createIterableAssertionsAnalyzer();
 	private static final BooleanAssertionOnInvocationAnalyzer MAP_ASSERTIONS_ANALYZER = createMapAssertionsAnalyzer();
-	private static final BooleanAssertionOnInvocationAnalyzer PATH_ASSERTIONS_ANALYZER = createPathAssertionsAnalyzer();
+	private static final BooleanAssertionOnInvocationAnalyzer PATH_ASSERTIONS_ANALYZER = new BooleanAssertionAnalyzerForPathMethods();
 	private static final BooleanAssertionOnInvocationAnalyzer FILE_ASSERTIONS_ANALYZER = createFileAssertionsAnalyzer();
 	private static final BooleanAssertionOnInvocationAnalyzer OPTIONAL_ASSERTIONS_ANALYZER = createOptionalAssertionsAnalyzer();
 	private static final BooleanAssertionOnInvocationAnalyzer DATE_AND_TIME_ASSERTIONS_ANALYZER = createDateAndTimeAssertionsAnalyzer();
@@ -110,35 +110,6 @@ class BooleanAssertionOnInvocationAnalyzer {
 		return new BooleanAssertionOnInvocationAnalyzer(IS_SUPPORTED_MAP_TYPE, map, negatedMap);
 	}
 
-	private static BooleanAssertionOnInvocationAnalyzer createPathAssertionsAnalyzer() {
-
-		Map<String, String> map = new HashMap<>();
-		map.put(IS_ABSOLUTE, IS_ABSOLUTE);
-		map.put(STARTS_WITH, STARTS_WITH);
-		map.put(ENDS_WITH, ENDS_WITH);
-		HashMap<String, String> negatedMap = new HashMap<>();
-		negatedMap.put(IS_ABSOLUTE, IS_RELATIVE);
-
-		return new BooleanAssertionOnInvocationAnalyzer(IS_PATH, map, negatedMap) {
-			@Override
-			protected boolean analyzeMethodBinding(IMethodBinding methodBinding) {
-				return super.analyzeMethodBinding(methodBinding) && analyzePathMethodParameter(methodBinding);
-			}
-
-			private boolean analyzePathMethodParameter(IMethodBinding methodBinding) {
-
-				String methodName = methodBinding.getName();
-				if (methodName.equals(STARTS_WITH) || (methodName.equals(ENDS_WITH))) {
-					ITypeBinding[] parameterTypes = methodBinding.getMethodDeclaration()
-						.getParameterTypes();
-					return parameterTypes.length == 1
-							&& ClassRelationUtil.isContentOfType(parameterTypes[0], java.nio.file.Path.class.getName());
-				}
-				return true;
-			}
-		};
-	}
-
 	private static BooleanAssertionOnInvocationAnalyzer createFileAssertionsAnalyzer() {
 
 		Map<String, String> map = new HashMap<>();
@@ -153,7 +124,8 @@ class BooleanAssertionOnInvocationAnalyzer {
 		HashMap<String, String> negatedMap = new HashMap<>();
 		negatedMap.put(IS_ABSOLUTE, IS_RELATIVE);
 		negatedMap.put(EXISTS, DOES_NOT_EXIST); // File
-		return new BooleanAssertionOnInvocationAnalyzer(SupportedAssertJAssertThatArgumentTypes.IS_FILE, map, negatedMap);
+		return new BooleanAssertionOnInvocationAnalyzer(SupportedAssertJAssertThatArgumentTypes.IS_FILE, map,
+				negatedMap);
 
 	}
 
@@ -305,7 +277,7 @@ class BooleanAssertionOnInvocationAnalyzer {
 		return Optional.empty();
 	}
 
-	private BooleanAssertionOnInvocationAnalyzer(Predicate<ITypeBinding> supportedTypeBindingPredicate,
+	BooleanAssertionOnInvocationAnalyzer(Predicate<ITypeBinding> supportedTypeBindingPredicate,
 			Map<String, String> mapToAssertJAssertions,
 			Map<String, String> mapToNegatedAssertJAssertions) {
 		this.supportedTypeBindingPredicate = supportedTypeBindingPredicate;
