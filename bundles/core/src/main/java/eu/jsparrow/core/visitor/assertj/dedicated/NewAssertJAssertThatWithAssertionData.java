@@ -1,9 +1,5 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
-import java.util.Optional;
-
-import org.eclipse.jdt.core.dom.SimpleType;
-
 /**
  * Stores all informations needed for the construction of a new AssertJ
  * assertThat invocation combined with an assertion, for example
@@ -17,8 +13,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
  */
 class NewAssertJAssertThatWithAssertionData {
 	private final MethodInvocationData newAssertThatData;
-	private MethodInvocationData newAssertionData;
-	private SimpleType instanceofRightOperand;
+	private final MethodInvocationData newAssertionData;
 
 	public NewAssertJAssertThatWithAssertionData(MethodInvocationData newAssertThatData,
 			MethodInvocationData newAssertionData) {
@@ -26,21 +21,11 @@ class NewAssertJAssertThatWithAssertionData {
 		this.newAssertionData = newAssertionData;
 	}
 
-	public NewAssertJAssertThatWithAssertionData(MethodInvocationData newAssertThatData,
-			SimpleType instanceofRightOperand) {
-		this.newAssertThatData = newAssertThatData;
-		this.instanceofRightOperand = instanceofRightOperand;
-	}
-
 	public MethodInvocationData getNewAssertThatData() {
 		return newAssertThatData;
 	}
 
-	public Optional<MethodInvocationData> getNewAssertionData() {
-		return Optional.ofNullable(newAssertionData);
-	}
-
-	public Optional<SimpleType> getInstanceofRightOperand() {
-		return Optional.ofNullable(instanceofRightOperand);
+	public MethodInvocationData getNewAssertionData() {
+		return newAssertionData;
 	}
 }
