@@ -20,11 +20,11 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 /**
  * This helper class analyzes method invocations which are used as argument of
  * an AssertJ assertThat invocation in connection with the boolean assertion
- * {@code isTrue} or isFalse and provides the informations for a corresponding
+ * {@code isTrue} or {@code isFalse} and provides the informations for a corresponding
  * dedicated assertion.
  * 
  * For example:
- * 
+ * <p>
  * For the AssertJ assertion
  * 
  * <pre>

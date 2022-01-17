@@ -62,6 +62,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 /**
  * Factory class for instances of {@link BooleanAssertionOnInvocationAnalyzer}
  * which are supported for different groups of methods.
+ * 
+ * @since 4.7.0
  *
  */
 public class BooleanAssertionOnInvocationAnalyzerFactory {

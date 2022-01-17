@@ -20,7 +20,6 @@ import eu.jsparrow.common.SingleRuleTest;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-@SuppressWarnings("nls")
 class UseDedicatedAssertJAssertionsRuleTest extends SingleRuleTest {
 
 	private UseDedicatedAssertJAssertionsRule rule;
@@ -40,12 +39,16 @@ class UseDedicatedAssertJAssertionsRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
+		String ruleDescription = "AssertJ contains a rich API for writing specific assertions about different types of objects. "
+				+ "Making use of the appropriate dedicated methods when writing certain assertions will simplify the test code and "
+				+ "improve the corresponding failure messages. This rule finds AssertJ assertions that can be simplified and replaces "
+				+ "the with equivalent dedicated assertions.";
 		assertThat(description.getName(), equalTo("Use Dedicated AssertJ Assertions"));
 		assertThat(description.getTags(),
 				contains(Tag.JAVA_1_8, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
-				equalTo("Replaces AssertJ assertions with the corresponding dedicated AssertJ assertions. For example, 'assertThat(string1.equals(string2)).isTrue();' can be replaced by 'assertThat(string1).isEqualTo(string2)', or 'assertThat(o1 == o2).isTrue();' can be replaced by 'assertThat(o1).isSameAs(o2)', or 'assertThat(o1 == null).isTrue();' can be replaced by 'assertThat(o1).isNull();'."));
+				equalTo(ruleDescription));
 	}
 
 	@Test

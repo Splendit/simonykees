@@ -109,8 +109,8 @@ public class MethodInvocationData {
 			.addAll(newArguments);
 
 		getExpression()
-			.ifPresent(expression -> newMethodInvocation
-				.setExpression((Expression) astRewrite.createCopyTarget(expression)));
+			.ifPresent(methodExpression -> newMethodInvocation
+				.setExpression((Expression) astRewrite.createCopyTarget(methodExpression)));
 		return newMethodInvocation;
 	}
 

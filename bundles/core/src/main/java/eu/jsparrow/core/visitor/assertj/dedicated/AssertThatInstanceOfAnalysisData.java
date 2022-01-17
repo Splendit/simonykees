@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
  * assertThat(string).isInstanceOf(String.class);
  * </pre>
  * 
- *
+ * @since 4.7.0
  */
 public class AssertThatInstanceOfAnalysisData {
 	private final MethodInvocationData newAssertThatData;

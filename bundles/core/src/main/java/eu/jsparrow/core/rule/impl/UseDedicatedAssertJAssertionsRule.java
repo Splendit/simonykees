@@ -7,8 +7,6 @@ import java.util.function.Predicate;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.visitor.assertj.ChainAssertJAssertThatStatementsASTVisitor;
 import eu.jsparrow.core.visitor.assertj.dedicated.UseDedicatedAssertJAssertionsASTVisitor;
@@ -23,7 +21,6 @@ import eu.jsparrow.rules.common.Tag;
  * @since 4.6.0
  *
  */
-@SuppressWarnings("nls")
 public class UseDedicatedAssertJAssertionsRule
 		extends RefactoringRuleImpl<UseDedicatedAssertJAssertionsASTVisitor> {
 
@@ -33,7 +30,7 @@ public class UseDedicatedAssertJAssertionsRule
 		this.ruleDescription = new RuleDescription(Messages.UseDedicatedAssertJAssertionsRule_name,
 				Messages.UseDedicatedAssertJAssertionsRule_description,
 				Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.ASSERTJ,  Tag.CODING_CONVENTIONS, Tag.READABILITY));
+				Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 	}
 
 	@Override
@@ -48,9 +45,9 @@ public class UseDedicatedAssertJAssertionsRule
 
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
-		Predicate<Version> assertJVersionComparator = version -> version.compareTo(Version.parseVersion("3.20.2")) >= 0
-				&& version.compareTo(Version.parseVersion("3.22.9")) <= 0;
+		Predicate<Version> assertJVersionComparator = version -> version.compareTo(Version.parseVersion("3.20.2")) >= 0 //$NON-NLS-1$
+				&& version.compareTo(Version.parseVersion("3.22.9")) <= 0; //$NON-NLS-1$
 
-		return isInProjectLibraries(project, "org.assertj.core.api.Assertions", assertJVersionComparator);
+		return isInProjectLibraries(project, "org.assertj.core.api.Assertions", assertJVersionComparator); //$NON-NLS-1$
 	}
 }
