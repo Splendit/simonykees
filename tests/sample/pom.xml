@@ -382,6 +382,16 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>assertj-3.20.1</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.assertj:assertj-core:3.20.1</artifact>
+						</configuration>
+					</execution>					
+					<execution>
 						<id>assertj-3.21.0</id>
 						<phase>package</phase>
 						<goals>
@@ -389,6 +399,16 @@
 						</goals>
 						<configuration>
 							<artifact>org.assertj:assertj-core:3.21.0</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>assertj-3.22.0</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.assertj:assertj-core:3.22.0</artifact>
 						</configuration>
 					</execution>
 				</executions>

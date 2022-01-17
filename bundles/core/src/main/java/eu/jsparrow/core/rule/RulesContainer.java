@@ -101,6 +101,7 @@ import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseArraysStreamRule;
 import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
 import eu.jsparrow.core.rule.impl.UseComparatorMethodsRule;
+import eu.jsparrow.core.rule.impl.UseDedicatedAssertJAssertionsRule;
 import eu.jsparrow.core.rule.impl.UseDedicatedAssertionsRule;
 import eu.jsparrow.core.rule.impl.UseFilesBufferedReaderRule;
 import eu.jsparrow.core.rule.impl.UseFilesBufferedWriterRule;
@@ -213,6 +214,7 @@ public class RulesContainer {
 				new ReplaceJUnitAssertThatWithHamcrestRule(),
 				new ReplaceJUnit4AssumptionsWithJupiterRule(),
 				new ReplaceJUnit4AssumptionsWithHamcrestJUnitRule(),
+				new UseDedicatedAssertJAssertionsRule(),
 				new ChainAssertJAssertThatStatementsRule(),
 				new ShiftAssertJDescriptionBeforeAssertionRule(),
 
