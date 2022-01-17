@@ -7,8 +7,6 @@ import static org.eclipse.jdt.core.dom.InfixExpression.Operator.LESS;
 import static org.eclipse.jdt.core.dom.InfixExpression.Operator.LESS_EQUALS;
 import static org.eclipse.jdt.core.dom.InfixExpression.Operator.NOT_EQUALS;
 
-import static eu.jsparrow.core.visitor.assertj.dedicated.BooleanAssertionOnInvocationAnalyzer.analyzeBooleanAssertionWithMethodInvocation;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -164,6 +162,51 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			return Optional.empty();
 		}
 		return Optional.of(assumedAssertThatInvocation);
+	}
+	
+	private static Optional<NewAssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithMethodInvocation(
+			MethodInvocation assertThat,
+			MethodInvocation invocationAsAssertThatArgument, String assertionMethodName) {
+
+		Expression newAssertThatArgument = invocationAsAssertThatArgument.getExpression();
+		if (newAssertThatArgument == null) {
+			return Optional.empty();
+		}
+		List<Expression> newAssertionArguments = ASTNodeUtil.convertToTypedList(
+				invocationAsAssertThatArgument.arguments(),
+				Expression.class);
+
+		if (newAssertionArguments.size() > 1) {
+			return Optional.empty();
+		}
+
+		ITypeBinding newAssertThatArgumentTypeBinding = newAssertThatArgument.resolveTypeBinding();
+		if (newAssertThatArgumentTypeBinding == null) {
+			return Optional.empty();
+		}
+
+		IMethodBinding assertThatArgumentMethodBinding = invocationAsAssertThatArgument.resolveMethodBinding();
+		if (assertThatArgumentMethodBinding == null) {
+			return Optional.empty();
+		}
+
+		BooleanAssertionOnInvocationAnalyzer analyzer = BooleanAssertionOnInvocationAnalyzerFactory.findAnalyzer(newAssertThatArgumentTypeBinding).orElse(null);
+		if (analyzer != null) {
+			MethodInvocationData newAssertionData = analyzer
+				.findDedicatedAssertJAssertionData(assertThatArgumentMethodBinding, newAssertionArguments,
+						assertionMethodName)
+				.orElse(null);
+			if (newAssertionData != null) {
+				MethodInvocationData assertThatData = MethodInvocationData.createNewAssertThatData(assertThat,
+						newAssertThatArgument);
+				NewAssertJAssertThatWithAssertionData dedicatedAssertionData = new NewAssertJAssertThatWithAssertionData(
+						assertThatData,
+						newAssertionData);
+
+				return Optional.of(dedicatedAssertionData);
+			}
+		}
+		return Optional.empty();
 	}
 
 	private Optional<NewAssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithInfixOperation(

@@ -33,6 +33,8 @@ public class SupportedAssertJAssertThatArgumentTypes {
 	public static final Predicate<ITypeBinding> IS_STRING = getTypeBindingPredicate(String.class);
 	public static final Predicate<ITypeBinding> IS_SUPPORTED_ITERABLE = SupportedAssertJAssertThatArgumentTypes::isSupportedIterableType;
 	public static final Predicate<ITypeBinding> IS_SUPPORTED_MAP_TYPE = SupportedAssertJAssertThatArgumentTypes::isSupportedMapType;
+	public static final Predicate<ITypeBinding> IS_SUPPORTED_ITERATOR_TYPE = SupportedAssertJAssertThatArgumentTypes::isSupportedIteratorTypeForAssertion;
+
 	public static final Predicate<ITypeBinding> IS_STREAM = getTypeBindingPredicate(
 			java.util.stream.Stream.class,
 			java.util.stream.IntStream.class,
