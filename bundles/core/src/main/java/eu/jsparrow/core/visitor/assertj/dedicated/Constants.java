@@ -10,6 +10,14 @@ package eu.jsparrow.core.visitor.assertj.dedicated;
 public class Constants {
 
 	/*
+	 * assertion methods for all supported types
+	 */
+	public static final String IS_NOT_NULL = "isNotNull";
+	public static final String IS_NOT_SAME_AS = "isNotSameAs";
+	public static final String IS_NULL = "isNull";
+	public static final String IS_SAME_AS = "isSameAs";
+
+	/*
 	 * String methods
 	 */
 	public static final String CONTAINS = "contains";
@@ -96,6 +104,12 @@ public class Constants {
 	public static final String JAVA_UTIL = "java.util";
 	public static final String IS_EQUAL_TO = "isEqualTo";
 	public static final String IS_NOT_EQUAL_TO = "isNotEqualTo";
+	
+	/*
+	 * Numeric
+	 */
+	public static final String IS_NOT_ZERO = "isNotZero";
+	public static final String IS_ZERO = "isZero";
 
 	private Constants() {
 		/*

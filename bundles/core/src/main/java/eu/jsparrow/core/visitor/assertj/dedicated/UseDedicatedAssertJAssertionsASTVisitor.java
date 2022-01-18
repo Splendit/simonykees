@@ -249,9 +249,9 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		if (rightOperandType.isPrimitive()) {
 			newAssertionMethodName = PRIMITIVE_INFIX_TO_METHOD_NAME_MAP.get(infixOperator);
 		} else if (infixOperator == EQUALS) {
-			newAssertionMethodName = "isSameAs"; //$NON-NLS-1$
+			newAssertionMethodName = Constants.IS_SAME_AS;
 		} else if (infixOperator == NOT_EQUALS) {
-			newAssertionMethodName = "isNotSameAs"; //$NON-NLS-1$
+			newAssertionMethodName = Constants.IS_NOT_SAME_AS;
 		}
 		if (newAssertionMethodName == null) {
 			return Optional.empty();
