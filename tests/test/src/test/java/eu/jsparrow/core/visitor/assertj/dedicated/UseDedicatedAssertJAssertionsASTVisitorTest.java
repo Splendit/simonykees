@@ -222,7 +222,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 	@Test
 	void visit_AssertthatIterableEqualsIsTrue_shouldTransform()
 			throws Exception {
-		
+
 		fixture.addImport(java.util.Arrays.class.getName());
 		String original = "" +
 				"		Iterable<String> iterable = Arrays.asList(\"str-1\", \"str-2\");\n"
@@ -230,7 +230,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		String expected = "" +
 				"		Iterable<String> iterable = Arrays.asList(\"str-1\", \"str-2\");\n"
 				+ "		assertThat(iterable).isEqualTo(iterable);";
-		
+
 		assertChange(original, expected);
 	}
 
@@ -244,7 +244,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		String expected = "" +
 				"		Iterable<String> iterable = Arrays.asList(\"str-1\", \"str-2\");\n"
 				+ "		assertThat(iterable).isNotEqualTo(Arrays.asList());";
-		
+
 		assertChange(original, expected);
 	}
 
@@ -764,8 +764,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
-	
+
 	@ParameterizedTest
 	@MethodSource("assertionsOnIteratorMethods")
 	void visit_AssertionsWithListIteratorMethods_shouldTransform(String originalInvocation, String expectedInvocation,
@@ -995,53 +994,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		assertChange(original, expected);
 	}
 
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"assertThat(o1 != null).isTrue()",
-			"assertThat(null != o1).isTrue()",
-			"assertThat(o1 == null).isFalse()",
-			"assertThat(null == o1).isFalse()"
-	})
-	void visit_ObjectIsNotNull_shouldTransform(String originalInvocation) throws Exception {
-		String original = String.format("" +
-				"		Object o1 = new Object();\n" +
-				"		%s;",
-				originalInvocation);
 
-		String expected = "" +
-				"		Object o1 = new Object();\n"
-				+ "		assertThat(o1).isNotNull();";
-
-		assertChange(original, expected);
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"assertThat(o1 == null).isTrue()",
-			"assertThat(null == o1).isTrue()",
-			"assertThat(o1 != null).isFalse()",
-			"assertThat(null != o1).isFalse()"
-	})
-	void visit_ObjectIsNull_shouldTransform(String originalInvocation) throws Exception {
-		String original = String.format("" +
-				"		Object o1 = null;\n" +
-				"		%s;",
-				originalInvocation);
-
-		String expected = "" +
-				"		Object o1 = null;\n"
-				+ "		assertThat(o1).isNull();";
-
-		assertChange(original, expected);
-	}
-
-	@Test
-	void visit_NullIsNull_shouldNotTransform() throws Exception {
-		String original = "" +
-				"		assertThat(null == null).isTrue();";
-
-		assertNoChange(original);
-	}
 
 	public static Stream<Arguments> assertionsOnInfixOperationsWithInt() throws Exception {
 		return Stream.of(
