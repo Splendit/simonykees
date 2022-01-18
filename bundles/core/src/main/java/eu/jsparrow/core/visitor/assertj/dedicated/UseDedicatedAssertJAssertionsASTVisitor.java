@@ -197,6 +197,17 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		if (newAssertionArguments.size() > 1) {
 			return Optional.empty();
 		}
+		if (assertionMethodName.equals(UseDedicatedAssertJAssertionsASTVisitor.IS_TRUE)
+				&& newAssertionArguments.size() == 1) {
+			String identifier = invocationAsAssertThatArgument.getName()
+				.getIdentifier();
+			if (identifier.equals(Constants.OBJECT_EQUALS)) {
+				Expression equalsArgument = newAssertionArguments.get(0);
+				if (equalsArgument.getNodeType() == ASTNode.NULL_LITERAL) {
+					return Optional.empty();
+				}
+			}
+		}
 
 		ITypeBinding newAssertThatArgumentTypeBinding = newAssertThatArgument.resolveTypeBinding();
 		if (newAssertThatArgumentTypeBinding == null) {

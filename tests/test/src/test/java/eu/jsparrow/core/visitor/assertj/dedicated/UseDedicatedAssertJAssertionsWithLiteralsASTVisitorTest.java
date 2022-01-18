@@ -65,22 +65,13 @@ public class UseDedicatedAssertJAssertionsWithLiteralsASTVisitorTest extends Use
 		assertNoChange(original);
 	}
 
-	/**
-	 * This test is expected to fail as soon as transformation is prohibited for
-	 * assertions like {@code assertThat(o.equals(null)).isTrue();}
-	 * 
-	 */
 	@Test
-	void visit_ObjectEqualsNullIsTrue_shouldNotTransform_butTransforms() throws Exception {
+	void visit_ObjectEqualsNullIsTrue_shouldNotTransform() throws Exception {
 		String original = "" +
 				"			Object o = null;\n"
 				+ "			assertThat(o.equals(null)).isTrue();";
 
-		String expected = "" +
-				"			Object o = null;\n"
-				+ "			assertThat(o).isNull();";
-
-		assertChange(original, expected);
+		assertNoChange(original);
 	}
 
 	@Test
