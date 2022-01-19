@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
 import eu.jsparrow.core.visitor.junit.dedicated.NotOperandUnwrapper;
@@ -112,9 +111,9 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			.getAssertThatInvocation();
 
 		if (unwrappedAssertThatArgument.getNodeType() == ASTNode.INSTANCEOF_EXPRESSION) {
-			findAssertThatInstanceOfAnalysisData(assertThatInvocation,
-					(InstanceofExpression) unwrappedAssertThatArgument, assertionName)
-						.ifPresent(data -> transform(node, data));
+			BooleanAssertionWithInstanceofAnalyzer.findAssertThatInstanceOfAnalysisData(
+					assertThatWithAssertionData, (InstanceofExpression) unwrappedAssertThatArgument)
+				.ifPresent(data -> transform(node, data));
 			return true;
 		}
 
@@ -268,36 +267,23 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 
 	}
 
-	private Optional<AssertThatInstanceOfAnalysisData> findAssertThatInstanceOfAnalysisData(
-			MethodInvocation assertThat, InstanceofExpression instanceofExpression, String assertionName) {
-		if (assertionName.equals(IS_FALSE)) {
-			return Optional.empty();
-		}
-		Expression leftOperand = instanceofExpression.getLeftOperand();
-		Type rightOperand = instanceofExpression.getRightOperand();
-		if (rightOperand.getNodeType() != ASTNode.SIMPLE_TYPE) {
-			return Optional.empty();
-		}
-		SimpleType simpleType = (SimpleType) rightOperand;
-
-		ITypeBinding leftOperandType = leftOperand.resolveTypeBinding();
-		if (leftOperandType == null) {
-			return Optional.empty();
-		}
-		if (!SupportedAssertJAssertThatArgumentTypes.isSupportedAssertThatArgumentType(leftOperandType)) {
-			return Optional.empty();
-		}
-
-		MethodInvocationData assertThatData = MethodInvocationData.createNewAssertThatData(assertThat, leftOperand);
-		return Optional.of(new AssertThatInstanceOfAnalysisData(assertThatData, simpleType));
-	}
-
-	private void transform(MethodInvocation node, AssertThatInstanceOfAnalysisData data) {
+	@SuppressWarnings("unchecked")
+	private void transform(MethodInvocation node, BooleanAssertionWithInstanceofAnalysisResult data) {
 		SimpleType instanceofRightOperand = data.getInstanceofRightOperand();
 		MethodInvocation newAssertion = createIsInstanceofInvocation(instanceofRightOperand);
-		MethodInvocationData newAssertThatData = data.getNewAssertThatData();
-		MethodInvocation newAssertThat = newAssertThatData.createNewMethodInvocation(astRewrite);
-		newAssertion.setExpression(newAssertThat);
+
+		AssertJAssertThatData newAssertThatData = data.getNewAssertThatData();
+		AST ast = astRewrite.getAST();
+		MethodInvocation newAssertThatInvocation = ast.newMethodInvocation();
+		newAssertThatInvocation.setName(ast.newSimpleName(newAssertThatData.getAssertThatMethodName()));
+		Expression newAssertThatArgument = (Expression) astRewrite
+			.createCopyTarget(newAssertThatData.getAssertThatArgument());
+		newAssertThatInvocation.arguments()
+			.add(newAssertThatArgument);
+		newAssertThatData.getAssertThatInvocationExpression()
+			.map(expression -> (Expression) astRewrite.createCopyTarget(expression))
+			.ifPresent(newAssertThatInvocation::setExpression);
+		newAssertion.setExpression(newAssertThatInvocation);
 		astRewrite.replace(node.getParent(), newAssertion, null);
 		onRewrite();
 	}

@@ -13,16 +13,16 @@ import org.eclipse.jdt.core.dom.SimpleType;
  * 
  * @since 4.7.0
  */
-public class AssertThatInstanceOfAnalysisData {
-	private final MethodInvocationData newAssertThatData;
+public class BooleanAssertionWithInstanceofAnalysisResult {
+	private final AssertJAssertThatData newAssertThatData;
 	private final SimpleType instanceofRightOperand;
 
-	public AssertThatInstanceOfAnalysisData(MethodInvocationData newAssertThatData, SimpleType instanceofRightOperand) {
+	public BooleanAssertionWithInstanceofAnalysisResult(AssertJAssertThatData newAssertThatData, SimpleType instanceofRightOperand) {
 		this.newAssertThatData = newAssertThatData;
 		this.instanceofRightOperand = instanceofRightOperand;
 	}
 
-	public MethodInvocationData getNewAssertThatData() {
+	public AssertJAssertThatData getNewAssertThatData() {
 		return newAssertThatData;
 	}
 
