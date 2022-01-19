@@ -38,7 +38,7 @@ public class AssertJAssertThatWithAssertionData {
 			.orElse(null);
 
 		if (assertThatData != null) {
-			String assumedAssertionName = assumedAssertThatInvocation.getName()
+			String assumedAssertionName = assumedAssertion.getName()
 				.getIdentifier();
 			if (assumedAssertionArguments.size() == 1) {
 				return Optional.of(new AssertJAssertThatWithAssertionData(assertThatData, assumedAssertionName,

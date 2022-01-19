@@ -64,4 +64,8 @@ class AssertJAssertThatData {
 	Optional<Expression> getAssertThatInvocationExpression() {
 		return Optional.ofNullable(assertThatInvocation.getExpression());
 	}
+
+	MethodInvocation getAssertThatInvocation() {
+		return assertThatInvocation;
+	}	
 }
