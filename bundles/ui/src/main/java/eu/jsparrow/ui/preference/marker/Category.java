@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import eu.jsparrow.rules.common.RuleDescription;
-import eu.jsparrow.rules.common.Tag;
 
 /**
  * Represents a category in the jSparrow Markers Preference Page tree-view.
@@ -82,9 +81,8 @@ public class Category {
 		sortedIds.addAll(categoryMarkerDescriptions.keySet());
 		for (String id : sortedIds) {
 			RuleDescription description = categoryMarkerDescriptions.get(id);
-			List<Tag> tags = description.getTags();
 			boolean selected = allActiveMarkers.contains(id);
-			TreeEntry treeEntry = new TreeEntry(id, selected, description, tags, treeWrapper, item);
+			TreeEntry treeEntry = new TreeEntry(id, selected, description, treeWrapper, item);
 			entries.add(treeEntry);
 		}
 		this.categoryEntries = Collections.unmodifiableList(entries);

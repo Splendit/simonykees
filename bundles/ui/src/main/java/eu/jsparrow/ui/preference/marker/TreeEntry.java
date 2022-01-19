@@ -1,25 +1,17 @@
 package eu.jsparrow.ui.preference.marker;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TreeEditor;
-import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import eu.jsparrow.rules.common.RuleDescription;
-import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 
 /**
@@ -32,17 +24,15 @@ public class TreeEntry {
 
 	private String markerId;
 	private RuleDescription description;
-	private List<Tag> tags;
 	private TreeWrapper treeWrapper;
 	private Button button;
 	private TreeItem categoryItem;
 	private boolean selected;
 
-	public TreeEntry(String markerId, boolean selected, RuleDescription description, List<Tag> tags,
+	public TreeEntry(String markerId, boolean selected, RuleDescription description,
 			TreeWrapper treeWrapper, TreeItem categoryItem) {
 		this.markerId = markerId;
 		this.description = description;
-		this.tags = tags;
 		this.treeWrapper = treeWrapper;
 		this.categoryItem = categoryItem;
 		this.selected = selected;
@@ -74,7 +64,7 @@ public class TreeEntry {
 
 		Composite composite = new Composite(tree, 0);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		GridLayout gridLayout = new GridLayout(4, false);
+		GridLayout gridLayout = new GridLayout(2, false);
 		gridLayout.marginHeight = 0;
 		composite.setLayout(gridLayout);
 
@@ -82,40 +72,7 @@ public class TreeEntry {
 		button.setText(description.getName());
 		button.setLayoutData(new GridData(SWT.LEFT, SWT.DEFAULT, false, false));
 
-		// -- hover UI START
-		// the shaft is missing its arrow
-		Label shaft = new Label(composite, 0);
-		GridData shaftGD = new GridData(SWT.FILL, SWT.DEFAULT, false, false);
-		shaftGD.widthHint = 10;
-		shaft.setLayoutData(shaftGD);
-		shaft.setVisible(false);
-
-		shaft.addPaintListener((PaintEvent e) -> {
-			e.gc.drawLine(0, 8, 10, 8);
-			e.gc.dispose();
-		});
-
-		String allTags = tags.stream()
-			.map(Tag::toString)
-			.map(String::toLowerCase)
-			.sorted(Comparator.reverseOrder())
-			.collect(Collectors.joining(", ")); //$NON-NLS-1$
-		Label label = new Label(composite, SWT.NONE);
-		label.setLayoutData(new GridData(SWT.RIGHT, SWT.DEFAULT, false, false));
-		label.setText(allTags);
-		label.setVisible(false);
-
 		editor.setEditor(composite, item);
-
-		button.addListener(SWT.MouseExit, (Event event) -> {
-			label.setVisible(false);
-			shaft.setVisible(false);
-		});
-
-		button.addListener(SWT.MouseEnter, (Event event) -> {
-			label.setVisible(true);
-			shaft.setVisible(true);
-		});
 		// -- hover UI END
 
 		button.setSelection(selected);

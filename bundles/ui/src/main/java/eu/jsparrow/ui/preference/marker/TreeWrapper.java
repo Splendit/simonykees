@@ -42,7 +42,7 @@ public class TreeWrapper {
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		List<String> tags = Arrays.stream(Tag.getAllTags())
-			.filter(StringUtils::isAlpha)
+			.filter(StringUtils::isAlphaSpace)
 			.filter(tag -> !"free".equalsIgnoreCase(tag)) //$NON-NLS-1$
 			.sorted()
 			.collect(Collectors.toList());
