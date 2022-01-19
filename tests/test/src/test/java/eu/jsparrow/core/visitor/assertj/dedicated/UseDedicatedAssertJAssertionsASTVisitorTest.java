@@ -994,8 +994,6 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		assertChange(original, expected);
 	}
 
-
-
 	public static Stream<Arguments> assertionsOnInfixOperationsWithInt() throws Exception {
 		return Stream.of(
 				Arguments.of("x == 10", IS_TRUE, "isEqualTo(10)"),
@@ -1075,6 +1073,66 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				"		Object o = null;\n"
 				+ "		assertThat(o instanceof Object).isFalse();");
 
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_AssertionNotInExpressionStatement_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "		Object object = new Object();\n"
+				+ "		Object isFalseReturnValue = assertThat(object == null).isFalse();";
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_AssertThatObjectIsNull_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "		Object o = null;\n"
+				+ "		assertThat(o).isNull();";
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_AssertThatWithTwoArguments_shouldNotTransform() throws Exception {
+		fixture.addImport(java.util.Arrays.class.getName());
+		String original = "" +
+				"		Iterable<String> iterable = Arrays.asList(\"str-1\", \"str-2\");\n"
+				+ "		assertThat(iterable, StringAssert.class).first();";
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_AssertThatNotFromAssertJ_shouldNotTransform() throws Exception {
+		fixture.addImport("org.assertj.core.api.AbstractBooleanAssert");
+		fixture.addImport("org.assertj.core.api.Assertions");
+		String original = "" +
+				"		class LocalClass {\n"
+				+ "			static AbstractBooleanAssert<?> assertThat(boolean b) {\n"
+				+ "				return org.assertj.core.api.Assertions.assertThat(b);\n"
+				+ "			}\n"
+				+ "\n"
+				+ "		}\n"
+				+ "		Object o = null;\n"
+				+ "		LocalClass.assertThat(o == null).isTrue();";
+		assertNoChange(original);
+
+	}
+
+	@Test
+	void visit_InstanceOfParameterizedType_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "		List<String> stringList = new ArrayList<>();\n"
+				+ "		assertThat(stringList instanceof List<String>).isTrue();";
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_InstanceOfWithNotSupportedLeftOperand_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "		class LocalClass {\n"
+				+ "		}\n"
+				+ "		LocalClass localCass = new LocalClass();\n"
+				+ "		assertThat(localCass instanceof LocalClass).isTrue();";
 		assertNoChange(original);
 	}
 }
