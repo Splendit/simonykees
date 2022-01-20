@@ -1,8 +1,12 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
@@ -19,40 +23,44 @@ public class UseDedicatedAssertJAssertionsWithLiteralsASTVisitorTest extends Use
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-			"assertThat(o1 != null).isTrue()",
-			"assertThat(null != o1).isTrue()",
-			"assertThat(o1 == null).isFalse()",
-			"assertThat(null == o1).isFalse()"
+			"assertThat(o != null).isTrue()",
+			"assertThat(null != o).isTrue()",
+			"assertThat(o == null).isFalse()",
+			"assertThat(null == o).isFalse()",
+			"assertThat(o).isNotEqualTo(null)",
+			"assertThat(o).isNotSameAs(null)"
 	})
 	void visit_ObjectIsNotNull_shouldTransform(String originalInvocation) throws Exception {
 		String original = String.format("" +
-				"		Object o1 = new Object();\n" +
+				"		Object o = new Object();\n" +
 				"		%s;",
 				originalInvocation);
 
 		String expected = "" +
-				"		Object o1 = new Object();\n"
-				+ "		assertThat(o1).isNotNull();";
+				"		Object o = new Object();\n"
+				+ "		assertThat(o).isNotNull();";
 
 		assertChange(original, expected);
 	}
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-			"assertThat(o1 == null).isTrue()",
-			"assertThat(null == o1).isTrue()",
-			"assertThat(o1 != null).isFalse()",
-			"assertThat(null != o1).isFalse()"
+			"assertThat(o == null).isTrue()",
+			"assertThat(null == o).isTrue()",
+			"assertThat(o != null).isFalse()",
+			"assertThat(null != o).isFalse()",
+			"assertThat(o).isEqualTo(null)",
+			"assertThat(o).isSameAs(null)"
 	})
 	void visit_ObjectIsNull_shouldTransform(String originalInvocation) throws Exception {
 		String original = String.format("" +
-				"		Object o1 = null;\n" +
+				"		Object o = null;\n" +
 				"		%s;",
 				originalInvocation);
 
 		String expected = "" +
-				"		Object o1 = null;\n"
-				+ "		assertThat(o1).isNull();";
+				"		Object o = null;\n"
+				+ "		assertThat(o).isNull();";
 
 		assertChange(original, expected);
 	}
@@ -85,5 +93,103 @@ public class UseDedicatedAssertJAssertionsWithLiteralsASTVisitorTest extends Use
 				+ "		assertThat(o).isNotNull();";
 
 		assertChange(original, expected);
+	}
+
+	public static Stream<Arguments> assertionsWithInfixAndZeroLiteral() throws Exception {
+		return Stream.of(
+				Arguments.of("int", "0"),
+				Arguments.of("long", "0L"),
+				Arguments.of("float", "0.0F"),
+				Arguments.of("double", "0.0"));
+	}
+
+	/**
+	 * This test is expected to fail as soon as isZero() is supported for infix
+	 * operations with zero literals
+	 */
+	@ParameterizedTest
+	@MethodSource("assertionsWithInfixAndZeroLiteral")
+	void visit_InfixWithZeroIsTrue_shouldTransform(String numericType, String zeroLiteral)
+			throws Exception {
+
+		String original = String.format("" +
+				"		%s x = %s;\n"
+				+ "		assertThat(x == %s).isTrue();",
+				numericType, zeroLiteral, zeroLiteral);
+
+		String expected = String.format("" +
+				"		%s x = %s;\n"
+				+ "		assertThat(x).isEqualTo(%s);",
+				numericType, zeroLiteral, zeroLiteral);
+
+		assertChange(original, expected);
+	}
+
+	/**
+	 * This test is expected to fail as soon as isNotZero() is supported for
+	 * infix operations with zero literals
+	 */
+	@ParameterizedTest
+	@MethodSource("assertionsWithInfixAndZeroLiteral")
+	void visit_InfixWithZeroIsFalse_shouldTransform(String numericType, String zeroLiteral)
+			throws Exception {
+
+		String original = String.format("" +
+				"		%s x = %s;\n"
+				+ "		assertThat(x == %s).isFalse();",
+				numericType, zeroLiteral, zeroLiteral);
+
+		String expected = String.format("" +
+				"		%s x = %s;\n"
+				+ "		assertThat(x).isNotEqualTo(%s);",
+				numericType, zeroLiteral, zeroLiteral);
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_DoubleWrapperIsEqualToZero_shouldTransform() throws Exception {
+		String original = "" +
+				"		Double x = Double.valueOf(0.0);\n"
+				+ "		assertThat(x).isEqualTo(0);";
+
+		String expected = "" +
+				"		Double x = Double.valueOf(0.0);\n"
+				+ "		assertThat(x).isZero();";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_DoubleWrapperIsNotEqualToZero_shouldTransform() throws Exception {
+		String original = "" +
+				"		Double x = Double.valueOf(1.0);\n"
+				+ "		assertThat(x).isNotEqualTo(0);";
+
+		String expected = "" +
+				"		Double x = Double.valueOf(1.0);\n"
+				+ "		assertThat(x).isNotZero();";
+
+		assertChange(original, expected);
+
+	}
+
+	/**
+	 * This test is expected to fail as soon as isNotZero() is supported for
+	 * equals invocations with zero literals
+	 */
+
+	@Test
+	void visit_DoubleWrapperEqualsZero_shouldTransform() throws Exception {
+		String original = "" +
+				"		Double x = Double.valueOf(0.0);\n"
+				+ "		assertThat(x.equals(0.0)).isTrue();";
+
+		String expected = "" +
+				"		Double x = Double.valueOf(0.0);\n"
+				+ "		assertThat(x).isEqualTo(0.0);";
+
+		assertChange(original, expected);
+
 	}
 }

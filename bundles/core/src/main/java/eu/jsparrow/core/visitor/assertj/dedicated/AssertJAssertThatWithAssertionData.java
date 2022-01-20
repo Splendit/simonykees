@@ -56,6 +56,12 @@ public class AssertJAssertThatWithAssertionData {
 		}
 		return Optional.empty();
 	}
+	
+	static AssertJAssertThatWithAssertionData createNewDataWithoutAssertionArgument(
+			AssertJAssertThatWithAssertionData data, String newAssertionName) {
+		Expression sameAssertThatArgument = data.getAssertThatData().getAssertThatArgument();
+		return createNewDataWithoutAssertionArgument(data, sameAssertThatArgument, newAssertionName);
+	}
 
 	static AssertJAssertThatWithAssertionData createNewDataWithoutAssertionArgument(
 			AssertJAssertThatWithAssertionData data, Expression newAssertThatArgument, String newAssertionName) {
