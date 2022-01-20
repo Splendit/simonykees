@@ -67,8 +67,9 @@ class BooleanAssertionOnInvocationAnalyzer {
 		this.mapToNegatedAssertJAssertions = Collections.unmodifiableMap(tmpMap);
 	}
 
-	Optional<MethodInvocationData> findDedicatedAssertJAssertionData(
+	Optional<AssertJAssertThatWithAssertionData> findDedicatedAssertJAssertionData(
 			AssertJAssertThatWithAssertionData assertThatWithAssertionData,
+			Expression newAssertThatArgument,
 			MethodInvocation invocationAsAssertThatArgument,
 			ITypeBinding newAssertThatArgumentTypeBinding) {
 
@@ -110,9 +111,16 @@ class BooleanAssertionOnInvocationAnalyzer {
 			newAssertionName = mapToAssertJAssertions.get(methodName);
 		}
 		if (newAssertionName != null) {
-			MethodInvocationData dedicatedAssertionData = new MethodInvocationData(newAssertionName);
-			dedicatedAssertionData.setArguments(newAssertionArguments);
-			return Optional.of(dedicatedAssertionData);
+			if (newAssertionArguments.isEmpty()) {
+
+				return Optional.of(AssertJAssertThatWithAssertionData.createNewDataWithoutAssertionArgument(
+						assertThatWithAssertionData, newAssertThatArgument, newAssertionName));
+			}
+
+			return Optional
+				.of(AssertJAssertThatWithAssertionData.createNewDataWithAssertionArgument(assertThatWithAssertionData,
+						newAssertThatArgument, newAssertionName, newAssertionArguments.get(0)));
+
 		}
 		return Optional.empty();
 

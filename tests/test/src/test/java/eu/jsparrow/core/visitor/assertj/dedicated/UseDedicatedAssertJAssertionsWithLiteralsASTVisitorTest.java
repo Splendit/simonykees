@@ -103,10 +103,6 @@ public class UseDedicatedAssertJAssertionsWithLiteralsASTVisitorTest extends Use
 				Arguments.of("double", "0.0"));
 	}
 
-	/**
-	 * This test is expected to fail as soon as isZero() is supported for infix
-	 * operations with zero literals
-	 */
 	@ParameterizedTest
 	@MethodSource("assertionsWithInfixAndZeroLiteral")
 	void visit_InfixWithZeroIsTrue_shouldTransform(String numericType, String zeroLiteral)
@@ -119,16 +115,12 @@ public class UseDedicatedAssertJAssertionsWithLiteralsASTVisitorTest extends Use
 
 		String expected = String.format("" +
 				"		%s x = %s;\n"
-				+ "		assertThat(x).isEqualTo(%s);",
+				+ "		assertThat(x).isZero();",
 				numericType, zeroLiteral, zeroLiteral);
 
 		assertChange(original, expected);
 	}
 
-	/**
-	 * This test is expected to fail as soon as isNotZero() is supported for
-	 * infix operations with zero literals
-	 */
 	@ParameterizedTest
 	@MethodSource("assertionsWithInfixAndZeroLiteral")
 	void visit_InfixWithZeroIsFalse_shouldTransform(String numericType, String zeroLiteral)
@@ -141,8 +133,8 @@ public class UseDedicatedAssertJAssertionsWithLiteralsASTVisitorTest extends Use
 
 		String expected = String.format("" +
 				"		%s x = %s;\n"
-				+ "		assertThat(x).isNotEqualTo(%s);",
-				numericType, zeroLiteral, zeroLiteral);
+				+ "		assertThat(x).isNotZero();",
+				numericType, zeroLiteral);
 
 		assertChange(original, expected);
 	}
@@ -174,11 +166,6 @@ public class UseDedicatedAssertJAssertionsWithLiteralsASTVisitorTest extends Use
 
 	}
 
-	/**
-	 * This test is expected to fail as soon as isNotZero() is supported for
-	 * equals invocations with zero literals
-	 */
-
 	@Test
 	void visit_DoubleWrapperEqualsZero_shouldTransform() throws Exception {
 		String original = "" +
@@ -187,7 +174,7 @@ public class UseDedicatedAssertJAssertionsWithLiteralsASTVisitorTest extends Use
 
 		String expected = "" +
 				"		Double x = Double.valueOf(0.0);\n"
-				+ "		assertThat(x).isEqualTo(0.0);";
+				+ "		assertThat(x).isZero();";
 
 		assertChange(original, expected);
 
