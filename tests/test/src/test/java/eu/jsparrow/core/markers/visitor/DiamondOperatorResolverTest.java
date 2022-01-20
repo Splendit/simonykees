@@ -62,6 +62,7 @@ class DiamondOperatorResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(162, event.getOffset()),
 				() -> assertEquals(23, event.getLength()),
+				() -> assertEquals(8, event.getLineNumber()),
 				() -> assertEquals(1, event.getWeightValue()));
 	}
 

@@ -71,6 +71,7 @@ class AvoidConcatenationInLoggingStatementsResolverTest extends UsesSimpleJDTUni
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(278, event.getOffset()),
 				() -> assertEquals(62, event.getLength()),
+				() -> assertEquals(11, event.getLineNumber()),
 				() -> assertEquals(5, event.getWeightValue()));
 	}
 	

@@ -1,4 +1,4 @@
-package eu.jsparrow.rules.java16;
+package eu.jsparrow.rules.java16.patternmatching;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.InstanceofExpression;

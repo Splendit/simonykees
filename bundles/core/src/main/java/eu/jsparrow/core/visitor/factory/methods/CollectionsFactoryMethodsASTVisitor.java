@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.CollectionsFactoryMethodsEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -38,7 +39,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 3.6.0
  *
  */
-public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVisitor {
+public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVisitor implements CollectionsFactoryMethodsEvent {
 
 	private static final String UNMODIFIABLE_LIST = "unmodifiableList"; //$NON-NLS-1$
 	private static final String UNMODIFIABLE_SET = "unmodifiableSet"; //$NON-NLS-1$
@@ -96,7 +97,7 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 
 		Expression factoryMethod = createCollectionFactoryMethod(expressionTypeName, factoryMethodName, newArguments);
 		replaceWithFactoryMethod(methodInvocation, analyser, factoryMethod);
-
+		addMarkerEvent(methodInvocation, expressionTypeName, factoryMethodName, elements);
 		onRewrite();
 		return true;
 	}

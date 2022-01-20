@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.osgi.framework.Version;
 
+import eu.jsparrow.core.markers.common.TryWithResourceEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.util.JdtCoreVersionBindingUtil;
@@ -48,7 +49,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @since 0.9
  */
 
-public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
+public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor implements TryWithResourceEvent {
 
 	private static final String AUTO_CLOSEABLE_FULLY_QUALIFIED_NAME = java.lang.AutoCloseable.class.getName();
 	private static final String CLOSEABLE_FULLY_QUALIFIED_NAME = java.io.Closeable.class.getName();
@@ -167,6 +168,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 				astRewrite.remove(invocation, null);
 			});
 		}
+		addMarkerEvent(node);
 		onRewrite();
 	}
 

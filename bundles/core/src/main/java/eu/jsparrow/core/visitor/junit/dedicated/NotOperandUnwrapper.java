@@ -20,11 +20,11 @@ import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
  * 
  * @since 4.0.0
  */
-class NotOperandUnwrapper {
+public class NotOperandUnwrapper {
 	private boolean negationByNot;
 	private Expression unwrappedOperand;
 
-	NotOperandUnwrapper(Expression booleanExpression) {
+	public NotOperandUnwrapper(Expression booleanExpression) {
 		unwrappedOperand = unwrapExpression(booleanExpression);
 	}
 
@@ -43,11 +43,11 @@ class NotOperandUnwrapper {
 		return expression;
 	}
 
-	boolean isNegationByNot() {
+	public boolean isNegationByNot() {
 		return negationByNot;
 	}
 
-	Expression getUnwrappedOperand() {
+	public Expression getUnwrappedOperand() {
 		return unwrappedOperand;
 	}
 }

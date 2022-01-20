@@ -1,4 +1,4 @@
-package eu.jsparrow.rules.java16;
+package eu.jsparrow.rules.java16.patternmatching;
 
 import java.time.Duration;
 import java.util.Arrays;

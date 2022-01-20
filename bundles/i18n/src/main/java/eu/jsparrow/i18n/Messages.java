@@ -161,6 +161,7 @@ public class Messages extends NLS {
 	public static String MakeFiledsAndVariablesFinalRule_name;
 	public static String MapGetOrDefaultRule_description;
 	public static String MapGetOrDefaultRule_name;
+	public static String MarkerFactory_locationPrefix;
 	public static String MavenProjectImporter_collectingProjectInfo;
 	public static String MavenProjectImporter_createingJavaProjects;
 	public static String MavenProjectImporter_creatingSingleJavaProject;
@@ -500,6 +501,8 @@ public class Messages extends NLS {
 	public static String SerialVersionUidRule_name;
 	public static String ShiftAssertJDescriptionBeforeAssertionRule_description;
 	public static String ShiftAssertJDescriptionBeforeAssertionRule_name;
+	public static String SimonykeesMarkersPreferencePage_disableAll;
+	public static String SimonykeesMarkersPreferencePage_enableAll;
 	public static String SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText;
 	public static String SimonykeesMessageDialog_bugreport_email;
 	public static String SimonykeesMessageDialog_default_error_message;
@@ -621,6 +624,8 @@ public class Messages extends NLS {
 	public static String UseComparatorMethodsRule_name;
 	public static String UseDedicatedAssertionsRule_description;
 	public static String UseDedicatedAssertionsRule_name;
+	public static String UseDedicatedAssertJAssertionsRule_description;
+	public static String UseDedicatedAssertJAssertionsRule_name;
 	public static String UseFilesBufferedReaderRule_description;
 	public static String UseFilesBufferedReaderRule_name;
 	public static String UseFilesBufferedWriterRule_description;
