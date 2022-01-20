@@ -1007,7 +1007,19 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				Arguments.of("x < 9", IS_FALSE, "isGreaterThanOrEqualTo(9)"),
 				Arguments.of("x <= 9", IS_FALSE, "isGreaterThan(9)"),
 				Arguments.of("x > 11", IS_FALSE, "isLessThanOrEqualTo(11)"),
-				Arguments.of("x >= 11", IS_FALSE, "isLessThan(11)"));
+				Arguments.of("x >= 11", IS_FALSE, "isLessThan(11)"),
+				Arguments.of("!(x == 10)", IS_FALSE, "isEqualTo(10)"),
+				Arguments.of("!(x != 11)", IS_FALSE, "isNotEqualTo(11)"),
+				Arguments.of("!(x < 11)", IS_FALSE, "isLessThan(11)"),
+				Arguments.of("!(x <= 11)", IS_FALSE, "isLessThanOrEqualTo(11)"),
+				Arguments.of("!(x > 9)", IS_FALSE, "isGreaterThan(9)"),
+				Arguments.of("!(x >= 9)", IS_FALSE, "isGreaterThanOrEqualTo(9)"),
+				Arguments.of("!(x != 10)", IS_TRUE, "isEqualTo(10)"),
+				Arguments.of("!(x == 11)", IS_TRUE, "isNotEqualTo(11)"),
+				Arguments.of("!(x < 9)", IS_TRUE, "isGreaterThanOrEqualTo(9)"),
+				Arguments.of("!(x <= 9)", IS_TRUE, "isGreaterThan(9)"),
+				Arguments.of("!(x > 11)", IS_TRUE, "isLessThanOrEqualTo(11)"),
+				Arguments.of("!(x >= 11)", IS_TRUE, "isLessThan(11)"));
 	}
 
 	@ParameterizedTest
@@ -1068,10 +1080,32 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 	}
 
 	@Test
-	void visit_instanceofIsFalse_shouldTransform() throws Exception {
+	void visit_negatedInstanceofIsFalse_shouldTransform() throws Exception {
+		String original = String.format("" +
+				"		Object o = new Object();\n"
+				+ "		assertThat(!(o instanceof Object)).isFalse();");
+
+		String expected = String.format("" +
+				"		Object o = new Object();\n"
+				+ "		assertThat(o).isInstanceOf(Object.class);");
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_instanceofIsFalse_shouldNotTransform() throws Exception {
 		String original = String.format("" +
 				"		Object o = null;\n"
 				+ "		assertThat(o instanceof Object).isFalse();");
+
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_negatedInstanceofIsTrue_shouldNotTransform() throws Exception {
+		String original = String.format("" +
+				"		Object o = null;\n"
+				+ "		assertThat(!(o instanceof Object)).isTrue();");
 
 		assertNoChange(original);
 	}
@@ -1119,7 +1153,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 	}
 
 	@Test
-	void visit_InstanceOfParameterizedType_shouldNotTransform() throws Exception {
+	void visit_InstanceofParameterizedType_shouldNotTransform() throws Exception {
 		String original = ""
 				+ "		List<String> stringList = new ArrayList<>();\n"
 				+ "		assertThat(stringList instanceof List<String>).isTrue();";
@@ -1127,7 +1161,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 	}
 
 	@Test
-	void visit_InstanceOfWithNotSupportedLeftOperand_shouldNotTransform() throws Exception {
+	void visit_InstanceofWithNotSupportedLeftOperand_shouldNotTransform() throws Exception {
 		String original = ""
 				+ "		class LocalClass {\n"
 				+ "		}\n"

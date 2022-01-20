@@ -11,17 +11,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * This helper class analyzes method invocations which are used as argument of
  * an AssertJ assertThat invocation in connection with the boolean assertion
- * {@code isTrue} or {@code isFalse} and provides the informations for a corresponding
- * dedicated assertion.
+ * {@code isTrue} or {@code isFalse} and provides the informations for a
+ * corresponding dedicated assertion.
  * 
  * For example:
  * <p>
@@ -64,8 +67,36 @@ class BooleanAssertionOnInvocationAnalyzer {
 		this.mapToNegatedAssertJAssertions = Collections.unmodifiableMap(tmpMap);
 	}
 
-	Optional<MethodInvocationData> findDedicatedAssertJAssertionData(IMethodBinding methodBinding,
-			List<Expression> newAssertionArguments, String booleanAssertion) {
+	Optional<MethodInvocationData> findDedicatedAssertJAssertionData(
+			AssertJAssertThatWithAssertionData assertThatWithAssertionData,
+			MethodInvocation invocationAsAssertThatArgument,
+			ITypeBinding newAssertThatArgumentTypeBinding) {
+
+		List<Expression> newAssertionArguments = ASTNodeUtil.convertToTypedList(
+				invocationAsAssertThatArgument.arguments(),
+				Expression.class);
+
+		if (newAssertionArguments.size() > 1) {
+			return Optional.empty();
+		}
+
+		String booleanAssertion = assertThatWithAssertionData.getAssertionName();
+		if (booleanAssertion.equals(UseDedicatedAssertJAssertionsASTVisitor.IS_TRUE)
+				&& newAssertionArguments.size() == 1) {
+			String identifier = invocationAsAssertThatArgument.getName()
+				.getIdentifier();
+			if (identifier.equals(Constants.OBJECT_EQUALS)) {
+				Expression equalsArgument = newAssertionArguments.get(0);
+				if (equalsArgument.getNodeType() == ASTNode.NULL_LITERAL) {
+					return Optional.empty();
+				}
+			}
+		}
+
+		IMethodBinding methodBinding = invocationAsAssertThatArgument.resolveMethodBinding();
+		if (methodBinding == null) {
+			return Optional.empty();
+		}
 
 		if (!analyzeMethodBinding(methodBinding)) {
 			return Optional.empty();

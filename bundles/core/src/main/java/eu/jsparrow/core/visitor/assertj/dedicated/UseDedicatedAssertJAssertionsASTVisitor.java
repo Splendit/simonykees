@@ -17,7 +17,6 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
@@ -27,7 +26,6 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
 import eu.jsparrow.core.visitor.junit.dedicated.NotOperandUnwrapper;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -92,10 +90,48 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			return true;
 		}
 
+		AssertJAssertThatWithAssertionData normalizedDataForBooleanAssertion = findNormalizedDataForBooleanAssertion(
+				assertThatWithAssertionData).orElse(null);
+		if (normalizedDataForBooleanAssertion != null) {
+
+			Expression unwrappedAssertThatArgument = normalizedDataForBooleanAssertion.getAssertThatData()
+				.getAssertThatArgument();
+			MethodInvocation assertThatInvocation = normalizedDataForBooleanAssertion.getAssertThatData()
+				.getAssertThatInvocation();
+
+			if (unwrappedAssertThatArgument.getNodeType() == ASTNode.INSTANCEOF_EXPRESSION) {
+				BooleanAssertionWithInstanceofAnalyzer.findAssertThatInstanceOfAnalysisData(
+						normalizedDataForBooleanAssertion, (InstanceofExpression) unwrappedAssertThatArgument)
+					.ifPresent(data -> transform(node, data));
+				return true;
+			}
+
+			Optional<NewAssertJAssertThatWithAssertionData> optionalNewData;
+			if (unwrappedAssertThatArgument.getNodeType() == ASTNode.METHOD_INVOCATION) {
+				optionalNewData = analyzeBooleanAssertionWithMethodInvocation(normalizedDataForBooleanAssertion,
+						(MethodInvocation) unwrappedAssertThatArgument);
+
+			} else if (unwrappedAssertThatArgument.getNodeType() == ASTNode.INFIX_EXPRESSION) {
+				optionalNewData = analyzeBooleanAssertionWithInfixOperation(assertThatInvocation,
+						(InfixExpression) unwrappedAssertThatArgument,
+						normalizedDataForBooleanAssertion.getAssertionName());
+			} else {
+				return true;
+			}
+			optionalNewData.map(this::handleNullLiteralArgument)
+				.ifPresent(data -> transform(node, data));
+
+		}
+
+		return true;
+	}
+
+	private Optional<AssertJAssertThatWithAssertionData> findNormalizedDataForBooleanAssertion(
+			AssertJAssertThatWithAssertionData assertThatWithAssertionData) {
 		String assertionName = assertThatWithAssertionData.getAssertionName();
 
 		if (!assertionName.equals(IS_TRUE) && !assertionName.equals(IS_FALSE)) { // $NON-NLS-1$
-			return true;
+			return Optional.empty();
 		}
 
 		Expression assertThatArgument = assertThatWithAssertionData.getAssertThatData()
@@ -107,31 +143,11 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			assertionName = IS_TRUE;
 		}
 		Expression unwrappedAssertThatArgument = notOperandUnwrapper.getUnwrappedOperand();
-		MethodInvocation assertThatInvocation = assertThatWithAssertionData.getAssertThatData()
-			.getAssertThatInvocation();
+		AssertJAssertThatWithAssertionData normalizedData = AssertJAssertThatWithAssertionData
+			.createNewDataWithoutAssertionArgument(
+					assertThatWithAssertionData, unwrappedAssertThatArgument, assertionName);
 
-		if (unwrappedAssertThatArgument.getNodeType() == ASTNode.INSTANCEOF_EXPRESSION) {
-			BooleanAssertionWithInstanceofAnalyzer.findAssertThatInstanceOfAnalysisData(
-					assertThatWithAssertionData, (InstanceofExpression) unwrappedAssertThatArgument)
-				.ifPresent(data -> transform(node, data));
-			return true;
-		}
-
-		Optional<NewAssertJAssertThatWithAssertionData> optionalNewData;
-		if (unwrappedAssertThatArgument.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			optionalNewData = analyzeBooleanAssertionWithMethodInvocation(assertThatInvocation,
-					(MethodInvocation) unwrappedAssertThatArgument, assertionName);
-
-		} else if (unwrappedAssertThatArgument.getNodeType() == ASTNode.INFIX_EXPRESSION) {
-			optionalNewData = analyzeBooleanAssertionWithInfixOperation(assertThatInvocation,
-					(InfixExpression) unwrappedAssertThatArgument, assertionName);
-		} else {
-			return true;
-		}
-		optionalNewData.map(this::handleNullLiteralArgument)
-			.ifPresent(data -> transform(node, data));
-
-		return true;
+		return Optional.of(normalizedData);
 	}
 
 	private NewAssertJAssertThatWithAssertionData handleNullLiteralArgument(
@@ -154,39 +170,16 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 	}
 
 	private static Optional<NewAssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithMethodInvocation(
-			MethodInvocation assertThat,
-			MethodInvocation invocationAsAssertThatArgument, String assertionMethodName) {
+			AssertJAssertThatWithAssertionData assertThatWithAssertionData,
+			MethodInvocation invocationAsAssertThatArgument) {
 
 		Expression newAssertThatArgument = invocationAsAssertThatArgument.getExpression();
 		if (newAssertThatArgument == null) {
 			return Optional.empty();
 		}
-		List<Expression> newAssertionArguments = ASTNodeUtil.convertToTypedList(
-				invocationAsAssertThatArgument.arguments(),
-				Expression.class);
-
-		if (newAssertionArguments.size() > 1) {
-			return Optional.empty();
-		}
-		if (assertionMethodName.equals(UseDedicatedAssertJAssertionsASTVisitor.IS_TRUE)
-				&& newAssertionArguments.size() == 1) {
-			String identifier = invocationAsAssertThatArgument.getName()
-				.getIdentifier();
-			if (identifier.equals(Constants.OBJECT_EQUALS)) {
-				Expression equalsArgument = newAssertionArguments.get(0);
-				if (equalsArgument.getNodeType() == ASTNode.NULL_LITERAL) {
-					return Optional.empty();
-				}
-			}
-		}
 
 		ITypeBinding newAssertThatArgumentTypeBinding = newAssertThatArgument.resolveTypeBinding();
 		if (newAssertThatArgumentTypeBinding == null) {
-			return Optional.empty();
-		}
-
-		IMethodBinding assertThatArgumentMethodBinding = invocationAsAssertThatArgument.resolveMethodBinding();
-		if (assertThatArgumentMethodBinding == null) {
 			return Optional.empty();
 		}
 
@@ -195,10 +188,12 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			.orElse(null);
 		if (analyzer != null) {
 			MethodInvocationData newAssertionData = analyzer
-				.findDedicatedAssertJAssertionData(assertThatArgumentMethodBinding, newAssertionArguments,
-						assertionMethodName)
+				.findDedicatedAssertJAssertionData(assertThatWithAssertionData, invocationAsAssertThatArgument,
+						newAssertThatArgumentTypeBinding)
 				.orElse(null);
 			if (newAssertionData != null) {
+				MethodInvocation assertThat = assertThatWithAssertionData.getAssertThatData()
+					.getAssertThatInvocation();
 				MethodInvocationData assertThatData = MethodInvocationData.createNewAssertThatData(assertThat,
 						newAssertThatArgument);
 				NewAssertJAssertThatWithAssertionData dedicatedAssertionData = new NewAssertJAssertThatWithAssertionData(
