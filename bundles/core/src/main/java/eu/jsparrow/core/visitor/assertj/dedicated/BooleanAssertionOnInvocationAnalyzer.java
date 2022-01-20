@@ -82,7 +82,7 @@ class BooleanAssertionOnInvocationAnalyzer {
 		}
 
 		String booleanAssertion = assertThatWithAssertionData.getAssertionName();
-		if (booleanAssertion.equals(UseDedicatedAssertJAssertionsASTVisitor.IS_TRUE)
+		if (booleanAssertion.equals(Constants.IS_TRUE)
 				&& newAssertionArguments.size() == 1) {
 			String identifier = invocationAsAssertThatArgument.getName()
 				.getIdentifier();
@@ -105,7 +105,7 @@ class BooleanAssertionOnInvocationAnalyzer {
 
 		String methodName = methodBinding.getName();
 		String newAssertionName;
-		if (booleanAssertion.equals(UseDedicatedAssertJAssertionsASTVisitor.IS_FALSE)) {
+		if (booleanAssertion.equals(Constants.IS_FALSE)) {
 			newAssertionName = mapToNegatedAssertJAssertions.get(methodName);
 		} else {
 			newAssertionName = mapToAssertJAssertions.get(methodName);

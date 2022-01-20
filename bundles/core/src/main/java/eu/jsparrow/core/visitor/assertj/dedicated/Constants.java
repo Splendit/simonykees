@@ -10,6 +10,12 @@ package eu.jsparrow.core.visitor.assertj.dedicated;
 public class Constants {
 
 	/*
+	 * boolean assertions
+	 */
+	public static final String IS_FALSE = "isFalse"; //$NON-NLS-1$
+	public static final String IS_TRUE = "isTrue"; //$NON-NLS-1$
+
+	/*
 	 * assertion methods for all supported types
 	 */
 	public static final String IS_NOT_NULL = "isNotNull";
@@ -104,7 +110,7 @@ public class Constants {
 	public static final String JAVA_UTIL = "java.util";
 	public static final String IS_EQUAL_TO = "isEqualTo";
 	public static final String IS_NOT_EQUAL_TO = "isNotEqualTo";
-	
+
 	/*
 	 * Numeric
 	 */
