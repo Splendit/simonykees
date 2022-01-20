@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.UseArraysStreamEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -75,7 +76,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * 
  *        Implemented in SIM-1747
  */
-public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
+public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor implements UseArraysStreamEvent {
 
 	private static final String STREAM_QUALIFIED_NAME = java.util.stream.Stream.class.getName();
 	private static final String ARRAYS_QUALIFIED_NAME = java.util.Arrays.class.getName();
@@ -137,10 +138,12 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 			}
 			Expression experssion = methodInvocation.getExpression();
 			replaceWithArraysStream(parent, arguments, argumentTypeBinding, experssion);
+			addMarkerEvent(parent, arguments, argumentTypeBinding.getName(), experssion);
 			onRewrite();
 			return true;
 		} else {
 			replaceWithStreamOf(parent, arguments);
+			addMarkerEvent(parent, arguments);
 			onRewrite();
 			return true;
 		}

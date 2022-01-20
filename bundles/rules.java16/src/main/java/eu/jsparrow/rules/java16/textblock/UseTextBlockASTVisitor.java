@@ -42,7 +42,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 4.3.0
  * 
  */
-public class UseTextBlockASTVisitor extends AbstractASTRewriteASTVisitor {
+public class UseTextBlockASTVisitor extends AbstractASTRewriteASTVisitor implements UseTextBlockEvent {
 
 	static final String TEXT_BLOCK_TRIPLE_QUOTES = "\"\"\""; //$NON-NLS-1$
 	static final String ESCAPE_TEXTBLOCK_TRIPLE_QUOTES = "\"\"\\\""; //$NON-NLS-1$
@@ -51,15 +51,16 @@ public class UseTextBlockASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String SYSTEM_LS = System.lineSeparator();
 
 	@Override
-	public boolean visit(InfixExpression infixExpresssion) {
+	public boolean visit(InfixExpression infixExpression) {
 
-		findValidEscapedValueForTextBlock(infixExpresssion).ifPresent(escapedValue -> {
+		findValidEscapedValueForTextBlock(infixExpression).ifPresent(escapedValue -> {
 			TextBlock textBlock = astRewrite.getAST()
 				.newTextBlock();
 			
 			textBlock.setEscapedValue(escapedValue);
 
-			astRewrite.replace(infixExpresssion, textBlock, null);
+			astRewrite.replace(infixExpression, textBlock, null);
+			addMarkerEvent(infixExpression, textBlock);
 			onRewrite();
 		});
 		return false;

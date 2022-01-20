@@ -11,13 +11,14 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
-import eu.jsparrow.core.markers.RefactoringEventImpl;
-import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.visitor.impl.StringLiteralEqualityCheckASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
+import eu.jsparrow.rules.common.markers.Resolver;
 
 /**
  * A visitor for resolving one issue of type
@@ -29,25 +30,18 @@ import eu.jsparrow.rules.common.RuleDescription;
 public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityCheckASTVisitor implements Resolver {
 
 	public static final String ID = "StringLiteralEqualityCheckResolver"; //$NON-NLS-1$
-	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;
 
 	public StringLiteralEqualityCheckResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
-				.findByRuleId(StringLiteralEqualityCheckRule.RULE_ID);
+			.findByRuleId(StringLiteralEqualityCheckRule.RULE_ID);
 	}
 
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -62,9 +56,23 @@ public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityChe
 	public void addMarkerEvent(StringLiteral stringLiteral, Expression expression) {
 		MethodInvocation newNode = createRepresentingNode(expression, stringLiteral);
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.StringLiteralEqualityCheckResolver_name,
-				Messages.StringLiteralEqualityCheckResolver_message,
-				javaElement, 0, stringLiteral, newNode, credit);
+		int offset = stringLiteral.getStartPosition();
+		int length = stringLiteral.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(stringLiteral.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.StringLiteralEqualityCheckResolver_name)
+			.withMessage(Messages.StringLiteralEqualityCheckResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(0)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 

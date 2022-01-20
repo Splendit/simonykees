@@ -13,9 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.markers.CoreRefactoringEventManager;
+import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.ui.markers.HighlightColorPicker;
 import eu.jsparrow.ui.markers.MarkerEngine;
 import eu.jsparrow.ui.markers.MarkerFactory;
+import eu.jsparrow.ui.markers.MarkerIdProvider;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -74,7 +76,8 @@ public class Startup implements IStartup {
 						currentLineColor);
 				MarkerFactory markerFactory = new MarkerFactory(jSparrowMarkerHighlightColor);
 				CoreRefactoringEventManager eventManager = new CoreRefactoringEventManager();
-				MarkerEngine engine = new MarkerEngine(markerFactory, eventManager);
+				MarkerIdProvider markerIdProvider = new MarkerIdProvider(ResolverVisitorsFactory.getAllMarkerDescriptions());
+				MarkerEngine engine = new MarkerEngine(markerFactory, eventManager, markerIdProvider);
 				engine.track(workbench);
 				JavaCore.addElementChangedListener(engine);
 			});

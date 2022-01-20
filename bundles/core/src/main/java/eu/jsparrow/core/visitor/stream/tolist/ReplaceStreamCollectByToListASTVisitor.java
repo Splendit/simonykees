@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import eu.jsparrow.core.markers.common.ReplaceStreamCollectByToListEvent;
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -51,7 +52,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @since 4.4.0
  * 
  */
-public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteASTVisitor {
+public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteASTVisitor implements ReplaceStreamCollectByToListEvent {
 
 	private static final String TO_LIST = "toList"; //$NON-NLS-1$
 	private static final String TO_UNMODIFIABLE_LIST = "toUnmodifiableList"; //$NON-NLS-1$
@@ -98,6 +99,7 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 			streamToListInvocation.setExpression(streamToListInvocationExpression);
 		}
 		astRewrite.replace(supportedStreamCollectInvocation, streamToListInvocation, null);
+		addMarkerEvent(supportedStreamCollectInvocation);
 		onRewrite();
 	}
 

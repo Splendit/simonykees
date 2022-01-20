@@ -11,13 +11,14 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
-import eu.jsparrow.core.markers.RefactoringEventImpl;
-import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.RemoveNullCheckBeforeInstanceofRule;
 import eu.jsparrow.core.visitor.impl.RemoveNullCheckBeforeInstanceofASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
+import eu.jsparrow.rules.common.markers.Resolver;
 
 /**
  * A visitor for resolving one issue of type
@@ -29,7 +30,6 @@ import eu.jsparrow.rules.common.RuleDescription;
 public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBeforeInstanceofASTVisitor implements Resolver {
 
 	public static final String ID = "RemoveNullCheckBeforeInstanceofResolver"; //$NON-NLS-1$
-	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;
 
@@ -42,12 +42,6 @@ public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBefo
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -66,9 +60,23 @@ public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBefo
 	public void addMarkerEvent(Expression leftOperand, InfixExpression infixExpression, Expression expression) {
 		ASTNode newNode = createRepresentingNode(infixExpression, expression);
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.RemoveNullCheckBeforeInstanceofResolver_name,
-				Messages.RemoveNullCheckBeforeInstanceofResolver_message,
-				javaElement, 0, leftOperand, newNode, credit);
+		int offset = leftOperand.getStartPosition();
+		int length = leftOperand.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(leftOperand.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.RemoveNullCheckBeforeInstanceofResolver_name)
+			.withMessage(Messages.RemoveNullCheckBeforeInstanceofResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(0)
+			.withOffset(offset)
+			.withCodePreview(newNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 	}
 

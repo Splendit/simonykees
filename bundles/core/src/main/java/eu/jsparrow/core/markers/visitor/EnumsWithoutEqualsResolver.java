@@ -10,14 +10,15 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-import eu.jsparrow.core.markers.RefactoringEventImpl;
-import eu.jsparrow.core.markers.common.Resolver;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.EnumsWithoutEqualsRule;
 import eu.jsparrow.core.visitor.impl.EnumsWithoutEqualsASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
+import eu.jsparrow.rules.common.markers.Resolver;
 
 /**
  * A visitor for resolving one issue of type
@@ -30,7 +31,6 @@ public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor imp
 
 	public static final String ID = "EnumsWithoutEqualsResolver"; //$NON-NLS-1$
 
-	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;
 
@@ -42,12 +42,6 @@ public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor imp
 	@Override
 	public RuleDescription getDescription() {
 		return this.description;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		this.javaElement = compilationUnit.getJavaElement();
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -66,12 +60,23 @@ public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor imp
 		int highlightLength = representingNode.toString()
 			.length();
 		int credit = description.getCredit();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.EnumsWithoutEqualsResolver_name,
-				Messages.EnumsWithoutEqualsResolver_message,
-				javaElement,
-				highlightLength, replacedNode,
-				representingNode,
-				credit);
+		int offset = replacedNode.getStartPosition();
+		int length = replacedNode.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(replacedNode.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(Messages.EnumsWithoutEqualsResolver_name)
+			.withMessage(Messages.EnumsWithoutEqualsResolver_message)
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(representingNode.toString())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
 		addMarkerEvent(event);
 
 	}
