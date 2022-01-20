@@ -62,6 +62,7 @@ class PutIfAbsentResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(229, event.getOffset()),
 				() -> assertEquals(13, event.getLength()),
+				() -> assertEquals(10, event.getLineNumber()),
 				() -> assertEquals(2, event.getWeightValue()));
 	}
 	

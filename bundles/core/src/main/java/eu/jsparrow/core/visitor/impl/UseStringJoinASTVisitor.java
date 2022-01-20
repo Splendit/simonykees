@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
+import eu.jsparrow.core.markers.common.UseStringJoinEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -37,7 +38,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 3.15.0
  *
  */
-public class UseStringJoinASTVisitor extends AbstractASTRewriteASTVisitor {
+public class UseStringJoinASTVisitor extends AbstractASTRewriteASTVisitor implements UseStringJoinEvent {
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
@@ -173,6 +174,7 @@ public class UseStringJoinASTVisitor extends AbstractASTRewriteASTVisitor {
 		stringJoinArguments.add(delimiter);
 		stringJoinArguments.add(ietrable);
 		astRewrite.replace(parentMethod, stringJoin, null);
+		addMarkerEvent(parentMethod, collection, joinArguments);
 		onRewrite();
 	}
 

@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.UnionType;
 
+import eu.jsparrow.core.markers.common.MultiCatchEvent;
 import eu.jsparrow.core.matcher.BijectiveSimpleNameASTMatcher;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -34,7 +35,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @since 0.9
  *
  */
-public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
+public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor implements MultiCatchEvent {
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -95,6 +96,7 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 				astRewrite.replace(referenceExceptionType, uniontype, null);
 				if (!onRewriteTriggered) {
 					onRewrite();
+					addMarkerEvent(node);
 					helper.saveCommentsInBlock(reference, relatedComments);
 					relatedComments.clear();
 					onRewriteTriggered = true;

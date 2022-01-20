@@ -19,8 +19,9 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class UseArraysStreamRule extends RefactoringRuleImpl<UseArraysStreamASTVisitor> {
 
+	public static final String RULE_ID = "UseArraysStream"; //$NON-NLS-1$
 	public UseArraysStreamRule() {
-		this.id = "UseArraysStream"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.visitorClass = UseArraysStreamASTVisitor.class;
 		this.ruleDescription = new RuleDescription(Messages.UseArraysStreamRule_name,
 				Messages.UseArraysStreamRule_description, Duration.ofMinutes(5),

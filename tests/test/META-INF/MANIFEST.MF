@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.test
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Test Fragment
 Bundle-SymbolicName: eu.jsparrow.test
-Bundle-Version: 4.6.0.qualifier
+Bundle-Version: 4.7.0.qualifier
 Fragment-Host: eu.jsparrow.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: eu.jsparrow.logging,
@@ -16,6 +16,7 @@ Require-Bundle: eu.jsparrow.logging,
  org.hamcrest;bundle-version="[1.1.0,2.0.0)",
  eu.jsparrow.rules.imports,
  eu.jsparrow.rules.java10,
+ eu.jsparrow.rules.java16,
  org.junit,
  org.junit.platform.commons,
  org.junit.platform.engine,

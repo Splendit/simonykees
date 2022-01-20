@@ -258,6 +258,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 		astRewrite.replace(loopNode, newStatement, null);
 		getCommentRewriter().saveRelatedComments(loopNode);
+		addMarkerEvent(loopNode);
 		onRewrite();
 	}
 
@@ -302,6 +303,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 			}
 
 			blockRewrite.insertAfter(expressionStatement, loopNode, null);
+			addMarkerEvent(loopNode);
 			onRewrite();
 		}
 	}
@@ -723,6 +725,10 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 					Collections.singletonList(Number.class.getName()));
 		}
 		return false;
+	}
+	
+	protected void updateJavaVersion(String javaVersion) {
+		this.javaVersion = javaVersion;
 	}
 
 	/**

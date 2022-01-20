@@ -66,4 +66,9 @@ public interface RefactoringMarkerEvent {
 	 */
 	int getWeightValue();
 
+	/**
+	 * 
+	 * @return the location in the compilation unit where the event occurred. 
+	 */
+	int getLineNumber();
 }

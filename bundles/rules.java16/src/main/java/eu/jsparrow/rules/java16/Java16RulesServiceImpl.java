@@ -10,6 +10,7 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionRule;
 import eu.jsparrow.rules.java16.textblock.UseTextBlockRule;
 import eu.jsparrow.rules.java16.javarecords.UseJavaRecordsRule;
+import eu.jsparrow.rules.java16.patternmatching.UsePatternMatchingForInstanceofRule;
 
 /**
  * Implementor of {@link RuleService}.
