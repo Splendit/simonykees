@@ -85,7 +85,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 	public boolean visit(MethodInvocation node) {
 
 		AssertJAssertThatWithAssertionData assertThatWithAssertionData = AssertJAssertThatWithAssertionData
-			.findDataForAssumedAssertThat(node)
+			.findDataForAssumedAssertion(node)
 			.orElse(null);
 
 		if (assertThatWithAssertionData == null) {
@@ -284,7 +284,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			.map(expression -> (Expression) astRewrite.createCopyTarget(expression))
 			.ifPresent(newAssertThatInvocation::setExpression);
 		newAssertion.setExpression(newAssertThatInvocation);
-		astRewrite.replace(node.getParent(), newAssertion, null);
+		astRewrite.replace(node, newAssertion, null);
 		onRewrite();
 	}
 
@@ -294,7 +294,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		MethodInvocationData newAssertThatData = data.getNewAssertThatData();
 		MethodInvocation newAssertThat = newAssertThatData.createNewMethodInvocation(astRewrite);
 		newAssertion.setExpression(newAssertThat);
-		astRewrite.replace(node.getParent(), newAssertion, null);
+		astRewrite.replace(node, newAssertion, null);
 		onRewrite();
 	}
 

@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.assertj.dedicated;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -14,15 +15,21 @@ public class AssertJAssertThatWithAssertionData {
 	private final String assertionName;
 	private Expression assertionArgument;
 
-	static Optional<AssertJAssertThatWithAssertionData> findDataForAssumedAssertThat(
-			MethodInvocation assumedAssertThatInvocation) {
+	static Optional<AssertJAssertThatWithAssertionData> findDataForAssumedAssertion(MethodInvocation assumedAssertion) {
 
-		if (assumedAssertThatInvocation.getLocationInParent() != MethodInvocation.EXPRESSION_PROPERTY) {
+		if (assumedAssertion.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return Optional.empty();
 		}
 
-		MethodInvocation assumedAssertion = (MethodInvocation) assumedAssertThatInvocation.getParent();
-		if (assumedAssertion.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+		Expression assertionInvocationExpression = assumedAssertion.getExpression();
+		if (assertionInvocationExpression == null
+				|| assertionInvocationExpression.getNodeType() != ASTNode.METHOD_INVOCATION) {
+			return Optional.empty();
+		}
+
+		MethodInvocation assumedAssertThatInvocation = (MethodInvocation) assertionInvocationExpression;
+
+		if (assumedAssertThatInvocation.getLocationInParent() != MethodInvocation.EXPRESSION_PROPERTY) {
 			return Optional.empty();
 		}
 
