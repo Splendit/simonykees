@@ -51,16 +51,14 @@ public class AssertionWithLiteralArgumentAnalyzer {
 		if (assertionArgument == null) {
 			return Optional.empty();
 		}
-
+		Expression sameAssertThatArguemnt = assertThatWithAssertionData.getAssertThatArgument();
 		if (assertionArgument.getNodeType() == ASTNode.NULL_LITERAL) {
 			String assertionName = assertThatWithAssertionData.getAssertionName();
 			if (assertionName.equals(Constants.IS_SAME_AS) || assertionName.equals(Constants.IS_EQUAL_TO)) {
-				return Optional.of(AssertJAssertThatWithAssertionData
-					.createNewDataWithoutAssertionArgument(assertThatWithAssertionData, Constants.IS_NULL));
+				return Optional.of(new AssertJAssertThatWithAssertionData(sameAssertThatArguemnt, Constants.IS_NULL));
 			}
 			if (assertionName.equals(Constants.IS_NOT_SAME_AS) || assertionName.equals(Constants.IS_NOT_EQUAL_TO)) {
-				return Optional.of(AssertJAssertThatWithAssertionData
-					.createNewDataWithoutAssertionArgument(assertThatWithAssertionData, Constants.IS_NOT_NULL));
+				return Optional.of(new AssertJAssertThatWithAssertionData(sameAssertThatArguemnt, Constants.IS_NOT_NULL));
 			}
 		}
 		return Optional.empty();
@@ -68,6 +66,7 @@ public class AssertionWithLiteralArgumentAnalyzer {
 
 	static Optional<AssertJAssertThatWithAssertionData> findDataForAssertionsWithZeroLiteral(
 			AssertJAssertThatWithAssertionData assertThatWithAssertionData) {
+		Expression sameAssertThatArgument = assertThatWithAssertionData.getAssertThatArgument();
 		Expression assertionArgument = assertThatWithAssertionData.getAssertionArgument()
 			.orElse(null);
 		if (assertionArgument == null) {
@@ -79,12 +78,12 @@ public class AssertionWithLiteralArgumentAnalyzer {
 			if (ZERO_LITERAL_TOKENS.contains(numericTooken)) {
 				String methodName = assertThatWithAssertionData.getAssertionName();
 				if (methodName.equals(Constants.IS_EQUAL_TO)) {
-					return Optional.of(AssertJAssertThatWithAssertionData
-						.createNewDataWithoutAssertionArgument(assertThatWithAssertionData, Constants.IS_ZERO));
+					return Optional
+						.of(new AssertJAssertThatWithAssertionData(sameAssertThatArgument, Constants.IS_ZERO));
 				}
 				if (methodName.equals(Constants.IS_NOT_EQUAL_TO)) {
-					return Optional.of(AssertJAssertThatWithAssertionData
-						.createNewDataWithoutAssertionArgument(assertThatWithAssertionData, Constants.IS_NOT_ZERO));
+					return Optional
+						.of(new AssertJAssertThatWithAssertionData(sameAssertThatArgument, Constants.IS_NOT_ZERO));
 				}
 			}
 		}

@@ -13,7 +13,6 @@ import eu.jsparrow.core.visitor.assertj.SupportedAssertJAssertions;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 public class AssertJAssertThatWithAssertionData {
-	private final MethodInvocation assertThatInvocation;
 	private final Expression assertThatArgument;
 	private final String assertionName;
 	private Expression assertionArgument;
@@ -66,58 +65,28 @@ public class AssertJAssertThatWithAssertionData {
 			.getIdentifier();
 		if (assumedAssertionArguments.size() == 1) {
 			return Optional
-				.of(new AssertJAssertThatWithAssertionData(assumedAssertThatInvocation, assumedAssertThatArgument,
+				.of(new AssertJAssertThatWithAssertionData(assumedAssertThatArgument,
 						assumedAssertionName, assumedAssertionArguments.get(0)));
 		}
 		return Optional
-			.of(new AssertJAssertThatWithAssertionData(assumedAssertThatInvocation, assumedAssertThatArgument,
+			.of(new AssertJAssertThatWithAssertionData(assumedAssertThatArgument,
 					assumedAssertionName));
 
 	}
 
-	static AssertJAssertThatWithAssertionData createNewDataWithoutAssertionArgument(
-			AssertJAssertThatWithAssertionData data, String newAssertionName) {
-		Expression sameAssertThatArgument = data.getAssertThatArgument();
-		return createNewDataWithoutAssertionArgument(data, sameAssertThatArgument, newAssertionName);
-	}
-
-	static AssertJAssertThatWithAssertionData createNewDataWithoutAssertionArgument(
-			AssertJAssertThatWithAssertionData data, Expression newAssertThatArgument, String newAssertionName) {
-		return new AssertJAssertThatWithAssertionData(data.getAssertThatInvocation(), newAssertThatArgument,
-				newAssertionName);
-	}
-
-	static AssertJAssertThatWithAssertionData createNewDataWithAssertionArgument(
-			AssertJAssertThatWithAssertionData data, Expression newAssertThatArgument, String newAssertionName,
-			Expression assertionArgument) {
-		return new AssertJAssertThatWithAssertionData(data.getAssertThatInvocation(), newAssertThatArgument,
-				newAssertionName, assertionArgument);
-	}
-
-	private AssertJAssertThatWithAssertionData(MethodInvocation assertThatInvocation, Expression newAssertThatArgument,
-			String assertionName) {
-		this.assertThatInvocation = assertThatInvocation;
+	AssertJAssertThatWithAssertionData(Expression newAssertThatArgument, String assertionName) {
 		this.assertThatArgument = newAssertThatArgument;
 		this.assertionName = assertionName;
 	}
 
-	private AssertJAssertThatWithAssertionData(MethodInvocation assertThatInvocation, Expression newAssertThatArgument,
-			String assertionName,
+	AssertJAssertThatWithAssertionData(Expression newAssertThatArgument, String assertionName,
 			Expression assertionArgument) {
-		this(assertThatInvocation, newAssertThatArgument, assertionName);
+		this(newAssertThatArgument, assertionName);
 		this.assertionArgument = assertionArgument;
-	}
-
-	MethodInvocation getAssertThatInvocation() {
-		return assertThatInvocation;
 	}
 
 	Expression getAssertThatArgument() {
 		return assertThatArgument;
-	}
-
-	Optional<Expression> getAssertThatExpression() {
-		return Optional.ofNullable(assertThatInvocation.getExpression());
 	}
 
 	String getAssertionName() {

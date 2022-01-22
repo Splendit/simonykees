@@ -1,13 +1,19 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
+import eu.jsparrow.core.visitor.assertj.SupportedAssertJAssertions;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -35,6 +41,28 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 	@Override
 	public boolean visit(MethodInvocation node) {
 
+		if (node.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			return true;
+		}
+		List<Expression> assumedAssertionArguments = ASTNodeUtil.convertToTypedList(node.arguments(),
+				Expression.class);
+		if (assumedAssertionArguments.size() > 1) {
+			return true;
+		}
+
+		MethodInvocation assertThatInvocation = findAssertThatAsAssertionExpression(node).orElse(null);
+		if (assertThatInvocation == null || assertThatInvocation.arguments()
+			.size() != 1) {
+			return true;
+		}
+		List<Expression> assertThatArguments = ASTNodeUtil
+			.convertToTypedList(assertThatInvocation.arguments(), Expression.class);
+
+		if (assertThatArguments.size() != 1) {
+			return true;
+		}
+		Expression assertThatArgument = assertThatArguments.get(0);
+
 		final AssertJAssertThatWithAssertionData initialData = AssertJAssertThatWithAssertionData
 			.findDataForAssumedAssertion(node)
 			.orElse(null);
@@ -53,7 +81,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 				.findResultForInstanceofAsAssertThatArgument()
 				.orElse(null);
 			if (resultForAssertionWithInstanceof != null) {
-				transform(node, resultForAssertionWithInstanceof);
+				transform(assertThatInvocation, node, resultForAssertionWithInstanceof);
 				return true;
 			}
 			dataExpectedToChange = allBooleanAssertinsAnalyzer.findResultForOtherAssertThatArgument()
@@ -68,24 +96,50 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			.orElse(dataExpectedToChange);
 
 		if (dataExpectedToChange != initialData) {
-			transform(node, dataExpectedToChange);
+			transform(assertThatInvocation, node, dataExpectedToChange);
 		}
 
 		return true;
 	}
 
-	private void transform(MethodInvocation node, BooleanAssertionWithInstanceofAnalysisResult data) {
+	Optional<MethodInvocation> findAssertThatAsAssertionExpression(MethodInvocation assumedAssertion) {
+
+		Expression assertionInvocationExpression = assumedAssertion.getExpression();
+		if (assertionInvocationExpression == null
+				|| assertionInvocationExpression.getNodeType() != ASTNode.METHOD_INVOCATION) {
+			return Optional.empty();
+		}
+
+		MethodInvocation assumedAssertThatInvocation = (MethodInvocation) assertionInvocationExpression;
+		String assumedAssertThatMethodName = assumedAssertThatInvocation.getName()
+			.getIdentifier();
+
+		if (!SupportedAssertJAssertions.isSupportedAssertJAsserThatMethodName(assumedAssertThatMethodName)) {
+			return Optional.empty();
+		}
+		IMethodBinding assertThatMethodBinding = assumedAssertThatInvocation.resolveMethodBinding();
+
+		if (assertThatMethodBinding == null ||
+				!SupportedAssertJAssertions.isSupportedAssertionsType(assertThatMethodBinding.getDeclaringClass())) {
+			return Optional.empty();
+		}
+		return Optional.of(assumedAssertThatInvocation);
+	}
+
+	private void transform(MethodInvocation assertThatInvocation, MethodInvocation node,
+			BooleanAssertionWithInstanceofAnalysisResult data) {
 		SimpleType instanceofRightOperand = data.getInstanceofRightOperand();
 		MethodInvocation newAssertion = createIsInstanceofInvocation(instanceofRightOperand);
 		MethodInvocation newAssertThatInvocation = createNewAssertThatInvocation(
-				data.getAssertThatInvocation(), data.getInstanceOfLeftOperand());
+				assertThatInvocation, data.getInstanceOfLeftOperand());
 		newAssertion.setExpression(newAssertThatInvocation);
 		astRewrite.replace(node, newAssertion, null);
 		onRewrite();
 	}
 
 	@SuppressWarnings("unchecked")
-	private void transform(MethodInvocation node, AssertJAssertThatWithAssertionData data) {
+	private void transform(MethodInvocation assertThatInvocation, MethodInvocation node,
+			AssertJAssertThatWithAssertionData data) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation newAssertion = ast.newMethodInvocation();
 		String newAssertionName = data.getAssertionName();
@@ -96,7 +150,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 				.add(assertionArgument));
 
 		MethodInvocation newAssertThatInvocation = createNewAssertThatInvocation(
-				data.getAssertThatInvocation(), data.getAssertThatArgument());
+				assertThatInvocation, data.getAssertThatArgument());
 		newAssertion.setExpression(newAssertThatInvocation);
 		astRewrite.replace(node, newAssertion, null);
 		onRewrite();

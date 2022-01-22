@@ -16,19 +16,13 @@ import org.eclipse.jdt.core.dom.SimpleType;
  * @since 4.7.0
  */
 public class BooleanAssertionWithInstanceofAnalysisResult {
-	private final MethodInvocation assertThatInvocation;
 	private final Expression instanceOfLeftOperand;
 	private final SimpleType instanceofRightOperand;
 
-	public BooleanAssertionWithInstanceofAnalysisResult(AssertJAssertThatWithAssertionData data,
-			Expression instanceOfLeftOperand, SimpleType instanceofRightOperand) {
-		this.assertThatInvocation = data.getAssertThatInvocation();
+	public BooleanAssertionWithInstanceofAnalysisResult(Expression instanceOfLeftOperand,
+			SimpleType instanceofRightOperand) {
 		this.instanceOfLeftOperand = instanceOfLeftOperand;
 		this.instanceofRightOperand = instanceofRightOperand;
-	}
-
-	MethodInvocation getAssertThatInvocation() {
-		return assertThatInvocation;
 	}
 
 	public Expression getInstanceOfLeftOperand() {

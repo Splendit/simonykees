@@ -73,9 +73,8 @@ public class AllBooleanAssertionsAnalyzer {
 			assertionName = Constants.IS_TRUE;
 		}
 		Expression unwrappedAssertThatArgument = notOperandUnwrapper.getUnwrappedOperand();
-		AssertJAssertThatWithAssertionData normalizedData = AssertJAssertThatWithAssertionData
-			.createNewDataWithoutAssertionArgument(
-					assertThatWithAssertionData, unwrappedAssertThatArgument, assertionName);
+		AssertJAssertThatWithAssertionData normalizedData = new AssertJAssertThatWithAssertionData(
+				unwrappedAssertThatArgument, assertionName);
 
 		return Optional.of(new AllBooleanAssertionsAnalyzer(normalizedData));
 	}
@@ -109,7 +108,7 @@ public class AllBooleanAssertionsAnalyzer {
 		if (!SupportedAssertJAssertThatArgumentTypes.isSupportedAssertThatArgumentType(leftOperandType)) {
 			return Optional.empty();
 		}
-		return Optional.of(new BooleanAssertionWithInstanceofAnalysisResult(normalizedDataForBooleanAssertion, leftOperand, simpleType));
+		return Optional.of(new BooleanAssertionWithInstanceofAnalysisResult(leftOperand, simpleType));
 	}
 
 	Optional<AssertJAssertThatWithAssertionData> findResultForOtherAssertThatArgument() {
@@ -172,8 +171,8 @@ public class AllBooleanAssertionsAnalyzer {
 		if (newAssertionMethodName == null) {
 			return Optional.empty();
 		}
-		return Optional.of(AssertJAssertThatWithAssertionData.createNewDataWithAssertionArgument(
-				normalizedDataForBooleanAssertion, leftOperand, newAssertionMethodName, rightOperand));
+		return Optional.of(new AssertJAssertThatWithAssertionData(leftOperand,
+				newAssertionMethodName, rightOperand));
 	}
 
 	private Optional<AssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithMethodInvocation(

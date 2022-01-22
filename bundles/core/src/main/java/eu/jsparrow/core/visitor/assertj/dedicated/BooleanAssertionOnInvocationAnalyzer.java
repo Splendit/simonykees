@@ -113,13 +113,12 @@ class BooleanAssertionOnInvocationAnalyzer {
 		if (newAssertionName != null) {
 			if (newAssertionArguments.isEmpty()) {
 
-				return Optional.of(AssertJAssertThatWithAssertionData.createNewDataWithoutAssertionArgument(
-						assertThatWithAssertionData, newAssertThatArgument, newAssertionName));
+				return Optional.of(new AssertJAssertThatWithAssertionData(newAssertThatArgument, newAssertionName));
 			}
 
 			return Optional
-				.of(AssertJAssertThatWithAssertionData.createNewDataWithAssertionArgument(assertThatWithAssertionData,
-						newAssertThatArgument, newAssertionName, newAssertionArguments.get(0)));
+				.of(new AssertJAssertThatWithAssertionData(newAssertThatArgument, newAssertionName,
+						newAssertionArguments.get(0)));
 
 		}
 		return Optional.empty();
