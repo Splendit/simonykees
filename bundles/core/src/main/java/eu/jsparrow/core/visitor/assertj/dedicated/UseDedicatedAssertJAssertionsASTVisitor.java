@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
+import java.util.Optional;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -75,8 +77,8 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 	private void transform(MethodInvocation node, BooleanAssertionWithInstanceofAnalysisResult data) {
 		SimpleType instanceofRightOperand = data.getInstanceofRightOperand();
 		MethodInvocation newAssertion = createIsInstanceofInvocation(instanceofRightOperand);
-		AssertJAssertThatData newAssertThatData = data.getNewAssertThatData();
-		MethodInvocation newAssertThatInvocation = createNewAssertThatInvocation(newAssertThatData);
+		MethodInvocation newAssertThatInvocation = createNewAssertThatInvocation(
+				data.getAssertThatInvocation(), data.getInstanceOfLeftOperand());
 		newAssertion.setExpression(newAssertThatInvocation);
 		astRewrite.replace(node, newAssertion, null);
 		onRewrite();
@@ -92,23 +94,26 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			.map(assertionArgument -> (Expression) astRewrite.createCopyTarget(assertionArgument))
 			.ifPresent(assertionArgument -> newAssertion.arguments()
 				.add(assertionArgument));
-		AssertJAssertThatData newAssertThatData = data.getAssertThatData();
-		MethodInvocation newAssertThatInvocation = createNewAssertThatInvocation(newAssertThatData);
+
+		MethodInvocation newAssertThatInvocation = createNewAssertThatInvocation(
+				data.getAssertThatInvocation(), data.getAssertThatArgument());
 		newAssertion.setExpression(newAssertThatInvocation);
 		astRewrite.replace(node, newAssertion, null);
 		onRewrite();
 	}
 
 	@SuppressWarnings("unchecked")
-	private MethodInvocation createNewAssertThatInvocation(AssertJAssertThatData newAssertThatData) {
+	private MethodInvocation createNewAssertThatInvocation(MethodInvocation assertThatInvocation,
+			Expression assertThatArgument) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation newAssertThatInvocation = ast.newMethodInvocation();
-		newAssertThatInvocation.setName(ast.newSimpleName(newAssertThatData.getAssertThatMethodName()));
-		Expression newAssertThatArgument = (Expression) astRewrite
-			.createCopyTarget(newAssertThatData.getAssertThatArgument());
+		String assertThatMethodName = assertThatInvocation.getName()
+			.getIdentifier();
+		newAssertThatInvocation.setName(ast.newSimpleName(assertThatMethodName));
+		Expression newAssertThatArgument = (Expression) astRewrite.createCopyTarget(assertThatArgument);
 		newAssertThatInvocation.arguments()
 			.add(newAssertThatArgument);
-		newAssertThatData.getAssertThatInvocationExpression()
+		Optional.ofNullable(assertThatInvocation.getExpression())
 			.map(expression -> (Expression) astRewrite.createCopyTarget(expression))
 			.ifPresent(newAssertThatInvocation::setExpression);
 		return newAssertThatInvocation;

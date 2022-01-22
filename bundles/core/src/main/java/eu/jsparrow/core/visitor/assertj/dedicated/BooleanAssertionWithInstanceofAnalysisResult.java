@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleType;
 
 /**
@@ -14,16 +16,23 @@ import org.eclipse.jdt.core.dom.SimpleType;
  * @since 4.7.0
  */
 public class BooleanAssertionWithInstanceofAnalysisResult {
-	private final AssertJAssertThatData newAssertThatData;
+	private final MethodInvocation assertThatInvocation;
+	private final Expression instanceOfLeftOperand;
 	private final SimpleType instanceofRightOperand;
 
-	public BooleanAssertionWithInstanceofAnalysisResult(AssertJAssertThatData newAssertThatData, SimpleType instanceofRightOperand) {
-		this.newAssertThatData = newAssertThatData;
+	public BooleanAssertionWithInstanceofAnalysisResult(AssertJAssertThatWithAssertionData data,
+			Expression instanceOfLeftOperand, SimpleType instanceofRightOperand) {
+		this.assertThatInvocation = data.getAssertThatInvocation();
+		this.instanceOfLeftOperand = instanceOfLeftOperand;
 		this.instanceofRightOperand = instanceofRightOperand;
 	}
 
-	public AssertJAssertThatData getNewAssertThatData() {
-		return newAssertThatData;
+	MethodInvocation getAssertThatInvocation() {
+		return assertThatInvocation;
+	}
+
+	public Expression getInstanceOfLeftOperand() {
+		return instanceOfLeftOperand;
 	}
 
 	public SimpleType getInstanceofRightOperand() {

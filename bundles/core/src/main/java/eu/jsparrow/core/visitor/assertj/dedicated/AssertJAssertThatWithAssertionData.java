@@ -6,12 +6,15 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+import eu.jsparrow.core.visitor.assertj.SupportedAssertJAssertions;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 public class AssertJAssertThatWithAssertionData {
-	private final AssertJAssertThatData assertThatData;
+	private final MethodInvocation assertThatInvocation;
+	private final Expression assertThatArgument;
 	private final String assertionName;
 	private Expression assertionArgument;
 
@@ -28,6 +31,12 @@ public class AssertJAssertThatWithAssertionData {
 		}
 
 		MethodInvocation assumedAssertThatInvocation = (MethodInvocation) assertionInvocationExpression;
+		List<Expression> assumedAssertThatArguments = ASTNodeUtil
+			.convertToTypedList(assumedAssertThatInvocation.arguments(), Expression.class);
+		if (assumedAssertThatArguments.size() != 1) {
+			return Optional.empty();
+		}
+		Expression assumedAssertThatArgument = assumedAssertThatArguments.get(0);
 
 		if (assumedAssertThatInvocation.getLocationInParent() != MethodInvocation.EXPRESSION_PROPERTY) {
 			return Optional.empty();
@@ -40,57 +49,75 @@ public class AssertJAssertThatWithAssertionData {
 			return Optional.empty();
 		}
 
-		AssertJAssertThatData assertThatData = AssertJAssertThatData
-			.findDataForAssumedAssertThat(assumedAssertThatInvocation)
-			.orElse(null);
+		String assumedAssertThatMethodName = assumedAssertThatInvocation.getName()
+			.getIdentifier();
 
-		if (assertThatData != null) {
-			String assumedAssertionName = assumedAssertion.getName()
-				.getIdentifier();
-			if (assumedAssertionArguments.size() == 1) {
-				return Optional.of(new AssertJAssertThatWithAssertionData(assertThatData, assumedAssertionName,
-						assumedAssertionArguments.get(0)));
-			}
-			return Optional.of(new AssertJAssertThatWithAssertionData(assertThatData, assumedAssertionName));
-
+		if (!SupportedAssertJAssertions.isSupportedAssertJAsserThatMethodName(assumedAssertThatMethodName)) {
+			return Optional.empty();
 		}
-		return Optional.empty();
+		IMethodBinding assertThatMethodBinding = assumedAssertThatInvocation.resolveMethodBinding();
+
+		if (assertThatMethodBinding == null ||
+				!SupportedAssertJAssertions.isSupportedAssertionsType(assertThatMethodBinding.getDeclaringClass())) {
+			return Optional.empty();
+		}
+
+		String assumedAssertionName = assumedAssertion.getName()
+			.getIdentifier();
+		if (assumedAssertionArguments.size() == 1) {
+			return Optional
+				.of(new AssertJAssertThatWithAssertionData(assumedAssertThatInvocation, assumedAssertThatArgument,
+						assumedAssertionName, assumedAssertionArguments.get(0)));
+		}
+		return Optional
+			.of(new AssertJAssertThatWithAssertionData(assumedAssertThatInvocation, assumedAssertThatArgument,
+					assumedAssertionName));
+
 	}
-	
+
 	static AssertJAssertThatWithAssertionData createNewDataWithoutAssertionArgument(
 			AssertJAssertThatWithAssertionData data, String newAssertionName) {
-		Expression sameAssertThatArgument = data.getAssertThatData().getAssertThatArgument();
+		Expression sameAssertThatArgument = data.getAssertThatArgument();
 		return createNewDataWithoutAssertionArgument(data, sameAssertThatArgument, newAssertionName);
 	}
 
 	static AssertJAssertThatWithAssertionData createNewDataWithoutAssertionArgument(
 			AssertJAssertThatWithAssertionData data, Expression newAssertThatArgument, String newAssertionName) {
-		AssertJAssertThatData newAssertThatData = AssertJAssertThatData
-			.createDataReplacingArgument(data.getAssertThatData(), newAssertThatArgument);
-		return new AssertJAssertThatWithAssertionData(newAssertThatData, newAssertionName);
+		return new AssertJAssertThatWithAssertionData(data.getAssertThatInvocation(), newAssertThatArgument,
+				newAssertionName);
 	}
 
 	static AssertJAssertThatWithAssertionData createNewDataWithAssertionArgument(
 			AssertJAssertThatWithAssertionData data, Expression newAssertThatArgument, String newAssertionName,
 			Expression assertionArgument) {
-		AssertJAssertThatData newAssertThatData = AssertJAssertThatData
-			.createDataReplacingArgument(data.getAssertThatData(), newAssertThatArgument);
-		return new AssertJAssertThatWithAssertionData(newAssertThatData, newAssertionName, assertionArgument);
+		return new AssertJAssertThatWithAssertionData(data.getAssertThatInvocation(), newAssertThatArgument,
+				newAssertionName, assertionArgument);
 	}
 
-	private AssertJAssertThatWithAssertionData(AssertJAssertThatData assertThatData, String assertionName) {
-		this.assertThatData = assertThatData;
+	private AssertJAssertThatWithAssertionData(MethodInvocation assertThatInvocation, Expression newAssertThatArgument,
+			String assertionName) {
+		this.assertThatInvocation = assertThatInvocation;
+		this.assertThatArgument = newAssertThatArgument;
 		this.assertionName = assertionName;
 	}
 
-	private AssertJAssertThatWithAssertionData(AssertJAssertThatData assertThatData, String assertionName,
+	private AssertJAssertThatWithAssertionData(MethodInvocation assertThatInvocation, Expression newAssertThatArgument,
+			String assertionName,
 			Expression assertionArgument) {
-		this(assertThatData, assertionName);
+		this(assertThatInvocation, newAssertThatArgument, assertionName);
 		this.assertionArgument = assertionArgument;
 	}
 
-	AssertJAssertThatData getAssertThatData() {
-		return assertThatData;
+	MethodInvocation getAssertThatInvocation() {
+		return assertThatInvocation;
+	}
+
+	Expression getAssertThatArgument() {
+		return assertThatArgument;
+	}
+
+	Optional<Expression> getAssertThatExpression() {
+		return Optional.ofNullable(assertThatInvocation.getExpression());
 	}
 
 	String getAssertionName() {

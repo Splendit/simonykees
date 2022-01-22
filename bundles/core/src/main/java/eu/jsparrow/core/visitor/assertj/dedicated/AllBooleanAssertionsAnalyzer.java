@@ -65,8 +65,7 @@ public class AllBooleanAssertionsAnalyzer {
 			return Optional.empty();
 		}
 
-		Expression assertThatArgument = assertThatWithAssertionData.getAssertThatData()
-			.getAssertThatArgument();
+		Expression assertThatArgument = assertThatWithAssertionData.getAssertThatArgument();
 		NotOperandUnwrapper notOperandUnwrapper = new NotOperandUnwrapper(assertThatArgument);
 		if (assertionName.equals(Constants.IS_FALSE) ^ notOperandUnwrapper.isNegationByNot()) {
 			assertionName = Constants.IS_FALSE;
@@ -82,8 +81,7 @@ public class AllBooleanAssertionsAnalyzer {
 	}
 
 	Optional<BooleanAssertionWithInstanceofAnalysisResult> findResultForInstanceofAsAssertThatArgument() {
-		Expression unwrappedAssertThatArgument = normalizedDataForBooleanAssertion.getAssertThatData()
-			.getAssertThatArgument();
+		Expression unwrappedAssertThatArgument = normalizedDataForBooleanAssertion.getAssertThatArgument();
 
 		String assertionName = normalizedDataForBooleanAssertion.getAssertionName();
 
@@ -111,15 +109,11 @@ public class AllBooleanAssertionsAnalyzer {
 		if (!SupportedAssertJAssertThatArgumentTypes.isSupportedAssertThatArgumentType(leftOperandType)) {
 			return Optional.empty();
 		}
-		AssertJAssertThatData assertThatData = normalizedDataForBooleanAssertion.getAssertThatData();
-		AssertJAssertThatData newAssartThatData = AssertJAssertThatData.createDataReplacingArgument(assertThatData,
-				leftOperand);
-		return Optional.of(new BooleanAssertionWithInstanceofAnalysisResult(newAssartThatData, simpleType));
+		return Optional.of(new BooleanAssertionWithInstanceofAnalysisResult(normalizedDataForBooleanAssertion, leftOperand, simpleType));
 	}
 
 	Optional<AssertJAssertThatWithAssertionData> findResultForOtherAssertThatArgument() {
-		Expression unwrappedAssertThatArgument = normalizedDataForBooleanAssertion.getAssertThatData()
-			.getAssertThatArgument();
+		Expression unwrappedAssertThatArgument = normalizedDataForBooleanAssertion.getAssertThatArgument();
 
 		if (unwrappedAssertThatArgument.getNodeType() == ASTNode.INFIX_EXPRESSION) {
 			return analyzeBooleanAssertionWithInfixOperation((InfixExpression) unwrappedAssertThatArgument);
