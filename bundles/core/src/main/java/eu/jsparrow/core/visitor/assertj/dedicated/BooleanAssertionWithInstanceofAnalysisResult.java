@@ -1,7 +1,6 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleType;
 
 /**

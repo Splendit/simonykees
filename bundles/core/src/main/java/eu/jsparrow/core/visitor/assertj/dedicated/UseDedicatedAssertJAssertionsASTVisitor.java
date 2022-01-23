@@ -41,39 +41,18 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 	@Override
 	public boolean visit(MethodInvocation node) {
 
-		if (node.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+		InitialAnalysisData initialAnalysisData = findInitialData(node).orElse(null);
+		if (initialAnalysisData == null) {
 			return true;
 		}
-		List<Expression> assumedAssertionArguments = ASTNodeUtil.convertToTypedList(node.arguments(),
-				Expression.class);
-		if (assumedAssertionArguments.size() > 1) {
-			return true;
-		}
+		MethodInvocation assertThatInvocation = initialAnalysisData.getAssertThatInvocation();
+		final AssertJAssertThatWithAssertionData analysisChainInitialData = initialAnalysisData
+			.getInitialAnalysisChainData();
 
-		MethodInvocation assertThatInvocation = findAssertThatAsAssertionExpression(node).orElse(null);
-		if (assertThatInvocation == null || assertThatInvocation.arguments()
-			.size() != 1) {
-			return true;
-		}
-		List<Expression> assertThatArguments = ASTNodeUtil
-			.convertToTypedList(assertThatInvocation.arguments(), Expression.class);
-
-		if (assertThatArguments.size() != 1) {
-			return true;
-		}
-		Expression assertThatArgument = assertThatArguments.get(0);
-
-		final AssertJAssertThatWithAssertionData initialData = AssertJAssertThatWithAssertionData
-			.findDataForAssumedAssertion(node)
-			.orElse(null);
-
-		if (initialData == null) {
-			return true;
-		}
-		AssertJAssertThatWithAssertionData dataExpectedToChange = initialData;
+		AssertJAssertThatWithAssertionData dataExpectedToChange = analysisChainInitialData;
 
 		AllBooleanAssertionsAnalyzer allBooleanAssertinsAnalyzer = AllBooleanAssertionsAnalyzer
-			.conditionalInstance(initialData)
+			.conditionalInstance(analysisChainInitialData)
 			.orElse(null);
 
 		if (allBooleanAssertinsAnalyzer != null) {
@@ -95,14 +74,25 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			.findDataForAssertionWithLiteral(dataExpectedToChange)
 			.orElse(dataExpectedToChange);
 
-		if (dataExpectedToChange != initialData) {
+		if (dataExpectedToChange != analysisChainInitialData) {
 			transform(assertThatInvocation, node, dataExpectedToChange);
 		}
 
 		return true;
 	}
 
-	Optional<MethodInvocation> findAssertThatAsAssertionExpression(MethodInvocation assumedAssertion) {
+	static Optional<InitialAnalysisData> findInitialData(MethodInvocation assumedAssertion) {
+
+		if (assumedAssertion.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			return Optional.empty();
+		}
+
+		List<Expression> assumedAssertionArguments = ASTNodeUtil.convertToTypedList(assumedAssertion.arguments(),
+				Expression.class);
+
+		if (assumedAssertionArguments.size() > 1) {
+			return Optional.empty();
+		}
 
 		Expression assertionInvocationExpression = assumedAssertion.getExpression();
 		if (assertionInvocationExpression == null
@@ -111,6 +101,13 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		}
 
 		MethodInvocation assumedAssertThatInvocation = (MethodInvocation) assertionInvocationExpression;
+		List<Expression> assumedAssertThatArguments = ASTNodeUtil
+			.convertToTypedList(assumedAssertThatInvocation.arguments(), Expression.class);
+		if (assumedAssertThatArguments.size() != 1) {
+			return Optional.empty();
+		}
+		Expression assumedAssertThatArgument = assumedAssertThatArguments.get(0);
+
 		String assumedAssertThatMethodName = assumedAssertThatInvocation.getName()
 			.getIdentifier();
 
@@ -123,7 +120,20 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 				!SupportedAssertJAssertions.isSupportedAssertionsType(assertThatMethodBinding.getDeclaringClass())) {
 			return Optional.empty();
 		}
-		return Optional.of(assumedAssertThatInvocation);
+
+		String assumedAssertionName = assumedAssertion.getName()
+			.getIdentifier();
+		AssertJAssertThatWithAssertionData assertJAssertThatWithAssertionData;
+		if (assumedAssertionArguments.isEmpty()) {
+			assertJAssertThatWithAssertionData = new AssertJAssertThatWithAssertionData(assumedAssertThatArgument,
+					assumedAssertionName);
+		} else {
+			assertJAssertThatWithAssertionData = new AssertJAssertThatWithAssertionData(assumedAssertThatArgument,
+					assumedAssertionName, assumedAssertionArguments.get(0));
+		}
+		return Optional
+			.of(new InitialAnalysisData(assumedAssertThatInvocation, assertJAssertThatWithAssertionData));
+
 	}
 
 	private void transform(MethodInvocation assertThatInvocation, MethodInvocation node,
