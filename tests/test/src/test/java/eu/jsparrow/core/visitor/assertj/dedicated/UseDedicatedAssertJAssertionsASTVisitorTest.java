@@ -1039,6 +1039,39 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
+	
+	public static Stream<Arguments> infixEqualsWithPrimitiveTypes() throws Exception {
+		return Stream.of(
+				Arguments.of("boolean", "true"),
+				Arguments.of("char", "'A'"),
+				Arguments.of("byte", "10"),
+				Arguments.of("short", "10"),
+				Arguments.of("int", "10"),
+				Arguments.of("long", "10L"),
+				Arguments.of("float", "10.0F"),
+				Arguments.of("double", "10.0"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("infixEqualsWithPrimitiveTypes")
+	void visit_InfixEqualsWithPrimitiveTypes_shouldTransform(String numericType, String literal)
+			throws Exception {
+
+		String original = String.format("" +
+				"		%s x1 = %s;\n"
+				+ "		%s x2 = %s;\n"
+				+ "		assertThat(x1 == x2).isTrue();\n",
+				numericType, literal, numericType, literal);
+
+		String expected = String.format("" +
+				"		%s x1 = %s;\n"
+				+ "		%s x2 = %s;\n"
+				+ "		assertThat(x1).isEqualTo(x2);\n",
+				numericType, literal, numericType, literal);
+
+
+		assertChange(original, expected);
+	}
 
 	public static Stream<Arguments> assertionsOnInfixOperationsWith1DIntArray() throws Exception {
 		return Stream.of(

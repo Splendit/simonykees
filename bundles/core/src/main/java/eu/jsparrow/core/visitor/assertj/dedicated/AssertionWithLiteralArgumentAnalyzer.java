@@ -35,76 +35,60 @@ public class AssertionWithLiteralArgumentAnalyzer {
 				if (methodName.equals(Constants.IS_EQUAL_TO)) {
 					return Optional.of(Constants.IS_ZERO);
 				}
-
 				if (methodName.equals(Constants.IS_NOT_EQUAL_TO)) {
 					return Optional.of(Constants.IS_NOT_ZERO);
 				}
+				if (methodName.equals(Constants.IS_GREATER_THAN)) {
+					return Optional.of("isPositive"); //$NON-NLS-1$
+				}
+				if (methodName.equals(Constants.IS_LESS_THAN)) {
+					return Optional.of("isNegative"); //$NON-NLS-1$
+				}
+				if (methodName.equals(Constants.IS_LESS_THAN_OR_EQUAL_TO)) {
+					return Optional.of("isNotPositive"); //$NON-NLS-1$
+				}
+				if (methodName.equals(Constants.IS_GREATER_THAN_OR_EQUAL_TO)) {
+					return Optional.of("isNotNegative"); //$NON-NLS-1$
+				}
 			}
 		}
 		return Optional.empty();
 	}
 
-	static Optional<AssertJAssertThatWithAssertionData> findDataForAssertionWithNullLiteral(
-			AssertJAssertThatWithAssertionData assertThatWithAssertionData) {
-		Expression assertionArgument = assertThatWithAssertionData.getAssertionArgument()
-			.orElse(null);
-		if (assertionArgument == null) {
-			return Optional.empty();
+	static Optional<String> findNameForAssertionWithoutArgument(String methodName, Expression argument) {
+		Optional<String> optionalNameForAssertionWithoutArgument = findNameReplacementForNullLiteralArgument(methodName,
+				argument);
+		if (optionalNameForAssertionWithoutArgument.isPresent()) {
+			return optionalNameForAssertionWithoutArgument;
 		}
-		Expression sameAssertThatArguemnt = assertThatWithAssertionData.getAssertThatArgument();
-		if (assertionArgument.getNodeType() == ASTNode.NULL_LITERAL) {
-			String assertionName = assertThatWithAssertionData.getAssertionName();
-			if (assertionName.equals(Constants.IS_SAME_AS) || assertionName.equals(Constants.IS_EQUAL_TO)) {
-				return Optional.of(new AssertJAssertThatWithAssertionData(sameAssertThatArguemnt, Constants.IS_NULL));
-			}
-			if (assertionName.equals(Constants.IS_NOT_SAME_AS) || assertionName.equals(Constants.IS_NOT_EQUAL_TO)) {
-				return Optional.of(new AssertJAssertThatWithAssertionData(sameAssertThatArguemnt, Constants.IS_NOT_NULL));
-			}
-		}
-		return Optional.empty();
-	}
-
-	static Optional<AssertJAssertThatWithAssertionData> findDataForAssertionsWithZeroLiteral(
-			AssertJAssertThatWithAssertionData assertThatWithAssertionData) {
-		Expression sameAssertThatArgument = assertThatWithAssertionData.getAssertThatArgument();
-		Expression assertionArgument = assertThatWithAssertionData.getAssertionArgument()
-			.orElse(null);
-		if (assertionArgument == null) {
-			return Optional.empty();
-		}
-		if (assertionArgument.getNodeType() == ASTNode.NUMBER_LITERAL) {
-			NumberLiteral numberLiteral = (NumberLiteral) assertionArgument;
-			String numericTooken = numberLiteral.getToken();
-			if (ZERO_LITERAL_TOKENS.contains(numericTooken)) {
-				String methodName = assertThatWithAssertionData.getAssertionName();
-				if (methodName.equals(Constants.IS_EQUAL_TO)) {
-					return Optional
-						.of(new AssertJAssertThatWithAssertionData(sameAssertThatArgument, Constants.IS_ZERO));
-				}
-				if (methodName.equals(Constants.IS_NOT_EQUAL_TO)) {
-					return Optional
-						.of(new AssertJAssertThatWithAssertionData(sameAssertThatArgument, Constants.IS_NOT_ZERO));
-				}
-			}
+		optionalNameForAssertionWithoutArgument = findNameReplacementForZeroLiteralArgument(methodName, argument);
+		if (optionalNameForAssertionWithoutArgument.isPresent()) {
+			return optionalNameForAssertionWithoutArgument;
 		}
 		return Optional.empty();
 	}
 
 	static Optional<AssertJAssertThatWithAssertionData> findDataForAssertionWithLiteral(
 			AssertJAssertThatWithAssertionData assertThatWithAssertionData) {
-		Optional<AssertJAssertThatWithAssertionData> optionalDataForAssertionWithLiteral = findDataForAssertionWithNullLiteral(
-				assertThatWithAssertionData);
-
-		if (optionalDataForAssertionWithLiteral.isPresent()) {
-			return optionalDataForAssertionWithLiteral;
+		Expression assertionArgument = assertThatWithAssertionData.getAssertionArgument()
+			.orElse(null);
+		if (assertionArgument == null) {
+			return Optional.empty();
 		}
+		String assertionName = assertThatWithAssertionData.getAssertionName();
 
-		optionalDataForAssertionWithLiteral = findDataForAssertionsWithZeroLiteral(assertThatWithAssertionData);
-		if (optionalDataForAssertionWithLiteral.isPresent()) {
-			return optionalDataForAssertionWithLiteral;
-		}
+		return findNameForAssertionWithoutArgument(assertionName, assertionArgument)
+			.map(nameForAssertionWithoutArgument -> {
+				Expression assertThatArgument = assertThatWithAssertionData.getAssertThatArgument();
+				return new AssertJAssertThatWithAssertionData(assertThatArgument, nameForAssertionWithoutArgument);
+			});
 
-		return Optional.empty();
+	}
+
+	private AssertionWithLiteralArgumentAnalyzer() {
+		/*
+		 * private default constructor hiding implicit public one
+		 */
 	}
 
 }

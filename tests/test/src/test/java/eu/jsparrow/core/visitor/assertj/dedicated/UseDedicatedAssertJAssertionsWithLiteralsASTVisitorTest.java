@@ -97,44 +97,53 @@ public class UseDedicatedAssertJAssertionsWithLiteralsASTVisitorTest extends Use
 
 	public static Stream<Arguments> assertionsWithInfixAndZeroLiteral() throws Exception {
 		return Stream.of(
-				Arguments.of("int", "0"),
-				Arguments.of("long", "0L"),
-				Arguments.of("float", "0.0F"),
-				Arguments.of("double", "0.0"));
+				Arguments.of("==", "isZero"),
+				Arguments.of("!=", "isNotZero"),
+				Arguments.of(">", "isPositive"),
+				Arguments.of("<", "isNegative"),
+				Arguments.of(">=", "isNotNegative"),
+				Arguments.of("<=", "isNotPositive"));
 	}
 
 	@ParameterizedTest
 	@MethodSource("assertionsWithInfixAndZeroLiteral")
-	void visit_InfixWithZeroIsTrue_shouldTransform(String numericType, String zeroLiteral)
+	void visit_InfixWithZeroIsTrue_shouldTransform(String infix, String newAssertion)
 			throws Exception {
 
 		String original = String.format("" +
-				"		%s x = %s;\n"
-				+ "		assertThat(x == %s).isTrue();",
-				numericType, zeroLiteral, zeroLiteral);
+				"		int x = 0;\n"
+				+ "		assertThat(x %s 0).isTrue();", infix);
 
 		String expected = String.format("" +
-				"		%s x = %s;\n"
-				+ "		assertThat(x).isZero();",
-				numericType, zeroLiteral, zeroLiteral);
+				"		int x = 0;\n"
+				+ "		assertThat(x).%s();", newAssertion);
 
 		assertChange(original, expected);
 	}
+	
+	public static Stream<Arguments> assertionsWithZeroLiteralAsArrgument() throws Exception {
+		return Stream.of(
+				Arguments.of("isEqualTo", "isZero"),
+				Arguments.of("isNotEqualTo", "isNotZero"),
+				Arguments.of("isGreaterThan", "isPositive"),
+				Arguments.of("isGreaterThanOrEqualTo", "isNotNegative"),
+				Arguments.of("isLessThan", "isNegative"),
+				Arguments.of("isLessThanOrEqualTo", "isNotPositive"));
+	}
 
 	@ParameterizedTest
-	@MethodSource("assertionsWithInfixAndZeroLiteral")
-	void visit_InfixWithZeroIsFalse_shouldTransform(String numericType, String zeroLiteral)
+	@MethodSource("assertionsWithZeroLiteralAsArrgument")
+	void visit_AssertionsWithZeroLiteralAsArgument_shouldTransform(String oldAssertion, String newAssertion)
 			throws Exception {
 
 		String original = String.format("" +
-				"		%s x = %s;\n"
-				+ "		assertThat(x == %s).isFalse();",
-				numericType, zeroLiteral, zeroLiteral);
+				"		int x = 0;\n"
+				+ "		assertThat(x).%s(0);", oldAssertion);
 
 		String expected = String.format("" +
-				"		%s x = %s;\n"
-				+ "		assertThat(x).isNotZero();",
-				numericType, zeroLiteral);
+				"		int x = 0;\n"
+				+ "		assertThat(x).%s();", newAssertion);
+
 
 		assertChange(original, expected);
 	}

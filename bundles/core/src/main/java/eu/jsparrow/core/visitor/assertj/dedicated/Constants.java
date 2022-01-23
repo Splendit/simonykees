@@ -43,6 +43,15 @@ public class Constants {
 	public static final String STARTS_WITH = "startsWith";
 
 	/*
+	 * other relational names
+	 */
+	public static final String IS_LESS_THAN = "isLessThan";
+	public static final String IS_GREATER_THAN = "isGreaterThan";
+	public static final String IS_GREATER_THAN_OR_EQUAL_TO = "isGreaterThanOrEqualTo";
+	public static final String IS_LESS_THAN_OR_EQUAL_TO = "isLessThanOrEqualTo";
+
+
+	/*
 	 * Iterable
 	 */
 	public static final String CONTAINS_ALL = "containsAll";
