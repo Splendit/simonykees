@@ -121,6 +121,21 @@ public class SupportedAssertJAssertThatArgumentTypes {
 						Arrays.asList(java.lang.Iterable.class.getName()));
 	}
 
+	static boolean isSupportedCollectionType(ITypeBinding typeBinding) {
+		if (ClassRelationUtil.isContentOfType(typeBinding, java.util.Collection.class.getName())) {
+			return true;
+		}
+		IPackageBinding packageBinding = typeBinding.getPackage();
+		if (packageBinding == null) {
+			return false;
+		}
+		String packageName = packageBinding
+			.getName();
+		return packageName.equals(JAVA_UTIL)
+				&& ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
+						Arrays.asList(java.util.Collection.class.getName()));
+	}
+
 	static boolean isSupportedMapType(ITypeBinding typeBinding) {
 		if (ClassRelationUtil.isContentOfType(typeBinding, java.util.Map.class.getName())) {
 			return true;

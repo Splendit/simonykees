@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
 @SuppressWarnings("nls")
-public class UseDedicatedAssertJAssertionsWithLiteralsASTVisitorTest extends UsesSimpleJDTUnitFixture {
+public class UseDedicatedAssertJAssertionsWithSpezialLiteralsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -120,7 +120,7 @@ public class UseDedicatedAssertJAssertionsWithLiteralsASTVisitorTest extends Use
 
 		assertChange(original, expected);
 	}
-	
+
 	public static Stream<Arguments> assertionsWithZeroLiteralAsArrgument() throws Exception {
 		return Stream.of(
 				Arguments.of("isEqualTo", "isZero"),
@@ -143,7 +143,6 @@ public class UseDedicatedAssertJAssertionsWithLiteralsASTVisitorTest extends Use
 		String expected = String.format("" +
 				"		int x = 0;\n"
 				+ "		assertThat(x).%s();", newAssertion);
-
 
 		assertChange(original, expected);
 	}
@@ -184,6 +183,59 @@ public class UseDedicatedAssertJAssertionsWithLiteralsASTVisitorTest extends Use
 		String expected = "" +
 				"		Double x = Double.valueOf(0.0);\n"
 				+ "		assertThat(x).isZero();";
+
+		assertChange(original, expected);
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"assertThat(emptyList.size() == 0).isTrue()",
+			"assertThat(emptyList.size() <= 0).isTrue()",
+			"assertThat(emptyList.size()).isEqualTo(0)",
+			"assertThat(emptyList.size()).isLessThanOrEqualTo(0)",
+			"assertThat(emptyList.size()).isZero()",
+			"assertThat(emptyList.size()).isNotPositive()",
+			"assertThat(emptyList).hasSize(0)",
+			"assertThat(emptyList).hasSizeLessThanOrEqualTo(0)"
+	})
+	void visit_EmptyListSizeAndZeroLiteral_shouldTransform(String originalAssertion) throws Exception {
+		fixture.addImport(java.util.Arrays.class.getName());
+		fixture.addImport(java.util.List.class.getName());
+
+		String original = String.format("" +
+				"		List<Object> emptyList = Arrays.asList();\n"
+				+ "		%s;", originalAssertion);
+
+		String expected = "" +
+				"		List<Object> emptyList = Arrays.asList();\n"
+				+ "		assertThat(emptyList).isEmpty();";
+
+		assertChange(original, expected);
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"assertThat(list.size() != 0).isTrue()",
+			"assertThat(list.size() > 0).isTrue()",
+			"assertThat(list.size()).isNotEqualTo(0)",
+			"assertThat(list.size()).isGreaterThan(0)",
+			"assertThat(list.size()).isNotZero()",
+			"assertThat(list.size()).isPositive()",
+			"assertThat(list).hasSizeGreaterThan(0)"
+	})
+	void visit_NotEmptyListSizeAndZeroLiteral_shouldTransform(String originalAssertion) throws Exception {
+		fixture.addImport(java.util.Arrays.class.getName());
+		fixture.addImport(java.util.List.class.getName());
+
+		String original = String.format("" +
+				"		List<Object> list = Arrays.asList(new Object());\n"
+				+ "		%s;", originalAssertion);
+
+		String expected = "" +
+				"		List<Object> list = Arrays.asList(new Object());\n"
+				+ "		assertThat(list).isNotEmpty();";
 
 		assertChange(original, expected);
 

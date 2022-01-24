@@ -70,6 +70,14 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			}
 		}
 
+		dataExpectedToChange = AssertionWithSizeAndLengthAnalyzer
+			.findResultForAssertionWithSizeOrLength(dataExpectedToChange)
+			.orElse(dataExpectedToChange);
+
+		dataExpectedToChange = AssertionWithSizeAndLengthAnalyzer
+			.findHasSameSizeAssertionData(dataExpectedToChange)
+			.orElse(dataExpectedToChange);
+
 		dataExpectedToChange = AssertionWithLiteralArgumentAnalyzer
 			.findDataForAssertionWithLiteral(dataExpectedToChange)
 			.orElse(dataExpectedToChange);

@@ -39,16 +39,22 @@ public class AssertionWithLiteralArgumentAnalyzer {
 					return Optional.of(Constants.IS_NOT_ZERO);
 				}
 				if (methodName.equals(Constants.IS_GREATER_THAN)) {
-					return Optional.of("isPositive"); //$NON-NLS-1$
+					return Optional.of(Constants.IS_POSITIVE);
 				}
 				if (methodName.equals(Constants.IS_LESS_THAN)) {
-					return Optional.of("isNegative"); //$NON-NLS-1$
+					return Optional.of(Constants.IS_NEGATIVE);
 				}
 				if (methodName.equals(Constants.IS_LESS_THAN_OR_EQUAL_TO)) {
-					return Optional.of("isNotPositive"); //$NON-NLS-1$
+					return Optional.of(Constants.IS_NOT_POSITIVE);
 				}
 				if (methodName.equals(Constants.IS_GREATER_THAN_OR_EQUAL_TO)) {
-					return Optional.of("isNotNegative"); //$NON-NLS-1$
+					return Optional.of(Constants.IS_NOT_NEGATIVE);
+				}
+				if (methodName.equals(Constants.HAS_SIZE) ||
+						methodName.equals(Constants.HAS_SIZE_LESS_THAN_OR_EQUAL_TO)) {
+					return Optional.of(Constants.IS_EMPTY);
+				} else if (methodName.equals(Constants.HAS_SIZE_GREATER_THAN)) {
+					return Optional.of(Constants.IS_NOT_EMPTY);
 				}
 			}
 		}
@@ -83,6 +89,15 @@ public class AssertionWithLiteralArgumentAnalyzer {
 				return new AssertJAssertThatWithAssertionData(assertThatArgument, nameForAssertionWithoutArgument);
 			});
 
+	}
+
+	public static boolean isZeroLiteralToken(Expression expression) {
+		if (expression.getNodeType() != ASTNode.NUMBER_LITERAL) {
+			return false;
+		}
+		NumberLiteral numberLiteral = (NumberLiteral) expression;
+		String numericTooken = numberLiteral.getToken();
+		return ZERO_LITERAL_TOKENS.contains(numericTooken);
 	}
 
 	private AssertionWithLiteralArgumentAnalyzer() {
