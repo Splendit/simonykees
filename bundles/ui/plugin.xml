@@ -37,6 +37,8 @@
 					label="%command.label.logger_rule_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.RenameFieldsRuleWizardHandler"
 					label="%command.label.rename_fields_rule_wizard" style="push" />
+				<command commandId="eu.jsparrow.ui.RemoveDeadCodeWizardHandler"
+					label="%command.label.remove_dead_code_rule_wizard" style="push" />
 			</menu>
 		</menuContribution>
 		<menuContribution
@@ -48,6 +50,8 @@
 					label="%command.label.logger_rule_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.RenameFieldsRuleWizardHandler"
 					label="%command.label.rename_fields_rule_wizard" style="push" />
+				<command commandId="eu.jsparrow.ui.RemoveDeadCodeWizardHandler"
+					label="%command.label.remove_dead_code_rule_wizard" style="push" />
 			</menu>
 		</menuContribution>
 		<menuContribution
@@ -59,6 +63,8 @@
 					label="%command.label.logger_rule_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.RenameFieldsRuleWizardHandler"
 					label="%command.label.rename_fields_rule_wizard" style="push" />
+				<command commandId="eu.jsparrow.ui.RemoveDeadCodeWizardHandler"
+					label="%command.label.remove_dead_code_rule_wizard" style="push" />
 			</menu>
 		</menuContribution>
 	</extension>
@@ -69,6 +75,8 @@
 			id="eu.jsparrow.ui.LoggerRuleWizardHandler" name="%command.name.logger_rule_wizard_handler" />
 		<command defaultHandler="eu.jsparrow.ui.handler.RenameFieldsRuleWizardHandler"
 			id="eu.jsparrow.ui.RenameFieldsRuleWizardHandler" name="%command.name.rename_fields_wizard_handler" />
+		<command defaultHandler="eu.jsparrow.ui.handler.RemoveDeadCodeWizardHandler"
+			id="eu.jsparrow.ui.RemoveDeadCodeWizardHandler" name="%command.name.remove_dead_code_wizard_handler" />
 		<command defaultHandler="eu.jsparrow.ui.handler.WelcomeHandler"
            id="eu.jsparrow.ui.handler.WelcomeHandler" name="jSparrow Dashboard" />
 	</extension>
