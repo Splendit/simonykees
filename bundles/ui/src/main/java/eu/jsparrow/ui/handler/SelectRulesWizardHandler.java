@@ -55,7 +55,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  */
 public class SelectRulesWizardHandler extends AbstractHandler {
 
-	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
+	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizardHandler.class);
 
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 

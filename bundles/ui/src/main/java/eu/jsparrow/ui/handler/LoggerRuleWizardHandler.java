@@ -59,10 +59,6 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
-	public LoggerRuleWizardHandler() {
-
-	}
-
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
