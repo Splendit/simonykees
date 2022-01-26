@@ -1,7 +1,8 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
 /**
- * Relevant method names for {@link BooleanAssertionOnInvocationAnalyzer}.
+ * Relevant method names for analyzers like for example
+ * {@link BooleanAssertionOnInvocationAnalyzer}.
  * 
  * @since 4.7.0
  *

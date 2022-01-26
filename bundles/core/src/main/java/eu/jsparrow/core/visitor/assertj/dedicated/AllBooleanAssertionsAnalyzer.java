@@ -25,6 +25,17 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import eu.jsparrow.core.visitor.junit.dedicated.NotOperandUnwrapper;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Helper class to analyze all possible kinds of boolean assertions which may be
+ * replaced by more specific dedicated assertions. For example:
+ * <ul>
+ * <li>assertions on instanceof expressions</li>
+ * <li>assertions on infix expressions</li>
+ * <li>assertions on method invocations</li>
+ * </ul>
+ *
+ * @since 4.8.0
+ */
 public class AllBooleanAssertionsAnalyzer {
 
 	private static final Map<Operator, Operator> INFIX_OPERATOR_NEGATIONS_MAP;
@@ -79,6 +90,17 @@ public class AllBooleanAssertionsAnalyzer {
 		return Optional.of(new AllBooleanAssertionsAnalyzer(normalizedData));
 	}
 
+	/**
+	 * Tries to find a replacement for a boolean assertion on an instanceof
+	 * expression. For example, for
+	 * <p>
+	 * {@code assertThat(s instanceof String).isTrue();}
+	 * <p>
+	 * the replacement is
+	 * <p>
+	 * {@code assertThat(s).isInstanceOf(String.class);}
+	 * 
+	 */
 	Optional<BooleanAssertionWithInstanceofAnalysisResult> findResultForInstanceofAsAssertThatArgument() {
 		Expression unwrappedAssertThatArgument = normalizedDataForBooleanAssertion.getAssertThatArgument();
 
@@ -111,6 +133,19 @@ public class AllBooleanAssertionsAnalyzer {
 		return Optional.of(new BooleanAssertionWithInstanceofAnalysisResult(leftOperand, simpleType));
 	}
 
+	/**
+	 * Tries to find a replacement for a boolean assertion in connection with an
+	 * infix expression or a method invocation.
+	 * <p>
+	 * For example, {@code assertThat(x == 10).isTrue();} <br>
+	 * can be replaced by {@code assertThat(x).isEqualTo(10);}
+	 * <p>
+	 * <p>
+	 * The following assertion with a method invocation like
+	 * {@code assertThat(string.equals("Hello World!")).isTrue();} <br can be
+	 * replaced by {@code assertThat(string).isEqualTo("Hello World!");}
+	 * <p>
+	 */
 	Optional<AssertJAssertThatWithAssertionData> findResultForOtherAssertThatArgument() {
 		Expression unwrappedAssertThatArgument = normalizedDataForBooleanAssertion.getAssertThatArgument();
 

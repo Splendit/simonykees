@@ -9,6 +9,16 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 
+/**
+ * Helper class to analyze all possible kinds of assertions in connection with
+ * special literals which may be transformed.
+ * <p>
+ * for example, the following example like {@code assertThat(x).isEqualTo(0);}
+ * <br>
+ * can be replaced by {@code assertThat(x).isZero();}
+ * 
+ * @since 4.8.0
+ */
 public class AssertionWithLiteralArgumentAnalyzer {
 
 	@SuppressWarnings("nls")

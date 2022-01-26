@@ -11,6 +11,17 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Helper class to analyze assertions in connection with the size of a
+ * collection or map, with the length of a string or with the length of an
+ * array.
+ * <p>
+ * An example like {@code assertThat(list.size()).isEqualTo(expectedSize);} <br>
+ * can be replaced by {@code assertThat(list).hasSize(expectedSize);}
+ * 
+ * @since 4.8.0
+ *
+ */
 public class AssertionWithSizeAndLengthAnalyzer {
 
 	private static final String LENGTH = "length"; //$NON-NLS-1$
