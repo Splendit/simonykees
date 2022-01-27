@@ -9,7 +9,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -91,17 +91,17 @@ public class FieldDeclarationVisitorWrapper {
 		visitor.updateOptions(options);
 		for (ICompilationUnit compilationUnit : selectedJavaElements) {
 			int status = visit(visitor, compilationUnit);
-			if (status != Status.OK) {
+			if (status != IStatus.OK) {
 				return status;
 			}
 
 			if (child.isCanceled()) {
-				return Status.CANCEL;
+				return IStatus.CANCEL;
 			} else {
 				child.worked(1);
 			}
 		}
-		return Status.OK;
+		return IStatus.OK;
 	}
 
 	/**
@@ -121,21 +121,21 @@ public class FieldDeclarationVisitorWrapper {
 		visitor.updateOptions(options);
 		for (ICompilationUnit compilationUnit : selectedJavaElements) {
 			int status = visit(visitor, compilationUnit);
-			if (status == Status.WARNING) {
+			if (status == IStatus.WARNING) {
 				return status;
 			}
 		}
-		return Status.OK;
+		return IStatus.OK;
 	}
 
 	private int visit(FieldDeclarationASTVisitor visitor, ICompilationUnit compilationUnit) {
 		if (!compilationUnit.getJavaProject()
 			.equals(javaProject)) {
-			return Status.WARNING;
+			return IStatus.WARNING;
 		}
 		CompilationUnit cu = RefactoringUtil.parse(compilationUnit);
 		cu.accept(visitor);
-		return Status.OK;
+		return IStatus.OK;
 	}
 
 	public List<FieldMetaData> getFieldsMetaData() {
