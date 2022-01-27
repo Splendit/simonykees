@@ -7,7 +7,10 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.NumberLiteral;
+
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * Helper class to analyze all possible kinds of assertions in connection with
@@ -20,6 +23,10 @@ import org.eclipse.jdt.core.dom.NumberLiteral;
  * @since 4.8.0
  */
 public class AssertionWithLiteralArgumentAnalyzer {
+
+	@SuppressWarnings("nls")
+	private static final List<String> PRIMITIVE_NUMERIC_TYPES = Collections.unmodifiableList(Arrays.asList(
+			"byte", "short", "int", "long", "float", "double"));
 
 	@SuppressWarnings("nls")
 	private static final List<String> ZERO_LITERAL_TOKENS = Collections.unmodifiableList(Arrays.asList(
@@ -37,28 +44,31 @@ public class AssertionWithLiteralArgumentAnalyzer {
 		return Optional.empty();
 	}
 
-	static Optional<String> findNameReplacementForZeroLiteralArgument(String methodName, Expression argument) {
+	static Optional<String> findNameReplacementForZeroLiteralArgument(Expression assertThatArgument, String methodName,
+			Expression argument) {
 		if (argument.getNodeType() == ASTNode.NUMBER_LITERAL) {
 			NumberLiteral numberLiteral = (NumberLiteral) argument;
 			String numericTooken = numberLiteral.getToken();
 			if (ZERO_LITERAL_TOKENS.contains(numericTooken)) {
-				if (methodName.equals(Constants.IS_EQUAL_TO)) {
-					return Optional.of(Constants.IS_ZERO);
-				}
-				if (methodName.equals(Constants.IS_NOT_EQUAL_TO)) {
-					return Optional.of(Constants.IS_NOT_ZERO);
-				}
-				if (methodName.equals(Constants.IS_GREATER_THAN)) {
-					return Optional.of(Constants.IS_POSITIVE);
-				}
-				if (methodName.equals(Constants.IS_LESS_THAN)) {
-					return Optional.of(Constants.IS_NEGATIVE);
-				}
-				if (methodName.equals(Constants.IS_LESS_THAN_OR_EQUAL_TO)) {
-					return Optional.of(Constants.IS_NOT_POSITIVE);
-				}
-				if (methodName.equals(Constants.IS_GREATER_THAN_OR_EQUAL_TO)) {
-					return Optional.of(Constants.IS_NOT_NEGATIVE);
+				if (isNumericAssertThatArgumentType(assertThatArgument)) {
+					if (methodName.equals(Constants.IS_EQUAL_TO)) {
+						return Optional.of(Constants.IS_ZERO);
+					}
+					if (methodName.equals(Constants.IS_NOT_EQUAL_TO)) {
+						return Optional.of(Constants.IS_NOT_ZERO);
+					}
+					if (methodName.equals(Constants.IS_GREATER_THAN)) {
+						return Optional.of(Constants.IS_POSITIVE);
+					}
+					if (methodName.equals(Constants.IS_LESS_THAN)) {
+						return Optional.of(Constants.IS_NEGATIVE);
+					}
+					if (methodName.equals(Constants.IS_LESS_THAN_OR_EQUAL_TO)) {
+						return Optional.of(Constants.IS_NOT_POSITIVE);
+					}
+					if (methodName.equals(Constants.IS_GREATER_THAN_OR_EQUAL_TO)) {
+						return Optional.of(Constants.IS_NOT_NEGATIVE);
+					}
 				}
 				if (methodName.equals(Constants.HAS_SIZE) ||
 						methodName.equals(Constants.HAS_SIZE_LESS_THAN_OR_EQUAL_TO)) {
@@ -71,13 +81,16 @@ public class AssertionWithLiteralArgumentAnalyzer {
 		return Optional.empty();
 	}
 
-	static Optional<String> findNameForAssertionWithoutArgument(String methodName, Expression argument) {
+	static Optional<String> findNameForAssertionWithoutArgument(Expression assertThatArgument, String methodName,
+			Expression argument) {
 		Optional<String> optionalNameForAssertionWithoutArgument = findNameReplacementForNullLiteralArgument(methodName,
 				argument);
 		if (optionalNameForAssertionWithoutArgument.isPresent()) {
 			return optionalNameForAssertionWithoutArgument;
 		}
-		optionalNameForAssertionWithoutArgument = findNameReplacementForZeroLiteralArgument(methodName, argument);
+
+		optionalNameForAssertionWithoutArgument = findNameReplacementForZeroLiteralArgument(assertThatArgument,
+				methodName, argument);
 		if (optionalNameForAssertionWithoutArgument.isPresent()) {
 			return optionalNameForAssertionWithoutArgument;
 		}
@@ -92,12 +105,10 @@ public class AssertionWithLiteralArgumentAnalyzer {
 			return Optional.empty();
 		}
 		String assertionName = assertThatWithAssertionData.getAssertionName();
-
-		return findNameForAssertionWithoutArgument(assertionName, assertionArgument)
-			.map(nameForAssertionWithoutArgument -> {
-				Expression assertThatArgument = assertThatWithAssertionData.getAssertThatArgument();
-				return new AssertJAssertThatWithAssertionData(assertThatArgument, nameForAssertionWithoutArgument);
-			});
+		Expression assertThatArgument = assertThatWithAssertionData.getAssertThatArgument();
+		return findNameForAssertionWithoutArgument(assertThatArgument, assertionName, assertionArgument)
+			.map(nameForAssertionWithoutArgument -> new AssertJAssertThatWithAssertionData(assertThatArgument,
+					nameForAssertionWithoutArgument));
 
 	}
 
@@ -108,6 +119,18 @@ public class AssertionWithLiteralArgumentAnalyzer {
 		NumberLiteral numberLiteral = (NumberLiteral) expression;
 		String numericTooken = numberLiteral.getToken();
 		return ZERO_LITERAL_TOKENS.contains(numericTooken);
+	}
+
+	private static boolean isNumericAssertThatArgumentType(Expression assertThatArgument) {
+		ITypeBinding assertThatArgumentType = assertThatArgument.resolveTypeBinding();
+		if (assertThatArgumentType == null) {
+			return false;
+		}
+		if (assertThatArgumentType.isPrimitive()) {
+			return ClassRelationUtil.isContentOfTypes(assertThatArgumentType, PRIMITIVE_NUMERIC_TYPES);
+		}
+		return ClassRelationUtil.isInheritingContentOfTypes(assertThatArgumentType,
+				Arrays.asList(java.lang.Number.class.getName()));
 	}
 
 	private AssertionWithLiteralArgumentAnalyzer() {
