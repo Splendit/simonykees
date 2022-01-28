@@ -7,6 +7,7 @@ import java.util.Map;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
@@ -15,6 +16,7 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 	private Map<String, Boolean> options;
 	
 	private List<UnusedFieldWrapper> unusedPrivateFields = new ArrayList<>();
+	private List<SimpleName> internalReassignments = new ArrayList<>();
 	private List<VariableDeclarationFragment> nonPrivateCandidates = new ArrayList<>();
 	
 	public UnusedFieldsCandidatesVisitor(Map<String, Boolean>options) {
@@ -55,6 +57,8 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 		return nonPrivateCandidates;
 	}
 
-	
+	public List<SimpleName> getInternalReassignments() {
+		return this.internalReassignments;
+	}
 	
 }
