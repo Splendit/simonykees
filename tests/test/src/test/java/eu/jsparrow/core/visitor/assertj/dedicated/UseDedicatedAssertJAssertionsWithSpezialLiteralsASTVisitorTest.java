@@ -240,4 +240,13 @@ public class UseDedicatedAssertJAssertionsWithSpezialLiteralsASTVisitorTest exte
 		assertChange(original, expected);
 
 	}
+
+	@Test
+	void visit_ObjectIsNotEqualToZero_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "		Object o = new Object();\n"
+				+ "		assertThat(o).isNotEqualTo(0);";
+
+		assertNoChange(original);
+	}
 }

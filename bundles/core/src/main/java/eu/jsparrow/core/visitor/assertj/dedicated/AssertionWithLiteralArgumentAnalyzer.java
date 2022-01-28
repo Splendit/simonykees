@@ -7,7 +7,9 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -32,7 +34,7 @@ public class AssertionWithLiteralArgumentAnalyzer {
 	private static final List<String> ZERO_LITERAL_TOKENS = Collections.unmodifiableList(Arrays.asList(
 			"0", "0L", "0l", "0F", "0f", "0.0F", "0.0f", "0.0"));
 
-	static Optional<String> findNameReplacementForNullLiteralArgument(String methodName, Expression argument) {
+	private static Optional<String> findNameReplacementForNullLiteralArgument(String methodName, Expression argument) {
 		if (argument.getNodeType() == ASTNode.NULL_LITERAL) {
 			if (methodName.equals(Constants.IS_SAME_AS) || methodName.equals(Constants.IS_EQUAL_TO)) {
 				return Optional.of(Constants.IS_NULL);
@@ -44,13 +46,18 @@ public class AssertionWithLiteralArgumentAnalyzer {
 		return Optional.empty();
 	}
 
-	static Optional<String> findNameReplacementForZeroLiteralArgument(Expression assertThatArgument, String methodName,
-			Expression argument) {
-		if (argument.getNodeType() == ASTNode.NUMBER_LITERAL) {
-			NumberLiteral numberLiteral = (NumberLiteral) argument;
+	private static Optional<String> findNameReplacementForZeroLiteralArgument(Expression assertThatArgument,
+			String methodName,
+			Expression assertionArgument) {
+		if (assertionArgument.getNodeType() == ASTNode.NUMBER_LITERAL) {
+			NumberLiteral numberLiteral = (NumberLiteral) assertionArgument;
 			String numericTooken = numberLiteral.getToken();
 			if (ZERO_LITERAL_TOKENS.contains(numericTooken)) {
+				if (isResolvedAsUnsuportedArgument(assertionArgument)) {
+					return Optional.empty();
+				}
 				if (isNumericAssertThatArgumentType(assertThatArgument)) {
+
 					if (methodName.equals(Constants.IS_EQUAL_TO)) {
 						return Optional.of(Constants.IS_ZERO);
 					}
@@ -81,16 +88,41 @@ public class AssertionWithLiteralArgumentAnalyzer {
 		return Optional.empty();
 	}
 
-	static Optional<String> findNameForAssertionWithoutArgument(Expression assertThatArgument, String methodName,
-			Expression argument) {
+	private static boolean isResolvedAsUnsuportedArgument(Expression assertionArgument) {
+		if (assertionArgument.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+			MethodInvocation assumedAssertion = (MethodInvocation) assertionArgument.getParent();
+			if (assumedAssertion.getName()
+				.getIdentifier()
+				.equals(Constants.OBJECT_EQUALS)) {
+				return false;
+			}
+
+			IMethodBinding assertionMethodBinding = assumedAssertion.resolveMethodBinding();
+
+			if (assertionMethodBinding == null) {
+				return true;
+			}
+			ITypeBinding[] parameterTypes = assertionMethodBinding.getMethodDeclaration()
+				.getParameterTypes();
+			if (parameterTypes.length != 1) {
+				return true;
+			}
+			return ClassRelationUtil.isContentOfType(parameterTypes[0], java.lang.Object.class.getName());
+		}
+		return false;
+	}
+
+	private static Optional<String> findNameForAssertionWithoutArgument(Expression assertThatArgument,
+			String methodName,
+			Expression assertionArgument) {
 		Optional<String> optionalNameForAssertionWithoutArgument = findNameReplacementForNullLiteralArgument(methodName,
-				argument);
+				assertionArgument);
 		if (optionalNameForAssertionWithoutArgument.isPresent()) {
 			return optionalNameForAssertionWithoutArgument;
 		}
 
 		optionalNameForAssertionWithoutArgument = findNameReplacementForZeroLiteralArgument(assertThatArgument,
-				methodName, argument);
+				methodName, assertionArgument);
 		if (optionalNameForAssertionWithoutArgument.isPresent()) {
 			return optionalNameForAssertionWithoutArgument;
 		}
@@ -112,7 +144,7 @@ public class AssertionWithLiteralArgumentAnalyzer {
 
 	}
 
-	public static boolean isZeroLiteralToken(Expression expression) {
+	static boolean isZeroLiteralToken(Expression expression) {
 		if (expression.getNodeType() != ASTNode.NUMBER_LITERAL) {
 			return false;
 		}
