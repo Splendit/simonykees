@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import eu.jsparrow.ui.wizard.IValueChangeListener;
@@ -14,8 +15,8 @@ public class RemoveDeadCodeWizardPageModel {
 
 	private List<String> classMemberTypes;
 	private String searchScope;
-	private String removeTestCode;
-	private String removeInitializersWithSideEffects;
+	private boolean removeTestCode;
+	private boolean removeInitializersWithSideEffects;
 	
 
 	public RemoveDeadCodeWizardPageModel() {
@@ -63,12 +64,12 @@ public class RemoveDeadCodeWizardPageModel {
 		notifyListeners();
 	}
 	
-	public void setRemoveTestCode(String newValue) {
+	public void setRemoveTestCode(boolean newValue) {
 		this.removeTestCode = newValue;
 		notifyListeners();
 	}
 	
-	public void setRemoveInitializersWithSideEffects(String newValue) {
+	public void setRemoveInitializersWithSideEffects(boolean newValue) {
 		this.removeInitializersWithSideEffects = newValue;
 		notifyListeners();
 	}
@@ -78,5 +79,13 @@ public class RemoveDeadCodeWizardPageModel {
 		searchScopes.add("Project");
 		searchScopes.add("Workspace");
 		return searchScopes;
+	}
+	
+	public Map<String, Boolean> getOptionsMap() {
+		return Collections.emptyMap();
+	}
+	
+	public String getSearchScope() {
+		return this.searchScope;
 	}
 }

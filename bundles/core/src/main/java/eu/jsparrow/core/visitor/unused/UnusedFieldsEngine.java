@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.unused;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -44,28 +46,42 @@ public class UnusedFieldsEngine {
 	 */
 
 	private String scope;
+	private Set<ICompilationUnit> targetCompilationUnits = new HashSet<>();
 	
 	public UnusedFieldsEngine(String scope) {
 		this.scope = scope;
 	}
 
 	public List<UnusedFieldWrapper> findUnusedFields(List<ICompilationUnit> selectedJavaElements,
-			Map<String, Boolean> optionsMap) {
+			Map<String, Boolean> optionsMap, SubMonitor subMonitor) {
 		List<CompilationUnit> compilationUnits = new ArrayList<>();
+		List<UnusedFieldWrapper> list = new ArrayList<>();
 		for (ICompilationUnit icu : selectedJavaElements) {
 			CompilationUnit cu = RefactoringUtil.parse(icu);
 			compilationUnits.add(cu);
-		}
-		
-		List<UnusedFieldWrapper> list = new ArrayList<>();
-		for (CompilationUnit cu : compilationUnits) {
+
 			UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(optionsMap);
 			cu.accept(visitor);
 			List<UnusedFieldWrapper> unusedPrivateFields = visitor.getUnusedPrivateFields();
-			list.addAll(unusedPrivateFields);
+			if(!unusedPrivateFields.isEmpty()) {
+				list.addAll(unusedPrivateFields);
+				targetCompilationUnits.add(icu);
+			}
+
 			List<VariableDeclarationFragment> nonPrivateCandidates = visitor.getNonPrivateCandidates();
 			List<SimpleName> internalReassignments = visitor.getInternalReassignments();
 			List<UnusedFieldWrapper> nonPrivate = findExternalUnusedReferences(cu, internalReassignments, nonPrivateCandidates);
+			if (!nonPrivate.isEmpty()) {
+				targetCompilationUnits.add(icu);
+			}
+		
+			for(UnusedFieldWrapper unused : nonPrivate) {
+				List<UnusedExternalReferences> externalReferences = unused.getUnusedExternalReferences();
+				for(UnusedExternalReferences r : externalReferences) {
+					// TOOD: taking target compilation units from a cache is going to be a lot easier.
+					targetCompilationUnits.add((ICompilationUnit) r.getCompilationUnit().getJavaElement());
+				}
+			}
 			list.addAll(nonPrivate);
 			
 		}
@@ -103,6 +119,7 @@ public class UnusedFieldsEngine {
 		Set<ICompilationUnit> targetICUs = fieldReferencesSearchEngine.getTargetIJavaElements();
 		/*
 		 * Make a cache with parsed compilation units. 
+		 * Keep  all the icu-s in a targetCompilationUnits field. 
 		 */
 		TypeDeclaration typDeclaration = ASTNodeUtil.getSpecificAncestor(fragment, TypeDeclaration.class);
 		List<UnusedExternalReferences> unusedExternalreferences = new ArrayList<>();
@@ -125,7 +142,7 @@ public class UnusedFieldsEngine {
 		
 		// FIXME this code is repeated
 
-		if ("Project".equalsIgnoreCase(modelSearchScope)) {
+		if ("Project".equalsIgnoreCase(modelSearchScope)) { //$NON-NLS-1$
 			return new IJavaElement[] { javaProject };
 		}
 
@@ -144,6 +161,10 @@ public class UnusedFieldsEngine {
 			logger.error(e.getMessage(), e);
 		}
 		return projectList.toArray(new IJavaElement[0]);
+	}
+
+	public Set<ICompilationUnit> getTargetCompilationUnits() {
+		return targetCompilationUnits;
 	}
 	
 

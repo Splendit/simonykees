@@ -73,7 +73,7 @@ public class RemoveDeadCodeWizardHandler extends AbstractRuleWizardHandler {
 			return false;
 		}
 
-		Job job = new Job("Find dead code") {
+		Job job = new Job("Find dead code") { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Function<List<ICompilationUnit>, AbstractRuleWizard> wizardGenerator = RemoveDeadCodeWizard::new;

@@ -52,7 +52,7 @@ public class RemoveDeadCodeWizardPage extends NewElementWizardPage {
 
 		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont())
 			.setStyle(SWT.BOLD);
-		boldFont = boldDescriptor.createFont(composite.getDisplay());
+		boldFont = boldDescriptor.createFont(composite.getDisplay());//FIXME dispose
 		
 		createClassMemberChoosingPart(composite);
 		createSearchScopeChoosingPart(composite);
@@ -114,7 +114,9 @@ public class RemoveDeadCodeWizardPage extends NewElementWizardPage {
 		controller.searchScopeSelectionChanged(((Button) scopesGroup.getChildren()[0]).getText());
 	}
 	
+	
 	private void createRemoveTestPart(Composite parent) {
+		// FIXME: extract method and reuse it. 
 		Label partTitle = new Label(parent, SWT.NONE);
 		partTitle.setText("Remove tests for unused code");
 		partTitle.setFont(boldFont);
@@ -130,12 +132,13 @@ public class RemoveDeadCodeWizardPage extends NewElementWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controller.removeTestCodeSelectionChaged(((Button) e.getSource()).getText());// FIXME; change to boolean
+				boolean selection = ((Button) e.getSource()).getSelection();
+				controller.removeTestCodeSelectionChanged(selection);
 			}
 		});
 
-		button.setSelection(true);
-		controller.removeTestCodeSelectionChaged(button.getText()); // FIXME; change to boolean
+		button.setSelection(false);
+		controller.removeTestCodeSelectionChanged(false);
 	}
 	
 	private void createRemoveInitializersWithSideEffectsSelectionChangedPart(Composite parent) {
@@ -154,12 +157,13 @@ public class RemoveDeadCodeWizardPage extends NewElementWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controller.removeInitializersWithSideEffectsSelectionChanged(((Button) e.getSource()).getText());// FIXME; change to boolean
+				boolean selection = ((Button) e.getSource()).getSelection();
+				controller.removeInitializersWithSideEffectsSelectionChanged(selection);
 			}
 		});
 
-		button.setSelection(true);
-		controller.removeInitializersWithSideEffectsSelectionChanged(button.getText()); // FIXME; change to boolean
+		button.setSelection(false);
+		controller.removeInitializersWithSideEffectsSelectionChanged(false);
 	}
 
 	private void updateView() {

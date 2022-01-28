@@ -2,9 +2,13 @@ package eu.jsparrow.core.rule.impl.unused;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.visitor.unused.RemoveUnusedFieldsASTVisitor;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
@@ -34,5 +38,13 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 	@Override
 	protected AbstractASTRewriteASTVisitor visitorFactory() {
 		return new RemoveUnusedFieldsASTVisitor(unusedFields);
+	}
+
+	public Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> computeDocumentChangesPerField() {
+		return Collections.emptyMap();
+	}
+	
+	public List<UnusedFieldWrapper> getUnusedFieldWrapperList() {
+		return this.unusedFields;
 	}
 }

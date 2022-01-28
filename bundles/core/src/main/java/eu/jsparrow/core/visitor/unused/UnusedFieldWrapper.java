@@ -3,9 +3,12 @@ package eu.jsparrow.core.visitor.unused;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+
+import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 
 public class UnusedFieldWrapper {
 
@@ -36,4 +39,19 @@ public class UnusedFieldWrapper {
 		return null;
 	}
 
+	public JavaAccessModifier getFieldModifier() {
+		return null;
+	}
+
+	public IPath getDeclarationPath() {
+		return null;
+	}
+
+	public String getFieldName() {
+		return null;
+	}
+
+	public String getClassDeclarationName() {
+		return null;
+	}
 }

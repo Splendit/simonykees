@@ -18,11 +18,11 @@ public class RemoveDeadCodeWizardPageController {
 		model.setSearchScope(newValue);
 	}
 	
-	public void removeTestCodeSelectionChaged(String newValue) {
+	public void removeTestCodeSelectionChanged(boolean newValue) {
 		model.setRemoveTestCode(newValue);
 	}
 	
-	public void removeInitializersWithSideEffectsSelectionChanged(String newValue) {
+	public void removeInitializersWithSideEffectsSelectionChanged(boolean newValue) {
 		model.setRemoveInitializersWithSideEffects(newValue);
 	}
 }
