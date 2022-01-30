@@ -4,12 +4,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -27,12 +27,35 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 public class AssertionWithLiteralArgumentAnalyzer {
 
 	@SuppressWarnings("nls")
-	private static final List<String> PRIMITIVE_NUMERIC_TYPES = Collections.unmodifiableList(Arrays.asList(
-			"byte", "short", "int", "long", "float", "double"));
-
-	@SuppressWarnings("nls")
 	private static final List<String> ZERO_LITERAL_TOKENS = Collections.unmodifiableList(Arrays.asList(
 			"0", "0L", "0l", "0F", "0f", "0.0F", "0.0f", "0.0"));
+
+	private static final List<String> ASSERT_THAT_TYPES_FOR_INT_ZERO = Stream.of(
+			int.class,
+			long.class,
+			float.class,
+			double.class,
+			Integer.class,
+			Long.class,
+			Float.class,
+			Double.class,
+			java.math.BigInteger.class)
+		.map(Class::getName)
+		.collect(Collectors.toList());
+
+	private static final List<String> ASSERT_THAT_TYPES_FOR_FLOAT_ZERO = Stream.of(
+			float.class,
+			double.class,
+			Float.class,
+			Double.class)
+		.map(Class::getName)
+		.collect(Collectors.toList());
+
+	private static final List<String> ASSERT_THAT_TYPES_FOR_DOUBLE_ZERO = Stream.of(
+			double.class,
+			Double.class)
+		.map(Class::getName)
+		.collect(Collectors.toList());
 
 	private static Optional<String> findNameReplacementForNullLiteralArgument(String methodName, Expression argument) {
 		if (argument.getNodeType() == ASTNode.NULL_LITERAL) {
@@ -53,10 +76,7 @@ public class AssertionWithLiteralArgumentAnalyzer {
 			NumberLiteral numberLiteral = (NumberLiteral) assertionArgument;
 			String numericTooken = numberLiteral.getToken();
 			if (ZERO_LITERAL_TOKENS.contains(numericTooken)) {
-				if (isResolvedAsUnsuportedArgument(assertionArgument)) {
-					return Optional.empty();
-				}
-				if (isNumericAssertThatArgumentType(assertThatArgument)) {
+				if (isSupportedNumericAssertThatArgument(assertThatArgument, numberLiteral)) {
 
 					if (methodName.equals(Constants.IS_EQUAL_TO)) {
 						return Optional.of(Constants.IS_ZERO);
@@ -88,26 +108,22 @@ public class AssertionWithLiteralArgumentAnalyzer {
 		return Optional.empty();
 	}
 
-	private static boolean isResolvedAsUnsuportedArgument(Expression assertionArgument) {
-		if (assertionArgument.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
-			MethodInvocation assumedAssertion = (MethodInvocation) assertionArgument.getParent();
-			if (assumedAssertion.getName()
-				.getIdentifier()
-				.equals(Constants.OBJECT_EQUALS)) {
-				return false;
-			}
+	private static boolean isSupportedNumericAssertThatArgument(Expression assertThatArgument,
+			NumberLiteral numberLiteral) {
+		ITypeBinding assertThatArgumentTypeBinding = assertThatArgument.resolveTypeBinding();
+		ITypeBinding numberLiteralTypeBinding = numberLiteral.resolveTypeBinding();
 
-			IMethodBinding assertionMethodBinding = assumedAssertion.resolveMethodBinding();
+		if (ClassRelationUtil.isContentOfType(numberLiteralTypeBinding, int.class.getName())
+				|| ClassRelationUtil.isContentOfType(numberLiteralTypeBinding, long.class.getName())) {
+			return ClassRelationUtil.isContentOfTypes(assertThatArgumentTypeBinding, ASSERT_THAT_TYPES_FOR_INT_ZERO);
+		}
 
-			if (assertionMethodBinding == null) {
-				return true;
-			}
-			ITypeBinding[] parameterTypes = assertionMethodBinding.getMethodDeclaration()
-				.getParameterTypes();
-			if (parameterTypes.length != 1) {
-				return true;
-			}
-			return ClassRelationUtil.isContentOfType(parameterTypes[0], java.lang.Object.class.getName());
+		if (ClassRelationUtil.isContentOfType(numberLiteralTypeBinding, float.class.getName())) {
+			return ClassRelationUtil.isContentOfTypes(assertThatArgumentTypeBinding, ASSERT_THAT_TYPES_FOR_FLOAT_ZERO);
+		}
+
+		if (ClassRelationUtil.isContentOfType(numberLiteralTypeBinding, double.class.getName())) {
+			return ClassRelationUtil.isContentOfTypes(assertThatArgumentTypeBinding, ASSERT_THAT_TYPES_FOR_DOUBLE_ZERO);
 		}
 		return false;
 	}
@@ -151,18 +167,6 @@ public class AssertionWithLiteralArgumentAnalyzer {
 		NumberLiteral numberLiteral = (NumberLiteral) expression;
 		String numericTooken = numberLiteral.getToken();
 		return ZERO_LITERAL_TOKENS.contains(numericTooken);
-	}
-
-	private static boolean isNumericAssertThatArgumentType(Expression assertThatArgument) {
-		ITypeBinding assertThatArgumentType = assertThatArgument.resolveTypeBinding();
-		if (assertThatArgumentType == null) {
-			return false;
-		}
-		if (assertThatArgumentType.isPrimitive()) {
-			return ClassRelationUtil.isContentOfTypes(assertThatArgumentType, PRIMITIVE_NUMERIC_TYPES);
-		}
-		return ClassRelationUtil.isInheritingContentOfTypes(assertThatArgumentType,
-				Arrays.asList(java.lang.Number.class.getName()));
 	}
 
 	private AssertionWithLiteralArgumentAnalyzer() {

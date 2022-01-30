@@ -147,6 +147,48 @@ public class UseDedicatedAssertJAssertionsWithSpezialLiteralsASTVisitorTest exte
 		assertChange(original, expected);
 	}
 
+	public static Stream<Arguments> assertThatValueIsEqualToZeroLiteral() throws Exception {
+		return Stream.of(
+				Arguments.of("0", "0"),
+				Arguments.of("0L", "0"),
+				Arguments.of("0.0F", "0"),
+				Arguments.of("0.0", "0"),
+				Arguments.of("Integer.valueOf(0)", "0"),
+				Arguments.of("Long.valueOf(0L)", "0"),
+				Arguments.of("Float.valueOf(0.0F)", "0"),
+				Arguments.of("Double.valueOf(0.0)", "0"),
+				Arguments.of("java.math.BigInteger.valueOf(0L)", "0"),
+				Arguments.of("0", "0L"),
+				Arguments.of("0L", "0L"),
+				Arguments.of("0.0F", "0L"),
+				Arguments.of("0.0", "0L"),
+				Arguments.of("Integer.valueOf(0)", "0L"),
+				Arguments.of("Long.valueOf(0L)", "0L"),
+				Arguments.of("Float.valueOf(0.0F)", "0L"),
+				Arguments.of("Double.valueOf(0.0)", "0L"),
+				Arguments.of("java.math.BigInteger.valueOf(0L)", "0L"),
+				Arguments.of("0.0F", "0.0F"),
+				Arguments.of("0.0", "0.0F"),
+				Arguments.of("Float.valueOf(0.0F)", "0.0F"),
+				Arguments.of("Double.valueOf(0.0)", "0.0F"),
+				Arguments.of("0.0", "0.0"),
+				Arguments.of("Double.valueOf(0.0)", "0.0"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("assertThatValueIsEqualToZeroLiteral")
+	void visit_AssertThatValueIsEqualToZeroLiteral_shouldTransform(String value, String zeroLiteral)
+			throws Exception {
+
+		String original = String.format("" +
+				"assertThat(%s).isEqualTo(%s);", value, zeroLiteral);
+
+		String expected = String.format("" +
+				"assertThat(%s).isZero();", value, zeroLiteral);
+
+		assertChange(original, expected);
+	}
+
 	@Test
 	void visit_DoubleWrapperIsEqualToZero_shouldTransform() throws Exception {
 		String original = "" +
