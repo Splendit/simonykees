@@ -70,79 +70,55 @@ public class AssertionWithLiteralArgumentAnalyzer {
 	}
 
 	private static Optional<String> findNameReplacementForZeroLiteralArgument(Expression assertThatArgument,
-			String methodName,
-			Expression assertionArgument) {
-		if (assertionArgument.getNodeType() == ASTNode.NUMBER_LITERAL) {
-			NumberLiteral numberLiteral = (NumberLiteral) assertionArgument;
-			String numericTooken = numberLiteral.getToken();
-			if (ZERO_LITERAL_TOKENS.contains(numericTooken)) {
-				if (isSupportedNumericAssertThatArgument(assertThatArgument, numberLiteral)) {
-
-					if (methodName.equals(Constants.IS_EQUAL_TO)) {
-						return Optional.of(Constants.IS_ZERO);
-					}
-					if (methodName.equals(Constants.IS_NOT_EQUAL_TO)) {
-						return Optional.of(Constants.IS_NOT_ZERO);
-					}
-					if (methodName.equals(Constants.IS_GREATER_THAN)) {
-						return Optional.of(Constants.IS_POSITIVE);
-					}
-					if (methodName.equals(Constants.IS_LESS_THAN)) {
-						return Optional.of(Constants.IS_NEGATIVE);
-					}
-					if (methodName.equals(Constants.IS_LESS_THAN_OR_EQUAL_TO)) {
-						return Optional.of(Constants.IS_NOT_POSITIVE);
-					}
-					if (methodName.equals(Constants.IS_GREATER_THAN_OR_EQUAL_TO)) {
-						return Optional.of(Constants.IS_NOT_NEGATIVE);
-					}
-				}
-				if (methodName.equals(Constants.HAS_SIZE) ||
-						methodName.equals(Constants.HAS_SIZE_LESS_THAN_OR_EQUAL_TO)) {
-					return Optional.of(Constants.IS_EMPTY);
-				} else if (methodName.equals(Constants.HAS_SIZE_GREATER_THAN)) {
-					return Optional.of(Constants.IS_NOT_EMPTY);
-				}
+			String methodName, ITypeBinding zeroLiteralTypeBinding) {
+		if (isSupportedNumericAssertThatArgument(assertThatArgument, zeroLiteralTypeBinding)) {
+			if (methodName.equals(Constants.IS_EQUAL_TO)) {
+				return Optional.of(Constants.IS_ZERO);
+			}
+			if (methodName.equals(Constants.IS_NOT_EQUAL_TO)) {
+				return Optional.of(Constants.IS_NOT_ZERO);
+			}
+			if (methodName.equals(Constants.IS_GREATER_THAN)) {
+				return Optional.of(Constants.IS_POSITIVE);
+			}
+			if (methodName.equals(Constants.IS_LESS_THAN)) {
+				return Optional.of(Constants.IS_NEGATIVE);
+			}
+			if (methodName.equals(Constants.IS_LESS_THAN_OR_EQUAL_TO)) {
+				return Optional.of(Constants.IS_NOT_POSITIVE);
+			}
+			if (methodName.equals(Constants.IS_GREATER_THAN_OR_EQUAL_TO)) {
+				return Optional.of(Constants.IS_NOT_NEGATIVE);
 			}
 		}
+		if (methodName.equals(Constants.HAS_SIZE) ||
+				methodName.equals(Constants.HAS_SIZE_LESS_THAN_OR_EQUAL_TO)) {
+			return Optional.of(Constants.IS_EMPTY);
+		}
+		if (methodName.equals(Constants.HAS_SIZE_GREATER_THAN)) {
+			return Optional.of(Constants.IS_NOT_EMPTY);
+		}
+
 		return Optional.empty();
 	}
 
 	private static boolean isSupportedNumericAssertThatArgument(Expression assertThatArgument,
-			NumberLiteral numberLiteral) {
+			ITypeBinding zeroLiteralTypeBinding) {
 		ITypeBinding assertThatArgumentTypeBinding = assertThatArgument.resolveTypeBinding();
-		ITypeBinding numberLiteralTypeBinding = numberLiteral.resolveTypeBinding();
 
-		if (ClassRelationUtil.isContentOfType(numberLiteralTypeBinding, int.class.getName())
-				|| ClassRelationUtil.isContentOfType(numberLiteralTypeBinding, long.class.getName())) {
+		if (ClassRelationUtil.isContentOfType(zeroLiteralTypeBinding, int.class.getName())
+				|| ClassRelationUtil.isContentOfType(zeroLiteralTypeBinding, long.class.getName())) {
 			return ClassRelationUtil.isContentOfTypes(assertThatArgumentTypeBinding, ASSERT_THAT_TYPES_FOR_INT_ZERO);
 		}
 
-		if (ClassRelationUtil.isContentOfType(numberLiteralTypeBinding, float.class.getName())) {
+		if (ClassRelationUtil.isContentOfType(zeroLiteralTypeBinding, float.class.getName())) {
 			return ClassRelationUtil.isContentOfTypes(assertThatArgumentTypeBinding, ASSERT_THAT_TYPES_FOR_FLOAT_ZERO);
 		}
 
-		if (ClassRelationUtil.isContentOfType(numberLiteralTypeBinding, double.class.getName())) {
+		if (ClassRelationUtil.isContentOfType(zeroLiteralTypeBinding, double.class.getName())) {
 			return ClassRelationUtil.isContentOfTypes(assertThatArgumentTypeBinding, ASSERT_THAT_TYPES_FOR_DOUBLE_ZERO);
 		}
 		return false;
-	}
-
-	private static Optional<String> findNameForAssertionWithoutArgument(Expression assertThatArgument,
-			String methodName,
-			Expression assertionArgument) {
-		Optional<String> optionalNameForAssertionWithoutArgument = findNameReplacementForNullLiteralArgument(methodName,
-				assertionArgument);
-		if (optionalNameForAssertionWithoutArgument.isPresent()) {
-			return optionalNameForAssertionWithoutArgument;
-		}
-
-		optionalNameForAssertionWithoutArgument = findNameReplacementForZeroLiteralArgument(assertThatArgument,
-				methodName, assertionArgument);
-		if (optionalNameForAssertionWithoutArgument.isPresent()) {
-			return optionalNameForAssertionWithoutArgument;
-		}
-		return Optional.empty();
 	}
 
 	static Optional<AssertJAssertThatWithAssertionData> findDataForAssertionWithLiteral(
@@ -154,7 +130,16 @@ public class AssertionWithLiteralArgumentAnalyzer {
 		}
 		String assertionName = assertThatWithAssertionData.getAssertionName();
 		Expression assertThatArgument = assertThatWithAssertionData.getAssertThatArgument();
-		return findNameForAssertionWithoutArgument(assertThatArgument, assertionName, assertionArgument)
+
+		if (isZeroLiteralToken(assertionArgument)) {
+			ITypeBinding zeroLiteralTypeBinding = assertionArgument.resolveTypeBinding();
+			return findNameReplacementForZeroLiteralArgument(assertThatArgument, assertionName, zeroLiteralTypeBinding)
+				.map(nameForAssertionWithoutArgument -> new AssertJAssertThatWithAssertionData(
+						assertThatArgument,
+						nameForAssertionWithoutArgument));
+		}
+
+		return findNameReplacementForNullLiteralArgument(assertionName, assertionArgument)
 			.map(nameForAssertionWithoutArgument -> new AssertJAssertThatWithAssertionData(assertThatArgument,
 					nameForAssertionWithoutArgument));
 
