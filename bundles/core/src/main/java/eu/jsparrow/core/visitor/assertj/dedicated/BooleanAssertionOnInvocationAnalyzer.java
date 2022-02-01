@@ -78,7 +78,8 @@ class BooleanAssertionOnInvocationAnalyzer {
 			AssertJAssertThatWithAssertionData assertThatWithAssertionData,
 			Expression newAssertThatArgument,
 			MethodInvocation invocationAsAssertThatArgument,
-			ITypeBinding newAssertThatArgumentTypeBinding) {
+			ITypeBinding newAssertThatArgumentTypeBinding,
+			IMethodBinding assertThatArgumentMethodBinding) {
 
 		List<Expression> newAssertionArguments = ASTNodeUtil.convertToTypedList(
 				invocationAsAssertThatArgument.arguments(),
@@ -87,45 +88,23 @@ class BooleanAssertionOnInvocationAnalyzer {
 		if (newAssertionArguments.size() > 1) {
 			return Optional.empty();
 		}
+
 		String booleanAssertion = assertThatWithAssertionData.getAssertionName();
 
-		String identifier = invocationAsAssertThatArgument.getName()
+		String methodNameToMap = invocationAsAssertThatArgument.getName()
 			.getIdentifier();
 
-		if (identifier.equals(Constants.OBJECT_EQUALS)) {
-			if (newAssertionArguments.size() != 1) {
-				return Optional.empty();
-			}
-			Expression equalsArgument = newAssertionArguments.get(0);
-
-			if (booleanAssertion.equals(Constants.IS_TRUE) && equalsArgument.getNodeType() == ASTNode.NULL_LITERAL) {
-				return Optional.empty();
-			}
-
-			ITypeBinding equalsArgumentTypeBinding = equalsArgument.resolveTypeBinding();
-			if (equalsArgumentTypeBinding == null) {
-				return Optional.empty();
-			}
-			if (isNumericEqualsDissimilarPrimitiveNumeric(newAssertThatArgumentTypeBinding, equalsArgumentTypeBinding)) {
-				return Optional.empty();
-			}
-		}
-
-		IMethodBinding methodBinding = invocationAsAssertThatArgument.resolveMethodBinding();
-		if (methodBinding == null) {
+		if (methodNameToMap.equals(Constants.OBJECT_EQUALS)
+				&& !analyzeEqualsMethod(booleanAssertion, newAssertionArguments, newAssertThatArgumentTypeBinding,
+						assertThatArgumentMethodBinding)) {
 			return Optional.empty();
 		}
 
-		if (!analyzeMethodBinding(methodBinding)) {
-			return Optional.empty();
-		}
-
-		String methodName = methodBinding.getName();
 		String newAssertionName;
 		if (booleanAssertion.equals(Constants.IS_FALSE)) {
-			newAssertionName = mapToNegatedAssertJAssertions.get(methodName);
+			newAssertionName = mapToNegatedAssertJAssertions.get(methodNameToMap);
 		} else {
-			newAssertionName = mapToAssertJAssertions.get(methodName);
+			newAssertionName = mapToAssertJAssertions.get(methodNameToMap);
 		}
 		if (newAssertionName != null) {
 			if (newAssertionArguments.isEmpty()) {
@@ -139,6 +118,29 @@ class BooleanAssertionOnInvocationAnalyzer {
 
 		}
 		return Optional.empty();
+
+	}
+
+	private boolean analyzeEqualsMethod(String booleanAssertion, List<Expression> newAssertionArguments,
+			ITypeBinding newAssertThatArgumentTypeBinding, IMethodBinding equalsMethodBinding) {
+
+		if (!analyzeEqualsMethodParameters(equalsMethodBinding)) {
+			return false;
+		}
+		if (newAssertionArguments.size() != 1) {
+			return false;
+		}
+		Expression equalsArgument = newAssertionArguments.get(0);
+
+		if (booleanAssertion.equals(Constants.IS_TRUE) && equalsArgument.getNodeType() == ASTNode.NULL_LITERAL) {
+			return false;
+		}
+
+		ITypeBinding equalsArgumentTypeBinding = equalsArgument.resolveTypeBinding();
+		if (equalsArgumentTypeBinding == null) {
+			return false;
+		}
+		return !isNumericEqualsDissimilarPrimitiveNumeric(newAssertThatArgumentTypeBinding, equalsArgumentTypeBinding);
 
 	}
 
@@ -158,16 +160,8 @@ class BooleanAssertionOnInvocationAnalyzer {
 				new ITypeBinding[] { equalsArgumentTypeBinding });
 	}
 
-	protected boolean analyzeMethodBinding(IMethodBinding methodBinding) {
-		return analyzeEqualsMethodParameters(methodBinding);
-	}
-
-	private static boolean analyzeEqualsMethodParameters(IMethodBinding methodBinding) {
-		String methodName = methodBinding.getName();
-		if (!methodName.equals(OBJECT_EQUALS)) {
-			return true;
-		}
-		ITypeBinding[] parameterTypes = methodBinding.getMethodDeclaration()
+	private static boolean analyzeEqualsMethodParameters(IMethodBinding equalsMethodBinding) {
+		ITypeBinding[] parameterTypes = equalsMethodBinding.getMethodDeclaration()
 			.getParameterTypes();
 		if (parameterTypes.length != 1) {
 			return false;

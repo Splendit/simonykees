@@ -8,9 +8,12 @@ import static eu.jsparrow.core.visitor.assertj.dedicated.SupportedAssertJAssertT
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
@@ -42,8 +45,15 @@ class BooleanAssertionAnalyzerForPathMethods extends BooleanAssertionOnInvocatio
 	}
 
 	@Override
-	protected boolean analyzeMethodBinding(IMethodBinding methodBinding) {
-		return super.analyzeMethodBinding(methodBinding) && analyzePathMethodParameter(methodBinding);
+	Optional<AssertJAssertThatWithAssertionData> findDedicatedAssertJAssertionData(
+			AssertJAssertThatWithAssertionData assertThatWithAssertionData, Expression newAssertThatArgument,
+			MethodInvocation invocationAsAssertThatArgument, ITypeBinding newAssertThatArgumentTypeBinding,
+			IMethodBinding assertThatArgumentMethodBinding) {
+		if (analyzePathMethodParameter(assertThatArgumentMethodBinding)) {
+			return super.findDedicatedAssertJAssertionData(assertThatWithAssertionData, newAssertThatArgument,
+					invocationAsAssertThatArgument, newAssertThatArgumentTypeBinding, assertThatArgumentMethodBinding);
+		}
+		return Optional.empty();
 	}
 
 	private boolean analyzePathMethodParameter(IMethodBinding methodBinding) {

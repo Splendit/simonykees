@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
@@ -222,6 +223,11 @@ public class AllBooleanAssertionsAnalyzer {
 		if (newAssertThatArgumentTypeBinding == null) {
 			return Optional.empty();
 		}
+		
+		IMethodBinding assertThatArgumentMethodBinding = invocationAsAssertThatArgument.resolveMethodBinding();
+		if (assertThatArgumentMethodBinding == null) {
+			return Optional.empty();
+		}
 
 		BooleanAssertionOnInvocationAnalyzer analyzer = BooleanAssertionOnInvocationAnalyzerFactory
 			.findAnalyzer(newAssertThatArgumentTypeBinding)
@@ -229,7 +235,8 @@ public class AllBooleanAssertionsAnalyzer {
 		if (analyzer != null) {
 			return analyzer.findDedicatedAssertJAssertionData(normalizedDataForBooleanAssertion, newAssertThatArgument,
 					invocationAsAssertThatArgument,
-					newAssertThatArgumentTypeBinding);
+					newAssertThatArgumentTypeBinding,
+					assertThatArgumentMethodBinding);
 
 		}
 		return Optional.empty();
