@@ -1183,7 +1183,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
+
 	@ParameterizedTest
 	@MethodSource("assertionsWithListSize")
 	void visit_AssertionWithArrayLengthAsQualifiedName_shouldTransform(String oldAssertion, String newAssertion)
@@ -1201,7 +1201,6 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-
 
 	@ParameterizedTest
 	@ValueSource(strings = {
@@ -1237,7 +1236,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				+ "		assertThat(string).hasSameSizeAs(string);";
 		assertChange(original, expected);
 	}
-	
+
 	@ParameterizedTest
 	@ValueSource(strings = {
 			"assertThat(intArray.length == intArray.length).isTrue()",
@@ -1253,7 +1252,6 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				+ "		assertThat(intArray).hasSameSizeAs(intArray);";
 		assertChange(original, expected);
 	}
-
 
 	@ParameterizedTest
 	@ValueSource(strings = {
@@ -1430,4 +1428,64 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				+ "		assertThat(localCass instanceof LocalClass).isTrue();";
 		assertNoChange(original);
 	}
+
+	public static Stream<Arguments> numericWrapperequalsPrimitiveNumericIsFalse() throws Exception {
+		return Stream.of(
+				Arguments.of("java.math.BigInteger.valueOf(10)", "10"),
+				Arguments.of("Double.valueOf(10.0)", "(byte) 10"),
+				Arguments.of("Double.valueOf(10.0)", "(short) 10"),
+				Arguments.of("Double.valueOf(10.0)", "10"),
+				Arguments.of("Double.valueOf(10.0)", "10L"),
+				Arguments.of("Double.valueOf(10.0)", "10.0F"),
+				Arguments.of("Float.valueOf(10.0F)", "(byte) 10"),
+				Arguments.of("Float.valueOf(10.0F)", "(short) 10"),
+				Arguments.of("Float.valueOf(10.0F)", "10"),
+				Arguments.of("Float.valueOf(10.0F)", "10L"),
+				Arguments.of("Long.valueOf(10L)", "(byte) 10"),
+				Arguments.of("Long.valueOf(10L)", "(short) 10"),
+				Arguments.of("Long.valueOf(10L)", "10"),
+				Arguments.of("Integer.valueOf(10)", "(byte) 10"),
+				Arguments.of("Integer.valueOf(10)", "(short) 10"),
+				Arguments.of("Short.valueOf((short) 10)", "(byte) 10"),
+				Arguments.of("java.math.BigInteger.valueOf(10)", "10"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("numericWrapperequalsPrimitiveNumericIsFalse")
+	void visit_NumericWrapperEqualsPrimitiveNumericIsFalse_shouldNotransform(String equalsExpression,
+			String equalsArgument) throws Exception {
+
+		String original = String.format("assertThat(%s.equals(%s)).isFalse();",
+				equalsExpression, equalsArgument);
+		assertNoChange(original);
+	}
+
+	
+	@Test
+	void visit_ObjectEqualsPrimitiveIntegerIsFalse_shouldTransform() throws Exception {
+		String original = "" +
+				"		Object object = new Object();\n"
+				+ "		assertThat(object.equals(10)).isFalse();";
+
+		String expected = "" +
+				"		Object object = new Object();\n"
+				+ "		assertThat(object).isNotEqualTo(10);";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_ObjectEqualsPrimitiveIntegerIsTrue_shouldTransform() throws Exception {
+		String original = "" +
+				"		Object object = Integer.valueOf(10);\n"
+				+ "		assertThat(object.equals(10)).isTrue();";
+
+		String expected = "" +
+				"		Object object = Integer.valueOf(10);\n"
+				+ "		assertThat(object).isEqualTo(10);";
+
+		assertChange(original, expected);
+
+	}
+	
 }

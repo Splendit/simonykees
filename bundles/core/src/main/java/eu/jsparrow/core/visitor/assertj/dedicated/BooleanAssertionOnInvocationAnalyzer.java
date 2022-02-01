@@ -4,6 +4,7 @@ import static eu.jsparrow.core.visitor.assertj.dedicated.Constants.IS_EQUAL_TO;
 import static eu.jsparrow.core.visitor.assertj.dedicated.Constants.IS_NOT_EQUAL_TO;
 import static eu.jsparrow.core.visitor.assertj.dedicated.Constants.OBJECT_EQUALS;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +48,12 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  */
 class BooleanAssertionOnInvocationAnalyzer {
 
+	private static final List<String> NUMBER_SINGLETON_LIST = Collections
+		.singletonList(java.lang.Number.class.getName());
+	@SuppressWarnings("nls")
+	private static final List<String> NUMERIC_PRIMITIVE_LIST = Collections
+		.unmodifiableList(Arrays.asList("byte", "short", "int", "long", "float", "double"));
+
 	private final Map<String, String> mapToAssertJAssertions;
 	private final Map<String, String> mapToNegatedAssertJAssertions;
 	private final Predicate<ITypeBinding> supportedTypeBindingPredicate;
@@ -80,17 +87,27 @@ class BooleanAssertionOnInvocationAnalyzer {
 		if (newAssertionArguments.size() > 1) {
 			return Optional.empty();
 		}
-
 		String booleanAssertion = assertThatWithAssertionData.getAssertionName();
-		if (booleanAssertion.equals(Constants.IS_TRUE)
-				&& newAssertionArguments.size() == 1) {
-			String identifier = invocationAsAssertThatArgument.getName()
-				.getIdentifier();
-			if (identifier.equals(Constants.OBJECT_EQUALS)) {
-				Expression equalsArgument = newAssertionArguments.get(0);
-				if (equalsArgument.getNodeType() == ASTNode.NULL_LITERAL) {
-					return Optional.empty();
-				}
+
+		String identifier = invocationAsAssertThatArgument.getName()
+			.getIdentifier();
+
+		if (identifier.equals(Constants.OBJECT_EQUALS)) {
+			if (newAssertionArguments.size() != 1) {
+				return Optional.empty();
+			}
+			Expression equalsArgument = newAssertionArguments.get(0);
+
+			if (booleanAssertion.equals(Constants.IS_TRUE) && equalsArgument.getNodeType() == ASTNode.NULL_LITERAL) {
+				return Optional.empty();
+			}
+
+			ITypeBinding equalsArgumentTypeBinding = equalsArgument.resolveTypeBinding();
+			if (equalsArgumentTypeBinding == null) {
+				return Optional.empty();
+			}
+			if (isNumericEqualsDissimilarPrimitiveNumeric(newAssertThatArgumentTypeBinding, equalsArgumentTypeBinding)) {
+				return Optional.empty();
 			}
 		}
 
@@ -123,6 +140,22 @@ class BooleanAssertionOnInvocationAnalyzer {
 		}
 		return Optional.empty();
 
+	}
+
+	private boolean isNumericEqualsDissimilarPrimitiveNumeric(ITypeBinding equalsExpressionTypeBinding,
+			ITypeBinding equalsArgumentTypeBinding) {
+
+		if (!ClassRelationUtil.isContentOfTypes(equalsArgumentTypeBinding, NUMERIC_PRIMITIVE_LIST)) {
+			return false;
+		}
+
+		if (!ClassRelationUtil.isInheritingContentOfTypes(equalsExpressionTypeBinding,
+				NUMBER_SINGLETON_LIST)) {
+			return false;
+		}
+
+		return !ClassRelationUtil.compareBoxedITypeBinding(new ITypeBinding[] { equalsExpressionTypeBinding },
+				new ITypeBinding[] { equalsArgumentTypeBinding });
 	}
 
 	protected boolean analyzeMethodBinding(IMethodBinding methodBinding) {
