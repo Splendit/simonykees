@@ -137,14 +137,16 @@ public class RemoveDeadCodeWizard extends AbstractRuleWizard {
 				try {
 					refactoringPipeline.prepareRefactoring(new ArrayList<>(targetCompilationUnits), childSecondPart);
 					// why not refactoringPipeline.createRefactoringStates(targetCompilationUnits);???
-					// refactoringPipeline.updateInitialSourceMap(); FIXME: what is this thing doing? 
+					 refactoringPipeline.updateInitialSourceMap(); //FIXME: what is this thing doing? 
 				} catch (RefactoringException e) {
 					e.printStackTrace();
 				}
 				
+				if(childSecondPart.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
 				
-				
-				return null;
+				return Status.OK_STATUS;
 			}
 
 		};
@@ -208,10 +210,15 @@ public class RemoveDeadCodeWizard extends AbstractRuleWizard {
 	}
 	
 	private void createAndShowPreviewWizard() {
+		Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes;
+		try {
+			changes = rule.computeDocumentChangesPerField();
+			synchronizeWithUIShowRefactoringPreviewWizard(changes);
+		} catch (JavaModelException e) {
+			logger.error("Cannot create document for displaying changes - " + e.getMessage(), e); //$NON-NLS-1$
+		}
 
-		Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes =  rule.computeDocumentChangesPerField();
 
-		synchronizeWithUIShowRefactoringPreviewWizard(changes);
 	}
 	
 	private void synchronizeWithUIShowRefactoringPreviewWizard(

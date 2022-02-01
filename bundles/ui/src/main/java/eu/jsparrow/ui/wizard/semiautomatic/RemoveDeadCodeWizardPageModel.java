@@ -2,11 +2,13 @@ package eu.jsparrow.ui.wizard.semiautomatic;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.ui.wizard.IValueChangeListener;
 
 public class RemoveDeadCodeWizardPageModel {
@@ -82,7 +84,29 @@ public class RemoveDeadCodeWizardPageModel {
 	}
 	
 	public Map<String, Boolean> getOptionsMap() {
-		return Collections.emptyMap();
+		Map<String, Boolean> map = new HashMap<>();
+		boolean removePrivateFields = classMemberTypes.contains("private fields");
+		boolean removeProtectedFields = classMemberTypes.contains("protected fields");
+		boolean removePublicFields = classMemberTypes.contains("public fields");
+		boolean removePackagePrivateFields = classMemberTypes.contains("package-private fields");
+		map.put(Constants.PRIVATE_FIELDS, removePrivateFields);
+		map.put(Constants.PROTECTED_FIELDS, removeProtectedFields);
+		map.put(Constants.PUBLIC_FIELDS, removePublicFields);
+		map.put(Constants.PACKAGE_PRIVATE_FIELDS, removePackagePrivateFields);
+		
+		map.put(Constants.PRIVATE_METHODS, false);
+		map.put(Constants.PROTECTED_METHODS, false);
+		map.put(Constants.PUBLIC_METHODS, false);
+		map.put(Constants.PACKAGE_PRIVATE_METHODS, false);
+		
+		map.put(Constants.PRIVATE_CLASSES, false);
+		map.put(Constants.PROTECTED_CLASSES, false);
+		map.put(Constants.PUBLIC_CLASSES, false);
+		map.put(Constants.PACKAGE_PRIVATE_CLASSES, false);
+		
+		map.put(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, removeInitializersWithSideEffects);
+		map.put(Constants.REMOVE_TEST_CODE, removeTestCode);
+		return map;
 	}
 	
 	public String getSearchScope() {
