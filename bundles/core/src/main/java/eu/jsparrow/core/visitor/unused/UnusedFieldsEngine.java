@@ -68,9 +68,8 @@ public class UnusedFieldsEngine {
 				targetCompilationUnits.add(icu);
 			}
 
-			List<VariableDeclarationFragment> nonPrivateCandidates = visitor.getNonPrivateCandidates();
-			List<SimpleName> internalReassignments = visitor.getInternalReassignments();
-			List<UnusedFieldWrapper> nonPrivate = findExternalUnusedReferences(cu, internalReassignments, nonPrivateCandidates);
+			List<NonPrivateUnusedFieldCandidate> nonPrivateCandidates = visitor.getNonPrivateCandidates();
+			List<UnusedFieldWrapper> nonPrivate = findExternalUnusedReferences(cu, nonPrivateCandidates, optionsMap);
 			if (!nonPrivate.isEmpty()) {
 				targetCompilationUnits.add(icu);
 			}
@@ -84,11 +83,16 @@ public class UnusedFieldsEngine {
 			}
 			list.addAll(nonPrivate);
 			
+			if (subMonitor.isCanceled()) {
+				return Collections.emptyList();
+			} else {
+				subMonitor.worked(1);
+			}
 		}
 		return list;
 	}
 	
-	private List<UnusedFieldWrapper> findExternalUnusedReferences(CompilationUnit compilationUnit, List<SimpleName>internalReassignments, List<VariableDeclarationFragment> nonPrivateCandidates) {
+	private List<UnusedFieldWrapper> findExternalUnusedReferences(CompilationUnit compilationUnit, List<NonPrivateUnusedFieldCandidate> nonPrivateCandidates, Map<String, Boolean> optionsMap) {
 		List<UnusedFieldWrapper> list = new ArrayList<>();
 		/* 
 		 * Get the compilation units of the search scope. 
@@ -98,18 +102,20 @@ public class UnusedFieldsEngine {
 		 */
 		IJavaElement javaElement = compilationUnit.getJavaElement();
 		IJavaProject javaProject = javaElement.getJavaProject();
-		for(VariableDeclarationFragment fragment : nonPrivateCandidates) { 
-			UnusedFieldReferenceSearchResult searchResult = searchReferences(fragment, javaProject);
+		for(NonPrivateUnusedFieldCandidate candidate : nonPrivateCandidates) { 
+			VariableDeclarationFragment fragment = candidate.getFragment();
+			UnusedFieldReferenceSearchResult searchResult = searchReferences(fragment, javaProject, optionsMap);
 			if(!searchResult.isActiveReferenceFound() && !searchResult.isInvalidSearchEngineResult()) {
 				List<UnusedExternalReferences> unusedReferences = searchResult.getUnusedReferences();
-				UnusedFieldWrapper unusedFieldWrapper = new UnusedFieldWrapper(fragment, internalReassignments, unusedReferences);
+				List<SimpleName> internalReassignments = candidate.getInternalReassignments();
+				UnusedFieldWrapper unusedFieldWrapper = new UnusedFieldWrapper(compilationUnit, candidate.getAccessModifier(), fragment,  internalReassignments, unusedReferences);
 				list.add(unusedFieldWrapper);
 			}
 		}
 		return list;
 	}
-	
-	public UnusedFieldReferenceSearchResult searchReferences(VariableDeclarationFragment fragment, IJavaProject project) {
+
+	public UnusedFieldReferenceSearchResult searchReferences(VariableDeclarationFragment fragment, IJavaProject project, Map<String, Boolean> optionsMap) {
 		IJavaElement[] searchScope = createSearchScope(scope, project);
 		FieldReferencesSearch fieldReferencesSearchEngine = new FieldReferencesSearch(searchScope);
 		Optional<List<ReferenceSearchMatch>> references = fieldReferencesSearchEngine.findFieldReferences(fragment);
@@ -125,11 +131,11 @@ public class UnusedFieldsEngine {
 		List<UnusedExternalReferences> unusedExternalreferences = new ArrayList<>();
 		for(ICompilationUnit icu : targetICUs) {
 			CompilationUnit cu = RefactoringUtil.parse(icu);
-			ReferencesVisitor visitor = new ReferencesVisitor(fragment, typDeclaration);
+			ReferencesVisitor visitor = new ReferencesVisitor(fragment, typDeclaration, optionsMap);
 			cu.accept(visitor);
 			if(!visitor.hasActiveReference()) {
 				List<SimpleName> reassignments = visitor.getReassignments();
-				UnusedExternalReferences unusedReferences = new UnusedExternalReferences(cu, reassignments);
+				UnusedExternalReferences unusedReferences = new UnusedExternalReferences(cu, icu, reassignments);
 				unusedExternalreferences.add(unusedReferences);
 			} else {
 				return new UnusedFieldReferenceSearchResult(true, false, Collections.emptyList());
