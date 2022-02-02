@@ -62,16 +62,8 @@ class BooleanAssertionOnInvocationAnalyzer {
 			Map<String, String> mapToAssertJAssertions,
 			Map<String, String> mapToNegatedAssertJAssertions) {
 		this.supportedTypeBindingPredicate = supportedTypeBindingPredicate;
-
-		Map<String, String> tmpMap = new HashMap<>();
-		tmpMap.put(OBJECT_EQUALS, IS_EQUAL_TO);
-		tmpMap.putAll(mapToAssertJAssertions);
-		this.mapToAssertJAssertions = Collections.unmodifiableMap(tmpMap);
-
-		tmpMap = new HashMap<>();
-		tmpMap.put(OBJECT_EQUALS, IS_NOT_EQUAL_TO);
-		tmpMap.putAll(mapToNegatedAssertJAssertions);
-		this.mapToNegatedAssertJAssertions = Collections.unmodifiableMap(tmpMap);
+		this.mapToAssertJAssertions = Collections.unmodifiableMap(mapToAssertJAssertions);
+		this.mapToNegatedAssertJAssertions = Collections.unmodifiableMap(mapToNegatedAssertJAssertions);
 	}
 
 	Optional<AssertJAssertThatWithAssertionData> findDedicatedAssertJAssertionData(
