@@ -140,8 +140,9 @@ public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
 		createPreviewViewer(sashForm);
 
 		if (!changesWrapperList.isEmpty()) {
-			this.selectedDocWrapper = (RemoveDeadCodeDocumentChangeWrapper) ((ChangeElementContentProvider) viewer
-				.getContentProvider()).getElements(viewer.getInput())[0];
+			ChangeElementContentProvider changeElementContentProvider = (ChangeElementContentProvider) viewer.getContentProvider();
+			Object viewerInput = viewer.getInput();
+			this.selectedDocWrapper = (RemoveDeadCodeDocumentChangeWrapper) changeElementContentProvider.getElements(viewerInput)[0];
 		}
 
 		/*

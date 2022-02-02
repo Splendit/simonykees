@@ -36,7 +36,7 @@ public class RemoveUnusedFieldsASTVisitor extends AbstractASTRewriteASTVisitor {
 	
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
-		// TOODO: find all relevant declaration fragments and reassignments that should be removed from this compilation unit. 
+		// TODO: find all relevant declaration fragments and reassignments that should be removed from this compilation unit. 
 		IPath currentPath = compilationUnit.getJavaElement().getPath();
 		List<UnusedFieldWrapper> relevantUnusedFields = new ArrayList<>();
 		for(UnusedFieldWrapper unusedField : unusedFields) {

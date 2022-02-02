@@ -22,16 +22,30 @@ public class ChangeElementLabelProvider extends LabelProvider implements IFontPr
 
 	@Override
 	public String getText(Object object) {
-		DocumentChangeWrapper documentChangeWrapper = (DocumentChangeWrapper) object;
-		if (documentChangeWrapper.isParent()) {
-			return documentChangeWrapper.getOldIdentifier() + " -> " //$NON-NLS-1$
-					+ documentChangeWrapper.getNewIdentifier() + "    " //$NON-NLS-1$
-					+ documentChangeWrapper.getDocumentChange()
-						.getName();
+		if(object instanceof DocumentChangeWrapper) {
+			DocumentChangeWrapper documentChangeWrapper = (DocumentChangeWrapper) object;
+			if (documentChangeWrapper.isParent()) {
+				return documentChangeWrapper.getOldIdentifier() + " -> " //$NON-NLS-1$
+						+ documentChangeWrapper.getNewIdentifier() + "    " //$NON-NLS-1$
+						+ documentChangeWrapper.getDocumentChange()
+							.getName();
+			} else {
+				return documentChangeWrapper.getDocumentChange()
+					.getName();
+			}
 		} else {
-			return documentChangeWrapper.getDocumentChange()
-				.getName();
+			RemoveDeadCodeDocumentChangeWrapper documentChangeWrapper = (RemoveDeadCodeDocumentChangeWrapper) object;
+			if (documentChangeWrapper.isParent()) {
+				return documentChangeWrapper.getIdentifier() + " - " //$NON-NLS-1$
+						+ "    " //$NON-NLS-1$
+						+ documentChangeWrapper.getDocumentChange()
+							.getName();
+			} else {
+				return documentChangeWrapper.getDocumentChange()
+					.getName();
+			}
 		}
+
 	}
 
 	@Override
