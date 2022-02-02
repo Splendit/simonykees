@@ -107,7 +107,7 @@ public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
 	 */
 	private void createDocumentChangeWrapperChildren(UnusedFieldWrapper fieldData, Document originalDocument,
 			Map<ICompilationUnit, DocumentChange> changesForField, DocumentChange parent) {
-		RemoveDeadCodeDocumentChangeWrapper dcw = new RemoveDeadCodeDocumentChangeWrapper(parent, selectedDocWrapper, originalDocument, fieldData); 
+		RemoveDeadCodeDocumentChangeWrapper dcw = new RemoveDeadCodeDocumentChangeWrapper(parent, null, originalDocument, fieldData); 
 		changesForField.entrySet().stream().map(Map.Entry::getKey).forEach(iCompilationUnit -> {
 			if (!(fieldData.getDeclarationPath()).equals(iCompilationUnit.getPath())) {
 				DocumentChange document = changesForField.get(iCompilationUnit);
@@ -305,8 +305,8 @@ public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
 	private void disposePages() {
 		IWizardPage[] pages = getWizard().getPages();
 		for (IWizardPage page : pages) {
-			if (page instanceof RenamingRulePreviewWizardPage) {
-				((RenamingRulePreviewWizardPage) page).disposeControl();
+			if (page instanceof RemoveDeadCodeRulePreviewWizardPage) {
+				((RemoveDeadCodeRulePreviewWizardPage) page).disposeControl();
 			}
 		}
 	}
