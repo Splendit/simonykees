@@ -1,6 +1,7 @@
 package eu.jsparrow.ui.wizard.semiautomatic;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IStatus;
@@ -33,9 +34,9 @@ public class RemoveDeadCodeWizardPage extends NewElementWizardPage {
 	protected IStatus fSelectionStatus;
 	
 	public RemoveDeadCodeWizardPage(RemoveDeadCodeWizardPageModel model) {
-		super("Remove Dead Code");
-		setTitle("Remove Dead Code");
-		setDescription("Remove Dead Code Configuration");
+		super("Remove Unused Code");
+		setTitle("Remove Unused Code");
+		setDescription("Remove Unused Code Configuration");
 		this.model = model;
 		this.controller = new RemoveDeadCodeWizardPageController(model);
 
@@ -52,15 +53,27 @@ public class RemoveDeadCodeWizardPage extends NewElementWizardPage {
 
 		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont())
 			.setStyle(SWT.BOLD);
-		boldFont = boldDescriptor.createFont(composite.getDisplay());//FIXME dispose
+		boldFont = boldDescriptor.createFont(composite.getDisplay());
 		
 		createClassMemberChoosingPart(composite);
 		createSearchScopeChoosingPart(composite);
-		createRemoveTestPart(composite);
-		createRemoveInitializersWithSideEffectsSelectionChangedPart(composite);
+		createSingleCheckBoxSection(composite, 
+				"Remove tests for unused code",  //$NON-NLS-1$
+				"Remove test cases having references of unused code.",  //$NON-NLS-1$
+				controller::removeTestCodeSelectionChanged, false);
+		createSingleCheckBoxSection(composite, 
+				"Remove initializers of unused fields",   //$NON-NLS-1$
+				"Remove fields initialized with expressions with probable side effects",   //$NON-NLS-1$
+				controller::removeInitializersWithSideEffectsSelectionChanged, false);
 
 
 		model.addListener(this::updateView);
+	}
+	
+	@Override
+	public void dispose() {
+		boldFont.dispose();
+		super.dispose();
 	}
 	
 	private void createClassMemberChoosingPart(Composite parent) {
@@ -114,11 +127,9 @@ public class RemoveDeadCodeWizardPage extends NewElementWizardPage {
 		controller.searchScopeSelectionChanged(((Button) scopesGroup.getChildren()[0]).getText());
 	}
 	
-	
-	private void createRemoveTestPart(Composite parent) {
-		// FIXME: extract method and reuse it. 
+	private void createSingleCheckBoxSection(Composite parent, String title, String buttonText, Consumer<Boolean>controllerUpdater, boolean defaultSelection) {
 		Label partTitle = new Label(parent, SWT.NONE);
-		partTitle.setText("Remove tests for unused code");
+		partTitle.setText(title);
 		partTitle.setFont(boldFont);
 
 		Group scopesGroup = new Group(parent, SWT.NONE);
@@ -127,43 +138,20 @@ public class RemoveDeadCodeWizardPage extends NewElementWizardPage {
 		scopesGroup.setLayoutData(gridData);
 
 		Button button = new Button(scopesGroup, SWT.CHECK);
-		button.setText("Remove test cases having references of unused code.");
+		button.setText(buttonText);
 		button.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean selection = ((Button) e.getSource()).getSelection();
+				
 				controller.removeTestCodeSelectionChanged(selection);
+				controllerUpdater.accept(selection);
 			}
 		});
 
-		button.setSelection(false);
-		controller.removeTestCodeSelectionChanged(false);
-	}
-	
-	private void createRemoveInitializersWithSideEffectsSelectionChangedPart(Composite parent) {
-		Label partTitle = new Label(parent, SWT.NONE);
-		partTitle.setText("Remove initializers of unused fields");
-		partTitle.setFont(boldFont);
-
-		Group scopesGroup = new Group(parent, SWT.NONE);
-		scopesGroup.setLayout(new GridLayout());
-		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		scopesGroup.setLayoutData(gridData);
-
-		Button button = new Button(scopesGroup, SWT.CHECK);
-		button.setText("Remove fields initialized with expressions with probable side effects");
-		button.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				boolean selection = ((Button) e.getSource()).getSelection();
-				controller.removeInitializersWithSideEffectsSelectionChanged(selection);
-			}
-		});
-
-		button.setSelection(false);
-		controller.removeInitializersWithSideEffectsSelectionChanged(false);
+		button.setSelection(defaultSelection);
+		controllerUpdater.accept(defaultSelection);
 	}
 
 	private void updateView() {
