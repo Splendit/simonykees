@@ -94,10 +94,9 @@ class BooleanAssertionOnInvocationAnalyzer {
 		String methodNameToMap = invocationAsAssertThatArgument.getName()
 			.getIdentifier();
 
-		if (methodNameToMap.equals(Constants.OBJECT_EQUALS)
-				&& !analyzeEqualsMethod(booleanAssertion, newAssertionArguments, newAssertThatArgumentTypeBinding,
-						assertThatArgumentMethodBinding)) {
-			return Optional.empty();
+		if (methodNameToMap.equals(Constants.OBJECT_EQUALS)) {
+			return findDedicatedAssertJAssertionDataForEquals(booleanAssertion, newAssertThatArgument,
+					newAssertionArguments, newAssertThatArgumentTypeBinding, assertThatArgumentMethodBinding);
 		}
 
 		String newAssertionName;
@@ -121,26 +120,45 @@ class BooleanAssertionOnInvocationAnalyzer {
 
 	}
 
-	private boolean analyzeEqualsMethod(String booleanAssertion, List<Expression> newAssertionArguments,
+	private Optional<AssertJAssertThatWithAssertionData> findDedicatedAssertJAssertionDataForEquals(
+			String booleanAssertion, Expression newAssertThatArgument, List<Expression> newAssertionArguments,
 			ITypeBinding newAssertThatArgumentTypeBinding, IMethodBinding equalsMethodBinding) {
 
 		if (!analyzeEqualsMethodParameters(equalsMethodBinding)) {
-			return false;
+			return Optional.empty();
 		}
 		if (newAssertionArguments.size() != 1) {
-			return false;
+			return Optional.empty();
 		}
 		Expression equalsArgument = newAssertionArguments.get(0);
 
 		if (booleanAssertion.equals(Constants.IS_TRUE) && equalsArgument.getNodeType() == ASTNode.NULL_LITERAL) {
-			return false;
+			return Optional.empty();
 		}
 
 		ITypeBinding equalsArgumentTypeBinding = equalsArgument.resolveTypeBinding();
 		if (equalsArgumentTypeBinding == null) {
-			return false;
+			return Optional.empty();
 		}
-		return !isNumericEqualsDissimilarPrimitiveNumeric(newAssertThatArgumentTypeBinding, equalsArgumentTypeBinding);
+		if (isNumericEqualsDissimilarPrimitiveNumeric(newAssertThatArgumentTypeBinding, equalsArgumentTypeBinding)) {
+			return Optional.empty();
+		}
+		String newAssertionName;
+		if (SupportedAssertJAssertThatArgumentTypes.IS_SUPPORTED_ARRAY_TYPE.test(newAssertThatArgumentTypeBinding)) {
+			if (booleanAssertion.equals(Constants.IS_FALSE)) {
+				newAssertionName = Constants.IS_NOT_SAME_AS;
+			} else {
+				newAssertionName = Constants.IS_SAME_AS;
+			}
+		} else {
+			if (booleanAssertion.equals(Constants.IS_FALSE)) {
+				newAssertionName = Constants.IS_NOT_EQUAL_TO;
+			} else {
+				newAssertionName = Constants.IS_EQUAL_TO;
+			}
+		}
+		return Optional
+			.of(new AssertJAssertThatWithAssertionData(newAssertThatArgument, newAssertionName, equalsArgument));
 
 	}
 

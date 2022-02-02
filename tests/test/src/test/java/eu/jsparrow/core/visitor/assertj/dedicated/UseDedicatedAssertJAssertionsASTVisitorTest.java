@@ -906,7 +906,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		String expected = String.format(
 				"" +
 						"		%s[] array = new %s[0];\n" +
-						"		assertThat(array).isEqualTo(array);",
+						"		assertThat(array).isSameAs(array);",
 				componentType, componentType);
 
 		assertChange(original, expected);
@@ -929,8 +929,29 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		String expected = String.format(
 				"" +
 						"		%s[][] array = new %s[0][0];\n" +
-						"		assertThat(array).isEqualTo(array);",
+						"		assertThat(array).isSameAs(array);",
 				componentType, componentType);
+
+		assertChange(original, expected);
+	}
+	
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"new int[0][0]",
+			"new Integer[0][0]",
+			"new Object[0][0]"
+	})
+	void visit_TwoDimensionalArrayEqualsOtherIsFalse_shouldTransform(String new2DArray) throws Exception {
+
+		String original = String.format(
+				"" +
+						"		assertThat(%s.equals(%s)).isFalse();",
+						new2DArray, new2DArray);
+
+		String expected = String.format(
+				"" +
+						"		assertThat(%s).isNotSameAs(%s);",
+						new2DArray, new2DArray);
 
 		assertChange(original, expected);
 	}
