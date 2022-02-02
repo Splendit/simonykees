@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -25,7 +26,7 @@ public class UnusedFieldWrapper {
 	private IPath declarationPath;
 	private CompilationUnit compilationUnit;
 	private String classDeclarationName;
-	private Map<ICompilationUnit, TextEditGroup> textEditGroups = new HashMap<>();
+	private Map<IPath, TextEditGroup> textEditGroups = new HashMap<>();
 	private String fieldName;
 
 	public UnusedFieldWrapper(CompilationUnit compilationUnit, JavaAccessModifier modifier,
@@ -89,12 +90,38 @@ public class UnusedFieldWrapper {
 	}
 
 	public TextEditGroup getTextEditGroup(ICompilationUnit iCompilationUnit) {
-		if (!textEditGroups.containsKey(iCompilationUnit)) {
+		IPath path = iCompilationUnit.getPath();
+		if (!textEditGroups.containsKey(path)) {
 			TextEditGroup textEditGroup = new TextEditGroup(fieldName);
-			textEditGroups.put(iCompilationUnit, textEditGroup);
+			textEditGroups.put(path, textEditGroup);
 			return textEditGroup;
 		} else {
-			return textEditGroups.get(iCompilationUnit);
+			return textEditGroups.get(path);
 		}
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(accessModifier, classDeclarationName, compilationUnit, fieldName, fragment,
+				internalReassignments, unusedExternalReferences);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof UnusedFieldWrapper)) {
+			return false;
+		}
+		UnusedFieldWrapper other = (UnusedFieldWrapper) obj;
+		return accessModifier == other.accessModifier
+				&& Objects.equals(classDeclarationName, other.classDeclarationName)
+				&& Objects.equals(compilationUnit, other.compilationUnit) && Objects.equals(fieldName, other.fieldName)
+				&& Objects.equals(fragment, other.fragment)
+				&& Objects.equals(internalReassignments, other.internalReassignments)
+				&& Objects.equals(unusedExternalReferences, other.unusedExternalReferences);
+	}
+	
+	
 }
