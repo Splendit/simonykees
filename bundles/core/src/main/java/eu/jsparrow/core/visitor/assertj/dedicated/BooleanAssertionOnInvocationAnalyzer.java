@@ -1,12 +1,7 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
-import static eu.jsparrow.core.visitor.assertj.dedicated.Constants.IS_EQUAL_TO;
-import static eu.jsparrow.core.visitor.assertj.dedicated.Constants.IS_NOT_EQUAL_TO;
-import static eu.jsparrow.core.visitor.assertj.dedicated.Constants.OBJECT_EQUALS;
-
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -67,7 +62,7 @@ class BooleanAssertionOnInvocationAnalyzer {
 	}
 
 	Optional<AssertJAssertThatWithAssertionData> findDedicatedAssertJAssertionData(
-			AssertJAssertThatWithAssertionData assertThatWithAssertionData,
+			String booleanAssertion,
 			Expression newAssertThatArgument,
 			MethodInvocation invocationAsAssertThatArgument,
 			ITypeBinding newAssertThatArgumentTypeBinding,
@@ -80,8 +75,6 @@ class BooleanAssertionOnInvocationAnalyzer {
 		if (newAssertionArguments.size() > 1) {
 			return Optional.empty();
 		}
-
-		String booleanAssertion = assertThatWithAssertionData.getAssertionName();
 
 		String methodNameToMap = invocationAsAssertThatArgument.getName()
 			.getIdentifier();

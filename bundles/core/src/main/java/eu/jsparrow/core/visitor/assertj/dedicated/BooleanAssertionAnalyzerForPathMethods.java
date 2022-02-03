@@ -46,11 +46,10 @@ class BooleanAssertionAnalyzerForPathMethods extends BooleanAssertionOnInvocatio
 
 	@Override
 	Optional<AssertJAssertThatWithAssertionData> findDedicatedAssertJAssertionData(
-			AssertJAssertThatWithAssertionData assertThatWithAssertionData, Expression newAssertThatArgument,
-			MethodInvocation invocationAsAssertThatArgument, ITypeBinding newAssertThatArgumentTypeBinding,
-			IMethodBinding assertThatArgumentMethodBinding) {
+			String booleanAssertion, Expression newAssertThatArgument, MethodInvocation invocationAsAssertThatArgument,
+			ITypeBinding newAssertThatArgumentTypeBinding, IMethodBinding assertThatArgumentMethodBinding) {
 		if (analyzePathMethodParameter(assertThatArgumentMethodBinding)) {
-			return super.findDedicatedAssertJAssertionData(assertThatWithAssertionData, newAssertThatArgument,
+			return super.findDedicatedAssertJAssertionData(booleanAssertion, newAssertThatArgument,
 					invocationAsAssertThatArgument, newAssertThatArgumentTypeBinding, assertThatArgumentMethodBinding);
 		}
 		return Optional.empty();

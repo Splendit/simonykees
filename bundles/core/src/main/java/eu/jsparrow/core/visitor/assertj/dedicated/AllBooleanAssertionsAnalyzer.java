@@ -34,6 +34,8 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * <li>assertions on infix expressions</li>
  * <li>assertions on method invocations</li>
  * </ul>
+ * For more informations, see
+ * {@link #analyzeBooleanAssertion(AssertJAssertThatWithAssertionData)}
  *
  * @since 4.8.0
  */
@@ -41,7 +43,8 @@ public class AllBooleanAssertionsAnalyzer {
 
 	private static final Map<Operator, Operator> INFIX_OPERATOR_NEGATIONS_MAP;
 	private static final Map<Operator, String> PRIMITIVE_INFIX_TO_METHOD_NAME_MAP;
-	private final AssertJAssertThatWithAssertionData normalizedDataForBooleanAssertion;
+	private AssertJAssertThatWithAssertionData analysisResult;;
+	private BooleanAssertionWithInstanceofAnalysisResult analysisResultForInstanceofExpression;
 
 	static {
 		Map<Operator, Operator> tmpOperatorNegationMap = new HashMap<>();
@@ -65,109 +68,64 @@ public class AllBooleanAssertionsAnalyzer {
 
 	}
 
-	private AllBooleanAssertionsAnalyzer(AssertJAssertThatWithAssertionData normalizedDataForBooleanAssertion) {
-		this.normalizedDataForBooleanAssertion = normalizedDataForBooleanAssertion;
-	}
-
-	static Optional<AllBooleanAssertionsAnalyzer> conditionalInstance(
-			AssertJAssertThatWithAssertionData assertThatWithAssertionData) {
-		String assertionName = assertThatWithAssertionData.getAssertionName();
-
-		if (!assertionName.equals(Constants.IS_TRUE) && !assertionName.equals(Constants.IS_FALSE)) { // $NON-NLS-1$
-			return Optional.empty();
-		}
-
-		Expression assertThatArgument = assertThatWithAssertionData.getAssertThatArgument();
-		NotOperandUnwrapper notOperandUnwrapper = new NotOperandUnwrapper(assertThatArgument);
-		if (assertionName.equals(Constants.IS_FALSE) ^ notOperandUnwrapper.isNegationByNot()) {
-			assertionName = Constants.IS_FALSE;
-		} else {
-			assertionName = Constants.IS_TRUE;
-		}
-		Expression unwrappedAssertThatArgument = notOperandUnwrapper.getUnwrappedOperand();
-		AssertJAssertThatWithAssertionData normalizedData = new AssertJAssertThatWithAssertionData(
-				unwrappedAssertThatArgument, assertionName);
-
-		return Optional.of(new AllBooleanAssertionsAnalyzer(normalizedData));
-	}
-
 	/**
-	 * Tries to find a replacement for a boolean assertion on an instanceof
-	 * expression. For example, for
+	 * Tries to find a replacement for a boolean assertion.
 	 * <p>
-	 * {@code assertThat(s instanceof String).isTrue();}
+	 * For example, the following infix operation with <br>
+	 * {@code assertThat(x == 10).isTrue();}<br>
+	 * can be replaced by <br>
+	 * {@code assertThat(x).isEqualTo(10);}
 	 * <p>
-	 * the replacement is
+	 * An assertion with a method invocation like<br>
+	 * {@code assertThat(string.equals("Hello World!")).isTrue();}<br>
+	 * can be replaced by<br>
+	 * {@code assertThat(string).isEqualTo("Hello World!");}
 	 * <p>
+	 * An assertion with an instanceof expression like<br>
+	 * {@code assertThat(s instanceof String).isTrue();}<br>
+	 * can be replaced by<br>
 	 * {@code assertThat(s).isInstanceOf(String.class);}
 	 * 
 	 */
-	Optional<BooleanAssertionWithInstanceofAnalysisResult> findResultForInstanceofAsAssertThatArgument() {
-		Expression unwrappedAssertThatArgument = normalizedDataForBooleanAssertion.getAssertThatArgument();
+	void analyzeBooleanAssertion(final AssertJAssertThatWithAssertionData originalData) {
 
-		String assertionName = normalizedDataForBooleanAssertion.getAssertionName();
+		String booleanAssertionName = originalData.getAssertionName();
 
-		if (assertionName.equals(Constants.IS_FALSE)) {
-			return Optional.empty();
+		if (booleanAssertionName.equals(Constants.IS_TRUE) || booleanAssertionName.equals(Constants.IS_FALSE)) { // $NON-NLS-1$
+
+			Expression assertThatArgument = originalData.getAssertThatArgument();
+			NotOperandUnwrapper notOperandUnwrapper = new NotOperandUnwrapper(assertThatArgument);
+			if (booleanAssertionName.equals(Constants.IS_FALSE) ^ notOperandUnwrapper.isNegationByNot()) {
+				booleanAssertionName = Constants.IS_FALSE;
+			} else {
+				booleanAssertionName = Constants.IS_TRUE;
+			}
+			Expression unwrappedAssertThatArgument = notOperandUnwrapper.getUnwrappedOperand();
+
+			if (unwrappedAssertThatArgument.getNodeType() == ASTNode.INFIX_EXPRESSION) {
+				analysisResult = analyzeBooleanAssertionWithInfixOperation(
+						(InfixExpression) unwrappedAssertThatArgument,
+						booleanAssertionName).orElse(null);
+
+			} else if (unwrappedAssertThatArgument.getNodeType() == ASTNode.INSTANCEOF_EXPRESSION) {
+				analysisResultForInstanceofExpression = analyzeBooleanAssertionWithInstanceofExpression(
+						(InstanceofExpression) unwrappedAssertThatArgument, booleanAssertionName).orElse(null);
+
+			} else if (unwrappedAssertThatArgument.getNodeType() == ASTNode.METHOD_INVOCATION) {
+				analysisResult = analyzeBooleanAssertionWithMethodInvocation(
+						(MethodInvocation) unwrappedAssertThatArgument,
+						booleanAssertionName).orElse(null);
+
+			}
 		}
-
-		if (unwrappedAssertThatArgument.getNodeType() != ASTNode.INSTANCEOF_EXPRESSION) {
-			return Optional.empty();
-		}
-
-		InstanceofExpression instanceofExpression = (InstanceofExpression) unwrappedAssertThatArgument;
-
-		Expression leftOperand = instanceofExpression.getLeftOperand();
-		Type rightOperand = instanceofExpression.getRightOperand();
-		if (rightOperand.getNodeType() != ASTNode.SIMPLE_TYPE) {
-			return Optional.empty();
-		}
-		SimpleType simpleType = (SimpleType) rightOperand;
-
-		ITypeBinding leftOperandType = leftOperand.resolveTypeBinding();
-		if (leftOperandType == null) {
-			return Optional.empty();
-		}
-		if (!SupportedAssertJAssertThatArgumentTypes.isSupportedAssertThatArgumentType(leftOperandType)) {
-			return Optional.empty();
-		}
-		return Optional.of(new BooleanAssertionWithInstanceofAnalysisResult(leftOperand, simpleType));
 	}
 
-	/**
-	 * Tries to find a replacement for a boolean assertion in connection with an
-	 * infix expression or a method invocation.
-	 * <p>
-	 * For example, {@code assertThat(x == 10).isTrue();} <br>
-	 * can be replaced by {@code assertThat(x).isEqualTo(10);}
-	 * <p>
-	 * <p>
-	 * The following assertion with a method invocation like
-	 * {@code assertThat(string.equals("Hello World!")).isTrue();} <br can be
-	 * replaced by {@code assertThat(string).isEqualTo("Hello World!");}
-	 * <p>
-	 */
-	Optional<AssertJAssertThatWithAssertionData> findResultForOtherAssertThatArgument() {
-		Expression unwrappedAssertThatArgument = normalizedDataForBooleanAssertion.getAssertThatArgument();
+	private static Optional<AssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithInfixOperation(
+			InfixExpression infixExpressionAsAssertThatArgument, String assertionMethodName) {
 
-		if (unwrappedAssertThatArgument.getNodeType() == ASTNode.INFIX_EXPRESSION) {
-			return analyzeBooleanAssertionWithInfixOperation((InfixExpression) unwrappedAssertThatArgument);
-		}
-
-		if (unwrappedAssertThatArgument.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			return analyzeBooleanAssertionWithMethodInvocation((MethodInvocation) unwrappedAssertThatArgument);
-
-		}
-		return Optional.empty();
-	}
-
-	private Optional<AssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithInfixOperation(
-			InfixExpression infixExpressionAsAssertThatArgument) {
 		Expression leftOperand = infixExpressionAsAssertThatArgument.getLeftOperand();
 		Expression rightOperand = infixExpressionAsAssertThatArgument.getRightOperand();
 		Operator infixOperator = infixExpressionAsAssertThatArgument.getOperator();
-
-		String assertionMethodName = normalizedDataForBooleanAssertion.getAssertionName();
 
 		if (assertionMethodName.equals(Constants.IS_FALSE)) {
 			infixOperator = INFIX_OPERATOR_NEGATIONS_MAP.get(infixOperator);
@@ -211,8 +169,31 @@ public class AllBooleanAssertionsAnalyzer {
 				newAssertionMethodName, rightOperand));
 	}
 
-	private Optional<AssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithMethodInvocation(
-			MethodInvocation invocationAsAssertThatArgument) {
+	private static Optional<BooleanAssertionWithInstanceofAnalysisResult> analyzeBooleanAssertionWithInstanceofExpression(
+			InstanceofExpression instanceofExpression, String assertionName) {
+		if (assertionName.equals(Constants.IS_FALSE)) {
+			return Optional.empty();
+		}
+
+		Expression leftOperand = instanceofExpression.getLeftOperand();
+		Type rightOperand = instanceofExpression.getRightOperand();
+		if (rightOperand.getNodeType() != ASTNode.SIMPLE_TYPE) {
+			return Optional.empty();
+		}
+		SimpleType simpleType = (SimpleType) rightOperand;
+
+		ITypeBinding leftOperandType = leftOperand.resolveTypeBinding();
+		if (leftOperandType == null) {
+			return Optional.empty();
+		}
+		if (!SupportedAssertJAssertThatArgumentTypes.isSupportedAssertThatArgumentType(leftOperandType)) {
+			return Optional.empty();
+		}
+		return Optional.of(new BooleanAssertionWithInstanceofAnalysisResult(leftOperand, simpleType));
+	}
+
+	private static Optional<AssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithMethodInvocation(
+			MethodInvocation invocationAsAssertThatArgument, String booleanAssertionName) {
 
 		Expression newAssertThatArgument = invocationAsAssertThatArgument.getExpression();
 		if (newAssertThatArgument == null) {
@@ -223,7 +204,7 @@ public class AllBooleanAssertionsAnalyzer {
 		if (newAssertThatArgumentTypeBinding == null) {
 			return Optional.empty();
 		}
-		
+
 		IMethodBinding assertThatArgumentMethodBinding = invocationAsAssertThatArgument.resolveMethodBinding();
 		if (assertThatArgumentMethodBinding == null) {
 			return Optional.empty();
@@ -233,13 +214,18 @@ public class AllBooleanAssertionsAnalyzer {
 			.findAnalyzer(newAssertThatArgumentTypeBinding)
 			.orElse(null);
 		if (analyzer != null) {
-			return analyzer.findDedicatedAssertJAssertionData(normalizedDataForBooleanAssertion, newAssertThatArgument,
-					invocationAsAssertThatArgument,
-					newAssertThatArgumentTypeBinding,
-					assertThatArgumentMethodBinding);
-
+			return analyzer.findDedicatedAssertJAssertionData(booleanAssertionName, newAssertThatArgument,
+					invocationAsAssertThatArgument, newAssertThatArgumentTypeBinding, assertThatArgumentMethodBinding);
 		}
 		return Optional.empty();
+	}
+
+	Optional<AssertJAssertThatWithAssertionData> getAnalysisResult() {
+		return Optional.ofNullable(analysisResult);
+	}
+
+	Optional<BooleanAssertionWithInstanceofAnalysisResult> getAnalysisResultForInstanceofExpression() {
+		return Optional.ofNullable(analysisResultForInstanceofExpression);
 	}
 
 }

@@ -52,21 +52,18 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			.findDataForAssertionWithBooleanLiteral(dataExpectedToChange)
 			.orElse(dataExpectedToChange);
 
-		AllBooleanAssertionsAnalyzer allBooleanAssertinsAnalyzer = AllBooleanAssertionsAnalyzer
-			.conditionalInstance(dataExpectedToChange)
+		AllBooleanAssertionsAnalyzer allBooleanAssertinsAnalyzer = new AllBooleanAssertionsAnalyzer();
+		allBooleanAssertinsAnalyzer.analyzeBooleanAssertion(dataExpectedToChange);
+		BooleanAssertionWithInstanceofAnalysisResult analysisResultForInstanceOf = allBooleanAssertinsAnalyzer
+			.getAnalysisResultForInstanceofExpression()
 			.orElse(null);
 
-		if (allBooleanAssertinsAnalyzer != null) {
-			BooleanAssertionWithInstanceofAnalysisResult resultForAssertionWithInstanceof = allBooleanAssertinsAnalyzer
-				.findResultForInstanceofAsAssertThatArgument()
-				.orElse(null);
-			if (resultForAssertionWithInstanceof != null) {
-				transform(assertThatInvocation, node, resultForAssertionWithInstanceof);
-				return true;
-			}
-			dataExpectedToChange = allBooleanAssertinsAnalyzer.findResultForOtherAssertThatArgument()
-				.orElse(dataExpectedToChange);
+		if (analysisResultForInstanceOf != null) {
+			transform(assertThatInvocation, node, analysisResultForInstanceOf);
+			return true;
 		}
+		dataExpectedToChange = allBooleanAssertinsAnalyzer.getAnalysisResult()
+			.orElse(dataExpectedToChange);
 
 		dataExpectedToChange = AssertionWithSizeAndLengthAnalyzer
 			.findResultForAssertionWithSizeOrLength(dataExpectedToChange)
@@ -83,7 +80,6 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		if (dataExpectedToChange != initialAnalysisData.getInitialAnalysisChainData()) {
 			transform(assertThatInvocation, node, dataExpectedToChange);
 		}
-
 		return true;
 	}
 
