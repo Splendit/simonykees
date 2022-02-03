@@ -2,7 +2,6 @@ package eu.jsparrow.core.rule.impl.unused;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,19 +11,18 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.DeleteEdit;
-import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import eu.jsparrow.core.visitor.unused.RemoveUnusedFieldsASTVisitor;
-import eu.jsparrow.core.visitor.unused.UnusedExternalReferences;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
@@ -100,24 +98,32 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 
 					DeleteEdit declDeleteEdit = new DeleteEdit(declOffset, length);
 					documentChange.addEdit(declDeleteEdit);
+					unusedField.getUnusedReassignments()
+						.forEach(reassignment -> {
+							DeleteEdit deleteEdit = new DeleteEdit(reassignment.getStartPosition(), reassignment.getLength());
+							documentChange.addEdit(deleteEdit);
+						});
 				}
-				unusedField.getUnusedReassignments()
-				.forEach(reassignment -> {
-					ASTNode statement = reassignment.getParent().getParent();
-					DeleteEdit deleteEdit = new DeleteEdit(statement.getStartPosition(), statement.getLength());
-					documentChange.addEdit(deleteEdit);
-				});
+
 				unusedField.getUnusedExternalReferences()
+					.stream()
+					.filter(externalReference -> {
+						CompilationUnit cu = externalReference.getCompilationUnit();
+						ICompilationUnit icu = (ICompilationUnit) cu.getJavaElement();
+						return !icu.getPath()
+							.toString()
+							.equals(unusedField.getDeclarationPath()
+								.toString());
+					})
 					.forEach(externalReference -> {
 						CompilationUnit cu = externalReference.getCompilationUnit();
 						ICompilationUnit icu = (ICompilationUnit) cu.getJavaElement();
 						if(icu.getPath().toString().equals(iCompilationUnit.getPath().toString())) {
-							for(SimpleName simpleName : externalReference.getUnusedReassignments()) {
-								ASTNode statement = simpleName.getParent().getParent();
+							for(ExpressionStatement statement : externalReference.getUnusedReassignments()) {
 								DeleteEdit deleteEdit = new DeleteEdit(statement.getStartPosition(), statement.getLength());
 								documentChange.addEdit(deleteEdit);
 							}
-
+	
 						}
 					});
 				documentChange.setTextType("java"); //$NON-NLS-1$

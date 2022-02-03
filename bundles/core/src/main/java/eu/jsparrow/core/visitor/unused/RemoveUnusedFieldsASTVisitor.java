@@ -80,13 +80,24 @@ public class RemoveUnusedFieldsASTVisitor extends AbstractASTRewriteASTVisitor {
 		return true;
 	}
 	
+//	@Override
+//	public boolean visit(SimpleName simpleName) {
+//		// TODO: here we need a map from assignments to UnusedFieldWrapper. We should visit assignments instead of simple names. it is more efficient. 
+//		if(simpleName.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+//			TextEditGroup editGroup = unusedFields.get(0).getTextEditGroup((ICompilationUnit)this.getCompilationUnit().getJavaElement());
+//			astRewrite.remove(simpleName.getParent().getParent(), editGroup);
+//		}
+//		return true;
+//	}
+	
 	@Override
-	public boolean visit(SimpleName simpleName) {
-		// TODO: here we need a map from assignments to UnusedFieldWrapper. We should visit assignments instead of simple names. it is more efficient. 
-		if(simpleName.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-			TextEditGroup editGroup = unusedFields.get(0).getTextEditGroup((ICompilationUnit)this.getCompilationUnit().getJavaElement());
-			astRewrite.remove(simpleName.getParent().getParent(), editGroup);
+	public boolean visit(Assignment assignment) {
+		if(assignment.getLeftHandSide().toString().contains(unusedFields.get(0).getFieldName())) {
+			TextEditGroup editGroup = unusedFields.get(0)
+					.getTextEditGroup((ICompilationUnit)this.getCompilationUnit().getJavaElement());
+			astRewrite.remove(assignment.getParent(), editGroup);
 		}
+
 		return true;
 	}
 

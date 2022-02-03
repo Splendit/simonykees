@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.text.edits.TextEditGroup;
@@ -20,7 +21,7 @@ import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 public class UnusedFieldWrapper {
 
 	private VariableDeclarationFragment fragment;
-	private List<SimpleName> internalReassignments;
+	private List<ExpressionStatement> internalReassignments;
 	private JavaAccessModifier accessModifier;
 	private List<UnusedExternalReferences> unusedExternalReferences = new ArrayList<>();
 	private IPath declarationPath;
@@ -30,7 +31,7 @@ public class UnusedFieldWrapper {
 	private String fieldName;
 
 	public UnusedFieldWrapper(CompilationUnit compilationUnit, JavaAccessModifier modifier,
-			VariableDeclarationFragment fragment, List<SimpleName> internalReassignments,
+			VariableDeclarationFragment fragment, List<ExpressionStatement> internalReassignments,
 			List<UnusedExternalReferences> unusedExternalReferences) {
 		this.compilationUnit = compilationUnit;
 		IJavaElement javaElement = compilationUnit.getJavaElement();
@@ -49,7 +50,7 @@ public class UnusedFieldWrapper {
 		return fragment;
 	}
 
-	public List<SimpleName> getUnusedReassignments() {
+	public List<ExpressionStatement> getUnusedReassignments() {
 		return internalReassignments;
 	}
 
@@ -122,6 +123,15 @@ public class UnusedFieldWrapper {
 				&& Objects.equals(internalReassignments, other.internalReassignments)
 				&& Objects.equals(unusedExternalReferences, other.unusedExternalReferences);
 	}
+
+	@Override
+	public String toString() {
+		return String.format(
+				"UnusedFieldWrapper [fieldName=%s, fragment=%s, accessModifier=%s, declarationPath=%s, classDeclarationName=%s]",
+				fieldName, fragment, accessModifier, declarationPath, classDeclarationName);
+	}
+	
+	
 	
 	
 }

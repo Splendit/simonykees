@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -59,7 +60,7 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 				ReferencesVisitor referencesVisitor = new ReferencesVisitor(fragment, typeDeclaration, options);
 				this.compilationUnit.accept(referencesVisitor);
 				if(!referencesVisitor.hasActiveReference()) {
-					List<SimpleName> reassignments = referencesVisitor.getReassignments();
+					List<ExpressionStatement> reassignments = referencesVisitor.getReassignments();
 					if (Modifier.isPrivate(modifierFlags)) {
 						UnusedFieldWrapper unusedField = new UnusedFieldWrapper(compilationUnit, JavaAccessModifier.PRIVATE, fragment, reassignments, Collections.emptyList());
 						unusedPrivateFields.add(unusedField);

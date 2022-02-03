@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.unused;
 
 import java.util.List;
+import java.util.Objects;
 
 public class UnusedFieldReferenceSearchResult {
 
@@ -27,4 +28,31 @@ public class UnusedFieldReferenceSearchResult {
 		return unusedReferences;
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(activeReferenceFound, invalidSearchEngineResult, unusedReferences);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof UnusedFieldReferenceSearchResult)) {
+			return false;
+		}
+		UnusedFieldReferenceSearchResult other = (UnusedFieldReferenceSearchResult) obj;
+		return activeReferenceFound == other.activeReferenceFound
+				&& invalidSearchEngineResult == other.invalidSearchEngineResult
+				&& Objects.equals(unusedReferences, other.unusedReferences);
+	}
+
+	@Override
+	public String toString() {
+		return String.format(
+				"UnusedFieldReferenceSearchResult [activeReferenceFound=%s, invalidSearchEngineResult=%s, unusedReferences=%s]",
+				activeReferenceFound, invalidSearchEngineResult, unusedReferences);
+	}
+
+	
 }

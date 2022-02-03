@@ -4,15 +4,15 @@ import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 
 public class UnusedExternalReferences {
 
 	private CompilationUnit compilationUnit;
 	private ICompilationUnit iCompilationUnit;
-	private List<SimpleName> unusedReassignments;
+	private List<ExpressionStatement> unusedReassignments;
 
-	public UnusedExternalReferences(CompilationUnit compilationUnit, ICompilationUnit iCompilationUnit, List<SimpleName> unusedReassignments) {
+	public UnusedExternalReferences(CompilationUnit compilationUnit, ICompilationUnit iCompilationUnit, List<ExpressionStatement> unusedReassignments) {
 		this.compilationUnit = compilationUnit;
 		this.iCompilationUnit = iCompilationUnit;
 		this.unusedReassignments = unusedReassignments;
@@ -22,7 +22,7 @@ public class UnusedExternalReferences {
 		return compilationUnit;
 	}
 
-	public List<SimpleName> getUnusedReassignments() {
+	public List<ExpressionStatement> getUnusedReassignments() {
 		return unusedReassignments;
 	}
 	
@@ -30,4 +30,11 @@ public class UnusedExternalReferences {
 		return this.iCompilationUnit;
 	}
 
+	@Override
+	public String toString() {
+		return String.format(
+				"UnusedExternalReferences [iCompilationUnit=%s, unusedReassignments=%s]", iCompilationUnit.getElementName(), unusedReassignments);
+	}
+
+	
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -26,7 +27,7 @@ public class ReferencesVisitor extends ASTVisitor {
 	private String originalIdentifier;
 	
 	private boolean activeReferenceFound = false;
-	private List<SimpleName> reassignments = new ArrayList<>();
+	private List<ExpressionStatement> reassignments = new ArrayList<>();
 	private ITypeBinding originalType;
 
 	public ReferencesVisitor(VariableDeclarationFragment  originalFragment, TypeDeclaration originalTypeDeclaration, Map<String, Boolean> options) {
@@ -54,19 +55,33 @@ public class ReferencesVisitor extends ASTVisitor {
 			return false;
 		}
 		if(locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-			reassignments.add(simpleName);
+			Assignment assignment  = (Assignment)simpleName.getParent();
+			if(assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+				ExpressionStatement statement = (ExpressionStatement)assignment.getParent();
+				reassignments.add(statement);
+			}
+			
 			return false;
 		} else if (locationInParent == FieldAccess.NAME_PROPERTY) {
 			FieldAccess fieldAccess = (FieldAccess)simpleName.getParent();
 			if(fieldAccess.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-				reassignments.add(simpleName);
-				return false;
+				Assignment assignment  = (Assignment)fieldAccess.getParent();
+				if(assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+					ExpressionStatement statement = (ExpressionStatement)assignment.getParent();
+					reassignments.add(statement);
+					return false;
+				}
+
 			}
 		} else if (locationInParent == QualifiedName.NAME_PROPERTY) {
 			QualifiedName qualifiedName = (QualifiedName)simpleName.getParent();
 			if(qualifiedName.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-				reassignments.add(simpleName);
-				return false;
+				Assignment assignment  = (Assignment)qualifiedName.getParent();
+				if(assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+					ExpressionStatement statement = (ExpressionStatement)assignment.getParent();
+					reassignments.add(statement);
+					return false;
+				}
 			}
 		}
 		
@@ -99,7 +114,7 @@ public class ReferencesVisitor extends ASTVisitor {
 		return activeReferenceFound;
 	}
 	
-	public List<SimpleName> getReassignments() {
+	public List<ExpressionStatement> getReassignments() {
 		return this.reassignments;
 	}
 }

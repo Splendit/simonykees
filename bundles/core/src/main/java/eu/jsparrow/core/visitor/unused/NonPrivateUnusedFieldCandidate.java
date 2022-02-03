@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -16,11 +17,11 @@ public class NonPrivateUnusedFieldCandidate {
 	private CompilationUnit compilationUnit;
 	private TypeDeclaration typeDeclaration;
 	private JavaAccessModifier accessModifier;
-	private List<SimpleName> internalReassignments;
+	private List<ExpressionStatement> internalReassignments;
 
 	public NonPrivateUnusedFieldCandidate(VariableDeclarationFragment fragment, CompilationUnit compilationUnit,
 			TypeDeclaration typeDeclaration, JavaAccessModifier accessModifier,
-			List<SimpleName> internalReassignments) {
+			List<ExpressionStatement> internalReassignments) {
 		super();
 		this.fragment = fragment;
 		this.compilationUnit = compilationUnit;
@@ -45,7 +46,7 @@ public class NonPrivateUnusedFieldCandidate {
 		return accessModifier;
 	}
 
-	public List<SimpleName> getInternalReassignments() {
+	public List<ExpressionStatement> getInternalReassignments() {
 		return internalReassignments;
 	}
 

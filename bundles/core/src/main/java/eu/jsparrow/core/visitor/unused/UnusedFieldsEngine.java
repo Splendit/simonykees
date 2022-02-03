@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -107,7 +108,7 @@ public class UnusedFieldsEngine {
 			UnusedFieldReferenceSearchResult searchResult = searchReferences(fragment, javaProject, optionsMap);
 			if(!searchResult.isActiveReferenceFound() && !searchResult.isInvalidSearchEngineResult()) {
 				List<UnusedExternalReferences> unusedReferences = searchResult.getUnusedReferences();
-				List<SimpleName> internalReassignments = candidate.getInternalReassignments();
+				List<ExpressionStatement> internalReassignments = candidate.getInternalReassignments();
 				UnusedFieldWrapper unusedFieldWrapper = new UnusedFieldWrapper(compilationUnit, candidate.getAccessModifier(), fragment,  internalReassignments, unusedReferences);
 				list.add(unusedFieldWrapper);
 			}
@@ -134,7 +135,7 @@ public class UnusedFieldsEngine {
 			ReferencesVisitor visitor = new ReferencesVisitor(fragment, typDeclaration, optionsMap);
 			cu.accept(visitor);
 			if(!visitor.hasActiveReference()) {
-				List<SimpleName> reassignments = visitor.getReassignments();
+				List<ExpressionStatement> reassignments = visitor.getReassignments();
 				UnusedExternalReferences unusedReferences = new UnusedExternalReferences(cu, icu, reassignments);
 				unusedExternalreferences.add(unusedReferences);
 			} else {
