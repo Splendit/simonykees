@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -29,6 +30,10 @@ public class AssertionWithLiteralArgumentAnalyzer {
 	@SuppressWarnings("nls")
 	private static final List<String> ZERO_LITERAL_TOKENS = Collections.unmodifiableList(Arrays.asList(
 			"0", "0L", "0l", "0F", "0f", "0.0F", "0.0f", "0.0"));
+
+	private static final List<String> ASSERT_THAT_TYPES_FOR_BOOLEAN_LITERAL = Stream.of(boolean.class, Boolean.class)
+		.map(Class::getName)
+		.collect(Collectors.toList());
 
 	private static final List<String> ASSERT_THAT_TYPES_FOR_INT_ZERO = Stream.of(
 			int.class,
@@ -119,6 +124,41 @@ public class AssertionWithLiteralArgumentAnalyzer {
 			return ClassRelationUtil.isContentOfTypes(assertThatArgumentTypeBinding, ASSERT_THAT_TYPES_FOR_DOUBLE_ZERO);
 		}
 		return false;
+	}
+
+	static Optional<AssertJAssertThatWithAssertionData> findDataForAssertionWithBooleanLiteral(
+			AssertJAssertThatWithAssertionData assertThatWithAssertionData) {
+		Expression sameAssertThatArgument = assertThatWithAssertionData.getAssertThatArgument();
+		if (!ClassRelationUtil.isContentOfTypes(sameAssertThatArgument.resolveTypeBinding(),
+				ASSERT_THAT_TYPES_FOR_BOOLEAN_LITERAL)) {
+			return Optional.empty();
+		}
+
+		Expression assertionArgument = assertThatWithAssertionData.getAssertionArgument()
+			.orElse(null);
+		if (assertionArgument == null) {
+			return Optional.empty();
+		}
+		if (assertionArgument.getNodeType() != ASTNode.BOOLEAN_LITERAL) {
+			return Optional.empty();
+		}
+		BooleanLiteral booleanLiteral = (BooleanLiteral) assertionArgument;
+		String originalAssertionNamne = assertThatWithAssertionData.getAssertionName();
+		String newAssertionName = null;
+
+		boolean booleanValue = booleanLiteral.booleanValue();
+		if (originalAssertionNamne.equals(Constants.IS_EQUAL_TO)
+				|| originalAssertionNamne.equals(Constants.IS_SAME_AS)) {
+			newAssertionName = booleanValue ? Constants.IS_TRUE : Constants.IS_FALSE;
+		} else if (originalAssertionNamne.equals(Constants.IS_NOT_EQUAL_TO)
+				|| originalAssertionNamne.equals(Constants.IS_NOT_SAME_AS)) {
+			newAssertionName = booleanValue ? Constants.IS_FALSE : Constants.IS_TRUE;
+		}
+
+		if (newAssertionName == null) {
+			return Optional.empty();
+		}
+		return Optional.of(new AssertJAssertThatWithAssertionData(sameAssertThatArgument, newAssertionName));
 	}
 
 	static Optional<AssertJAssertThatWithAssertionData> findDataForAssertionWithLiteral(

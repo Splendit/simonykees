@@ -291,4 +291,72 @@ public class UseDedicatedAssertJAssertionsWithSpezialLiteralsASTVisitorTest exte
 
 		assertNoChange(original);
 	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"assertThat(integer.equals(10)).isEqualTo(true)",
+			"assertThat(!integer.equals(10)).isEqualTo(false)",
+			"assertThat(!integer.equals(10)).isNotEqualTo(true)",
+			"assertThat(integer.equals(10)).isNotEqualTo(false)"
+	})
+	void visit_IntegerEqualsValueIsEqualToBooleanLiteral_shouldTransform(String originalAssertion) throws Exception {
+
+		String original = String.format(""
+				+ "		Integer integer = Integer.valueOf(10);\n"
+				+ "		%s;", originalAssertion);
+
+		String expected = ""
+				+ "		Integer integer = Integer.valueOf(10);\n"
+				+ "		assertThat(integer).isEqualTo(10);";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_TrueIsSameAsTrue_shouldTransform() throws Exception {
+
+		String original = ""
+				+ "assertThat(true).isSameAs(true);";
+
+		String expected = ""
+				+ "assertThat(true).isTrue();";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_FalseIsNotSameAsTrue_shouldTransform() throws Exception {
+
+		String original = ""
+				+ "assertThat(false).isNotSameAs(true);";
+
+		String expected = ""
+				+ "assertThat(false).isFalse();";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_BooleanValueOfIsEqualToBooleanLiteral_shouldTransform() throws Exception {
+		String original = "assertThat(Boolean.valueOf(true)).isEqualTo(true);";
+		String expected = "assertThat(Boolean.valueOf(true)).isTrue();";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_BooleanVariableIsEqualToSame_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "		Boolean booleanTrue = Boolean.valueOf(true);\n"
+				+ "		assertThat(booleanTrue).isEqualTo(booleanTrue);";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_BooleanValueOfIsInFalse_shouldNotTransform() throws Exception {
+		String original = "assertThat(Boolean.valueOf(false)).isIn(false);";
+		assertNoChange(original);
+
+	}
 }

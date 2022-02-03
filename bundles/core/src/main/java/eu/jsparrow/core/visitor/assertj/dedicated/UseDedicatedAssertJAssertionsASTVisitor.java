@@ -46,13 +46,14 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			return true;
 		}
 		MethodInvocation assertThatInvocation = initialAnalysisData.getAssertThatInvocation();
-		final AssertJAssertThatWithAssertionData analysisChainInitialData = initialAnalysisData
-			.getInitialAnalysisChainData();
+		AssertJAssertThatWithAssertionData dataExpectedToChange = initialAnalysisData.getInitialAnalysisChainData();
 
-		AssertJAssertThatWithAssertionData dataExpectedToChange = analysisChainInitialData;
+		dataExpectedToChange = AssertionWithLiteralArgumentAnalyzer
+			.findDataForAssertionWithBooleanLiteral(dataExpectedToChange)
+			.orElse(dataExpectedToChange);
 
 		AllBooleanAssertionsAnalyzer allBooleanAssertinsAnalyzer = AllBooleanAssertionsAnalyzer
-			.conditionalInstance(analysisChainInitialData)
+			.conditionalInstance(dataExpectedToChange)
 			.orElse(null);
 
 		if (allBooleanAssertinsAnalyzer != null) {
@@ -64,10 +65,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 				return true;
 			}
 			dataExpectedToChange = allBooleanAssertinsAnalyzer.findResultForOtherAssertThatArgument()
-				.orElse(null);
-			if (dataExpectedToChange == null) {
-				return true;
-			}
+				.orElse(dataExpectedToChange);
 		}
 
 		dataExpectedToChange = AssertionWithSizeAndLengthAnalyzer
@@ -82,7 +80,7 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			.findDataForAssertionWithLiteral(dataExpectedToChange)
 			.orElse(dataExpectedToChange);
 
-		if (dataExpectedToChange != analysisChainInitialData) {
+		if (dataExpectedToChange != initialAnalysisData.getInitialAnalysisChainData()) {
 			transform(assertThatInvocation, node, dataExpectedToChange);
 		}
 
