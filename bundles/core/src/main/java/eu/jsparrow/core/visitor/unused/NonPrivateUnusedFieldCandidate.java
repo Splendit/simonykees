@@ -3,9 +3,9 @@ package eu.jsparrow.core.visitor.unused;
 import java.util.List;
 import java.util.Objects;
 
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
@@ -14,12 +14,12 @@ public class NonPrivateUnusedFieldCandidate {
 
 	private VariableDeclarationFragment fragment;
 	private CompilationUnit compilationUnit;
-	private TypeDeclaration typeDeclaration;
+	private AbstractTypeDeclaration typeDeclaration;
 	private JavaAccessModifier accessModifier;
 	private List<ExpressionStatement> internalReassignments;
 
 	public NonPrivateUnusedFieldCandidate(VariableDeclarationFragment fragment, CompilationUnit compilationUnit,
-			TypeDeclaration typeDeclaration, JavaAccessModifier accessModifier,
+			AbstractTypeDeclaration typeDeclaration, JavaAccessModifier accessModifier,
 			List<ExpressionStatement> internalReassignments) {
 		this.fragment = fragment;
 		this.compilationUnit = compilationUnit;
@@ -36,7 +36,7 @@ public class NonPrivateUnusedFieldCandidate {
 		return compilationUnit;
 	}
 
-	public TypeDeclaration getTypeDeclaration() {
+	public AbstractTypeDeclaration getTypeDeclaration() {
 		return typeDeclaration;
 	}
 

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -50,7 +51,7 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 		 * 		-- if yes, discard them
 		 * 		-- if not, add them to the nonPrivateCandidates.
 		 */
-		TypeDeclaration typeDeclaration = ASTNodeUtil.getSpecificAncestor(fieldDeclaration, TypeDeclaration.class);
+		AbstractTypeDeclaration typeDeclaration = ASTNodeUtil.getSpecificAncestor(fieldDeclaration, AbstractTypeDeclaration.class);
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class);
 		int modifierFlags = fieldDeclaration.getModifiers();
 		for(VariableDeclarationFragment fragment : fragments) {
@@ -72,7 +73,6 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 				}
 			}
 		}
-
 		return true;
 	}
 

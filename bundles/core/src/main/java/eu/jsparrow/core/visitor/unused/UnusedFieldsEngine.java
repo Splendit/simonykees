@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -127,7 +128,7 @@ public class UnusedFieldsEngine {
 		 * Make a cache with parsed compilation units. 
 		 * Keep  all the icu-s in a targetCompilationUnits field. 
 		 */
-		TypeDeclaration typDeclaration = ASTNodeUtil.getSpecificAncestor(fragment, TypeDeclaration.class);
+		AbstractTypeDeclaration typDeclaration = ASTNodeUtil.getSpecificAncestor(fragment, AbstractTypeDeclaration.class);
 		List<UnusedExternalReferences> unusedExternalreferences = new ArrayList<>();
 		for(ICompilationUnit icu : targetICUs) {
 			CompilationUnit cu = RefactoringUtil.parse(icu);
