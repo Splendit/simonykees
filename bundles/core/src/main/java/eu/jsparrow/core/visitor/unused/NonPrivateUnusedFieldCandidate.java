@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -22,7 +21,6 @@ public class NonPrivateUnusedFieldCandidate {
 	public NonPrivateUnusedFieldCandidate(VariableDeclarationFragment fragment, CompilationUnit compilationUnit,
 			TypeDeclaration typeDeclaration, JavaAccessModifier accessModifier,
 			List<ExpressionStatement> internalReassignments) {
-		super();
 		this.fragment = fragment;
 		this.compilationUnit = compilationUnit;
 		this.typeDeclaration = typeDeclaration;

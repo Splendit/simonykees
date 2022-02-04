@@ -127,11 +127,8 @@ public class UnusedFieldWrapper {
 	@Override
 	public String toString() {
 		return String.format(
-				"UnusedFieldWrapper [fieldName=%s, fragment=%s, accessModifier=%s, declarationPath=%s, classDeclarationName=%s]",
+				"UnusedFieldWrapper [fieldName=%s, fragment=%s, accessModifier=%s, declarationPath=%s, classDeclarationName=%s]", //$NON-NLS-1$
 				fieldName, fragment, accessModifier, declarationPath, classDeclarationName);
 	}
-	
-	
-	
 	
 }

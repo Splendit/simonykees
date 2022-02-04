@@ -50,9 +50,8 @@ public class UnusedFieldReferenceSearchResult {
 	@Override
 	public String toString() {
 		return String.format(
-				"UnusedFieldReferenceSearchResult [activeReferenceFound=%s, invalidSearchEngineResult=%s, unusedReferences=%s]",
+				"UnusedFieldReferenceSearchResult [activeReferenceFound=%s, invalidSearchEngineResult=%s, unusedReferences=%s]", //$NON-NLS-1$
 				activeReferenceFound, invalidSearchEngineResult, unusedReferences);
 	}
 
-	
 }

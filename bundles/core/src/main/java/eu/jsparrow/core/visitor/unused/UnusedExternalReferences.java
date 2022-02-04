@@ -12,7 +12,8 @@ public class UnusedExternalReferences {
 	private ICompilationUnit iCompilationUnit;
 	private List<ExpressionStatement> unusedReassignments;
 
-	public UnusedExternalReferences(CompilationUnit compilationUnit, ICompilationUnit iCompilationUnit, List<ExpressionStatement> unusedReassignments) {
+	public UnusedExternalReferences(CompilationUnit compilationUnit, ICompilationUnit iCompilationUnit,
+			List<ExpressionStatement> unusedReassignments) {
 		this.compilationUnit = compilationUnit;
 		this.iCompilationUnit = iCompilationUnit;
 		this.unusedReassignments = unusedReassignments;
@@ -25,7 +26,7 @@ public class UnusedExternalReferences {
 	public List<ExpressionStatement> getUnusedReassignments() {
 		return unusedReassignments;
 	}
-	
+
 	public ICompilationUnit getICompilationUnit() {
 		return this.iCompilationUnit;
 	}
@@ -33,8 +34,8 @@ public class UnusedExternalReferences {
 	@Override
 	public String toString() {
 		return String.format(
-				"UnusedExternalReferences [iCompilationUnit=%s, unusedReassignments=%s]", iCompilationUnit.getElementName(), unusedReassignments);
+				"UnusedExternalReferences [iCompilationUnit=%s, unusedReassignments=%s]", //$NON-NLS-1$
+				iCompilationUnit.getElementName(), unusedReassignments);
 	}
 
-	
 }
