@@ -222,8 +222,8 @@ public class RemoveDeadCodeRulePreviewWizard extends AbstractPreviewWizard {
 			return;
 		}
 
-		if (page instanceof RenamingRulePreviewWizardPage) {
-			RenamingRulePreviewWizardPage previewPage = (RenamingRulePreviewWizardPage) page;
+		if (page instanceof RemoveDeadCodeRulePreviewWizardPage) {
+			RemoveDeadCodeRulePreviewWizardPage previewPage = (RemoveDeadCodeRulePreviewWizardPage) page;
 			boolean recalculate = previewPage.isRecalculateNeeded();
 			if (recalculate) {
 				performRecalculation(container);
@@ -260,8 +260,8 @@ public class RemoveDeadCodeRulePreviewWizard extends AbstractPreviewWizard {
 		}
 
 		IWizardPage currentPage = container.getCurrentPage();
-		if (currentPage instanceof RenamingRulePreviewWizardPage) {
-			((RenamingRulePreviewWizardPage) currentPage).disposeControl();
+		if (currentPage instanceof RemoveDeadCodeRulePreviewWizardPage) {
+			((RemoveDeadCodeRulePreviewWizardPage) currentPage).disposeControl();
 		}
 
 		getNextPage(currentPage);
