@@ -1,12 +1,5 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
-import static org.eclipse.jdt.core.dom.InfixExpression.Operator.EQUALS;
-import static org.eclipse.jdt.core.dom.InfixExpression.Operator.GREATER;
-import static org.eclipse.jdt.core.dom.InfixExpression.Operator.GREATER_EQUALS;
-import static org.eclipse.jdt.core.dom.InfixExpression.Operator.LESS;
-import static org.eclipse.jdt.core.dom.InfixExpression.Operator.LESS_EQUALS;
-import static org.eclipse.jdt.core.dom.InfixExpression.Operator.NOT_EQUALS;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,11 +10,11 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 
 import eu.jsparrow.core.visitor.junit.dedicated.NotOperandUnwrapper;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -43,27 +36,27 @@ public class AllBooleanAssertionsAnalyzer {
 
 	private static final Map<Operator, Operator> INFIX_OPERATOR_NEGATIONS_MAP;
 	private static final Map<Operator, String> PRIMITIVE_INFIX_TO_METHOD_NAME_MAP;
-	private AssertJAssertThatWithAssertionData analysisResult;;
+	private AssertJAssertThatWithAssertionData analysisResult;
 	private BooleanAssertionWithInstanceofAnalysisResult analysisResultForInstanceofExpression;
 
 	static {
 		Map<Operator, Operator> tmpOperatorNegationMap = new HashMap<>();
 
-		tmpOperatorNegationMap.put(EQUALS, NOT_EQUALS);
-		tmpOperatorNegationMap.put(NOT_EQUALS, EQUALS);
-		tmpOperatorNegationMap.put(LESS, GREATER_EQUALS);
-		tmpOperatorNegationMap.put(LESS_EQUALS, GREATER);
-		tmpOperatorNegationMap.put(GREATER, LESS_EQUALS);
-		tmpOperatorNegationMap.put(GREATER_EQUALS, LESS);
+		tmpOperatorNegationMap.put(InfixExpression.Operator.EQUALS, InfixExpression.Operator.NOT_EQUALS);
+		tmpOperatorNegationMap.put(InfixExpression.Operator.NOT_EQUALS, InfixExpression.Operator.EQUALS);
+		tmpOperatorNegationMap.put(InfixExpression.Operator.LESS, InfixExpression.Operator.GREATER_EQUALS);
+		tmpOperatorNegationMap.put(InfixExpression.Operator.LESS_EQUALS, InfixExpression.Operator.GREATER);
+		tmpOperatorNegationMap.put(InfixExpression.Operator.GREATER, InfixExpression.Operator.LESS_EQUALS);
+		tmpOperatorNegationMap.put(InfixExpression.Operator.GREATER_EQUALS, InfixExpression.Operator.LESS);
 		INFIX_OPERATOR_NEGATIONS_MAP = Collections.unmodifiableMap(tmpOperatorNegationMap);
 
 		Map<Operator, String> tmpMethodNameMap = new HashMap<>();
-		tmpMethodNameMap.put(EQUALS, "isEqualTo"); //$NON-NLS-1$
-		tmpMethodNameMap.put(NOT_EQUALS, "isNotEqualTo"); //$NON-NLS-1$
-		tmpMethodNameMap.put(LESS, "isLessThan"); //$NON-NLS-1$
-		tmpMethodNameMap.put(LESS_EQUALS, "isLessThanOrEqualTo"); //$NON-NLS-1$
-		tmpMethodNameMap.put(GREATER, "isGreaterThan"); //$NON-NLS-1$
-		tmpMethodNameMap.put(GREATER_EQUALS, "isGreaterThanOrEqualTo"); //$NON-NLS-1$
+		tmpMethodNameMap.put(InfixExpression.Operator.EQUALS, "isEqualTo"); //$NON-NLS-1$
+		tmpMethodNameMap.put(InfixExpression.Operator.NOT_EQUALS, "isNotEqualTo"); //$NON-NLS-1$
+		tmpMethodNameMap.put(InfixExpression.Operator.LESS, "isLessThan"); //$NON-NLS-1$
+		tmpMethodNameMap.put(InfixExpression.Operator.LESS_EQUALS, "isLessThanOrEqualTo"); //$NON-NLS-1$
+		tmpMethodNameMap.put(InfixExpression.Operator.GREATER, "isGreaterThan"); //$NON-NLS-1$
+		tmpMethodNameMap.put(InfixExpression.Operator.GREATER_EQUALS, "isGreaterThanOrEqualTo"); //$NON-NLS-1$
 		PRIMITIVE_INFIX_TO_METHOD_NAME_MAP = Collections.unmodifiableMap(tmpMethodNameMap);
 
 	}
@@ -91,7 +84,7 @@ public class AllBooleanAssertionsAnalyzer {
 
 		String booleanAssertionName = originalData.getAssertionName();
 
-		if (booleanAssertionName.equals(Constants.IS_TRUE) || booleanAssertionName.equals(Constants.IS_FALSE)) { // $NON-NLS-1$
+		if (booleanAssertionName.equals(Constants.IS_TRUE) || booleanAssertionName.equals(Constants.IS_FALSE)) {
 
 			Expression assertThatArgument = originalData.getAssertThatArgument();
 			NotOperandUnwrapper notOperandUnwrapper = new NotOperandUnwrapper(assertThatArgument);
@@ -157,9 +150,9 @@ public class AllBooleanAssertionsAnalyzer {
 		String newAssertionMethodName = null;
 		if (rightOperandType.isPrimitive()) {
 			newAssertionMethodName = PRIMITIVE_INFIX_TO_METHOD_NAME_MAP.get(infixOperator);
-		} else if (infixOperator == EQUALS) {
+		} else if (infixOperator == InfixExpression.Operator.EQUALS) {
 			newAssertionMethodName = Constants.IS_SAME_AS;
-		} else if (infixOperator == NOT_EQUALS) {
+		} else if (infixOperator == InfixExpression.Operator.NOT_EQUALS) {
 			newAssertionMethodName = Constants.IS_NOT_SAME_AS;
 		}
 		if (newAssertionMethodName == null) {

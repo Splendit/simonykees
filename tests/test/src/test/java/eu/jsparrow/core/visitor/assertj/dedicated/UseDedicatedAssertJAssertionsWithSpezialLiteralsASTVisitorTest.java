@@ -323,7 +323,7 @@ public class UseDedicatedAssertJAssertionsWithSpezialLiteralsASTVisitorTest exte
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	void visit_FalseIsNotSameAsTrue_shouldTransform() throws Exception {
 

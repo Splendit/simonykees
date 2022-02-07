@@ -27,6 +27,12 @@ public class AssertionWithSizeAndLengthAnalyzer {
 	private static final String LENGTH = "length"; //$NON-NLS-1$
 	private static final String SIZE = "size"; //$NON-NLS-1$
 
+	private AssertionWithSizeAndLengthAnalyzer() {
+		/*
+		 * private default constructor hiding implicit public one
+		 */
+	}
+
 	static Optional<AssertJAssertThatWithAssertionData> findResultForAssertionWithSizeOrLength(
 			AssertJAssertThatWithAssertionData assertThatWithAssertion) {
 
@@ -43,20 +49,16 @@ public class AssertionWithSizeAndLengthAnalyzer {
 			return findReplacementData(assertThatWithAssertion, newAssertThatArgument);
 		}
 
-		Expression assumedArrayExpression = findAssumedArrayByLengthAccess(assertThatArgument).orElse(null);
-		if (assumedArrayExpression == null) {
+		Expression supportedArrayExpression = findSupportedArrayByLengthAccess(assertThatArgument).orElse(null);
+		if (supportedArrayExpression == null) {
 			return Optional.empty();
 		}
-		ITypeBinding assumedSupportedArrayType = assumedArrayExpression.resolveTypeBinding();
 
-		if (assumedSupportedArrayType == null
-				|| !SupportedAssertJAssertThatArgumentTypes.IS_SUPPORTED_ARRAY_TYPE.test(assumedSupportedArrayType)) {
-			return Optional.empty();
-		}
-		return findReplacementData(assertThatWithAssertion, assumedArrayExpression);
+		return findReplacementData(assertThatWithAssertion, supportedArrayExpression);
+
 	}
 
-	private static Optional<Expression> findAssumedArrayByLengthAccess(Expression assertThatArgument) {
+	private static Optional<Expression> findSupportedArrayByLengthAccess(Expression assertThatArgument) {
 		Expression assumedArrayExpression = null;
 		if (assertThatArgument.getNodeType() == ASTNode.FIELD_ACCESS) {
 			FieldAccess fieldAccess = (FieldAccess) assertThatArgument;
@@ -73,10 +75,14 @@ public class AssertionWithSizeAndLengthAnalyzer {
 				assumedArrayExpression = qualifiedName.getQualifier();
 			}
 		}
-		if (assumedArrayExpression != null) {
-			return Optional.of(assumedArrayExpression);
-		}
-		return Optional.empty();
+
+		return Optional.ofNullable(assumedArrayExpression)
+			.filter(assumed -> {
+				ITypeBinding typeBinding = assumed.resolveTypeBinding();
+				return typeBinding != null
+						&& SupportedAssertJAssertThatArgumentTypes.IS_SUPPORTED_ARRAY_TYPE.test(typeBinding);
+			});
+
 	}
 
 	private static Optional<AssertJAssertThatWithAssertionData> findReplacementData(
@@ -88,18 +94,18 @@ public class AssertionWithSizeAndLengthAnalyzer {
 			.orElse(null);
 
 		if (oldAssertionArgument == null) {
-			return findNewAssertionNameForAssertionWithoutArgument(oldAssertionName)
+			return findNewAssertionNameForAssertionWithNoArgument(oldAssertionName)
 				.map(newAssertionName -> new AssertJAssertThatWithAssertionData(newAssertThatArgument,
 						newAssertionName));
 		}
 
 		if (AssertionWithLiteralArgumentAnalyzer.isZeroLiteralToken(oldAssertionArgument)) {
-			return findNewAssertionNameForAssertionWithZeroArgument(oldAssertionName)
+			return findNewAssertionNameForAssertionWithZeroLiteralArgument(oldAssertionName)
 				.map(newAssertionName -> new AssertJAssertThatWithAssertionData(newAssertThatArgument,
 						newAssertionName));
 		}
 
-		return findNewAssertionNameForAssertionWithOtherArgument(oldAssertionName)
+		return findHasSizeAssertionName(oldAssertionName)
 			.map(newAssertionName -> new AssertJAssertThatWithAssertionData(newAssertThatArgument,
 					newAssertionName, oldAssertionArgument));
 
@@ -129,52 +135,49 @@ public class AssertionWithSizeAndLengthAnalyzer {
 			.isContentOfType(newAssertThatArguemntTypeBinding, java.lang.String.class.getName());
 	}
 
-	private static Optional<String> findNewAssertionNameForAssertionWithoutArgument(String oldAssertionName) {
-		if (oldAssertionName.equals(Constants.IS_ZERO) || oldAssertionName.equals(Constants.IS_NOT_POSITIVE)) {
+	private static Optional<String> findNewAssertionNameForAssertionWithNoArgument(String oldAssertionName) {
+		switch (oldAssertionName) {
+		case Constants.IS_ZERO:
+		case Constants.IS_NOT_POSITIVE:
 			return Optional.of(Constants.IS_EMPTY);
-		}
-		if (oldAssertionName.equals(Constants.IS_NOT_ZERO) || oldAssertionName.equals(Constants.IS_POSITIVE)) {
+		case Constants.IS_NOT_ZERO:
+		case Constants.IS_POSITIVE:
 			return Optional.of(Constants.IS_NOT_EMPTY);
+		default:
+			return Optional.empty();
 		}
-		return Optional.empty();
 	}
 
-	private static Optional<String> findNewAssertionNameForAssertionWithZeroArgument(
+	private static Optional<String> findNewAssertionNameForAssertionWithZeroLiteralArgument(
 			String oldAssertionName) {
-		if (oldAssertionName.equals(Constants.IS_EQUAL_TO)) {
+		switch (oldAssertionName) {
+		case Constants.IS_EQUAL_TO:
+		case Constants.IS_LESS_THAN_OR_EQUAL_TO:
 			return Optional.of(Constants.IS_EMPTY);
-		}
-		if (oldAssertionName.equals(Constants.IS_LESS_THAN_OR_EQUAL_TO)) {
-			return Optional.of(Constants.IS_EMPTY);
-		}
-		if (oldAssertionName.equals(Constants.IS_NOT_EQUAL_TO)) {
+		case Constants.IS_NOT_EQUAL_TO:
+		case Constants.IS_GREATER_THAN:
 			return Optional.of(Constants.IS_NOT_EMPTY);
+		default:
+			return Optional.empty();
 		}
-		if (oldAssertionName.equals(Constants.IS_GREATER_THAN)) {
-			return Optional.of(Constants.IS_NOT_EMPTY);
-		}
-		return Optional.empty();
 	}
 
-	private static Optional<String> findNewAssertionNameForAssertionWithOtherArgument(
+	private static Optional<String> findHasSizeAssertionName(
 			String oldAssertionName) {
-
-		if (oldAssertionName.equals(Constants.IS_EQUAL_TO)) {
+		switch (oldAssertionName) {
+		case Constants.IS_EQUAL_TO:
 			return Optional.of(Constants.HAS_SIZE);
-		}
-		if (oldAssertionName.equals(Constants.IS_GREATER_THAN)) {
+		case Constants.IS_GREATER_THAN:
 			return Optional.of(Constants.HAS_SIZE_GREATER_THAN);
-		}
-		if (oldAssertionName.equals(Constants.IS_GREATER_THAN_OR_EQUAL_TO)) {
+		case Constants.IS_GREATER_THAN_OR_EQUAL_TO:
 			return Optional.of(Constants.HAS_SIZE_GREATER_THAN_OR_EQUAL_TO);
-		}
-		if (oldAssertionName.equals(Constants.IS_LESS_THAN)) {
+		case Constants.IS_LESS_THAN:
 			return Optional.of(Constants.HAS_SIZE_LESS_THAN);
-		}
-		if (oldAssertionName.equals(Constants.IS_LESS_THAN_OR_EQUAL_TO)) {
+		case Constants.IS_LESS_THAN_OR_EQUAL_TO:
 			return Optional.of(Constants.HAS_SIZE_LESS_THAN_OR_EQUAL_TO);
+		default:
+			return Optional.empty();
 		}
-		return Optional.empty();
 	}
 
 	static Optional<AssertJAssertThatWithAssertionData> findHasSameSizeAssertionData(
@@ -212,30 +215,18 @@ public class AssertionWithSizeAndLengthAnalyzer {
 					assumedNewAssertionArgument));
 		}
 
-		Expression assumedArrayAsNewAssertionArgument = null;
-		assumedArrayAsNewAssertionArgument = findAssumedArrayByLengthAccess(oldAssertionArgument).orElse(null);
-		if (assumedArrayAsNewAssertionArgument == null) {
-			return Optional.empty();
-		}
-		ITypeBinding assumedSupportedArrayType = assumedArrayAsNewAssertionArgument.resolveTypeBinding();
-
-		if (assumedSupportedArrayType == null
-				|| !SupportedAssertJAssertThatArgumentTypes.IS_SUPPORTED_ARRAY_TYPE.test(assumedSupportedArrayType)) {
+		Expression arrayAsNewAssertionArgument = null;
+		arrayAsNewAssertionArgument = findSupportedArrayByLengthAccess(oldAssertionArgument).orElse(null);
+		if (arrayAsNewAssertionArgument == null) {
 			return Optional.empty();
 		}
 
 		if (!ClassRelationUtil.compareITypeBinding(sameAssertThatArgument.resolveTypeBinding(),
-				assumedArrayAsNewAssertionArgument.resolveTypeBinding())) {
+				arrayAsNewAssertionArgument.resolveTypeBinding())) {
 			return Optional.empty();
 		}
 
 		return Optional.of(new AssertJAssertThatWithAssertionData(sameAssertThatArgument, "hasSameSizeAs", //$NON-NLS-1$
-				assumedArrayAsNewAssertionArgument));
-	}
-
-	private AssertionWithSizeAndLengthAnalyzer() {
-		/*
-		 * private default constructor hiding implicit public one
-		 */
+				arrayAsNewAssertionArgument));
 	}
 }

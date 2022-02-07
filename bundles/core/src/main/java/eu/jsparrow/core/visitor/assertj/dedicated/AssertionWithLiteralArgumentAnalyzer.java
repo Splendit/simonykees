@@ -2,7 +2,9 @@ package eu.jsparrow.core.visitor.assertj.dedicated;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -62,6 +64,31 @@ public class AssertionWithLiteralArgumentAnalyzer {
 		.map(Class::getName)
 		.collect(Collectors.toList());
 
+	private static final List<String> PRIMITIVE_INT_OR_PRIMITIVE_LONG = Stream.of(
+			int.class,
+			long.class)
+		.map(Class::getName)
+		.collect(Collectors.toList());
+
+	private static final Map<String, String> RELATIONAL_METHOD_WITH_ZERO_LITERAL_MAP;
+
+	static {
+		Map<String, String> tmpMap = new HashMap<>();
+		tmpMap.put(Constants.IS_EQUAL_TO, Constants.IS_ZERO);
+		tmpMap.put(Constants.IS_NOT_EQUAL_TO, Constants.IS_NOT_ZERO);
+		tmpMap.put(Constants.IS_GREATER_THAN, Constants.IS_POSITIVE);
+		tmpMap.put(Constants.IS_LESS_THAN, Constants.IS_NEGATIVE);
+		tmpMap.put(Constants.IS_LESS_THAN_OR_EQUAL_TO, Constants.IS_NOT_POSITIVE);
+		tmpMap.put(Constants.IS_GREATER_THAN_OR_EQUAL_TO, Constants.IS_NOT_NEGATIVE);
+		RELATIONAL_METHOD_WITH_ZERO_LITERAL_MAP = Collections.unmodifiableMap(tmpMap);
+	}
+
+	private AssertionWithLiteralArgumentAnalyzer() {
+		/*
+		 * private default constructor hiding implicit public one
+		 */
+	}
+
 	private static Optional<String> findNameReplacementForNullLiteralArgument(String methodName, Expression argument) {
 		if (argument.getNodeType() == ASTNode.NULL_LITERAL) {
 			if (methodName.equals(Constants.IS_SAME_AS) || methodName.equals(Constants.IS_EQUAL_TO)) {
@@ -77,24 +104,7 @@ public class AssertionWithLiteralArgumentAnalyzer {
 	private static Optional<String> findNameReplacementForZeroLiteralArgument(Expression assertThatArgument,
 			String methodName, ITypeBinding zeroLiteralTypeBinding) {
 		if (isSupportedNumericAssertThatArgument(assertThatArgument, zeroLiteralTypeBinding)) {
-			if (methodName.equals(Constants.IS_EQUAL_TO)) {
-				return Optional.of(Constants.IS_ZERO);
-			}
-			if (methodName.equals(Constants.IS_NOT_EQUAL_TO)) {
-				return Optional.of(Constants.IS_NOT_ZERO);
-			}
-			if (methodName.equals(Constants.IS_GREATER_THAN)) {
-				return Optional.of(Constants.IS_POSITIVE);
-			}
-			if (methodName.equals(Constants.IS_LESS_THAN)) {
-				return Optional.of(Constants.IS_NEGATIVE);
-			}
-			if (methodName.equals(Constants.IS_LESS_THAN_OR_EQUAL_TO)) {
-				return Optional.of(Constants.IS_NOT_POSITIVE);
-			}
-			if (methodName.equals(Constants.IS_GREATER_THAN_OR_EQUAL_TO)) {
-				return Optional.of(Constants.IS_NOT_NEGATIVE);
-			}
+			return Optional.ofNullable(RELATIONAL_METHOD_WITH_ZERO_LITERAL_MAP.get(methodName));
 		}
 		if (methodName.equals(Constants.HAS_SIZE) ||
 				methodName.equals(Constants.HAS_SIZE_LESS_THAN_OR_EQUAL_TO)) {
@@ -111,8 +121,7 @@ public class AssertionWithLiteralArgumentAnalyzer {
 			ITypeBinding zeroLiteralTypeBinding) {
 		ITypeBinding assertThatArgumentTypeBinding = assertThatArgument.resolveTypeBinding();
 
-		if (ClassRelationUtil.isContentOfType(zeroLiteralTypeBinding, int.class.getName())
-				|| ClassRelationUtil.isContentOfType(zeroLiteralTypeBinding, long.class.getName())) {
+		if (ClassRelationUtil.isContentOfTypes(zeroLiteralTypeBinding, PRIMITIVE_INT_OR_PRIMITIVE_LONG)) {
 			return ClassRelationUtil.isContentOfTypes(assertThatArgumentTypeBinding, ASSERT_THAT_TYPES_FOR_INT_ZERO);
 		}
 
@@ -193,11 +202,4 @@ public class AssertionWithLiteralArgumentAnalyzer {
 		String numericTooken = numberLiteral.getToken();
 		return ZERO_LITERAL_TOKENS.contains(numericTooken);
 	}
-
-	private AssertionWithLiteralArgumentAnalyzer() {
-		/*
-		 * private default constructor hiding implicit public one
-		 */
-	}
-
 }
