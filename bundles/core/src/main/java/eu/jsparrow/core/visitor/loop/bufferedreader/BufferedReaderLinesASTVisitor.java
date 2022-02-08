@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import eu.jsparrow.core.markers.common.BufferedReaderLinesEvent;
 import eu.jsparrow.core.visitor.sub.ExternalNonEffectivelyFinalReferencesVisitor;
 import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
 import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
@@ -68,7 +69,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @since 3.3.0
  *
  */
-public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor {
+public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor implements BufferedReaderLinesEvent {
 
 	@Override
 	public boolean visit(WhileStatement whileLoop) {
@@ -141,6 +142,7 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 		removeFragment(lineDeclaration);
 		saveComments(loop, body);
 		onRewrite();
+		addMarkerEvent(loop);
 	}
 
 	private void saveComments(Statement loop, Statement body) {
