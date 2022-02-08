@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 
+import eu.jsparrow.core.markers.common.OptionalIfPresentEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
@@ -28,7 +29,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * @since 3.10.0
  *
  */
-public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisitor {
+public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisitor implements OptionalIfPresentEvent {
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
@@ -90,6 +91,8 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 				nonDiscardedGetExpressions, elseBody, identifier);
 		astRewrite.replace(ifStatement, ifPresentOrElse, null);
 		removedNodes.clear();
+		onRewrite();
+		addMarkerEvent(methodInvocation);
 		return true;
 	}
 
