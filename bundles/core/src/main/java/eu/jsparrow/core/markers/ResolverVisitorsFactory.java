@@ -62,6 +62,10 @@ import eu.jsparrow.core.markers.visitor.optional.OptionalIfPresentOrElseResolver
 import eu.jsparrow.core.markers.visitor.optional.OptionalIfPresentResolver;
 import eu.jsparrow.core.markers.visitor.optional.OptionalMapResolver;
 import eu.jsparrow.core.markers.visitor.security.CreateTempFilesUsingJavaNIOResolver;
+import eu.jsparrow.core.markers.visitor.security.UseParameterizedJPAQueryResolver;
+import eu.jsparrow.core.markers.visitor.security.UseParameterizedLDAPQueryResolver;
+import eu.jsparrow.core.markers.visitor.security.UseParameterizedQueryResolver;
+import eu.jsparrow.core.markers.visitor.security.random.ReuseRandomObjectsResolver;
 import eu.jsparrow.core.markers.visitor.stream.tolist.ReplaceStreamCollectByToListResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.MultiCatchResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.TryWithResourceResolver;
@@ -139,6 +143,12 @@ public class ResolverVisitorsFactory {
 		map.put(OptionalMapResolver.ID, OptionalMapResolver::new);
 		map.put(OptionalFilterResolver.ID, OptionalFilterResolver::new);
 		map.put(CreateTempFilesUsingJavaNIOResolver.ID, CreateTempFilesUsingJavaNIOResolver::new);
+		
+		map.put(ReuseRandomObjectsResolver.ID, ReuseRandomObjectsResolver::new);
+		map.put(ReuseRandomObjectsResolver.ID, ReuseRandomObjectsResolver::new);
+		map.put(UseParameterizedQueryResolver.ID, UseParameterizedQueryResolver::new);
+		map.put(UseParameterizedJPAQueryResolver.ID, UseParameterizedJPAQueryResolver::new);
+		map.put(UseParameterizedLDAPQueryResolver.ID, UseParameterizedLDAPQueryResolver::new);
 
 		List<MarkerService> markerServices = getExternalRuleServices();
 		markerServices.stream()
