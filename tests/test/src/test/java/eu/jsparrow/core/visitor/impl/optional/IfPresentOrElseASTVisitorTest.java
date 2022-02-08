@@ -6,17 +6,16 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.optional.OptionalIfPresentOrElseASTVisitor;
 
-@SuppressWarnings("nls")
-public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		setVisitor(new OptionalIfPresentOrElseASTVisitor());
 		fixture.addImport("java.util.Optional");
 	}
 
 	@Test
-	public void visit_baseCase_shouldTransform() throws Exception {
+	void visit_baseCase_shouldTransform() throws Exception {
 		String original = "" +
 				" 		Optional<String> optional = Optional.empty();\n" +
 				"		if(optional.isPresent()) {\n" +
@@ -35,7 +34,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_multiStatementLambdaBody_shouldTransform() throws Exception {
+	void visit_multiStatementLambdaBody_shouldTransform() throws Exception {
 		String original = "" +
 				" 		Optional<String> optional = Optional.empty();\n" +
 				"		if(optional.isPresent()) {\n" +
@@ -56,7 +55,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_throwsStatement_shouldNotTransform() throws Exception {
+	void visit_throwsStatement_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		Optional<String> optional = Optional.empty();" +
 				"		if(optional.isPresent()) {\n" +
@@ -69,7 +68,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_returnStatement_shouldNotTransform() throws Exception {
+	void visit_returnStatement_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		Optional<String> optional = Optional.empty();" +
 				"		if(optional.isPresent()) {\n" +
@@ -82,7 +81,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_nonFinalVariables_shouldNotTransform() throws Exception {
+	void visit_nonFinalVariables_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		Optional<String> optional = Optional.empty();\n" +
 				"		int i = 0;\n" +
@@ -97,7 +96,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_nonFinalVariablesInElseBlock_shouldNotTransform() throws Exception {
+	void visit_nonFinalVariablesInElseBlock_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		Optional<String> optional = Optional.empty();\n" +
 				"		int j = 0;\n" +
@@ -111,7 +110,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_multipleIfThenElseStatements_shouldNotTransform() throws Exception {
+	void visit_multipleIfThenElseStatements_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		Optional<String> optional = Optional.empty();\n" +
 				"		if(optional.isPresent()) {\n" +
@@ -125,7 +124,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_ifThenElseIf_shouldNotTransform() throws Exception {
+	void visit_ifThenElseIf_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		Optional<String> optional = Optional.empty();\n" +
 				"		\n" +
@@ -138,7 +137,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_discardedOptionalGet_shouldNotTransform() throws Exception {
+	void visit_discardedOptionalGet_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		Optional<String> optional = Optional.empty();\n" +
 				"		if(optional.isPresent()) {\n" +
@@ -152,7 +151,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_compoundIfCondition_shouldNotTransform() throws Exception {
+	void visit_compoundIfCondition_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		Optional<String> optional = Optional.empty();\n" +
 				"		final int i = 0;\n" +
@@ -165,7 +164,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_missingOptionalGet_shouldNotTransform() throws Exception {
+	void visit_missingOptionalGet_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		Optional<String> optional = Optional.empty();\n" +
 				"		if(optional.isPresent()) {\n" +
@@ -177,7 +176,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_emptyElseBlock_shouldTransform() throws Exception {
+	void visit_emptyElseBlock_shouldTransform() throws Exception {
 		String original = "" +
 				"		Optional<String> optional = Optional.empty();\n" +
 				"		if(optional.isPresent()) {\n" +
@@ -195,7 +194,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_singleStatementElse_shouldTransform() throws Exception {
+	void visit_singleStatementElse_shouldTransform() throws Exception {
 		String original = "" +
 				"		Optional<String> optional = Optional.empty();\n" +
 				"		if(optional.isPresent()) {\n" +
@@ -213,7 +212,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_illegalElseExpression_shouldNotTransform() throws Exception {
+	void visit_illegalElseExpression_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		Optional<String> optional = Optional.empty();\n" +
 				"		if(optional.isPresent()) {\n" +

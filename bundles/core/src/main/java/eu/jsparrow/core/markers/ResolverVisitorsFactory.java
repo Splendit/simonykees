@@ -40,18 +40,28 @@ import eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver;
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver;
 import eu.jsparrow.core.markers.visitor.UseStringJoinResolver;
+import eu.jsparrow.core.markers.visitor.arithmetic.ArithmeticAssignmentResolver;
 import eu.jsparrow.core.markers.visitor.factory.methods.CollectionsFactoryMethodsResolver;
+import eu.jsparrow.core.markers.visitor.files.UseFilesBufferedReaderResolver;
+import eu.jsparrow.core.markers.visitor.files.UseFilesBufferedWriterResolver;
+import eu.jsparrow.core.markers.visitor.files.writestring.UseFilesWriteStringResolver;
 import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachCollectResolver;
 import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachIfWrapperToFilterResolver;
 import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachMapResolver;
 import eu.jsparrow.core.markers.visitor.loop.ForToForEachResolver;
 import eu.jsparrow.core.markers.visitor.loop.StringBuildingLoopResolver;
 import eu.jsparrow.core.markers.visitor.loop.WhileToForEachResolver;
+import eu.jsparrow.core.markers.visitor.loop.bufferedreader.BufferedReaderLinesResolver;
 import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamAnyMatchResolver;
 import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamFindFirstResolver;
 import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamForEachResolver;
 import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamSumResolver;
 import eu.jsparrow.core.markers.visitor.loop.stream.EnhancedForLoopToStreamTakeWhileResolver;
+import eu.jsparrow.core.markers.visitor.optional.OptionalFilterResolver;
+import eu.jsparrow.core.markers.visitor.optional.OptionalIfPresentOrElseResolver;
+import eu.jsparrow.core.markers.visitor.optional.OptionalIfPresentResolver;
+import eu.jsparrow.core.markers.visitor.optional.OptionalMapResolver;
+import eu.jsparrow.core.markers.visitor.security.CreateTempFilesUsingJavaNIOResolver;
 import eu.jsparrow.core.markers.visitor.stream.tolist.ReplaceStreamCollectByToListResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.MultiCatchResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.TryWithResourceResolver;
@@ -118,6 +128,17 @@ public class ResolverVisitorsFactory {
 		map.put(EnhancedForLoopToStreamForEachResolver.ID, EnhancedForLoopToStreamForEachResolver::new);
 		map.put(EnhancedForLoopToStreamSumResolver.ID, EnhancedForLoopToStreamSumResolver::new);
 		map.put(EnhancedForLoopToStreamTakeWhileResolver.ID, EnhancedForLoopToStreamTakeWhileResolver::new);
+		
+		map.put(ArithmeticAssignmentResolver.ID, ArithmeticAssignmentResolver::new);
+		map.put(UseFilesBufferedReaderResolver.ID, UseFilesBufferedReaderResolver::new);
+		map.put(UseFilesBufferedWriterResolver.ID, UseFilesBufferedWriterResolver::new);
+		map.put(UseFilesWriteStringResolver.ID, UseFilesWriteStringResolver::new);
+		map.put(BufferedReaderLinesResolver.ID, BufferedReaderLinesResolver::new);
+		map.put(OptionalIfPresentResolver.ID, OptionalIfPresentResolver::new);
+		map.put(OptionalIfPresentOrElseResolver.ID, OptionalIfPresentOrElseResolver::new);
+		map.put(OptionalMapResolver.ID, OptionalMapResolver::new);
+		map.put(OptionalFilterResolver.ID, OptionalFilterResolver::new);
+		map.put(CreateTempFilesUsingJavaNIOResolver.ID, CreateTempFilesUsingJavaNIOResolver::new);
 
 		List<MarkerService> markerServices = getExternalRuleServices();
 		markerServices.stream()
