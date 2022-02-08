@@ -68,6 +68,10 @@ class BooleanAssertionOnInvocationAnalyzer {
 			ITypeBinding newAssertThatArgumentTypeBinding,
 			IMethodBinding assertThatArgumentMethodBinding) {
 
+		if (!analyzePathMethodParameter(newAssertThatArgumentTypeBinding, assertThatArgumentMethodBinding)) {
+			return Optional.empty();
+		}
+
 		List<Expression> newAssertionArguments = ASTNodeUtil.convertToTypedList(
 				invocationAsAssertThatArgument.arguments(),
 				Expression.class);
@@ -102,6 +106,25 @@ class BooleanAssertionOnInvocationAnalyzer {
 
 		}
 		return Optional.empty();
+
+	}
+
+	private boolean analyzePathMethodParameter(ITypeBinding newAssertThatArgumentTypeBinding,
+			IMethodBinding assertThatArgumentMethodBinding) {
+
+		String methodName = assertThatArgumentMethodBinding.getName();
+		if (!methodName.equals(Constants.STARTS_WITH) && !methodName.equals(Constants.ENDS_WITH)) {
+			return true;
+
+		}
+		if (!ClassRelationUtil.isContentOfType(newAssertThatArgumentTypeBinding, java.nio.file.Path.class.getName())) {
+			return true;
+		}
+
+		ITypeBinding[] parameterTypes = assertThatArgumentMethodBinding.getMethodDeclaration()
+			.getParameterTypes();
+		return parameterTypes.length == 1
+				&& ClassRelationUtil.isContentOfType(parameterTypes[0], java.nio.file.Path.class.getName());
 
 	}
 

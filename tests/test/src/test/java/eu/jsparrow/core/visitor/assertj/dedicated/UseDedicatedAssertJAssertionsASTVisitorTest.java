@@ -323,99 +323,6 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		assertChange(original, expected);
 	}
 
-	public static Stream<Arguments> pathMethodIsTrue() throws Exception {
-		return Stream.of(
-				Arguments.of("equals(path)", "isEqualTo(path)"),
-				Arguments.of("isAbsolute()", "isAbsolute()"),
-				Arguments.of("startsWith(Path.of(\"/home/gregor/\"))", "startsWith(Path.of(\"/home/gregor/\"))"),
-				Arguments.of("endsWith(Path.of(\"pom.xml\"))", "endsWith(Path.of(\"pom.xml\"))"));
-	}
-
-	@ParameterizedTest
-	@MethodSource("pathMethodIsTrue")
-	void visit_AssertThatPathMethodIsTrue_shouldTransform(String originalInvocation, String expectedInvocation)
-			throws Exception {
-
-		fixture.addImport(java.nio.file.Path.class.getName());
-		String variableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
-
-		String original = String.format("" +
-				"		%s\n" +
-				"		assertThat(path.%s).isTrue();",
-				variableDeclaration, originalInvocation);
-
-		String expected = String.format("" +
-				"		%s\n" +
-				"		assertThat(path).%s;",
-				variableDeclaration, expectedInvocation);
-
-		assertChange(original, expected);
-	}
-
-	public static Stream<Arguments> pathMethodIsFalse() throws Exception {
-		return Stream.of(
-				Arguments.of("equals(path)", "isNotEqualTo(path)"),
-				Arguments.of("isAbsolute()", "isRelative()"));
-	}
-
-	@ParameterizedTest
-	@MethodSource("pathMethodIsFalse")
-	void visit_AssertThatPathMethodIsFalse_shouldTransform(String originalInvocation, String expectedInvocation)
-			throws Exception {
-
-		fixture.addImport(java.nio.file.Path.class.getName());
-		String variableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
-
-		String original = String.format("" +
-				"		%s\n" +
-				"		assertThat(path.%s).isFalse();",
-				variableDeclaration, originalInvocation);
-
-		String expected = String.format("" +
-				"		%s\n" +
-				"		assertThat(path).%s;",
-				variableDeclaration, expectedInvocation);
-
-		assertChange(original, expected);
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"startsWith(\"/home/gregor/\")",
-			"endsWith(\"pom.xml\")"
-	})
-	void visit_AssertThatPathMethodIsTrue_shouldNotTransform(String originalInvocation)
-			throws Exception {
-
-		fixture.addImport(java.nio.file.Path.class.getName());
-		String variableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
-
-		String original = String.format("" +
-				"		%s\n" +
-				"		assertThat(path.%s).isTrue();",
-				variableDeclaration, originalInvocation);
-
-		assertNoChange(original);
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"startsWith(Path.of(\"/home/gregor-1/\"))",
-			"endsWith(Path.of(\"pom-1.xml\"))"
-	})
-	void visit_AssertThatPathMethodIsFalse_shouldNotTransform(String originalInvocation)
-			throws Exception {
-
-		fixture.addImport(java.nio.file.Path.class.getName());
-		String variableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
-
-		String original = String.format("" +
-				"		%s\n" +
-				"		assertThat(path.%s).isFalse();",
-				variableDeclaration, originalInvocation);
-
-		assertNoChange(original);
-	}
 
 	public static Stream<Arguments> fileMethodIsTrue() throws Exception {
 		return Stream.of(
@@ -934,7 +841,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
+
 	@ParameterizedTest
 	@ValueSource(strings = {
 			"new int[0][0]",
@@ -946,12 +853,12 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		String original = String.format(
 				"" +
 						"		assertThat(%s.equals(%s)).isFalse();",
-						new2DArray, new2DArray);
+				new2DArray, new2DArray);
 
 		String expected = String.format(
 				"" +
 						"		assertThat(%s).isNotSameAs(%s);",
-						new2DArray, new2DArray);
+				new2DArray, new2DArray);
 
 		assertChange(original, expected);
 	}
@@ -1481,7 +1388,6 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		assertNoChange(original);
 	}
 
-	
 	@Test
 	void visit_ObjectEqualsPrimitiveIntegerIsFalse_shouldTransform() throws Exception {
 		String original = "" +
@@ -1494,7 +1400,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	void visit_ObjectEqualsPrimitiveIntegerIsTrue_shouldTransform() throws Exception {
 		String original = "" +
@@ -1508,5 +1414,5 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		assertChange(original, expected);
 
 	}
-	
+
 }
