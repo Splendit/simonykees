@@ -8,21 +8,21 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.common.UsesJDTUnitFixture;
 import eu.jsparrow.core.visitor.security.random.ReuseRandomObjectsASTVisitor;
 
-public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
+class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
-	public void setUpDefaultVisitor() throws Exception {
+	void setUpDefaultVisitor() throws Exception {
 		setDefaultVisitor(new ReuseRandomObjectsASTVisitor());
 		defaultFixture.addImport(java.util.Random.class.getName());
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		fixtureProject.clear();
 	}
 
 	@Test
-	public void test_localRandomVariable_shouldTransform() throws Exception {
+	void test_localRandomVariable_shouldTransform() throws Exception {
 		String actual = "" +
 				"private void sampleMethod() {\n" +
 				"	Random random = new Random();\n" +
@@ -40,7 +40,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void test_multipleLocalVariables_shouldTransform() throws Exception {
+	void test_multipleLocalVariables_shouldTransform() throws Exception {
 		String actual = "" +
 				"private void sampleMethod(String value) {\n" +
 				"	if(value.isEmpty()) {\n" +
@@ -62,7 +62,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
-	public void test_usingStaticFinalSeed_shouldTransform() throws Exception {
+	void test_usingStaticFinalSeed_shouldTransform() throws Exception {
 		String actual = "" +
 				"private static final int seed = 10;\n" + 
 				"public void sampleMethod() {\n" + 
@@ -77,7 +77,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void test_localRandomObjectShadowingAField_shouldTransform() throws Exception {
+	void test_localRandomObjectShadowingAField_shouldTransform() throws Exception {
 		String actual = "" +
 				"private Random random = new Random();" +
 				"private void sampleMethod(String value) {\n" +
@@ -93,7 +93,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
-	public void test_staticMethod_shouldTransform() throws Exception {
+	void test_staticMethod_shouldTransform() throws Exception {
 		String actual = "" +
 				"private static void sampleMethod(String value) {\n" + 
 				"	Random random = new Random();\n" + 
@@ -109,7 +109,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
-	public void test_finalVariable_shouldTransform() throws Exception {
+	void test_finalVariable_shouldTransform() throws Exception {
 		String actual = "" + 
 				"private void sampleMethod(String value) {\n" + 
 				"	final Random random = new Random();\n" + 
@@ -125,7 +125,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
-	public void test_randomInLambdaInitializer_shouldTransform() throws Exception {
+	void test_randomInLambdaInitializer_shouldTransform() throws Exception {
 		String actual = "" + 
 				"private Runnable runnable = () -> {\n" + 
 				"	Random random = new Random();\n" + 
@@ -140,7 +140,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
-	public void test_findingPositionOfExtractedField_shouldTransform() throws Exception {
+	void test_findingPositionOfExtractedField_shouldTransform() throws Exception {
 		String actual = "" + 
 				"private Runnable runnable = () -> {\n" + 
 				"	Random random = new Random();\n" + 
@@ -161,7 +161,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	 */
 	
 	@Test
-	public void test_shadowingNonPrivateField_shouldNotTransform() throws Exception {
+	void test_shadowingNonPrivateField_shouldNotTransform() throws Exception {
 		String actual = "" + 
 				"Random random = new Random();\n" + 
 				"private void sampleMethod(String value) {\n" + 
@@ -172,7 +172,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
-	public void test_shadowingNonRandomField_shouldNotTransform() throws Exception {
+	void test_shadowingNonRandomField_shouldNotTransform() throws Exception {
 		String actual = "" + 
 				"int random = 123;\n" + 
 				"private void sampleMethod(String value) {\n" + 
@@ -183,7 +183,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
-	public void test_shadowingNonStaticField_shouldNotTransform() throws Exception {
+	void test_shadowingNonStaticField_shouldNotTransform() throws Exception {
 		String actual = "" + 
 				"private Random random = new Random();\n" + 
 				"private static void sampleMethod(String value) {\n" + 
@@ -194,7 +194,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
-	public void test_shadowingNotInitializedField_shouldNotTransform() throws Exception {
+	void test_shadowingNotInitializedField_shouldNotTransform() throws Exception {
 		String actual = "" + 
 				"private Random random;\n" + 
 				"private void sampleMethod(String value) {\n" + 
@@ -205,7 +205,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void test_shadowingNullInitializedField_shouldNotTransform() throws Exception {
+	void test_shadowingNullInitializedField_shouldNotTransform() throws Exception {
 		String actual = "" + 
 				"private Random random = null;\n" + 
 				"private void sampleMethod(String value) {\n" + 
@@ -216,7 +216,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void test_shadowingNullInitializedLocalVariable_shouldNotTransform() throws Exception {
+	void test_shadowingNullInitializedLocalVariable_shouldNotTransform() throws Exception {
 		String actual = "" +
 				"private void sampleMethod(String value) {\n" + 
 				"	Random random = null;\n" + 
@@ -226,7 +226,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void test_randomVariableInAnonymousClass_shouldNotTransform() throws Exception {
+	void test_randomVariableInAnonymousClass_shouldNotTransform() throws Exception {
 		String actual = "" + 
 				"private void sampleMethod() {\n" + 
 				"	Runnable r = new Runnable() {\n" + 
@@ -241,7 +241,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
-	public void test_innerClass_shouldNotTransform() throws Exception {
+	void test_innerClass_shouldNotTransform() throws Exception {
 		String actual = "" + 
 				"private void sampleMethod() {\n" + 
 				"	class LocalClass {\n" + 
@@ -255,7 +255,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void test_usingLocalVariableAsSeed_shouldNotTransform() throws Exception {
+	void test_usingLocalVariableAsSeed_shouldNotTransform() throws Exception {
 		String actual = "" + 
 				"private void sampleMethod() {\n" + 
 				"	int seed = 10;\n" + 
@@ -266,7 +266,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void test_matchingFieldWithDifferentInitializer_shouldNotTransform() throws Exception {
+	void test_matchingFieldWithDifferentInitializer_shouldNotTransform() throws Exception {
 		String actual = "" + 
 				"private Random random = new Random();\n" + 
 				"private void sampleMethod() {\n" + 
@@ -277,7 +277,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void test_reuseObjectWithIntLiteralAsSeed_shouldTransform() throws Exception {
+	void test_reuseObjectWithIntLiteralAsSeed_shouldTransform() throws Exception {
 		String actual = "" + 
 				"private Random random = new Random(10);\n" + 
 				"private void sampleMethod() {\n" + 
@@ -293,7 +293,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void test_extractObjectWithIntLiteralAsSeed_shouldTransform() throws Exception {
+	void test_extractObjectWithIntLiteralAsSeed_shouldTransform() throws Exception {
 		String actual = "" + 
 				"private void sampleMethod() {\n" + 
 				"	Random random = new Random(10);\n" + 
@@ -308,7 +308,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void test_usingLocalVarTypeInference_shouldTransform() throws Exception {
+	void test_usingLocalVarTypeInference_shouldTransform() throws Exception {
 		setJavaVersion(JavaCore.VERSION_11);
 		String actual = "" + 
 				"private void sampleMethod() {\n" + 
