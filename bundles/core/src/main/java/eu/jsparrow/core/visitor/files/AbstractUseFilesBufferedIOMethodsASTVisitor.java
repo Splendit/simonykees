@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.core.markers.common.UseFilesBufferedIOMethodsEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -32,15 +33,15 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.22.0
  *
  */
-abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddImportASTVisitor {
+abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddImportASTVisitor
+		implements UseFilesBufferedIOMethodsEvent {
 	private final String bufferedIOQualifiedTypeName;
 	private final String fileIOQualifiedTypeName;
 	private final String newBufferedIOMethodName;
 
-	public AbstractUseFilesBufferedIOMethodsASTVisitor(String bufferedIOQualifiedTypeName,
+	protected AbstractUseFilesBufferedIOMethodsASTVisitor(String bufferedIOQualifiedTypeName,
 			String fileIOQualifiedTypeName,
 			String newBufferedIOMethodName) {
-		super();
 		this.bufferedIOQualifiedTypeName = bufferedIOQualifiedTypeName;
 		this.fileIOQualifiedTypeName = fileIOQualifiedTypeName;
 		this.newBufferedIOMethodName = newBufferedIOMethodName;
@@ -158,6 +159,8 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 		MethodInvocation filesNewBufferedIO = createFilesNewBufferedIOMethodInvocation(transformationData);
 		astRewrite.replace(bufferedIOInstanceCreation, filesNewBufferedIO, null);
 		onRewrite();
+		addMarkerEvent(bufferedIOInstanceCreation);
+
 	}
 
 	private MethodInvocation createFilesNewBufferedIOMethodInvocation(TransformationData transformationData) {
