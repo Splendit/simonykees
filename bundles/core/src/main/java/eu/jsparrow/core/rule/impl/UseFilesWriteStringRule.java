@@ -19,8 +19,9 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class UseFilesWriteStringRule extends RefactoringRuleImpl<UseFilesWriteStringASTVisitor> {
 
+	public static final String RULE_ID = "UseFilesWriteString"; //$NON-NLS-1$
 	public UseFilesWriteStringRule() {
-		this.id = "UseFilesWriteString"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.visitorClass = UseFilesWriteStringASTVisitor.class;
 		this.ruleDescription = new RuleDescription(Messages.UseFilesWriteStringRule_name,
 				Messages.UseFilesWriteStringRule_description,
