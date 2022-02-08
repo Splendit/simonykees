@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
-public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
-	public void setUpVisitor() throws Exception {
+	void setUpVisitor() throws Exception {
 		addDependency("javax.persistence", "persistence-api", "1.0.2");
 		fixture.addImport("javax.persistence.EntityManager");
 		fixture.addImport("javax.persistence.Query");
@@ -16,7 +16,7 @@ public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFix
 	}
 
 	@Test
-	public void visit_createQueryInMethod_shouldTransform() throws Exception {
+	void visit_createQueryInMethod_shouldTransform() throws Exception {
 
 		String original = "" + //
 				"		String orderId = \"100000000\";\n" +
@@ -38,7 +38,7 @@ public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFix
 	}
 	
 	@Test
-	public void visit_CreateQueryWithJPQLVariable_shouldTransform() throws Exception {
+	void visit_CreateQueryWithJPQLVariable_shouldTransform() throws Exception {
 		String original = "" +
 				"		String orderId = \"100000000\";\n" +
 				"		EntityManager entityManager = null;\n" +
@@ -58,7 +58,7 @@ public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFix
 	}
 
 	@Test
-	public void visit_useRelationalGT_shouldTransform() throws Exception {
+	void visit_useRelationalGT_shouldTransform() throws Exception {
 		String original = "" +
 				"			int price = 1000;\n" +
 				"			EntityManager entityManager = null;\n" +
@@ -78,7 +78,7 @@ public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFix
 	}
 
 	@Test
-	public void visit_useRelationalLT_shouldTransform() throws Exception {
+	void visit_useRelationalLT_shouldTransform() throws Exception {
 		String original = "" +
 				"			int price = 1000;\n" +
 				"			EntityManager entityManager = null;\n" +
@@ -99,7 +99,7 @@ public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFix
 	}
 
 	@Test
-	public void visit_createQueryInInitializer_shouldTransform() throws Exception {
+	void visit_createQueryInInitializer_shouldTransform() throws Exception {
 
 		String original = "" + //
 				"class LocalClass {\n" +
@@ -129,7 +129,7 @@ public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFix
 	}
 
 	@Test
-	public void visit_createQueryInitializedAfterDeclaration_shouldTransform() throws Exception {
+	void visit_createQueryInitializedAfterDeclaration_shouldTransform() throws Exception {
 
 		String original = "" + //
 				"		String orderId = \"100000000\";\n" +
@@ -153,7 +153,7 @@ public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFix
 	}
 
 	@Test
-	public void visit_ReassignQueryInitializedWithNull_shouldTransform() throws Exception {
+	void visit_ReassignQueryInitializedWithNull_shouldTransform() throws Exception {
 		String original = "" +
 				"		String orderId = \"100000000\";\n" +
 				"		EntityManager entityManager = null;\n" +
@@ -175,7 +175,7 @@ public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFix
 	}
 
 	@Test
-	public void visit_createQueryWithTwoInputs_shouldTransform() throws Exception {
+	void visit_createQueryWithTwoInputs_shouldTransform() throws Exception {
 
 		String original = "" + //
 				"		String firstName = \"Max\";\n" +
@@ -201,7 +201,7 @@ public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFix
 	}
 
 	@Test
-	public void visit_UpdateQuery_shouldTransformAfterWhere() throws Exception {
+	void visit_UpdateQuery_shouldTransformAfterWhere() throws Exception {
 
 		String original = "" +
 				"	EntityManager entityManager = null;\n" +
@@ -225,7 +225,7 @@ public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFix
 	}
 
 	@Test
-	public void visit_createQueryWithinLambda_shouldTransform() throws Exception {
+	void visit_createQueryWithinLambda_shouldTransform() throws Exception {
 		String original = "" +
 				"	class TestQueryInLambda {\n" + 
 				"		private Runnable r = () -> {\n" + 
