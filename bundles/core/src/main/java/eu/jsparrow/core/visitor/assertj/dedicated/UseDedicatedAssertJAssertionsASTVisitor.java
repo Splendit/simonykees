@@ -48,6 +48,14 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		MethodInvocation assertThatInvocation = initialAnalysisData.getAssertThatInvocation();
 		AssertJAssertThatWithAssertionData dataExpectedToChange = initialAnalysisData.getInitialAnalysisChainData();
 
+		/**
+		 * For example, if dataExpectedToChange represents<br>
+		 * assertThat(emptyList.size() == 0).isEqualTo(true)<br>
+		 * then the return value of findDataForAssertionWithBooleanLiteral which
+		 * is assigned again to dataExpectedToChange is expected to
+		 * represent<br>
+		 * assertThat(emptyList.size() == 0).isTrue()
+		 */
 		dataExpectedToChange = AssertionWithLiteralArgumentAnalyzer
 			.findDataForAssertionWithBooleanLiteral(dataExpectedToChange)
 			.orElse(dataExpectedToChange);
@@ -62,22 +70,58 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 			transform(assertThatInvocation, node, analysisResultForInstanceOf);
 			return true;
 		}
+
+		/**
+		 * For example, if dataExpectedToChange represents<br>
+		 * assertThat(emptyList.size() == 0).isTrue();<br>
+		 * then the new value which is assigned to dataExpectedToChange will
+		 * represent<br>
+		 * assertThat(emptyList.size()).isEqualTo(0);
+		 * 
+		 */
 		dataExpectedToChange = allBooleanAssertinsAnalyzer.getAnalysisResult()
 			.orElse(dataExpectedToChange);
 
+		/**
+		 * For example, if dataExpectedToChange represents<br>
+		 * assertThat(emptyList.size()).isEqualTo(0)<br>
+		 * then the new value which is assigned to dataExpectedToChange will
+		 * represent<br>
+		 * assertThat(emptyList).isEmpty();
+		 */
 		dataExpectedToChange = AssertionWithSizeAndLengthAnalyzer
 			.findResultForAssertionWithSizeOrLength(dataExpectedToChange)
 			.orElse(dataExpectedToChange);
 
+		/**
+		 * If dataExpectedToChange represents<br>
+		 * assertThat(list1).hasSize(list2.size()); <br>
+		 * then the new value which is assigned to dataExpectedToChange will
+		 * represent<br>
+		 * assertThat(list1).hasSameSizeAs(list2);
+		 */
 		dataExpectedToChange = AssertionWithSizeAndLengthAnalyzer
 			.findHasSameSizeAssertionData(dataExpectedToChange)
 			.orElse(dataExpectedToChange);
 
+		/**
+		 * If dataExpectedToChange represents<br>
+		 * assertThat(x).isEqualTo(0);<br>
+		 * then the new value which is assigned to dataExpectedToChange will
+		 * represent<br>
+		 * assertThat(x).isZero();
+		 */
 		dataExpectedToChange = AssertionWithLiteralArgumentAnalyzer
 			.findDataForAssertionWithLiteral(dataExpectedToChange)
 			.orElse(dataExpectedToChange);
 
 		if (dataExpectedToChange != initialAnalysisData.getInitialAnalysisChainData()) {
+			/*
+			 * Each successful analysis will return a new instance of {@link
+			 * AssertJAssertThatWithAssertionData} and therefore this condition
+			 * is true as soon as at least one of the analyzers in the chain has
+			 * been successful.
+			 */
 			transform(assertThatInvocation, node, dataExpectedToChange);
 		}
 		return true;
