@@ -11,7 +11,7 @@ import java.util.Set;
 import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.ui.wizard.IValueChangeListener;
 
-public class RemoveDeadCodeWizardPageModel {
+public class RemoveUnusedCodeWizardPageModel {
 
 	Set<IValueChangeListener> listeners = new HashSet<>();
 
@@ -21,7 +21,7 @@ public class RemoveDeadCodeWizardPageModel {
 	private boolean removeInitializersWithSideEffects;
 	
 
-	public RemoveDeadCodeWizardPageModel() {
+	public RemoveUnusedCodeWizardPageModel() {
 		classMemberTypes = initClassMemberTypes();
 		searchScope = "Project";
 

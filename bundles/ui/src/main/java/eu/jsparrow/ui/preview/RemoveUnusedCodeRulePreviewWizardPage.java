@@ -35,7 +35,7 @@ import eu.jsparrow.core.rule.impl.unused.RemoveUnusedFieldsRule;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
-public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
+public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 
 	
 	private Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes;
@@ -45,14 +45,14 @@ public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
 
 	private Composite previewComposite;
 
-	private List<RemoveDeadCodeDocumentChangeWrapper> changesWrapperList;
-	private RemoveDeadCodeDocumentChangeWrapper selectedDocWrapper;
+	private List<RemoveUnusedCodeDocumentChangeWrapper> changesWrapperList;
+	private RemoveUnusedCodeDocumentChangeWrapper selectedDocWrapper;
 
 	private List<UnusedFieldWrapper> uncheckedFields = new ArrayList<>();
 	private List<UnusedFieldWrapper> recheckedFields = new ArrayList<>();
 	private Map<IPath, Document> originalDocuments;
 
-	public RemoveDeadCodeRulePreviewWizardPage(Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes,
+	public RemoveUnusedCodeRulePreviewWizardPage(Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes,
 			Map<IPath, Document> originalDocuments, RemoveUnusedFieldsRule rule1, boolean enabledDiffView) {
 		super(rule1.getRuleDescription()
 			.getName());
@@ -69,7 +69,7 @@ public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Creates {@link RemoveDeadCodeDocumentChangeWrapper} for each {@link DocumentChange}.
+	 * Creates {@link RemoveUnusedCodeDocumentChangeWrapper} for each {@link DocumentChange}.
 	 * First finds parent and then calls method to create children for that
 	 * parent.
 	 */
@@ -99,7 +99,7 @@ public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Creates children for {@link RemoveDeadCodeDocumentChangeWrapper} parent.
+	 * Creates children for {@link RemoveUnusedCodeDocumentChangeWrapper} parent.
 	 * 
 	 * @param fieldData
 	 * @param changesForField
@@ -107,7 +107,7 @@ public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
 	 */
 	private void createDocumentChangeWrapperChildren(UnusedFieldWrapper fieldData, Document originalDocument,
 			Map<ICompilationUnit, DocumentChange> changesForField, DocumentChange parent) {
-		RemoveDeadCodeDocumentChangeWrapper dcw = new RemoveDeadCodeDocumentChangeWrapper(parent, null, originalDocument, fieldData); 
+		RemoveUnusedCodeDocumentChangeWrapper dcw = new RemoveUnusedCodeDocumentChangeWrapper(parent, null, originalDocument, fieldData); 
 		changesForField.entrySet().stream().map(Map.Entry::getKey).forEach(iCompilationUnit -> {
 			if (!(fieldData.getDeclarationPath()).equals(iCompilationUnit.getPath())) {
 				DocumentChange document = changesForField.get(iCompilationUnit);
@@ -142,7 +142,7 @@ public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
 		if (!changesWrapperList.isEmpty()) {
 			ChangeElementContentProvider changeElementContentProvider = (ChangeElementContentProvider) viewer.getContentProvider();
 			Object viewerInput = viewer.getInput();
-			this.selectedDocWrapper = (RemoveDeadCodeDocumentChangeWrapper) changeElementContentProvider.getElements(viewerInput)[0];
+			this.selectedDocWrapper = (RemoveUnusedCodeDocumentChangeWrapper) changeElementContentProvider.getElements(viewerInput)[0];
 		}
 
 		/*
@@ -178,13 +178,13 @@ public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
 		viewer.setComparator(new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
-				if (((RemoveDeadCodeDocumentChangeWrapper) e1).getIdentifier()
-					.equals(((RemoveDeadCodeDocumentChangeWrapper) e2).getIdentifier())) {
-					return ((RemoveDeadCodeDocumentChangeWrapper) e1).getCompilationUnitName()
-						.compareTo(((RemoveDeadCodeDocumentChangeWrapper) e2).getCompilationUnitName());
+				if (((RemoveUnusedCodeDocumentChangeWrapper) e1).getIdentifier()
+					.equals(((RemoveUnusedCodeDocumentChangeWrapper) e2).getIdentifier())) {
+					return ((RemoveUnusedCodeDocumentChangeWrapper) e1).getCompilationUnitName()
+						.compareTo(((RemoveUnusedCodeDocumentChangeWrapper) e2).getCompilationUnitName());
 				}
-				return ((RemoveDeadCodeDocumentChangeWrapper) e1).getIdentifier()
-					.compareTo(((RemoveDeadCodeDocumentChangeWrapper) e2).getIdentifier());
+				return ((RemoveUnusedCodeDocumentChangeWrapper) e1).getIdentifier()
+					.compareTo(((RemoveUnusedCodeDocumentChangeWrapper) e2).getIdentifier());
 			}
 		});
 
@@ -194,7 +194,7 @@ public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
 	private void createSelectionChangedListener(SelectionChangedEvent event) {
 		IStructuredSelection sel = (IStructuredSelection) event.getSelection();
 		if (sel.size() == 1) {
-			RemoveDeadCodeDocumentChangeWrapper newSelection = (RemoveDeadCodeDocumentChangeWrapper) sel.getFirstElement();
+			RemoveUnusedCodeDocumentChangeWrapper newSelection = (RemoveUnusedCodeDocumentChangeWrapper) sel.getFirstElement();
 			if (!newSelection.equals(selectedDocWrapper)) {
 				selectedDocWrapper = newSelection;
 				populatePreviewViewer();
@@ -203,7 +203,7 @@ public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
 	}
 
 	private void createCheckListener(CheckStateChangedEvent event) {
-		RemoveDeadCodeDocumentChangeWrapper selectedWrapper = (RemoveDeadCodeDocumentChangeWrapper) event.getElement();
+		RemoveUnusedCodeDocumentChangeWrapper selectedWrapper = (RemoveUnusedCodeDocumentChangeWrapper) event.getElement();
 		boolean checked = event.getChecked();
 		if (null == selectedWrapper.getParent()) {
 			viewer.setSubtreeChecked(selectedWrapper, checked);
@@ -211,7 +211,7 @@ public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
 			viewer.setSubtreeChecked(selectedWrapper.getParent(), checked);
 		}
 
-		RemoveDeadCodeRulePreviewWizard wizard = (RemoveDeadCodeRulePreviewWizard) getWizard();
+		RemoveUnusedCodeRulePreviewWizard wizard = (RemoveUnusedCodeRulePreviewWizard) getWizard();
 
 		UnusedFieldWrapper selectedFieldData = selectedWrapper.getFieldData();
 		if (checked) {
@@ -244,7 +244,7 @@ public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
 	 * Fills {@link CheckboxTreeViewer} component with data.
 	 */
 	private void populateFileView() {
-		RemoveDeadCodeDocumentChangeWrapper[] changesArray = changesWrapperList.toArray(new RemoveDeadCodeDocumentChangeWrapper[] {});
+		RemoveUnusedCodeDocumentChangeWrapper[] changesArray = changesWrapperList.toArray(new RemoveUnusedCodeDocumentChangeWrapper[] {});
 		viewer.setInput(changesArray);
 		Arrays.asList(changesArray)
 			.stream()
@@ -305,8 +305,8 @@ public class RemoveDeadCodeRulePreviewWizardPage extends WizardPage {
 	private void disposePages() {
 		IWizardPage[] pages = getWizard().getPages();
 		for (IWizardPage page : pages) {
-			if (page instanceof RemoveDeadCodeRulePreviewWizardPage) {
-				((RemoveDeadCodeRulePreviewWizardPage) page).disposeControl();
+			if (page instanceof RemoveUnusedCodeRulePreviewWizardPage) {
+				((RemoveUnusedCodeRulePreviewWizardPage) page).disposeControl();
 			}
 		}
 	}

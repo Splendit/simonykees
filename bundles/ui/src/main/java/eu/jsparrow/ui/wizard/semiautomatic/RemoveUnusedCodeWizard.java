@@ -36,20 +36,20 @@ import eu.jsparrow.core.visitor.unused.UnusedFieldsEngine;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
-import eu.jsparrow.ui.preview.RemoveDeadCodeRulePreviewWizard;
-import eu.jsparrow.ui.preview.RemoveDeadCodeRulePreviewWizardPage;
+import eu.jsparrow.ui.preview.RemoveUnusedCodeRulePreviewWizard;
+import eu.jsparrow.ui.preview.RemoveUnusedCodeRulePreviewWizardPage;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
-public class RemoveDeadCodeWizard extends AbstractRuleWizard {
+public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	
-	private static final Logger logger = LoggerFactory.getLogger(RemoveDeadCodeWizard.class);
+	private static final Logger logger = LoggerFactory.getLogger(RemoveUnusedCodeWizard.class);
 	
 	private static final String WINDOW_ICON = "icons/jsparrow-icon-16-003.png"; //$NON-NLS-1$
 	private static final int SUMMARY_BUTTON_ID = 9;
 	
-	private RemoveDeadCodeWizardPageModel model;
+	private RemoveUnusedCodeWizardPageModel model;
 
 	private IJavaProject selectedJavaProject;
 	private List<ICompilationUnit> selectedJavaElements;
@@ -61,7 +61,7 @@ public class RemoveDeadCodeWizard extends AbstractRuleWizard {
 	private UnusedFieldsEngine engine;
 	private Image windowDefaultImage;
 	
-	public RemoveDeadCodeWizard(List<ICompilationUnit> selectedJavaElements) {
+	public RemoveUnusedCodeWizard(List<ICompilationUnit> selectedJavaElements) {
 		this.selectedJavaElements = selectedJavaElements;
 		setNeedsProgressMonitor(true);
 		windowDefaultImage = ResourceHelper.createImage(WINDOW_ICON);
@@ -83,8 +83,8 @@ public class RemoveDeadCodeWizard extends AbstractRuleWizard {
 
 	@Override
 	public void addPages() {
-		model = new RemoveDeadCodeWizardPageModel();
-		RemoveDeadCodeWizardPage page = new RemoveDeadCodeWizardPage(model);
+		model = new RemoveUnusedCodeWizardPageModel();
+		RemoveUnusedCodeWizardPage page = new RemoveUnusedCodeWizardPage(model);
 		addPage(page);
 	}
 
@@ -247,18 +247,18 @@ public class RemoveDeadCodeWizard extends AbstractRuleWizard {
 					.getShell();
 				List<ICompilationUnit> targetCompilationUnits = new ArrayList<>(engine.getTargetCompilationUnits());
 				List<UnusedFieldWrapper> unusedFields = rule.getUnusedFieldWrapperList();
-				RemoveDeadCodeRulePreviewWizard removeDeadCodePreviewWizard = new RemoveDeadCodeRulePreviewWizard(refactoringPipeline,
+				RemoveUnusedCodeRulePreviewWizard removeUnusedCodePreviewWizard = new RemoveUnusedCodeRulePreviewWizard(refactoringPipeline,
 						unusedFields, changes, targetCompilationUnits, rule);
-				final WizardDialog dialog = new WizardDialog(shell, removeDeadCodePreviewWizard) {
+				final WizardDialog dialog = new WizardDialog(shell, removeUnusedCodePreviewWizard) {
 					@Override
 					protected void nextPressed() {
-						((RemoveDeadCodeRulePreviewWizard) getWizard()).pressedNext();
+						((RemoveUnusedCodeRulePreviewWizard) getWizard()).pressedNext();
 						super.nextPressed();
 					}
 
 					@Override
 					protected void backPressed() {
-						((RemoveDeadCodeRulePreviewWizard) getWizard()).pressedBack();
+						((RemoveUnusedCodeRulePreviewWizard) getWizard()).pressedBack();
 						super.backPressed();
 					}
 
@@ -285,11 +285,11 @@ public class RemoveDeadCodeWizard extends AbstractRuleWizard {
 						 * current page. If it is already on Summary page, just
 						 * refresh.
 						 */
-						if (getCurrentPage() instanceof RemoveDeadCodeRulePreviewWizardPage) {
-							removeDeadCodePreviewWizard.updateViewsOnNavigation(getCurrentPage());
-							((RemoveDeadCodeRulePreviewWizardPage) getCurrentPage()).disposeControl();
+						if (getCurrentPage() instanceof RemoveUnusedCodeRulePreviewWizardPage) {
+							removeUnusedCodePreviewWizard.updateViewsOnNavigation(getCurrentPage());
+							((RemoveUnusedCodeRulePreviewWizardPage) getCurrentPage()).disposeControl();
 						}
-						showPage(removeDeadCodePreviewWizard.getSummaryPage());
+						showPage(removeUnusedCodePreviewWizard.getSummaryPage());
 					}
 				};
 

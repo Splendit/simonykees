@@ -34,7 +34,7 @@ public class ChangeElementLabelProvider extends LabelProvider implements IFontPr
 					.getName();
 			}
 		} else {
-			RemoveDeadCodeDocumentChangeWrapper documentChangeWrapper = (RemoveDeadCodeDocumentChangeWrapper) object;
+			RemoveUnusedCodeDocumentChangeWrapper documentChangeWrapper = (RemoveUnusedCodeDocumentChangeWrapper) object;
 			if (documentChangeWrapper.isParent()) {
 				return documentChangeWrapper.getIdentifier() + " - " //$NON-NLS-1$
 						+ "    " //$NON-NLS-1$

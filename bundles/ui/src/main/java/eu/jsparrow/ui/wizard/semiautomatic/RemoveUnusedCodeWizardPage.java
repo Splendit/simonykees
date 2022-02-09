@@ -25,20 +25,20 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 
 @SuppressWarnings("restriction")
-public class RemoveDeadCodeWizardPage extends NewElementWizardPage {
+public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 
-	private RemoveDeadCodeWizardPageModel model;
-	private RemoveDeadCodeWizardPageController controller;
+	private RemoveUnusedCodeWizardPageModel model;
+	private RemoveUnusedCodeWizardPageController controller;
 	
 	private Font boldFont;
 	protected IStatus fSelectionStatus;
 	
-	public RemoveDeadCodeWizardPage(RemoveDeadCodeWizardPageModel model) {
+	public RemoveUnusedCodeWizardPage(RemoveUnusedCodeWizardPageModel model) {
 		super("Remove Unused Code");
 		setTitle("Remove Unused Code");
 		setDescription("Remove Unused Code Configuration");
 		this.model = model;
-		this.controller = new RemoveDeadCodeWizardPageController(model);
+		this.controller = new RemoveUnusedCodeWizardPageController(model);
 
 	}
 

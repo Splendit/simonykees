@@ -34,9 +34,9 @@ import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
-public class RemoveDeadCodeRulePreviewWizard extends AbstractPreviewWizard {
+public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 
-	private static final Logger logger = LoggerFactory.getLogger(RemoveDeadCodeRulePreviewWizard.class);
+	private static final Logger logger = LoggerFactory.getLogger(RemoveUnusedCodeRulePreviewWizard.class);
 
 	private RefactoringPipeline refactoringPipeline;
 	private List<UnusedFieldWrapper> metaData;
@@ -49,7 +49,7 @@ public class RemoveDeadCodeRulePreviewWizard extends AbstractPreviewWizard {
 	private RefactoringSummaryWizardPage summaryPage;
 	private StatisticsSection statisticsSection;
 
-	public RemoveDeadCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<UnusedFieldWrapper> metadata,
+	public RemoveUnusedCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<UnusedFieldWrapper> metadata,
 			Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			List<ICompilationUnit> targetCompilationUnits, RemoveUnusedFieldsRule rule) {
 		this.refactoringPipeline = refactoringPipeline;
@@ -100,19 +100,19 @@ public class RemoveDeadCodeRulePreviewWizard extends AbstractPreviewWizard {
 			.stream()
 			.forEach(x -> model.addFileToRule(rule, x.getHandleIdentifier()));
 		if (!publicChanges.isEmpty()) {
-			addPage(new RemoveDeadCodeRulePreviewWizardPage(publicChanges, originalDocuments, rule, canFinish()));
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(publicChanges, originalDocuments, rule, canFinish()));
 		}
 
 		if (!protectedChanges.isEmpty()) {
-			addPage(new RemoveDeadCodeRulePreviewWizardPage(protectedChanges, originalDocuments, rule, canFinish()));
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(protectedChanges, originalDocuments, rule, canFinish()));
 		}
 
 		if (!packagePrivateChanges.isEmpty()) {
-			addPage(new RemoveDeadCodeRulePreviewWizardPage(packagePrivateChanges, originalDocuments, rule, canFinish()));
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(packagePrivateChanges, originalDocuments, rule, canFinish()));
 		}
 
 		if (!privateChanges.isEmpty()) {
-			addPage(new RemoveDeadCodeRulePreviewWizardPage(privateChanges, originalDocuments, rule, canFinish()));
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(privateChanges, originalDocuments, rule, canFinish()));
 		}
 		this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), null, statisticsSection); // FIXME: get the statistics metadata. 
 		addPage(summaryPage);
@@ -222,8 +222,8 @@ public class RemoveDeadCodeRulePreviewWizard extends AbstractPreviewWizard {
 			return;
 		}
 
-		if (page instanceof RemoveDeadCodeRulePreviewWizardPage) {
-			RemoveDeadCodeRulePreviewWizardPage previewPage = (RemoveDeadCodeRulePreviewWizardPage) page;
+		if (page instanceof RemoveUnusedCodeRulePreviewWizardPage) {
+			RemoveUnusedCodeRulePreviewWizardPage previewPage = (RemoveUnusedCodeRulePreviewWizardPage) page;
 			boolean recalculate = previewPage.isRecalculateNeeded();
 			if (recalculate) {
 				performRecalculation(container);
@@ -260,8 +260,8 @@ public class RemoveDeadCodeRulePreviewWizard extends AbstractPreviewWizard {
 		}
 
 		IWizardPage currentPage = container.getCurrentPage();
-		if (currentPage instanceof RemoveDeadCodeRulePreviewWizardPage) {
-			((RemoveDeadCodeRulePreviewWizardPage) currentPage).disposeControl();
+		if (currentPage instanceof RemoveUnusedCodeRulePreviewWizardPage) {
+			((RemoveUnusedCodeRulePreviewWizardPage) currentPage).disposeControl();
 		}
 
 		getNextPage(currentPage);

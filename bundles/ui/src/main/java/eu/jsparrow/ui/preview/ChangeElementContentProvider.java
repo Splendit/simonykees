@@ -22,8 +22,8 @@ public class ChangeElementContentProvider implements ITreeContentProvider {
 	public Object[] getChildren(Object o) {
 		if (o instanceof DocumentChangeWrapper) {
 			return ((DocumentChangeWrapper) o).getChildren();
-		} else if (o instanceof RemoveDeadCodeDocumentChangeWrapper) {
-			return ((RemoveDeadCodeDocumentChangeWrapper) o).getChildren();
+		} else if (o instanceof RemoveUnusedCodeDocumentChangeWrapper) {
+			return ((RemoveUnusedCodeDocumentChangeWrapper) o).getChildren();
 		}
 		return new Object[] {};
 	}
@@ -35,8 +35,8 @@ public class ChangeElementContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public Object getParent(Object element) {
-		if(element instanceof RemoveDeadCodeDocumentChangeWrapper) {
-			return ((RemoveDeadCodeDocumentChangeWrapper) element).getParent();
+		if(element instanceof RemoveUnusedCodeDocumentChangeWrapper) {
+			return ((RemoveUnusedCodeDocumentChangeWrapper) element).getParent();
 		}
 		return ((DocumentChangeWrapper) element).getParent();
 	}
@@ -71,15 +71,15 @@ public class ChangeElementContentProvider implements ITreeContentProvider {
 						.compareTo(e2.getOldIdentifier());
 				});
 			return (DocumentChangeWrapper[]) element;
-		} else if (element instanceof RemoveDeadCodeDocumentChangeWrapper[]) {
-			Arrays.asList((RemoveDeadCodeDocumentChangeWrapper[]) element)
+		} else if (element instanceof RemoveUnusedCodeDocumentChangeWrapper[]) {
+			Arrays.asList((RemoveUnusedCodeDocumentChangeWrapper[]) element)
 			.sort((e1, e2) -> {
 				if(e1.getIdentifier().equals(e2.getIdentifier())) {
 					return e1.getCompilationUnitName().compareTo(e2.getCompilationUnitName());
 				}
 				return e1.getIdentifier().compareTo(e2.getIdentifier());
 			});
-			return (RemoveDeadCodeDocumentChangeWrapper[]) element;
+			return (RemoveUnusedCodeDocumentChangeWrapper[]) element;
 		}
 		return new Object[] {};
 	}

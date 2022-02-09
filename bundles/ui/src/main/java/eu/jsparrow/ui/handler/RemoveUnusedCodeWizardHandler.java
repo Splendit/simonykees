@@ -26,11 +26,11 @@ import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
-import eu.jsparrow.ui.wizard.semiautomatic.RemoveDeadCodeWizard;
+import eu.jsparrow.ui.wizard.semiautomatic.RemoveUnusedCodeWizard;
 
-public class RemoveDeadCodeWizardHandler extends AbstractRuleWizardHandler {
+public class RemoveUnusedCodeWizardHandler extends AbstractRuleWizardHandler {
 
-	private static final Logger logger = LoggerFactory.getLogger(RemoveDeadCodeWizardHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(RemoveUnusedCodeWizardHandler.class);
 
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
@@ -76,7 +76,7 @@ public class RemoveDeadCodeWizardHandler extends AbstractRuleWizardHandler {
 		Job job = new Job("Find dead code") { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Function<List<ICompilationUnit>, AbstractRuleWizard> wizardGenerator = RemoveDeadCodeWizard::new;
+				Function<List<ICompilationUnit>, AbstractRuleWizard> wizardGenerator = RemoveUnusedCodeWizard::new;
 				return startRuleWizard(selectedJavaElements, monitor, wizardGenerator);
 			}
 		};

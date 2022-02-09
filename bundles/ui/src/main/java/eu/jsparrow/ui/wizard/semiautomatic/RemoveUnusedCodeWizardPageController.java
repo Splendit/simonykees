@@ -2,11 +2,11 @@ package eu.jsparrow.ui.wizard.semiautomatic;
 
 import java.util.List;
 
-public class RemoveDeadCodeWizardPageController {
+public class RemoveUnusedCodeWizardPageController {
 	
-	private RemoveDeadCodeWizardPageModel model;
+	private RemoveUnusedCodeWizardPageModel model;
 	
-	public RemoveDeadCodeWizardPageController(RemoveDeadCodeWizardPageModel model) {
+	public RemoveUnusedCodeWizardPageController(RemoveUnusedCodeWizardPageModel model) {
 		this.model = model;
 	}
 				

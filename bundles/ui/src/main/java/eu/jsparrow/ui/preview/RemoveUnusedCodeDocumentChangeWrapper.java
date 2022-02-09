@@ -8,18 +8,18 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 
-public class RemoveDeadCodeDocumentChangeWrapper {
+public class RemoveUnusedCodeDocumentChangeWrapper {
 	
 	private DocumentChange documentChange;
 	private boolean isParent;
-	private RemoveDeadCodeDocumentChangeWrapper parent;
+	private RemoveUnusedCodeDocumentChangeWrapper parent;
 	private String identifier;
 	private String compilationUnitName;
-	private List<RemoveDeadCodeDocumentChangeWrapper> children = new ArrayList<>();
+	private List<RemoveUnusedCodeDocumentChangeWrapper> children = new ArrayList<>();
 	private UnusedFieldWrapper fieldData;
 	private Document originalDocument;
 
-	public RemoveDeadCodeDocumentChangeWrapper(DocumentChange documentChange, RemoveDeadCodeDocumentChangeWrapper parent, Document originalDocument, UnusedFieldWrapper fieldData) {
+	public RemoveUnusedCodeDocumentChangeWrapper(DocumentChange documentChange, RemoveUnusedCodeDocumentChangeWrapper parent, Document originalDocument, UnusedFieldWrapper fieldData) {
 		this.documentChange = documentChange;
 		this.parent = parent;
 		this.isParent = null == parent;
@@ -29,7 +29,7 @@ public class RemoveDeadCodeDocumentChangeWrapper {
 		this.originalDocument = originalDocument;
 	}
 
-	private RemoveDeadCodeDocumentChangeWrapper(DocumentChange documentChange, RemoveDeadCodeDocumentChangeWrapper parent, String identifier, 
+	private RemoveUnusedCodeDocumentChangeWrapper(DocumentChange documentChange, RemoveUnusedCodeDocumentChangeWrapper parent, String identifier, 
 			String compilationUnitName, Document compilationUnitSource, UnusedFieldWrapper fieldData) {
 		this.documentChange = documentChange;
 		this.parent = parent;
@@ -49,15 +49,15 @@ public class RemoveDeadCodeDocumentChangeWrapper {
 	}
 
 	public void addChild(DocumentChange child, String compilationUnitName, Document document) {
-		this.children.add(new RemoveDeadCodeDocumentChangeWrapper(child, this, this.identifier, 
+		this.children.add(new RemoveUnusedCodeDocumentChangeWrapper(child, this, this.identifier, 
 				compilationUnitName, document, this.fieldData));
 	}
 
-	public RemoveDeadCodeDocumentChangeWrapper[] getChildren() {
-		return children.toArray(new RemoveDeadCodeDocumentChangeWrapper[] {});
+	public RemoveUnusedCodeDocumentChangeWrapper[] getChildren() {
+		return children.toArray(new RemoveUnusedCodeDocumentChangeWrapper[] {});
 	}
 
-	public RemoveDeadCodeDocumentChangeWrapper getParent() {
+	public RemoveUnusedCodeDocumentChangeWrapper getParent() {
 		return parent;
 	}
 
