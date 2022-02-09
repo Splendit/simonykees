@@ -3,9 +3,11 @@ package eu.jsparrow.core.visitor.assertj.dedicated;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
@@ -149,5 +151,62 @@ public class UseDedicatedAssertJAssertionsWithInfixASTVisitorTest extends UsesSi
 				numericType, literal, numericType, literal);
 
 		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_ExtendedInfixOperands_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "		boolean a = false;\n"
+				+ "		assertThat(a || false || true).isTrue();";
+
+		assertNoChange(original);
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"||",
+			"&&",
+			"|",
+			"&",
+			"^",
+	})
+	void visit_NotSupportedInfixOperator_shouldNotTransform(String notSupportedInfix) throws Exception {
+		String original = String.format(""
+				+ "		boolean a = true;\n"
+				+ "		assertThat(a %s true).isTrue();",
+				notSupportedInfix);
+
+		assertNoChange(original);
+	}
+
+	/**
+	 * This test may fail in the future as soon as some infix operations with
+	 * different types are be supported.
+	 * 
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"new Object() != Long.valueOf(0L)",
+			"Integer.valueOf(0) == 0",
+			"0L == 0",
+			"0.0 == 0",
+	})
+	void visit_InfixOperandsOfDifferenttype_shouldNotTransform(String unsupportedInfixExpression) throws Exception {
+		String original = String.format(
+				"assertThat(%s).isTrue();",
+				unsupportedInfixExpression);
+
+		assertNoChange(original);
+	}
+	
+	
+	@Test
+	void visit_InfixOperandsOfNotSupportedType_shouldNotTransform()  throws Exception {
+		String original = ""
+				+ "		int[][][] array3D = new int[0][0][0];\n"
+				+ "		assertThat(array3D == array3D).isTrue();";
+
+		assertNoChange(original);
 	}
 }

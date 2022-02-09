@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.assertj.dedicated;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -297,6 +298,39 @@ public class UseDedicatedAssertJAssertionsWithSizeOrLengthASTVisitorTest extends
 				+ "		}\n"
 				+ "		assertThat(new LocalClass().%s).isEqualTo(10);",
 				methodDeclaration, invocation);
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_3DarraysOfSameLength_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "		int[][][] array3D1 = new int[0][0][0];\n"
+				+ "		int[][][] array3D2 = new int[0][0][0];\n"
+				+ "		assertThat(array3D1.length).isEqualTo(array3D2.length);";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_QualifiedNameIsNotLength_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "		class LocalClass {\n"
+				+ "			int x = 1;\n"
+				+ "		}\n"
+				+ "		LocalClass localClass = new LocalClass();\n"
+				+ "		assertThat(localClass.x).isEqualTo(1);";
+
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_FieldAccessIsNotLength_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "		class LocalClass {\n"
+				+ "			int x = 1;\n"
+				+ "		}\n"
+				+ "		assertThat(new LocalClass().x).isEqualTo(1);";
+
 		assertNoChange(original);
 	}
 }
