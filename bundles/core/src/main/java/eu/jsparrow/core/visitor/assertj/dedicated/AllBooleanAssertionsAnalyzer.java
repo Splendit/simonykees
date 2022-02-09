@@ -115,6 +115,10 @@ public class AllBooleanAssertionsAnalyzer {
 
 	private static Optional<AssertJAssertThatWithAssertionData> analyzeBooleanAssertionWithInfixOperation(
 			InfixExpression infixExpressionAsAssertThatArgument, String assertionMethodName) {
+		
+		if(!infixExpressionAsAssertThatArgument.extendedOperands().isEmpty()) {
+			return Optional.empty();
+		}
 
 		Expression leftOperand = infixExpressionAsAssertThatArgument.getLeftOperand();
 		Expression rightOperand = infixExpressionAsAssertThatArgument.getRightOperand();
