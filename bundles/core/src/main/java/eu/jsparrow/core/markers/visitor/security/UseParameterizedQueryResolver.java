@@ -15,8 +15,14 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link UseParameterizedQueryASTVisitor}.
+ * 
+ * @since 4.8.0
+ * 
+ */
 public class UseParameterizedQueryResolver extends UseParameterizedQueryASTVisitor implements Resolver {
-
 
 	public static final String ID = "UseParameterizedQueryResolver"; //$NON-NLS-1$
 

@@ -16,6 +16,12 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type {@link UseSecureRandomASTVisitor}.
+ * 
+ * @since 4.8.0
+ * 
+ */
 public class UseSecureRandomResolver extends UseSecureRandomASTVisitor implements Resolver {
 
 	public static final String ID = "UseSecureRandomResolver"; //$NON-NLS-1$

@@ -15,6 +15,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link UseParameterizedLDAPQueryASTVisitor}.
+ * 
+ * @since 4.8.0
+ * 
+ */
 public class UseParameterizedLDAPQueryResolver extends UseParameterizedLDAPQueryASTVisitor implements Resolver {
 
 	public static final String ID = "UseParameterizedLDAPQueryResolver"; //$NON-NLS-1$

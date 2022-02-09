@@ -17,6 +17,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link UseFilesBufferedReaderASTVisitor}.
+ * 
+ * @since 4.8.0
+ * 
+ */
 public class UseFilesBufferedReaderResolver extends UseFilesBufferedReaderASTVisitor implements Resolver {
 
 	public static final String ID = "UseFilesBufferedReaderResolver"; //$NON-NLS-1$
@@ -38,7 +45,7 @@ public class UseFilesBufferedReaderResolver extends UseFilesBufferedReaderASTVis
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {
 		Expression initializer = fragment.getInitializer();
-		if(initializer == null) {
+		if (initializer == null) {
 			return false;
 		}
 

@@ -16,6 +16,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link UseFilesWriteStringASTVisitor}.
+ * 
+ * @since 4.8.0
+ * 
+ */
 public class UseFilesWriteStringResolver extends UseFilesWriteStringASTVisitor implements Resolver {
 
 	public static final String ID = "UseFilesWriteStringResolver"; //$NON-NLS-1$
@@ -47,12 +54,11 @@ public class UseFilesWriteStringResolver extends UseFilesWriteStringASTVisitor i
 		addMarkerEventForASTNode(node);
 	}
 
-	
 	@Override
 	public void addMarkerEvent(ExpressionStatement node) {
 		addMarkerEventForASTNode(node.getParent());
 	}
-	
+
 	private void addMarkerEventForASTNode(ASTNode node) {
 		int credit = description.getCredit();
 		int highlightLength = 0;
@@ -75,5 +81,5 @@ public class UseFilesWriteStringResolver extends UseFilesWriteStringASTVisitor i
 			.build();
 		addMarkerEvent(event);
 	}
-	
+
 }

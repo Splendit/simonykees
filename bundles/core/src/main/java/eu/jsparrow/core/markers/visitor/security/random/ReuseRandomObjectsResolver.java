@@ -15,6 +15,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link ReuseRandomObjectsASTVisitor}.
+ * 
+ * @since 4.8.0
+ * 
+ */
 public class ReuseRandomObjectsResolver extends ReuseRandomObjectsASTVisitor implements Resolver {
 
 	public static final String ID = "ReuseRandomObjectsResolver"; //$NON-NLS-1$

@@ -33,7 +33,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.22.0
  *
  */
-abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddImportASTVisitor
+public abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddImportASTVisitor
 		implements UseFilesBufferedIOMethodsEvent {
 	private final String bufferedIOQualifiedTypeName;
 	private final String fileIOQualifiedTypeName;

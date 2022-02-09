@@ -15,8 +15,14 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type {@link OptionalMapASTVisitor}.
+ * 
+ * @since 4.8.0
+ * 
+ */
 public class OptionalMapResolver extends OptionalMapASTVisitor implements Resolver {
-	
+
 	public static final String ID = "OptionalMapResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;

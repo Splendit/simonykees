@@ -66,6 +66,7 @@ import eu.jsparrow.core.markers.visitor.security.UseParameterizedJPAQueryResolve
 import eu.jsparrow.core.markers.visitor.security.UseParameterizedLDAPQueryResolver;
 import eu.jsparrow.core.markers.visitor.security.UseParameterizedQueryResolver;
 import eu.jsparrow.core.markers.visitor.security.random.ReuseRandomObjectsResolver;
+import eu.jsparrow.core.markers.visitor.security.random.UseSecureRandomResolver;
 import eu.jsparrow.core.markers.visitor.stream.tolist.ReplaceStreamCollectByToListResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.MultiCatchResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.TryWithResourceResolver;
@@ -132,7 +133,6 @@ public class ResolverVisitorsFactory {
 		map.put(EnhancedForLoopToStreamForEachResolver.ID, EnhancedForLoopToStreamForEachResolver::new);
 		map.put(EnhancedForLoopToStreamSumResolver.ID, EnhancedForLoopToStreamSumResolver::new);
 		map.put(EnhancedForLoopToStreamTakeWhileResolver.ID, EnhancedForLoopToStreamTakeWhileResolver::new);
-		
 		map.put(ArithmeticAssignmentResolver.ID, ArithmeticAssignmentResolver::new);
 		map.put(UseFilesBufferedReaderResolver.ID, UseFilesBufferedReaderResolver::new);
 		map.put(UseFilesBufferedWriterResolver.ID, UseFilesBufferedWriterResolver::new);
@@ -143,9 +143,8 @@ public class ResolverVisitorsFactory {
 		map.put(OptionalMapResolver.ID, OptionalMapResolver::new);
 		map.put(OptionalFilterResolver.ID, OptionalFilterResolver::new);
 		map.put(CreateTempFilesUsingJavaNIOResolver.ID, CreateTempFilesUsingJavaNIOResolver::new);
-		
 		map.put(ReuseRandomObjectsResolver.ID, ReuseRandomObjectsResolver::new);
-		map.put(ReuseRandomObjectsResolver.ID, ReuseRandomObjectsResolver::new);
+		map.put(UseSecureRandomResolver.ID, UseSecureRandomResolver::new);
 		map.put(UseParameterizedQueryResolver.ID, UseParameterizedQueryResolver::new);
 		map.put(UseParameterizedJPAQueryResolver.ID, UseParameterizedJPAQueryResolver::new);
 		map.put(UseParameterizedLDAPQueryResolver.ID, UseParameterizedLDAPQueryResolver::new);

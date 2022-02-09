@@ -15,6 +15,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link CreateTempFilesUsingJavaNIOASTVisitor}.
+ * 
+ * @since 4.8.0
+ * 
+ */
 public class CreateTempFilesUsingJavaNIOResolver extends CreateTempFilesUsingJavaNIOASTVisitor implements Resolver {
 
 	public static final String ID = "CreateTempFilesUsingJavaNIOResolver"; //$NON-NLS-1$
