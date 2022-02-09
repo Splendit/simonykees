@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.ui.wizard.IValueChangeListener;
@@ -56,11 +57,18 @@ public class RemoveUnusedCodeWizardPageModel {
 		return this.classMemberTypes;
 	}
 
-	public void setClasMemberTypes(List<String> classMemberTypes) {
+	public List<String> getDefaultClassMemberTypes() {
+		return this.initClassMemberTypes().stream()
+				.filter(name -> name.startsWith("private")) //$NON-NLS-1$
+				.collect(Collectors.toList());
+	}
+
+	public void setClassMemberTypes(List<String> classMemberTypes) {
 		this.classMemberTypes = Collections.unmodifiableList(classMemberTypes);
 		notifyListeners();
 	}
 
+	
 	public void setSearchScope(String newValue) {
 		this.searchScope = newValue;
 		notifyListeners();

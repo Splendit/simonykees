@@ -1,6 +1,7 @@
 package eu.jsparrow.ui.wizard.semiautomatic;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -85,10 +86,12 @@ public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 		table.setLayout(new GridLayout());
 		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		table.setLayoutData(gridData);
+		List<String> defaultChecked = model.getDefaultClassMemberTypes();
 		for (String fieldType : model.getClassMemberTypes()) {
 			TableItem item = new TableItem(table, SWT.NONE);
 			item.setText(fieldType);
-			item.setChecked(true);
+			boolean checked = defaultChecked.contains(fieldType);
+			item.setChecked(checked);
 		}
 
 		table.addListener(SWT.Selection, event -> {

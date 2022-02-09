@@ -11,7 +11,7 @@ public class RemoveUnusedCodeWizardPageController {
 	}
 				
 	public void classMemberSelectionChanged(List<String> selection) {
-		model.setClasMemberTypes(selection);
+		model.setClassMemberTypes(selection);
 	}
 	
 	public void searchScopeSelectionChanged(String newValue) {
