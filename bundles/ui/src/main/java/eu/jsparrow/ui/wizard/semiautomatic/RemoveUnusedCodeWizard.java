@@ -33,7 +33,7 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedFieldsRule;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 import eu.jsparrow.core.visitor.unused.UnusedFieldsEngine;
-import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RemoveUnusedCodeRulePreviewWizard;
@@ -55,7 +55,6 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	private List<ICompilationUnit> selectedJavaElements;
 	private Rectangle rectangle;
 	
-	private boolean canRefactor = true;
 	private RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 	private RemoveUnusedFieldsRule rule;
 	private UnusedFieldsEngine engine;
@@ -78,7 +77,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	
 	@Override
 	public String getWindowTitle() {
-		return "Remove Unused Code"; //$NON-NLS-1$
+		return ExceptionMessages.RemoveUnusedCodeWizard_removeUnusedCodeWindowTitle;
 	}
 
 	@Override
@@ -111,11 +110,11 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 				.getPrimaryMonitor()
 				.getBounds();
 		
-		String message = NLS.bind("Start refactoring from [{0}] in project [{1}]", this.getClass() //$NON-NLS-1$
+		String message = NLS.bind(ExceptionMessages.RemoveUnusedCodeWizard_startRefactoringInProjectMessage, this.getClass()
 				.getSimpleName(), selectedJavaProject.getElementName());
 			logger.info(message);
 		
-		Job job = new Job("Analysing Field References") { //$NON-NLS-1$
+		Job job = new Job(ExceptionMessages.RemoveUnusedCodeWizard_analysingFieldReferencesJobName) {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -127,7 +126,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 
 				SubMonitor child = subMonitor.split(70);
 				child.setWorkRemaining(selectedJavaElements.size());
-				child.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
+				child.setTaskName(ExceptionMessages.RemoveUnusedCodeWizard_collectingTheSelectedCompilationUnitsTaskName);
 
 				List<UnusedFieldWrapper> unusedFields = engine.findUnusedFields(selectedJavaElements, model.getOptionsMap(), child);
 				
@@ -141,13 +140,20 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 				rule = new RemoveUnusedFieldsRule(unusedFields);
 				refactoringPipeline.setRules(Collections.singletonList(rule));
 				Set<ICompilationUnit> targetCompilationUnits = engine.getTargetCompilationUnits();
+				if(targetCompilationUnits.isEmpty()) {
+					return Status.CANCEL_STATUS;
+				}
 				try {
 					refactoringPipeline.prepareRefactoring(new ArrayList<>(targetCompilationUnits), childSecondPart);
 					refactoringPipeline.updateInitialSourceMap();
 				} catch (RefactoringException e) {
-					e.printStackTrace();//FIXME
+					logger.error("Cannot create working copies of the target compilation units.", e); //$NON-NLS-1$
+					WizardMessageDialog.synchronizeWithUIShowInfo(
+							new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+									ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
+					return Status.CANCEL_STATUS;
 				}
-				// TODO: check canRefactor flag
+				
 				if(childSecondPart.isCanceled()) {
 					return Status.CANCEL_STATUS;
 				}
@@ -164,7 +170,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 			public void done(IJobChangeEvent event) {
 
 				if (event.getResult()
-					.isOK() && canRefactor) { // this flag is very bad!
+					.isOK()) {
 					Job refactorJob = startRefactoringJob();
 
 					refactorJob.setUser(true);
@@ -180,7 +186,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	}
 	
 	private Job startRefactoringJob() {
-		Job refactorJob = new Job(Messages.ProgressMonitor_calculating_possible_refactorings) {
+		Job refactorJob = new Job(ExceptionMessages.RemoveUnusedCodeWizard_calculateChangesJobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -221,7 +227,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 			changes = rule.computeDocumentChangesPerField();
 			synchronizeWithUIShowRefactoringPreviewWizard(changes);
 		} catch (JavaModelException e) {
-			logger.error("Cannot create document for displaying changes - " + e.getMessage(), e); //$NON-NLS-1$
+			logger.error("Cannot create document for displaying changes - {} ", e.getMessage(), e); //$NON-NLS-1$
 		}
 
 
@@ -231,10 +237,10 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 			Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes) {
 
 		
-		String message = NLS.bind("End refactoring from [{0}] in project [{1}]", this.getClass() //$NON-NLS-1$
+		String message = NLS.bind(ExceptionMessages.RemoveUnusedCodeWizard_endRefactoringInProjectMessage, this.getClass()
 			.getSimpleName(), selectedJavaProject.getElementName());
 		logger.info(message);
-		message = NLS.bind("Rules with changes for project [{0}] are: [{1}]", selectedJavaProject.getElementName(), //$NON-NLS-1$
+		message = NLS.bind(ExceptionMessages.RemoveUnusedCodeWizard_rulesWithChangesForProjectMessage, selectedJavaProject.getElementName(),
 				rule.getRuleDescription()
 					.getName());
 		logger.info(message);
@@ -264,7 +270,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 
 					@Override
 					protected void createButtonsForButtonBar(Composite parent) {
-						createButton(parent, SUMMARY_BUTTON_ID, Messages.SelectRulesWizard_Summary, false);
+						createButton(parent, SUMMARY_BUTTON_ID, ExceptionMessages.RemoveUnusedCodeWizard_summaryButtonName, false);
 						super.createButtonsForButtonBar(parent);
 					}
 
@@ -297,7 +303,5 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 				dialog.setPageSize(rectangle.width, rectangle.height);
 				dialog.open();
 			});
-
 	}
-
 }

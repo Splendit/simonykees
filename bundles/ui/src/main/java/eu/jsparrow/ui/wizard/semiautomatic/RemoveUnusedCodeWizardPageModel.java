@@ -1,5 +1,7 @@
 package eu.jsparrow.ui.wizard.semiautomatic;
 
+import static eu.jsparrow.ui.wizard.semiautomatic.RemoveUnusedCodeWizardPageConstants.*;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,35 +22,33 @@ public class RemoveUnusedCodeWizardPageModel {
 	private String searchScope;
 	private boolean removeTestCode;
 	private boolean removeInitializersWithSideEffects;
-	
 
 	public RemoveUnusedCodeWizardPageModel() {
 		classMemberTypes = initClassMemberTypes();
-		searchScope = "Project";
-
+		searchScope = PROJECT;
 	}
 
 	private List<String> initClassMemberTypes() {
 		List<String> options = new ArrayList<>();
-		options.add("private fields");
-		options.add("protected fields");
-		options.add("package-private fields");
-		options.add("public fields");
-		options.add("private methods");
-		options.add("protected methods");
-		options.add("package-private methods");
-		options.add("public methods");
-		options.add("private classes");
-		options.add("protected classes");
-		options.add("package-protected classes");
-		options.add("public classes");
+		options.add(PRIVATE_FIELDS);
+		options.add(PROTECTED_FIELDS);
+		options.add(PACKAGE_PRIVATE_FIELDS);
+		options.add(PUBLIC_FIELDS);
+		options.add(PRIVATE_METHODS);
+		options.add(PROTECTED_METHODS);
+		options.add(PACKAGE_PRIVATE_METHODS);
+		options.add(PUBLIC_METHODS);
+		options.add(PRIVATE_CLASSES);
+		options.add(PROTECTED_CLASSES);
+		options.add(PACKAGE_PROTECTED_CLASSES);
+		options.add(PUBLIC_CLASSES);
 		return Collections.unmodifiableList(options);
 	}
 
 	public void notifyListeners() {
 		listeners.forEach(IValueChangeListener::valueChanged);
 	}
-	
+
 	public void addListener(IValueChangeListener listener) {
 		listeners.add(listener);
 	}
@@ -58,9 +58,10 @@ public class RemoveUnusedCodeWizardPageModel {
 	}
 
 	public List<String> getDefaultClassMemberTypes() {
-		return this.initClassMemberTypes().stream()
-				.filter(name -> name.startsWith("private")) //$NON-NLS-1$
-				.collect(Collectors.toList());
+		return this.initClassMemberTypes()
+			.stream()
+			.filter(name -> name.startsWith("private")) //$NON-NLS-1$
+			.collect(Collectors.toList());
 	}
 
 	public void setClassMemberTypes(List<String> classMemberTypes) {
@@ -68,55 +69,54 @@ public class RemoveUnusedCodeWizardPageModel {
 		notifyListeners();
 	}
 
-	
 	public void setSearchScope(String newValue) {
 		this.searchScope = newValue;
 		notifyListeners();
 	}
-	
+
 	public void setRemoveTestCode(boolean newValue) {
 		this.removeTestCode = newValue;
 		notifyListeners();
 	}
-	
+
 	public void setRemoveInitializersWithSideEffects(boolean newValue) {
 		this.removeInitializersWithSideEffects = newValue;
 		notifyListeners();
 	}
-	
+
 	public List<String> getSearchScopeOptions() {
 		List<String> searchScopes = new ArrayList<>();
-		searchScopes.add("Project");
-		searchScopes.add("Workspace");
+		searchScopes.add(PROJECT);
+		searchScopes.add(WORKSPACE);
 		return searchScopes;
 	}
-	
+
 	public Map<String, Boolean> getOptionsMap() {
 		Map<String, Boolean> map = new HashMap<>();
-		boolean removePrivateFields = classMemberTypes.contains("private fields");
-		boolean removeProtectedFields = classMemberTypes.contains("protected fields");
-		boolean removePublicFields = classMemberTypes.contains("public fields");
-		boolean removePackagePrivateFields = classMemberTypes.contains("package-private fields");
+		boolean removePrivateFields = classMemberTypes.contains(PRIVATE_FIELDS);
+		boolean removeProtectedFields = classMemberTypes.contains(PROTECTED_FIELDS);
+		boolean removePublicFields = classMemberTypes.contains(PUBLIC_FIELDS);
+		boolean removePackagePrivateFields = classMemberTypes.contains(PACKAGE_PRIVATE_FIELDS);
 		map.put(Constants.PRIVATE_FIELDS, removePrivateFields);
 		map.put(Constants.PROTECTED_FIELDS, removeProtectedFields);
 		map.put(Constants.PUBLIC_FIELDS, removePublicFields);
 		map.put(Constants.PACKAGE_PRIVATE_FIELDS, removePackagePrivateFields);
-		
+
 		map.put(Constants.PRIVATE_METHODS, false);
 		map.put(Constants.PROTECTED_METHODS, false);
 		map.put(Constants.PUBLIC_METHODS, false);
 		map.put(Constants.PACKAGE_PRIVATE_METHODS, false);
-		
+
 		map.put(Constants.PRIVATE_CLASSES, false);
 		map.put(Constants.PROTECTED_CLASSES, false);
 		map.put(Constants.PUBLIC_CLASSES, false);
 		map.put(Constants.PACKAGE_PRIVATE_CLASSES, false);
-		
+
 		map.put(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, removeInitializersWithSideEffects);
 		map.put(Constants.REMOVE_TEST_CODE, removeTestCode);
 		return map;
 	}
-	
+
 	public String getSearchScope() {
 		return this.searchScope;
 	}

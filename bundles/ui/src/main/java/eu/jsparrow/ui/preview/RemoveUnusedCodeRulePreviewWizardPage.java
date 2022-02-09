@@ -288,6 +288,7 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 			currentPreviewViewer.getControl()
 				.setLayoutData(new GridData(GridData.FILL_BOTH));
 
+			@SuppressWarnings("restriction")
 			ChangePreviewViewerInput viewerInput = TextEditChangePreviewViewer.createInput(getCurrentDocumentChange());
 			currentPreviewViewer.setInput(viewerInput);
 

@@ -35,9 +35,9 @@ public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 	protected IStatus fSelectionStatus;
 	
 	public RemoveUnusedCodeWizardPage(RemoveUnusedCodeWizardPageModel model) {
-		super("Remove Unused Code");
-		setTitle("Remove Unused Code");
-		setDescription("Remove Unused Code Configuration");
+		super(Messages.RemoveUnusedCodeWizardPage_pageName);
+		setTitle(Messages.RemoveUnusedCodeWizardPage_pageTitle);
+		setDescription(Messages.RemoveUnusedCodeWizardPage_pageDescription);
 		this.model = model;
 		this.controller = new RemoveUnusedCodeWizardPageController(model);
 
@@ -59,12 +59,12 @@ public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 		createClassMemberChoosingPart(composite);
 		createSearchScopeChoosingPart(composite);
 		createSingleCheckBoxSection(composite, 
-				"Remove tests for unused code",  //$NON-NLS-1$
-				"Remove test cases having references of unused code.",  //$NON-NLS-1$
+				Messages.RemoveUnusedCodeWizardPage_removeUnusedTestsSectionTitle,
+				Messages.RemoveUnusedCodeWizardPage_removeUnusedTestsDescription,
 				controller::removeTestCodeSelectionChanged, false);
 		createSingleCheckBoxSection(composite, 
-				"Remove initializers of unused fields",   //$NON-NLS-1$
-				"Remove fields initialized with expressions with probable side effects",   //$NON-NLS-1$
+				Messages.RemoveUnusedCodeWizardPage_removeInitializersSectionTitle,
+				Messages.RemoveUnusedCodeWizardPage_removeInitializersSectionDescription,
 				controller::removeInitializersWithSideEffectsSelectionChanged, false);
 
 
@@ -79,7 +79,7 @@ public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 	
 	private void createClassMemberChoosingPart(Composite parent) {
 		Label partTitle = new Label(parent, SWT.NONE);
-		partTitle.setText("Apply on:");
+		partTitle.setText(Messages.RemoveUnusedCodeWizardPage_applyOn);
 		partTitle.setFont(boldFont);
 
 		Table table = new Table(parent, SWT.CHECK);
@@ -107,7 +107,7 @@ public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 
 	private void createSearchScopeChoosingPart(Composite parent) {
 		Label partTitle = new Label(parent, SWT.NONE);
-		partTitle.setText("Search scope for references");
+		partTitle.setText(Messages.RemoveUnusedCodeWizardPage_searchScopeText);
 		partTitle.setFont(boldFont);
 
 		Group scopesGroup = new Group(parent, SWT.NONE);
