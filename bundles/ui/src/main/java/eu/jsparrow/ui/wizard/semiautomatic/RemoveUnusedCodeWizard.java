@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedFieldsRule;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 import eu.jsparrow.core.visitor.unused.UnusedFieldsEngine;
@@ -251,10 +252,11 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
+				StandaloneStatisticsMetadata standaloneStatisticsMetadata = prepareStatisticsMetadata(Collections.singletonList(selectedJavaProject));
 				List<ICompilationUnit> targetCompilationUnits = new ArrayList<>(engine.getTargetCompilationUnits());
 				List<UnusedFieldWrapper> unusedFields = rule.getUnusedFieldWrapperList();
 				RemoveUnusedCodeRulePreviewWizard removeUnusedCodePreviewWizard = new RemoveUnusedCodeRulePreviewWizard(refactoringPipeline,
-						unusedFields, changes, targetCompilationUnits, rule);
+						standaloneStatisticsMetadata, unusedFields, changes, targetCompilationUnits, rule);
 				final WizardDialog dialog = new WizardDialog(shell, removeUnusedCodePreviewWizard) {
 					@Override
 					protected void nextPressed() {

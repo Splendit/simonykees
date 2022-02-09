@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedFieldsRule;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
@@ -48,8 +49,9 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	private Map<IPath, Document> originalDocuments;
 	private RefactoringSummaryWizardPage summaryPage;
 	private StatisticsSection statisticsSection;
+	private StandaloneStatisticsMetadata standaloneStatisticsMetadata;
 
-	public RemoveUnusedCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<UnusedFieldWrapper> metadata,
+	public RemoveUnusedCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline, StandaloneStatisticsMetadata standaloneStatisticsMetadata, List<UnusedFieldWrapper> metadata,
 			Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			List<ICompilationUnit> targetCompilationUnits, RemoveUnusedFieldsRule rule) {
 		this.refactoringPipeline = refactoringPipeline;
@@ -60,7 +62,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 			.map(ICompilationUnit::getPrimary)
 			.collect(Collectors.toMap(ICompilationUnit::getPath, this::createDocument));
 		this.statisticsSection = StatisticsSectionFactory.createStatisticsSectionForSummaryPage(refactoringPipeline);
-
+		this.standaloneStatisticsMetadata = standaloneStatisticsMetadata;
 		this.rule = rule;
 		setNeedsProgressMonitor(true);
 	}
@@ -114,7 +116,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 		if (!privateChanges.isEmpty()) {
 			addPage(new RemoveUnusedCodeRulePreviewWizardPage(privateChanges, originalDocuments, rule, canFinish()));
 		}
-		this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), null, statisticsSection); // FIXME: get the statistics metadata. 
+		this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), standaloneStatisticsMetadata, statisticsSection); 
 		addPage(summaryPage);
 	}
 
