@@ -18,9 +18,10 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class OptionalIfPresentRule extends RefactoringRuleImpl<OptionalIfPresentASTVisitor> {
 
+	public static final String RULE_ID = "OptionalIfPresent"; //$NON-NLS-1$
 	public OptionalIfPresentRule() {
 		this.visitorClass = OptionalIfPresentASTVisitor.class;
-		this.id = "OptionalIfPresent"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.OptionalIfPresentRule_name,
 				Messages.OptionalIfPresentRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_8, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.LAMBDA));

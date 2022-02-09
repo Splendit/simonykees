@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 
+import eu.jsparrow.core.markers.common.ArithmeticAssignmentEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.OperatorUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -25,7 +26,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 0.9
  *
  */
-public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisitor {
+public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisitor implements ArithmeticAssignmentEvent {
 
 	@Override
 	public boolean visit(Assignment node) {
@@ -62,6 +63,7 @@ public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisito
 				getCommentRewriter().saveRelatedComments(node.getRightHandSide(),
 						ASTNodeUtil.getSpecificAncestor(node, Statement.class));
 				onRewrite();
+				addMarkerEvent(node);
 			}
 		}
 		return true;

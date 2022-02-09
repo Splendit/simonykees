@@ -119,4 +119,38 @@ class UseSwitchExpressionResolverTest extends UsesSimpleJDTUnitFixture {
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertEquals(1, events.size());
 	}
+	
+	@Test
+	void test_initializeVariable_shouldResolveOne() throws Exception {
+		UseSwitchExpressionResolver visitor = new UseSwitchExpressionResolver(node -> true);
+		visitor.addMarkerListener(RefactoringMarkers.getFor("UseSwitchExpressionResolver"));
+		setVisitor(visitor);
+		String original = ""
+				+ "int finished = 1;\n"
+				+ "String medal;\n"
+				+ "switch(finished) {\n"
+				+ "case 1 : \n"
+				+ "    medal = \"Gold\";\n"
+				+ "    break;\n"
+				+ "case 2: \n"
+				+ "    medal = \"Silver\";\n"
+				+ "    break;\n"
+				+ "case 3: \n"
+				+ "    medal = \"Bronze\";\n"
+				+ "    break;\n"
+				+ "default:\n"
+				+ "    medal = \"None\";\n"
+				+ "}";
+		String expected = ""
+				+ "int finished = 1;\n"
+				+ "String medal = switch (finished) {\n"
+				+ "case 1 -> \"Gold\";\n"
+				+ "case 2 -> \"Silver\";\n"
+				+ "case 3 -> \"Bronze\";\n"
+				+ "default -> \"None\";\n"
+				+ "};";
+		assertChange(original, expected);
+		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
+		assertEquals(1, events.size());
+	}
 }

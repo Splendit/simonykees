@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
+import eu.jsparrow.core.markers.common.OptionalFilterEvent;
 import eu.jsparrow.core.visitor.utils.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
@@ -45,7 +46,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @since 3.14.0
  *
  */
-public class OptionalFilterASTVisitor extends AbstractOptionalASTVisitor {
+public class OptionalFilterASTVisitor extends AbstractOptionalASTVisitor implements OptionalFilterEvent {
 
 	@Override
 	public boolean visit(LambdaExpression lambdaExpression) {
@@ -143,6 +144,7 @@ public class OptionalFilterASTVisitor extends AbstractOptionalASTVisitor {
 
 		astRewrite.replace(methodInvocation, ifPresentMethodInvocation, null);
 		onRewrite();
+		addMarkerEvent(lambdaExpression);
 	}
 
 	private boolean usesSimpleName(Expression expression, SimpleName simpleName) {

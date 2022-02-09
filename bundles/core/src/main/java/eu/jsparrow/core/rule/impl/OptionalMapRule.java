@@ -20,9 +20,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class OptionalMapRule extends RefactoringRuleImpl<OptionalMapASTVisitor> {
 
+	public static final String RULE_ID = "OptionalMap"; //$NON-NLS-1$
+
 	public OptionalMapRule() {
 		this.visitorClass = OptionalMapASTVisitor.class;
-		this.id = "OptionalMap"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.OptionalMapRule_name,
 				Messages.OptionalMapRule_description,
 				Duration.ofMinutes(2),

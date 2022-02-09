@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.core.markers.common.OptionalMapEvent;
 import eu.jsparrow.core.visitor.sub.LambdaExpressionBodyAnalyzer;
 import eu.jsparrow.core.visitor.utils.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -43,7 +44,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 3.13.0
  *
  */
-public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
+public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor implements OptionalMapEvent {
 
 	@Override
 	public boolean visit(LambdaExpression lambdaExpression) {
@@ -124,6 +125,7 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 		astRewrite.replace(lambdaBody, remainingBlock, null);
 		astRewrite.replace(parameter, newParameterName, null);
 		onRewrite();
+		addMarkerEvent(lambdaExpression);
 
 		LambdaNodeUtil.saveComments(getCommentRewriter(), analyzer,
 				ASTNodeUtil.getSpecificAncestor(lambdaExpression, Statement.class));

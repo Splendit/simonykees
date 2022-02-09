@@ -20,10 +20,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class ArithmethicAssignmentRule extends RefactoringRuleImpl<ArithmethicAssignmentASTVisitor> {
 
+	public static final String RULE_ID = "ArithmethicAssignment"; //$NON-NLS-1$
+
 	public ArithmethicAssignmentRule() {
 		super();
 		this.visitorClass = ArithmethicAssignmentASTVisitor.class;
-		this.id = "ArithmethicAssignment"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.ArithmethicAssignmentRule_name,
 				Messages.ArithmethicAssignmentRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_4, Tag.READABILITY, Tag.CODING_CONVENTIONS));

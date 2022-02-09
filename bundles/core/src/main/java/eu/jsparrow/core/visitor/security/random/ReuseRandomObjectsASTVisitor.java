@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.ReuseRandomObjectsEvent;
 import eu.jsparrow.core.visitor.sub.ReferencedVariablesASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -61,7 +62,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @since 3.20.0
  *
  */
-public class ReuseRandomObjectsASTVisitor extends AbstractAddImportASTVisitor {
+public class ReuseRandomObjectsASTVisitor extends AbstractAddImportASTVisitor implements ReuseRandomObjectsEvent {
 
 	private static final String JAVA_UTIL_RANDOM = java.util.Random.class.getName();
 	private List<FieldProperties> introducedFields = new ArrayList<>();
@@ -131,6 +132,7 @@ public class ReuseRandomObjectsASTVisitor extends AbstractAddImportASTVisitor {
 		for (VariableDeclarationFragment fragment : reusableRandomDeclaration) {
 			moveToFields(fragment, typeDeclaration, requiredModifiers, statement.getType());
 			onRewrite();
+			addMarkerEvent(statement);
 			introducedFields.add(new FieldProperties(fragment.getName()
 				.getIdentifier(), requiredModifiers, fragment.getInitializer()));
 		}
@@ -138,6 +140,7 @@ public class ReuseRandomObjectsASTVisitor extends AbstractAddImportASTVisitor {
 		for (VariableDeclarationFragment fragment : alreadyExtracted) {
 			astRewrite.remove(fragment, null);
 			onRewrite();
+			addMarkerEvent(statement);
 		}
 
 		int originalNumFragments = statement.fragments()

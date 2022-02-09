@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.core.markers.common.UseParameterizedQueryEvent;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
@@ -42,7 +43,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * @since 3.18.0
  *
  */
-public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTVisitor {
+public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTVisitor implements UseParameterizedQueryEvent {
 
 	private static final String ENTITY_MANAGER_QUALIFIED_NAME = "javax.persistence.EntityManager"; //$NON-NLS-1$
 	private static final List<String> ENTITY_MANAGER_SINGLETON_LIST = Collections
@@ -84,6 +85,7 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 				querySimpleName);
 		addSetters(methodInvocation, setParameterStatements);
 		onRewrite();
+		addMarkerEvent(methodInvocation);
 		return true;
 	}
 
