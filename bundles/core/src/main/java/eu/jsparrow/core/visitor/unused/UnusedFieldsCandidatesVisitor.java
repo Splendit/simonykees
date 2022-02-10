@@ -64,8 +64,8 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class);
 		int modifierFlags = fieldDeclaration.getModifiers();
 		for(VariableDeclarationFragment fragment : fragments) {
-			boolean removeSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
-			if(removeSideEffects || hasNoSideEffects(fragment)) {
+			boolean removeSideEffects = options.get(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS);
+			if(removeSideEffects || ExpressionWithoutSideEffect.hasNoSideEffects(fragment)) {
 				ReferencesVisitor referencesVisitor = new ReferencesVisitor(fragment, typeDeclaration, options);
 				this.compilationUnit.accept(referencesVisitor);
 				if(!referencesVisitor.hasActiveReference()) {
