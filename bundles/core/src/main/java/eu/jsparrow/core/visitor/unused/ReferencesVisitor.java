@@ -3,10 +3,13 @@ package eu.jsparrow.core.visitor.unused;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -15,14 +18,14 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.core.rule.impl.unused.Constants;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class ReferencesVisitor extends ASTVisitor {
 
-	private VariableDeclarationFragment originalFragment;
 	private AbstractTypeDeclaration originalTypeDeclaration;
 	private Map<String, Boolean> options;
 	private String originalIdentifier;
@@ -34,7 +37,6 @@ public class ReferencesVisitor extends ASTVisitor {
 	public ReferencesVisitor(VariableDeclarationFragment originalFragment,
 			AbstractTypeDeclaration originalTypeDeclaration,
 			Map<String, Boolean> options) {
-		this.originalFragment = originalFragment;
 		this.originalTypeDeclaration = originalTypeDeclaration;
 		this.options = options;
 		SimpleName name = originalFragment.getName();
@@ -44,11 +46,6 @@ public class ReferencesVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(SimpleName simpleName) {
-		/*
-		 * TODO:check if the RHS of the field assignment is not causing
-		 * undesirable side effects.
-		 */
-
 		boolean isReference = isTargetFieldReference(simpleName);
 		if (!isReference) {
 			return false;
@@ -60,38 +57,57 @@ public class ReferencesVisitor extends ASTVisitor {
 		}
 		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) simpleName.getParent();
-			if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-				ExpressionStatement statement = (ExpressionStatement) assignment.getParent();
-				reassignments.add(statement);
+			Optional<ExpressionStatement> reassignment = isSafelyRemovable(assignment);
+			reassignment.ifPresent(reassignments::add);
+			if(reassignment.isPresent()) {
+				return false;
 			}
 
-			return false;
 		} else if (locationInParent == FieldAccess.NAME_PROPERTY) {
 			FieldAccess fieldAccess = (FieldAccess) simpleName.getParent();
-			if (fieldAccess.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-				Assignment assignment = (Assignment) fieldAccess.getParent();
-				if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-					ExpressionStatement statement = (ExpressionStatement) assignment.getParent();
-					reassignments.add(statement);
-					return false;
-				}
-
+			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(fieldAccess);
+			reassignment.ifPresent(reassignments::add);
+			if(reassignment.isPresent()) {
+				return false;
 			}
 		} else if (locationInParent == QualifiedName.NAME_PROPERTY) {
 			QualifiedName qualifiedName = (QualifiedName) simpleName.getParent();
-			if (qualifiedName.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-				Assignment assignment = (Assignment) qualifiedName.getParent();
-				if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-					ExpressionStatement statement = (ExpressionStatement) assignment.getParent();
-					reassignments.add(statement);
-					return false;
-				}
+			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(qualifiedName);
+			reassignment.ifPresent(reassignments::add);
+			if(reassignment.isPresent()) {
+				return false;
 			}
+			
 		}
 
 		activeReferenceFound = true;
-
 		return true;
+	}
+	
+	private Optional<ExpressionStatement> isSafelyRemovableReassignment(Expression expression) {
+		if (expression.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+			Assignment assignment = (Assignment) expression.getParent();
+			return isSafelyRemovable(assignment);
+		}
+		return Optional.empty();
+	}
+	
+	private Optional<ExpressionStatement> isSafelyRemovable(Assignment assignment) {
+		if(assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			return Optional.empty();
+		}
+		Expression rightHandSide = assignment.getRightHandSide();
+
+		ExpressionStatement expressionStatement = (ExpressionStatement)assignment.getParent();
+		boolean ignoreSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
+		if(ignoreSideEffects) {
+			return Optional.of(expressionStatement);
+		}
+		boolean isSimpleExpression = rightHandSide.getNodeType() == ASTNode.SIMPLE_NAME || ASTNodeUtil.isLiteral(rightHandSide);
+		if(isSimpleExpression) {
+			return Optional.of(expressionStatement);
+		}
+		return Optional.empty();
 	}
 
 	private boolean isTargetFieldReference(SimpleName simpleName) {
