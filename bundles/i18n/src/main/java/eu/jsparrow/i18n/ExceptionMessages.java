@@ -23,6 +23,14 @@ public class ExceptionMessages extends NLS {
 	public static String RefactoringPipeline_warn_working_copies_already_generated;
 	public static String RefactoringState_no_changes_found;
 	public static String RefactoringState_warning_workingcopy_already_present;
+	public static String RemoveUnusedCodeWizard_analysingFieldReferencesJobName;
+	public static String RemoveUnusedCodeWizard_calculateChangesJobName;
+	public static String RemoveUnusedCodeWizard_collectingTheSelectedCompilationUnitsTaskName;
+	public static String RemoveUnusedCodeWizard_endRefactoringInProjectMessage;
+	public static String RemoveUnusedCodeWizard_removeUnusedCodeWindowTitle;
+	public static String RemoveUnusedCodeWizard_rulesWithChangesForProjectMessage;
+	public static String RemoveUnusedCodeWizard_startRefactoringInProjectMessage;
+	public static String RemoveUnusedCodeWizard_summaryButtonName;
 	public static String LicenseUtil_license_service_unavailable;
 	public static String Netlicensing_persistenceException_couldNotDeserialize;
 	public static String Netlicensing_persistenceException_couldNotSerialize;
