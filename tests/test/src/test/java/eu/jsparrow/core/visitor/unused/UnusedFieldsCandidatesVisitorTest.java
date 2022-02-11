@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.unused;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -10,6 +11,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
@@ -22,7 +24,7 @@ class UnusedFieldsCandidatesVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	private static Stream<String> unusedPrivate() {
-		String sample1 = "private int unusedPrivate = 0;";
+		String sample1_0 = "private int unusedPrivate = 0;";
 		String sample1_1 = "private Class<?> unusedPrivate = String.class;";
 		String sample1_2 = "private char unusedPrivate = 'c';";
 		String sample1_3 = "private String unusedPrivate = \"string\";";
@@ -52,7 +54,7 @@ class UnusedFieldsCandidatesVisitorTest extends UsesJDTUnitFixture {
 				+ "	System.out.println(used);\n"
 				+ "}\n";
 		return Stream.of(
-				sample1, 
+				sample1_0, 
 				sample1_1,
 				sample1_2,
 				sample1_3,
@@ -85,4 +87,83 @@ class UnusedFieldsCandidatesVisitorTest extends UsesJDTUnitFixture {
 		String unusedFieldName = unusedField.getFieldName();
 		assertEquals("unusedPrivate", unusedFieldName);
 	}
+	
+	private static Stream<Arguments> unusedProtected() {
+		String sample1 = "protected int unusedNonPrivate = 0;";
+		String sample2 = ""
+				+ "private int value = 0;\n"
+				+ "protected int unusedNonPrivate = 0;";
+		String sample2_1 = ""
+				+ "int value = 0;\n"
+				+ "protected int unusedNonPrivate = 0;";
+		String sample2_2 = ""
+				+ "public int value = 0;\n"
+				+ "protected int unusedNonPrivate = 0;";
+		
+		
+		String sample3 = "int unusedNonPrivate = 0;";
+		String sample3_0 = ""
+				+ "private int value = 0;\n"
+				+ "int unusedNonPrivate = 0;";
+		String sample3_1 = ""
+				+ "public int value = 0;\n"
+				+ "int unusedNonPrivate = 0;";
+		String sample3_2 = ""
+				+ "protected int value = 0;\n"
+				+ "int unusedNonPrivate = 0;";
+		
+		String sample4 = "public int unusedNonPrivate = 0;";
+		String sample4_0 = ""
+				+ "private int value = 0;\n"
+				+ "public int unusedNonPrivate = 0;";
+		String sample4_1 = ""
+				+ "protected int value = 0;\n"
+				+ "public int unusedNonPrivate = 0;";
+		String sample4_2 = ""
+				+ "int value = 0;\n"
+				+ "public int unusedNonPrivate = 0;";
+		
+		
+		String protectedFields = "protected-fields";
+		String packagePrivateFields = "package-private-fields";
+		String publicFields = "public-fields";
+		
+		return Stream.of(
+				Arguments.of(sample1, protectedFields), 
+				Arguments.of(sample2, protectedFields),
+				Arguments.of(sample2_1, protectedFields),
+				Arguments.of(sample2_2, protectedFields),
+				
+				Arguments.of(sample3, packagePrivateFields), 
+				Arguments.of(sample3_0, packagePrivateFields),
+				Arguments.of(sample3_1, packagePrivateFields),
+				Arguments.of(sample3_2, packagePrivateFields),
+				
+				Arguments.of(sample4, publicFields), 
+				Arguments.of(sample4_0, publicFields),
+				Arguments.of(sample4_1, publicFields),
+				Arguments.of(sample4_2, publicFields)
+			);
+	}
+	
+	
+	@ParameterizedTest
+	@MethodSource(value = "unusedProtected")
+	void test_protectedUnusedField(String code, String selectedModifier) throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put(selectedModifier, true);
+		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);
+		
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, code);
+		defaultFixture.accept(visitor);
+		
+		List<UnusedFieldWrapper> unusedPrivateFields = visitor.getUnusedPrivateFields();
+		assertTrue(unusedPrivateFields.isEmpty());
+		List<NonPrivateUnusedFieldCandidate> candidates = visitor.getNonPrivateCandidates();
+		assertEquals(1, candidates.size());
+		NonPrivateUnusedFieldCandidate candidate = candidates.get(0);
+		String unusedFieldName = candidate.getFragment().getName().getIdentifier();
+		assertEquals("unusedNonPrivate", unusedFieldName);
+	}
+	
 }
