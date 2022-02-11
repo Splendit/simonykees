@@ -96,11 +96,12 @@ public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 
 		table.addListener(SWT.Selection, event -> {
 			if (event.detail == SWT.CHECK) {
-				controller.classMemberSelectionChanged(Arrays.asList(table.getItems())
-					.stream()
-					.filter(TableItem::getChecked)
-					.map(TableItem::getText)
-					.collect(Collectors.toList()));
+				List<String>checkedItems = Arrays.asList(table.getItems())
+						.stream()
+						.filter(TableItem::getChecked)
+						.map(TableItem::getText)
+						.collect(Collectors.toList());
+				controller.classMemberSelectionChanged(checkedItems);
 			}
 		});
 	}

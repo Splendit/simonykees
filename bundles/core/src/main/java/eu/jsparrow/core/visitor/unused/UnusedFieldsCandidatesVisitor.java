@@ -40,17 +40,11 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 	
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
-		/*
-		 * TODO
-		 * For private fields:
-		 * - use ReferencesVisitor to find if they are unused. 
-		 * - if yes, add them to unusedPrivateFields
-		 * 
-		 * For non-private fields:
-		 * - use referecsVisitor to find if they are used within the compilation unit.
-		 * 		-- if yes, discard them
-		 * 		-- if not, add them to the nonPrivateCandidates.
-		 */
+
+		if(!hasSelectedAccessModifier(fieldDeclaration)) {
+			return true;
+		}
+		
 		AbstractTypeDeclaration typeDeclaration = ASTNodeUtil.getSpecificAncestor(fieldDeclaration, AbstractTypeDeclaration.class);
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class);
 		int modifierFlags = fieldDeclaration.getModifiers();
@@ -74,6 +68,19 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 			}
 		}
 		return true;
+	}
+	
+	private boolean hasSelectedAccessModifier(FieldDeclaration fieldDeclaration) {
+		int modifierFlags = fieldDeclaration.getModifiers();
+		if(Modifier.isPublic(modifierFlags)) {
+			return options.getOrDefault(Constants.PUBLIC_FIELDS, false);
+		} else if (Modifier.isProtected(modifierFlags)) {
+			return options.getOrDefault(Constants.PROTECTED_FIELDS, false);
+		} else if (Modifier.isPrivate(modifierFlags)) {
+			return options.getOrDefault(Constants.PRIVATE_FIELDS, false);
+		} else {
+			return options.getOrDefault(Constants.PACKAGE_PRIVATE_FIELDS, false);
+		}
 	}
 
 	private boolean hasNoSideEffects(VariableDeclarationFragment fragment) {

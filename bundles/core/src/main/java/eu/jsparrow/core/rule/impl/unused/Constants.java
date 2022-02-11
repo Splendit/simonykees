@@ -10,17 +10,17 @@ public class Constants {
 	}
 
 	public static final String PRIVATE_FIELDS = "private-fields";
-	public static final String PROTECTED_FIELDS = "private-fields";
+	public static final String PROTECTED_FIELDS = "protected-fields";
 	public static final String PACKAGE_PRIVATE_FIELDS = "package-private-fields";
 	public static final String PUBLIC_FIELDS = "public-fields";
 	
 	public static final String PRIVATE_METHODS = "private-methods";
-	public static final String PROTECTED_METHODS = "private-methods";
+	public static final String PROTECTED_METHODS = "protected-methods";
 	public static final String PACKAGE_PRIVATE_METHODS = "package-private-methods";
 	public static final String PUBLIC_METHODS = "public-methods";
 	
 	public static final String PRIVATE_CLASSES = "private-classes";
-	public static final String PROTECTED_CLASSES = "private-classes";
+	public static final String PROTECTED_CLASSES = "protected-classes";
 	public static final String PACKAGE_PRIVATE_CLASSES = "package-private-classes";
 	public static final String PUBLIC_CLASSES = "public-classes";
 
