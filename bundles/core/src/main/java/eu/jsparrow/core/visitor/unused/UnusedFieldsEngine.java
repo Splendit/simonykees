@@ -96,7 +96,7 @@ public class UnusedFieldsEngine {
 		return list;
 	}
 
-	public UnusedFieldReferenceSearchResult searchReferences(VariableDeclarationFragment fragment, IJavaProject project,
+	private UnusedFieldReferenceSearchResult searchReferences(VariableDeclarationFragment fragment, IJavaProject project,
 			Map<String, Boolean> optionsMap) {
 		IJavaElement[] searchScope = createSearchScope(scope, project);
 		FieldReferencesSearch fieldReferencesSearchEngine = new FieldReferencesSearch(searchScope);
