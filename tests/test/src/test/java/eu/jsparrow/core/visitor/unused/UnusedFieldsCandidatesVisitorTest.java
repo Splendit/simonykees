@@ -88,7 +88,7 @@ class UnusedFieldsCandidatesVisitorTest extends UsesJDTUnitFixture {
 		assertEquals("unusedPrivate", unusedFieldName);
 	}
 	
-	private static Stream<Arguments> unusedProtected() {
+	private static Stream<Arguments> unusedNonPrivate() {
 		String sample1 = "protected int unusedNonPrivate = 0;";
 		String sample2 = ""
 				+ "private int value = 0;\n"
@@ -123,6 +123,19 @@ class UnusedFieldsCandidatesVisitorTest extends UsesJDTUnitFixture {
 				+ "int value = 0;\n"
 				+ "public int unusedNonPrivate = 0;";
 		
+		String sample4_3 = ""
+				+ "@java.io.Serial\n"
+				+ "public String value = \"\";\n"
+				+ "public int unusedNonPrivate = 0;";
+		
+		String sample4_4 = ""
+				+ "@Deprecated\n"
+				+ "public int unusedNonPrivate = 0;";
+		
+		String sample4_5 = ""
+				+ "@SuppressWarnings(\"unused\")\n"
+				+ "public int unusedNonPrivate = 0;";
+		
 		
 		String protectedFields = "protected-fields";
 		String packagePrivateFields = "package-private-fields";
@@ -142,14 +155,18 @@ class UnusedFieldsCandidatesVisitorTest extends UsesJDTUnitFixture {
 				Arguments.of(sample4, publicFields), 
 				Arguments.of(sample4_0, publicFields),
 				Arguments.of(sample4_1, publicFields),
-				Arguments.of(sample4_2, publicFields)
+				Arguments.of(sample4_2, publicFields),
+				Arguments.of(sample4_3, publicFields),
+				Arguments.of(sample4_4, publicFields),
+				Arguments.of(sample4_5, publicFields)
+				
 			);
 	}
 	
 	
 	@ParameterizedTest
-	@MethodSource(value = "unusedProtected")
-	void test_protectedUnusedField(String code, String selectedModifier) throws Exception {
+	@MethodSource(value = "unusedNonPrivate")
+	void test_nonPrivateUnusedField(String code, String selectedModifier) throws Exception {
 		Map<String, Boolean> options = new HashMap<>();
 		options.put(selectedModifier, true);
 		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);

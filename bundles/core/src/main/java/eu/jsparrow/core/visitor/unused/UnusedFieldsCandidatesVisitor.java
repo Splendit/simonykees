@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.unused;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -8,17 +9,20 @@ import java.util.Map;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 	
@@ -50,6 +54,12 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 			return true;
 		}
 		
+		boolean hasAnnotations = hasUsefulAnnotations(fieldDeclaration);
+		if(hasAnnotations) {
+			return true;
+		}
+		
+		
 		AbstractTypeDeclaration typeDeclaration = ASTNodeUtil.getSpecificAncestor(fieldDeclaration, AbstractTypeDeclaration.class);
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class);
 		int modifierFlags = fieldDeclaration.getModifiers();
@@ -79,6 +89,18 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 		return true;
 	}
 	
+	private boolean hasUsefulAnnotations(FieldDeclaration fieldDeclaration) {
+		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(fieldDeclaration.modifiers(), Annotation.class);
+		for(Annotation annotation : annotations) {
+			ITypeBinding typeBinding = annotation.resolveTypeBinding();
+			if(!ClassRelationUtil.isContentOfTypes(typeBinding, Arrays.asList(java.lang.Deprecated.class.getName(), java.lang.SuppressWarnings.class.getName()))) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	private boolean hasSelectedAccessModifier(FieldDeclaration fieldDeclaration) {
 		int modifierFlags = fieldDeclaration.getModifiers();
 		if(Modifier.isPublic(modifierFlags)) {
