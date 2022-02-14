@@ -2,6 +2,7 @@ package eu.jsparrow.ui.preview;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -178,13 +179,11 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 		viewer.setComparator(new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
-				if (((RemoveUnusedCodeDocumentChangeWrapper) e1).getIdentifier()
-					.equals(((RemoveUnusedCodeDocumentChangeWrapper) e2).getIdentifier())) {
-					return ((RemoveUnusedCodeDocumentChangeWrapper) e1).getCompilationUnitName()
-						.compareTo(((RemoveUnusedCodeDocumentChangeWrapper) e2).getCompilationUnitName());
-				}
-				return ((RemoveUnusedCodeDocumentChangeWrapper) e1).getIdentifier()
-					.compareTo(((RemoveUnusedCodeDocumentChangeWrapper) e2).getIdentifier());
+				
+				Comparator<RemoveUnusedCodeDocumentChangeWrapper> comparator = Comparator
+						.comparing(RemoveUnusedCodeDocumentChangeWrapper::getCompilationUnitName)
+						.thenComparing(RemoveUnusedCodeDocumentChangeWrapper::getIdentifier);
+				return comparator.compare((RemoveUnusedCodeDocumentChangeWrapper)e1, (RemoveUnusedCodeDocumentChangeWrapper)e2);
 			}
 		});
 
