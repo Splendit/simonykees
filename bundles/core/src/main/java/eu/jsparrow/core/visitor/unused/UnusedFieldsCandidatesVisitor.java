@@ -38,6 +38,11 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 		return true;
 	}
 	
+	@Override 
+	public boolean visit(AnonymousClassDeclaration node) {
+		return false;
+	}
+	
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
 
