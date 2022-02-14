@@ -92,6 +92,9 @@ public class ReferencesVisitor extends ASTVisitor {
 		return Optional.empty();
 	}
 	
+	/*
+	 * FIXME:: move this method to class ExpressionWithoutSideEffectRecursive
+	 */
 	private Optional<ExpressionStatement> isSafelyRemovable(Assignment assignment) {
 		if(assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return Optional.empty();
@@ -103,6 +106,8 @@ public class ReferencesVisitor extends ASTVisitor {
 		if(ignoreSideEffects) {
 			return Optional.of(expressionStatement);
 		}
+		
+		// FIXME: use ExpressionWithoutSideEffectRecursive#isExpressionWithoutSideEffect
 		boolean isSimpleExpression = rightHandSide.getNodeType() == ASTNode.SIMPLE_NAME || ASTNodeUtil.isLiteral(rightHandSide);
 		if(isSimpleExpression) {
 			return Optional.of(expressionStatement);

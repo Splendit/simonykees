@@ -30,9 +30,9 @@ class UnusedFieldsCandidatesVisitorTest extends UsesJDTUnitFixture {
 		String sample1_3 = "private String unusedPrivate = \"string\";";
 		String sample1_4 = "private Object unusedPrivate = null;";
 		String sample1_5 = "private Boolean unusedPrivate = false;";
-		String sample1_6 = "private Object o = new Object(); private Object unusedPrivate = this.o;";
+		String sample1_6 = "private Object o = new Object() {}; private Object unusedPrivate = this.o;";
 		String sample1_7 = "private Object unusedPrivate;";
-		String sample1_8 = "private Object o = new Object(); private String unusedPrivate = \"\";";
+		String sample1_8 = "private Object o = new Object() {}; private String unusedPrivate = \"\";";
 		String sample2 = ""
 				+ "private int value2 = 0;\n"
 				+ "private int unusedPrivate = value2;";

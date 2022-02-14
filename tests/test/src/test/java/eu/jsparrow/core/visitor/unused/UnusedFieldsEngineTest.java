@@ -112,10 +112,10 @@ class UnusedFieldsEngineTest extends AbstractRulesTest {
 	@Test
 	void test_allAccessModifiers_shouldFind9Unused() throws Exception {
 		Map<String, Boolean> options = new HashMap<String, Boolean>();
-		options.put("private-fields", true);
-		options.put("protected-fields", true);
-		options.put("package-private-fields", true);
-		options.put("public-fields", true);
+		options.put("private-fields", Boolean.TRUE);
+		options.put("protected-fields", Boolean.TRUE);
+		options.put("package-private-fields", Boolean.TRUE);
+		options.put("public-fields", Boolean.TRUE);
 		NullProgressMonitor progressMonitor = new NullProgressMonitor();
 		SubMonitor subMonitor = SubMonitor.convert(progressMonitor, 100);
 		List<CompilationUnit> compilationUnits = RenamingTestHelper

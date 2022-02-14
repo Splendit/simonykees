@@ -15,12 +15,15 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 @SuppressWarnings("nls")
 public class BindingWithoutSideEffect {
+
 	private static final String EQUALS = "equals";
 	private static final String HASH_CODE = "hashCode";
 	private static final String GET_CLASS = "getClass";
 	private static final String JAVA_LANG = "java.lang";
 	private static final String JAVA_TIME = "java.time";
 	private static final String JAVA_UTIL = "java.util";
+	private static final String JAVA_UTIL_DOT = "java.util.";
+	
 	private static final List<String> JAVA_UTIL_COLLECTION = Collections
 		.singletonList(java.util.Collection.class.getName());
 	private static final List<String> JAVA_UTIL_MAP = Collections
@@ -46,7 +49,6 @@ public class BindingWithoutSideEffect {
 
 	static {
 		IMMUTABLE_CLASSES = Stream.of(
-				Class.class,
 				String.class,
 				Boolean.class,
 				Character.class,
@@ -61,8 +63,7 @@ public class BindingWithoutSideEffect {
 				java.util.OptionalLong.class,
 				java.util.OptionalDouble.class,
 				java.math.BigInteger.class,
-				java.math.BigDecimal.class,
-				java.io.File.class)
+				java.math.BigDecimal.class)
 			.map(Class::getName)
 			.collect(Collectors.toList());
 
@@ -107,7 +108,9 @@ public class BindingWithoutSideEffect {
 		if (ClassRelationUtil.isInheritingContentOfTypes(typeBinding, JAVA_UTIL_COLLECTION)) {
 			IPackageBinding packageBinding = typeBinding.getPackage();
 			return packageBinding.getName()
-				.equals(JAVA_UTIL);
+				.equals(JAVA_UTIL)
+					|| packageBinding.getName()
+						.startsWith(JAVA_UTIL_DOT);
 		}
 		return false;
 	}
@@ -119,7 +122,10 @@ public class BindingWithoutSideEffect {
 		if (ClassRelationUtil.isInheritingContentOfTypes(typeBinding, JAVA_UTIL_MAP)) {
 			IPackageBinding packageBinding = typeBinding.getPackage();
 			return packageBinding.getName()
-				.equals(JAVA_UTIL);
+				.equals(JAVA_UTIL)
+					|| packageBinding.getName()
+						.startsWith(JAVA_UTIL_DOT);
+
 		}
 		return false;
 	}
@@ -153,9 +159,9 @@ public class BindingWithoutSideEffect {
 		String packageName = declaringClass.getPackage()
 			.getName();
 
-		return (packageName.startsWith(JAVA_LANG) ||
-				packageName.startsWith(JAVA_UTIL) ||
-				packageName.startsWith(JAVA_TIME)) &&
+		return (packageName.equals(JAVA_LANG) ||
+				packageName.equals(JAVA_UTIL) ||
+				packageName.equals(JAVA_TIME)) &&
 				SUPPORTED_INSTANCE_METHODE_PREFIXES.stream()
 					.anyMatch(methodName::startsWith);
 

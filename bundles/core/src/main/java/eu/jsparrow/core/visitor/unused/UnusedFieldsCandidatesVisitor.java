@@ -6,13 +6,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -25,61 +23,65 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
-	
+
 	private CompilationUnit compilationUnit;
 	private Map<String, Boolean> options;
-	
+
 	private List<UnusedFieldWrapper> unusedPrivateFields = new ArrayList<>();
 	private List<NonPrivateUnusedFieldCandidate> nonPrivateCandidates = new ArrayList<>();
-	
-	public UnusedFieldsCandidatesVisitor(Map<String, Boolean>options) {
+
+	public UnusedFieldsCandidatesVisitor(Map<String, Boolean> options) {
 		this.options = options;
 	}
-	
+
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
 		return true;
 	}
-	
-	@Override 
+
+	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
 
-		if(!hasSelectedAccessModifier(fieldDeclaration)) {
+		if (!hasSelectedAccessModifier(fieldDeclaration)) {
 			return true;
 		}
-		
+
 		boolean hasAnnotations = hasUsefulAnnotations(fieldDeclaration);
-		if(hasAnnotations) {
+		if (hasAnnotations) {
 			return true;
 		}
-		
-		
-		AbstractTypeDeclaration typeDeclaration = ASTNodeUtil.getSpecificAncestor(fieldDeclaration, AbstractTypeDeclaration.class);
-		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class);
+
+		AbstractTypeDeclaration typeDeclaration = ASTNodeUtil.getSpecificAncestor(fieldDeclaration,
+				AbstractTypeDeclaration.class);
+		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(),
+				VariableDeclarationFragment.class);
 		int modifierFlags = fieldDeclaration.getModifiers();
-		for(VariableDeclarationFragment fragment : fragments) {
-			boolean removeSideEffects = options.get(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS);
-			if(removeSideEffects || ExpressionWithoutSideEffect.hasNoInitializerWithSideEffect(fragment)) {
+		for (VariableDeclarationFragment fragment : fragments) {
+			boolean removeSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
+			if (removeSideEffects || ExpressionWithoutSideEffect.hasNoInitializerWithSideEffect(fragment)) {
 				ReferencesVisitor referencesVisitor = new ReferencesVisitor(fragment, typeDeclaration, options);
 				this.compilationUnit.accept(referencesVisitor);
-				if(!referencesVisitor.hasActiveReference()) {
+				if (!referencesVisitor.hasActiveReference()) {
 					List<ExpressionStatement> reassignments = referencesVisitor.getReassignments();
 					if (Modifier.isPrivate(modifierFlags)) {
-						UnusedFieldWrapper unusedField = new UnusedFieldWrapper(compilationUnit, JavaAccessModifier.PRIVATE, fragment, reassignments, Collections.emptyList());
+						UnusedFieldWrapper unusedField = new UnusedFieldWrapper(compilationUnit,
+								JavaAccessModifier.PRIVATE, fragment, reassignments, Collections.emptyList());
 						unusedPrivateFields.add(unusedField);
 					} else {
 						JavaAccessModifier accessModifier = findAccessModifier(fieldDeclaration);
-						NonPrivateUnusedFieldCandidate candidate = new NonPrivateUnusedFieldCandidate(fragment, compilationUnit, typeDeclaration, accessModifier, reassignments);
+						NonPrivateUnusedFieldCandidate candidate = new NonPrivateUnusedFieldCandidate(fragment,
+								compilationUnit, typeDeclaration, accessModifier, reassignments);
 						nonPrivateCandidates.add(candidate);
 					}
 					/*
-					 * removing multiple fragments from the same field declaration may result to incorrect changes. 
+					 * removing multiple fragments from the same field
+					 * declaration may result to incorrect changes.
 					 */
 					return false;
 
@@ -88,22 +90,23 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 		}
 		return true;
 	}
-	
+
 	private boolean hasUsefulAnnotations(FieldDeclaration fieldDeclaration) {
 		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(fieldDeclaration.modifiers(), Annotation.class);
-		for(Annotation annotation : annotations) {
+		for (Annotation annotation : annotations) {
 			ITypeBinding typeBinding = annotation.resolveTypeBinding();
-			if(!ClassRelationUtil.isContentOfTypes(typeBinding, Arrays.asList(java.lang.Deprecated.class.getName(), java.lang.SuppressWarnings.class.getName()))) {
+			if (!ClassRelationUtil.isContentOfTypes(typeBinding,
+					Arrays.asList(java.lang.Deprecated.class.getName(), java.lang.SuppressWarnings.class.getName()))) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
 	private boolean hasSelectedAccessModifier(FieldDeclaration fieldDeclaration) {
 		int modifierFlags = fieldDeclaration.getModifiers();
-		if(Modifier.isPublic(modifierFlags)) {
+		if (Modifier.isPublic(modifierFlags)) {
 			return options.getOrDefault(Constants.PUBLIC_FIELDS, false);
 		} else if (Modifier.isProtected(modifierFlags)) {
 			return options.getOrDefault(Constants.PROTECTED_FIELDS, false);
@@ -112,38 +115,6 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 		} else {
 			return options.getOrDefault(Constants.PACKAGE_PRIVATE_FIELDS, false);
 		}
-	}
-
-	private boolean hasNoSideEffects(VariableDeclarationFragment fragment) {
-		Expression initializer = fragment.getInitializer();
-		if(initializer == null) {
-			return true;
-		}
-		int initializerNodeType = initializer.getNodeType();
-		
-		if(initializerNodeType == ASTNode.CLASS_INSTANCE_CREATION) {
-			/*
-			 * TODO: define a list of types we can tolerate. E.g. new ArrayList(), new LinkedList(), new HashMap, new HashSet, new Object, new String, 
-			 */
-		} else if (initializerNodeType == ASTNode.METHOD_INVOCATION) {
-			/*
-			 * TODO: define a list of method invocations we can tolerate. E.g. Collections.emptyList(), etc
-			 */
-		} else if (initializerNodeType == ASTNode.ARRAY_CREATION) {
-			/*
-			 * TODO: make sure the literal consists of only literals or instance creations/method invocations that we can tolerate
-			 */
-		}
-
-		
-		return initializerNodeType == ASTNode.NULL_LITERAL
-				|| initializerNodeType == ASTNode.NUMBER_LITERAL
-				|| initializerNodeType == ASTNode.STRING_LITERAL
-				|| initializerNodeType == ASTNode.CHARACTER_LITERAL
-				|| initializerNodeType == ASTNode.BOOLEAN_LITERAL
-				|| initializerNodeType == ASTNode.TYPE_LITERAL
-				|| initializerNodeType == ASTNode.SIMPLE_NAME
-				|| initializerNodeType == ASTNode.FIELD_ACCESS;
 	}
 
 	private JavaAccessModifier findAccessModifier(FieldDeclaration fieldDeclaration) {
@@ -169,5 +140,5 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 	public List<NonPrivateUnusedFieldCandidate> getNonPrivateCandidates() {
 		return nonPrivateCandidates;
 	}
-	
+
 }
