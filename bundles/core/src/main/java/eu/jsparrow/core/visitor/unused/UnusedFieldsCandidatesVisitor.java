@@ -8,6 +8,7 @@ import java.util.Map;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -62,6 +63,10 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 						NonPrivateUnusedFieldCandidate candidate = new NonPrivateUnusedFieldCandidate(fragment, compilationUnit, typeDeclaration, accessModifier, reassignments);
 						nonPrivateCandidates.add(candidate);
 					}
+					/*
+					 * removing multiple fragments from the same field declaration may result to incorrect changes. 
+					 */
+					return false;
 
 				}
 			}
