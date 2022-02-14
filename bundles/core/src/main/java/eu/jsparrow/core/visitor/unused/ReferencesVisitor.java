@@ -126,8 +126,12 @@ public class ReferencesVisitor extends ASTVisitor {
 		if (!variableBinding.isField()) {
 			return false;
 		}
-		ITypeBinding declaringClass = variableBinding.getDeclaringClass();
-		return ClassRelationUtil.compareITypeBinding(declaringClass, originalType);
+		ITypeBinding declaringClass = variableBinding.getDeclaringClass();//FIXME
+		if(declaringClass == null) {
+			return true;//FIXME
+		}
+
+		return ClassRelationUtil.isContentOfType(declaringClass, originalType.getQualifiedName());
 	}
 
 	public boolean hasActiveReference() {
