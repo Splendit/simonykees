@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -56,23 +57,26 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 		return visitor;
 	}
 
-	public Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> computeDocumentChangesPerField() throws JavaModelException {
+	public Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> computeDocumentChangesPerField()
+			throws JavaModelException {
 		Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> map = new HashMap<>();
-		for(UnusedFieldWrapper unusedField : unusedFields) {
-			Map<ICompilationUnit, DocumentChange> unusedFieldDocumentChanges = computeDocumentChangesForUnusedField(unusedField);
+		for (UnusedFieldWrapper unusedField : unusedFields) {
+			Map<ICompilationUnit, DocumentChange> unusedFieldDocumentChanges = computeDocumentChangesForUnusedField(
+					unusedField);
 			map.put(unusedField, unusedFieldDocumentChanges);
 		}
 		return map;
 
 	}
-	
-	public Map<ICompilationUnit, DocumentChange> computeDocumentChangesForUnusedField(UnusedFieldWrapper unusedField) throws JavaModelException {
+
+	public Map<ICompilationUnit, DocumentChange> computeDocumentChangesForUnusedField(UnusedFieldWrapper unusedField)
+			throws JavaModelException {
 		List<ICompilationUnit> targetCompilationUnits = unusedField.getTargetICompilationUnits();
 		Map<ICompilationUnit, DocumentChange> documentChanges = new HashMap<>();
 		for (ICompilationUnit iCompilationUnit : targetCompilationUnits) {
 			TextEditGroup editGroup = unusedField.getTextEditGroup(iCompilationUnit);
 			if (!editGroup.isEmpty()) {
-				
+
 				VariableDeclarationFragment oldFragment = unusedField.getFragment();
 				Document doc = new Document(iCompilationUnit.getPrimary()
 					.getSource());
@@ -80,7 +84,7 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 						iCompilationUnit.getElementName() + " - " + getPathString(iCompilationUnit), doc); //$NON-NLS-1$
 				TextEdit rootEdit = new MultiTextEdit();
 				documentChange.setEdit(rootEdit);
-				FieldDeclaration fieldDeclaration = (FieldDeclaration) oldFragment.getParent(); 
+				FieldDeclaration fieldDeclaration = (FieldDeclaration) oldFragment.getParent();
 				addDeclarationTextEdits(unusedField, iCompilationUnit, oldFragment, documentChange, fieldDeclaration);
 
 				unusedField.getUnusedExternalReferences()
@@ -88,17 +92,15 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 					.filter(externalReference -> {
 						CompilationUnit cu = externalReference.getCompilationUnit();
 						ICompilationUnit icu = (ICompilationUnit) cu.getJavaElement();
-						return !icu.getPath()
-							.toString()
-							.equals(unusedField.getDeclarationPath()
-								.toString());
+						return !comparePaths(icu.getPath(), unusedField.getDeclarationPath());
 					})
 					.forEach(externalReference -> {
 						CompilationUnit cu = externalReference.getCompilationUnit();
 						ICompilationUnit icu = (ICompilationUnit) cu.getJavaElement();
-						if(comparePaths(iCompilationUnit, icu)) {
-							for(ExpressionStatement statement : externalReference.getUnusedReassignments()) {
-								DeleteEdit deleteEdit = new DeleteEdit(statement.getStartPosition(), statement.getLength());
+						if (comparePaths(iCompilationUnit, icu)) {
+							for (ExpressionStatement statement : externalReference.getUnusedReassignments()) {
+								DeleteEdit deleteEdit = new DeleteEdit(statement.getStartPosition(),
+										statement.getLength());
 								documentChange.addEdit(deleteEdit);
 							}
 						}
@@ -111,13 +113,10 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 		return documentChanges;
 	}
 
-	private boolean comparePaths(ICompilationUnit iCompilationUnit, ICompilationUnit icu) {
-		return icu.getPath().toString().equals(iCompilationUnit.getPath().toString());
-	}
-
 	private void addDeclarationTextEdits(UnusedFieldWrapper unusedField, ICompilationUnit iCompilationUnit,
 			VariableDeclarationFragment oldFragment, DocumentChange documentChange, FieldDeclaration fieldDeclaration) {
-		List<VariableDeclarationFragment> allFragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class);
+		List<VariableDeclarationFragment> allFragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(),
+				VariableDeclarationFragment.class);
 		int declOffset;
 		int length;
 		if (allFragments.size() != 1) {
@@ -128,10 +127,7 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 			length = fieldDeclaration.getLength();
 		}
 
-		if (iCompilationUnit.getPath()
-			.toString()
-			.equals(unusedField.getDeclarationPath()
-				.toString())) {
+		if (comparePaths(iCompilationUnit.getPath(), unusedField.getDeclarationPath())) {
 
 			DeleteEdit declDeleteEdit = new DeleteEdit(declOffset, length);
 			documentChange.addEdit(declDeleteEdit);
@@ -142,7 +138,16 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 				});
 		}
 	}
-	
+
+	private boolean comparePaths(ICompilationUnit iCompilationUnit, ICompilationUnit icu) {
+		return comparePaths(icu.getPath(), iCompilationUnit.getPath());
+	}
+
+	private boolean comparePaths(IPath path1, IPath path2) {
+		return path1.toString()
+			.equals(path2.toString());
+	}
+
 	/**
 	 * Returns the path of an {@link ICompilationUnit} without leading slash
 	 * (the same as in the Externalize Strings refactoring view).
@@ -156,7 +161,7 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 			.toString();
 		return temp.startsWith("/") ? temp.substring(1) : temp; //$NON-NLS-1$
 	}
-	
+
 	public List<UnusedFieldWrapper> getUnusedFieldWrapperList() {
 		return this.unusedFields;
 	}
