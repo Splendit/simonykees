@@ -92,7 +92,7 @@ public class ExpressionWithoutSideEffectRecursive {
 			return false;
 		}
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		if (methodBinding != null || !BindingWithoutSideEffect.isSupportedMethod(methodBinding)) {
+		if (methodBinding == null || !BindingWithoutSideEffect.isSupportedMethod(methodBinding)) {
 			return false;
 		}
 		return ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
