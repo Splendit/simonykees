@@ -15,6 +15,10 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.PrimitiveType.Code;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.rule.impl.unused.Constants;
@@ -57,10 +61,12 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 			return true;
 		}
 
-		AbstractTypeDeclaration typeDeclaration = ASTNodeUtil.getSpecificAncestor(fieldDeclaration,
-				AbstractTypeDeclaration.class);
-		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(),
-				VariableDeclarationFragment.class);
+		if(isSerialVersionUIDDeclaration(fieldDeclaration)) {
+			return false;
+		}
+		
+		AbstractTypeDeclaration typeDeclaration = ASTNodeUtil.getSpecificAncestor(fieldDeclaration, AbstractTypeDeclaration.class);
+		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class);
 		int modifierFlags = fieldDeclaration.getModifiers();
 		for (VariableDeclarationFragment fragment : fragments) {
 			boolean removeSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
@@ -89,6 +95,29 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 			}
 		}
 		return true;
+	}
+	
+	private boolean isSerialVersionUIDDeclaration(FieldDeclaration fieldDeclaration) {
+		int modifierFlags = fieldDeclaration.getModifiers();
+		if(Modifier.isStatic(modifierFlags) && Modifier.isFinal(modifierFlags)) {
+
+			List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class);
+			final String versionUIDName = "serialVersionUID"; //$NON-NLS-1$
+			boolean matchesName = fragments.stream()
+				.map(VariableDeclarationFragment::getName)
+				.map(SimpleName::getIdentifier)
+				.anyMatch(versionUIDName::equals); 
+			
+			if(matchesName) {
+				Type type = fieldDeclaration.getType();
+				if(type.isPrimitiveType()) {
+					PrimitiveType primitiveType = (PrimitiveType)type;
+					Code code = primitiveType.getPrimitiveTypeCode();
+					return "long".equals(code.toString()); //$NON-NLS-1$
+				}
+			}
+		}
+		return false;
 	}
 
 	private boolean hasUsefulAnnotations(FieldDeclaration fieldDeclaration) {

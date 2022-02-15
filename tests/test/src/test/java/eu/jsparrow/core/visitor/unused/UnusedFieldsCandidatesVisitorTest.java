@@ -33,6 +33,7 @@ class UnusedFieldsCandidatesVisitorTest extends UsesJDTUnitFixture {
 		String sample1_6 = "private Object o = new Object() {}; private Object unusedPrivate = this.o;";
 		String sample1_7 = "private Object unusedPrivate;";
 		String sample1_8 = "private Object o = new Object() {}; private String unusedPrivate = \"\";";
+		String sample1_9 = "private String unusedPrivate = \"\", secondUnusedFragment = \"shouldNotBeRemoved\";";
 		String sample2 = ""
 				+ "private int value2 = 0;\n"
 				+ "private int unusedPrivate = value2;";
@@ -63,6 +64,7 @@ class UnusedFieldsCandidatesVisitorTest extends UsesJDTUnitFixture {
 				sample1_6,
 				sample1_7,
 				sample1_8,
+				sample1_9,
 				sample2,
 				sample3,
 				sample3_1,
@@ -181,6 +183,35 @@ class UnusedFieldsCandidatesVisitorTest extends UsesJDTUnitFixture {
 		NonPrivateUnusedFieldCandidate candidate = candidates.get(0);
 		String unusedFieldName = candidate.getFragment().getName().getIdentifier();
 		assertEquals("unusedNonPrivate", unusedFieldName);
+	}
+	
+	
+	private static Stream<String> serialVersionUIDDeclarations() {
+		return Stream.of(
+				"private static final long serialVersionUID = 0L;",
+				"protected static final long serialVersionUID = 0L;",
+				"static final long serialVersionUID = 0L;",
+				"public static final long serialVersionUID = 0L;"
+				);
+	}
+	
+	@ParameterizedTest
+	@MethodSource(value = "serialVersionUIDDeclarations")
+	void test_keepingSerialVersionUID(String code) throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-fields", true);
+		options.put("protected-fields", true);
+		options.put("package-private-fields", true);
+		options.put("public-fields", true);
+		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);
+		
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, code);
+		defaultFixture.accept(visitor);
+		
+		List<UnusedFieldWrapper> unusedPrivateFields = visitor.getUnusedPrivateFields();
+		List<NonPrivateUnusedFieldCandidate> candidates = visitor.getNonPrivateCandidates();
+		assertTrue(unusedPrivateFields.isEmpty());
+		assertTrue(candidates.isEmpty());
 	}
 	
 }
