@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.SimpleType;
 
 /**
@@ -13,17 +14,18 @@ import org.eclipse.jdt.core.dom.SimpleType;
  * 
  * @since 4.7.0
  */
-public class AssertThatInstanceOfAnalysisData {
-	private final MethodInvocationData newAssertThatData;
+public class BooleanAssertionWithInstanceofAnalysisResult {
+	private final Expression instanceOfLeftOperand;
 	private final SimpleType instanceofRightOperand;
 
-	public AssertThatInstanceOfAnalysisData(MethodInvocationData newAssertThatData, SimpleType instanceofRightOperand) {
-		this.newAssertThatData = newAssertThatData;
+	public BooleanAssertionWithInstanceofAnalysisResult(Expression instanceOfLeftOperand,
+			SimpleType instanceofRightOperand) {
+		this.instanceOfLeftOperand = instanceOfLeftOperand;
 		this.instanceofRightOperand = instanceofRightOperand;
 	}
 
-	public MethodInvocationData getNewAssertThatData() {
-		return newAssertThatData;
+	public Expression getInstanceOfLeftOperand() {
+		return instanceOfLeftOperand;
 	}
 
 	public SimpleType getInstanceofRightOperand() {
