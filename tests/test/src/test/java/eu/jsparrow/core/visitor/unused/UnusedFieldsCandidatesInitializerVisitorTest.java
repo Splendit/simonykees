@@ -25,6 +25,20 @@ public class UnusedFieldsCandidatesInitializerVisitorTest extends UsesJDTUnitFix
 	private static Stream<String> privateFragmentWithInitializer() {
 		return Stream.of(
 				/*
+				 * super field access
+				 */
+				"" +
+						"class ExampleSuperClass {\n" +
+						"	protected int x;\n" +
+						"}\n" +
+						"class ExampleClass extends ExampleSuperClass{\n" +
+						"	private int unusedField = super.x;\n" +
+						"}",
+				/*
+				 * qualified name
+				 */
+				"private int unusedField = Integer.MAX_VALUE;",
+				/*
 				 * initialization with array access
 				 */
 				"" +
