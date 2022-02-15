@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.unused;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -63,7 +64,9 @@ public class ExpressionWithoutSideEffectRecursive {
 			// private int[] unusedField = {};
 			return isArrayInitializerWithoutSideEffect((ArrayInitializer) expression);
 		}
-		// FIXME: also consider array access like intArray2D[0][0];
+		if (expressionNodeType == ASTNode.ARRAY_ACCESS) {
+			return isArrayAccessWithoutSideEffect((ArrayAccess) expression);
+		}
 
 		return expressionNodeType == ASTNode.NULL_LITERAL
 				|| expressionNodeType == ASTNode.NUMBER_LITERAL
@@ -125,5 +128,11 @@ public class ExpressionWithoutSideEffectRecursive {
 			.stream()
 			.allMatch(ExpressionWithoutSideEffectRecursive::isExpressionWithoutSideEffect);
 
+	}
+
+	private static boolean isArrayAccessWithoutSideEffect(ArrayAccess arrayAccess) {
+		Expression index = arrayAccess.getIndex();
+		Expression array = arrayAccess.getArray();
+		return isExpressionWithoutSideEffect(array) && isExpressionWithoutSideEffect(index);
 	}
 }

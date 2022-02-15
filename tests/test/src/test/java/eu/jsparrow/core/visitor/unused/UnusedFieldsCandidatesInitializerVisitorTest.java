@@ -25,6 +25,15 @@ public class UnusedFieldsCandidatesInitializerVisitorTest extends UsesJDTUnitFix
 	private static Stream<String> privateFragmentWithInitializer() {
 		return Stream.of(
 				/*
+				 * initialization with array access
+				 */
+				"" +
+						"private int[] intArray = { 1, 2, 3 };\n" +
+						"private int unusedField = intArray[0];",
+				"" +
+						"private int[][] intArray2D = { { 1, 2, 3 }, { 1, 2, 3 } };\n" +
+						"private int unusedField = intArray2D[0][0];",
+				/*
 				 * initialization with array creation
 				 */
 				"private int[] unusedField = {};",
