@@ -116,7 +116,7 @@ public class UnusedFieldsEngine {
 			CompilationUnit compilationUnit = RefactoringUtil.parse(iCompilationUnit);
 			ReferencesVisitor visitor = new ReferencesVisitor(fragment, typDeclaration, optionsMap);
 			compilationUnit.accept(visitor);
-			if (!visitor.hasActiveReference()) {
+			if (!visitor.hasActiveReference() && !visitor.hasUnresolvedReference()) {
 				List<ExpressionStatement> reassignments = visitor.getReassignments();
 				UnusedExternalReferences unusedReferences = new UnusedExternalReferences(compilationUnit, iCompilationUnit, reassignments);
 				unusedExternalreferences.add(unusedReferences);

@@ -73,7 +73,7 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 			if (removeSideEffects || ExpressionWithoutSideEffectRecursive.hasNoInitializerWithSideEffect(fragment)) {
 				ReferencesVisitor referencesVisitor = new ReferencesVisitor(fragment, typeDeclaration, options);
 				this.compilationUnit.accept(referencesVisitor);
-				if (!referencesVisitor.hasActiveReference()) {
+				if(!referencesVisitor.hasActiveReference() && !referencesVisitor.hasUnresolvedReference()) {
 					List<ExpressionStatement> reassignments = referencesVisitor.getReassignments();
 					if (Modifier.isPrivate(modifierFlags)) {
 						UnusedFieldWrapper unusedField = new UnusedFieldWrapper(compilationUnit,
