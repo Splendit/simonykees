@@ -53,5 +53,4 @@ public class UnusedFieldReferenceSearchResult {
 				"UnusedFieldReferenceSearchResult [activeReferenceFound=%s, invalidSearchEngineResult=%s, unusedReferences=%s]", //$NON-NLS-1$
 				activeReferenceFound, invalidSearchEngineResult, unusedReferences);
 	}
-
 }

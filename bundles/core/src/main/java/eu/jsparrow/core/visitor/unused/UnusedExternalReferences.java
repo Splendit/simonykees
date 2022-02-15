@@ -37,5 +37,4 @@ public class UnusedExternalReferences {
 				"UnusedExternalReferences [iCompilationUnit=%s, unusedReassignments=%s]", //$NON-NLS-1$
 				iCompilationUnit.getElementName(), unusedReassignments);
 	}
-
 }

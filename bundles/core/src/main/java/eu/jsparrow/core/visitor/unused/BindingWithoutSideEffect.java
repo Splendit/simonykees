@@ -13,6 +13,11 @@ import org.eclipse.jdt.core.dom.Modifier;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Analyzes the type binding of a class instance creation or the method binding
+ * of a method invocation to find out whether side effects can be excluded.
+ * 
+ */
 @SuppressWarnings("nls")
 public class BindingWithoutSideEffect {
 
@@ -23,7 +28,7 @@ public class BindingWithoutSideEffect {
 	private static final String JAVA_TIME = "java.time";
 	private static final String JAVA_UTIL = "java.util";
 	private static final String JAVA_UTIL_DOT = "java.util.";
-	
+
 	private static final List<String> JAVA_UTIL_COLLECTION = Collections
 		.singletonList(java.util.Collection.class.getName());
 	private static final List<String> JAVA_UTIL_MAP = Collections

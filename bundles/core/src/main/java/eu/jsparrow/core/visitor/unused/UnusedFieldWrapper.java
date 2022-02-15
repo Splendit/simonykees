@@ -43,7 +43,7 @@ public class UnusedFieldWrapper {
 		this.accessModifier = modifier;
 		SimpleName name = fragment.getName();
 		this.fieldName = name.getIdentifier();
-		
+
 	}
 
 	public VariableDeclarationFragment getFragment() {
@@ -71,7 +71,7 @@ public class UnusedFieldWrapper {
 	}
 
 	public String getFieldName() {
-		return this.fieldName; 
+		return this.fieldName;
 	}
 
 	public String getClassDeclarationName() {
@@ -130,5 +130,4 @@ public class UnusedFieldWrapper {
 				"UnusedFieldWrapper [fieldName=%s, fragment=%s, accessModifier=%s, declarationPath=%s, classDeclarationName=%s]", //$NON-NLS-1$
 				fieldName, fragment, accessModifier, declarationPath, classDeclarationName);
 	}
-	
 }

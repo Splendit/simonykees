@@ -67,6 +67,4 @@ public class NonPrivateUnusedFieldCandidate {
 				&& Objects.equals(internalReassignments, other.internalReassignments)
 				&& Objects.equals(typeDeclaration, other.typeDeclaration);
 	}
-
-	
 }

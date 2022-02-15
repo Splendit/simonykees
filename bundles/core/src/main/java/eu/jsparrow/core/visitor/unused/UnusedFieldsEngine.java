@@ -96,7 +96,8 @@ public class UnusedFieldsEngine {
 		return list;
 	}
 
-	private UnusedFieldReferenceSearchResult searchReferences(VariableDeclarationFragment fragment, IJavaProject project,
+	private UnusedFieldReferenceSearchResult searchReferences(VariableDeclarationFragment fragment,
+			IJavaProject project,
 			Map<String, Boolean> optionsMap) {
 		IJavaElement[] searchScope = createSearchScope(scope, project);
 		FieldReferencesSearch fieldReferencesSearchEngine = new FieldReferencesSearch(searchScope);
@@ -118,7 +119,8 @@ public class UnusedFieldsEngine {
 			compilationUnit.accept(visitor);
 			if (!visitor.hasActiveReference() && !visitor.hasUnresolvedReference()) {
 				List<ExpressionStatement> reassignments = visitor.getReassignments();
-				UnusedExternalReferences unusedReferences = new UnusedExternalReferences(compilationUnit, iCompilationUnit, reassignments);
+				UnusedExternalReferences unusedReferences = new UnusedExternalReferences(compilationUnit,
+						iCompilationUnit, reassignments);
 				unusedExternalreferences.add(unusedReferences);
 			} else {
 				return new UnusedFieldReferenceSearchResult(true, false, Collections.emptyList());
@@ -137,5 +139,4 @@ public class UnusedFieldsEngine {
 	public Set<ICompilationUnit> getTargetCompilationUnits() {
 		return targetCompilationUnits;
 	}
-
 }

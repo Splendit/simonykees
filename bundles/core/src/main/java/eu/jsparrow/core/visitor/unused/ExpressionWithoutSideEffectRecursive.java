@@ -12,21 +12,18 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
- * FIXME: use this class instead of ExpressionWithoutSideEffect Analyzes an
- * expression to find out whether or not side effects can be excluded. For
- * example, the side effect of a method invocation can be the change of the
- * state of a mutable Object.
+ * Analyzes an expression to find out whether side effects can be excluded.
+ * <p>
+ * One example for a side effects is be the change of state of a mutable
+ * collection by calling an 'add' method.
+ * <p>
+ * Another example for a side effect is a change in the file system by calling a
+ * method.
  * 
- * <ul>
- * <li>either be removed safely together with the fragment declaring the unused
- * field if it is the initializer of the unused field</li>
- * <li>or be removed safely together with an assignment to the unused field</li>
- * </ul>
  */
 public class ExpressionWithoutSideEffectRecursive {
 
@@ -34,11 +31,6 @@ public class ExpressionWithoutSideEffectRecursive {
 		/*
 		 * Private default constructor hiding implicit public one
 		 */
-	}
-
-	static boolean hasNoInitializerWithSideEffect(VariableDeclarationFragment fragment) {
-		Expression initializer = fragment.getInitializer();
-		return initializer == null || isExpressionWithoutSideEffect(initializer);
 	}
 
 	static boolean isExpressionWithoutSideEffect(Expression expression) {

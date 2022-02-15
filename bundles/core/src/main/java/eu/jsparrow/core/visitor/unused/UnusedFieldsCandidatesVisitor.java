@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -61,19 +62,21 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 			return true;
 		}
 
-		if(isSerialVersionUIDDeclaration(fieldDeclaration)) {
+		if (isSerialVersionUIDDeclaration(fieldDeclaration)) {
 			return false;
 		}
-		
-		AbstractTypeDeclaration typeDeclaration = ASTNodeUtil.getSpecificAncestor(fieldDeclaration, AbstractTypeDeclaration.class);
-		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class);
+
+		AbstractTypeDeclaration typeDeclaration = ASTNodeUtil.getSpecificAncestor(fieldDeclaration,
+				AbstractTypeDeclaration.class);
+		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(),
+				VariableDeclarationFragment.class);
 		int modifierFlags = fieldDeclaration.getModifiers();
 		for (VariableDeclarationFragment fragment : fragments) {
-			boolean removeSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
-			if (removeSideEffects || ExpressionWithoutSideEffectRecursive.hasNoInitializerWithSideEffect(fragment)) {
+			boolean ignoreSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
+			if (ignoreSideEffects || isSafelyRemovable(fragment)) {
 				ReferencesVisitor referencesVisitor = new ReferencesVisitor(fragment, typeDeclaration, options);
 				this.compilationUnit.accept(referencesVisitor);
-				if(!referencesVisitor.hasActiveReference() && !referencesVisitor.hasUnresolvedReference()) {
+				if (!referencesVisitor.hasActiveReference() && !referencesVisitor.hasUnresolvedReference()) {
 					List<ExpressionStatement> reassignments = referencesVisitor.getReassignments();
 					if (Modifier.isPrivate(modifierFlags)) {
 						UnusedFieldWrapper unusedField = new UnusedFieldWrapper(compilationUnit,
@@ -96,22 +99,28 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 		}
 		return true;
 	}
-	
+
+	private boolean isSafelyRemovable(VariableDeclarationFragment fragment) {
+		Expression initializer = fragment.getInitializer();
+		return initializer == null || ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(initializer);
+	}
+
 	private boolean isSerialVersionUIDDeclaration(FieldDeclaration fieldDeclaration) {
 		int modifierFlags = fieldDeclaration.getModifiers();
-		if(Modifier.isStatic(modifierFlags) && Modifier.isFinal(modifierFlags)) {
+		if (Modifier.isStatic(modifierFlags) && Modifier.isFinal(modifierFlags)) {
 
-			List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class);
+			List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(),
+					VariableDeclarationFragment.class);
 			final String versionUIDName = "serialVersionUID"; //$NON-NLS-1$
 			boolean matchesName = fragments.stream()
 				.map(VariableDeclarationFragment::getName)
 				.map(SimpleName::getIdentifier)
-				.anyMatch(versionUIDName::equals); 
-			
-			if(matchesName) {
+				.anyMatch(versionUIDName::equals);
+
+			if (matchesName) {
 				Type type = fieldDeclaration.getType();
-				if(type.isPrimitiveType()) {
-					PrimitiveType primitiveType = (PrimitiveType)type;
+				if (type.isPrimitiveType()) {
+					PrimitiveType primitiveType = (PrimitiveType) type;
 					Code code = primitiveType.getPrimitiveTypeCode();
 					return "long".equals(code.toString()); //$NON-NLS-1$
 				}
@@ -169,5 +178,4 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 	public List<NonPrivateUnusedFieldCandidate> getNonPrivateCandidates() {
 		return nonPrivateCandidates;
 	}
-
 }

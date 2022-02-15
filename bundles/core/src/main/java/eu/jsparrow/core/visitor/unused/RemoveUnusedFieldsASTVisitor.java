@@ -144,5 +144,4 @@ public class RemoveUnusedFieldsASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 		return Optional.empty();
 	}
-
 }
