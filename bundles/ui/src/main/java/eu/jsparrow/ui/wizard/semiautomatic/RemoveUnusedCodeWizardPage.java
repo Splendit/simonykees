@@ -155,11 +155,10 @@ public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 	}
 
 	private void updateView() {
+		fSelectionStatus = new StatusInfo();
 		if (model.getClassMemberTypes()
 			.isEmpty()) {
 			((StatusInfo) fSelectionStatus).setError(Messages.RenameFieldsRuleWizardPage_warning_noFieldSelected);
-		} else {
-			fSelectionStatus = new StatusInfo();
 		}
 
 		// status of all used components
