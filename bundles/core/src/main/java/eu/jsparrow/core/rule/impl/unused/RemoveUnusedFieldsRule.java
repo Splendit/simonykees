@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
@@ -22,6 +23,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import eu.jsparrow.core.visitor.unused.RemoveUnusedFieldsASTVisitor;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
@@ -36,8 +38,8 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 	public RemoveUnusedFieldsRule(List<UnusedFieldWrapper> unusedFields) {
 		this.visitorClass = RemoveUnusedFieldsASTVisitor.class;
 		this.id = "RemoveUnusedFields"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription("Remove Unused Fields Rule",
-				"Finds and remove fields that are never used actively. ", Duration.ofMinutes(2),
+		this.ruleDescription = new RuleDescription(Messages.RemoveUnusedFieldsRule_name,
+				Messages.RemoveUnusedFieldsRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
 		this.unusedFields = unusedFields;
 	}
@@ -70,6 +72,7 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 		for (ICompilationUnit iCompilationUnit : targetCompilationUnits) {
 			TextEditGroup editGroup = unusedField.getTextEditGroup(iCompilationUnit);
 			if (!editGroup.isEmpty()) {
+				
 				VariableDeclarationFragment oldFragment = unusedField.getFragment();
 				Document doc = new Document(iCompilationUnit.getPrimary()
 					.getSource());
@@ -78,30 +81,7 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 				TextEdit rootEdit = new MultiTextEdit();
 				documentChange.setEdit(rootEdit);
 				FieldDeclaration fieldDeclaration = (FieldDeclaration) oldFragment.getParent(); 
-				List<VariableDeclarationFragment> allFragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class);
-				int declOffset;
-				int length;
-				if (allFragments.size() != 1) {
-					declOffset = oldFragment.getStartPosition();
-					length = oldFragment.getLength();
-				} else {
-					declOffset = fieldDeclaration.getStartPosition();
-					length = fieldDeclaration.getLength();
-				}
-
-				if (iCompilationUnit.getPath()
-					.toString()
-					.equals(unusedField.getDeclarationPath()
-						.toString())) {
-
-					DeleteEdit declDeleteEdit = new DeleteEdit(declOffset, length);
-					documentChange.addEdit(declDeleteEdit);
-					unusedField.getUnusedReassignments()
-						.forEach(reassignment -> {
-							DeleteEdit deleteEdit = new DeleteEdit(reassignment.getStartPosition(), reassignment.getLength());
-							documentChange.addEdit(deleteEdit);
-						});
-				}
+				addDeclarationTextEdits(unusedField, iCompilationUnit, oldFragment, documentChange, fieldDeclaration);
 
 				unusedField.getUnusedExternalReferences()
 					.stream()
@@ -116,12 +96,11 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 					.forEach(externalReference -> {
 						CompilationUnit cu = externalReference.getCompilationUnit();
 						ICompilationUnit icu = (ICompilationUnit) cu.getJavaElement();
-						if(icu.getPath().toString().equals(iCompilationUnit.getPath().toString())) {
+						if(comparePaths(iCompilationUnit, icu)) {
 							for(ExpressionStatement statement : externalReference.getUnusedReassignments()) {
 								DeleteEdit deleteEdit = new DeleteEdit(statement.getStartPosition(), statement.getLength());
 								documentChange.addEdit(deleteEdit);
 							}
-	
 						}
 					});
 				documentChange.setTextType("java"); //$NON-NLS-1$
@@ -130,6 +109,38 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 		}
 
 		return documentChanges;
+	}
+
+	private boolean comparePaths(ICompilationUnit iCompilationUnit, ICompilationUnit icu) {
+		return icu.getPath().toString().equals(iCompilationUnit.getPath().toString());
+	}
+
+	private void addDeclarationTextEdits(UnusedFieldWrapper unusedField, ICompilationUnit iCompilationUnit,
+			VariableDeclarationFragment oldFragment, DocumentChange documentChange, FieldDeclaration fieldDeclaration) {
+		List<VariableDeclarationFragment> allFragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class);
+		int declOffset;
+		int length;
+		if (allFragments.size() != 1) {
+			declOffset = oldFragment.getStartPosition();
+			length = oldFragment.getLength();
+		} else {
+			declOffset = fieldDeclaration.getStartPosition();
+			length = fieldDeclaration.getLength();
+		}
+
+		if (iCompilationUnit.getPath()
+			.toString()
+			.equals(unusedField.getDeclarationPath()
+				.toString())) {
+
+			DeleteEdit declDeleteEdit = new DeleteEdit(declOffset, length);
+			documentChange.addEdit(declDeleteEdit);
+			unusedField.getUnusedReassignments()
+				.forEach(reassignment -> {
+					DeleteEdit deleteEdit = new DeleteEdit(reassignment.getStartPosition(), reassignment.getLength());
+					documentChange.addEdit(deleteEdit);
+				});
+		}
 	}
 	
 	/**
@@ -140,7 +151,6 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 	 * @return
 	 */
 	private String getPathString(ICompilationUnit compilationUnit) {
-		// FIXME: copied from FieldsRenamingRule
 		String temp = compilationUnit.getParent()
 			.getPath()
 			.toString();
@@ -149,5 +159,28 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 	
 	public List<UnusedFieldWrapper> getUnusedFieldWrapperList() {
 		return this.unusedFields;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(unusedFields);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (!(obj instanceof RemoveUnusedFieldsRule)) {
+			return false;
+		}
+		RemoveUnusedFieldsRule other = (RemoveUnusedFieldsRule) obj;
+		return Objects.equals(unusedFields, other.unusedFields);
 	}
 }
