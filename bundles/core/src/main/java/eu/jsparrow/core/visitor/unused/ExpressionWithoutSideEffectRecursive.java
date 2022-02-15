@@ -16,10 +16,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
- * FIXME: use this class instead of ExpressionWithoutSideEffect
- * Analyzes an expression to find out whether or not side effects can be
- * excluded. For example, the side effect of a method invocation can be the
- * change of the state of a mutable Object.
+ * FIXME: use this class instead of ExpressionWithoutSideEffect Analyzes an
+ * expression to find out whether or not side effects can be excluded. For
+ * example, the side effect of a method invocation can be the change of the
+ * state of a mutable Object.
  * 
  * <ul>
  * <li>either be removed safely together with the fragment declaring the unused
@@ -58,7 +58,12 @@ public class ExpressionWithoutSideEffectRecursive {
 		if (expressionNodeType == ASTNode.ARRAY_CREATION) {
 			return isArrayCreationWithoutSideEffect((ArrayCreation) expression);
 		}
-		// FIXME: also consider array access like  intArray2D[0][0];
+		if (expressionNodeType == ASTNode.ARRAY_INITIALIZER) {
+			// to handle cases like the following:
+			// private int[] unusedField = {};
+			return isArrayInitializerWithoutSideEffect((ArrayInitializer) expression);
+		}
+		// FIXME: also consider array access like intArray2D[0][0];
 
 		return expressionNodeType == ASTNode.NULL_LITERAL
 				|| expressionNodeType == ASTNode.NUMBER_LITERAL
@@ -106,16 +111,19 @@ public class ExpressionWithoutSideEffectRecursive {
 		boolean dimensionswithoutSideEffect = dimensions.stream()
 			.allMatch(ExpressionWithoutSideEffectRecursive::isExpressionWithoutSideEffect);
 		if (dimensionswithoutSideEffect) {
-
 			ArrayInitializer arrayInitializer = arrayCreation.getInitializer();
-			if (arrayInitializer == null) {
-				return true;
-			}
-			return ASTNodeUtil.convertToTypedList(arrayInitializer.expressions(),
-					Expression.class)
-				.stream()
-				.allMatch(ExpressionWithoutSideEffectRecursive::isExpressionWithoutSideEffect);
+			return arrayInitializer == null || isArrayInitializerWithoutSideEffect(arrayInitializer);
 		}
 		return false;
+	}
+
+	private static boolean isArrayInitializerWithoutSideEffect(ArrayInitializer arrayInitializer) {
+		List<Expression> initializerExpressions = ASTNodeUtil.convertToTypedList(arrayInitializer.expressions(),
+				Expression.class);
+
+		return initializerExpressions
+			.stream()
+			.allMatch(ExpressionWithoutSideEffectRecursive::isExpressionWithoutSideEffect);
+
 	}
 }

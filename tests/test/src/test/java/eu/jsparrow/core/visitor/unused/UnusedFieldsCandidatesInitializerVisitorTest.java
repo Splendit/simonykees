@@ -21,13 +21,22 @@ public class UnusedFieldsCandidatesInitializerVisitorTest extends UsesJDTUnitFix
 	void tearDown() throws Exception {
 		fixtureProject.clear();
 	}
-	
-	class TestRemoveUnusedPrivateField {
-		
-	}
 
 	private static Stream<String> privateFragmentWithInitializer() {
 		return Stream.of(
+				/*
+				 * initialization with array creation
+				 */
+				"private int[] unusedField = {};",
+				"private int[] unusedField = new int[] { 1, 2, 3 };",
+				"private int[] unusedField = new int[3];",
+				"private int[][] unusedField = {};",
+				"private int[][] unusedField = { {} };",
+				"private int[][] unusedField = new int[][] { { 1, 2, 3 }, new int[0] };",
+				"private int[][] unusedField = new int[2][3];",
+				/*
+				 * initialization with class instance creation
+				 */
 				"private Object unusedField = new Object();",
 				"private String unusedField = new String();",
 				"private String unusedField = new String(\"s\");",
@@ -62,7 +71,8 @@ public class UnusedFieldsCandidatesInitializerVisitorTest extends UsesJDTUnitFix
 		List<UnusedFieldWrapper> removedUnusedFields = visitor.getUnusedPrivateFields();
 		assertFalse(removedUnusedFields.isEmpty());
 		assertEquals(1, removedUnusedFields.size());
-		String removedUnusedFieldName = removedUnusedFields.get(0).getFieldName();
+		String removedUnusedFieldName = removedUnusedFields.get(0)
+			.getFieldName();
 		assertEquals("unusedField", removedUnusedFieldName);
 	}
 }
