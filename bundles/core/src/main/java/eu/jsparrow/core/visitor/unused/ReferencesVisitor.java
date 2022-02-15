@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
 import eu.jsparrow.core.rule.impl.unused.Constants;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class ReferencesVisitor extends ASTVisitor {
@@ -49,7 +48,7 @@ public class ReferencesVisitor extends ASTVisitor {
 		this.originalIdentifier = name.getIdentifier();
 		this.originalType = this.originalTypeDeclaration.resolveBinding();
 	}
-	
+
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		return !activeReferenceFound && !unresolvedReferenceFound;
@@ -77,7 +76,7 @@ public class ReferencesVisitor extends ASTVisitor {
 			Assignment assignment = (Assignment) simpleName.getParent();
 			Optional<ExpressionStatement> reassignment = isSafelyRemovable(assignment);
 			reassignment.ifPresent(reassignments::add);
-			if(reassignment.isPresent()) {
+			if (reassignment.isPresent()) {
 				return false;
 			}
 
@@ -85,23 +84,23 @@ public class ReferencesVisitor extends ASTVisitor {
 			FieldAccess fieldAccess = (FieldAccess) simpleName.getParent();
 			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(fieldAccess);
 			reassignment.ifPresent(reassignments::add);
-			if(reassignment.isPresent()) {
+			if (reassignment.isPresent()) {
 				return false;
 			}
 		} else if (locationInParent == QualifiedName.NAME_PROPERTY) {
 			QualifiedName qualifiedName = (QualifiedName) simpleName.getParent();
 			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(qualifiedName);
 			reassignment.ifPresent(reassignments::add);
-			if(reassignment.isPresent()) {
+			if (reassignment.isPresent()) {
 				return false;
 			}
-			
+
 		}
 
 		activeReferenceFound = true;
 		return true;
 	}
-	
+
 	private Optional<ExpressionStatement> isSafelyRemovableReassignment(Expression expression) {
 		if (expression.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) expression.getParent();
@@ -109,25 +108,21 @@ public class ReferencesVisitor extends ASTVisitor {
 		}
 		return Optional.empty();
 	}
-	
-	/*
-	 * FIXME:: move this method to class ExpressionWithoutSideEffectRecursive
-	 */
+
 	private Optional<ExpressionStatement> isSafelyRemovable(Assignment assignment) {
-		if(assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return Optional.empty();
 		}
 		Expression rightHandSide = assignment.getRightHandSide();
 
-		ExpressionStatement expressionStatement = (ExpressionStatement)assignment.getParent();
+		ExpressionStatement expressionStatement = (ExpressionStatement) assignment.getParent();
 		boolean ignoreSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
-		if(ignoreSideEffects) {
+		if (ignoreSideEffects) {
 			return Optional.of(expressionStatement);
 		}
-		
-		// FIXME: use ExpressionWithoutSideEffectRecursive#isExpressionWithoutSideEffect
-		boolean isSimpleExpression = rightHandSide.getNodeType() == ASTNode.SIMPLE_NAME || ASTNodeUtil.isLiteral(rightHandSide);
-		if(isSimpleExpression) {
+
+		boolean safelyRemovable = ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(rightHandSide);
+		if (safelyRemovable) {
 			return Optional.of(expressionStatement);
 		}
 		return Optional.empty();
@@ -140,7 +135,7 @@ public class ReferencesVisitor extends ASTVisitor {
 		}
 
 		IBinding binding = simpleName.resolveBinding();
-		if(binding == null) {
+		if (binding == null) {
 			throw new UnresolvedTypeBindingException("The binding of the reference candidate cannot be resolved."); //$NON-NLS-1$
 		}
 		int kind = binding.getKind();
@@ -153,7 +148,7 @@ public class ReferencesVisitor extends ASTVisitor {
 			return false;
 		}
 		ITypeBinding declaringClass = variableBinding.getDeclaringClass();
-		if(declaringClass == null) {
+		if (declaringClass == null) {
 			throw new UnresolvedTypeBindingException("The declaring class of the reference candidate cannot be found."); //$NON-NLS-1$
 		}
 
