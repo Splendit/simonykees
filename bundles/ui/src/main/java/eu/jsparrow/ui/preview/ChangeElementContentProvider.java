@@ -1,6 +1,7 @@
 package eu.jsparrow.ui.preview;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
@@ -35,7 +36,7 @@ public class ChangeElementContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public Object getParent(Object element) {
-		if(element instanceof RemoveUnusedCodeDocumentChangeWrapper) {
+		if (element instanceof RemoveUnusedCodeDocumentChangeWrapper) {
 			return ((RemoveUnusedCodeDocumentChangeWrapper) element).getParent();
 		}
 		return ((DocumentChangeWrapper) element).getParent();
@@ -60,25 +61,17 @@ public class ChangeElementContentProvider implements ITreeContentProvider {
 	@Override
 	public Object[] getElements(Object element) {
 		if (element instanceof DocumentChangeWrapper[]) {
+			Comparator<DocumentChangeWrapper> comparator = Comparator.comparing(DocumentChangeWrapper::getOldIdentifier)
+				.thenComparing(DocumentChangeWrapper::getCompilationUnitName);
 			Arrays.asList((DocumentChangeWrapper[]) element)
-				.sort((e1, e2) -> {
-					if (e1.getOldIdentifier()
-						.equals(e2.getOldIdentifier())) {
-						return e1.getCompilationUnitName()
-							.compareTo(e2.getCompilationUnitName());
-					}
-					return e1.getOldIdentifier()
-						.compareTo(e2.getOldIdentifier());
-				});
+				.sort(comparator);
 			return (DocumentChangeWrapper[]) element;
 		} else if (element instanceof RemoveUnusedCodeDocumentChangeWrapper[]) {
+			Comparator<RemoveUnusedCodeDocumentChangeWrapper> comparator = Comparator
+				.comparing(RemoveUnusedCodeDocumentChangeWrapper::getCompilationUnitName)
+				.thenComparing(RemoveUnusedCodeDocumentChangeWrapper::getIdentifier);
 			Arrays.asList((RemoveUnusedCodeDocumentChangeWrapper[]) element)
-			.sort((e1, e2) -> {
-				if(e1.getIdentifier().equals(e2.getIdentifier())) {
-					return e1.getCompilationUnitName().compareTo(e2.getCompilationUnitName());
-				}
-				return e1.getIdentifier().compareTo(e2.getIdentifier());
-			});
+				.sort(comparator);
 			return (RemoveUnusedCodeDocumentChangeWrapper[]) element;
 		}
 		return new Object[] {};
