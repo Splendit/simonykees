@@ -106,7 +106,7 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 
 		if (null == selectedJavaProjekt) {
 			SimonykeesMessageDialog.openMessageDialog(HandlerUtil.getActiveShell(event),
-					"The Java Project of the seelcted sources could not be found.", MessageDialog.WARNING); //$NON-NLS-1$
+					"The Java Project of the selected sources could not be found.", MessageDialog.WARNING); //$NON-NLS-1$
 			Activator.setRunning(false);
 			return null;
 		}

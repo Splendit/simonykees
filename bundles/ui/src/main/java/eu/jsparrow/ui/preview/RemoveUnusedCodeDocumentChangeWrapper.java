@@ -10,7 +10,7 @@ import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 
 /**
  * A wrapper class for storing the relation between document changes and the
- * rules for removing unused code.
+ * rules that remove unused code.
  * 
  * @since 4.8.0
  *

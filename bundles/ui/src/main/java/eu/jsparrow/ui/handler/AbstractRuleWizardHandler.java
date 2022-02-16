@@ -38,6 +38,13 @@ import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
+/**
+ * A parent class for handlers that collect the selected compilation units and
+ * start the rule refactoring wizards.
+ * 
+ * @since 4.8.0
+ *
+ */
 public abstract class AbstractRuleWizardHandler extends AbstractHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractRuleWizardHandler.class);
@@ -155,11 +162,11 @@ public abstract class AbstractRuleWizardHandler extends AbstractHandler {
 					.getActiveWorkbenchWindow()
 					.getShell();
 				MessageDialog.openWarning(shell, title, message);
-	
+
 				Activator.setRunning(false);
 			});
 	}
-	
+
 	protected IStatus startRuleWizard(Map<IJavaProject, List<IJavaElement>> selectedJavaElements,
 			IProgressMonitor monitor, Function<List<ICompilationUnit>, AbstractRuleWizard> wizardGenerator) {
 		List<IJavaElement> selectedElements = selectedJavaElements.entrySet()
