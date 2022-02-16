@@ -19,48 +19,51 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The default configuration options for removing unused code (i.e., fields,
+ * methods, and classes).
+ * 
+ * @since 4.8.0
+ *
+ */
 public class DefaultOptions {
-	
+
 	private static final Map<String, Boolean> DEFAULT_OPTIONS = initDefaultOptions();
-	
 
 	public static final String PROJECT_SCOPE = "Project"; //$NON-NLS-1$
 	public static final String WORKSPACE_SCOPE = "Workspace"; //$NON-NLS-1$
 	public static final String DEFAULT_SCOPE = WORKSPACE_SCOPE;
-	
+
 	private DefaultOptions() {
 		/*
 		 * Hide default constructor
 		 */
 	}
-	
+
 	public static Map<String, Boolean> getDefaultOptions() {
 		return DEFAULT_OPTIONS;
 	}
 
 	private static Map<String, Boolean> initDefaultOptions() {
 		Map<String, Boolean> options = new HashMap<>();
-		options.put(PRIVATE_FIELDS,  true);
-		options.put(PROTECTED_FIELDS,  false);
-		options.put(PACKAGE_PRIVATE_FIELDS,  false);
-		options.put(PUBLIC_FIELDS,  false);
-		
-		options.put(PRIVATE_METHODS,  true);
-		options.put(PROTECTED_METHODS,  false);
-		options.put(PACKAGE_PRIVATE_METHODS,  false);
-		options.put(PUBLIC_METHODS,  false);
-		
-		options.put(PRIVATE_CLASSES,  true);
-		options.put(PROTECTED_CLASSES,  false);
-		options.put(PACKAGE_PRIVATE_CLASSES,  false);
-		options.put(PUBLIC_CLASSES,  false);
-		
+		options.put(PRIVATE_FIELDS, true);
+		options.put(PROTECTED_FIELDS, false);
+		options.put(PACKAGE_PRIVATE_FIELDS, false);
+		options.put(PUBLIC_FIELDS, false);
+
+		options.put(PRIVATE_METHODS, true);
+		options.put(PROTECTED_METHODS, false);
+		options.put(PACKAGE_PRIVATE_METHODS, false);
+		options.put(PUBLIC_METHODS, false);
+
+		options.put(PRIVATE_CLASSES, true);
+		options.put(PROTECTED_CLASSES, false);
+		options.put(PACKAGE_PRIVATE_CLASSES, false);
+		options.put(PUBLIC_CLASSES, false);
+
 		options.put(REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
 		options.put(REMOVE_TEST_CODE, false);
 
 		return Collections.unmodifiableMap(options);
 	}
-	
-	
-
 }

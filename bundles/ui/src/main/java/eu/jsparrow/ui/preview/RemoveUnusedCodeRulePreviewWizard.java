@@ -35,6 +35,12 @@ import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
+/**
+ * A wizard for displaying the changes made by rules that remove unused fields, methods, or classes. 
+ * 
+ * @since 4.8.0
+ *
+ */
 public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(RemoveUnusedCodeRulePreviewWizard.class);

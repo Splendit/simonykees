@@ -3,10 +3,13 @@ package eu.jsparrow.core.visitor.unused;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -15,26 +18,37 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
+import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Finds the references of a field declaration in a compilation unit. Determines
+ * whether the reference is a safely removable reassignment.
+ * 
+ * @since 4.8.0
+ *
+ */
 public class ReferencesVisitor extends ASTVisitor {
 
-	private VariableDeclarationFragment originalFragment;
+	private static final Logger logger = LoggerFactory.getLogger(ReferencesVisitor.class);
+
 	private AbstractTypeDeclaration originalTypeDeclaration;
 	private Map<String, Boolean> options;
 	private String originalIdentifier;
 
 	private boolean activeReferenceFound = false;
+	private boolean unresolvedReferenceFound = false;
 	private List<ExpressionStatement> reassignments = new ArrayList<>();
 	private ITypeBinding originalType;
 
 	public ReferencesVisitor(VariableDeclarationFragment originalFragment,
 			AbstractTypeDeclaration originalTypeDeclaration,
 			Map<String, Boolean> options) {
-		this.originalFragment = originalFragment;
 		this.originalTypeDeclaration = originalTypeDeclaration;
 		this.options = options;
 		SimpleName name = originalFragment.getName();
@@ -43,13 +57,20 @@ public class ReferencesVisitor extends ASTVisitor {
 	}
 
 	@Override
-	public boolean visit(SimpleName simpleName) {
-		/*
-		 * TODO:check if the RHS of the field assignment is not causing
-		 * undesirable side effects.
-		 */
+	public boolean preVisit2(ASTNode node) {
+		return !activeReferenceFound && !unresolvedReferenceFound;
+	}
 
-		boolean isReference = isTargetFieldReference(simpleName);
+	@Override
+	public boolean visit(SimpleName simpleName) {
+		boolean isReference;
+		try {
+			isReference = isTargetFieldReference(simpleName);
+		} catch (UnresolvedTypeBindingException e) {
+			logger.debug(e.getMessage(), e);
+			unresolvedReferenceFound = true;
+			return false;
+		}
 		if (!isReference) {
 			return false;
 		}
@@ -60,47 +81,70 @@ public class ReferencesVisitor extends ASTVisitor {
 		}
 		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) simpleName.getParent();
-			if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-				ExpressionStatement statement = (ExpressionStatement) assignment.getParent();
-				reassignments.add(statement);
+			Optional<ExpressionStatement> reassignment = isSafelyRemovable(assignment);
+			reassignment.ifPresent(reassignments::add);
+			if (reassignment.isPresent()) {
+				return false;
 			}
 
-			return false;
 		} else if (locationInParent == FieldAccess.NAME_PROPERTY) {
 			FieldAccess fieldAccess = (FieldAccess) simpleName.getParent();
-			if (fieldAccess.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-				Assignment assignment = (Assignment) fieldAccess.getParent();
-				if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-					ExpressionStatement statement = (ExpressionStatement) assignment.getParent();
-					reassignments.add(statement);
-					return false;
-				}
-
+			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(fieldAccess);
+			reassignment.ifPresent(reassignments::add);
+			if (reassignment.isPresent()) {
+				return false;
 			}
 		} else if (locationInParent == QualifiedName.NAME_PROPERTY) {
 			QualifiedName qualifiedName = (QualifiedName) simpleName.getParent();
-			if (qualifiedName.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-				Assignment assignment = (Assignment) qualifiedName.getParent();
-				if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-					ExpressionStatement statement = (ExpressionStatement) assignment.getParent();
-					reassignments.add(statement);
-					return false;
-				}
+			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(qualifiedName);
+			reassignment.ifPresent(reassignments::add);
+			if (reassignment.isPresent()) {
+				return false;
 			}
+
 		}
 
 		activeReferenceFound = true;
-
 		return true;
 	}
 
-	private boolean isTargetFieldReference(SimpleName simpleName) {
+	private Optional<ExpressionStatement> isSafelyRemovableReassignment(Expression expression) {
+		if (expression.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+			Assignment assignment = (Assignment) expression.getParent();
+			return isSafelyRemovable(assignment);
+		}
+		return Optional.empty();
+	}
+
+	private Optional<ExpressionStatement> isSafelyRemovable(Assignment assignment) {
+		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			return Optional.empty();
+		}
+		Expression rightHandSide = assignment.getRightHandSide();
+
+		ExpressionStatement expressionStatement = (ExpressionStatement) assignment.getParent();
+		boolean ignoreSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
+		if (ignoreSideEffects) {
+			return Optional.of(expressionStatement);
+		}
+
+		boolean safelyRemovable = ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(rightHandSide);
+		if (safelyRemovable) {
+			return Optional.of(expressionStatement);
+		}
+		return Optional.empty();
+	}
+
+	private boolean isTargetFieldReference(SimpleName simpleName) throws UnresolvedTypeBindingException {
 		String identifier = simpleName.getIdentifier();
 		if (!identifier.equals(originalIdentifier)) {
 			return false;
 		}
 
 		IBinding binding = simpleName.resolveBinding();
+		if (binding == null) {
+			throw new UnresolvedTypeBindingException("The binding of the reference candidate cannot be resolved."); //$NON-NLS-1$
+		}
 		int kind = binding.getKind();
 		if (kind != IBinding.VARIABLE) {
 			return false;
@@ -111,11 +155,19 @@ public class ReferencesVisitor extends ASTVisitor {
 			return false;
 		}
 		ITypeBinding declaringClass = variableBinding.getDeclaringClass();
-		return ClassRelationUtil.compareITypeBinding(declaringClass, originalType);
+		if (declaringClass == null) {
+			throw new UnresolvedTypeBindingException("The declaring class of the reference candidate cannot be found."); //$NON-NLS-1$
+		}
+
+		return ClassRelationUtil.isContentOfType(declaringClass, originalType.getQualifiedName());
 	}
 
 	public boolean hasActiveReference() {
 		return activeReferenceFound;
+	}
+
+	public boolean hasUnresolvedReference() {
+		return unresolvedReferenceFound;
 	}
 
 	public List<ExpressionStatement> getReassignments() {

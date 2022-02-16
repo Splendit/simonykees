@@ -10,6 +10,15 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 
+/**
+ * Wraps information (the declaration fragment, the compilation unit, the access
+ * modifier, and the reassignments within the compilation unit) about
+ * non-private fields that are not used in the compilation unit where they are
+ * declared.
+ * 
+ * @since 4.8.0
+ *
+ */
 public class NonPrivateUnusedFieldCandidate {
 
 	private VariableDeclarationFragment fragment;
@@ -67,6 +76,4 @@ public class NonPrivateUnusedFieldCandidate {
 				&& Objects.equals(internalReassignments, other.internalReassignments)
 				&& Objects.equals(typeDeclaration, other.typeDeclaration);
 	}
-
-	
 }

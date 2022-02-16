@@ -18,6 +18,15 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 
+/**
+ * Wraps information about unused fields. E.g., the declaration fragment,
+ * reassignments in the same compilation unit, reassignments in external
+ * compilation units, etc. Additionally, it maintains the {@link TextEditGroup}s
+ * related to the field.
+ * 
+ * @since 4.8.0
+ *
+ */
 public class UnusedFieldWrapper {
 
 	private VariableDeclarationFragment fragment;
@@ -43,7 +52,7 @@ public class UnusedFieldWrapper {
 		this.accessModifier = modifier;
 		SimpleName name = fragment.getName();
 		this.fieldName = name.getIdentifier();
-		
+
 	}
 
 	public VariableDeclarationFragment getFragment() {
@@ -71,7 +80,7 @@ public class UnusedFieldWrapper {
 	}
 
 	public String getFieldName() {
-		return this.fieldName; 
+		return this.fieldName;
 	}
 
 	public String getClassDeclarationName() {
@@ -130,5 +139,4 @@ public class UnusedFieldWrapper {
 				"UnusedFieldWrapper [fieldName=%s, fragment=%s, accessModifier=%s, declarationPath=%s, classDeclarationName=%s]", //$NON-NLS-1$
 				fieldName, fragment, accessModifier, declarationPath, classDeclarationName);
 	}
-	
 }

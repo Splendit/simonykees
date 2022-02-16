@@ -28,6 +28,13 @@ import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 import eu.jsparrow.ui.wizard.semiautomatic.RemoveUnusedCodeWizard;
 
+/**
+ * Collects the selected Java sources and starts the configuration wizard for
+ * removing unused code.
+ * 
+ * @since 4.8.0
+ *
+ */
 public class RemoveUnusedCodeWizardHandler extends AbstractRuleWizardHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(RemoveUnusedCodeWizardHandler.class);
@@ -40,8 +47,8 @@ public class RemoveUnusedCodeWizardHandler extends AbstractRuleWizardHandler {
 		if (Activator.isRunning()) {
 			openAlreadyRunningDialog();
 			return null;
-		} 
-		
+		}
+
 		Activator.setRunning(true);
 		final Shell shell = HandlerUtil.getActiveShell(event);
 		if (!licenseUtil.checkAtStartUp(shell)) {

@@ -25,6 +25,12 @@ import org.eclipse.swt.widgets.TableItem;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 
+/**
+ * A wizard page for configuring the rules that remove unused code. 
+ * 
+ * @since 4.8.0
+ *
+ */
 @SuppressWarnings("restriction")
 public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 
@@ -58,10 +64,6 @@ public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 		
 		createClassMemberChoosingPart(composite);
 		createSearchScopeChoosingPart(composite);
-		createSingleCheckBoxSection(composite, 
-				Messages.RemoveUnusedCodeWizardPage_removeUnusedTestsSectionTitle,
-				Messages.RemoveUnusedCodeWizardPage_removeUnusedTestsDescription,
-				controller::removeTestCodeSelectionChanged, false);
 		createSingleCheckBoxSection(composite, 
 				Messages.RemoveUnusedCodeWizardPage_removeInitializersSectionTitle,
 				Messages.RemoveUnusedCodeWizardPage_removeInitializersSectionDescription,
@@ -159,11 +161,10 @@ public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 	}
 
 	private void updateView() {
+		fSelectionStatus = new StatusInfo();
 		if (model.getClassMemberTypes()
 			.isEmpty()) {
 			((StatusInfo) fSelectionStatus).setError(Messages.RenameFieldsRuleWizardPage_warning_noFieldSelected);
-		} else {
-			fSelectionStatus = new StatusInfo();
 		}
 
 		// status of all used components
