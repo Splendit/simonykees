@@ -25,6 +25,12 @@ import org.eclipse.swt.widgets.TableItem;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 
+/**
+ * A wizard page for configuring the rules that remove unused code. 
+ * 
+ * @since 4.8.0
+ *
+ */
 @SuppressWarnings("restriction")
 public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 

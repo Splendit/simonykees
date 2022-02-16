@@ -25,6 +25,14 @@ import eu.jsparrow.core.visitor.utils.SearchScopeFactory;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
+/**
+ * An engine to search for unused fields. Uses
+ * {@link UnusedFieldsCandidatesVisitor} to analyze field declarations. Uses
+ * {@link FieldReferencesSearch} to find the references of fields in external
+ * files. Provides the results as a list of {@link UnusedFieldWrapper}s.
+ * 
+ * @since 4.8.0
+ */
 public class UnusedFieldsEngine {
 
 	private static final Logger logger = LoggerFactory.getLogger(UnusedFieldsEngine.class);

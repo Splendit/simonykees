@@ -14,6 +14,12 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
+/**
+ * Constructs the scope for the Eclipse' search engine. We use it for finding
+ * references of a field in external compilation units.
+ * 
+ * @since 4.8.0
+ */
 public class SearchScopeFactory {
 
 	private static final Logger logger = LoggerFactory.getLogger(SearchScopeFactory.class);

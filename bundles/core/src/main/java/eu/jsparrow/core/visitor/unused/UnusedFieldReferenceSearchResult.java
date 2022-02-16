@@ -3,6 +3,13 @@ package eu.jsparrow.core.visitor.unused;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Represents the results of searching for external references with the
+ * {@link FieldReferencesSearch}.
+ * 
+ * @since 4.8.0
+ *
+ */
 public class UnusedFieldReferenceSearchResult {
 
 	private boolean activeReferenceFound;

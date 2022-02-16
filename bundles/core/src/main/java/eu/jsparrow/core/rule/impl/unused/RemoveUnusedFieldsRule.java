@@ -24,6 +24,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import eu.jsparrow.core.visitor.unused.RemoveUnusedFieldsASTVisitor;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
+import eu.jsparrow.core.visitor.unused.UnusedFieldsEngine;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
@@ -32,6 +33,15 @@ import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Removes the provided list of unused fields ({@link UnusedFieldWrapper}). See
+ * {@link UnusedFieldsEngine} to search for unused fields.
+ * 
+ * @see RemoveUnusedFieldsASTVisitor
+ * 
+ * @since 4.8.0
+ *
+ */
 public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFieldsASTVisitor> {
 
 	private List<UnusedFieldWrapper> unusedFields;

@@ -36,9 +36,16 @@ import eu.jsparrow.core.rule.impl.unused.RemoveUnusedFieldsRule;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
+/**
+ * Represents a page in the preview wizard that displays changes made by rules
+ * that remove unused code.
+ * In case of removing unused fields, one page groups the changes of fields with the same access modifier. 
+ * 
+ * @since 4.8.0
+ *
+ */
 public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 
-	
 	private Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes;
 
 	private CheckboxTreeViewer viewer;
@@ -60,7 +67,7 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 		CustomTextEditChangePreviewViewer.setEnableDiffView(enabledDiffView);
 		this.changes = changes;
 
-		setTitle("Remove unused " + getModifierAsString() + " fields");  //$NON-NLS-1$//$NON-NLS-2$
+		setTitle("Remove unused " + getModifierAsString() + " fields"); //$NON-NLS-1$//$NON-NLS-2$
 		setDescription(rule1.getRuleDescription()
 			.getDescription());
 		this.originalDocuments = originalDocuments;
@@ -70,37 +77,42 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Creates {@link RemoveUnusedCodeDocumentChangeWrapper} for each {@link DocumentChange}.
-	 * First finds parent and then calls method to create children for that
-	 * parent.
+	 * Creates {@link RemoveUnusedCodeDocumentChangeWrapper} for each
+	 * {@link DocumentChange}. First finds parent and then calls method to
+	 * create children for that parent.
 	 */
 	private void convertChangesToDocumentChangeWrappers() {
 		changesWrapperList = new ArrayList<>();
-		changes.entrySet().stream().map(Map.Entry::getKey).forEach(unusedFieldWrapper -> {
-			Map<ICompilationUnit, DocumentChange> changesForField = changes.get(unusedFieldWrapper);
-			if (!changesForField.isEmpty()) {
-				DocumentChange parent = null;
-				ICompilationUnit parentICU = null;
-				for (Map.Entry<ICompilationUnit, DocumentChange> dcEntry : changesForField.entrySet()) {
-					ICompilationUnit iCompilationUnit = dcEntry.getKey();
-					if ((unusedFieldWrapper.getDeclarationPath()).equals(iCompilationUnit.getPath())) {
-						parent = changesForField.get(iCompilationUnit);
-						parentICU = iCompilationUnit;
+		changes.entrySet()
+			.stream()
+			.map(Map.Entry::getKey)
+			.forEach(unusedFieldWrapper -> {
+				Map<ICompilationUnit, DocumentChange> changesForField = changes.get(unusedFieldWrapper);
+				if (!changesForField.isEmpty()) {
+					DocumentChange parent = null;
+					ICompilationUnit parentICU = null;
+					for (Map.Entry<ICompilationUnit, DocumentChange> dcEntry : changesForField.entrySet()) {
+						ICompilationUnit iCompilationUnit = dcEntry.getKey();
+						if ((unusedFieldWrapper.getDeclarationPath()).equals(iCompilationUnit.getPath())) {
+							parent = changesForField.get(iCompilationUnit);
+							parentICU = iCompilationUnit;
+						}
+					}
+					if (null != parent) {
+						createDocumentChangeWrapperChildren(unusedFieldWrapper,
+								this.originalDocuments.get(parentICU.getPath()),
+								changesForField, parent);
 					}
 				}
-				if (null != parent) {
-					createDocumentChangeWrapperChildren(unusedFieldWrapper, this.originalDocuments.get(parentICU.getPath()),
-							changesForField, parent);
-				}
-			}
-		});
+			});
 		if (!changesWrapperList.isEmpty()) {
 			this.selectedDocWrapper = changesWrapperList.get(0);
 		}
 	}
 
 	/**
-	 * Creates children for {@link RemoveUnusedCodeDocumentChangeWrapper} parent.
+	 * Creates children for {@link RemoveUnusedCodeDocumentChangeWrapper}
+	 * parent.
 	 * 
 	 * @param fieldData
 	 * @param changesForField
@@ -108,14 +120,18 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 	 */
 	private void createDocumentChangeWrapperChildren(UnusedFieldWrapper fieldData, Document originalDocument,
 			Map<ICompilationUnit, DocumentChange> changesForField, DocumentChange parent) {
-		RemoveUnusedCodeDocumentChangeWrapper dcw = new RemoveUnusedCodeDocumentChangeWrapper(parent, null, originalDocument, fieldData); 
-		changesForField.entrySet().stream().map(Map.Entry::getKey).forEach(iCompilationUnit -> {
-			if (!(fieldData.getDeclarationPath()).equals(iCompilationUnit.getPath())) {
-				DocumentChange document = changesForField.get(iCompilationUnit);
-				dcw.addChild(document, iCompilationUnit.getElementName(),
-						this.originalDocuments.get(iCompilationUnit.getPath()));
-			}
-		});
+		RemoveUnusedCodeDocumentChangeWrapper dcw = new RemoveUnusedCodeDocumentChangeWrapper(parent, null,
+				originalDocument, fieldData);
+		changesForField.entrySet()
+			.stream()
+			.map(Map.Entry::getKey)
+			.forEach(iCompilationUnit -> {
+				if (!(fieldData.getDeclarationPath()).equals(iCompilationUnit.getPath())) {
+					DocumentChange document = changesForField.get(iCompilationUnit);
+					dcw.addChild(document, iCompilationUnit.getElementName(),
+							this.originalDocuments.get(iCompilationUnit.getPath()));
+				}
+			});
 
 		changesWrapperList.add(dcw);
 	}
@@ -141,9 +157,11 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 		createPreviewViewer(sashForm);
 
 		if (!changesWrapperList.isEmpty()) {
-			ChangeElementContentProvider changeElementContentProvider = (ChangeElementContentProvider) viewer.getContentProvider();
+			ChangeElementContentProvider changeElementContentProvider = (ChangeElementContentProvider) viewer
+				.getContentProvider();
 			Object viewerInput = viewer.getInput();
-			this.selectedDocWrapper = (RemoveUnusedCodeDocumentChangeWrapper) changeElementContentProvider.getElements(viewerInput)[0];
+			this.selectedDocWrapper = (RemoveUnusedCodeDocumentChangeWrapper) changeElementContentProvider
+				.getElements(viewerInput)[0];
 		}
 
 		/*
@@ -179,11 +197,12 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 		viewer.setComparator(new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
-				
+
 				Comparator<RemoveUnusedCodeDocumentChangeWrapper> comparator = Comparator
-						.comparing(RemoveUnusedCodeDocumentChangeWrapper::getCompilationUnitName)
-						.thenComparing(RemoveUnusedCodeDocumentChangeWrapper::getIdentifier);
-				return comparator.compare((RemoveUnusedCodeDocumentChangeWrapper)e1, (RemoveUnusedCodeDocumentChangeWrapper)e2);
+					.comparing(RemoveUnusedCodeDocumentChangeWrapper::getCompilationUnitName)
+					.thenComparing(RemoveUnusedCodeDocumentChangeWrapper::getIdentifier);
+				return comparator.compare((RemoveUnusedCodeDocumentChangeWrapper) e1,
+						(RemoveUnusedCodeDocumentChangeWrapper) e2);
 			}
 		});
 
@@ -193,7 +212,8 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 	private void createSelectionChangedListener(SelectionChangedEvent event) {
 		IStructuredSelection sel = (IStructuredSelection) event.getSelection();
 		if (sel.size() == 1) {
-			RemoveUnusedCodeDocumentChangeWrapper newSelection = (RemoveUnusedCodeDocumentChangeWrapper) sel.getFirstElement();
+			RemoveUnusedCodeDocumentChangeWrapper newSelection = (RemoveUnusedCodeDocumentChangeWrapper) sel
+				.getFirstElement();
 			if (!newSelection.equals(selectedDocWrapper)) {
 				selectedDocWrapper = newSelection;
 				populatePreviewViewer();
@@ -202,7 +222,8 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 	}
 
 	private void createCheckListener(CheckStateChangedEvent event) {
-		RemoveUnusedCodeDocumentChangeWrapper selectedWrapper = (RemoveUnusedCodeDocumentChangeWrapper) event.getElement();
+		RemoveUnusedCodeDocumentChangeWrapper selectedWrapper = (RemoveUnusedCodeDocumentChangeWrapper) event
+			.getElement();
 		boolean checked = event.getChecked();
 		if (null == selectedWrapper.getParent()) {
 			viewer.setSubtreeChecked(selectedWrapper, checked);
@@ -243,7 +264,8 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 	 * Fills {@link CheckboxTreeViewer} component with data.
 	 */
 	private void populateFileView() {
-		RemoveUnusedCodeDocumentChangeWrapper[] changesArray = changesWrapperList.toArray(new RemoveUnusedCodeDocumentChangeWrapper[] {});
+		RemoveUnusedCodeDocumentChangeWrapper[] changesArray = changesWrapperList
+			.toArray(new RemoveUnusedCodeDocumentChangeWrapper[] {});
 		viewer.setInput(changesArray);
 		Arrays.asList(changesArray)
 			.stream()

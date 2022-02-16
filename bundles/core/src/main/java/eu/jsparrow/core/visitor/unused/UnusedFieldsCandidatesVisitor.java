@@ -27,6 +27,12 @@ import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Analyzes field declarations. Verifies if they are used within the compilation
+ * unit. Reassignments with no side effects are not counted as active usages.
+ * 
+ * @since 4.8.0
+ */
 public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 
 	private CompilationUnit compilationUnit;
@@ -35,6 +41,11 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 	private List<UnusedFieldWrapper> unusedPrivateFields = new ArrayList<>();
 	private List<NonPrivateUnusedFieldCandidate> nonPrivateCandidates = new ArrayList<>();
 
+	/**
+	 * 
+	 * @param options
+	 *            expects the values defined in {@link Constants} as keys.
+	 */
 	public UnusedFieldsCandidatesVisitor(Map<String, Boolean> options) {
 		this.options = options;
 	}
@@ -70,24 +81,14 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 				AbstractTypeDeclaration.class);
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(),
 				VariableDeclarationFragment.class);
-		int modifierFlags = fieldDeclaration.getModifiers();
+
 		for (VariableDeclarationFragment fragment : fragments) {
 			boolean ignoreSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
 			if (ignoreSideEffects || isSafelyRemovable(fragment)) {
 				ReferencesVisitor referencesVisitor = new ReferencesVisitor(fragment, typeDeclaration, options);
 				this.compilationUnit.accept(referencesVisitor);
 				if (!referencesVisitor.hasActiveReference() && !referencesVisitor.hasUnresolvedReference()) {
-					List<ExpressionStatement> reassignments = referencesVisitor.getReassignments();
-					if (Modifier.isPrivate(modifierFlags)) {
-						UnusedFieldWrapper unusedField = new UnusedFieldWrapper(compilationUnit,
-								JavaAccessModifier.PRIVATE, fragment, reassignments, Collections.emptyList());
-						unusedPrivateFields.add(unusedField);
-					} else {
-						JavaAccessModifier accessModifier = findAccessModifier(fieldDeclaration);
-						NonPrivateUnusedFieldCandidate candidate = new NonPrivateUnusedFieldCandidate(fragment,
-								compilationUnit, typeDeclaration, accessModifier, reassignments);
-						nonPrivateCandidates.add(candidate);
-					}
+					markAsUnusedInternally(fieldDeclaration, typeDeclaration, fragment, referencesVisitor);
 					/*
 					 * removing multiple fragments from the same field
 					 * declaration may result to incorrect changes.
@@ -98,6 +99,23 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 			}
 		}
 		return true;
+	}
+
+	private void markAsUnusedInternally(FieldDeclaration fieldDeclaration,
+			AbstractTypeDeclaration typeDeclaration, VariableDeclarationFragment fragment,
+			ReferencesVisitor referencesVisitor) {
+		List<ExpressionStatement> reassignments = referencesVisitor.getReassignments();
+		int modifierFlags = fieldDeclaration.getModifiers();
+		if (Modifier.isPrivate(modifierFlags)) {
+			UnusedFieldWrapper unusedField = new UnusedFieldWrapper(compilationUnit,
+					JavaAccessModifier.PRIVATE, fragment, reassignments, Collections.emptyList());
+			unusedPrivateFields.add(unusedField);
+		} else {
+			JavaAccessModifier accessModifier = findAccessModifier(fieldDeclaration);
+			NonPrivateUnusedFieldCandidate candidate = new NonPrivateUnusedFieldCandidate(fragment,
+					compilationUnit, typeDeclaration, accessModifier, reassignments);
+			nonPrivateCandidates.add(candidate);
+		}
 	}
 
 	private boolean isSafelyRemovable(VariableDeclarationFragment fragment) {

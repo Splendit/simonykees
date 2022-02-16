@@ -18,6 +18,13 @@ import org.eclipse.text.edits.TextEditGroup;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Deletes the fields represented by the list of {@link UnusedFieldWrapper}s.
+ * Uses node positions for matching relevant nodes with the provided ones.
+ * 
+ * @since 4.8.0
+ *
+ */
 public class RemoveUnusedFieldsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private List<UnusedFieldWrapper> unusedFields;
@@ -62,7 +69,7 @@ public class RemoveUnusedFieldsASTVisitor extends AbstractASTRewriteASTVisitor {
 				VariableDeclarationFragment.class);
 		for (VariableDeclarationFragment declaratingFragment : fragments) {
 			isDesignatedForRemoval(declaratingFragment).ifPresent(unusedField -> {
-				TextEditGroup editGroup = unusedField.getTextEditGroup((ICompilationUnit) this.getCompilationUnit()
+				TextEditGroup editGroup = unusedField.getTextEditGroup((ICompilationUnit) getCompilationUnit()
 					.getJavaElement());
 				if (fragments.size() == 1) {
 					astRewrite.remove(fieldDeclaration, editGroup);

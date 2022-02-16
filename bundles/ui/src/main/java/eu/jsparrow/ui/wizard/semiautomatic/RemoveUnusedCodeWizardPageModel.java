@@ -14,6 +14,18 @@ import java.util.stream.Collectors;
 import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.ui.wizard.IValueChangeListener;
 
+/**
+ * The configuration model for removing used code. Let's user choose: <br/>
+ * <ul>
+ * <li>class members they want to remove by the access modifier</li>
+ * <li>the scope to search references for</li>
+ * <li>whether to remove initializers that may potentially have side effects
+ * </li>
+ * </ul>
+ * 
+ * @since 4.8.0
+ *
+ */
 public class RemoveUnusedCodeWizardPageModel {
 
 	Set<IValueChangeListener> listeners = new HashSet<>();

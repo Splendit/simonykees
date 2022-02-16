@@ -6,6 +6,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 
+/**
+ * Holds information about reassignments of a field in a compilation unit.
+ * 
+ * @since 4.8.0
+ */
 public class UnusedExternalReferences {
 
 	private CompilationUnit compilationUnit;

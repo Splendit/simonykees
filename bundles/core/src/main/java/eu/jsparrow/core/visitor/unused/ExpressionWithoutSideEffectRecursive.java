@@ -24,6 +24,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * Another example for a side effect is a change in the file system by calling a
  * method.
  * 
+ * @since 4.8.0
  */
 public class ExpressionWithoutSideEffectRecursive {
 
@@ -52,8 +53,6 @@ public class ExpressionWithoutSideEffectRecursive {
 			return isArrayCreationWithoutSideEffect((ArrayCreation) expression);
 		}
 		if (expressionNodeType == ASTNode.ARRAY_INITIALIZER) {
-			// to handle cases like the following:
-			// private int[] unusedField = {};
 			return isArrayInitializerWithoutSideEffect((ArrayInitializer) expression);
 		}
 		if (expressionNodeType == ASTNode.ARRAY_ACCESS) {

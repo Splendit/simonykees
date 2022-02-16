@@ -26,6 +26,13 @@ import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
 import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Finds the references of a field declaration in a compilation unit. Determines
+ * whether the reference is a safely removable reassignment.
+ * 
+ * @since 4.8.0
+ *
+ */
 public class ReferencesVisitor extends ASTVisitor {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReferencesVisitor.class);

@@ -1,5 +1,11 @@
 package eu.jsparrow.ui.wizard.semiautomatic;
 
+/**
+ * Some constants for setting up the configuration for removing unused code.
+ * 
+ * @since 4.8.0
+ *
+ */
 @SuppressWarnings("nls")
 public class RemoveUnusedCodeWizardPageConstants {
 
@@ -23,5 +29,4 @@ public class RemoveUnusedCodeWizardPageConstants {
 		 * Hide the default constructor.
 		 */
 	}
-
 }

@@ -8,8 +8,15 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 
+/**
+ * A wrapper class for storing the relation between document changes and the
+ * rules for removing unused code.
+ * 
+ * @since 4.8.0
+ *
+ */
 public class RemoveUnusedCodeDocumentChangeWrapper {
-	
+
 	private DocumentChange documentChange;
 	private boolean isParent;
 	private RemoveUnusedCodeDocumentChangeWrapper parent;
@@ -19,7 +26,8 @@ public class RemoveUnusedCodeDocumentChangeWrapper {
 	private UnusedFieldWrapper fieldData;
 	private Document originalDocument;
 
-	public RemoveUnusedCodeDocumentChangeWrapper(DocumentChange documentChange, RemoveUnusedCodeDocumentChangeWrapper parent, Document originalDocument, UnusedFieldWrapper fieldData) {
+	public RemoveUnusedCodeDocumentChangeWrapper(DocumentChange documentChange,
+			RemoveUnusedCodeDocumentChangeWrapper parent, Document originalDocument, UnusedFieldWrapper fieldData) {
 		this.documentChange = documentChange;
 		this.parent = parent;
 		this.isParent = null == parent;
@@ -29,7 +37,8 @@ public class RemoveUnusedCodeDocumentChangeWrapper {
 		this.originalDocument = originalDocument;
 	}
 
-	private RemoveUnusedCodeDocumentChangeWrapper(DocumentChange documentChange, RemoveUnusedCodeDocumentChangeWrapper parent, String identifier, 
+	private RemoveUnusedCodeDocumentChangeWrapper(DocumentChange documentChange,
+			RemoveUnusedCodeDocumentChangeWrapper parent, String identifier,
 			String compilationUnitName, Document compilationUnitSource, UnusedFieldWrapper fieldData) {
 		this.documentChange = documentChange;
 		this.parent = parent;
@@ -49,7 +58,7 @@ public class RemoveUnusedCodeDocumentChangeWrapper {
 	}
 
 	public void addChild(DocumentChange child, String compilationUnitName, Document document) {
-		this.children.add(new RemoveUnusedCodeDocumentChangeWrapper(child, this, this.identifier, 
+		this.children.add(new RemoveUnusedCodeDocumentChangeWrapper(child, this, this.identifier,
 				compilationUnitName, document, this.fieldData));
 	}
 
@@ -68,7 +77,7 @@ public class RemoveUnusedCodeDocumentChangeWrapper {
 	public String getCompilationUnitName() {
 		return compilationUnitName;
 	}
-	
+
 	public Document getOriginalDocument() {
 		return this.originalDocument;
 	}

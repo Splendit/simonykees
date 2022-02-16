@@ -17,6 +17,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * Analyzes the type binding of a class instance creation or the method binding
  * of a method invocation to find out whether side effects can be excluded.
  * 
+ * @since 4.8.0
  */
 @SuppressWarnings("nls")
 public class BindingWithoutSideEffect {
