@@ -1,6 +1,6 @@
 package eu.jsparrow.core.visitor.unused;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -60,7 +61,6 @@ public class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFi
 		defaultFixture.addImport(java.util.GregorianCalendar.class.getName());
 		defaultFixture.addImport(java.time.Instant.class.getName());
 
-
 		String originalCode = String.format("" +
 				"	%s\n" +
 				"	private Object unusedField;\n" +
@@ -84,5 +84,26 @@ public class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFi
 			.trim();
 		assertEquals(reAssignmentStatement, actualRemovedAssignment);
 
+	}
+
+	@Test
+	void testReAssignmentNotInBlock_shouldNotBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-fields", true);
+		options.put("remove-initializers-side-effects", true);
+		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);
+
+		String originalCode = "" +
+				"	private int x = 0;\n" +
+				"	void assignmentNotInBlock() {\n" +
+				"		boolean condition = true;\n" +
+				"		if (condition) x = 1;\n" +
+				"	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, originalCode);
+		defaultFixture.accept(visitor);
+
+		List<UnusedFieldWrapper> removedUnusedFields = visitor.getUnusedPrivateFields();
+		assertTrue(removedUnusedFields.isEmpty());
 	}
 }

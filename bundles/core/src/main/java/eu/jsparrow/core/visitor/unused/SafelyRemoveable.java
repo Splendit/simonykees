@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -22,18 +23,23 @@ public class SafelyRemoveable {
 		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return Optional.empty();
 		}
-		Expression rightHandSide = assignment.getRightHandSide();
 
 		ExpressionStatement expressionStatement = (ExpressionStatement) assignment.getParent();
-		boolean ignoreSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
-		if (ignoreSideEffects) {
+		if (expressionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return Optional.empty();
+		}
+
+		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
+		if (removeInitializersSideEffects) {
 			return Optional.of(expressionStatement);
 		}
 
+		Expression rightHandSide = assignment.getRightHandSide();
 		boolean safelyRemovable = ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(rightHandSide);
 		if (safelyRemovable) {
 			return Optional.of(expressionStatement);
 		}
+		
 		return Optional.empty();
 	}
 
