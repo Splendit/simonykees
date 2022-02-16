@@ -1,6 +1,5 @@
 package eu.jsparrow.ui.wizard.impl;
 
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -132,7 +131,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				statisticsMetadata = prepareStatisticsMetadata();
+				statisticsMetadata = prepareStatisticsMetadata(javaProjects);
 
 				preRefactoring();
 				IStatus refactoringStatus = doRefactoring(monitor, refactoringPipeline);
@@ -165,16 +164,6 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		job.schedule();
 
 		return true;
-	}
-
-	private StandaloneStatisticsMetadata prepareStatisticsMetadata() {
-
-		String repoName = this.javaProjects.stream()
-			.map(IJavaProject::getElementName)
-			.collect(Collectors.joining(";")); //$NON-NLS-1$
-
-		return new StandaloneStatisticsMetadata(Instant.now()
-			.getEpochSecond(), "Splendit-Internal-Measurement", repoName); //$NON-NLS-1$
 	}
 
 	/**

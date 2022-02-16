@@ -71,7 +71,7 @@ public final class RefactoringUtil {
 								.equals(p.getElementName()))
 					.forEach(packageElement -> {
 						result.add(packageElement);
-						logger.debug("Subpackage found:" + packageElement.getElementName()); //$NON-NLS-1$
+						logger.debug("Subpackage found: {}", packageElement.getElementName()); //$NON-NLS-1$
 					});
 			} catch (JavaModelException e) {
 				logger.debug("Java Model Exception", e); //$NON-NLS-1$

@@ -1,16 +1,14 @@
 package eu.jsparrow.ui.handler;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -20,27 +18,26 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
-import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
+import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
-import eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizard;
+import eu.jsparrow.ui.wizard.semiautomatic.RemoveUnusedCodeWizard;
 
 /**
- * Handler for semi-automatic rename public fields rule
+ * Collects the selected Java sources and starts the configuration wizard for
+ * removing unused code.
  * 
- * @author Andreja Sambolec, Ardit Ymeri
- * @since 2.3.0
+ * @since 4.8.0
  *
  */
-public class RenameFieldsRuleWizardHandler extends AbstractRuleWizardHandler {
+public class RemoveUnusedCodeWizardHandler extends AbstractRuleWizardHandler {
 
-	private static final Logger logger = LoggerFactory.getLogger(RenameFieldsRuleWizardHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(RemoveUnusedCodeWizardHandler.class);
 
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
@@ -53,7 +50,6 @@ public class RenameFieldsRuleWizardHandler extends AbstractRuleWizardHandler {
 		}
 
 		Activator.setRunning(true);
-
 		final Shell shell = HandlerUtil.getActiveShell(event);
 		if (!licenseUtil.checkAtStartUp(shell)) {
 			Activator.setRunning(false);
@@ -70,7 +66,6 @@ public class RenameFieldsRuleWizardHandler extends AbstractRuleWizardHandler {
 					Messages.SelectRulesWizardHandler_user_getting_selected_resources_failed, e));
 			return null;
 		}
-
 		if (selectedJavaElements.isEmpty()) {
 			WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
 			logger.error(Messages.WizardMessageDialog_selectionDidNotContainAnyJavaFiles);
@@ -85,47 +80,16 @@ public class RenameFieldsRuleWizardHandler extends AbstractRuleWizardHandler {
 			return false;
 		}
 
-		Job job = new Job(Messages.RenameFieldsRuleWizardHandler_performFinish_jobName) {
+		Job job = new Job("Find dead code") { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				List<IJavaElement> selectedElements = selectedJavaElements.entrySet()
-					.iterator()
-					.next()
-					.getValue();
-
-				List<ICompilationUnit> iCompilationUnits = new ArrayList<>();
-
-				boolean transformed = getCompilationUnits(iCompilationUnits, selectedElements, monitor);
-				if (!transformed) {
-					return Status.CANCEL_STATUS;
-				}
-
-				List<ICompilationUnit> errorIcus = iCompilationUnits.stream()
-					.filter(RefactoringUtil::checkForSyntaxErrors)
-					.collect(Collectors.toList());
-
-				List<ICompilationUnit> errorFreeIcus = iCompilationUnits.stream()
-					.filter(icu -> !errorIcus.contains(icu))
-					.collect(Collectors.toList());
-
-				if (!errorIcus.isEmpty()) {
-					synchronizeWithUIShowCompilationErrorMessage(errorIcus, errorFreeIcus, ConfigureRenameFieldsRuleWizard::new);
-				} else if (!errorFreeIcus.isEmpty()) {
-					synchronizeWithUIShowRuleWizard(errorFreeIcus, ConfigureRenameFieldsRuleWizard::new);
-				} else {
-					logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found);
-					WizardMessageDialog.synchronizeWithUIShowInfo(new RefactoringException(
-							ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found,
-							ExceptionMessages.RefactoringPipeline_user_warn_no_compilation_units_found));
-				}
-
-				return Status.OK_STATUS;
+				Function<List<ICompilationUnit>, AbstractRuleWizard> wizardGenerator = RemoveUnusedCodeWizard::new;
+				return startRuleWizard(selectedJavaElements, monitor, wizardGenerator);
 			}
 		};
 
 		job.setUser(true);
 		job.schedule();
-
 		return true;
 	}
 }

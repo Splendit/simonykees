@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.CoreException;
@@ -17,7 +16,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.layout.GridData;
@@ -38,7 +36,6 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
-import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
@@ -53,9 +50,9 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  *         Webhofer
  * @since 0.9
  */
-public class SelectRulesWizardHandler extends AbstractHandler {
+public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 
-	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
+	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizardHandler.class);
 
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
@@ -63,84 +60,47 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
 		if (Activator.isRunning()) {
-			SimonykeesMessageDialog.openMessageDialog(Display.getDefault()
-				.getActiveShell(), Messages.SelectRulesWizardHandler_allready_running, MessageDialog.INFORMATION);
-		} else {
-			Activator.setRunning(true);
-
-			final Shell shell = HandlerUtil.getActiveShell(event);
-			if (!licenseUtil.checkAtStartUp(shell)) {
-				Activator.setRunning(false);
-				return null;
-			}
-
-			Map<IJavaProject, List<IJavaElement>> selectedJavaElements;
-			try {
-				selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
-			} catch (CoreException e) {
-				logger.error(e.getMessage(), e);
-				WizardMessageDialog.synchronizeWithUIShowError(new RefactoringException(
-						Messages.SelectRulesWizardHandler_getting_selected_resources_failed + e.getMessage(),
-						Messages.SelectRulesWizardHandler_user_getting_selected_resources_failed, e));
-				return null;
-			}
-			if (!selectedJavaElements.isEmpty()) {
-
-				Job job = new Job(Messages.ProgressMonitor_verifying_project_information) {
-
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-						RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
-
-						try {
-							List<ICompilationUnit> compilationUnits = new LinkedList<>();
-							for (Map.Entry<IJavaProject, List<IJavaElement>> entry : selectedJavaElements.entrySet()) {
-								SelectRulesWizard.collectICompilationUnits(compilationUnits, entry.getValue(),
-										monitor);
-							}
-							List<ICompilationUnit> containingErrorList = refactoringPipeline
-								.prepareRefactoring(compilationUnits, monitor);
-							if (monitor.isCanceled()) {
-								refactoringPipeline.clearStates();
-								Activator.setRunning(false);
-								return Status.CANCEL_STATUS;
-							} else if (null != containingErrorList && !containingErrorList.isEmpty()) {
-								synchronizeWithUIShowCompilationErrorMessage(containingErrorList,
-										refactoringPipeline, selectedJavaElements);
-							} else {
-								synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, selectedJavaElements);
-							}
-
-						} catch (RefactoringException e) {
-							logger.error(e.getMessage(), e);
-							WizardMessageDialog.synchronizeWithUIShowInfo(e);
-							return Status.CANCEL_STATUS;
-						} catch (JavaModelException jme) {
-							logger.error(jme.getMessage(), jme);
-							WizardMessageDialog.synchronizeWithUIShowInfo(new RefactoringException(
-									ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
-									ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed,
-									jme));
-							return Status.CANCEL_STATUS;
-						}
-
-						return Status.OK_STATUS;
-					}
-				};
-
-				job.setUser(true);
-				job.schedule();
-
-				return true;
-			} else {
-				WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
-				logger.error(Messages.WizardMessageDialog_selectionDidNotContainAnyJavaFiles);
-				Activator.setRunning(false);
-			}
-
+			super.openAlreadyRunningDialog();
+			return null;
 		}
 
-		return null;
+		Activator.setRunning(true);
+
+		final Shell shell = HandlerUtil.getActiveShell(event);
+		if (!licenseUtil.checkAtStartUp(shell)) {
+			Activator.setRunning(false);
+			return null;
+		}
+
+		Map<IJavaProject, List<IJavaElement>> selectedJavaElements;
+		try {
+			selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
+		} catch (CoreException e) {
+			logger.error(e.getMessage(), e);
+			WizardMessageDialog.synchronizeWithUIShowError(new RefactoringException(
+					Messages.SelectRulesWizardHandler_getting_selected_resources_failed + e.getMessage(),
+					Messages.SelectRulesWizardHandler_user_getting_selected_resources_failed, e));
+			return null;
+		}
+		if (selectedJavaElements.isEmpty()) {
+			WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
+			logger.error(Messages.WizardMessageDialog_selectionDidNotContainAnyJavaFiles);
+			Activator.setRunning(false);
+			return null;
+		}
+
+		Job job = new Job(Messages.ProgressMonitor_verifying_project_information) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
+				return startSelectRulesWizard(selectedJavaElements, monitor, refactoringPipeline);
+			}
+		};
+
+		job.setUser(true);
+		job.schedule();
+
+		return true;
 	}
 
 	/**
@@ -237,5 +197,42 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 					Activator.setRunning(false);
 				}
 			});
+	}
+	
+	private IStatus startSelectRulesWizard(Map<IJavaProject, List<IJavaElement>> selectedJavaElements,
+			IProgressMonitor monitor, RefactoringPipeline refactoringPipeline) {
+		try {
+			List<ICompilationUnit> compilationUnits = new LinkedList<>();
+			for (Map.Entry<IJavaProject, List<IJavaElement>> entry : selectedJavaElements.entrySet()) {
+				SelectRulesWizard.collectICompilationUnits(compilationUnits, entry.getValue(),
+						monitor);
+			}
+			List<ICompilationUnit> containingErrorList = refactoringPipeline
+				.prepareRefactoring(compilationUnits, monitor);
+			if (monitor.isCanceled()) {
+				refactoringPipeline.clearStates();
+				Activator.setRunning(false);
+				return Status.CANCEL_STATUS;
+			} else if (null != containingErrorList && !containingErrorList.isEmpty()) {
+				synchronizeWithUIShowCompilationErrorMessage(containingErrorList,
+						refactoringPipeline, selectedJavaElements);
+			} else {
+				synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, selectedJavaElements);
+			}
+
+		} catch (RefactoringException e) {
+			logger.error(e.getMessage(), e);
+			WizardMessageDialog.synchronizeWithUIShowInfo(e);
+			return Status.CANCEL_STATUS;
+		} catch (JavaModelException jme) {
+			logger.error(jme.getMessage(), jme);
+			WizardMessageDialog.synchronizeWithUIShowInfo(new RefactoringException(
+					ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+					ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed,
+					jme));
+			return Status.CANCEL_STATUS;
+		}
+
+		return Status.OK_STATUS;
 	}
 }
