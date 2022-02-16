@@ -89,7 +89,7 @@ public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		table.setLayoutData(gridData);
 		List<String> defaultChecked = model.getDefaultClassMemberTypes();
-		for (String fieldType : model.getClassMemberTypes()) {
+		for (String fieldType : model.getAllClassMemberTypes()) {
 			TableItem item = new TableItem(table, SWT.NONE);
 			item.setText(fieldType);
 			boolean checked = defaultChecked.contains(fieldType);
