@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.unused;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
@@ -98,6 +99,81 @@ public class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFi
 				"	void assignmentNotInBlock() {\n" +
 				"		boolean condition = true;\n" +
 				"		if (condition) x = 1;\n" +
+				"	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, originalCode);
+		defaultFixture.accept(visitor);
+
+		List<UnusedFieldWrapper> removedUnusedFields = visitor.getUnusedPrivateFields();
+		assertTrue(removedUnusedFields.isEmpty());
+	}
+
+	@Test
+	void testReAssignmentNotInExpressionStatement_shouldNotBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-fields", true);
+		options.put("remove-initializers-side-effects", true);
+		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);
+
+		String originalCode = "" +
+				"	private int x = 0;\n"
+				+ "	void assingnmentNotInExpressionStatement() {\n"
+				+ "		if((x = 0) == 0) {\n"
+				+ "			\n"
+				+ "		}\n"
+				+ "	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, originalCode);
+		defaultFixture.accept(visitor);
+
+		List<UnusedFieldWrapper> removedUnusedFields = visitor.getUnusedPrivateFields();
+		assertTrue(removedUnusedFields.isEmpty());
+	}
+
+	@Test
+	void testRemoveSideEffectsOfReAssignment_shouldBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-fields", true);
+		options.put("remove-initializers-side-effects", true);
+		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);
+
+		String originalCode = "" +
+				"	private int unusedField;\n" +
+				"	private int usedField;\n" +
+				"	void reAssignmentWithAssignment() {\n" +
+				"		unusedField = (usedField = 1);\n" +
+				"	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, originalCode);
+		defaultFixture.accept(visitor);
+
+		List<UnusedFieldWrapper> removedUnusedFields = visitor.getUnusedPrivateFields();
+		assertEquals(1, removedUnusedFields.size());
+		UnusedFieldWrapper unusedFieldWrapper = removedUnusedFields.get(0);
+		String removedUnusedFieldName = unusedFieldWrapper
+			.getFieldName();
+		assertEquals("unusedField", removedUnusedFieldName);
+		List<ExpressionStatement> unusedReassignments = unusedFieldWrapper.getUnusedReassignments();
+		assertEquals(1, unusedReassignments.size());
+		String actualRemovedAssignment = unusedReassignments.get(0)
+			.toString()
+			.trim();
+		String expectedRemovedAssignment = "unusedField=(usedField=1);";
+		assertEquals(expectedRemovedAssignment, actualRemovedAssignment);
+	}
+
+	@Test
+	void testSideEffectsOfReAssignmentNotRemoved_shouldNotBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-fields", true);
+		options.put("remove-initializers-side-effects", false);
+		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);
+
+		String originalCode = "" +
+				"	private int unusedField;\n" +
+				"	private int usedField;\n" +
+				"	void reAssignmentWithAssignment() {\n" +
+				"		unusedField = (usedField = 1);\n" +
 				"	}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, originalCode);
