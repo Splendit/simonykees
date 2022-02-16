@@ -135,8 +135,9 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 				child.setWorkRemaining(selectedJavaElements.size());
 				child.setTaskName(Messages.RemoveUnusedCodeWizard_collectingTheSelectedCompilationUnitsTaskName);
 
+				Map<String, Boolean> options = model.getOptionsMap();
 				List<UnusedFieldWrapper> unusedFields = engine.findUnusedFields(selectedJavaElements,
-						model.getOptionsMap(), child);
+						options, child);
 
 				if (unusedFields.isEmpty()) {
 					WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();

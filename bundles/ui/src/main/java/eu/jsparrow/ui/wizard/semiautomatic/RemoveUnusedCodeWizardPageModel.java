@@ -30,17 +30,17 @@ public class RemoveUnusedCodeWizardPageModel {
 
 	Set<IValueChangeListener> listeners = new HashSet<>();
 
-	private List<String> classMemberTypes;
+	private List<String> selectedClassMemberTypes;
 	private String searchScope;
 	private boolean removeTestCode;
 	private boolean removeInitializersWithSideEffects;
 
 	public RemoveUnusedCodeWizardPageModel() {
-		classMemberTypes = initClassMemberTypes();
+		selectedClassMemberTypes = getDefaultClassMemberTypes();
 		searchScope = PROJECT;
 	}
 
-	private List<String> initClassMemberTypes() {
+	public List<String> getAllClassMemberTypes() {
 		List<String> options = new ArrayList<>();
 		options.add(PRIVATE_FIELDS);
 		options.add(PROTECTED_FIELDS);
@@ -58,18 +58,18 @@ public class RemoveUnusedCodeWizardPageModel {
 	}
 
 	public List<String> getClassMemberTypes() {
-		return this.classMemberTypes;
+		return this.selectedClassMemberTypes;
 	}
 
 	public List<String> getDefaultClassMemberTypes() {
-		return this.initClassMemberTypes()
+		return this.getAllClassMemberTypes()
 			.stream()
 			.filter(name -> name.startsWith("private")) //$NON-NLS-1$
 			.collect(Collectors.toList());
 	}
 
 	public void setClassMemberTypes(List<String> classMemberTypes) {
-		this.classMemberTypes = Collections.unmodifiableList(classMemberTypes);
+		this.selectedClassMemberTypes = Collections.unmodifiableList(classMemberTypes);
 		notifyListeners();
 	}
 
@@ -97,10 +97,10 @@ public class RemoveUnusedCodeWizardPageModel {
 
 	public Map<String, Boolean> getOptionsMap() {
 		Map<String, Boolean> map = new HashMap<>();
-		boolean removePrivateFields = classMemberTypes.contains(PRIVATE_FIELDS);
-		boolean removeProtectedFields = classMemberTypes.contains(PROTECTED_FIELDS);
-		boolean removePublicFields = classMemberTypes.contains(PUBLIC_FIELDS);
-		boolean removePackagePrivateFields = classMemberTypes.contains(PACKAGE_PRIVATE_FIELDS);
+		boolean removePrivateFields = selectedClassMemberTypes.contains(PRIVATE_FIELDS);
+		boolean removeProtectedFields = selectedClassMemberTypes.contains(PROTECTED_FIELDS);
+		boolean removePublicFields = selectedClassMemberTypes.contains(PUBLIC_FIELDS);
+		boolean removePackagePrivateFields = selectedClassMemberTypes.contains(PACKAGE_PRIVATE_FIELDS);
 		map.put(Constants.PRIVATE_FIELDS, removePrivateFields);
 		map.put(Constants.PROTECTED_FIELDS, removeProtectedFields);
 		map.put(Constants.PUBLIC_FIELDS, removePublicFields);
