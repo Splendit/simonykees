@@ -118,6 +118,7 @@ import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.rule.impl.UseStringJoinRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
+import eu.jsparrow.core.rule.impl.unused.RemoveUnusedLocalVariablesRule;
 import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
 
@@ -189,6 +190,7 @@ public class RulesContainer {
 				new UseFilesBufferedReaderRule(), new UseFilesBufferedWriterRule(),
 				new UsePredefinedStandardCharsetRule(),
 				new UseFilesWriteStringRule(),
+				new RemoveUnusedLocalVariablesRule(),
 
 				/*
 				 * Security

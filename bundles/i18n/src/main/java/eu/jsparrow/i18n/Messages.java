@@ -439,6 +439,8 @@ public class Messages extends NLS {
 	public static String RemoveUnusedCodeWizardPage_searchScopeText;
 	public static String RemoveUnusedFieldsRule_description;
 	public static String RemoveUnusedFieldsRule_name;
+	public static String RemoveUnusedLocalVariablesRule_description;
+	public static String RemoveUnusedLocalVariablesRule_name;
 	public static String RemoveUnusedParameterRule_description;
 	public static String RemoveUnusedParameterRule_name;
 	public static String RenameFieldsRuleWizard_taskName_collectingUnits;
