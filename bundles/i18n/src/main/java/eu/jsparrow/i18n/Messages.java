@@ -420,6 +420,14 @@ public class Messages extends NLS {
 	public static String RemoveNullCheckBeforeInstanceofRule_name;
 	public static String RemoveRedundantTypeCastRule_description;
 	public static String RemoveRedundantTypeCastRule_name;
+	public static String RemoveUnusedCodeWizard_analysingFieldReferencesJobName;
+	public static String RemoveUnusedCodeWizard_calculateChangesJobName;
+	public static String RemoveUnusedCodeWizard_collectingTheSelectedCompilationUnitsTaskName;
+	public static String RemoveUnusedCodeWizard_endRefactoringInProjectMessage;
+	public static String RemoveUnusedCodeWizard_removeUnusedCodeWindowTitle;
+	public static String RemoveUnusedCodeWizard_rulesWithChangesForProjectMessage;
+	public static String RemoveUnusedCodeWizard_startRefactoringInProjectMessage;
+	public static String RemoveUnusedCodeWizard_summaryButtonName;
 	public static String RemoveUnusedCodeWizardPage_applyOn;
 	public static String RemoveUnusedCodeWizardPage_pageDescription;
 	public static String RemoveUnusedCodeWizardPage_pageName;
@@ -430,9 +438,7 @@ public class Messages extends NLS {
 	public static String RemoveUnusedCodeWizardPage_removeUnusedTestsSectionTitle;
 	public static String RemoveUnusedCodeWizardPage_searchScopeText;
 	public static String RemoveUnusedFieldsRule_description;
-
 	public static String RemoveUnusedFieldsRule_name;
-
 	public static String RemoveUnusedParameterRule_description;
 	public static String RemoveUnusedParameterRule_name;
 	public static String RenameFieldsRuleWizard_taskName_collectingUnits;

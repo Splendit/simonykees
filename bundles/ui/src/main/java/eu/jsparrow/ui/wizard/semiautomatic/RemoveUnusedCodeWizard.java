@@ -35,6 +35,7 @@ import eu.jsparrow.core.rule.impl.unused.RemoveUnusedFieldsRule;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 import eu.jsparrow.core.visitor.unused.UnusedFieldsEngine;
 import eu.jsparrow.i18n.ExceptionMessages;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RemoveUnusedCodeRulePreviewWizard;
@@ -78,7 +79,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	
 	@Override
 	public String getWindowTitle() {
-		return ExceptionMessages.RemoveUnusedCodeWizard_removeUnusedCodeWindowTitle;
+		return Messages.RemoveUnusedCodeWizard_removeUnusedCodeWindowTitle;
 	}
 
 	@Override
@@ -111,11 +112,11 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 				.getPrimaryMonitor()
 				.getBounds();
 		
-		String message = NLS.bind(ExceptionMessages.RemoveUnusedCodeWizard_startRefactoringInProjectMessage, this.getClass()
+		String message = NLS.bind(Messages.RemoveUnusedCodeWizard_startRefactoringInProjectMessage, this.getClass()
 				.getSimpleName(), selectedJavaProject.getElementName());
 			logger.info(message);
 		
-		Job job = new Job(ExceptionMessages.RemoveUnusedCodeWizard_analysingFieldReferencesJobName) {
+		Job job = new Job(Messages.RemoveUnusedCodeWizard_analysingFieldReferencesJobName) {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -127,7 +128,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 
 				SubMonitor child = subMonitor.split(70);
 				child.setWorkRemaining(selectedJavaElements.size());
-				child.setTaskName(ExceptionMessages.RemoveUnusedCodeWizard_collectingTheSelectedCompilationUnitsTaskName);
+				child.setTaskName(Messages.RemoveUnusedCodeWizard_collectingTheSelectedCompilationUnitsTaskName);
 
 				List<UnusedFieldWrapper> unusedFields = engine.findUnusedFields(selectedJavaElements, model.getOptionsMap(), child);
 				
@@ -192,7 +193,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	}
 	
 	private Job startRefactoringJob() {
-		Job refactorJob = new Job(ExceptionMessages.RemoveUnusedCodeWizard_calculateChangesJobName) {
+		Job refactorJob = new Job(Messages.RemoveUnusedCodeWizard_calculateChangesJobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -243,10 +244,10 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 			Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes) {
 
 		
-		String message = NLS.bind(ExceptionMessages.RemoveUnusedCodeWizard_endRefactoringInProjectMessage, this.getClass()
+		String message = NLS.bind(Messages.RemoveUnusedCodeWizard_endRefactoringInProjectMessage, this.getClass()
 			.getSimpleName(), selectedJavaProject.getElementName());
 		logger.info(message);
-		message = NLS.bind(ExceptionMessages.RemoveUnusedCodeWizard_rulesWithChangesForProjectMessage, selectedJavaProject.getElementName(),
+		message = NLS.bind(Messages.RemoveUnusedCodeWizard_rulesWithChangesForProjectMessage, selectedJavaProject.getElementName(),
 				rule.getRuleDescription()
 					.getName());
 		logger.info(message);
@@ -277,7 +278,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 
 					@Override
 					protected void createButtonsForButtonBar(Composite parent) {
-						createButton(parent, SUMMARY_BUTTON_ID, ExceptionMessages.RemoveUnusedCodeWizard_summaryButtonName, false);
+						createButton(parent, SUMMARY_BUTTON_ID, Messages.RemoveUnusedCodeWizard_summaryButtonName, false);
 						super.createButtonsForButtonBar(parent);
 					}
 
