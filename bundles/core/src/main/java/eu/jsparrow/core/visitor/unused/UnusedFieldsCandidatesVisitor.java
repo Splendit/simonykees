@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -83,8 +82,7 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 				VariableDeclarationFragment.class);
 
 		for (VariableDeclarationFragment fragment : fragments) {
-			boolean ignoreSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
-			if (ignoreSideEffects || isSafelyRemovable(fragment)) {
+			if (SafelyRemoveable.isSafelyRemovable(fragment, options)) {
 				ReferencesVisitor referencesVisitor = new ReferencesVisitor(fragment, typeDeclaration, options);
 				this.compilationUnit.accept(referencesVisitor);
 				if (!referencesVisitor.hasActiveReference() && !referencesVisitor.hasUnresolvedReference()) {
@@ -94,7 +92,6 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 					 * declaration may result to incorrect changes.
 					 */
 					return false;
-
 				}
 			}
 		}
@@ -116,11 +113,6 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 					compilationUnit, typeDeclaration, accessModifier, reassignments);
 			nonPrivateCandidates.add(candidate);
 		}
-	}
-
-	private boolean isSafelyRemovable(VariableDeclarationFragment fragment) {
-		Expression initializer = fragment.getInitializer();
-		return initializer == null || ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(initializer);
 	}
 
 	private boolean isSerialVersionUIDDeclaration(FieldDeclaration fieldDeclaration) {

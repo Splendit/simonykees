@@ -9,7 +9,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -20,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
-import eu.jsparrow.core.rule.impl.unused.Constants;
 
 /**
  * Finds the references of a field declaration in a compilation unit. Determines
@@ -78,7 +76,7 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 		StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
 		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) simpleName.getParent();
-			Optional<ExpressionStatement> reassignment = isSafelyRemovable(assignment);
+			Optional<ExpressionStatement> reassignment = SafelyRemoveable.isSafelyRemovable(assignment, options);
 			reassignment.ifPresent(reassignments::add);
 			if (reassignment.isPresent()) {
 				return false;
@@ -86,29 +84,6 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 		}
 		activeReferenceFound = true;
 		return true;
-	}
-
-	/**
-	 * The same code as in
-	 * {@link ReferencesVisitor#isSafelyRemovable(Assignment)}
-	 */
-	private Optional<ExpressionStatement> isSafelyRemovable(Assignment assignment) {
-		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return Optional.empty();
-		}
-		Expression rightHandSide = assignment.getRightHandSide();
-
-		ExpressionStatement expressionStatement = (ExpressionStatement) assignment.getParent();
-		boolean ignoreSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
-		if (ignoreSideEffects) {
-			return Optional.of(expressionStatement);
-		}
-
-		boolean safelyRemovable = ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(rightHandSide);
-		if (safelyRemovable) {
-			return Optional.of(expressionStatement);
-		}
-		return Optional.empty();
 	}
 
 	private boolean isTargetLocalVariableReference(SimpleName simpleName) throws UnresolvedTypeBindingException {
