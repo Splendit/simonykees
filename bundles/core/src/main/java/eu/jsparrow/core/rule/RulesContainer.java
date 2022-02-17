@@ -173,6 +173,7 @@ public class RulesContainer {
 				/*
 				 * Coding conventions
 				 */
+				new RemoveUnusedLocalVariablesRule(),
 				new TryWithResourceRule(), new MultiCatchRule(), new FunctionalInterfaceRule(),
 				new CollectionRemoveAllRule(), new ImmutableStaticFinalCollectionsRule(), new DiamondOperatorRule(),
 				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),
@@ -190,7 +191,6 @@ public class RulesContainer {
 				new UseFilesBufferedReaderRule(), new UseFilesBufferedWriterRule(),
 				new UsePredefinedStandardCharsetRule(),
 				new UseFilesWriteStringRule(),
-				new RemoveUnusedLocalVariablesRule(),
 
 				/*
 				 * Security
