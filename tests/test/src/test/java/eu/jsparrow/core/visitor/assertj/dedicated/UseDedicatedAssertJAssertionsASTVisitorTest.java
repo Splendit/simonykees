@@ -222,7 +222,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 	@Test
 	void visit_AssertthatIterableEqualsIsTrue_shouldTransform()
 			throws Exception {
-		
+
 		fixture.addImport(java.util.Arrays.class.getName());
 		String original = "" +
 				"		Iterable<String> iterable = Arrays.asList(\"str-1\", \"str-2\");\n"
@@ -230,7 +230,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		String expected = "" +
 				"		Iterable<String> iterable = Arrays.asList(\"str-1\", \"str-2\");\n"
 				+ "		assertThat(iterable).isEqualTo(iterable);";
-		
+
 		assertChange(original, expected);
 	}
 
@@ -244,7 +244,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		String expected = "" +
 				"		Iterable<String> iterable = Arrays.asList(\"str-1\", \"str-2\");\n"
 				+ "		assertThat(iterable).isNotEqualTo(Arrays.asList());";
-		
+
 		assertChange(original, expected);
 	}
 
@@ -321,202 +321,6 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				expectedInvocation);
 
 		assertChange(original, expected);
-	}
-
-	public static Stream<Arguments> pathMethodIsTrue() throws Exception {
-		return Stream.of(
-				Arguments.of("equals(path)", "isEqualTo(path)"),
-				Arguments.of("isAbsolute()", "isAbsolute()"),
-				Arguments.of("startsWith(Path.of(\"/home/gregor/\"))", "startsWith(Path.of(\"/home/gregor/\"))"),
-				Arguments.of("endsWith(Path.of(\"pom.xml\"))", "endsWith(Path.of(\"pom.xml\"))"));
-	}
-
-	@ParameterizedTest
-	@MethodSource("pathMethodIsTrue")
-	void visit_AssertThatPathMethodIsTrue_shouldTransform(String originalInvocation, String expectedInvocation)
-			throws Exception {
-
-		fixture.addImport(java.nio.file.Path.class.getName());
-		String variableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
-
-		String original = String.format("" +
-				"		%s\n" +
-				"		assertThat(path.%s).isTrue();",
-				variableDeclaration, originalInvocation);
-
-		String expected = String.format("" +
-				"		%s\n" +
-				"		assertThat(path).%s;",
-				variableDeclaration, expectedInvocation);
-
-		assertChange(original, expected);
-	}
-
-	public static Stream<Arguments> pathMethodIsFalse() throws Exception {
-		return Stream.of(
-				Arguments.of("equals(path)", "isNotEqualTo(path)"),
-				Arguments.of("isAbsolute()", "isRelative()"));
-	}
-
-	@ParameterizedTest
-	@MethodSource("pathMethodIsFalse")
-	void visit_AssertThatPathMethodIsFalse_shouldTransform(String originalInvocation, String expectedInvocation)
-			throws Exception {
-
-		fixture.addImport(java.nio.file.Path.class.getName());
-		String variableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
-
-		String original = String.format("" +
-				"		%s\n" +
-				"		assertThat(path.%s).isFalse();",
-				variableDeclaration, originalInvocation);
-
-		String expected = String.format("" +
-				"		%s\n" +
-				"		assertThat(path).%s;",
-				variableDeclaration, expectedInvocation);
-
-		assertChange(original, expected);
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"startsWith(\"/home/gregor/\")",
-			"endsWith(\"pom.xml\")"
-	})
-	void visit_AssertThatPathMethodIsTrue_shouldNotTransform(String originalInvocation)
-			throws Exception {
-
-		fixture.addImport(java.nio.file.Path.class.getName());
-		String variableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
-
-		String original = String.format("" +
-				"		%s\n" +
-				"		assertThat(path.%s).isTrue();",
-				variableDeclaration, originalInvocation);
-
-		assertNoChange(original);
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"startsWith(Path.of(\"/home/gregor-1/\"))",
-			"endsWith(Path.of(\"pom-1.xml\"))"
-	})
-	void visit_AssertThatPathMethodIsFalse_shouldNotTransform(String originalInvocation)
-			throws Exception {
-
-		fixture.addImport(java.nio.file.Path.class.getName());
-		String variableDeclaration = "Path path = Path.of(\"/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/pom.xml\");";
-
-		String original = String.format("" +
-				"		%s\n" +
-				"		assertThat(path.%s).isFalse();",
-				variableDeclaration, originalInvocation);
-
-		assertNoChange(original);
-	}
-
-	public static Stream<Arguments> fileMethodIsTrue() throws Exception {
-		return Stream.of(
-				Arguments.of("equals(file)", "isEqualTo(file)"),
-				Arguments.of("exists()", "exists()"),
-				Arguments.of("isFile()", "isFile()"),
-				Arguments.of("isDirectory()", "isDirectory()"),
-				Arguments.of("isAbsolute()", "isAbsolute()"),
-				Arguments.of("canRead()", "canRead()"),
-				Arguments.of("canWrite()", "canWrite()"));
-	}
-
-	@ParameterizedTest
-	@MethodSource("fileMethodIsTrue")
-	void visit_AssertThatFileMethodIsTrue_shouldTransform(String originalInvocation, String expectedInvocation)
-			throws Exception {
-
-		fixture.addImport(java.io.File.class.getName());
-		String variableDeclaration = "File file = new File(\"pom.xml\");";
-
-		String original = String.format("" +
-				"		%s\n" +
-				"		assertThat(file.%s).isTrue();",
-				variableDeclaration, originalInvocation);
-
-		String expected = String.format("" +
-				"		%s\n" +
-				"		assertThat(file).%s;",
-				variableDeclaration, expectedInvocation);
-
-		assertChange(original, expected);
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"canExecute()",
-			"isHidden()"
-	})
-	void visit_AssertThatFileMethodIsTrue_shouldNotTransform(String originalInvocation)
-			throws Exception {
-
-		fixture.addImport(java.io.File.class.getName());
-		String variableDeclaration = "File file = new File(\"pom.xml\");";
-
-		String original = String.format("" +
-				"		%s\n" +
-				"		assertThat(file.%s).isTrue();",
-				variableDeclaration, originalInvocation);
-
-		assertNoChange(original);
-	}
-
-	public static Stream<Arguments> fileMethodIsFalse() throws Exception {
-		return Stream.of(
-				Arguments.of("equals(file)", "isNotEqualTo(file)"),
-				Arguments.of("exists()", "doesNotExist()"),
-				Arguments.of("isAbsolute()", "isRelative()"));
-	}
-
-	@ParameterizedTest
-	@MethodSource("fileMethodIsFalse")
-	void visit_AssertThatFileMethodIsFalse_shouldTransform(String originalInvocation, String expectedInvocation)
-			throws Exception {
-
-		fixture.addImport(java.io.File.class.getName());
-		String variableDeclaration = "File file = new File(\"pom.xml\");";
-
-		String original = String.format("" +
-				"		%s\n" +
-				"		assertThat(file.%s).isFalse();",
-				variableDeclaration, originalInvocation);
-
-		String expected = String.format("" +
-				"		%s\n" +
-				"		assertThat(file).%s;",
-				variableDeclaration, expectedInvocation);
-
-		assertChange(original, expected);
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"isFile()",
-			"isDirectory()",
-			"canRead()",
-			"canWrite()",
-			"canExecute()",
-			"isHidden()"
-	})
-	void visit_AssertThatFileMethodIsFalse_shouldNotTransform(String originalInvocation)
-			throws Exception {
-
-		fixture.addImport(java.io.File.class.getName());
-		String variableDeclaration = "File file = new File(\"pom.xml\");";
-
-		String original = String.format("" +
-				"		%s\n" +
-				"		assertThat(file.%s).isFalse();",
-				variableDeclaration, originalInvocation);
-
-		assertNoChange(original);
 	}
 
 	public static Stream<Arguments> assertionsOnOptionalMethods() throws Exception {
@@ -764,8 +568,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
-	
+
 	@ParameterizedTest
 	@MethodSource("assertionsOnIteratorMethods")
 	void visit_AssertionsWithListIteratorMethods_shouldTransform(String originalInvocation, String expectedInvocation,
@@ -907,7 +710,7 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		String expected = String.format(
 				"" +
 						"		%s[] array = new %s[0];\n" +
-						"		assertThat(array).isEqualTo(array);",
+						"		assertThat(array).isSameAs(array);",
 				componentType, componentType);
 
 		assertChange(original, expected);
@@ -930,8 +733,29 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		String expected = String.format(
 				"" +
 						"		%s[][] array = new %s[0][0];\n" +
-						"		assertThat(array).isEqualTo(array);",
+						"		assertThat(array).isSameAs(array);",
 				componentType, componentType);
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"new int[0][0]",
+			"new Integer[0][0]",
+			"new Object[0][0]"
+	})
+	void visit_TwoDimensionalArrayEqualsOtherIsFalse_shouldTransform(String new2DArray) throws Exception {
+
+		String original = String.format(
+				"" +
+						"		assertThat(%s.equals(%s)).isFalse();",
+				new2DArray, new2DArray);
+
+		String expected = String.format(
+				"" +
+						"		assertThat(%s).isNotSameAs(%s);",
+				new2DArray, new2DArray);
 
 		assertChange(original, expected);
 	}
@@ -970,158 +794,104 @@ class UseDedicatedAssertJAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		assertNoChange(original);
 	}
 
-	public static Stream<Arguments> assertionsOnInfixOperationsWithObject() throws Exception {
-		return Stream.of(
-				Arguments.of("o == o", IS_TRUE, "isSameAs(o)"),
-				Arguments.of("o != o", IS_TRUE, "isNotSameAs(o)"),
-				Arguments.of("o == o", IS_FALSE, "isNotSameAs(o)"),
-				Arguments.of("o != o", IS_FALSE, "isSameAs(o)"));
-	}
-
-	@ParameterizedTest
-	@MethodSource("assertionsOnInfixOperationsWithObject")
-	void visit_InfixOperationWithObject_shouldTransform(String infixOperation, String booleanAssertion,
-			String newAssertion) throws Exception {
-
-		String original = String.format("" +
-				"		Object o = new Object();\n"
-				+ "		assertThat(%s).%s;",
-				infixOperation, booleanAssertion);
-
-		String expected = String.format("" +
-				"		Object o = new Object();\n"
-				+ "		assertThat(o).%s;",
-				newAssertion);
-		assertChange(original, expected);
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"assertThat(o1 != null).isTrue()",
-			"assertThat(null != o1).isTrue()",
-			"assertThat(o1 == null).isFalse()",
-			"assertThat(null == o1).isFalse()"
-	})
-	void visit_ObjectIsNotNull_shouldTransform(String originalInvocation) throws Exception {
-		String original = String.format("" +
-				"		Object o1 = new Object();\n" +
-				"		%s;",
-				originalInvocation);
-
-		String expected = "" +
-				"		Object o1 = new Object();\n"
-				+ "		assertThat(o1).isNotNull();";
-
-		assertChange(original, expected);
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"assertThat(o1 == null).isTrue()",
-			"assertThat(null == o1).isTrue()",
-			"assertThat(o1 != null).isFalse()",
-			"assertThat(null != o1).isFalse()"
-	})
-	void visit_ObjectIsNull_shouldTransform(String originalInvocation) throws Exception {
-		String original = String.format("" +
-				"		Object o1 = null;\n" +
-				"		%s;",
-				originalInvocation);
-
-		String expected = "" +
-				"		Object o1 = null;\n"
-				+ "		assertThat(o1).isNull();";
-
-		assertChange(original, expected);
+	@Test
+	void visit_AssertionNotInExpressionStatement_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "		Object object = new Object();\n"
+				+ "		Object isFalseReturnValue = assertThat(object == null).isFalse();";
+		assertNoChange(original);
 	}
 
 	@Test
-	void visit_NullIsNull_shouldNotTransform() throws Exception {
+	void visit_AssertThatObjectIsNull_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "		Object o = null;\n"
+				+ "		assertThat(o).isNull();";
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_AssertThatWithTwoArguments_shouldNotTransform() throws Exception {
+		fixture.addImport(java.util.Arrays.class.getName());
 		String original = "" +
-				"		assertThat(null == null).isTrue();";
-
+				"		Iterable<String> iterable = Arrays.asList(\"str-1\", \"str-2\");\n"
+				+ "		assertThat(iterable, StringAssert.class).first();";
 		assertNoChange(original);
 	}
 
-	public static Stream<Arguments> assertionsOnInfixOperationsWithInt() throws Exception {
+	@Test
+	void visit_AssertThatNotFromAssertJ_shouldNotTransform() throws Exception {
+		fixture.addImport("org.assertj.core.api.AbstractBooleanAssert");
+		fixture.addImport("org.assertj.core.api.Assertions");
+		String original = "" +
+				"		class LocalClass {\n"
+				+ "			static AbstractBooleanAssert<?> assertThat(boolean b) {\n"
+				+ "				return org.assertj.core.api.Assertions.assertThat(b);\n"
+				+ "			}\n"
+				+ "\n"
+				+ "		}\n"
+				+ "		Object o = null;\n"
+				+ "		LocalClass.assertThat(o == null).isTrue();";
+		assertNoChange(original);
+
+	}
+
+	public static Stream<Arguments> numericWrapperequalsPrimitiveNumericIsFalse() throws Exception {
 		return Stream.of(
-				Arguments.of("x == 10", IS_TRUE, "isEqualTo(10)"),
-				Arguments.of("x != 11", IS_TRUE, "isNotEqualTo(11)"),
-				Arguments.of("x < 11", IS_TRUE, "isLessThan(11)"),
-				Arguments.of("x <= 11", IS_TRUE, "isLessThanOrEqualTo(11)"),
-				Arguments.of("x > 9", IS_TRUE, "isGreaterThan(9)"),
-				Arguments.of("x >= 9", IS_TRUE, "isGreaterThanOrEqualTo(9)"),
-				Arguments.of("x != 10", IS_FALSE, "isEqualTo(10)"),
-				Arguments.of("x == 11", IS_FALSE, "isNotEqualTo(11)"),
-				Arguments.of("x < 9", IS_FALSE, "isGreaterThanOrEqualTo(9)"),
-				Arguments.of("x <= 9", IS_FALSE, "isGreaterThan(9)"),
-				Arguments.of("x > 11", IS_FALSE, "isLessThanOrEqualTo(11)"),
-				Arguments.of("x >= 11", IS_FALSE, "isLessThan(11)"));
+				Arguments.of("java.math.BigInteger.valueOf(10)", "10"),
+				Arguments.of("Double.valueOf(10.0)", "(byte) 10"),
+				Arguments.of("Double.valueOf(10.0)", "(short) 10"),
+				Arguments.of("Double.valueOf(10.0)", "10"),
+				Arguments.of("Double.valueOf(10.0)", "10L"),
+				Arguments.of("Double.valueOf(10.0)", "10.0F"),
+				Arguments.of("Float.valueOf(10.0F)", "(byte) 10"),
+				Arguments.of("Float.valueOf(10.0F)", "(short) 10"),
+				Arguments.of("Float.valueOf(10.0F)", "10"),
+				Arguments.of("Float.valueOf(10.0F)", "10L"),
+				Arguments.of("Long.valueOf(10L)", "(byte) 10"),
+				Arguments.of("Long.valueOf(10L)", "(short) 10"),
+				Arguments.of("Long.valueOf(10L)", "10"),
+				Arguments.of("Integer.valueOf(10)", "(byte) 10"),
+				Arguments.of("Integer.valueOf(10)", "(short) 10"),
+				Arguments.of("Short.valueOf((short) 10)", "(byte) 10"),
+				Arguments.of("java.math.BigInteger.valueOf(10)", "10"));
 	}
 
 	@ParameterizedTest
-	@MethodSource("assertionsOnInfixOperationsWithInt")
-	void visit_InfixOperationWithInt_shouldTransform(String infixOperation, String booleanAssertion,
-			String newAssertion) throws Exception {
+	@MethodSource("numericWrapperequalsPrimitiveNumericIsFalse")
+	void visit_NumericWrapperEqualsPrimitiveNumericIsFalse_shouldNotransform(String equalsExpression,
+			String equalsArgument) throws Exception {
 
-		String original = String.format("" +
-				"		int x = 10;\n"
-				+ "		assertThat(%s).%s;",
-				infixOperation, booleanAssertion);
-
-		String expected = String.format("" +
-				"		int x = 10;\n"
-				+ "		assertThat(x).%s;",
-				newAssertion);
-
-		assertChange(original, expected);
+		String original = String.format("assertThat(%s.equals(%s)).isFalse();",
+				equalsExpression, equalsArgument);
+		assertNoChange(original);
 	}
 
-	public static Stream<Arguments> assertionsOnInfixOperationsWith1DIntArray() throws Exception {
-		return Stream.of(
-				Arguments.of("intArray == intArray", IS_TRUE, "isSameAs(intArray)"),
-				Arguments.of("intArray != new int[0]", IS_TRUE, "isNotSameAs(new int[0])"),
-				Arguments.of("intArray != intArray", IS_FALSE, "isSameAs(intArray)"),
-				Arguments.of("intArray == new int[0]", IS_FALSE, "isNotSameAs(new int[0])"));
-	}
+	@Test
+	void visit_ObjectEqualsPrimitiveIntegerIsFalse_shouldTransform() throws Exception {
+		String original = "" +
+				"		Object object = new Object();\n"
+				+ "		assertThat(object.equals(10)).isFalse();";
 
-	@ParameterizedTest
-	@MethodSource("assertionsOnInfixOperationsWith1DIntArray")
-	void visit_InfixOperationWith1DIntArray_shouldTransform(String infixOperation, String booleanAssertion,
-			String newAssertion) throws Exception {
-
-		String original = String.format("" +
-				"		int[] intArray = new int[0];\n"
-				+ "		assertThat(%s).%s;",
-				infixOperation, booleanAssertion);
-
-		String expected = String.format("" +
-				"		int[] intArray = new int[0];\n"
-				+ "		assertThat(intArray).%s;",
-				newAssertion);
+		String expected = "" +
+				"		Object object = new Object();\n"
+				+ "		assertThat(object).isNotEqualTo(10);";
 
 		assertChange(original, expected);
 	}
 
 	@Test
-	void visit_instanceofIsTrue_shouldTransform() throws Exception {
-		String original = String.format("" +
-				"		Object o = new Object();\n"
-				+ "		assertThat(o instanceof Object).isTrue();");
+	void visit_ObjectEqualsPrimitiveIntegerIsTrue_shouldTransform() throws Exception {
+		String original = "" +
+				"		Object object = Integer.valueOf(10);\n"
+				+ "		assertThat(object.equals(10)).isTrue();";
 
-		String expected = String.format("" +
-				"		Object o = new Object();\n"
-				+ "		assertThat(o).isInstanceOf(Object.class);");
+		String expected = "" +
+				"		Object object = Integer.valueOf(10);\n"
+				+ "		assertThat(object).isEqualTo(10);";
 
 		assertChange(original, expected);
+
 	}
 
-	@Test
-	void visit_instanceofIsFalse_shouldTransform() throws Exception {
-		String original = String.format("" +
-				"		Object o = null;\n"
-				+ "		assertThat(o instanceof Object).isFalse();");
-
-		assertNoChange(original);
-	}
 }

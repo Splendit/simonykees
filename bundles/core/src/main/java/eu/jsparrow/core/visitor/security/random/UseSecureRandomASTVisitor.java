@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.UseSecureRandomEvent;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
@@ -38,7 +39,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * 
  * @since 3.20.0
  */
-public class UseSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
+public class UseSecureRandomASTVisitor extends AbstractAddImportASTVisitor implements UseSecureRandomEvent {
 
 	private static final String SECURE_RANDOM_QUALIFIED_NAME = java.security.SecureRandom.class.getName();
 
@@ -88,6 +89,7 @@ public class UseSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
 		Expression expression = analyzer.getRandomExpressionToReplace();
 		astRewrite.replace(analyzer.getRandomExpressionToReplace(), getSecureRandomInstanceCreation(expression), null);
 		onRewrite();
+		addMarkerEvent(expression);
 	}
 
 	private ClassInstanceCreation getSecureRandomInstanceCreation(ASTNode context) {

@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
-public class UseParameterizedLDAPQueryASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class UseParameterizedLDAPQueryASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		setVisitor(new UseParameterizedLDAPQueryASTVisitor());
 		fixture.addImport(javax.naming.directory.DirContext.class.getName());
 		fixture.addImport(javax.naming.directory.SearchResult.class.getName());
@@ -18,7 +18,7 @@ public class UseParameterizedLDAPQueryASTVisitorTest extends UsesSimpleJDTUnitFi
 	}
 
 	@Test
-	public void visit_searchWithUserPass_shouldTransform() throws Exception {
+	void visit_searchWithUserPass_shouldTransform() throws Exception {
 		String original = "" +
 				"String user = null;\n" +
 				"String pass = null;\n" +
@@ -45,7 +45,7 @@ public class UseParameterizedLDAPQueryASTVisitorTest extends UsesSimpleJDTUnitFi
 	}
 
 	@Test
-	public void visit_FilterArgumentNotStoredInVariable_shouldTransform() throws Exception {
+	void visit_FilterArgumentNotStoredInVariable_shouldTransform() throws Exception {
 		String original = "" +
 				"			String user = null;\n" +
 				"			String pass = null;\n" +
@@ -72,7 +72,7 @@ public class UseParameterizedLDAPQueryASTVisitorTest extends UsesSimpleJDTUnitFi
 	}
 
 	@Test
-	public void visit_FilterInitializedAfterDeclaration_shouldTransform() throws Exception {
+	void visit_FilterInitializedAfterDeclaration_shouldTransform() throws Exception {
 		String original = "" +
 				"			String user = null;\n" +
 				"			String pass = null;\n" +
@@ -110,7 +110,7 @@ public class UseParameterizedLDAPQueryASTVisitorTest extends UsesSimpleJDTUnitFi
 	}
 
 	@Test
-	public void visit_FilterInitializedWithNullAtDeclaration_shouldTransform() throws Exception {
+	void visit_FilterInitializedWithNullAtDeclaration_shouldTransform() throws Exception {
 		String original = "" +
 				"			String user = null;\n" +
 				"			String pass = null;\n" +
@@ -148,7 +148,7 @@ public class UseParameterizedLDAPQueryASTVisitorTest extends UsesSimpleJDTUnitFi
 	}
 
 	@Test
-	public void visit_useSearchWithInstanceOfName_shouldTransform() throws Exception {
+	void visit_useSearchWithInstanceOfName_shouldTransform() throws Exception {
 		fixture.addImport(javax.naming.Name.class.getName());
 		String original = "" +
 				"			String user = null;\n" +
@@ -179,7 +179,7 @@ public class UseParameterizedLDAPQueryASTVisitorTest extends UsesSimpleJDTUnitFi
 	}
 
 	@Test
-	public void visit_FilterSameNameAsLocalClass_shouldTransform() throws Exception {
+	void visit_FilterSameNameAsLocalClass_shouldTransform() throws Exception {
 		String original = "" +
 				"			String user = null;\n" + 
 				"			String pass = null;\n" + 
@@ -208,7 +208,7 @@ public class UseParameterizedLDAPQueryASTVisitorTest extends UsesSimpleJDTUnitFi
 	}
 	
 	@Test
-	public void visit_FilterSameNameAsLocalClassField_shouldTransform() throws Exception {
+	void visit_FilterSameNameAsLocalClassField_shouldTransform() throws Exception {
 		String original = "" +
 				"			String user = null;\n" + 
 				"			String pass = null;\n" + 

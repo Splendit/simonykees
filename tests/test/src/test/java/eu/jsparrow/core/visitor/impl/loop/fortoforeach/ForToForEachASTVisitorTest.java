@@ -6,18 +6,17 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.fortoforeach.ForToForEachASTVisitor;
 
-@SuppressWarnings("nls")
-public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
-	public void beforeEach() throws Exception {
+	void beforeEach() throws Exception {
 		setVisitor(new ForToForEachASTVisitor());
 		fixture.addImport(java.util.List.class.getName());
 		fixture.addImport(java.util.ArrayList.class.getName());
 	}
 
 	@Test
-	public void visit_loopOverArray_shouldTransform() throws Exception {
+	void visit_loopOverArray_shouldTransform() throws Exception {
 		String original = "" +
 				"		String[] ms = {};\n" +
 				"		StringBuilder sb = new StringBuilder();\n" +
@@ -37,7 +36,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_variableDeclarationExpression_shouldTransform() throws Exception {
+	void visit_variableDeclarationExpression_shouldTransform() throws Exception {
 		String original = "" +
 				"		Map<String, String>[] table = (Map<String, String>[])new HashMap[10];\n" +
 				"		for (int i = 0; i<table.length; i++) {\n" +
@@ -63,7 +62,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_multipleVariableDeclarationExpressions_shouldTransform() throws Exception {
+	void visit_multipleVariableDeclarationExpressions_shouldTransform() throws Exception {
 		String original = "" +
 				"		Map<String, String>[] table = (Map<String, String>[])new HashMap[10];\n" +
 				"		for (int i = 0; i<table.length; i++) {\n" +
@@ -89,7 +88,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_updatingCollectionInsideLoop_shouldNotTransform() throws Exception {
+	void visit_updatingCollectionInsideLoop_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		List<String> list = new ArrayList<>();\n" +
 				"		list.add(\"value\");\n" +
@@ -102,7 +101,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_reassigningCollection_shouldNotTransform() throws Exception {
+	void visit_reassigningCollection_shouldNotTransform() throws Exception {
 		fixture.addImport(java.util.List.class.getName());
 		fixture.addImport(java.util.ArrayList.class.getName());
 
@@ -118,7 +117,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_passingCollectionAsParameter_shouldNotTransform() throws Exception {
+	void visit_passingCollectionAsParameter_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		List<String> list = new ArrayList<>();\n" +
 				"		for (int i =0; i<list.size(); i++) {\n" +
@@ -131,7 +130,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_passingCollectionAsConstructorParameter_shouldNotTransform() throws Exception {
+	void visit_passingCollectionAsConstructorParameter_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		List<String> list = new ArrayList<>();\n" +
 				"		for (int i =0; i<list.size(); i++) {\n" +
@@ -143,7 +142,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_reassigningArrays_shouldNotTransform() throws Exception {
+	void visit_reassigningArrays_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		String[] list = new String[10];\n" +
 				"		for (int i =0; i<list.length; i++) {\n" +
@@ -155,7 +154,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_assigningIterableToOtherIterable_shouldNotTransform() throws Exception {
+	void visit_assigningIterableToOtherIterable_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		List<String> list = new ArrayList<>();\n" +
 				"		for (int i =0; i<list.size(); i++) {\n" +
@@ -168,7 +167,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_iterableAsVariableInitializer_shouldNotTransform() throws Exception {
+	void visit_iterableAsVariableInitializer_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		List<String> list = new ArrayList<>();\n" +
 				"		for (int i =0; i<list.size(); i++) {\n" +
@@ -180,7 +179,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_discardedIteratingIndex_shouldNotTransform() throws Exception {
+	void visit_discardedIteratingIndex_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		List<String> list = new ArrayList<>();\n" +
 				"		for (int i =0; i<list.size(); i++) {\n" +

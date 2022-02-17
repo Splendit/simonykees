@@ -6,16 +6,16 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
-public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
-	public void setUpVisitor() throws Exception {
+	void setUpVisitor() throws Exception {
 		setVisitor(new UseFilesWriteStringASTVisitor());
 		setJavaVersion(JavaCore.VERSION_11);
 	}
 
 	@Test
-	public void visit_WriteIntToFile_shouldNotTransform() throws Exception {
+	void visit_WriteIntToFile_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -33,7 +33,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_WriteIfTrue_shouldNotTransform() throws Exception {
+	void visit_WriteIfTrue_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -51,7 +51,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_WriteWithinNestedBlock_shouldNotTransform() throws Exception {
+	void visit_WriteWithinNestedBlock_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -71,7 +71,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_WriteStringWithinNestedTryStatement_shouldNotTransform() throws Exception {
+	void visit_WriteStringWithinNestedTryStatement_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -92,21 +92,21 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_MethodInvocationWithoutExpression_shouldNotTransform() throws Exception {
+	void visit_MethodInvocationWithoutExpression_shouldNotTransform() throws Exception {
 		fixture.addMethod("exampleMethod");
 		String original = "exampleMethod();";
 		assertNoChange(original);
 	}
 
 	@Test
-	public void visit_ThisMethodInvocation_shouldNotTransform() throws Exception {
+	void visit_ThisMethodInvocation_shouldNotTransform() throws Exception {
 		fixture.addMethod("exampleMethod");
 		String original = "this.exampleMethod();";
 		assertNoChange(original);
 	}
 
 	@Test
-	public void visit_VarMethodInvocationWithSimpleNameExpression_shouldNotTransform() throws Exception {
+	void visit_VarMethodInvocationWithSimpleNameExpression_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		var o = new Object() {\n"
 				+ "			void exampeMethod() {}\n"
@@ -116,7 +116,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_MethodInvocationNotInExpressionStatement_shouldNotTransform() throws Exception {
+	void visit_MethodInvocationNotInExpressionStatement_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		String s = \"Hello World!\";\n"
 				+ "		int i = s.length();";
@@ -124,7 +124,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_BufferedWriterUsedTwice_shouldNotTransform() throws Exception {
+	void visit_BufferedWriterUsedTwice_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -143,7 +143,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_NoVariableDeclarationExpressionFound_shouldNotTransform() throws Exception {
+	void visit_NoVariableDeclarationExpressionFound_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -162,7 +162,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_BufferedWriterWithTwoArguments_shouldNotTransform() throws Exception {
+	void visit_BufferedWriterWithTwoArguments_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -180,7 +180,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_TWRUsingMethodNotOfFilesClass_shouldNotTransform() throws Exception {
+	void visit_TWRUsingMethodNotOfFilesClass_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.charset.Charset.class,
 				java.nio.charset.StandardCharsets.class,
@@ -208,7 +208,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_TWRUsingFileWriterVariableNotResource_shouldNotTransform() throws Exception {
+	void visit_TWRUsingFileWriterVariableNotResource_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -230,7 +230,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_TWRUsingFileWriterResourceInitializedWithVariable_shouldNotTransform() throws Exception {
+	void visit_TWRUsingFileWriterResourceInitializedWithVariable_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -252,7 +252,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_TWRFileWriterResourceToString_shouldNotTransform() throws Exception {
+	void visit_TWRFileWriterResourceToString_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -274,7 +274,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_FileWriterResourceUsedByTwoBufferedWriters_shouldNotTransform() throws Exception {
+	void visit_FileWriterResourceUsedByTwoBufferedWriters_shouldNotTransform() throws Exception {
 		addImports(
 				java.io.BufferedWriter.class,
 				java.io.File.class,
@@ -294,7 +294,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_FileWriterResourceFromFileVariable_shouldNotTransform() throws Exception {
+	void visit_FileWriterResourceFromFileVariable_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.File.class,
 				java.io.FileWriter.class,
@@ -315,7 +315,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_NewFileWriterFromFileVariable_shouldNotTransform() throws Exception {
+	void visit_NewFileWriterFromFileVariable_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.File.class,
 				java.io.FileWriter.class,
@@ -335,7 +335,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_FileWriterResourceConstructedWithCharsetAndBoolean_shouldNotTransform() throws Exception {
+	void visit_FileWriterResourceConstructedWithCharsetAndBoolean_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.File.class,
 				java.io.FileWriter.class,
@@ -355,7 +355,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_FileWriterResourceConstructedWithoutCharsetWithBoolean_shouldNotTransform() throws Exception {
+	void visit_FileWriterResourceConstructedWithoutCharsetWithBoolean_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.File.class,
 				java.io.FileWriter.class);
@@ -372,7 +372,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_NewFileWriterWithCharsetAndBoolean_shouldNotTransform() throws Exception {
+	void visit_NewFileWriterWithCharsetAndBoolean_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.File.class,
 				java.io.FileWriter.class,
@@ -391,7 +391,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_NewFileWriterWithoutCharsetWithBoolean_shouldNotTransform() throws Exception {
+	void visit_NewFileWriterWithoutCharsetWithBoolean_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.File.class,
 				java.io.FileWriter.class);
@@ -407,7 +407,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_FileWriterNotSimpleName_shouldNotTransform() throws Exception {
+	void visit_FileWriterNotSimpleName_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.File.class,
 				java.io.FileWriter.class);
@@ -430,7 +430,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_WriteInvocationOfAnonymousClass_shouldNotTransform() throws Exception {
+	void visit_WriteInvocationOfAnonymousClass_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.io.IOException.class);
@@ -440,7 +440,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 				+ "		String pathString = \"/home/test/testpath\";\n"
 				+ "		try (BufferedWriter bufferedWriterAnonymous = new BufferedWriter(new FileWriter(pathString)) {\n"
 				+ "			@Override\n"
-				+ "			public void write(String s) throws IOException {\n"
+				+ "			void write(String s) throws IOException {\n"
 				+ "				super.write(s);\n"
 				+ "			}\n"
 				+ "		}) {\n"
@@ -452,13 +452,13 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_WriteWithoutExpression_shouldNotTransform() throws Exception {
+	void visit_WriteWithoutExpression_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.Writer.class);
 
 		String original = "" +
 				"			class LocalClass extends BufferedWriter {\n"
-				+ "				public LocalClass(Writer out) {super(out);}\n"
+				+ "				LocalClass(Writer out) {super(out);}\n"
 				+ "				void test(String value) {\n"
 				+ "					try {\n"
 				+ "						write(value);\n"
@@ -471,13 +471,13 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_WriteWithThisQualifier_shouldNotTransform() throws Exception {
+	void visit_WriteWithThisQualifier_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.Writer.class);
 
 		String original = "" +
 				"			class LocalClass extends BufferedWriter {\n"
-				+ "				public LocalClass(Writer out) {super(out);}\n"
+				+ "				LocalClass(Writer out) {super(out);}\n"
 				+ "				void test(String value) {\n"
 				+ "					try {\n"
 				+ "						this.write(value);\n"
@@ -490,15 +490,15 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_WriteWithSuperQualifier_shouldNotTransform() throws Exception {
+	void visit_WriteWithSuperQualifier_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.Writer.class);
 
 		String original = "" +
 				"			class LocalClass extends BufferedWriter {\n"
-				+ "				public LocalClass(Writer out) {super(out);}\n"
+				+ "				LocalClass(Writer out) {super(out);}\n"
 				+ "				@Override\n"
-				+ "				public void write(String value) {\n"
+				+ "				void write(String value) {\n"
 				+ "					try {\n"
 				+ "						super.write(value);\n"
 				+ "					} catch (Exception exception) {\n"
@@ -510,7 +510,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_BufferedWriterAsInputForBufferedWriter_shouldNotTransform() throws Exception {
+	void visit_BufferedWriterAsInputForBufferedWriter_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.File.class,
 				java.io.FileWriter.class,
