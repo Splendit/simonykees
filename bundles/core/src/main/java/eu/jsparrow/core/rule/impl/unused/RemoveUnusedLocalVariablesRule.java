@@ -40,6 +40,7 @@ public class RemoveUnusedLocalVariablesRule extends RefactoringRuleImpl<RemoveUn
 		return JavaCore.VERSION_1_1;
 	}
 
+	@Override
 	protected AbstractASTRewriteASTVisitor visitorFactory() throws InstantiationException, IllegalAccessException {
 		Map<String, Boolean> options = new HashMap<>();
 		options.put(REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
