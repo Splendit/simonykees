@@ -15,11 +15,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.SearchPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.visitor.renaming.FieldReferencesSearch;
 import eu.jsparrow.core.visitor.renaming.ReferenceSearchMatch;
 import eu.jsparrow.core.visitor.utils.SearchScopeFactory;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -28,7 +30,7 @@ import eu.jsparrow.rules.common.util.RefactoringUtil;
 /**
  * An engine to search for unused fields. Uses
  * {@link UnusedFieldsCandidatesVisitor} to analyze field declarations. Uses
- * {@link FieldReferencesSearch} to find the references of fields in external
+ * {@link JavaElementSearchEngine} to find the references of fields in external
  * files. Provides the results as a list of {@link UnusedFieldWrapper}s.
  * 
  * @since 4.8.0
@@ -108,8 +110,12 @@ public class UnusedFieldsEngine {
 			IJavaProject project,
 			Map<String, Boolean> optionsMap) {
 		IJavaElement[] searchScope = createSearchScope(scope, project);
-		FieldReferencesSearch fieldReferencesSearchEngine = new FieldReferencesSearch(searchScope);
-		Optional<List<ReferenceSearchMatch>> references = fieldReferencesSearchEngine.findFieldReferences(fragment);
+		JavaElementSearchEngine fieldReferencesSearchEngine = new JavaElementSearchEngine(searchScope);
+		SearchPattern pattern = createSearchPattern(fragment);
+		String identifier = fragment.getName()
+			.getIdentifier();
+		Optional<List<ReferenceSearchMatch>> references = fieldReferencesSearchEngine.findFieldReferences(pattern,
+				identifier);
 		if (!references.isPresent()) {
 			return new UnusedFieldReferenceSearchResult(false, true, Collections.emptyList());
 		}
@@ -135,6 +141,12 @@ public class UnusedFieldsEngine {
 			}
 		}
 		return new UnusedFieldReferenceSearchResult(false, false, unusedExternalreferences);
+	}
+
+	private SearchPattern createSearchPattern(VariableDeclarationFragment fragment) {
+		IVariableBinding fragmentBinding = fragment.resolveBinding();
+		IJavaElement iVariableBinding = fragmentBinding.getJavaElement();
+		return SearchPattern.createPattern(iVariableBinding, IJavaSearchConstants.REFERENCES);
 	}
 
 	private IJavaElement[] createSearchScope(String modelSearchScope, IJavaProject javaProject) {
