@@ -23,8 +23,10 @@ import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedFieldsRule;
+import eu.jsparrow.core.rule.impl.unused.RemoveUnusedMethodsRule;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
+import eu.jsparrow.core.visitor.unused.method.UnusedMethodWrapper;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
@@ -57,9 +59,15 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	private StatisticsSection statisticsSection;
 	private StandaloneStatisticsMetadata standaloneStatisticsMetadata;
 
-	public RemoveUnusedCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline, StandaloneStatisticsMetadata standaloneStatisticsMetadata, List<UnusedFieldWrapper> metadata,
+	public RemoveUnusedCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline, 
+			StandaloneStatisticsMetadata standaloneStatisticsMetadata, 
+			List<UnusedFieldWrapper> metadata,
+			List<UnusedMethodWrapper> unusedMethods,
 			Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges,
-			List<ICompilationUnit> targetCompilationUnits, RemoveUnusedFieldsRule rule) {
+			Map<UnusedMethodWrapper, Map<ICompilationUnit, DocumentChange>> methodDocumentChanges,
+			List<ICompilationUnit> targetCompilationUnits, 
+			RemoveUnusedFieldsRule rule,
+			RemoveUnusedMethodsRule unusedMethodsRule) {
 		this.refactoringPipeline = refactoringPipeline;
 		this.metaData = metadata;
 		this.documentChanges = documentChanges;

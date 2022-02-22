@@ -2,9 +2,13 @@ package eu.jsparrow.core.rule.impl.unused;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.visitor.unused.method.RemoveUnusedMethodsASTVisitor;
 import eu.jsparrow.core.visitor.unused.method.UnusedMethodWrapper;
@@ -20,7 +24,7 @@ public class RemoveUnusedMethodsRule extends RefactoringRuleImpl<RemoveUnusedMet
 
 	public RemoveUnusedMethodsRule(List<UnusedMethodWrapper> unusedMethods) {
 		this.visitorClass = RemoveUnusedMethodsASTVisitor.class;
-		this.id = "RemoveUnusedFields"; //$NON-NLS-1$
+		this.id = "RemoveUnusedmethods"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription("Remove Unused Methods", //$NON-NLS-1$
 				"Finds and removes unused methods", Duration.ofMinutes(2), //$NON-NLS-1$
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
@@ -37,5 +41,13 @@ public class RemoveUnusedMethodsRule extends RefactoringRuleImpl<RemoveUnusedMet
 		RemoveUnusedMethodsASTVisitor visitor = new RemoveUnusedMethodsASTVisitor(unusedMethods);
 		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
 		return visitor;
+	}
+
+	public Map<UnusedMethodWrapper, Map<ICompilationUnit, DocumentChange>> computeDocumentChangesPerMethod() {
+		return Collections.emptyMap();
+	}
+
+	public List<UnusedMethodWrapper> getUnusedMethodWrapperList() {
+		return Collections.emptyList();
 	}
 }

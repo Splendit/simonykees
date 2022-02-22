@@ -1,7 +1,9 @@
 package eu.jsparrow.ui.wizard.semiautomatic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,8 +34,11 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedFieldsRule;
+import eu.jsparrow.core.rule.impl.unused.RemoveUnusedMethodsRule;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 import eu.jsparrow.core.visitor.unused.UnusedFieldsEngine;
+import eu.jsparrow.core.visitor.unused.method.UnusedMethodWrapper;
+import eu.jsparrow.core.visitor.unused.method.UnusedMethodsEngine;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
@@ -65,7 +70,9 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 
 	private RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 	private RemoveUnusedFieldsRule rule;
+	private RemoveUnusedMethodsRule unusedMethodsRule;
 	private UnusedFieldsEngine engine;
+	private UnusedMethodsEngine unusedMethodsEngine;
 	private Image windowDefaultImage;
 
 	public RemoveUnusedCodeWizard(List<ICompilationUnit> selectedJavaElements) {
@@ -128,6 +135,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 				String scope = model.getSearchScope();
 				preRefactoring();
 				engine = new UnusedFieldsEngine(scope);
+				unusedMethodsEngine = new UnusedMethodsEngine(scope);
 
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
@@ -138,8 +146,11 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 				Map<String, Boolean> options = model.getOptionsMap();
 				List<UnusedFieldWrapper> unusedFields = engine.findUnusedFields(selectedJavaElements,
 						options, child);
+				List<UnusedMethodWrapper> unusedMethods = unusedMethodsEngine.findUnusedMethods(selectedJavaElements, 
+						options, child);
+				
 
-				if (unusedFields.isEmpty()) {
+				if (unusedFields.isEmpty() && unusedMethods.isEmpty()) {
 					WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
 					return Status.CANCEL_STATUS;
 				}
@@ -152,13 +163,17 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 				childSecondPart.setTaskName("Collect compilation units"); //$NON-NLS-1$
 
 				rule = new RemoveUnusedFieldsRule(unusedFields);
-				refactoringPipeline.setRules(Collections.singletonList(rule));
+				unusedMethodsRule = new RemoveUnusedMethodsRule(unusedMethods);
+				refactoringPipeline.setRules(Arrays.asList(rule, unusedMethodsRule));
 				Set<ICompilationUnit> targetCompilationUnits = engine.getTargetCompilationUnits();
-				if (targetCompilationUnits.isEmpty()) {
+				Set<ICompilationUnit> targetUnusedMethodsCUs = unusedMethodsEngine.getTargetCompilationUnits();
+				Set<ICompilationUnit>allTargetCUs = new HashSet<>(targetCompilationUnits);
+				allTargetCUs.addAll(targetUnusedMethodsCUs);
+				if (allTargetCUs.isEmpty()) {
 					return Status.CANCEL_STATUS;
 				}
 				try {
-					refactoringPipeline.prepareRefactoring(new ArrayList<>(targetCompilationUnits), childSecondPart);
+					refactoringPipeline.prepareRefactoring(new ArrayList<>(allTargetCUs), childSecondPart);
 					refactoringPipeline.updateInitialSourceMap();
 				} catch (RefactoringException e) {
 					logger.error("Cannot create working copies of the target compilation units.", e); //$NON-NLS-1$
@@ -238,9 +253,11 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 
 	private void createAndShowPreviewWizard() {
 		Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes;
+		Map<UnusedMethodWrapper, Map<ICompilationUnit, DocumentChange>> unusedMethodChanges;
 		try {
 			changes = rule.computeDocumentChangesPerField();
-			synchronizeWithUIShowRefactoringPreviewWizard(changes);
+			unusedMethodChanges = unusedMethodsRule.computeDocumentChangesPerMethod();
+			synchronizeWithUIShowRefactoringPreviewWizard(changes, unusedMethodChanges);
 		} catch (JavaModelException e) {
 			logger.error("Cannot create document for displaying changes - {} ", e.getMessage(), e); //$NON-NLS-1$
 		}
@@ -248,7 +265,8 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	}
 
 	private void synchronizeWithUIShowRefactoringPreviewWizard(
-			Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes) {
+			Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes, 
+			Map<UnusedMethodWrapper, Map<ICompilationUnit, DocumentChange>> unusedMethodChanges) {
 
 		String message = NLS.bind(Messages.RemoveUnusedCodeWizard_endRefactoringInProjectMessage, this.getClass()
 			.getSimpleName(), selectedJavaProject.getElementName());
@@ -268,9 +286,10 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 						Collections.singletonList(selectedJavaProject));
 				List<ICompilationUnit> targetCompilationUnits = new ArrayList<>(engine.getTargetCompilationUnits());
 				List<UnusedFieldWrapper> unusedFields = rule.getUnusedFieldWrapperList();
+				List<UnusedMethodWrapper> unusedMethods = unusedMethodsRule.getUnusedMethodWrapperList();
 				RemoveUnusedCodeRulePreviewWizard removeUnusedCodePreviewWizard = new RemoveUnusedCodeRulePreviewWizard(
 						refactoringPipeline,
-						standaloneStatisticsMetadata, unusedFields, changes, targetCompilationUnits, rule);
+						standaloneStatisticsMetadata, unusedFields, unusedMethods, changes, unusedMethodChanges, targetCompilationUnits, rule, unusedMethodsRule);
 				final WizardDialog dialog = new WizardDialog(shell, removeUnusedCodePreviewWizard) {
 					@Override
 					protected void nextPressed() {
