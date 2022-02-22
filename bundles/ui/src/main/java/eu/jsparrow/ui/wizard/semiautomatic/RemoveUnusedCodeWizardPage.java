@@ -65,6 +65,10 @@ public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 		createClassMemberChoosingPart(composite);
 		createSearchScopeChoosingPart(composite);
 		createSingleCheckBoxSection(composite, 
+				Messages.RemoveUnusedCodeWizardPage_removeUnusedTestsSectionTitle,
+				Messages.RemoveUnusedCodeWizardPage_removeUnusedTestsDescription,
+				controller::removeTestCodeSelectionChanged, false);
+		createSingleCheckBoxSection(composite, 
 				Messages.RemoveUnusedCodeWizardPage_removeInitializersSectionTitle,
 				Messages.RemoveUnusedCodeWizardPage_removeInitializersSectionDescription,
 				controller::removeInitializersWithSideEffectsSelectionChanged, false);
