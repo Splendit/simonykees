@@ -64,11 +64,11 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
 
-		if (!hasSelectedAccessModifier(fieldDeclaration)) {
+		if (!BodyDeclarationsUtil.hasSelectedAccessModifier(fieldDeclaration, options)) {
 			return true;
 		}
 
-		boolean hasAnnotations = hasUsefulAnnotations(fieldDeclaration);
+		boolean hasAnnotations = BodyDeclarationsUtil.hasUsefulAnnotations(fieldDeclaration);
 		if (hasAnnotations) {
 			return true;
 		}
@@ -145,32 +145,6 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 			}
 		}
 		return false;
-	}
-
-	private boolean hasUsefulAnnotations(FieldDeclaration fieldDeclaration) {
-		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(fieldDeclaration.modifiers(), Annotation.class);
-		for (Annotation annotation : annotations) {
-			ITypeBinding typeBinding = annotation.resolveTypeBinding();
-			if (!ClassRelationUtil.isContentOfTypes(typeBinding,
-					Arrays.asList(java.lang.Deprecated.class.getName(), java.lang.SuppressWarnings.class.getName()))) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean hasSelectedAccessModifier(FieldDeclaration fieldDeclaration) {
-		int modifierFlags = fieldDeclaration.getModifiers();
-		if (Modifier.isPublic(modifierFlags)) {
-			return options.getOrDefault(Constants.PUBLIC_FIELDS, false);
-		} else if (Modifier.isProtected(modifierFlags)) {
-			return options.getOrDefault(Constants.PROTECTED_FIELDS, false);
-		} else if (Modifier.isPrivate(modifierFlags)) {
-			return options.getOrDefault(Constants.PRIVATE_FIELDS, false);
-		} else {
-			return options.getOrDefault(Constants.PACKAGE_PRIVATE_FIELDS, false);
-		}
 	}
 
 	private JavaAccessModifier findAccessModifier(FieldDeclaration fieldDeclaration) {

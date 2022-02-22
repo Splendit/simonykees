@@ -1,7 +1,6 @@
 package eu.jsparrow.core.visitor.unused.method;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -9,17 +8,14 @@ import java.util.Map;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 
-import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.unused.BodyDeclarationsUtil;
+import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
 
 public class UnusedMethodsCandidateVisitor extends ASTVisitor {
 
@@ -46,24 +42,20 @@ public class UnusedMethodsCandidateVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
-		if(!hasSelectedAccessModifier(methodDeclaration)) {
+		if(!BodyDeclarationsUtil.hasSelectedAccessModifier(methodDeclaration, options)) {
 			return false;
 		}
 		
-		if(hasUsefulAnnotations(methodDeclaration)) {
+		if(BodyDeclarationsUtil.hasUsefulAnnotations(methodDeclaration)) {
 			return false;
 		}
 		
-		/*
-		 * Check if it is an entry point. I.e., public static void main(String []args)
-		 */
+		if(MethodDeclarationUtils.isJavaApplicationMainMethod(compilationUnit, methodDeclaration)) {
+			return false;
+		}
 		
 		int modifiers = methodDeclaration.getModifiers();
 		if (Modifier.isPrivate(modifiers)) {
-			/*
-			 * search only inside the compilation unit
-			 * Use the MethodsReferencesVisitor
-			 */
 			ASTNode parent = methodDeclaration.getParent();
 			if(parent instanceof AbstractTypeDeclaration) {
 				AbstractTypeDeclaration typeDeclaration = (AbstractTypeDeclaration) methodDeclaration.getParent();
@@ -89,33 +81,7 @@ public class UnusedMethodsCandidateVisitor extends ASTVisitor {
 		return false;
 	}
 	
-	private boolean hasSelectedAccessModifier(MethodDeclaration methodDeclaration) {
-		// FIXME copied
-		int modifierFlags = methodDeclaration.getModifiers();
-		if (Modifier.isPublic(modifierFlags)) {
-			return options.getOrDefault(Constants.PUBLIC_FIELDS, false);
-		} else if (Modifier.isProtected(modifierFlags)) {
-			return options.getOrDefault(Constants.PROTECTED_FIELDS, false);
-		} else if (Modifier.isPrivate(modifierFlags)) {
-			return options.getOrDefault(Constants.PRIVATE_FIELDS, false);
-		} else {
-			return options.getOrDefault(Constants.PACKAGE_PRIVATE_FIELDS, false);
-		}
-	}
-	
-	private boolean hasUsefulAnnotations(MethodDeclaration methodDeclaration) {
-		//FIXME copied
-		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(methodDeclaration.modifiers(), Annotation.class);
-		for (Annotation annotation : annotations) {
-			ITypeBinding typeBinding = annotation.resolveTypeBinding();
-			if (!ClassRelationUtil.isContentOfTypes(typeBinding,
-					Arrays.asList(java.lang.Deprecated.class.getName(), java.lang.SuppressWarnings.class.getName()))) {
-				return true;
-			}
-		}
 
-		return false;
-	}
 
 	public List<UnusedMethodWrapper> getUnusedPrivateMethods() {
 		return unusedPrivateMethods;
