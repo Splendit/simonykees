@@ -40,7 +40,7 @@ public class UnusedMethodsEngine {
 	}
 
 
-	public List<UnusedMethodWrapper> findUnusedFields(List<ICompilationUnit> selectedJavaElements,
+	public List<UnusedMethodWrapper> findUnusedMethods(List<ICompilationUnit> selectedJavaElements,
 			Map<String, Boolean> optionsMap, SubMonitor subMonitor) {
 		
 		List<CompilationUnit> compilationUnits = new ArrayList<>();
