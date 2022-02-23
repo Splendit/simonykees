@@ -15,8 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
-@SuppressWarnings("nls")
-public class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
+class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
 
 	@AfterEach
 	void tearDown() throws Exception {
@@ -75,7 +74,7 @@ public class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFi
 		assertEquals(1, removedUnusedFields.size());
 		UnusedFieldWrapper unusedFieldWrapper = removedUnusedFields.get(0);
 		String removedUnusedFieldName = unusedFieldWrapper
-			.getFieldName();
+			.getClassMemberIdentifier();
 		assertEquals("unusedField", removedUnusedFieldName);
 		List<ExpressionStatement> unusedReassignments = unusedFieldWrapper.getUnusedReassignments();
 		assertEquals(1, unusedReassignments.size());

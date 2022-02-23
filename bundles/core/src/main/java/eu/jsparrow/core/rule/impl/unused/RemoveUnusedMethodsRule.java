@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
+import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
 import eu.jsparrow.core.visitor.unused.method.RemoveUnusedMethodsASTVisitor;
 import eu.jsparrow.core.visitor.unused.method.UnusedMethodWrapper;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
@@ -43,11 +44,11 @@ public class RemoveUnusedMethodsRule extends RefactoringRuleImpl<RemoveUnusedMet
 		return visitor;
 	}
 
-	public Map<UnusedMethodWrapper, Map<ICompilationUnit, DocumentChange>> computeDocumentChangesPerMethod() {
+	public Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> computeDocumentChangesPerMethod() {
 		return Collections.emptyMap();
 	}
 
-	public List<UnusedMethodWrapper> getUnusedMethodWrapperList() {
+	public List<UnusedClassMemberWrapper> getUnusedMethodWrapperList() {
 		return Collections.emptyList();
 	}
 }

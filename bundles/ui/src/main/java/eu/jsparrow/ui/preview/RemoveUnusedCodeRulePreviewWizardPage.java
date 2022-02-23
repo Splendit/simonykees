@@ -33,7 +33,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedFieldsRule;
-import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
+import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
@@ -46,7 +46,7 @@ import eu.jsparrow.rules.common.util.RefactoringUtil;
  */
 public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 
-	private Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes;
+	private Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> changes;
 
 	private CheckboxTreeViewer viewer;
 	private IChangePreviewViewer currentPreviewViewer;
@@ -56,11 +56,11 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 	private List<RemoveUnusedCodeDocumentChangeWrapper> changesWrapperList;
 	private RemoveUnusedCodeDocumentChangeWrapper selectedDocWrapper;
 
-	private List<UnusedFieldWrapper> uncheckedFields = new ArrayList<>();
-	private List<UnusedFieldWrapper> recheckedFields = new ArrayList<>();
+	private List<UnusedClassMemberWrapper> uncheckedFields = new ArrayList<>();
+	private List<UnusedClassMemberWrapper> recheckedFields = new ArrayList<>();
 	private Map<IPath, Document> originalDocuments;
 
-	public RemoveUnusedCodeRulePreviewWizardPage(Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes,
+	public RemoveUnusedCodeRulePreviewWizardPage(Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> changes,
 			Map<IPath, Document> originalDocuments, RemoveUnusedFieldsRule rule1, boolean enabledDiffView) {
 		super(rule1.getRuleDescription()
 			.getName());
@@ -118,7 +118,7 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 	 * @param changesForField
 	 * @param parent
 	 */
-	private void createDocumentChangeWrapperChildren(UnusedFieldWrapper fieldData, Document originalDocument,
+	private void createDocumentChangeWrapperChildren(UnusedClassMemberWrapper fieldData, Document originalDocument,
 			Map<ICompilationUnit, DocumentChange> changesForField, DocumentChange parent) {
 		RemoveUnusedCodeDocumentChangeWrapper dcw = new RemoveUnusedCodeDocumentChangeWrapper(parent, null,
 				originalDocument, fieldData);
@@ -233,7 +233,7 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 
 		RemoveUnusedCodeRulePreviewWizard wizard = (RemoveUnusedCodeRulePreviewWizard) getWizard();
 
-		UnusedFieldWrapper selectedFieldData = selectedWrapper.getFieldData();
+		UnusedClassMemberWrapper selectedFieldData = selectedWrapper.getFieldData();
 		if (checked) {
 			markAsNewCheck(selectedFieldData);
 			wizard.addMetaData(selectedFieldData);
@@ -244,7 +244,7 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 		populatePreviewViewer();
 	}
 
-	private void markAsNewUncheck(UnusedFieldWrapper selectedFieldData) {
+	private void markAsNewUncheck(UnusedClassMemberWrapper selectedFieldData) {
 		if (recheckedFields.contains(selectedFieldData)) {
 			recheckedFields.remove(selectedFieldData);
 		} else if (!uncheckedFields.contains(selectedFieldData)) {
@@ -252,7 +252,7 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 		}
 	}
 
-	private void markAsNewCheck(UnusedFieldWrapper selectedFieldData) {
+	private void markAsNewCheck(UnusedClassMemberWrapper selectedFieldData) {
 		if (uncheckedFields.contains(selectedFieldData)) {
 			uncheckedFields.remove(selectedFieldData);
 		} else if (!recheckedFields.contains(selectedFieldData)) {
@@ -338,7 +338,7 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 
 		Set<String> modifiers = changes.keySet()
 			.stream()
-			.map(key -> key.getFieldModifier()
+			.map(key -> key.getAccessModifier()
 				.toString())
 			.collect(Collectors.toSet());
 

@@ -18,4 +18,9 @@ public class TestSourceReference {
 		return null;
 	}
 
+	public ICompilationUnit getICompilationUnit() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

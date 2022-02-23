@@ -25,8 +25,7 @@ import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedFieldsRule;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedMethodsRule;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
-import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
-import eu.jsparrow.core.visitor.unused.method.UnusedMethodWrapper;
+import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
@@ -48,9 +47,9 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	private static final Logger logger = LoggerFactory.getLogger(RemoveUnusedCodeRulePreviewWizard.class);
 
 	private RefactoringPipeline refactoringPipeline;
-	private List<UnusedFieldWrapper> metaData;
+	private List<UnusedClassMemberWrapper> metaData;
 
-	private Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges;
+	private Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges;
 	private RemoveUnusedFieldsRule rule;
 
 	private List<ICompilationUnit> targetCompilationUnits;
@@ -61,10 +60,10 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 
 	public RemoveUnusedCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline, 
 			StandaloneStatisticsMetadata standaloneStatisticsMetadata, 
-			List<UnusedFieldWrapper> metadata,
-			List<UnusedMethodWrapper> unusedMethods,
-			Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges,
-			Map<UnusedMethodWrapper, Map<ICompilationUnit, DocumentChange>> methodDocumentChanges,
+			List<UnusedClassMemberWrapper> metadata,
+			List<UnusedClassMemberWrapper> unusedMethods,
+			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges,
+			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> methodDocumentChanges,
 			List<ICompilationUnit> targetCompilationUnits, 
 			RemoveUnusedFieldsRule rule,
 			RemoveUnusedMethodsRule unusedMethodsRule) {
@@ -102,13 +101,13 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 		RefactoringPreviewWizardModel model = new RefactoringPreviewWizardModel();
 		Map<ICompilationUnit, DocumentChange> changesPerRule = refactoringPipeline.getChangesForRule(rule);
 
-		Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(
 				JavaAccessModifier.PUBLIC);
-		Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> protectedChanges = filterChangesByModifier(
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> protectedChanges = filterChangesByModifier(
 				JavaAccessModifier.PROTECTED);
-		Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> packagePrivateChanges = filterChangesByModifier(
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> packagePrivateChanges = filterChangesByModifier(
 				JavaAccessModifier.PACKAGE_PRIVATE);
-		Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> privateChanges = filterChangesByModifier(
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> privateChanges = filterChangesByModifier(
 				JavaAccessModifier.PRIVATE);
 
 		model.addRule(rule);
@@ -134,12 +133,12 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 		addPage(summaryPage);
 	}
 
-	private Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> filterChangesByModifier(
+	private Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> filterChangesByModifier(
 			JavaAccessModifier modifier) {
 		return documentChanges.entrySet()
 			.stream()
 			.filter(e -> e.getKey()
-				.getFieldModifier()
+				.getAccessModifier()
 				.equals(modifier))
 			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
@@ -297,11 +296,11 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 		getPreviousPage(currentPage);
 	}
 
-	public void removeMetaData(UnusedFieldWrapper fieldData) {
+	public void removeMetaData(UnusedClassMemberWrapper fieldData) {
 		this.metaData.remove(fieldData);
 	}
 
-	public void addMetaData(UnusedFieldWrapper fieldData) {
+	public void addMetaData(UnusedClassMemberWrapper fieldData) {
 		this.metaData.add(fieldData);
 	}
 

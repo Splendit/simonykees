@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -22,6 +23,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import eu.jsparrow.core.visitor.unused.RemoveUnusedFieldsASTVisitor;
+import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 import eu.jsparrow.core.visitor.unused.UnusedFieldsEngine;
 import eu.jsparrow.i18n.Messages;
@@ -66,9 +68,9 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 		return visitor;
 	}
 
-	public Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> computeDocumentChangesPerField()
+	public Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> computeDocumentChangesPerField()
 			throws JavaModelException {
-		Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> map = new HashMap<>();
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> map = new HashMap<>();
 		for (UnusedFieldWrapper unusedField : unusedFields) {
 			Map<ICompilationUnit, DocumentChange> unusedFieldDocumentChanges = computeDocumentChangesForUnusedField(
 					unusedField);
@@ -171,7 +173,9 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 		return temp.startsWith("/") ? temp.substring(1) : temp; //$NON-NLS-1$
 	}
 
-	public List<UnusedFieldWrapper> getUnusedFieldWrapperList() {
-		return this.unusedFields;
+	public List<UnusedClassMemberWrapper> getUnusedFieldWrapperList() {
+		return unusedFields.stream()
+			.map(UnusedClassMemberWrapper.class::cast)
+			.collect(Collectors.toList());
 	}
 }
