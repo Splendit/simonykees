@@ -51,6 +51,10 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 
 	private Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges;
 	private RemoveUnusedFieldsRule rule;
+	
+	private List<UnusedClassMemberWrapper> unusedMethodsData;
+	private Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> methodDocumentChanges;
+	private RemoveUnusedMethodsRule unusedMethodsRule;
 
 	private List<ICompilationUnit> targetCompilationUnits;
 	private Map<IPath, Document> originalDocuments;
@@ -60,16 +64,16 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 
 	public RemoveUnusedCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline, 
 			StandaloneStatisticsMetadata standaloneStatisticsMetadata, 
-			List<UnusedClassMemberWrapper> metadata,
-			List<UnusedClassMemberWrapper> unusedMethods,
 			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> methodDocumentChanges,
 			List<ICompilationUnit> targetCompilationUnits, 
 			RemoveUnusedFieldsRule rule,
 			RemoveUnusedMethodsRule unusedMethodsRule) {
 		this.refactoringPipeline = refactoringPipeline;
-		this.metaData = metadata;
+		this.metaData = rule.getUnusedFieldWrapperList();
+		this.unusedMethodsData = unusedMethodsRule.getUnusedMethodWrapperList();
 		this.documentChanges = documentChanges;
+		this.methodDocumentChanges = methodDocumentChanges;
 		this.targetCompilationUnits = targetCompilationUnits;
 		this.originalDocuments = targetCompilationUnits.stream()
 			.map(ICompilationUnit::getPrimary)
@@ -77,6 +81,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 		this.statisticsSection = StatisticsSectionFactory.createStatisticsSectionForSummaryPage(refactoringPipeline);
 		this.standaloneStatisticsMetadata = standaloneStatisticsMetadata;
 		this.rule = rule;
+		this.unusedMethodsRule = unusedMethodsRule;
 		setNeedsProgressMonitor(true);
 	}
 
@@ -100,40 +105,88 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	public void addPages() {
 		RefactoringPreviewWizardModel model = new RefactoringPreviewWizardModel();
 		Map<ICompilationUnit, DocumentChange> changesPerRule = refactoringPipeline.getChangesForRule(rule);
+		Map<ICompilationUnit, DocumentChange> methodChangesPerRule = refactoringPipeline.getChangesForRule(unusedMethodsRule);
 
-		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(documentChanges,
 				JavaAccessModifier.PUBLIC);
-		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> protectedChanges = filterChangesByModifier(
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> protectedChanges = filterChangesByModifier(documentChanges,
 				JavaAccessModifier.PROTECTED);
-		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> packagePrivateChanges = filterChangesByModifier(
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> packagePrivateChanges = filterChangesByModifier(documentChanges,
 				JavaAccessModifier.PACKAGE_PRIVATE);
-		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> privateChanges = filterChangesByModifier(
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> privateChanges = filterChangesByModifier(documentChanges,
+				JavaAccessModifier.PRIVATE);
+		
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> publicMethodChanges = filterChangesByModifier(methodDocumentChanges,
+				JavaAccessModifier.PUBLIC);
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> protectedMethodChanges = filterChangesByModifier(methodDocumentChanges,
+				JavaAccessModifier.PROTECTED);
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> packagePrivateMethodChanges = filterChangesByModifier(methodDocumentChanges,
+				JavaAccessModifier.PACKAGE_PRIVATE);
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> privateMethodChanges = filterChangesByModifier(methodDocumentChanges,
 				JavaAccessModifier.PRIVATE);
 
 		model.addRule(rule);
 		changesPerRule.keySet()
 			.stream()
 			.forEach(x -> model.addFileToRule(rule, x.getHandleIdentifier()));
+		model.addRule(unusedMethodsRule);
+		methodChangesPerRule.keySet()
+			.stream()
+			.forEach(x -> model.addFileToRule(unusedMethodsRule, x.getHandleIdentifier()));
 		if (!publicChanges.isEmpty()) {
-			addPage(new RemoveUnusedCodeRulePreviewWizardPage(publicChanges, originalDocuments, rule, canFinish()));
+			String title = "Remove unused public fields"; //$NON-NLS-1$
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(publicChanges, originalDocuments, rule, title, canFinish(),
+					this::addMetaData, this::removeMetaData));
 		}
 
 		if (!protectedChanges.isEmpty()) {
-			addPage(new RemoveUnusedCodeRulePreviewWizardPage(protectedChanges, originalDocuments, rule, canFinish()));
+			String title = "Remove unused protected fields"; //$NON-NLS-1$
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(protectedChanges, originalDocuments, rule, title, canFinish(),
+					this::addMetaData, this::removeMetaData));
 		}
 
 		if (!packagePrivateChanges.isEmpty()) {
-			addPage(new RemoveUnusedCodeRulePreviewWizardPage(packagePrivateChanges, originalDocuments, rule, canFinish()));
+			String title = "Remove unused package private fields"; //$NON-NLS-1$
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(packagePrivateChanges, originalDocuments, rule, title, canFinish(),
+					this::addMetaData, this::removeMetaData));
 		}
 
 		if (!privateChanges.isEmpty()) {
-			addPage(new RemoveUnusedCodeRulePreviewWizardPage(privateChanges, originalDocuments, rule, canFinish()));
+			String title = "Remove unused private fields"; //$NON-NLS-1$
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(privateChanges, originalDocuments, rule, title, canFinish(), 
+					this::addMetaData, this::removeMetaData));
 		}
+		
+		if (!publicMethodChanges.isEmpty()) {
+			String title = "Remove unused public methods"; //$NON-NLS-1$
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(publicMethodChanges, originalDocuments, unusedMethodsRule, title, canFinish(),
+					this::addUnusedMethodData, this::removeUnusedMethodData));
+		}
+
+		if (!protectedMethodChanges.isEmpty()) {
+			String title = "Remove unused protected methods"; //$NON-NLS-1$
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(protectedMethodChanges, originalDocuments, unusedMethodsRule, title, canFinish(),
+					this::addUnusedMethodData, this::removeUnusedMethodData));
+		}
+
+		if (!packagePrivateMethodChanges.isEmpty()) {
+			String title = "Remove unused package private methods"; //$NON-NLS-1$
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(packagePrivateMethodChanges, originalDocuments, unusedMethodsRule, title, canFinish(),
+					this::addUnusedMethodData, this::removeUnusedMethodData));
+		}
+
+		if (!privateMethodChanges.isEmpty()) {
+			String title = "Remove unused private methods"; //$NON-NLS-1$
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(privateMethodChanges, originalDocuments, unusedMethodsRule, title, canFinish(),
+					this::addUnusedMethodData, this::removeUnusedMethodData));
+		}
+		
 		this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), standaloneStatisticsMetadata, statisticsSection); 
 		addPage(summaryPage);
 	}
 
 	private Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> filterChangesByModifier(
+			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			JavaAccessModifier modifier) {
 		return documentChanges.entrySet()
 			.stream()
@@ -302,6 +355,14 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 
 	public void addMetaData(UnusedClassMemberWrapper fieldData) {
 		this.metaData.add(fieldData);
+	}
+	
+	public void removeUnusedMethodData(UnusedClassMemberWrapper unusedMethod) {
+		this.unusedMethodsData.remove(unusedMethod);
+	}
+
+	public void addUnusedMethodData(UnusedClassMemberWrapper unusedMethod) {
+		this.unusedMethodsData.add(unusedMethod);
 	}
 
 	public RefactoringSummaryWizardPage getSummaryPage() {

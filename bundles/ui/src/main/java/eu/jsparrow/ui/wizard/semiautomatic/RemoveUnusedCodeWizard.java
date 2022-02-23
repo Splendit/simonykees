@@ -72,9 +72,8 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	private RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 	private RemoveUnusedFieldsRule rule;
 	private RemoveUnusedMethodsRule unusedMethodsRule;
-	private UnusedFieldsEngine engine;
-	private UnusedMethodsEngine unusedMethodsEngine;
 	private Image windowDefaultImage;
+	private Set<ICompilationUnit> allTargetCompilationUnits = new HashSet<>();
 
 	public RemoveUnusedCodeWizard(List<ICompilationUnit> selectedJavaElements) {
 		this.selectedJavaElements = selectedJavaElements;
@@ -135,8 +134,8 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 			protected IStatus run(IProgressMonitor monitor) {
 				String scope = model.getSearchScope();
 				preRefactoring();
-				engine = new UnusedFieldsEngine(scope);
-				unusedMethodsEngine = new UnusedMethodsEngine(scope);
+				UnusedFieldsEngine engine = new UnusedFieldsEngine(scope);
+				UnusedMethodsEngine unusedMethodsEngine = new UnusedMethodsEngine(scope);
 
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
@@ -168,13 +167,13 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 				refactoringPipeline.setRules(Arrays.asList(rule, unusedMethodsRule));
 				Set<ICompilationUnit> targetCompilationUnits = engine.getTargetCompilationUnits();
 				Set<ICompilationUnit> targetUnusedMethodsCUs = unusedMethodsEngine.getTargetCompilationUnits();
-				Set<ICompilationUnit>allTargetCUs = new HashSet<>(targetCompilationUnits);
-				allTargetCUs.addAll(targetUnusedMethodsCUs);
-				if (allTargetCUs.isEmpty()) {
+				allTargetCompilationUnits.addAll(targetCompilationUnits);
+				allTargetCompilationUnits.addAll(targetUnusedMethodsCUs);
+				if (allTargetCompilationUnits.isEmpty()) {
 					return Status.CANCEL_STATUS;
 				}
 				try {
-					refactoringPipeline.prepareRefactoring(new ArrayList<>(allTargetCUs), childSecondPart);
+					refactoringPipeline.prepareRefactoring(new ArrayList<>(allTargetCompilationUnits), childSecondPart);
 					refactoringPipeline.updateInitialSourceMap();
 				} catch (RefactoringException e) {
 					logger.error("Cannot create working copies of the target compilation units.", e); //$NON-NLS-1$
@@ -285,12 +284,10 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 					.getShell();
 				StandaloneStatisticsMetadata standaloneStatisticsMetadata = prepareStatisticsMetadata(
 						Collections.singletonList(selectedJavaProject));
-				List<ICompilationUnit> targetCompilationUnits = new ArrayList<>(engine.getTargetCompilationUnits());
-				List<UnusedClassMemberWrapper> unusedFields = rule.getUnusedFieldWrapperList();
-				List<UnusedClassMemberWrapper> unusedMethods = unusedMethodsRule.getUnusedMethodWrapperList();
+				List<ICompilationUnit> targetCompilationUnits = new ArrayList<>(allTargetCompilationUnits);
 				RemoveUnusedCodeRulePreviewWizard removeUnusedCodePreviewWizard = new RemoveUnusedCodeRulePreviewWizard(
 						refactoringPipeline,
-						standaloneStatisticsMetadata, unusedFields, unusedMethods, unusedFieldChanges, unusedMethodChanges, targetCompilationUnits, rule, unusedMethodsRule);
+						standaloneStatisticsMetadata, unusedFieldChanges, unusedMethodChanges, targetCompilationUnits, rule, unusedMethodsRule);
 				final WizardDialog dialog = new WizardDialog(shell, removeUnusedCodePreviewWizard) {
 					@Override
 					protected void nextPressed() {
