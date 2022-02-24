@@ -84,7 +84,7 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 				ReferencesVisitor referencesVisitor = new ReferencesVisitor(fragment, typeDeclaration, options);
 				this.compilationUnit.accept(referencesVisitor);
 				if (!referencesVisitor.hasActiveReference() && !referencesVisitor.hasUnresolvedReference()) {
-					markAsUnusedInternally(fieldDeclaration, typeDeclaration, fragment, referencesVisitor);
+					markAsUnusedInternally(fieldDeclaration, fragment, referencesVisitor);
 					/*
 					 * removing multiple fragments from the same field
 					 * declaration may result to incorrect changes.
@@ -98,8 +98,7 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 	}
 
 	private void markAsUnusedInternally(FieldDeclaration fieldDeclaration,
-			AbstractTypeDeclaration typeDeclaration, VariableDeclarationFragment fragment,
-			ReferencesVisitor referencesVisitor) {
+			VariableDeclarationFragment fragment, ReferencesVisitor referencesVisitor) {
 		List<ExpressionStatement> reassignments = referencesVisitor.getReassignments();
 		int modifierFlags = fieldDeclaration.getModifiers();
 		if (Modifier.isPrivate(modifierFlags)) {
@@ -109,7 +108,7 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 		} else {
 			JavaAccessModifier accessModifier = BodyDeclarationsUtil.findAccessModifier(fieldDeclaration);
 			NonPrivateUnusedFieldCandidate candidate = new NonPrivateUnusedFieldCandidate(fragment,
-					compilationUnit, typeDeclaration, accessModifier, reassignments);
+					accessModifier, reassignments);
 			nonPrivateCandidates.add(candidate);
 		}
 	}

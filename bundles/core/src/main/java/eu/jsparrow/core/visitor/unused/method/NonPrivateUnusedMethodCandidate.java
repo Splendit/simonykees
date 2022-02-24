@@ -10,7 +10,6 @@ public class NonPrivateUnusedMethodCandidate {
 	private JavaAccessModifier accessModifier;
 
 	public NonPrivateUnusedMethodCandidate(MethodDeclaration methodDeclaration, JavaAccessModifier accessModifier) {
-		super();
 		this.methodDeclaration = methodDeclaration;
 		this.accessModifier = accessModifier;
 	}

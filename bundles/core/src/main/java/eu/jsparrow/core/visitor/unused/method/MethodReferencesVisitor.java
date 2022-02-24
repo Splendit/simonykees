@@ -22,14 +22,15 @@ public class MethodReferencesVisitor extends ASTVisitor {
 	private Map<String, Boolean> optionsMap;
 	private String methodDeclarationIdentifier;
 	private IMethodBinding iMethodBinding;
-	
+
 	private List<MethodDeclaration> relatedTestDeclarations = new ArrayList<>();
 	private boolean mainSourceReferenceFound = false;
 	private boolean unresolvedReferenceFound = false;
-	
+
 	public MethodReferencesVisitor(MethodDeclaration methodDeclaration, Map<String, Boolean> optionsMap) {
 		this.optionsMap = optionsMap;
-		this.methodDeclarationIdentifier = methodDeclaration.getName().getIdentifier();
+		this.methodDeclarationIdentifier = methodDeclaration.getName()
+			.getIdentifier();
 		this.iMethodBinding = methodDeclaration.resolveBinding();
 	}
 
@@ -49,34 +50,33 @@ public class MethodReferencesVisitor extends ASTVisitor {
 	public boolean visit(MethodInvocation methodInvocation) {
 		SimpleName name = methodInvocation.getName();
 		String identifier = name.getIdentifier();
-		if (!identifier.equals(methodDeclarationIdentifier)) {
-			return true;
-		}
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		IMethodBinding declaration = methodBinding.getMethodDeclaration();
-		if(declaration.isEqualTo(iMethodBinding)) {
-			MethodDeclaration enclosingMethodDeclaration = ASTNodeUtil.getSpecificAncestor(methodInvocation, MethodDeclaration.class);
-			if(enclosingMethodDeclaration == null) {
-				this.mainSourceReferenceFound = true;
-				return true;
+		if (identifier.equals(methodDeclarationIdentifier)) {
+			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+			IMethodBinding declaration = methodBinding.getMethodDeclaration();
+			if (declaration.isEqualTo(iMethodBinding)) {
+				MethodDeclaration enclosingMethodDeclaration = ASTNodeUtil.getSpecificAncestor(methodInvocation,
+						MethodDeclaration.class);
+				if (enclosingMethodDeclaration == null) {
+					this.mainSourceReferenceFound = true;
+				} else {
+					if (isTestAnnotatedMethod(enclosingMethodDeclaration) && isRemoveTestsOptionSet()) {
+						this.relatedTestDeclarations.add(enclosingMethodDeclaration);
+					} else {
+						this.mainSourceReferenceFound = true;
+					}
+				}
 			}
-			if(isTestAnnotatedMethod(enclosingMethodDeclaration) && isRemoveTestsOptionSet()) {
-				this.relatedTestDeclarations.add(enclosingMethodDeclaration);
-			} else {
-				this.mainSourceReferenceFound = true;
-			}
-
 		}
 		return true;
 	}
-	
+
 	private boolean isRemoveTestsOptionSet() {
 		return optionsMap.getOrDefault(Constants.REMOVE_TEST_CODE, false);
 	}
 
 	private boolean isTestAnnotatedMethod(MethodDeclaration methodDeclaration) {
 		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(methodDeclaration.modifiers(), Annotation.class);
-		for(Annotation annotation : annotations) {
+		for (Annotation annotation : annotations) {
 			ITypeBinding typeBinding = annotation.resolveTypeBinding();
 
 			List<String> supportedTestAnnotations = Arrays.asList("org.junt.Test", "org.junt.jupiter.api.Test");
