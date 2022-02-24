@@ -4,37 +4,65 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 
 import eu.jsparrow.core.rule.impl.unused.Constants;
+import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class BodyDeclarationsUtil {
-	
+
 	private BodyDeclarationsUtil() {
 		/*
 		 * Hide default constructor
 		 */
 	}
 
-	public static boolean hasSelectedAccessModifier(BodyDeclaration methodDeclaration, Map<String, Boolean>options) {
-		int modifierFlags = methodDeclaration.getModifiers();
-		if (Modifier.isPublic(modifierFlags)) {
-			return options.getOrDefault(Constants.PUBLIC_FIELDS, false);
+	public static JavaAccessModifier findAccessModifier(BodyDeclaration bodyDeclaration) {
+		int modifierFlags = bodyDeclaration.getModifiers();
+		if (Modifier.isPrivate(modifierFlags)) {
+			return JavaAccessModifier.PRIVATE;
 		} else if (Modifier.isProtected(modifierFlags)) {
-			return options.getOrDefault(Constants.PROTECTED_FIELDS, false);
-		} else if (Modifier.isPrivate(modifierFlags)) {
-			return options.getOrDefault(Constants.PRIVATE_FIELDS, false);
-		} else {
-			return options.getOrDefault(Constants.PACKAGE_PRIVATE_FIELDS, false);
+			return JavaAccessModifier.PROTECTED;
+		} else if (Modifier.isPublic(modifierFlags)) {
+			return JavaAccessModifier.PUBLIC;
 		}
+		return JavaAccessModifier.PACKAGE_PRIVATE;
 	}
-	
+
+	public static boolean hasSelectedAccessModifier(BodyDeclaration methodDeclaration, Map<String, Boolean> options) {
+		int modifierFlags = methodDeclaration.getModifiers();
+
+		if (methodDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
+			if (Modifier.isPublic(modifierFlags)) {
+				return options.getOrDefault(Constants.PUBLIC_METHODS, false);
+			} else if (Modifier.isProtected(modifierFlags)) {
+				return options.getOrDefault(Constants.PROTECTED_METHODS, false);
+			} else if (Modifier.isPrivate(modifierFlags)) {
+				return options.getOrDefault(Constants.PRIVATE_METHODS, false);
+			} else {
+				return options.getOrDefault(Constants.PACKAGE_PRIVATE_METHODS, false);
+			}
+		} else if (methodDeclaration.getNodeType() == ASTNode.FIELD_DECLARATION) {
+			if (Modifier.isPublic(modifierFlags)) {
+				return options.getOrDefault(Constants.PUBLIC_FIELDS, false);
+			} else if (Modifier.isProtected(modifierFlags)) {
+				return options.getOrDefault(Constants.PROTECTED_FIELDS, false);
+			} else if (Modifier.isPrivate(modifierFlags)) {
+				return options.getOrDefault(Constants.PRIVATE_FIELDS, false);
+			} else {
+				return options.getOrDefault(Constants.PACKAGE_PRIVATE_FIELDS, false);
+			}
+		}
+		return false;
+
+	}
+
 	public static boolean hasUsefulAnnotations(BodyDeclaration methodDeclaration) {
 		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(methodDeclaration.modifiers(), Annotation.class);
 		for (Annotation annotation : annotations) {

@@ -12,7 +12,6 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -25,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.visitor.renaming.ReferenceSearchMatch;
 import eu.jsparrow.core.visitor.unused.JavaElementSearchEngine;
 import eu.jsparrow.core.visitor.utils.SearchScopeFactory;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 public class UnusedMethodsEngine {
@@ -120,13 +118,11 @@ public class UnusedMethodsEngine {
 		 * Make a cache with parsed compilation units. Keep all the icu-s in a
 		 * targetCompilationUnits field.
 		 */
-		AbstractTypeDeclaration typDeclaration = ASTNodeUtil.getSpecificAncestor(methodDeclaration,
-				AbstractTypeDeclaration.class);
 		List<TestSourceReference> relatedTestDeclarations = new ArrayList<>();
 		for (ICompilationUnit iCompilationUnit : targetICUs) {
 			CompilationUnit compilationUnit = RefactoringUtil.parse(iCompilationUnit);
 			
-			MethodReferencesVisitor visitor = new MethodReferencesVisitor(methodDeclaration, typDeclaration, optionsMap);
+			MethodReferencesVisitor visitor = new MethodReferencesVisitor(methodDeclaration, optionsMap);
 			compilationUnit.accept(visitor);
 			if (!visitor.hasMainSourceReference() && !visitor.hasUnresolvedReference()) {
 				List<MethodDeclaration> testMethodDeclarations = visitor.getRelatedTestDeclarations();

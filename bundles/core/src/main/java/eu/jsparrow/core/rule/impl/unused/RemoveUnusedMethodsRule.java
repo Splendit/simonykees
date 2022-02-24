@@ -2,7 +2,6 @@ package eu.jsparrow.core.rule.impl.unused;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -5,15 +5,22 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 
 public class NonPrivateUnusedMethodCandidate {
+	
+	private MethodDeclaration methodDeclaration;
+	private JavaAccessModifier accessModifier;
+
+	public NonPrivateUnusedMethodCandidate(MethodDeclaration methodDeclaration, JavaAccessModifier accessModifier) {
+		super();
+		this.methodDeclaration = methodDeclaration;
+		this.accessModifier = accessModifier;
+	}
 
 	public MethodDeclaration getDeclaration() {
-		// TODO Auto-generated method stub
-		return null;
+		return methodDeclaration;
 	}
 
 	public JavaAccessModifier getAccessModifier() {
-		// TODO Auto-generated method stub
-		return null;
+		return accessModifier;
 	}
 
 }

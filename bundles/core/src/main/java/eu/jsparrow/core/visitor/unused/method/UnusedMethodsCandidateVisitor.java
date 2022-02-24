@@ -10,12 +10,15 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.core.visitor.unused.BodyDeclarationsUtil;
 import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class UnusedMethodsCandidateVisitor extends ASTVisitor {
 
@@ -54,33 +57,42 @@ public class UnusedMethodsCandidateVisitor extends ASTVisitor {
 			return false;
 		}
 		
+		ASTNode parent = methodDeclaration.getParent();
+		if(!(parent instanceof AbstractTypeDeclaration)) {
+			return false;
+		}
+
 		int modifiers = methodDeclaration.getModifiers();
+		MethodReferencesVisitor visitor = new MethodReferencesVisitor(methodDeclaration, options);
+		this.compilationUnit.accept(visitor);
+		if(visitor.hasUnresolvedReference()) {
+			return false;
+		}
+		
+		if(visitor.hasMainSourceReference()) {
+			return false;
+		}
 		if (Modifier.isPrivate(modifiers)) {
-			ASTNode parent = methodDeclaration.getParent();
-			if(parent instanceof AbstractTypeDeclaration) {
-				AbstractTypeDeclaration typeDeclaration = (AbstractTypeDeclaration) methodDeclaration.getParent();
-				MethodReferencesVisitor visitor = new MethodReferencesVisitor(methodDeclaration, typeDeclaration, options);
-				this.compilationUnit.accept(visitor);
-				if (!visitor.hasMainSourceReference() && !visitor.hasUnresolvedReference()) {
-					
-					UnusedMethodWrapper unusedMethod = new UnusedMethodWrapper(compilationUnit, 
-							JavaAccessModifier.PRIVATE, methodDeclaration, Collections.emptyList());
-					this.unusedPrivateMethods.add(unusedMethod);
+			UnusedMethodWrapper unusedMethod = new UnusedMethodWrapper(compilationUnit, 
+					JavaAccessModifier.PRIVATE, methodDeclaration, Collections.emptyList());
+			this.unusedPrivateMethods.add(unusedMethod);
+		} else {
+			AbstractTypeDeclaration typeDeclaration = (AbstractTypeDeclaration) methodDeclaration.getParent();
+			ITypeBinding parentTypeBinding = typeDeclaration.resolveBinding();
+			List<IMethodBinding> inheritedMethods = ClassRelationUtil.findInheretedMethods(parentTypeBinding);
+			IMethodBinding methodBinding = methodDeclaration.resolveBinding();
+			for(IMethodBinding binding : inheritedMethods) {
+				if(methodBinding.overrides(binding)) {
+					return false;
 				}
 			}
-		} else {
-			
-			/*
-			 * Search in the compilation unit. 
-			 * If no references are found, check if this method is overriding any parent method.
-			 * If not, then
-			 * use the 'UnusedMethodsEngine' to search for external references.
-			 */
+			JavaAccessModifier accessModifier = BodyDeclarationsUtil.findAccessModifier(methodDeclaration);
+			NonPrivateUnusedMethodCandidate candidate = new NonPrivateUnusedMethodCandidate(methodDeclaration, accessModifier);
+			this.nonPrivateCandidates.add(candidate);
 		}
 
 		return false;
 	}
-	
 
 
 	public List<UnusedMethodWrapper> getUnusedPrivateMethods() {

@@ -1,20 +1,17 @@
 package eu.jsparrow.core.visitor.unused;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
@@ -25,7 +22,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * Analyzes field declarations. Verifies if they are used within the compilation
@@ -111,7 +107,7 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 					JavaAccessModifier.PRIVATE, fragment, reassignments, Collections.emptyList());
 			unusedPrivateFields.add(unusedField);
 		} else {
-			JavaAccessModifier accessModifier = findAccessModifier(fieldDeclaration);
+			JavaAccessModifier accessModifier = BodyDeclarationsUtil.findAccessModifier(fieldDeclaration);
 			NonPrivateUnusedFieldCandidate candidate = new NonPrivateUnusedFieldCandidate(fragment,
 					compilationUnit, typeDeclaration, accessModifier, reassignments);
 			nonPrivateCandidates.add(candidate);
@@ -145,18 +141,6 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 			}
 		}
 		return false;
-	}
-
-	private JavaAccessModifier findAccessModifier(FieldDeclaration fieldDeclaration) {
-		int modifierFlags = fieldDeclaration.getModifiers();
-		if (Modifier.isPrivate(modifierFlags)) {
-			return JavaAccessModifier.PRIVATE;
-		} else if (Modifier.isProtected(modifierFlags)) {
-			return JavaAccessModifier.PROTECTED;
-		} else if (Modifier.isPublic(modifierFlags)) {
-			return JavaAccessModifier.PUBLIC;
-		}
-		return JavaAccessModifier.PACKAGE_PRIVATE;
 	}
 
 	public CompilationUnit getCompilationUnit() {
