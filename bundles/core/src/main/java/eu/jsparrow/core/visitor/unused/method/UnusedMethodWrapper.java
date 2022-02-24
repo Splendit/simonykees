@@ -2,7 +2,9 @@ package eu.jsparrow.core.visitor.unused.method;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -10,6 +12,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.text.edits.TextEditGroup;
 
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
@@ -23,6 +26,7 @@ public class UnusedMethodWrapper implements UnusedClassMemberWrapper {
 	private IPath declarationPath;
 	private String classMemberIdentifier;
 	private String classDeclarationName;
+	private Map<IPath, TextEditGroup> textEditGroups = new HashMap<>();
 
 	public UnusedMethodWrapper(CompilationUnit compilationUnit, JavaAccessModifier accessModifier,
 			MethodDeclaration methodDeclaration, List<TestSourceReference> testReferences) {
@@ -82,6 +86,17 @@ public class UnusedMethodWrapper implements UnusedClassMemberWrapper {
 			compilationUnits.add(iCompilationUnit);
 		}
 		return Collections.unmodifiableList(compilationUnits);
+	}
+
+	public TextEditGroup getTextEditGroup(ICompilationUnit iCompilationUnit) {
+		IPath path = iCompilationUnit.getPath();
+		if (!textEditGroups.containsKey(path)) {
+			TextEditGroup textEditGroup = new TextEditGroup(classMemberIdentifier);
+			textEditGroups.put(path, textEditGroup);
+			return textEditGroup;
+		} else {
+			return textEditGroups.get(path);
+		}
 	}
 
 	@Override
