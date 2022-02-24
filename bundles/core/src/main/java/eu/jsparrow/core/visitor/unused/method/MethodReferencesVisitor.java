@@ -79,7 +79,7 @@ public class MethodReferencesVisitor extends ASTVisitor {
 		for (Annotation annotation : annotations) {
 			ITypeBinding typeBinding = annotation.resolveTypeBinding();
 
-			List<String> supportedTestAnnotations = Arrays.asList("org.junt.Test", "org.junt.jupiter.api.Test");
+			List<String> supportedTestAnnotations = Arrays.asList("org.junit.Test", "org.junit.jupiter.api.Test");
 			if (ClassRelationUtil.isContentOfTypes(typeBinding, supportedTestAnnotations)) {
 				return true;
 			}

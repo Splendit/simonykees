@@ -114,10 +114,15 @@ public class RemoveUnusedCodeWizardPageModel {
 		map.put(Constants.PUBLIC_FIELDS, removePublicFields);
 		map.put(Constants.PACKAGE_PRIVATE_FIELDS, removePackagePrivateFields);
 
-		map.put(Constants.PRIVATE_METHODS, false);
-		map.put(Constants.PROTECTED_METHODS, false);
-		map.put(Constants.PUBLIC_METHODS, false);
-		map.put(Constants.PACKAGE_PRIVATE_METHODS, false);
+		
+		boolean removePrivateMethods = selectedClassMemberTypes.contains(PRIVATE_METHODS);
+		boolean removeProtectedMeMethods = selectedClassMemberTypes.contains(PROTECTED_METHODS);
+		boolean removePublicMethods = selectedClassMemberTypes.contains(PUBLIC_METHODS);
+		boolean removePackagePrivateMethods = selectedClassMemberTypes.contains(PACKAGE_PRIVATE_METHODS);
+		map.put(Constants.PRIVATE_METHODS, removePrivateMethods);
+		map.put(Constants.PROTECTED_METHODS, removeProtectedMeMethods);
+		map.put(Constants.PUBLIC_METHODS, removePublicMethods);
+		map.put(Constants.PACKAGE_PRIVATE_METHODS, removePackagePrivateMethods);
 
 		map.put(Constants.PRIVATE_CLASSES, false);
 		map.put(Constants.PROTECTED_CLASSES, false);
