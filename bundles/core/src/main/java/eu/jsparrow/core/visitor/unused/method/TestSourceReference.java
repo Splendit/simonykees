@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.unused.method;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -10,17 +11,19 @@ public class TestSourceReference {
 
 	public TestSourceReference(CompilationUnit compilationUnit, ICompilationUnit iCompilationUnit,
 			List<MethodDeclaration> testMethodDeclarations) {
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	public CompilationUnit getCompilationUnit() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public ICompilationUnit getICompilationUnit() {
-		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public List<MethodDeclaration> getTestDeclarations() {
+		return Collections.emptyList();
 	}
 
 }
