@@ -5,13 +5,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 
 import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -34,39 +37,75 @@ public class MethodReferencesVisitor extends ASTVisitor {
 		this.iMethodBinding = methodDeclaration.resolveBinding();
 	}
 
-	public List<MethodDeclaration> getRelatedTestDeclarations() {
-		return relatedTestDeclarations;
+	@Override
+	public boolean preVisit2(ASTNode node) {
+		return !unresolvedReferenceFound && !mainSourceReferenceFound;
 	}
-
-	public boolean hasMainSourceReference() {
-		return this.mainSourceReferenceFound;
+	
+	@Override
+	public boolean visit(ConstructorInvocation constructorInvocation) {
+		IMethodBinding constructorBinding = constructorInvocation.resolveConstructorBinding();
+		if(constructorBinding == null) {
+			this.unresolvedReferenceFound = true;
+			return false;
+		}
+		
+		if(constructorBinding.isEqualTo(iMethodBinding)) {
+			// FIXME: what if this is only used in a test? reuse the solution from visit(methodInvocation)
+			this.mainSourceReferenceFound = true;
+		}
+		
+		return true;
 	}
-
-	public boolean hasUnresolvedReference() {
-		return this.unresolvedReferenceFound;
+	
+	@Override
+	public boolean visit(SuperConstructorInvocation superConstructorInvocation) {
+		IMethodBinding constructorBinding = superConstructorInvocation.resolveConstructorBinding();
+		if(constructorBinding == null) {
+			this.unresolvedReferenceFound = true;
+			return false;
+		}
+		
+		if(constructorBinding.isEqualTo(iMethodBinding)) {
+			// FIXME: what if this is only used in a test? reuse the solution from visit(methodInvocation)
+			this.mainSourceReferenceFound = true;
+		}
+		
+		return true;
 	}
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		SimpleName name = methodInvocation.getName();
 		String identifier = name.getIdentifier();
-		if (identifier.equals(methodDeclarationIdentifier)) {
-			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-			IMethodBinding declaration = methodBinding.getMethodDeclaration();
-			if (declaration.isEqualTo(iMethodBinding)) {
-				MethodDeclaration enclosingMethodDeclaration = ASTNodeUtil.getSpecificAncestor(methodInvocation,
-						MethodDeclaration.class);
-				if (enclosingMethodDeclaration == null) {
-					this.mainSourceReferenceFound = true;
-				} else {
-					if (isTestAnnotatedMethod(enclosingMethodDeclaration) && isRemoveTestsOptionSet()) {
-						this.relatedTestDeclarations.add(enclosingMethodDeclaration);
-					} else {
-						this.mainSourceReferenceFound = true;
-					}
-				}
-			}
+		if (!identifier.equals(methodDeclarationIdentifier)) {
+			return true;
 		}
+
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			this.unresolvedReferenceFound = true;
+			return false;
+		}
+		IMethodBinding declaration = methodBinding.getMethodDeclaration();
+		if (!declaration.isEqualTo(iMethodBinding)) {
+			return true;
+		}
+
+		MethodDeclaration enclosingMethodDeclaration = ASTNodeUtil.getSpecificAncestor(methodInvocation,
+				MethodDeclaration.class);
+		if (enclosingMethodDeclaration == null) {
+			this.mainSourceReferenceFound = true;
+			return false;
+		}
+
+		if (isRemoveTestsOptionSet() && isTestAnnotatedMethod(enclosingMethodDeclaration)) {
+			this.relatedTestDeclarations.add(enclosingMethodDeclaration);
+		} else {
+			this.mainSourceReferenceFound = true;
+			return false;
+		}
+
 		return true;
 	}
 
@@ -85,5 +124,17 @@ public class MethodReferencesVisitor extends ASTVisitor {
 			}
 		}
 		return false;
+	}
+
+	public List<MethodDeclaration> getRelatedTestDeclarations() {
+		return relatedTestDeclarations;
+	}
+
+	public boolean hasMainSourceReference() {
+		return this.mainSourceReferenceFound;
+	}
+
+	public boolean hasUnresolvedReference() {
+		return this.unresolvedReferenceFound;
 	}
 }
