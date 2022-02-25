@@ -2,12 +2,14 @@ package eu.jsparrow.core.visitor.unused.method;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -40,12 +42,11 @@ public class UnusedMethodsEngine {
 
 	public List<UnusedMethodWrapper> findUnusedMethods(List<ICompilationUnit> selectedJavaElements,
 			Map<String, Boolean> optionsMap, SubMonitor subMonitor) {
-		
-		List<CompilationUnit> compilationUnits = new ArrayList<>();
+		Map<IPath, CompilationUnit> cache = new HashMap<>();
 		List<UnusedMethodWrapper> list = new ArrayList<>();
 		for (ICompilationUnit icu : selectedJavaElements) {
 			CompilationUnit compilationUnit = RefactoringUtil.parse(icu);
-			compilationUnits.add(compilationUnit);
+			cache.put(icu.getPath(), compilationUnit);
 
 			UnusedMethodsCandidateVisitor visitor = new UnusedMethodsCandidateVisitor(optionsMap);
 			compilationUnit.accept(visitor);
@@ -57,7 +58,7 @@ public class UnusedMethodsEngine {
 
 			List<NonPrivateUnusedMethodCandidate> nonPrivateCandidates = visitor.getNonPrivateCandidates();
 			List<UnusedMethodWrapper> nonPrivate = findExternalUnusedReferences(compilationUnit, nonPrivateCandidates,
-					optionsMap);
+					optionsMap, cache);
 			if (!nonPrivate.isEmpty()) {
 				targetCompilationUnits.add(icu);
 			}
@@ -83,13 +84,14 @@ public class UnusedMethodsEngine {
 	}
 	
 	private List<UnusedMethodWrapper> findExternalUnusedReferences(CompilationUnit compilationUnit,
-			List<NonPrivateUnusedMethodCandidate> nonPrivateCandidates, Map<String, Boolean> optionsMap) {
+			List<NonPrivateUnusedMethodCandidate> nonPrivateCandidates, Map<String, Boolean> optionsMap, 
+			Map<IPath, CompilationUnit> cache) {
 		List<UnusedMethodWrapper> list = new ArrayList<>();
 		IJavaElement javaElement = compilationUnit.getJavaElement();
 		IJavaProject javaProject = javaElement.getJavaProject();
 		for (NonPrivateUnusedMethodCandidate candidate : nonPrivateCandidates) {
 			MethodDeclaration methodDeclaration = candidate.getDeclaration();
-			UnusedMethodReferenceSearchResult searchResult = searchReferences(methodDeclaration, javaProject, optionsMap);
+			UnusedMethodReferenceSearchResult searchResult = searchReferences(methodDeclaration, javaProject, optionsMap, cache);
 			if (!searchResult.isMainSourceReferenceFound() && !searchResult.isInvalidSearchEngineResult()) {
 				List<TestSourceReference> testReferences = searchResult.getReferencesInTestSources();
 
@@ -103,12 +105,18 @@ public class UnusedMethodsEngine {
 	
 	private UnusedMethodReferenceSearchResult searchReferences(MethodDeclaration methodDeclaration,
 			IJavaProject project,
-			Map<String, Boolean> optionsMap) {
+			Map<String, Boolean> optionsMap, 
+			Map<IPath, CompilationUnit> cache) {
 		IJavaElement[] searchScope = createSearchScope(scope, project);
 		JavaElementSearchEngine fieldReferencesSearchEngine = new JavaElementSearchEngine(searchScope);
 		SimpleName name = methodDeclaration.getName();
 		String methodIdentifier = name.getIdentifier();
-		SearchPattern searchPattern = createSearchPattern(methodDeclaration);
+		IMethodBinding methodBinding = methodDeclaration.resolveBinding();
+		if(methodBinding == null) {
+			return new UnusedMethodReferenceSearchResult(false, true, Collections.emptyList());
+		}
+		IJavaElement javaElement = methodBinding.getJavaElement();
+		SearchPattern searchPattern = SearchPattern.createPattern(javaElement, IJavaSearchConstants.REFERENCES);
 		Optional<List<ReferenceSearchMatch>> references = fieldReferencesSearchEngine.findFieldReferences(searchPattern, methodIdentifier);
 		if (!references.isPresent()) {
 			return new UnusedMethodReferenceSearchResult(false, true, Collections.emptyList());
@@ -120,8 +128,8 @@ public class UnusedMethodsEngine {
 		 */
 		List<TestSourceReference> relatedTestDeclarations = new ArrayList<>();
 		for (ICompilationUnit iCompilationUnit : targetICUs) {
-			CompilationUnit compilationUnit = RefactoringUtil.parse(iCompilationUnit);
-			
+			IPath path = iCompilationUnit.getPath();
+			CompilationUnit compilationUnit = cache.computeIfAbsent(path, iPath -> RefactoringUtil.parse(iCompilationUnit));
 			MethodReferencesVisitor visitor = new MethodReferencesVisitor(methodDeclaration, optionsMap);
 			compilationUnit.accept(visitor);
 			if (!visitor.hasMainSourceReference() && !visitor.hasUnresolvedReference()) {
@@ -135,13 +143,6 @@ public class UnusedMethodsEngine {
 		}
 		return new UnusedMethodReferenceSearchResult(false, false, relatedTestDeclarations);
 	}
-
-	private SearchPattern createSearchPattern(MethodDeclaration methodDeclaration) {
-		IMethodBinding methodBinding = methodDeclaration.resolveBinding();
-		IJavaElement javaElement = methodBinding.getJavaElement();
-		return SearchPattern.createPattern(javaElement, IJavaSearchConstants.REFERENCES);
-	}
-
 
 	private IJavaElement[] createSearchScope(String modelSearchScope, IJavaProject javaProject) {
 		if ("Project".equalsIgnoreCase(modelSearchScope)) { //$NON-NLS-1$

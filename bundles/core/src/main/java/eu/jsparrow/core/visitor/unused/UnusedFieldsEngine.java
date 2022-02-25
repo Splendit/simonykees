@@ -2,12 +2,14 @@ package eu.jsparrow.core.visitor.unused;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -48,12 +50,12 @@ public class UnusedFieldsEngine {
 
 	public List<UnusedFieldWrapper> findUnusedFields(List<ICompilationUnit> selectedJavaElements,
 			Map<String, Boolean> optionsMap, SubMonitor subMonitor) {
-		List<CompilationUnit> compilationUnits = new ArrayList<>();
+
 		List<UnusedFieldWrapper> list = new ArrayList<>();
+		Map<IPath, CompilationUnit> cache = new HashMap<>();
 		for (ICompilationUnit icu : selectedJavaElements) {
 			CompilationUnit compilationUnit = RefactoringUtil.parse(icu);
-			compilationUnits.add(compilationUnit);
-
+			cache.put(icu.getPath(), compilationUnit);
 			UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(optionsMap);
 			compilationUnit.accept(visitor);
 			List<UnusedFieldWrapper> unusedPrivateFields = visitor.getUnusedPrivateFields();
@@ -64,7 +66,7 @@ public class UnusedFieldsEngine {
 
 			List<NonPrivateUnusedFieldCandidate> nonPrivateCandidates = visitor.getNonPrivateCandidates();
 			List<UnusedFieldWrapper> nonPrivate = findExternalUnusedReferences(compilationUnit, nonPrivateCandidates,
-					optionsMap);
+					optionsMap, cache);
 			if (!nonPrivate.isEmpty()) {
 				targetCompilationUnits.add(icu);
 			}
@@ -88,13 +90,13 @@ public class UnusedFieldsEngine {
 	}
 
 	private List<UnusedFieldWrapper> findExternalUnusedReferences(CompilationUnit compilationUnit,
-			List<NonPrivateUnusedFieldCandidate> nonPrivateCandidates, Map<String, Boolean> optionsMap) {
+			List<NonPrivateUnusedFieldCandidate> nonPrivateCandidates, Map<String, Boolean> optionsMap, Map<IPath, CompilationUnit>cache) {
 		List<UnusedFieldWrapper> list = new ArrayList<>();
 		IJavaElement javaElement = compilationUnit.getJavaElement();
 		IJavaProject javaProject = javaElement.getJavaProject();
 		for (NonPrivateUnusedFieldCandidate candidate : nonPrivateCandidates) {
 			VariableDeclarationFragment fragment = candidate.getFragment();
-			UnusedFieldReferenceSearchResult searchResult = searchReferences(fragment, javaProject, optionsMap);
+			UnusedFieldReferenceSearchResult searchResult = searchReferences(fragment, javaProject, optionsMap, cache);
 			if (!searchResult.isActiveReferenceFound() && !searchResult.isInvalidSearchEngineResult()) {
 				List<UnusedExternalReferences> unusedReferences = searchResult.getUnusedReferences();
 				List<ExpressionStatement> internalReassignments = candidate.getInternalReassignments();
@@ -108,7 +110,8 @@ public class UnusedFieldsEngine {
 
 	private UnusedFieldReferenceSearchResult searchReferences(VariableDeclarationFragment fragment,
 			IJavaProject project,
-			Map<String, Boolean> optionsMap) {
+			Map<String, Boolean> optionsMap, 
+			Map<IPath, CompilationUnit> cache) {
 		IJavaElement[] searchScope = createSearchScope(scope, project);
 		JavaElementSearchEngine fieldReferencesSearchEngine = new JavaElementSearchEngine(searchScope);
 		SearchPattern pattern = createSearchPattern(fragment);
@@ -128,7 +131,8 @@ public class UnusedFieldsEngine {
 				AbstractTypeDeclaration.class);
 		List<UnusedExternalReferences> unusedExternalreferences = new ArrayList<>();
 		for (ICompilationUnit iCompilationUnit : targetICUs) {
-			CompilationUnit compilationUnit = RefactoringUtil.parse(iCompilationUnit);
+			CompilationUnit compilationUnit = cache.computeIfAbsent(iCompilationUnit.getPath(), 
+					path -> RefactoringUtil.parse(iCompilationUnit));
 			ReferencesVisitor visitor = new ReferencesVisitor(fragment, typDeclaration, optionsMap);
 			compilationUnit.accept(visitor);
 			if (!visitor.hasActiveReference() && !visitor.hasUnresolvedReference()) {
