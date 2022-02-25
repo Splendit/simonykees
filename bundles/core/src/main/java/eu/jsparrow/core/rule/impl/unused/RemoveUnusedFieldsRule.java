@@ -15,7 +15,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MultiTextEdit;
@@ -87,12 +86,8 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 		for (ICompilationUnit iCompilationUnit : targetCompilationUnits) {
 			TextEditGroup editGroup = unusedField.getTextEditGroup(iCompilationUnit);
 			if (!editGroup.isEmpty()) {
-
 				VariableDeclarationFragment oldFragment = unusedField.getFragment();
-				Document doc = new Document(iCompilationUnit.getPrimary()
-					.getSource());
-				DocumentChange documentChange = new DocumentChange(
-						iCompilationUnit.getElementName() + " - " + getPathString(iCompilationUnit), doc); //$NON-NLS-1$
+				DocumentChange documentChange = DocumentChangeUtil.createDocumentChange(iCompilationUnit);
 				TextEdit rootEdit = new MultiTextEdit();
 				documentChange.setEdit(rootEdit);
 				FieldDeclaration fieldDeclaration = (FieldDeclaration) oldFragment.getParent();
@@ -155,22 +150,7 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 	}
 
 	private boolean comparePaths(IPath path1, IPath path2) {
-		return path1.toString()
-			.equals(path2.toString());
-	}
-
-	/**
-	 * Returns the path of an {@link ICompilationUnit} without leading slash
-	 * (the same as in the Externalize Strings refactoring view).
-	 * 
-	 * @param compilationUnit
-	 * @return
-	 */
-	private String getPathString(ICompilationUnit compilationUnit) {
-		String temp = compilationUnit.getParent()
-			.getPath()
-			.toString();
-		return temp.startsWith("/") ? temp.substring(1) : temp; //$NON-NLS-1$
+		return path1.equals(path2);
 	}
 
 	public List<UnusedClassMemberWrapper> getUnusedFieldWrapperList() {
