@@ -69,6 +69,28 @@ class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
+	@Test
+	void visit_UnusedLocalVariableWithReAssignment_shouldTransform() throws Exception {
+		String unusedVariableWithReassignment = "\n" +
+				"		int x = 0;\n" +
+				"		x = 1;\n";
+
+		String original = "{" + unusedVariableWithReassignment + "}";
+		String expected = "{}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_ReAssignmentNotInBlock_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		int x = 0;\n" +
+				"		if (true)\n" +
+				"			x = 1;";
+
+		assertNoChange(original);
+	}
+
 	/**
 	 * This test is expected to fail as soon as lambdas without side effect are
 	 * tolerated.

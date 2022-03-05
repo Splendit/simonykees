@@ -19,33 +19,39 @@ public class SafelyRemoveable {
 		 */
 	}
 
-	static Optional<ExpressionStatement> isSafelyRemovable(Assignment assignment, Map<String, Boolean> options) {
-		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+	static Optional<ExpressionStatement> findParentStatementInBlock(Expression expression) {
+		if (expression.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return Optional.empty();
 		}
 
-		ExpressionStatement expressionStatement = (ExpressionStatement) assignment.getParent();
+		ExpressionStatement expressionStatement = (ExpressionStatement) expression.getParent();
 		if (expressionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return Optional.empty();
 		}
+		return Optional.of(expressionStatement);
+	}
 
-		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
-		if (removeInitializersSideEffects) {
-			return Optional.of(expressionStatement);
-		}
+	static Optional<ExpressionStatement> isSafelyRemovable(Assignment assignment, Map<String, Boolean> options) {
 
-		Expression rightHandSide = assignment.getRightHandSide();
-		boolean safelyRemovable = ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(rightHandSide);
-		if (safelyRemovable) {
-			return Optional.of(expressionStatement);
+		Optional<ExpressionStatement> optionalParentStatement = findParentStatementInBlock(assignment);
+		if (optionalParentStatement.isPresent() && isSafelyRemovableAssignment(assignment, options)) {
+			return optionalParentStatement;
 		}
-		
 		return Optional.empty();
 	}
 
+	private static boolean isSafelyRemovableAssignment(Assignment assignment, Map<String, Boolean> options) {
+
+		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS,
+				false);
+		return removeInitializersSideEffects
+				|| ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(assignment.getRightHandSide());
+
+	}
+
 	static boolean isSafelyRemovable(VariableDeclarationFragment fragment, Map<String, Boolean> options) {
-		boolean ignoreSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
-		if (ignoreSideEffects) {
+		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
+		if (removeInitializersSideEffects) {
 			return true;
 		}
 		Expression initializer = fragment.getInitializer();
