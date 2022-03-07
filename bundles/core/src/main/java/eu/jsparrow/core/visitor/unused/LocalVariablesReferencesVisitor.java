@@ -8,10 +8,13 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -89,6 +92,14 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 	private boolean isTargetLocalVariableReference(SimpleName simpleName) throws UnresolvedTypeBindingException {
 		String identifier = simpleName.getIdentifier();
 		if (!identifier.equals(originalIdentifier)) {
+			return false;
+		}
+		
+		if (simpleName.getLocationInParent() == LabeledStatement.LABEL_PROPERTY
+				|| simpleName.getLocationInParent() == ContinueStatement.LABEL_PROPERTY
+				|| simpleName.getLocationInParent() == BreakStatement.LABEL_PROPERTY
+
+		) {
 			return false;
 		}
 

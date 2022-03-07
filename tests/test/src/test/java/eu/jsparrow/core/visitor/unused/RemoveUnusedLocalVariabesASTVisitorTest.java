@@ -72,7 +72,7 @@ class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	void visit_UnusedLocalVariableWithReAssignment_shouldTransform() throws Exception {
 		String unusedVariableWithReassignment = "\n" +
-				"		int x = 0;\n" +
+				"		int x;\n" +
 				"		x = 1;\n";
 
 		String original = "{" + unusedVariableWithReassignment + "}";
@@ -81,12 +81,106 @@ class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"		x: while (true)\n" +
+					"			break x;",
+			"" +
+					"		while (true) {\n" +
+					"			x: while (true)\n" +
+					"				continue x;\n" +
+					"		}"
+	})
+	void visit_UnusedVariableXAndLabelX_shouldTransform(String statementWithLabelX) throws Exception {
+		String original = "" +
+				"		int x;\n" +
+				"		x = 1;\n" +
+				statementWithLabelX;
+
+		String expected = statementWithLabelX;
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_UnusedLocalVariabeXAndFieldX_shouldTransform() throws Exception {
+		String original = "" +
+				"		int x;\n" +
+				"		class LocalClass {\n" +
+				"			int x;\n" +
+				"		}";
+
+		String expected = "" +
+				"		class LocalClass {\n" +
+				"			int x;\n" +
+				"		}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_UnusedLocalVariabeXAndMethodX_shouldTransform() throws Exception {
+		String original = "" +
+				"		int x;\n" +
+				"		class LocalClass {\n" +
+				"			int x() {\n" +
+				"				return 0;\n" +
+				"			}\n" +
+				"		}";
+
+		String expected = "" +
+				"		class LocalClass {\n" +
+				"			int x() {\n" +
+				"				return 0;\n" +
+				"			}\n" +
+				"		}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_UnusedAndUsedLocalVariabeX_shouldTransform() throws Exception {
+		String original = "" +
+				"		int x;\n" +
+				"		class LocalClass {\n" +
+				"			int getInt() {\n" +
+				"				int x = 0;\n" +
+				"				return x;\n" +
+				"			}\n" +
+				"		}";
+
+		String expected = "" +
+				"		class LocalClass {\n" +
+				"			int getInt() {\n" +
+				"				int x = 0;\n" +
+				"				return x;\n" +
+				"			}\n" +
+				"		}";
+
+		assertChange(original, expected);
+	}
+
 	@Test
 	void visit_ReAssignmentNotInBlock_shouldNotTransform() throws Exception {
 		String original = "" +
-				"		int x = 0;\n" +
+				"		int x;\n" +
 				"		if (true)\n" +
 				"			x = 1;";
+
+		assertNoChange(original);
+	}
+
+	/**
+	 * Covers the case where a simple name is found which is not a label and has
+	 * no valid binding. Note that the code in this test is invalid cannot be
+	 * compiled!
+	 */
+	@Test
+	void visit_UnresolvedBinding_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		int x;\n" +
+				"		x();";
 
 		assertNoChange(original);
 	}
