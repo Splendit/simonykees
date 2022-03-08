@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.exception.visitor.DeclaringNodeNotFoundException;
 import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
 import eu.jsparrow.core.rule.impl.unused.Constants;
 
@@ -70,7 +71,7 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 		boolean isReference;
 		try {
 			isReference = isTargetLocalVariableReference(simpleName);
-		} catch (UnresolvedTypeBindingException e) {
+		} catch (UnresolvedTypeBindingException | DeclaringNodeNotFoundException e) {
 			logger.debug(e.getMessage(), e);
 			unresolvedReferenceFound = true;
 			return false;
@@ -116,7 +117,8 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 		return Optional.empty();
 	}
 
-	private boolean isTargetLocalVariableReference(SimpleName simpleName) throws UnresolvedTypeBindingException {
+	private boolean isTargetLocalVariableReference(SimpleName simpleName)
+			throws UnresolvedTypeBindingException, DeclaringNodeNotFoundException {
 		String identifier = simpleName.getIdentifier();
 		if (!identifier.equals(originalIdentifier)) {
 			return false;
@@ -148,9 +150,9 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 		if (declaringNode == null) {
 			/*
 			 * This should never happen if variableBinding is not null and not a
-			 * field binding
+			 * field binding.
 			 */
-			throw new UnresolvedTypeBindingException("Could not find fragment declaring local variable."); //$NON-NLS-1$
+			throw new DeclaringNodeNotFoundException("Could not find fragment declaring local variable."); //$NON-NLS-1$
 		}
 		return declaringNode == originalFragment;
 	}
