@@ -171,6 +171,50 @@ class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertNoChange(original);
 	}
 
+	@Test
+	void visit_ReassignmentWithPossibleSideEffects_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		class LocalClass {\n" +
+				"			void reassignmentWithPossibleSideEffects() {\n" +
+				"				int x;\n" +
+				"				x = getValue();\n" +
+				"			}\n" +
+				"			int getValue() {\n" +
+				"				return 0;\n" +
+				"			}\n" +
+				"		}";
+
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_RemoveInitializersSideEffectsOption_shouldNotTransform() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put(REMOVE_INITIALIZERS_SIDE_EFFECTS, true);
+		setVisitor(new RemoveUnusedLocalVariabesASTVisitor(options));
+		String original = "" +
+				"		class LocalClass {\n" +
+				"			void reassignmentWithPossibleSideEffects() {\n" +
+				"				int x;\n" +
+				"				x = getValue();\n" +
+				"			}\n" +
+				"			int getValue() {\n" +
+				"				return 0;\n" +
+				"			}\n" +
+				"		}";
+		
+		String expected = "" +
+				"		class LocalClass {\n" +
+				"			void reassignmentWithPossibleSideEffects() {\n" +
+				"			}\n" +
+				"			int getValue() {\n" +
+				"				return 0;\n" +
+				"			}\n" +
+				"		}";
+
+		assertChange(original, expected);
+	}
+
 	/**
 	 * Covers the case where a simple name is found which is not a label and has
 	 * no valid binding. Note that the code in this test is invalid cannot be

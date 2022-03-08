@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
+import eu.jsparrow.core.rule.impl.unused.Constants;
 
 /**
  * Finds the references of a field declaration in a compilation unit. Determines
@@ -76,17 +77,30 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 			return false;
 		}
 
-		StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
-		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment) simpleName.getParent();
-			Optional<ExpressionStatement> reassignment = SafelyRemoveable.isSafelyRemovable(assignment, options);
-			reassignment.ifPresent(reassignments::add);
-			if (reassignment.isPresent()) {
-				return false;
-			}
+		Optional<ExpressionStatement> referencingStatementToRemove = findReferencingStatementToRemove(simpleName);
+		referencingStatementToRemove.ifPresent(reassignments::add);
+		if (referencingStatementToRemove.isPresent()) {
+			return false;
 		}
+
 		activeReferenceFound = true;
 		return true;
+	}
+
+	Optional<ExpressionStatement> findReferencingStatementToRemove(SimpleName simpleName) {
+		StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
+		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
+		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+			Assignment assignment = (Assignment) simpleName.getParent();
+			Optional<ExpressionStatement> optionalParentStatement = SafelyRemoveable
+				.findParentStatementInBlock(assignment);
+			if (optionalParentStatement.isPresent()
+					&& (removeInitializersSideEffects || ExpressionWithoutSideEffectRecursive
+						.isExpressionWithoutSideEffect(assignment.getRightHandSide()))) {
+				return optionalParentStatement;
+			}
+		}
+		return Optional.empty();
 	}
 
 	private boolean isTargetLocalVariableReference(SimpleName simpleName) throws UnresolvedTypeBindingException {
@@ -94,7 +108,7 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 		if (!identifier.equals(originalIdentifier)) {
 			return false;
 		}
-		
+
 		if (simpleName.getLocationInParent() == LabeledStatement.LABEL_PROPERTY
 				|| simpleName.getLocationInParent() == ContinueStatement.LABEL_PROPERTY
 				|| simpleName.getLocationInParent() == BreakStatement.LABEL_PROPERTY
