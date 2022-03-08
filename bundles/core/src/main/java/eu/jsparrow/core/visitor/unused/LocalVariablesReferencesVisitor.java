@@ -15,6 +15,8 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -89,9 +91,10 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 
 	Optional<ExpressionStatement> findReferencingStatementToRemove(SimpleName simpleName) {
 		StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
+		ASTNode simpleNameParent = simpleName.getParent();
 		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
 		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment) simpleName.getParent();
+			Assignment assignment = (Assignment) simpleNameParent;
 			Optional<ExpressionStatement> optionalParentStatement = SafelyRemoveable
 				.findParentStatementInBlock(assignment);
 			if (optionalParentStatement.isPresent()
@@ -99,7 +102,17 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 						.isExpressionWithoutSideEffect(assignment.getRightHandSide()))) {
 				return optionalParentStatement;
 			}
+			return Optional.empty();
 		}
+
+		if (locationInParent == PrefixExpression.OPERAND_PROPERTY) {
+			return SafelyRemoveable.findParentStatementInBlock((PrefixExpression) simpleNameParent);
+		}
+
+		if (locationInParent == PostfixExpression.OPERAND_PROPERTY) {
+			return SafelyRemoveable.findParentStatementInBlock((PostfixExpression) simpleNameParent);
+		}
+
 		return Optional.empty();
 	}
 

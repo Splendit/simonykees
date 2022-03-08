@@ -69,6 +69,40 @@ class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"		int x = 0;\n" +
+					"		++x;",
+			"" +
+					"		int x = 0;\n" +
+					"		--x;"
+	})
+	void visit_VariableInPrefixExpressionstatement_shouldTransform(String codeToRemove) throws Exception {
+
+		String original = "{" + codeToRemove + "}";
+		String expected = "{}";
+
+		assertChange(original, expected);
+	}
+	
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"		int x = 0;\n" +
+					"		x++;",
+			"" +
+					"		int x = 0;\n" +
+					"		x--;"
+	})
+	void visit_VariableInPostfixExpressionstatement_shouldTransform(String codeToRemove) throws Exception {
+
+		String original = "{" + codeToRemove + "}";
+		String expected = "{}";
+
+		assertChange(original, expected);
+	}
+
 	@Test
 	void visit_UnusedLocalVariableWithReAssignment_shouldTransform() throws Exception {
 		String unusedVariableWithReassignment = "\n" +
@@ -186,7 +220,7 @@ class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_RemoveInitializersSideEffectsOption_shouldNotTransform() throws Exception {
 		Map<String, Boolean> options = new HashMap<>();
@@ -202,7 +236,7 @@ class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"				return 0;\n" +
 				"			}\n" +
 				"		}";
-		
+
 		String expected = "" +
 				"		class LocalClass {\n" +
 				"			void reassignmentWithPossibleSideEffects() {\n" +
