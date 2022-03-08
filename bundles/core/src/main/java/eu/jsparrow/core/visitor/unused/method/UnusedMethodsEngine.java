@@ -80,6 +80,10 @@ public class UnusedMethodsEngine {
 				subMonitor.worked(1);
 			}
 		}
+		for(CompilationUnit compilationUnit : cache.values()) {
+			OverridenMethodsVisitor visitor = new OverridenMethodsVisitor(list);
+			compilationUnit.accept(visitor);
+		}
 		return list;
 	}
 	
