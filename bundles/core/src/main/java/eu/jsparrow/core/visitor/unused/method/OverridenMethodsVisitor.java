@@ -37,6 +37,7 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 				.map(ITypeBinding::getQualifiedName)
 				.collect(Collectors.toList());
 		List<String> superInterfaceNames = superInterfaces.stream()
+				.map(ITypeBinding::getErasure)
 				.map(ITypeBinding::getQualifiedName)
 				.collect(Collectors.toList());
 		
@@ -46,6 +47,9 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 			MethodDeclaration decl = unused.getMethodDeclaration();
 			AbstractTypeDeclaration type = (AbstractTypeDeclaration) decl.getParent();
 			ITypeBinding unusedDeclTypeBidning = type.resolveBinding();
+			if(unusedDeclTypeBidning.isGenericType()) {
+				unusedDeclTypeBidning = unusedDeclTypeBidning.getErasure();
+			}
 			return ClassRelationUtil.isContentOfTypes(unusedDeclTypeBidning, superClassNames);
 		})
 		.collect(Collectors.toList());
@@ -55,6 +59,9 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 					MethodDeclaration decl = unused.getMethodDeclaration();
 					AbstractTypeDeclaration type = (AbstractTypeDeclaration) decl.getParent();
 					ITypeBinding unusedDeclTypeBidning = type.resolveBinding();
+					if(unusedDeclTypeBidning.isGenericType()) {
+						unusedDeclTypeBidning = unusedDeclTypeBidning.getErasure();
+					}
 					return ClassRelationUtil.isContentOfTypes(unusedDeclTypeBidning, superInterfaceNames);
 				})
 		.collect(Collectors.toList());
@@ -133,7 +140,16 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 		}
 		for(int i = 0; i<currentParamTypes.length; i++) {
 			ITypeBinding currentParamType = currentParamTypes[i];
+			if(currentParamType.isParameterizedType()) {
+				currentParamType = currentParamType.getErasure();
+			}
 			ITypeBinding otherParamType = otherParamTypes[i];
+			if(otherParamType.isParameterizedType()) {
+				otherParamType = otherParamType.getErasure();
+			}
+			if(currentParamType.isTypeVariable() || otherParamType.isTypeVariable()) {
+				return true; // maybe throw an exception. 
+			}
 			boolean sameTypes = ClassRelationUtil.compareITypeBinding(currentParamType, otherParamType);
 			if(!sameTypes) {
 				return false;
@@ -151,7 +167,6 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 				superClasses.add(superClass);
 			} else {
 				break;
-				
 			}
 			
 			iTypeBinding = superClass;
@@ -169,6 +184,9 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 		}
 		ITypeBinding superClass = type.getSuperclass();
 		if(superClass != null) {
+			if(superClass.isInterface()) {
+				interfaces.add(superClass);
+			}
 			List<ITypeBinding> superClassInterfaces = findSuperInterfaces(superClass);
 			interfaces.addAll(superClassInterfaces);
 		}
