@@ -85,7 +85,7 @@ class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
-	
+
 	@ParameterizedTest
 	@ValueSource(strings = {
 			"" +
@@ -263,15 +263,65 @@ class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertNoChange(original);
 	}
 
-	/**
-	 * This test is expected to fail as soon as lambdas without side effect are
-	 * tolerated.
-	 * 
-	 */
-	@Test
-	void visit_NotSupportedInitializer_shouldNotTransform() throws Exception {
-		String original = "Runnable r = () -> {};";
-		assertNoChange(original);
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"		Runnable r = () -> {\n" +
+					"		};",
+			"" +
+					"		Runnable r = () -> {\n" +
+					"			;\n" +
+					"		};",
+			"" +
+					"		Runnable r = () -> {\n" +
+					"			new Object().hashCode();\n" +
+					"		};",
+			"" +
+					"		Runnable r = () -> {\n" +
+					"			assert Integer.MAX_VALUE > 0;\n" +
+					"		};",
+			"" +
+					"		Runnable r = () -> {\n" +
+					"			int x = 0;\n" +
+					"		};",
+			"" +
+					"		Supplier<String> supplier = () -> {\n" +
+					"			return \"HelloWorld\";\n" +
+					"		};",
+			"" +
+					"		Supplier<String> supplier = () -> \"HelloWorld\";",
+
+	})
+	void visit_SimpleLambdaExpression_shouldTransform(String declarationInitializedWithLambda) throws Exception {
+		fixture.addImport(java.util.function.Supplier.class.getName());
+		String original = "{" +
+				declarationInitializedWithLambda +
+				"}";
+		String expected = "{}";
+		assertChange(original, expected);
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"		Supplier<String> supplier = () -> {\n" +
+					"			String helloWorld =  \"HelloWorld\";\n" +
+					"			return helloWorld;\n" +
+					"		};",
+			"" +
+					"		Supplier<String> supplier = () -> {\n" +
+					"			if(true) {\n" +
+					"				return \"true\";\n" +
+					"			}\n" +
+					"			else {\n" +
+					"				return \"false\";\n" +
+					"			}\n" +
+					"		};"
+	})
+	void visit_ComplexLambdaExpression_shouldTransform(String declarationInitializedWithLambda) throws Exception {
+		fixture.addImport(java.util.function.Supplier.class.getName());
+		assertNoChange(declarationInitializedWithLambda);
 
 	}
 }
