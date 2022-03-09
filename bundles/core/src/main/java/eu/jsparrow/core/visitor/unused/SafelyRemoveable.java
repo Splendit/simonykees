@@ -34,19 +34,16 @@ public class SafelyRemoveable {
 	static Optional<ExpressionStatement> isSafelyRemovable(Assignment assignment, Map<String, Boolean> options) {
 
 		Optional<ExpressionStatement> optionalParentStatement = findParentStatementInBlock(assignment);
-		if (optionalParentStatement.isPresent() && isSafelyRemovableAssignment(assignment, options)) {
-			return optionalParentStatement;
+		if (optionalParentStatement.isPresent()) {
+
+			boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS,
+					false);
+			if (removeInitializersSideEffects || ExpressionWithoutSideEffectRecursive
+				.isExpressionWithoutSideEffect(assignment.getRightHandSide())) {
+				return optionalParentStatement;
+			}
 		}
 		return Optional.empty();
-	}
-
-	private static boolean isSafelyRemovableAssignment(Assignment assignment, Map<String, Boolean> options) {
-
-		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS,
-				false);
-		return removeInitializersSideEffects
-				|| ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(assignment.getRightHandSide());
-
 	}
 
 	static boolean isSafelyRemovable(VariableDeclarationFragment fragment, Map<String, Boolean> options) {
