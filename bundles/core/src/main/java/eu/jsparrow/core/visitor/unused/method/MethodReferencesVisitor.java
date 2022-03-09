@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 
@@ -85,6 +86,15 @@ public class MethodReferencesVisitor extends ASTVisitor {
 		MethodDeclaration enclosingMethodDeclaration = ASTNodeUtil.getSpecificAncestor(methodInvocation,
 				MethodDeclaration.class);
 		
+		return analyzeMethodInvocation(name, methodBinding, enclosingMethodDeclaration);
+	}
+	
+	@Override
+	public boolean visit(SuperMethodInvocation superInvocation) {
+		SimpleName name = superInvocation.getName();
+		IMethodBinding methodBinding = superInvocation.resolveMethodBinding();
+		MethodDeclaration enclosingMethodDeclaration = ASTNodeUtil.getSpecificAncestor(superInvocation,
+				MethodDeclaration.class);
 		return analyzeMethodInvocation(name, methodBinding, enclosingMethodDeclaration);
 	}
 	
