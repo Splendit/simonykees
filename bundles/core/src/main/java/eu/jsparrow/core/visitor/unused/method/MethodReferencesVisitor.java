@@ -9,12 +9,16 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodReference;
+import org.eclipse.jdt.core.dom.TypeMethodReference;
 
 import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -77,12 +81,42 @@ public class MethodReferencesVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		SimpleName name = methodInvocation.getName();
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		MethodDeclaration enclosingMethodDeclaration = ASTNodeUtil.getSpecificAncestor(methodInvocation,
+				MethodDeclaration.class);
+		
+		return analyzeMethodInvocation(name, methodBinding, enclosingMethodDeclaration);
+	}
+	
+	@Override
+	public boolean visit(ExpressionMethodReference methodReference) {
+		return analyzeMethodReference(methodReference, methodReference.getName());
+	}
+	
+	@Override
+	public boolean visit(SuperMethodReference methodReference) {
+		return analyzeMethodReference(methodReference, methodReference.getName());
+	}
+	
+	@Override
+	public boolean visit(TypeMethodReference methodReference) {
+		return analyzeMethodReference(methodReference, methodReference.getName());
+	}
+
+	private boolean analyzeMethodReference(MethodReference methodReference, SimpleName methodName) {
+		IMethodBinding methodBinding = methodReference.resolveMethodBinding();
+		MethodDeclaration enclosingMethodDeclaration = ASTNodeUtil.getSpecificAncestor(methodReference,
+				MethodDeclaration.class);
+		return analyzeMethodInvocation(methodName, methodBinding, enclosingMethodDeclaration);
+	}
+
+	private boolean analyzeMethodInvocation(SimpleName name, IMethodBinding methodBinding,
+			MethodDeclaration enclosingMethodDeclaration) {
 		String identifier = name.getIdentifier();
 		if (!identifier.equals(methodDeclarationIdentifier)) {
 			return true;
 		}
 
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		if (methodBinding == null) {
 			this.unresolvedReferenceFound = true;
 			return false;
@@ -92,8 +126,6 @@ public class MethodReferencesVisitor extends ASTVisitor {
 			return true;
 		}
 
-		MethodDeclaration enclosingMethodDeclaration = ASTNodeUtil.getSpecificAncestor(methodInvocation,
-				MethodDeclaration.class);
 		if (enclosingMethodDeclaration == null) {
 			this.mainSourceReferenceFound = true;
 			return false;
