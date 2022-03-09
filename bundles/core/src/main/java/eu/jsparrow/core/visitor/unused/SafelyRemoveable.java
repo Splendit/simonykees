@@ -11,6 +11,14 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.rule.impl.unused.Constants;
 
+/**
+ * Offers methods to find {@link ExpressionStatement} nodes which can be removed
+ * together with the reference on an unused variable or field without causing
+ * side effects.
+ * 
+ * @since 4.9.0
+ *
+ */
 public class SafelyRemoveable {
 
 	private SafelyRemoveable() {

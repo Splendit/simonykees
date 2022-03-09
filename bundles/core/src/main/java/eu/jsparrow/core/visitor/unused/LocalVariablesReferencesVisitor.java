@@ -28,10 +28,11 @@ import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
 import eu.jsparrow.core.rule.impl.unused.Constants;
 
 /**
- * Finds the references of a field declaration in a compilation unit. Determines
- * whether the reference is a safely removable reassignment.
+ * Finds the references on a local variable in a block. Determines whether all
+ * references belong to expression statements which can be removed without side
+ * effect.
  * 
- * @since 4.8.0
+ * @since 4.9.0
  *
  */
 public class LocalVariablesReferencesVisitor extends ASTVisitor {

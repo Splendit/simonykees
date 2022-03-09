@@ -12,6 +12,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Removes all unused local variables which can be found in a given compilation
+ * unit.
+ * 
+ * @since 4.9.0
+ *
+ */
 public class RemoveUnusedLocalVariabesASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private final Map<String, Boolean> options;
