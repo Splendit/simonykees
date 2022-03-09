@@ -7,11 +7,15 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class OverridenMethodsVisitor extends ASTVisitor {
@@ -22,6 +26,31 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 
 	public OverridenMethodsVisitor(List<UnusedMethodWrapper>unusedMethods) {
 		this.unusedMethods = unusedMethods;
+	}
+	
+	@Override
+	public boolean visit(EnumDeclaration enumDeclaration) {
+		
+		List<EnumConstantDeclaration> enumConstantDeclarations = ASTNodeUtil.convertToTypedList(enumDeclaration.enumConstants(), EnumConstantDeclaration.class);
+		for(EnumConstantDeclaration enumConstantDeclaration : enumConstantDeclarations) {
+			AnonymousClassDeclaration anonymousClass = enumConstantDeclaration.getAnonymousClassDeclaration();
+			if(anonymousClass != null) {
+				List<MethodDeclaration> methodDeclarations = ASTNodeUtil.convertToTypedList(anonymousClass.bodyDeclarations(), MethodDeclaration.class);
+				for(MethodDeclaration methodDeclaration : methodDeclarations) {
+					IMethodBinding methodBinding = methodDeclaration.resolveBinding();
+					for(UnusedMethodWrapper unusedMethod : unusedMethods) {
+						MethodDeclaration unusedDecl = unusedMethod.getMethodDeclaration();
+						IMethodBinding unusedBinding = unusedDecl.resolveBinding();
+						if(matchesNameAndParameters(methodBinding, unusedBinding)) {
+							this.overriden.add(unusedMethod);
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return true;
 	}
 	
 	@Override
