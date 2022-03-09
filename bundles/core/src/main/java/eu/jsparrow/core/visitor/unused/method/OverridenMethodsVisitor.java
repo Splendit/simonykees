@@ -16,7 +16,9 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class OverridenMethodsVisitor extends ASTVisitor {
 	
-	private List<UnusedMethodWrapper>unusedMethods;
+	private List<UnusedMethodWrapper> unusedMethods;
+	private List<UnusedMethodWrapper> overriden = new ArrayList<>();
+	private List<UnusedMethodWrapper> implicitlyOverrides = new ArrayList<>();
 
 	public OverridenMethodsVisitor(List<UnusedMethodWrapper>unusedMethods) {
 		this.unusedMethods = unusedMethods;
@@ -26,14 +28,9 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 	public boolean visit(TypeDeclaration typeDeclaration) {
 		ITypeBinding iTypeBinding = typeDeclaration.resolveBinding();
 		List<ITypeBinding> superClasses = findSuperClasses(iTypeBinding);
-		if(superClasses.isEmpty()) {
-			return true;
-		}
+
 		
 		List<ITypeBinding> superInterfaces = findSuperInterfaces(iTypeBinding);
-		if(superInterfaces.isEmpty()) {
-			return true;
-		}
 		
 		List<String> superClassNames = superClasses.stream()
 				.map(ITypeBinding::getErasure)
@@ -42,8 +39,6 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 		List<String> superInterfaceNames = superInterfaces.stream()
 				.map(ITypeBinding::getQualifiedName)
 				.collect(Collectors.toList());
-		
-
 		
 		// 1. Find all unused methods in super classes 
 		List<UnusedMethodWrapper> relevantSuperClassesMethods = unusedMethods.stream()
@@ -78,8 +73,8 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 			for(UnusedMethodWrapper unusedMethod : relevantSuperClassesMethods) {
 				MethodDeclaration unusedDecl = unusedMethod.getMethodDeclaration();
 				IMethodBinding unusedBinding = unusedDecl.resolveBinding();
-				if(declaredMethod.overrides(unusedBinding)) {
-					this.unusedMethods.remove(unusedMethod); //FIXME - dont change the state. create a new list. 
+				if(matchesNameAndParameters(declaredMethod, unusedBinding)) {
+					this.overriden.add(unusedMethod);
 					break;
 				}
 			}
@@ -89,14 +84,18 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 			for(UnusedMethodWrapper unusedMethod : relevantSuperInterfaceMethods) {
 				MethodDeclaration unusedDecl = unusedMethod.getMethodDeclaration();
 				IMethodBinding unusedBinding = unusedDecl.resolveBinding();
-				if(declaredMethod.overrides(unusedBinding)) {
-					this.unusedMethods.remove(unusedMethod); //FIXME - dont change the state. create a new list. 
+				if(matchesNameAndParameters(declaredMethod, unusedBinding)) {
+					this.overriden.add(unusedMethod);
 					break;
 				}
 			}
 		}
 		
-		// 4. For each relevant unused methods in super classes, find any implicitly overriden method defined in the inhereted interfaces. 
+		// 4. For each relevant unused methods in super classes, find any implicitly overriden method defined in the inherited interfaces. 
+		if(superClasses.isEmpty() || superInterfaces.isEmpty()) {
+			return true;
+		}
+
 		removeImplicitOverridedMethods(relevantSuperClassesMethods, superInterfaceMethodBindings,
 				superClassMethodBindings);
 		
@@ -112,12 +111,11 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 				if(superClassMethod.isEqualTo(unusedBinding)) {
 					for(IMethodBinding superInterfaceMethod : superInterfaceMethodBindings) {
 						if(matchesNameAndParameters(superClassMethod, superInterfaceMethod)) {
-							this.unusedMethods.remove(unusedMethod);
+							this.implicitlyOverrides.add(unusedMethod);
 						}
 					}
 				}
 			}
-			
 		}
 	}
 	
@@ -169,6 +167,20 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 			List<ITypeBinding> grandParents = findSuperInterfaces(interfaceType);
 			interfaces.addAll(grandParents);
 		}
+		ITypeBinding superClass = type.getSuperclass();
+		if(superClass != null) {
+			List<ITypeBinding> superClassInterfaces = findSuperInterfaces(superClass);
+			interfaces.addAll(superClassInterfaces);
+		}
+		
 		return interfaces;
+	}
+	
+	public List<UnusedMethodWrapper> getOverriden() {
+		return this.overriden;
+	}
+	
+	public List<UnusedMethodWrapper> getImplicitOverrides() {
+		return this.implicitlyOverrides;
 	}
 }

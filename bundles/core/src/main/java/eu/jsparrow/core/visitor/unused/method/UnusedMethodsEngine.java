@@ -83,6 +83,8 @@ public class UnusedMethodsEngine {
 		for(CompilationUnit compilationUnit : cache.values()) {
 			OverridenMethodsVisitor visitor = new OverridenMethodsVisitor(list);
 			compilationUnit.accept(visitor);
+			list.removeAll(visitor.getImplicitOverrides());
+			list.removeAll(visitor.getOverriden());
 		}
 		return list;
 	}
