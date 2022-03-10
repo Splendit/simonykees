@@ -1,15 +1,19 @@
 package eu.jsparrow.core.visitor.unused;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -21,6 +25,8 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  */
 public class RemoveUnusedLocalVariabesASTVisitor extends AbstractASTRewriteASTVisitor {
 
+	private static final List<String> SUPPORTED_ANNOTATIONS = Collections.unmodifiableList(
+			Arrays.asList(Deprecated.class.getName(), SuppressWarnings.class.getName()));
 	private final Map<String, Boolean> options;
 
 	public RemoveUnusedLocalVariabesASTVisitor(Map<String, Boolean> options) {
@@ -29,6 +35,11 @@ public class RemoveUnusedLocalVariabesASTVisitor extends AbstractASTRewriteASTVi
 
 	@Override
 	public boolean visit(VariableDeclarationStatement node) {
+		
+		if(hasUnsupportedAnnotations(node)) {
+			return true;
+		}
+
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(node.fragments(),
 				VariableDeclarationFragment.class);
 
@@ -60,6 +71,13 @@ public class RemoveUnusedLocalVariabesASTVisitor extends AbstractASTRewriteASTVi
 		}
 
 		return true;
+	}
+
+	boolean hasUnsupportedAnnotations(VariableDeclarationStatement node) {
+		return ASTNodeUtil.convertToTypedList(node.modifiers(), Annotation.class)
+			.stream()
+			.map(Annotation::resolveTypeBinding)
+			.anyMatch(typeBinding -> !ClassRelationUtil.isContentOfTypes(typeBinding, SUPPORTED_ANNOTATIONS));
 	}
 
 }

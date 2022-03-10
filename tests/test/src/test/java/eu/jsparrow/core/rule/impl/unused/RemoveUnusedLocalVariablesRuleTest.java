@@ -98,6 +98,23 @@ class RemoveUnusedLocalVariablesRuleTest extends SingleRuleTest {
 		assertEquals(expected, actual);
 	}
 	
+	
+	@Test
+	void testTransformationWithAnnotation() throws Exception {
+		Path preRule = getPreRuleFile("unused/UnusedLocalVariablesWithAnnotation.java");
+		Path postRule = getPostRuleFile("UnusedLocalVariablesWithAnnotation.java", "unused");
+		
+		RemoveUnusedLocalVariablesRule rule = new RemoveUnusedLocalVariablesRule();
+		
+		String refactoring = applyRemoveUnusedFieldRefactoring(rule, "eu.jsparrow.sample.preRule.unused", preRule, root);
+		String postRulePackage = getPostRulePackage("unused");
+		String actual = StringUtils.replace(refactoring, "package eu.jsparrow.sample.preRule.unused",
+				postRulePackage);
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		
+		assertEquals(expected, actual);
+	}
+	
 	private String applyRemoveUnusedFieldRefactoring(RemoveUnusedLocalVariablesRule rule, String packageString,
 			Path preFile, IPackageFragmentRoot root) throws Exception {
 

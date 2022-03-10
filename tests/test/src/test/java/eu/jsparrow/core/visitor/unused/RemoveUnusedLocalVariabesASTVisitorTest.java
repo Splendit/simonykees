@@ -222,7 +222,7 @@ class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	void visit_RemoveInitializersSideEffectsOption_shouldNotTransform() throws Exception {
+	void visit_RemoveInitializersSideEffectsOption_shouldTransform() throws Exception {
 		Map<String, Boolean> options = new HashMap<>();
 		options.put(REMOVE_INITIALIZERS_SIDE_EFFECTS, true);
 		setVisitor(new RemoveUnusedLocalVariabesASTVisitor(options));
