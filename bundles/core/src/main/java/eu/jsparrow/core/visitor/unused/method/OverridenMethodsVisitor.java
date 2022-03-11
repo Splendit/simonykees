@@ -19,29 +19,31 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class OverridenMethodsVisitor extends ASTVisitor {
-	
+
 	private List<UnusedMethodWrapper> unusedMethods;
 	private List<UnusedMethodWrapper> overriden = new ArrayList<>();
 	private List<UnusedMethodWrapper> implicitlyOverrides = new ArrayList<>();
 
-	public OverridenMethodsVisitor(List<UnusedMethodWrapper>unusedMethods) {
+	public OverridenMethodsVisitor(List<UnusedMethodWrapper> unusedMethods) {
 		this.unusedMethods = unusedMethods;
 	}
-	
+
 	@Override
 	public boolean visit(EnumDeclaration enumDeclaration) {
-		
-		List<EnumConstantDeclaration> enumConstantDeclarations = ASTNodeUtil.convertToTypedList(enumDeclaration.enumConstants(), EnumConstantDeclaration.class);
-		for(EnumConstantDeclaration enumConstantDeclaration : enumConstantDeclarations) {
+
+		List<EnumConstantDeclaration> enumConstantDeclarations = ASTNodeUtil
+			.convertToTypedList(enumDeclaration.enumConstants(), EnumConstantDeclaration.class);
+		for (EnumConstantDeclaration enumConstantDeclaration : enumConstantDeclarations) {
 			AnonymousClassDeclaration anonymousClass = enumConstantDeclaration.getAnonymousClassDeclaration();
-			if(anonymousClass != null) {
-				List<MethodDeclaration> methodDeclarations = ASTNodeUtil.convertToTypedList(anonymousClass.bodyDeclarations(), MethodDeclaration.class);
-				for(MethodDeclaration methodDeclaration : methodDeclarations) {
+			if (anonymousClass != null) {
+				List<MethodDeclaration> methodDeclarations = ASTNodeUtil
+					.convertToTypedList(anonymousClass.bodyDeclarations(), MethodDeclaration.class);
+				for (MethodDeclaration methodDeclaration : methodDeclarations) {
 					IMethodBinding methodBinding = methodDeclaration.resolveBinding();
-					for(UnusedMethodWrapper unusedMethod : unusedMethods) {
+					for (UnusedMethodWrapper unusedMethod : unusedMethods) {
 						MethodDeclaration unusedDecl = unusedMethod.getMethodDeclaration();
 						IMethodBinding unusedBinding = unusedDecl.resolveBinding();
-						if(matchesNameAndParameters(methodBinding, unusedBinding)) {
+						if (matchesNameAndParameters(methodBinding, unusedBinding)) {
 							this.overriden.add(unusedMethod);
 							break;
 						}
@@ -49,104 +51,99 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 				}
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 		ITypeBinding iTypeBinding = typeDeclaration.resolveBinding();
 		List<ITypeBinding> superClasses = findSuperClasses(iTypeBinding);
 
-		
 		List<ITypeBinding> superInterfaces = findSuperInterfaces(iTypeBinding);
-		
+
 		List<String> superClassNames = superClasses.stream()
-				.map(ITypeBinding::getErasure)
-				.map(ITypeBinding::getQualifiedName)
-				.collect(Collectors.toList());
+			.map(ITypeBinding::getErasure)
+			.map(ITypeBinding::getQualifiedName)
+			.collect(Collectors.toList());
 		List<String> superInterfaceNames = superInterfaces.stream()
-				.map(ITypeBinding::getErasure)
-				.map(ITypeBinding::getQualifiedName)
-				.collect(Collectors.toList());
-		
-		// 1. Find all unused methods in super classes 
+			.map(ITypeBinding::getErasure)
+			.map(ITypeBinding::getQualifiedName)
+			.collect(Collectors.toList());
+
+		// 1. Find all unused methods in super classes
 		List<UnusedMethodWrapper> relevantSuperClassesMethods = unusedMethods.stream()
-		.filter(unused -> {
-			MethodDeclaration decl = unused.getMethodDeclaration();
-			AbstractTypeDeclaration type = (AbstractTypeDeclaration) decl.getParent();
-			ITypeBinding unusedDeclTypeBidning = type.resolveBinding();
-			if(unusedDeclTypeBidning.isGenericType()) {
-				unusedDeclTypeBidning = unusedDeclTypeBidning.getErasure();
-			}
-			return ClassRelationUtil.isContentOfTypes(unusedDeclTypeBidning, superClassNames);
-		})
-		.collect(Collectors.toList());
-		
+			.filter(unused -> {
+				MethodDeclaration decl = unused.getMethodDeclaration();
+				AbstractTypeDeclaration type = (AbstractTypeDeclaration) decl.getParent();
+				ITypeBinding unusedDeclTypeBidning = type.resolveBinding();
+				if (unusedDeclTypeBidning.isGenericType()) {
+					unusedDeclTypeBidning = unusedDeclTypeBidning.getErasure();
+				}
+				return ClassRelationUtil.isContentOfTypes(unusedDeclTypeBidning, superClassNames);
+			})
+			.collect(Collectors.toList());
+
 		List<UnusedMethodWrapper> relevantSuperInterfaceMethods = unusedMethods.stream()
-				.filter(unused -> {
-					MethodDeclaration decl = unused.getMethodDeclaration();
-					AbstractTypeDeclaration type = (AbstractTypeDeclaration) decl.getParent();
-					ITypeBinding unusedDeclTypeBidning = type.resolveBinding();
-					if(unusedDeclTypeBidning.isGenericType()) {
-						unusedDeclTypeBidning = unusedDeclTypeBidning.getErasure();
-					}
-					return ClassRelationUtil.isContentOfTypes(unusedDeclTypeBidning, superInterfaceNames);
-				})
-		.collect(Collectors.toList());
-		
+			.filter(unused -> {
+				MethodDeclaration decl = unused.getMethodDeclaration();
+				AbstractTypeDeclaration type = (AbstractTypeDeclaration) decl.getParent();
+				ITypeBinding unusedDeclTypeBidning = type.resolveBinding();
+				if (unusedDeclTypeBidning.isGenericType()) {
+					unusedDeclTypeBidning = unusedDeclTypeBidning.getErasure();
+				}
+				return ClassRelationUtil.isContentOfTypes(unusedDeclTypeBidning, superInterfaceNames);
+			})
+			.collect(Collectors.toList());
+
 		// 2. Find all inherited methods from interfaces.
 		List<IMethodBinding> superInterfaceMethodBindings = superInterfaces.stream()
-				.flatMap(superType -> Arrays.stream(superType.getDeclaredMethods()))
-				.collect(Collectors.toList());
+			.flatMap(superType -> Arrays.stream(superType.getDeclaredMethods()))
+			.collect(Collectors.toList());
 		List<IMethodBinding> superClassMethodBindings = superClasses.stream()
-				.flatMap(superType -> Arrays.stream(superType.getDeclaredMethods()))
-				.collect(Collectors.toList());
+			.flatMap(superType -> Arrays.stream(superType.getDeclaredMethods()))
+			.collect(Collectors.toList());
 
-		
-		// 3. Check if any method defined in the typeDeclaration is overriding any of the relevant methods 
-		for(IMethodBinding declaredMethod : iTypeBinding.getDeclaredMethods()) {
-			for(UnusedMethodWrapper unusedMethod : relevantSuperClassesMethods) {
-				MethodDeclaration unusedDecl = unusedMethod.getMethodDeclaration();
-				IMethodBinding unusedBinding = unusedDecl.resolveBinding();
-				if(matchesNameAndParameters(declaredMethod, unusedBinding)) {
-					this.overriden.add(unusedMethod);
-					break;
-				}
-			}
-		}
-		
-		for(IMethodBinding declaredMethod : iTypeBinding.getDeclaredMethods()) {
-			for(UnusedMethodWrapper unusedMethod : relevantSuperInterfaceMethods) {
-				MethodDeclaration unusedDecl = unusedMethod.getMethodDeclaration();
-				IMethodBinding unusedBinding = unusedDecl.resolveBinding();
-				if(matchesNameAndParameters(declaredMethod, unusedBinding)) {
-					this.overriden.add(unusedMethod);
-					break;
-				}
-			}
-		}
-		
-		// 4. For each relevant unused methods in super classes, find any implicitly overriden method defined in the inherited interfaces. 
-		if(superClasses.isEmpty() || superInterfaces.isEmpty()) {
-			return true;
+		dropOverridenMethods(iTypeBinding, relevantSuperClassesMethods);
+
+		dropOverridenMethods(iTypeBinding, relevantSuperInterfaceMethods);
+
+		/*
+		 * 4. For each relevant unused methods in super classes, find any
+		 * implicitly overriden method defined in the inherited interfaces.
+		 */
+
+		if (!superInterfaces.isEmpty()) {
+			removeImplicitOverridedMethods(relevantSuperClassesMethods, superInterfaceMethodBindings,
+					superClassMethodBindings);
 		}
 
-		removeImplicitOverridedMethods(relevantSuperClassesMethods, superInterfaceMethodBindings,
-				superClassMethodBindings);
-		
 		return true;
+	}
+
+	private void dropOverridenMethods(ITypeBinding iTypeBinding,
+			List<UnusedMethodWrapper> relevantSuperInterfaceMethods) {
+		for (IMethodBinding declaredMethod : iTypeBinding.getDeclaredMethods()) {
+			for (UnusedMethodWrapper unusedMethod : relevantSuperInterfaceMethods) {
+				MethodDeclaration unusedDecl = unusedMethod.getMethodDeclaration();
+				IMethodBinding unusedBinding = unusedDecl.resolveBinding();
+				if (matchesNameAndParameters(declaredMethod, unusedBinding)) {
+					this.overriden.add(unusedMethod);
+					break;
+				}
+			}
+		}
 	}
 
 	private void removeImplicitOverridedMethods(List<UnusedMethodWrapper> relevantSuperClassesMethods,
 			List<IMethodBinding> superInterfaceMethodBindings, List<IMethodBinding> superClassMethodBindings) {
 		for (IMethodBinding superClassMethod : superClassMethodBindings) {
-			for(UnusedMethodWrapper unusedMethod : relevantSuperClassesMethods) {
+			for (UnusedMethodWrapper unusedMethod : relevantSuperClassesMethods) {
 				MethodDeclaration unusedDecl = unusedMethod.getMethodDeclaration();
 				IMethodBinding unusedBinding = unusedDecl.resolveBinding();
-				if(matchesNameAndParameters(superClassMethod, unusedBinding)) {
-					for(IMethodBinding superInterfaceMethod : superInterfaceMethodBindings) {
-						if(matchesNameAndParameters(superClassMethod, superInterfaceMethod)) {
+				if (matchesNameAndParameters(superClassMethod, unusedBinding)) {
+					for (IMethodBinding superInterfaceMethod : superInterfaceMethodBindings) {
+						if (matchesNameAndParameters(superClassMethod, superInterfaceMethod)) {
 							this.implicitlyOverrides.add(unusedMethod);
 						}
 					}
@@ -154,79 +151,79 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 			}
 		}
 	}
-	
+
 	private boolean matchesNameAndParameters(IMethodBinding current, IMethodBinding target) {
 		String currentName = current.getName();
 		String targetName = target.getName();
-		if(!currentName.equals(targetName)) {
+		if (!currentName.equals(targetName)) {
 			return false;
 		}
-		
+
 		ITypeBinding[] currentParamTypes = current.getParameterTypes();
 		ITypeBinding[] otherParamTypes = target.getParameterTypes();
-		if(currentParamTypes.length != otherParamTypes.length) {
+		if (currentParamTypes.length != otherParamTypes.length) {
 			return false;
 		}
-		for(int i = 0; i<currentParamTypes.length; i++) {
+		for (int i = 0; i < currentParamTypes.length; i++) {
 			ITypeBinding currentParamType = currentParamTypes[i];
-			if(currentParamType.isParameterizedType()) {
+			if (currentParamType.isParameterizedType()) {
 				currentParamType = currentParamType.getErasure();
 			}
 			ITypeBinding otherParamType = otherParamTypes[i];
-			if(otherParamType.isParameterizedType()) {
+			if (otherParamType.isParameterizedType()) {
 				otherParamType = otherParamType.getErasure();
 			}
-			if(currentParamType.isTypeVariable() || otherParamType.isTypeVariable()) {
-				return true; // maybe throw an exception. 
+			if (currentParamType.isTypeVariable() || otherParamType.isTypeVariable()) {
+				return true; // maybe throw an exception.
 			}
 			boolean sameTypes = ClassRelationUtil.compareITypeBinding(currentParamType, otherParamType);
-			if(!sameTypes) {
+			if (!sameTypes) {
 				return false;
 			}
 		}
 		return true;
 	}
-	
+
 	private List<ITypeBinding> findSuperClasses(ITypeBinding type) {
 		ITypeBinding iTypeBinding = type;
 		List<ITypeBinding> superClasses = new ArrayList<>();
-		while(true) {
+		while (true) {
 			ITypeBinding superClass = iTypeBinding.getSuperclass();
-			if(superClass != null) {
+			if (superClass != null) {
 				superClasses.add(superClass);
 			} else {
 				break;
 			}
-			
+
 			iTypeBinding = superClass;
-			
+
 		}
 		return superClasses;
 	}
-	
+
 	private List<ITypeBinding> findSuperInterfaces(ITypeBinding type) {
 		List<ITypeBinding> interfaces = new ArrayList<>();
-		for(ITypeBinding interfaceType :  type.getInterfaces()) {
+		for (ITypeBinding interfaceType : type.getInterfaces()) {
 			interfaces.add(interfaceType);
 			List<ITypeBinding> grandParents = findSuperInterfaces(interfaceType);
 			interfaces.addAll(grandParents);
 		}
 		ITypeBinding superClass = type.getSuperclass();
-		if(superClass != null) {
-			if(superClass.isInterface()) {
+		if (superClass != null) {
+			if (superClass.isInterface()) {
 				interfaces.add(superClass);
 			}
 			List<ITypeBinding> superClassInterfaces = findSuperInterfaces(superClass);
 			interfaces.addAll(superClassInterfaces);
 		}
-		
+
 		return interfaces;
 	}
-	
+
 	public List<UnusedMethodWrapper> getOverriden() {
 		return this.overriden;
 	}
-	
+
 	public List<UnusedMethodWrapper> getImplicitOverrides() {
 		return this.implicitlyOverrides;
 	}
