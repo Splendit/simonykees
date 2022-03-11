@@ -1,12 +1,18 @@
 package eu.jsparrow.sample.preRule.unused.methods;
 
-public class UnusedProtectedMethods {
+import java.util.List;
+
+public class UnusedProtectedMethods<T> {
 
 	protected void unusedMethod() {
 		// do nothing
 	}
 
-	protected void unusedOverriden() {
+	protected void unusedOverriden(String value) {
+		// do nothing
+	}
+
+	protected void unusedOverridenOverloaded(String stringValue, List<String> values, T value, int intValue) {
 		// do nothing
 	}
 
@@ -19,7 +25,7 @@ public class UnusedProtectedMethods {
 	}
 
 	public static void main(String[] args) {
-		UnusedProtectedMethods object = new UnusedProtectedMethods();
+		UnusedProtectedMethods<String> object = new UnusedProtectedMethods<String>();
 		object.usedInternally();
 	}
 }

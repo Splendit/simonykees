@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -67,6 +68,8 @@ class UnusedMethodsEngineTest extends AbstractRulesTest {
 				.collect(Collectors.toList());
 		
 		List<UnusedMethodWrapper> unused = unusedMethodsEngine.findUnusedMethods(icus , options, subMonitor);
+		Set<ICompilationUnit> targetCompilationUnits = unusedMethodsEngine.getTargetCompilationUnits();
 		assertEquals(4, unused.size());
+		assertEquals(4, targetCompilationUnits.size());
 	}
 }

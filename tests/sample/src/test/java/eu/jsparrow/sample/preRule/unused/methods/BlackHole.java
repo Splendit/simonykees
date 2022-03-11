@@ -20,6 +20,9 @@ public class BlackHole {
 		c.accept(new ParameterizedType<String>(), "");
 		List<ParameterizedType<String>> list = new ArrayList<>();
 		list.stream().map(ParameterizedType<String>::foo);
+		
+		ColoredShape coloredShape = new ColoredCircle();
+		coloredShape.implicitlyOverriden();
 	}
 
 	public static void main(String[]args) {

@@ -12,4 +12,7 @@ public abstract class AbstractShape {
 		return "";
 	}
 
+	public void implicitlyOverriden() {
+		// do nothing
+	}
 }

@@ -57,6 +57,16 @@ public class UnusedPublicMethods {
 		return "";
 	}
 
+	public enum Work {
+		CODE {
+			public void writeNewCode() {}
+		},
+		REFACTOR {
+			public void improveExistingCode() {}
+		},
+		COFFEE;
+	}
+
 	void blackHole() {
 		usedInMethodInvocationInternally();
 		Runnable r = this::usedInExpressionMethodReference;

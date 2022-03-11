@@ -11,5 +11,8 @@ public abstract class AbstractShape {
 	public String getColor() {
 		return "";
 	}
-
+	
+	public void implicitlyOverriden() {
+		// do nothing
+	}
 }

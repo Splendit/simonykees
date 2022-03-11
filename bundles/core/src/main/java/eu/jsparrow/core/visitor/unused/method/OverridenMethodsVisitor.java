@@ -144,7 +144,7 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 			for(UnusedMethodWrapper unusedMethod : relevantSuperClassesMethods) {
 				MethodDeclaration unusedDecl = unusedMethod.getMethodDeclaration();
 				IMethodBinding unusedBinding = unusedDecl.resolveBinding();
-				if(superClassMethod.isEqualTo(unusedBinding)) {
+				if(matchesNameAndParameters(superClassMethod, unusedBinding)) {
 					for(IMethodBinding superInterfaceMethod : superInterfaceMethodBindings) {
 						if(matchesNameAndParameters(superClassMethod, superInterfaceMethod)) {
 							this.implicitlyOverrides.add(unusedMethod);
