@@ -10,16 +10,15 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.core.visitor.unused.BodyDeclarationsUtil;
 import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class UnusedMethodsCandidateVisitor extends ASTVisitor {
@@ -44,6 +43,11 @@ public class UnusedMethodsCandidateVisitor extends ASTVisitor {
 	public boolean visit(AnonymousClassDeclaration node) {
 		return false;
 	}
+	
+	@Override
+	public boolean visit(EnumConstantDeclaration node) {
+		return false;
+	}
 
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
@@ -52,21 +56,6 @@ public class UnusedMethodsCandidateVisitor extends ASTVisitor {
 		}
 
 		if (methodDeclaration.isConstructor()) {
-			List<SingleVariableDeclaration> parameters = ASTNodeUtil.convertToTypedList(methodDeclaration.parameters(),
-					SingleVariableDeclaration.class);
-			if (parameters.isEmpty()) {
-				/*
-				 * This is a default constructor. We should not remove it
-				 * because it may be invoked implicitly by other constructors.
-				 * It can also be used to hide the implicit default constructor.
-				 */
-				return false;
-			}
-			/*
-			 * For now skip all constructors. There are two known problems: 
-			 * 	- the external references of non-private constructors are not found
-			 * 	- the references of enum constructors are also not found, 
-			 */
 			return false;
 		}
 
@@ -100,6 +89,7 @@ public class UnusedMethodsCandidateVisitor extends ASTVisitor {
 		} else {
 			AbstractTypeDeclaration typeDeclaration = (AbstractTypeDeclaration) methodDeclaration.getParent();
 			ITypeBinding parentTypeBinding = typeDeclaration.resolveBinding();
+			
 			List<IMethodBinding> inheritedMethods = ClassRelationUtil.findInheretedMethods(parentTypeBinding);
 			IMethodBinding methodBinding = methodDeclaration.resolveBinding();
 			if (methodBinding == null) {

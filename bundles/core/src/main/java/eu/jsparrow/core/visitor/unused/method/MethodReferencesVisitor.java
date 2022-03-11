@@ -1,14 +1,15 @@
 package eu.jsparrow.core.visitor.unused.method;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -16,7 +17,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
@@ -49,38 +49,6 @@ public class MethodReferencesVisitor extends ASTVisitor {
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		return !unresolvedReferenceFound && !mainSourceReferenceFound;
-	}
-	
-	@Override
-	public boolean visit(ConstructorInvocation constructorInvocation) {
-		IMethodBinding constructorBinding = constructorInvocation.resolveConstructorBinding();
-		if(constructorBinding == null) {
-			this.unresolvedReferenceFound = true;
-			return false;
-		}
-		
-		if(constructorBinding.isEqualTo(iMethodBinding)) {
-			// FIXME: what if this is only used in a test? reuse the solution from visit(methodInvocation)
-			this.mainSourceReferenceFound = true;
-		}
-		
-		return true;
-	}
-	
-	@Override
-	public boolean visit(SuperConstructorInvocation superConstructorInvocation) {
-		IMethodBinding constructorBinding = superConstructorInvocation.resolveConstructorBinding();
-		if(constructorBinding == null) {
-			this.unresolvedReferenceFound = true;
-			return false;
-		}
-		
-		if(constructorBinding.isEqualTo(iMethodBinding)) {
-			// FIXME: what if this is only used in a test? reuse the solution from visit(methodInvocation)
-			this.mainSourceReferenceFound = true;
-		}
-		
-		return true;
 	}
 
 	@Override

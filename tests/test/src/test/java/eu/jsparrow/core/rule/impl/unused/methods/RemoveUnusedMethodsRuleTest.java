@@ -96,7 +96,8 @@ class RemoveUnusedMethodsRuleTest extends SingleRuleTest {
 			"Board",
 			"ClassOne",
 			"ParameterizedType",
-			"ReferencedInTests"
+			"ReferencedInTests",
+			"EnumConstantAnonymousClasses"
 			})
 	void testTransformation(String className) throws Exception {
 		String preRuleFilePath = String.format("unused/methods/%s.java", className);

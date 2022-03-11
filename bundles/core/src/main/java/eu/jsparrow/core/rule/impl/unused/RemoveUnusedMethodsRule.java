@@ -35,9 +35,9 @@ public class RemoveUnusedMethodsRule extends RefactoringRuleImpl<RemoveUnusedMet
 
 	public RemoveUnusedMethodsRule(List<UnusedMethodWrapper> unusedMethods) {
 		this.visitorClass = RemoveUnusedMethodsASTVisitor.class;
-		this.id = "RemoveUnusedmethods"; //$NON-NLS-1$
+		this.id = "RemoveUnusedMethods"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription("Remove Unused Methods", //$NON-NLS-1$
-				"Finds and removes unused methods", Duration.ofMinutes(2), //$NON-NLS-1$
+				"Finds and removes methods that are never used actively.", Duration.ofMinutes(2), //$NON-NLS-1$
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
 		this.unusedMethods = unusedMethods;
 	}
