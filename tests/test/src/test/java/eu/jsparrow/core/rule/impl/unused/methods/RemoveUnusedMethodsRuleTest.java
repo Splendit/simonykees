@@ -94,7 +94,9 @@ class RemoveUnusedMethodsRuleTest extends SingleRuleTest {
 			"ColoredShape",
 			"Square",
 			"Board",
-			"ClassOne"
+			"ClassOne",
+			"ParameterizedType",
+			"ReferencedInTests"
 			})
 	void testTransformation(String className) throws Exception {
 		String preRuleFilePath = String.format("unused/methods/%s.java", className);

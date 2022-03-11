@@ -2,6 +2,9 @@ package eu.jsparrow.core.visitor.unused.method;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 public class UnusedMethodReferenceSearchResult {
 
@@ -26,6 +29,23 @@ public class UnusedMethodReferenceSearchResult {
 
 	public List<TestSourceReference> getReferencesInTestSources() {
 		return relatedTestDeclarations;
+	}
+	
+	public boolean hasOverlappingTestDeclarations(List<UnusedMethodWrapper> unusedMethods) {
+		for(TestSourceReference testReference : relatedTestDeclarations) {
+			Set<MethodDeclaration> testDeclarations = testReference.getTestDeclarations();
+			for(UnusedMethodWrapper unusedMethod : unusedMethods) {
+				List<TestSourceReference> testsForRemoval = unusedMethod.getTestReferences();
+				for(TestSourceReference testForRemoval : testsForRemoval) {
+					Set<MethodDeclaration> forRemovalDeclarations = testForRemoval.getTestDeclarations();
+					boolean retained = forRemovalDeclarations.stream().anyMatch(testDeclarations::contains);
+					if(retained) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override

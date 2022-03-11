@@ -86,6 +86,7 @@ public class UnusedFieldsTestHelper {
 		options.put("protected-methods", true);
 		options.put("package-private-methods", true);
 		options.put("public-methods", true);
+		options.put("remove-test-code", true);
 		return engine.findUnusedMethods(compilationUnits, options, subMonitor);
 	}
 

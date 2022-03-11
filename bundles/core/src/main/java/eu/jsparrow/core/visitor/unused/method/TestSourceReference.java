@@ -1,6 +1,6 @@
 package eu.jsparrow.core.visitor.unused.method;
 
-import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -10,10 +10,10 @@ public class TestSourceReference {
 
 	private CompilationUnit compilationUnit;
 	private ICompilationUnit iCompilationUnit;
-	private List<MethodDeclaration> testMethodDeclarations;
+	private Set<MethodDeclaration> testMethodDeclarations;
 
 	public TestSourceReference(CompilationUnit compilationUnit, ICompilationUnit iCompilationUnit,
-			List<MethodDeclaration> testMethodDeclarations) {
+			Set<MethodDeclaration> testMethodDeclarations) {
 		this.compilationUnit = compilationUnit;
 		this.iCompilationUnit = iCompilationUnit;
 		this.testMethodDeclarations = testMethodDeclarations;
@@ -27,7 +27,7 @@ public class TestSourceReference {
 		return iCompilationUnit;
 	}
 
-	public List<MethodDeclaration> getTestDeclarations() {
+	public Set<MethodDeclaration> getTestDeclarations() {
 		return testMethodDeclarations;
 	}
 

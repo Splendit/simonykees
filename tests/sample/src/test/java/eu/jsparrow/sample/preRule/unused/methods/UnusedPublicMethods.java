@@ -2,10 +2,13 @@ package eu.jsparrow.sample.preRule.unused.methods;
 
 public class UnusedPublicMethods {
 	
+	private Runnable r = () -> useInInitializer();
+	
 	public UnusedPublicMethods() {
 		/*
 		 * Default constructor - should not be removed. 
 		 */
+		r.run();
 	}
 	
 	public UnusedPublicMethods(String value) {
@@ -42,18 +45,26 @@ public class UnusedPublicMethods {
 		// do nothing
 	}
 	
+	public void useInInitializer() {
+		// do nothing
+	}
+
+	public boolean equals(Object other) {
+		return false;
+	}
+
+	public String usedInTestsOnly() {
+		return "";
+	}
+
 	void blackHole() {
 		usedInMethodInvocationInternally();
 		Runnable r = this::usedInExpressionMethodReference;
 		r.run();
 	}
-	
+
 	public static void main(String[]args) {
 		UnusedPublicMethods unusedPublicMethod = new UnusedPublicMethods();
 		unusedPublicMethod.blackHole();
-	}
-	
-	public boolean equals(Object other) {
-		return false;
 	}
 }

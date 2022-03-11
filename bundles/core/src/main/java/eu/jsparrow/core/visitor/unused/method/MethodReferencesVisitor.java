@@ -31,9 +31,13 @@ public class MethodReferencesVisitor extends ASTVisitor {
 	private String methodDeclarationIdentifier;
 	private IMethodBinding iMethodBinding;
 
-	private List<MethodDeclaration> relatedTestDeclarations = new ArrayList<>();
+	private Set<MethodDeclaration> relatedTestDeclarations = new HashSet<>();
 	private boolean mainSourceReferenceFound = false;
 	private boolean unresolvedReferenceFound = false;
+	
+	private static final List<String> supportedTestAnnotations = Collections.unmodifiableList(Arrays.asList(
+			"org.junit.Test",  //$NON-NLS-1$
+			"org.junit.jupiter.api.Test")); //$NON-NLS-1$
 
 	public MethodReferencesVisitor(MethodDeclaration methodDeclaration, Map<String, Boolean> optionsMap) {
 		this.optionsMap = optionsMap;
@@ -159,8 +163,6 @@ public class MethodReferencesVisitor extends ASTVisitor {
 		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(methodDeclaration.modifiers(), Annotation.class);
 		for (Annotation annotation : annotations) {
 			ITypeBinding typeBinding = annotation.resolveTypeBinding();
-
-			List<String> supportedTestAnnotations = Arrays.asList("org.junit.Test", "org.junit.jupiter.api.Test");
 			if (ClassRelationUtil.isContentOfTypes(typeBinding, supportedTestAnnotations)) {
 				return true;
 			}
@@ -168,7 +170,7 @@ public class MethodReferencesVisitor extends ASTVisitor {
 		return false;
 	}
 
-	public List<MethodDeclaration> getRelatedTestDeclarations() {
+	public Set<MethodDeclaration> getRelatedTestDeclarations() {
 		return relatedTestDeclarations;
 	}
 

@@ -98,7 +98,9 @@ public class UnusedMethodsEngine {
 		for (NonPrivateUnusedMethodCandidate candidate : nonPrivateCandidates) {
 			MethodDeclaration methodDeclaration = candidate.getDeclaration();
 			UnusedMethodReferenceSearchResult searchResult = searchReferences(methodDeclaration, javaProject, optionsMap, cache);
-			if (!searchResult.isMainSourceReferenceFound() && !searchResult.isInvalidSearchEngineResult()) {
+			if (!searchResult.isMainSourceReferenceFound() 
+					&& !searchResult.isInvalidSearchEngineResult()
+					&& !searchResult.hasOverlappingTestDeclarations(list)) {
 				List<TestSourceReference> testReferences = searchResult.getReferencesInTestSources();
 
 				UnusedMethodWrapper unusedFieldWrapper = new UnusedMethodWrapper(compilationUnit,
@@ -139,7 +141,7 @@ public class UnusedMethodsEngine {
 			MethodReferencesVisitor visitor = new MethodReferencesVisitor(methodDeclaration, optionsMap);
 			compilationUnit.accept(visitor);
 			if (!visitor.hasMainSourceReference() && !visitor.hasUnresolvedReference()) {
-				List<MethodDeclaration> testMethodDeclarations = visitor.getRelatedTestDeclarations();
+				Set<MethodDeclaration> testMethodDeclarations = visitor.getRelatedTestDeclarations();
 				TestSourceReference unusedReferences = new TestSourceReference(compilationUnit,
 						iCompilationUnit, testMethodDeclarations);
 				relatedTestDeclarations.add(unusedReferences);
