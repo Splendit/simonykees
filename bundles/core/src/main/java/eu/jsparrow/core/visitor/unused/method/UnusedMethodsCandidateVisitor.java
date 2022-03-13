@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.core.visitor.unused.BodyDeclarationsUtil;
@@ -40,10 +41,20 @@ public class UnusedMethodsCandidateVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(TypeDeclaration type) {
+		ITypeBinding typeBinding = type.resolveBinding();
+		final String testCase = "junit.framework.TestCase"; //$NON-NLS-1$
+		boolean isTest = ClassRelationUtil.isContentOfType(typeBinding, testCase)
+				|| ClassRelationUtil.isInheritingContentOfTypes(typeBinding, Collections.singletonList(testCase));
+		return !isTest;
+
+	}
+
+	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(EnumConstantDeclaration node) {
 		return false;
@@ -89,7 +100,7 @@ public class UnusedMethodsCandidateVisitor extends ASTVisitor {
 		} else {
 			AbstractTypeDeclaration typeDeclaration = (AbstractTypeDeclaration) methodDeclaration.getParent();
 			ITypeBinding parentTypeBinding = typeDeclaration.resolveBinding();
-			
+
 			List<IMethodBinding> inheritedMethods = ClassRelationUtil.findInheretedMethods(parentTypeBinding);
 			IMethodBinding methodBinding = methodDeclaration.resolveBinding();
 			if (methodBinding == null) {
