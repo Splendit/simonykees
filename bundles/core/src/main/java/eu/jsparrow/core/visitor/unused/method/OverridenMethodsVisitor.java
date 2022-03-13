@@ -40,8 +40,10 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 			if (anonymousClass != null) {
 				List<MethodDeclaration> methodDeclarations = ASTNodeUtil
 					.convertToTypedList(anonymousClass.bodyDeclarations(), MethodDeclaration.class);
-				CompilationUnit compilationUnit = ASTNodeUtil.getSpecificAncestor(enumDeclaration, CompilationUnit.class);
-				IPath enumDeclcarationPath = compilationUnit.getJavaElement().getPath();
+				CompilationUnit compilationUnit = ASTNodeUtil.getSpecificAncestor(enumDeclaration,
+						CompilationUnit.class);
+				IPath enumDeclcarationPath = compilationUnit.getJavaElement()
+					.getPath();
 				List<UnusedMethodWrapper> relevantUnusedMethods = unusedMethods.stream()
 					.filter(unused -> enumDeclcarationPath.equals(unused.getDeclarationPath()))
 					.collect(Collectors.toList());
@@ -63,11 +65,21 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 	}
 
 	@Override
-	public boolean visit(TypeDeclaration typeDeclaration) {
-		
-		ITypeBinding iTypeBinding = typeDeclaration.resolveBinding();
-		List<ITypeBinding> superClasses = ClassRelationUtil.findSuperClasses(iTypeBinding);
+	public boolean visit(AnonymousClassDeclaration anonymousClass) {
+		ITypeBinding iTypeBinding = anonymousClass.resolveBinding();
+		analyzeOverridenMethods(iTypeBinding);
+		return true;
+	}
 
+	@Override
+	public boolean visit(TypeDeclaration typeDeclaration) {
+		ITypeBinding iTypeBinding = typeDeclaration.resolveBinding();
+		analyzeOverridenMethods(iTypeBinding);
+		return true;
+	}
+
+	private void analyzeOverridenMethods(ITypeBinding iTypeBinding) {
+		List<ITypeBinding> superClasses = ClassRelationUtil.findSuperClasses(iTypeBinding);
 		List<ITypeBinding> superInterfaces = ClassRelationUtil.findSuperInterfaces(iTypeBinding);
 
 		List<String> superClassNames = superClasses.stream()
@@ -108,8 +120,6 @@ public class OverridenMethodsVisitor extends ASTVisitor {
 			dropImplicitOverridedMethods(relevantSuperClassesMethods, superInterfaceMethodBindings,
 					superClassMethodBindings);
 		}
-
-		return true;
 	}
 
 	private boolean isDeclaredIn(UnusedMethodWrapper unused, List<String> superClassNames) {
