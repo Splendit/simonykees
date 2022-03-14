@@ -9,12 +9,15 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.BreakStatement;
+import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -123,6 +126,13 @@ public class ReferencesVisitor extends ASTVisitor {
 
 		IBinding binding = simpleName.resolveBinding();
 		if (binding == null) {
+			if (simpleName.getLocationInParent() == LabeledStatement.LABEL_PROPERTY
+					|| simpleName.getLocationInParent() == ContinueStatement.LABEL_PROPERTY
+					|| simpleName.getLocationInParent() == BreakStatement.LABEL_PROPERTY
+
+			) {
+				return false;
+			}
 			throw new UnresolvedTypeBindingException("The binding of the reference candidate cannot be resolved."); //$NON-NLS-1$
 		}
 		int kind = binding.getKind();
