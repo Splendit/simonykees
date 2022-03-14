@@ -22,6 +22,17 @@ import eu.jsparrow.core.visitor.unused.BodyDeclarationsUtil;
 import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Finds the {@link MethodDeclaration} that are not used within a
+ * {@link CompilationUnit}. If the method is private, it is immediately
+ * classified as an unused method. Otherwise, further actions are needed to
+ * determine whether the method is used or not. Therefore, it is only stored as
+ * an unused candidate method.
+ * 
+ * Only the methods defined in the top level classes are analyzed. 
+ * 
+ * @since 4.9.0
+ */
 public class UnusedMethodsCandidateVisitor extends ASTVisitor {
 
 	private Map<String, Boolean> options;

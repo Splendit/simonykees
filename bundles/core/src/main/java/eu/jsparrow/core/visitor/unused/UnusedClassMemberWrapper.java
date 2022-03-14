@@ -9,6 +9,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 
 /**
+ * A common type for unused class member declarations, i.e., unused fields and
+ * unused methods.
  * 
  * @since 4.9.0
  *
@@ -16,14 +18,14 @@ import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 public interface UnusedClassMemberWrapper {
 
 	CompilationUnit getCompilationUnit();
-	
+
 	JavaAccessModifier getAccessModifier();
-	
+
 	IPath getDeclarationPath();
-	
+
 	String getClassMemberIdentifier();
-	
+
 	String getClassDeclarationName();
-	
+
 	List<ICompilationUnit> getTargetICompilationUnits();
 }

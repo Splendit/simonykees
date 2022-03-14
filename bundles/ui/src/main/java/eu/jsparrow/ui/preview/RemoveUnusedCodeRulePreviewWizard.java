@@ -134,49 +134,49 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 			.stream()
 			.forEach(x -> model.addFileToRule(unusedMethodsRule, x.getHandleIdentifier()));
 		if (!publicChanges.isEmpty()) {
-			String title = "Remove unused public fields"; //$NON-NLS-1$
+			String title = Messages.RemoveUnusedCodeRulePreviewWizard_removeUnusedPublicFields_pageTitle;
 			addPage(new RemoveUnusedCodeRulePreviewWizardPage(publicChanges, originalDocuments, rule, title, canFinish(),
 					this::addMetaData, this::removeMetaData));
 		}
 
 		if (!protectedChanges.isEmpty()) {
-			String title = "Remove unused protected fields"; //$NON-NLS-1$
+			String title = Messages.RemoveUnusedCodeRulePreviewWizard_removeUnusedProtectedFields_pageTitle;
 			addPage(new RemoveUnusedCodeRulePreviewWizardPage(protectedChanges, originalDocuments, rule, title, canFinish(),
 					this::addMetaData, this::removeMetaData));
 		}
 
 		if (!packagePrivateChanges.isEmpty()) {
-			String title = "Remove unused package private fields"; //$NON-NLS-1$
+			String title = Messages.RemoveUnusedCodeRulePreviewWizard_removeUnusedPackagePrivateFields_pageTitle;
 			addPage(new RemoveUnusedCodeRulePreviewWizardPage(packagePrivateChanges, originalDocuments, rule, title, canFinish(),
 					this::addMetaData, this::removeMetaData));
 		}
 
 		if (!privateChanges.isEmpty()) {
-			String title = "Remove unused private fields"; //$NON-NLS-1$
+			String title = Messages.RemoveUnusedCodeRulePreviewWizard_removeUnusedPrivateFields_pageTitle;
 			addPage(new RemoveUnusedCodeRulePreviewWizardPage(privateChanges, originalDocuments, rule, title, canFinish(), 
 					this::addMetaData, this::removeMetaData));
 		}
 		
 		if (!publicMethodChanges.isEmpty()) {
-			String title = "Remove unused public methods"; //$NON-NLS-1$
+			String title = Messages.RemoveUnusedCodeRulePreviewWizard_removeUnusedPublicMethods_pageTitle;
 			addPage(new RemoveUnusedCodeRulePreviewWizardPage(publicMethodChanges, originalDocuments, unusedMethodsRule, title, canFinish(),
 					this::addUnusedMethodData, this::removeUnusedMethodData));
 		}
 
 		if (!protectedMethodChanges.isEmpty()) {
-			String title = "Remove unused protected methods"; //$NON-NLS-1$
+			String title = Messages.RemoveUnusedCodeRulePreviewWizard_removeUnusedProtectedMethods_pageTitle;
 			addPage(new RemoveUnusedCodeRulePreviewWizardPage(protectedMethodChanges, originalDocuments, unusedMethodsRule, title, canFinish(),
 					this::addUnusedMethodData, this::removeUnusedMethodData));
 		}
 
 		if (!packagePrivateMethodChanges.isEmpty()) {
-			String title = "Remove unused package private methods"; //$NON-NLS-1$
+			String title = Messages.RemoveUnusedCodeRulePreviewWizard_removeUnusedPackagePrivateMethods_pageTitle;
 			addPage(new RemoveUnusedCodeRulePreviewWizardPage(packagePrivateMethodChanges, originalDocuments, unusedMethodsRule, title, canFinish(),
 					this::addUnusedMethodData, this::removeUnusedMethodData));
 		}
 
 		if (!privateMethodChanges.isEmpty()) {
-			String title = "Remove unused private methods"; //$NON-NLS-1$
+			String title = Messages.RemoveUnusedCodeRulePreviewWizard_removeUnusedPrivateMethods_pageTitle;
 			addPage(new RemoveUnusedCodeRulePreviewWizardPage(privateMethodChanges, originalDocuments, unusedMethodsRule, title, canFinish(),
 					this::addUnusedMethodData, this::removeUnusedMethodData));
 		}

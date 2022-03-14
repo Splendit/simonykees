@@ -58,7 +58,7 @@ public class FieldReferencesSearch {
 		SearchPattern searchPattern = SearchPattern.createPattern(iField, IJavaSearchConstants.REFERENCES);
 		
 		JavaElementSearchEngine elementSearch = new JavaElementSearchEngine(this.searchScope);
-		Optional<List<ReferenceSearchMatch>> result = elementSearch.findFieldReferences(searchPattern, fragment.getName().getIdentifier());
+		Optional<List<ReferenceSearchMatch>> result = elementSearch.findReferences(searchPattern, fragment.getName().getIdentifier());
 		this.targetIJavaElements = elementSearch.getTargetIJavaElements();
 		
 		return result;

@@ -25,6 +25,13 @@ import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Finds references of method in a compilation unit. Determines whether the
+ * reference occurs in a test case or not.
+ * 
+ * @since 4.9.0
+ *
+ */
 public class MethodReferencesVisitor extends ASTVisitor {
 
 	private Map<String, Boolean> optionsMap;
@@ -34,9 +41,9 @@ public class MethodReferencesVisitor extends ASTVisitor {
 	private Set<MethodDeclaration> relatedTestDeclarations = new HashSet<>();
 	private boolean mainSourceReferenceFound = false;
 	private boolean unresolvedReferenceFound = false;
-	
+
 	private static final List<String> supportedTestAnnotations = Collections.unmodifiableList(Arrays.asList(
-			"org.junit.Test",  //$NON-NLS-1$
+			"org.junit.Test", //$NON-NLS-1$
 			"org.junit.jupiter.api.Test")); //$NON-NLS-1$
 
 	public MethodReferencesVisitor(MethodDeclaration methodDeclaration, Map<String, Boolean> optionsMap) {
@@ -57,10 +64,10 @@ public class MethodReferencesVisitor extends ASTVisitor {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		MethodDeclaration enclosingMethodDeclaration = ASTNodeUtil.getSpecificAncestor(methodInvocation,
 				MethodDeclaration.class);
-		
+
 		return analyzeMethodInvocation(name, methodBinding, enclosingMethodDeclaration);
 	}
-	
+
 	@Override
 	public boolean visit(SuperMethodInvocation superInvocation) {
 		SimpleName name = superInvocation.getName();
@@ -69,17 +76,17 @@ public class MethodReferencesVisitor extends ASTVisitor {
 				MethodDeclaration.class);
 		return analyzeMethodInvocation(name, methodBinding, enclosingMethodDeclaration);
 	}
-	
+
 	@Override
 	public boolean visit(ExpressionMethodReference methodReference) {
 		return analyzeMethodReference(methodReference, methodReference.getName());
 	}
-	
+
 	@Override
 	public boolean visit(SuperMethodReference methodReference) {
 		return analyzeMethodReference(methodReference, methodReference.getName());
 	}
-	
+
 	@Override
 	public boolean visit(TypeMethodReference methodReference) {
 		return analyzeMethodReference(methodReference, methodReference.getName());

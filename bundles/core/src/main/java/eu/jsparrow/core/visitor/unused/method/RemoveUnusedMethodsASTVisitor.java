@@ -13,6 +13,11 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Removes the provided unused method declarations.
+ * 
+ * @since 4.9.0
+ */
 public class RemoveUnusedMethodsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private List<UnusedMethodWrapper> unusedMethods;

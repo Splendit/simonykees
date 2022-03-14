@@ -29,7 +29,7 @@ import eu.jsparrow.rules.common.util.RefactoringUtil;
 public class JavaElementSearchEngine {
 
 	private static final Logger logger = LoggerFactory.getLogger(JavaElementSearchEngine.class);
-	
+
 	private Set<ICompilationUnit> targetIJavaElements = new HashSet<>();
 
 	private static final String FILE_WITH_COMPILATION_ERROR_EXCEPTION_MESSAGE = "A reference was found in a CompilationUnit with compilation errors."; //$NON-NLS-1$
@@ -41,17 +41,19 @@ public class JavaElementSearchEngine {
 	}
 
 	/**
-	 * Makes use of {@link SearchEngine} for finding the references of a field
-	 * which is declared in the given declaration fragment. Uses
-	 * {@link #searchScope} for as the scope of the search. Discards the whole
-	 * search if an error occurs during the search process.
+	 * Makes use of {@link SearchEngine} for finding the references of fields or
+	 * methods. Uses {@link #searchScope} for as the scope of the search.
+	 * Discards the whole search if an error occurs during the search process.
 	 * 
-	 * @param fragment
-	 *            a declaration fragment belonging to a field declaration.
+	 * @param searchPattern
+	 *            a pattern defining the search
+	 * @param elementIdentifier
+	 *            the identifier of the class member element to search for,
+	 *            i.e., the field name or the method name.
 	 * @return an optional of the list of {@link ReferenceSearchMatch}s or an
 	 *         empty optional if the references cannot be found.
 	 */
-	public Optional<List<ReferenceSearchMatch>> findFieldReferences(SearchPattern searchPattern, String elementIdentifier) {
+	public Optional<List<ReferenceSearchMatch>> findReferences(SearchPattern searchPattern, String elementIdentifier) {
 
 		/*
 		 * Create the search scope based on the provided scope.
@@ -105,7 +107,7 @@ public class JavaElementSearchEngine {
 			}
 		};
 	}
-	
+
 	private ICompilationUnit findCompilationUnit(SearchMatch match) {
 		ICompilationUnit icu = null;
 		IJavaElement iJavaElement = (IJavaElement) match.getElement();
@@ -119,16 +121,15 @@ public class JavaElementSearchEngine {
 		}
 		return icu;
 	}
-	
+
 	private void storeIJavaElement(ICompilationUnit iJavaElement) {
 		this.targetIJavaElements.add(iJavaElement);
 	}
-	
 
 	/**
 	 * 
-	 * @return the set of the {@link IJavaElement}s containing a reference to a 
-	 * field being renamed.
+	 * @return the set of the {@link IJavaElement}s containing a reference to a
+	 *         field being renamed.
 	 */
 	public Set<ICompilationUnit> getTargetIJavaElements() {
 		return this.targetIJavaElements;

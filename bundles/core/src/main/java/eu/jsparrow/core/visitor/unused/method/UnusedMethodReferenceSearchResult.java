@@ -6,6 +6,14 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
+/**
+ * Holds the relevant information (e.g., did the search process complete
+ * successfully, does a method have references to a main sources, the list of
+ * test cases that are the only clients of the method) resulting from a method
+ * search result.
+ * 
+ * @since 4.9.0
+ */
 public class UnusedMethodReferenceSearchResult {
 
 	private boolean mainSourceReferenceFound;
@@ -30,16 +38,25 @@ public class UnusedMethodReferenceSearchResult {
 	public List<TestSourceReference> getReferencesInTestSources() {
 		return relatedTestDeclarations;
 	}
-	
+
+	/**
+	 * 
+	 * @param unusedMethods
+	 *            the list of unused methods that are already marked for
+	 *            removal.
+	 * @return if this unused method has references some test cases that are
+	 *         already marked for removal.
+	 */
 	public boolean hasOverlappingTestDeclarations(List<UnusedMethodWrapper> unusedMethods) {
-		for(TestSourceReference testReference : relatedTestDeclarations) {
+		for (TestSourceReference testReference : relatedTestDeclarations) {
 			Set<MethodDeclaration> testDeclarations = testReference.getTestDeclarations();
-			for(UnusedMethodWrapper unusedMethod : unusedMethods) {
+			for (UnusedMethodWrapper unusedMethod : unusedMethods) {
 				List<TestSourceReference> testsForRemoval = unusedMethod.getTestReferences();
-				for(TestSourceReference testForRemoval : testsForRemoval) {
+				for (TestSourceReference testForRemoval : testsForRemoval) {
 					Set<MethodDeclaration> forRemovalDeclarations = testForRemoval.getTestDeclarations();
-					boolean retained = forRemovalDeclarations.stream().anyMatch(testDeclarations::contains);
-					if(retained) {
+					boolean retained = forRemovalDeclarations.stream()
+						.anyMatch(testDeclarations::contains);
+					if (retained) {
 						return true;
 					}
 				}

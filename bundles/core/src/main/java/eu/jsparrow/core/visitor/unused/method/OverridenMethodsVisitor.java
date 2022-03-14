@@ -20,6 +20,13 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Provides functionalities to find the methods that marked for removal, but
+ * should not be removed because they are either implicitly or explicitly
+ * overriden.
+ * 
+ * @since 4.9.0
+ */
 public class OverridenMethodsVisitor extends ASTVisitor {
 
 	private List<UnusedMethodWrapper> unusedMethods;

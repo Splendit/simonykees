@@ -6,6 +6,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
+/**
+ * Holds the relevant information about the test cases that are the only clients
+ * of a method declaration.
+ * 
+ * @since 4.9.0
+ */
 public class TestSourceReference {
 
 	private CompilationUnit compilationUnit;

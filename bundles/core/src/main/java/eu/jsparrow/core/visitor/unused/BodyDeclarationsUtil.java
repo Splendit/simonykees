@@ -15,6 +15,13 @@ import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * A utility class providing functionalities to find or analyze the modifiers
+ * and annotations of class member declarations.
+ * 
+ * @since 4.9.0
+ *
+ */
 public class BodyDeclarationsUtil {
 
 	private BodyDeclarationsUtil() {

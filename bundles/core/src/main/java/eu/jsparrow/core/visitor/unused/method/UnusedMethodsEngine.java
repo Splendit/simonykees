@@ -28,6 +28,11 @@ import eu.jsparrow.core.visitor.unused.JavaElementSearchEngine;
 import eu.jsparrow.core.visitor.utils.SearchScopeFactory;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
+/**
+ * An engine to find unused methods. 
+ * 
+ * @since 4.9.0
+ */
 public class UnusedMethodsEngine {
 	
 	private static final Logger logger = LoggerFactory.getLogger(UnusedMethodsEngine.class);
@@ -50,9 +55,9 @@ public class UnusedMethodsEngine {
 
 			UnusedMethodsCandidateVisitor visitor = new UnusedMethodsCandidateVisitor(optionsMap);
 			compilationUnit.accept(visitor);
-			List<UnusedMethodWrapper> unusedPrivateFields = visitor.getUnusedPrivateMethods();
-			if (!unusedPrivateFields.isEmpty()) {
-				list.addAll(unusedPrivateFields);
+			List<UnusedMethodWrapper> unusedPrivateMethods = visitor.getUnusedPrivateMethods();
+			if (!unusedPrivateMethods.isEmpty()) {
+				list.addAll(unusedPrivateMethods);
 				targetCompilationUnits.add(icu);
 			}
 
@@ -74,7 +79,7 @@ public class UnusedMethodsEngine {
 
 			list.addAll(nonPrivate);
 			if (subMonitor.isCanceled()) {
-				logger.debug("Cancelled while searching for unused fields."); //$NON-NLS-1$
+				logger.debug("Cancelled while searching for unused methods."); //$NON-NLS-1$
 				return Collections.emptyList();
 			} else {
 				subMonitor.worked(1);
@@ -103,9 +108,9 @@ public class UnusedMethodsEngine {
 					&& !searchResult.hasOverlappingTestDeclarations(list)) {
 				List<TestSourceReference> testReferences = searchResult.getReferencesInTestSources();
 
-				UnusedMethodWrapper unusedFieldWrapper = new UnusedMethodWrapper(compilationUnit,
+				UnusedMethodWrapper unusedMethodWrapper = new UnusedMethodWrapper(compilationUnit,
 						candidate.getAccessModifier(), methodDeclaration, testReferences);
-				list.add(unusedFieldWrapper);
+				list.add(unusedMethodWrapper);
 			}
 		}
 		return list;
@@ -116,7 +121,7 @@ public class UnusedMethodsEngine {
 			Map<String, Boolean> optionsMap, 
 			Map<IPath, CompilationUnit> cache) {
 		IJavaElement[] searchScope = createSearchScope(scope, project);
-		JavaElementSearchEngine fieldReferencesSearchEngine = new JavaElementSearchEngine(searchScope);
+		JavaElementSearchEngine referencesSearchEngine = new JavaElementSearchEngine(searchScope);
 		SimpleName name = methodDeclaration.getName();
 		String methodIdentifier = name.getIdentifier();
 		IMethodBinding methodBinding = methodDeclaration.resolveBinding();
@@ -125,15 +130,11 @@ public class UnusedMethodsEngine {
 		}
 		IJavaElement javaElement = methodBinding.getJavaElement();
 		SearchPattern searchPattern = SearchPattern.createPattern(javaElement, IJavaSearchConstants.REFERENCES);
-		Optional<List<ReferenceSearchMatch>> references = fieldReferencesSearchEngine.findFieldReferences(searchPattern, methodIdentifier);
+		Optional<List<ReferenceSearchMatch>> references = referencesSearchEngine.findReferences(searchPattern, methodIdentifier);
 		if (!references.isPresent()) {
 			return new UnusedMethodReferenceSearchResult(false, true, Collections.emptyList());
 		}
-		Set<ICompilationUnit> targetICUs = fieldReferencesSearchEngine.getTargetIJavaElements();
-		/*
-		 * Make a cache with parsed compilation units. Keep all the icu-s in a
-		 * targetCompilationUnits field.
-		 */
+		Set<ICompilationUnit> targetICUs = referencesSearchEngine.getTargetIJavaElements();
 		List<TestSourceReference> relatedTestDeclarations = new ArrayList<>();
 		for (ICompilationUnit iCompilationUnit : targetICUs) {
 			IPath path = iCompilationUnit.getPath();

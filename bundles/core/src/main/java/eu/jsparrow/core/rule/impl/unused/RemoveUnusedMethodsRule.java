@@ -23,12 +23,22 @@ import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
 import eu.jsparrow.core.visitor.unused.method.RemoveUnusedMethodsASTVisitor;
 import eu.jsparrow.core.visitor.unused.method.TestSourceReference;
 import eu.jsparrow.core.visitor.unused.method.UnusedMethodWrapper;
+import eu.jsparrow.core.visitor.unused.method.UnusedMethodsEngine;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Finds and remove unused methods.
+ * 
+ * @see RemoveUnusedMethodsASTVisitor
+ * @see UnusedMethodsEngine
+ * 
+ * @since 4.9.0
+ *
+ */
 public class RemoveUnusedMethodsRule extends RefactoringRuleImpl<RemoveUnusedMethodsASTVisitor> {
 
 	private List<UnusedMethodWrapper> unusedMethods;

@@ -12,13 +12,20 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
 
+/**
+ * Wraps information about an unused method. Additionally, provides the relevant
+ * {@link TextEdit}s for removing an unused method declaration.
+ * 
+ * @since 4.9.0
+ */
 public class UnusedMethodWrapper implements UnusedClassMemberWrapper {
-	
+
 	private CompilationUnit compilationUnit;
 	private JavaAccessModifier accessModifier;
 	private MethodDeclaration methodDeclaration;
@@ -39,7 +46,7 @@ public class UnusedMethodWrapper implements UnusedClassMemberWrapper {
 		this.classDeclarationName = javaElement.getElementName();
 		SimpleName name = methodDeclaration.getName();
 		classMemberIdentifier = name.getIdentifier();
-		
+
 	}
 
 	public List<TestSourceReference> getTestReferences() {
@@ -101,7 +108,8 @@ public class UnusedMethodWrapper implements UnusedClassMemberWrapper {
 
 	@Override
 	public String toString() {
-		String compilationUnitName = compilationUnit.getJavaElement().getElementName();
+		String compilationUnitName = compilationUnit.getJavaElement()
+			.getElementName();
 		return String.format(
 				"UnusedMethodWrapper [compilationUnit=%s, accessModifier=%s, methodDeclaration=%s, testReferences=%s]", //$NON-NLS-1$
 				compilationUnitName, accessModifier, methodDeclaration, testReferences);

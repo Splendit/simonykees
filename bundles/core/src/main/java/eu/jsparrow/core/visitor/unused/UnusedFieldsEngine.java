@@ -117,7 +117,7 @@ public class UnusedFieldsEngine {
 		SearchPattern pattern = createSearchPattern(fragment);
 		String identifier = fragment.getName()
 			.getIdentifier();
-		Optional<List<ReferenceSearchMatch>> references = fieldReferencesSearchEngine.findFieldReferences(pattern,
+		Optional<List<ReferenceSearchMatch>> references = fieldReferencesSearchEngine.findReferences(pattern,
 				identifier);
 		if (!references.isPresent()) {
 			return new UnusedFieldReferenceSearchResult(false, true, Collections.emptyList());
