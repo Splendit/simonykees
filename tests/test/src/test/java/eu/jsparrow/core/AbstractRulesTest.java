@@ -58,7 +58,7 @@ public abstract class AbstractRulesTest {
 	}
 
 	/**
-	 * FIXME: There are 35 rules tests which fail because of interaction with
+	 * There are 35 rules tests which fail because of interaction with
 	 * RemoveUnusedLocalVariablesRule, for example:
 	 * <ul>
 	 * <li>StringUtilsClashingImportCornerCaseRule</li>
@@ -66,9 +66,7 @@ public abstract class AbstractRulesTest {
 	 * <li>RearrangeClassMembersRule</li>
 	 * <li>ReplaceJUnit3TestCasesRunUnexpectedTestInMainRule</li>
 	 * </ul>
-	 * Therefore RemoveUnusedLocalVariablesRule is temporarily skipped. The pull
-	 * request for SIM-2065 cannot be approved and the corresponding branch
-	 * cannot be merged until this problem is not solved.
+	 * Therefore RemoveUnusedLocalVariablesRule is skipped.
 	 */
 	private static boolean isNotRemoveUnusedLocalVariablesRule(RefactoringRule refactoringRule) {
 		return !"RemoveUnusedLocalVariables".equals(refactoringRule.getId()); //$NON-NLS-1$
@@ -82,14 +80,6 @@ public abstract class AbstractRulesTest {
 		rulesList = new ArrayList<>();
 		List<RefactoringRule> allRules = RulesContainer.getAllRules(false)
 			.stream()
-			/*
-			 * RemoveUnusedLocalVariablesRule is temporarily skipped by using
-			 * the following filter.
-			 * 
-			 * FIXME: remove the following filter after having fixed the
-			 * unexpected interaction of RemoveUnusedLocalVariablesRule with 35
-			 * rules tests, also see above.
-			 */
 			.filter(AbstractRulesTest::isNotRemoveUnusedLocalVariablesRule)
 			/*
 			 * we cannot apply Local Variable Type Inference rule until we

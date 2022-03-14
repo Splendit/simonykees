@@ -24,6 +24,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.SingleRuleTest;
 import eu.jsparrow.common.util.RulesTestUtil;
@@ -46,7 +48,7 @@ class RemoveUnusedLocalVariablesRuleTest extends SingleRuleTest {
 		String ruleId = rule.getId();
 		assertThat(ruleId, equalTo("RemoveUnusedLocalVariables"));
 	}
-	
+
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
@@ -57,7 +59,7 @@ class RemoveUnusedLocalVariablesRuleTest extends SingleRuleTest {
 		assertThat(description.getDescription(),
 				equalTo("Finds and removes local variables that are never used actively."));
 	}
-	
+
 	@Test
 	void test_requiredLibraries() throws Exception {
 
@@ -67,7 +69,7 @@ class RemoveUnusedLocalVariablesRuleTest extends SingleRuleTest {
 
 		assertThat(rule.requiredLibraries(), nullValue());
 	}
-	
+
 	@Test
 	void test_requiredJavaVersion() throws Exception {
 		assertThat(rule.getRequiredJavaVersion(), equalTo("1.1"));
@@ -81,40 +83,29 @@ class RemoveUnusedLocalVariablesRuleTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-	
-	@Test
-	void testTransformation() throws Exception {
-		Path preRule = getPreRuleFile("unused/UnusedLocalVariables.java");
-		Path postRule = getPostRuleFile("UnusedLocalVariables.java", "unused");
-		
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"UnusedLocalVariables",
+			"UnusedLocalVariablesWithAnnotation"
+	})
+	void testTransformation(String javaClassName) throws Exception {
+		String javaFileName = javaClassName + ".java";
+		Path preRule = getPreRuleFile("unused/" + javaFileName);
+		Path postRule = getPostRuleFile(javaFileName, "unused");
+
 		RemoveUnusedLocalVariablesRule rule = new RemoveUnusedLocalVariablesRule();
-		
-		String refactoring = applyRemoveUnusedFieldRefactoring(rule, "eu.jsparrow.sample.preRule.unused", preRule, root);
+
+		String refactoring = applyRemoveUnusedFieldRefactoring(rule, "eu.jsparrow.sample.preRule.unused", preRule,
+				root);
 		String postRulePackage = getPostRulePackage("unused");
 		String actual = StringUtils.replace(refactoring, "package eu.jsparrow.sample.preRule.unused",
 				postRulePackage);
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
-		
+
 		assertEquals(expected, actual);
 	}
-	
-	
-	@Test
-	void testTransformationWithAnnotation() throws Exception {
-		Path preRule = getPreRuleFile("unused/UnusedLocalVariablesWithAnnotation.java");
-		Path postRule = getPostRuleFile("UnusedLocalVariablesWithAnnotation.java", "unused");
-		
-		RemoveUnusedLocalVariablesRule rule = new RemoveUnusedLocalVariablesRule();
-		
-		String refactoring = applyRemoveUnusedFieldRefactoring(rule, "eu.jsparrow.sample.preRule.unused", preRule, root);
-		String postRulePackage = getPostRulePackage("unused");
-		String actual = StringUtils.replace(refactoring, "package eu.jsparrow.sample.preRule.unused",
-				postRulePackage);
-		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
-		
-		assertEquals(expected, actual);
-	}
-	
+
 	private String applyRemoveUnusedFieldRefactoring(RemoveUnusedLocalVariablesRule rule, String packageString,
 			Path preFile, IPackageFragmentRoot root) throws Exception {
 
@@ -135,6 +126,5 @@ class RemoveUnusedLocalVariablesRuleTest extends SingleRuleTest {
 
 		return compilationUnit.getSource();
 	}
-	
 
 }
