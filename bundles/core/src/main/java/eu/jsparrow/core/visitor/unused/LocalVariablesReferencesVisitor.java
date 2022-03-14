@@ -125,16 +125,15 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 			return false;
 		}
 
-		if (simpleName.getLocationInParent() == LabeledStatement.LABEL_PROPERTY
-				|| simpleName.getLocationInParent() == ContinueStatement.LABEL_PROPERTY
-				|| simpleName.getLocationInParent() == BreakStatement.LABEL_PROPERTY
-
-		) {
-			return false;
-		}
-
 		IBinding binding = simpleName.resolveBinding();
 		if (binding == null) {
+			if (simpleName.getLocationInParent() == LabeledStatement.LABEL_PROPERTY
+					|| simpleName.getLocationInParent() == ContinueStatement.LABEL_PROPERTY
+					|| simpleName.getLocationInParent() == BreakStatement.LABEL_PROPERTY
+
+			) {
+				return false;
+			}
 			throw new UnresolvedTypeBindingException("The binding of the reference candidate cannot be resolved."); //$NON-NLS-1$
 		}
 		int kind = binding.getKind();
