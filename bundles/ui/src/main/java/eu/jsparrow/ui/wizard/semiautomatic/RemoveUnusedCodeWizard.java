@@ -139,28 +139,20 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
-				int fieldsSubmonitorSplit = calcFieldsSubMonitorSplit(model);
-				SubMonitor removeUnusedFieldsSubMonitor = subMonitor.split(fieldsSubmonitorSplit);
-				removeUnusedFieldsSubMonitor.setWorkRemaining(selectedJavaElements.size());
-				removeUnusedFieldsSubMonitor.setTaskName("Finding unused fields"); //$NON-NLS-1$
+				boolean fieldsChecked = hasClassMemberOptionsChecked(model, "fields"); //$NON-NLS-1$
+				boolean methodsChecked = hasClassMemberOptionsChecked(model, "methods"); //$NON-NLS-1$
+
+				int fieldsSubmonitorSplit = calcFieldsSubMonitorSplit(fieldsChecked, methodsChecked);
 
 				Map<String, Boolean> options = model.getOptionsMap();
-				List<UnusedFieldWrapper> unusedFields = engine.findUnusedFields(selectedJavaElements,
-						options, removeUnusedFieldsSubMonitor);
 
-				SubMonitor removeUnusedMethodsSubMonitor = subMonitor.split(70 - fieldsSubmonitorSplit);
-				removeUnusedMethodsSubMonitor.setWorkRemaining(selectedJavaElements.size());
-				removeUnusedMethodsSubMonitor.setTaskName("Finding unused methods"); //$NON-NLS-1$
-
-				List<UnusedMethodWrapper> unusedMethods = unusedMethodsEngine.findUnusedMethods(selectedJavaElements,
-						options, removeUnusedMethodsSubMonitor);
+				List<UnusedFieldWrapper> unusedFields = findUnusedFields(engine, subMonitor, fieldsSubmonitorSplit,
+						options);
+				List<UnusedMethodWrapper> unusedMethods = findUnusedMethods(unusedMethodsEngine, subMonitor,
+						fieldsSubmonitorSplit, options);
 
 				if (unusedFields.isEmpty() && unusedMethods.isEmpty()) {
 					WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
-					return Status.CANCEL_STATUS;
-				}
-
-				if (removeUnusedFieldsSubMonitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
 				}
 
@@ -195,7 +187,6 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 				monitor.done();
 				return Status.OK_STATUS;
 			}
-
 		};
 		job.setUser(true);
 		job.schedule();
@@ -220,15 +211,63 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 		return true;
 	}
 
-	private int calcFieldsSubMonitorSplit(RemoveUnusedCodeWizardPageModel model) {
+	private List<UnusedFieldWrapper> findUnusedFields(UnusedFieldsEngine engine, SubMonitor subMonitor,
+			int fieldsSubmonitorSplit, Map<String, Boolean> options) {
+		boolean fieldsChecked = hasClassMemberOptionsChecked(model, "fields"); //$NON-NLS-1$
+		if (!fieldsChecked) {
+			return Collections.emptyList();
+		}
+
+		SubMonitor removeUnusedFieldsSubMonitor = subMonitor.split(fieldsSubmonitorSplit);
+		removeUnusedFieldsSubMonitor.setWorkRemaining(selectedJavaElements.size());
+		removeUnusedFieldsSubMonitor.setTaskName("Finding unused fields"); //$NON-NLS-1$
+		List<UnusedFieldWrapper> unusedFields = engine.findUnusedFields(selectedJavaElements,
+				options, removeUnusedFieldsSubMonitor);
+		if (removeUnusedFieldsSubMonitor.isCanceled()) {
+			return Collections.emptyList();
+		}
+
+		return unusedFields;
+	}
+
+	private List<UnusedMethodWrapper> findUnusedMethods(UnusedMethodsEngine unusedMethodsEngine,
+			SubMonitor subMonitor, int fieldsSubmonitorSplit,
+			Map<String, Boolean> options) {
+		boolean methodsChecked = hasClassMemberOptionsChecked(model, "methods"); //$NON-NLS-1$
+		if (!methodsChecked) {
+			return Collections.emptyList();
+		}
+		SubMonitor removeUnusedMethodsSubMonitor = subMonitor.split(70 - fieldsSubmonitorSplit);
+		removeUnusedMethodsSubMonitor.setWorkRemaining(selectedJavaElements.size());
+		removeUnusedMethodsSubMonitor.setTaskName("Finding unused methods"); //$NON-NLS-1$
+
+		List<UnusedMethodWrapper> unusedMethods = unusedMethodsEngine.findUnusedMethods(selectedJavaElements,
+				options, removeUnusedMethodsSubMonitor);
+
+		if (removeUnusedMethodsSubMonitor.isCanceled()) {
+			return Collections.emptyList();
+		}
+		return unusedMethods;
+	}
+
+	private boolean hasClassMemberOptionsChecked(RemoveUnusedCodeWizardPageModel model, String classMember) {
 		Map<String, Boolean> options = model.getOptionsMap();
-		boolean fieldsSelected = options.entrySet()
+		return options.entrySet()
 			.stream()
 			.filter(entry -> entry.getKey()
-				.contains("fields")) //$NON-NLS-1$
+				.contains(classMember))
 			.map(Map.Entry<String, Boolean>::getValue)
 			.anyMatch(value -> value);
-		return fieldsSelected ? 30 : 0;
+	}
+
+	private int calcFieldsSubMonitorSplit(boolean fieldsChecked, boolean methodsChecked) {
+		if (fieldsChecked && methodsChecked) {
+			return 30;
+		} else if (fieldsChecked) {
+			return 70;
+		} else {
+			return 0;
+		}
 	}
 
 	private Job startRefactoringJob() {
