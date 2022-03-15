@@ -50,10 +50,6 @@ public class RemoveUnusedCodeWizardPageModel {
 		options.add(PROTECTED_METHODS);
 		options.add(PACKAGE_PRIVATE_METHODS);
 		options.add(PUBLIC_METHODS);
-		options.add(PRIVATE_CLASSES);
-		options.add(PROTECTED_CLASSES);
-		options.add(PACKAGE_PROTECTED_CLASSES);
-		options.add(PUBLIC_CLASSES);
 		return Collections.unmodifiableList(options);
 	}
 
