@@ -7,6 +7,7 @@ import java.util.Arrays;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import eu.jsparrow.core.markers.common.RemoveModifiersInInterfacePropertiesEvent;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -16,7 +17,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 3.3.0
  *
  */
-public class RemoveModifiersInInterfacePropertiesASTVisitor extends AbstractASTRewriteASTVisitor {
+public class RemoveModifiersInInterfacePropertiesASTVisitor extends AbstractASTRewriteASTVisitor implements RemoveModifiersInInterfacePropertiesEvent {
 
 	@Override
 	public boolean visit(TypeDeclaration interfaceDeclaration) {
@@ -41,6 +42,7 @@ public class RemoveModifiersInInterfacePropertiesASTVisitor extends AbstractASTR
 	private void removeModifier(Modifier modifier) {
 		astRewrite.remove(modifier, null);
 		onRewrite();
+		addMarkerEvent(modifier);
 	}
 
 }
