@@ -220,7 +220,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(SimpleName node) {
-		transformationPossible = analyzeName(node);
+		transformationPossible = ASTNodeUtil.isLabel(node) || analyzeName(node);
 		return false;
 	}
 
@@ -340,10 +340,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 						&& jUnit3TestCaseSuperTypesToRemove.contains(name.getParent()))
 				|| name.getLocationInParent() == MethodDeclaration.NAME_PROPERTY
 				|| name.getLocationInParent() == MethodInvocation.NAME_PROPERTY
-				|| name.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY
-				|| name.getLocationInParent() == LabeledStatement.LABEL_PROPERTY
-				|| name.getLocationInParent() == ContinueStatement.LABEL_PROPERTY
-				|| name.getLocationInParent() == BreakStatement.LABEL_PROPERTY) {
+				|| name.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY) {
 			return true;
 		}
 		IBinding binding = name.resolveBinding();

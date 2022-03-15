@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
@@ -66,7 +67,7 @@ class JUnit4AnnotationsAnalyzerVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(SimpleName node) {
-		transformationPossible = analyzeName(node);
+		transformationPossible = ASTNodeUtil.isLabel(node) || analyzeName(node);
 		return false;
 	}
 
@@ -91,13 +92,6 @@ class JUnit4AnnotationsAnalyzerVisitor extends ASTVisitor {
 	}
 
 	private boolean analyzeName(Name node) {
-		if (node.getLocationInParent() == LabeledStatement.LABEL_PROPERTY
-				|| node.getLocationInParent() == ContinueStatement.LABEL_PROPERTY
-				|| node.getLocationInParent() == BreakStatement.LABEL_PROPERTY
-
-		) {
-			return true;
-		}
 		IBinding binding = node.resolveBinding();
 		if (binding == null) {
 			return false;

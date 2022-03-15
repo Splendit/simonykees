@@ -138,12 +138,12 @@ class NonStaticReferencesVisitor extends ASTVisitor {
 	}
 
 	private boolean analyzeSimpleName(SimpleName node) {
+		if (ASTNodeUtil.isLabel(node)) {
+			return true;
+		}
 		if (node.getLocationInParent() == MethodDeclaration.NAME_PROPERTY ||
 				node.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY ||
-				node.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY ||
-				node.getLocationInParent() == LabeledStatement.LABEL_PROPERTY ||
-				node.getLocationInParent() == ContinueStatement.LABEL_PROPERTY ||
-				node.getLocationInParent() == BreakStatement.LABEL_PROPERTY) {
+				node.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY) {
 			return true;
 		}
 		return analyzeNameBinding(node);

@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.visitor.DeclaringNodeNotFoundException;
 import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
 import eu.jsparrow.core.rule.impl.unused.Constants;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * Finds the references on a local variable in a block. Determines whether all
@@ -127,11 +128,7 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 
 		IBinding binding = simpleName.resolveBinding();
 		if (binding == null) {
-			if (simpleName.getLocationInParent() == LabeledStatement.LABEL_PROPERTY
-					|| simpleName.getLocationInParent() == ContinueStatement.LABEL_PROPERTY
-					|| simpleName.getLocationInParent() == BreakStatement.LABEL_PROPERTY
-
-			) {
+			if (ASTNodeUtil.isLabel(simpleName)) {
 				return false;
 			}
 			throw new UnresolvedTypeBindingException("The binding of the reference candidate cannot be resolved."); //$NON-NLS-1$
