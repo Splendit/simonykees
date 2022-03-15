@@ -24,4 +24,19 @@ public class ReplaceJUnit3TestCasesWithJupiterRule {
 	public void testAssertEqualsWithMessage() throws Exception {
 		assertEquals(0x7fffffff, Integer.MAX_VALUE, "Expected to be {0x7fffffff}.");
 	}
+
+	public void useLabels() {
+
+		xLabel1: for (int i = 0; i < 10; i++) {
+			if (i == 3) {
+				break xLabel1;
+			}
+		}
+
+		for (int i = 0; i < 5; i++) {
+			xLabel2: for (int j = 0; j < 5; j++) {
+				continue xLabel2;
+			}
+		}
+	}
 }
