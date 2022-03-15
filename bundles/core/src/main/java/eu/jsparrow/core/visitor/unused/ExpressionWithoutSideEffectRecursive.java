@@ -6,12 +6,15 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
@@ -40,14 +43,11 @@ public class ExpressionWithoutSideEffectRecursive {
 		if (expressionNodeType == ASTNode.CLASS_INSTANCE_CREATION) {
 			return isClassInstanceCreationWithoutSideEffect((ClassInstanceCreation) expression);
 		}
-
 		if (expressionNodeType == ASTNode.METHOD_INVOCATION) {
 			return isMethodInvocationWithoutSideEffect((MethodInvocation) expression);
 		}
-
 		if (expressionNodeType == ASTNode.FIELD_ACCESS) {
 			return isExpressionWithoutSideEffect(((FieldAccess) expression).getExpression());
-
 		}
 		if (expressionNodeType == ASTNode.ARRAY_CREATION) {
 			return isArrayCreationWithoutSideEffect((ArrayCreation) expression);
@@ -57,6 +57,9 @@ public class ExpressionWithoutSideEffectRecursive {
 		}
 		if (expressionNodeType == ASTNode.ARRAY_ACCESS) {
 			return isArrayAccessWithoutSideEffect((ArrayAccess) expression);
+		}
+		if (expressionNodeType == ASTNode.LAMBDA_EXPRESSION) {
+			return isSimpleLambdaExpression((LambdaExpression) expression);
 		}
 
 		return expressionNodeType == ASTNode.NULL_LITERAL
@@ -126,4 +129,29 @@ public class ExpressionWithoutSideEffectRecursive {
 		Expression array = arrayAccess.getArray();
 		return isExpressionWithoutSideEffect(array) && isExpressionWithoutSideEffect(index);
 	}
+
+	private static boolean isSimpleLambdaExpression(LambdaExpression lambdaExpression) {
+		ASTNode lambdaBody = lambdaExpression.getBody();
+		if (lambdaBody.getNodeType() == ASTNode.BLOCK) {
+			Block block = (Block) lambdaBody;
+			List<Statement> lambdaStatements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
+			if (lambdaStatements.isEmpty()) {
+				return true;
+			}
+			if (lambdaStatements.size() > 1) {
+				return false;
+			}
+			Statement lambdaStatement = lambdaStatements.get(0);
+			return lambdaStatement.getNodeType() == ASTNode.EMPTY_STATEMENT ||
+					lambdaStatement.getNodeType() == ASTNode.RETURN_STATEMENT ||
+					lambdaStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT ||
+					lambdaStatement.getNodeType() == ASTNode.ASSERT_STATEMENT ||
+					lambdaStatement.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT;
+
+		}
+		// In this case the body of the lambda expression can only be an
+		// expression
+		return true;
+	}
+
 }

@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
-import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
@@ -81,7 +80,7 @@ public class ReferencesVisitor extends ASTVisitor {
 		}
 		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) simpleName.getParent();
-			Optional<ExpressionStatement> reassignment = isSafelyRemovable(assignment);
+			Optional<ExpressionStatement> reassignment = SafelyRemoveable.isSafelyRemovable(assignment, options);
 			reassignment.ifPresent(reassignments::add);
 			if (reassignment.isPresent()) {
 				return false;
@@ -111,26 +110,7 @@ public class ReferencesVisitor extends ASTVisitor {
 	private Optional<ExpressionStatement> isSafelyRemovableReassignment(Expression expression) {
 		if (expression.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) expression.getParent();
-			return isSafelyRemovable(assignment);
-		}
-		return Optional.empty();
-	}
-
-	private Optional<ExpressionStatement> isSafelyRemovable(Assignment assignment) {
-		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return Optional.empty();
-		}
-		Expression rightHandSide = assignment.getRightHandSide();
-
-		ExpressionStatement expressionStatement = (ExpressionStatement) assignment.getParent();
-		boolean ignoreSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
-		if (ignoreSideEffects) {
-			return Optional.of(expressionStatement);
-		}
-
-		boolean safelyRemovable = ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(rightHandSide);
-		if (safelyRemovable) {
-			return Optional.of(expressionStatement);
+			return SafelyRemoveable.isSafelyRemovable(assignment, options);
 		}
 		return Optional.empty();
 	}
