@@ -89,9 +89,9 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 		changesWrapperList = new ArrayList<>();
 		changes.entrySet()
 			.stream()
-			.map(Map.Entry::getKey)
-			.forEach(unusedFieldWrapper -> {
-				Map<ICompilationUnit, DocumentChange> changesForField = changes.get(unusedFieldWrapper);
+			.forEach(entry -> {
+				UnusedClassMemberWrapper unusedFieldWrapper = entry.getKey();
+				Map<ICompilationUnit, DocumentChange> changesForField = entry.getValue();
 				if (!changesForField.isEmpty()) {
 					DocumentChange parent = null;
 					ICompilationUnit parentICU = null;

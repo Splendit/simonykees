@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -104,6 +105,28 @@ public class UnusedMethodWrapper implements UnusedClassMemberWrapper {
 		} else {
 			return textEditGroups.get(path);
 		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(accessModifier, classDeclarationName, classMemberIdentifier, declarationPath.toString(),
+				methodDeclaration);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		UnusedMethodWrapper other = (UnusedMethodWrapper) obj;
+		return accessModifier == other.accessModifier
+				&& Objects.equals(classDeclarationName, other.classDeclarationName)
+				&& Objects.equals(classMemberIdentifier, other.classMemberIdentifier)
+				&& Objects.equals(declarationPath.toString(), other.declarationPath.toString())
+				&& Objects.equals(methodDeclaration, other.methodDeclaration);
 	}
 
 	@Override

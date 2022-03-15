@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -79,16 +80,13 @@ public class RemoveUnusedMethodsASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	private Optional<UnusedMethodWrapper> isDesignatedForRemoval(MethodDeclaration methodDeclaration,
 			Map<MethodDeclaration, UnusedMethodWrapper> map) {
-		int start = methodDeclaration.getStartPosition();
-		int length = methodDeclaration.getLength();
+		IMethodBinding methodBinding = methodDeclaration.resolveBinding();
 		for (Map.Entry<MethodDeclaration, UnusedMethodWrapper> entry : map.entrySet()) {
 			MethodDeclaration relevantDeclaration = entry.getKey();
+			IMethodBinding unusedMethodBinding = relevantDeclaration.resolveBinding();
 			UnusedMethodWrapper unusedMethod = entry.getValue();
-			int candidateStart = relevantDeclaration.getStartPosition();
-			int candidateLength = relevantDeclaration.getLength();
-			if (candidateStart == start && candidateLength == length) {
+			if (methodBinding.isEqualTo(unusedMethodBinding)) {
 				return Optional.of(unusedMethod);
-
 			}
 		}
 		return Optional.empty();
