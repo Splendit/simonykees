@@ -47,12 +47,10 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	private static final Logger logger = LoggerFactory.getLogger(RemoveUnusedCodeRulePreviewWizard.class);
 
 	private RefactoringPipeline refactoringPipeline;
-	private List<UnusedClassMemberWrapper> metaData;
 
 	private Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges;
 	private RemoveUnusedFieldsRule rule;
 	
-	private List<UnusedClassMemberWrapper> unusedMethodsData;
 	private Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> methodDocumentChanges;
 	private RemoveUnusedMethodsRule unusedMethodsRule;
 
@@ -70,8 +68,6 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 			RemoveUnusedFieldsRule rule,
 			RemoveUnusedMethodsRule unusedMethodsRule) {
 		this.refactoringPipeline = refactoringPipeline;
-		this.metaData = rule.getUnusedFieldWrapperList();
-		this.unusedMethodsData = unusedMethodsRule.getUnusedMethodWrapperList();
 		this.documentChanges = documentChanges;
 		this.methodDocumentChanges = methodDocumentChanges;
 		this.targetCompilationUnits = targetCompilationUnits;
@@ -350,19 +346,19 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	}
 
 	public void removeMetaData(UnusedClassMemberWrapper fieldData) {
-		this.metaData.remove(fieldData);
+		this.rule.dropUnusedField(fieldData);
 	}
 
 	public void addMetaData(UnusedClassMemberWrapper fieldData) {
-		this.metaData.add(fieldData);
+		this.rule.addUnusedField(fieldData);
 	}
 	
 	public void removeUnusedMethodData(UnusedClassMemberWrapper unusedMethod) {
-		this.unusedMethodsData.remove(unusedMethod);
+		this.unusedMethodsRule.dropUnusedMethod(unusedMethod);
 	}
 
 	public void addUnusedMethodData(UnusedClassMemberWrapper unusedMethod) {
-		this.unusedMethodsData.add(unusedMethod);
+		this.unusedMethodsRule.addUnusedMethod(unusedMethod);
 	}
 
 	public RefactoringSummaryWizardPage getSummaryPage() {

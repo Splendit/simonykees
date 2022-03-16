@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -128,9 +127,13 @@ public class RemoveUnusedMethodsRule extends RefactoringRuleImpl<RemoveUnusedMet
 		}
 	}
 
-	public List<UnusedClassMemberWrapper> getUnusedMethodWrapperList() {
-		return unusedMethods.stream()
-			.map(UnusedClassMemberWrapper.class::cast)
-			.collect(Collectors.toList());
+	public void dropUnusedMethod(UnusedClassMemberWrapper unusedMethod) {
+		this.unusedMethods.remove(unusedMethod);
+	}
+
+	public void addUnusedMethod(UnusedClassMemberWrapper unusedMethod) {
+		if (unusedMethod instanceof UnusedMethodWrapper) {
+			this.unusedMethods.add((UnusedMethodWrapper) unusedMethod);
+		}
 	}
 }

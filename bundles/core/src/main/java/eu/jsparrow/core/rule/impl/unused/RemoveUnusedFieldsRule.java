@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -153,9 +152,13 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 		return path1.equals(path2);
 	}
 
-	public List<UnusedClassMemberWrapper> getUnusedFieldWrapperList() {
-		return unusedFields.stream()
-			.map(UnusedClassMemberWrapper.class::cast)
-			.collect(Collectors.toList());
+	public void dropUnusedField(UnusedClassMemberWrapper unusedField) {
+		this.unusedFields.remove(unusedField);
+	}
+
+	public void addUnusedField(UnusedClassMemberWrapper unusedField) {
+		if (unusedField instanceof UnusedFieldWrapper) {
+			this.unusedFields.add((UnusedFieldWrapper) unusedField);
+		}
 	}
 }
