@@ -470,4 +470,64 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 		assertChange(original, expected);
 
 	}
+	
+	
+	@Test
+	public void visit_MethodWithLabeledStatements_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+		
+		defaultFixture.addMethodDeclarationFromString("" +
+				"public void useLabels() {\n"
+				+ "\n"
+				+ "		xLabel1: for (int i = 0; i < 10; i++) {\n"
+				+ "			if (i == 3) {\n"
+				+ "				break xLabel1;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		for (int i = 0; i < 5; i++) {\n"
+				+ "			xLabel2: for (int j = 0; j < 5; j++) {\n"
+				+ "				continue xLabel2;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}");
+		
+		String original = ""
+				+ "public void test() {\n"
+				+ "	int number = 1;\n"
+				+ "	assertEquals(1, number);\n"
+				+ "}";
+
+		String expected = ""
+				+ "@Test\n"
+				+ "public void test(){\n"
+				+ "	int number = 1;\n"
+				+ "	assertEquals(1,number);\n"
+				+ "}";
+		String expectedCompilationUnitFormat = ""
+				+ "package %s;\n"
+				+ "import static org.junit.jupiter.api.Assertions.assertEquals;\n"
+				+ "import org.junit.jupiter.api.Test;"
+				+ "public class %s {\n"
+				+ "public void useLabels() {\n"
+				+ "\n"
+				+ "		xLabel1: for (int i = 0; i < 10; i++) {\n"
+				+ "			if (i == 3) {\n"
+				+ "				break xLabel1;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		for (int i = 0; i < 5; i++) {\n"
+				+ "			xLabel2: for (int j = 0; j < 5; j++) {\n"
+				+ "				continue xLabel2;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}"
+				+ "	%s \n"
+				+ "}";
+
+		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+
+	}
 }

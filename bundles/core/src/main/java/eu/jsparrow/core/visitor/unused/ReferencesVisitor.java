@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
@@ -123,6 +124,9 @@ public class ReferencesVisitor extends ASTVisitor {
 
 		IBinding binding = simpleName.resolveBinding();
 		if (binding == null) {
+			if (ASTNodeUtil.isLabel(simpleName)) {
+				return false;
+			}
 			throw new UnresolvedTypeBindingException("The binding of the reference candidate cannot be resolved."); //$NON-NLS-1$
 		}
 		int kind = binding.getKind();

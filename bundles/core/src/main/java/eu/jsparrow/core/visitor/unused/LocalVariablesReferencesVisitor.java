@@ -8,13 +8,10 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -26,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.visitor.DeclaringNodeNotFoundException;
 import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
 import eu.jsparrow.core.rule.impl.unused.Constants;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * Finds the references on a local variable in a block. Determines whether all
@@ -127,11 +125,7 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 
 		IBinding binding = simpleName.resolveBinding();
 		if (binding == null) {
-			if (simpleName.getLocationInParent() == LabeledStatement.LABEL_PROPERTY
-					|| simpleName.getLocationInParent() == ContinueStatement.LABEL_PROPERTY
-					|| simpleName.getLocationInParent() == BreakStatement.LABEL_PROPERTY
-
-			) {
+			if (ASTNodeUtil.isLabel(simpleName)) {
 				return false;
 			}
 			throw new UnresolvedTypeBindingException("The binding of the reference candidate cannot be resolved."); //$NON-NLS-1$
