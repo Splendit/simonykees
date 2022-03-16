@@ -15,6 +15,12 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type {@link UseListSortASTVisitor}.
+ * 
+ * @since 4.9.0
+ *
+ */
 public class UseListSortResolver extends UseListSortASTVisitor implements Resolver {
 	public static final String ID = "UseListSortResolver"; //$NON-NLS-1$
 

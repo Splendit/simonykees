@@ -17,6 +17,13 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * 
+ * A visitor for resolving one issue of type {@link GuardConditionASTVisitor}.
+ * 
+ * @since 4.9.0
+ *
+ */
 public class GuardConditionResolver extends GuardConditionASTVisitor implements Resolver {
 
 	public static final String ID = "GuardConditionResolver"; //$NON-NLS-1$
@@ -39,7 +46,7 @@ public class GuardConditionResolver extends GuardConditionASTVisitor implements 
 	public boolean visit(MethodDeclaration methodDeclaration) {
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(IfStatement ifStatement) {
 		if (positionChecker.test(ifStatement)) {

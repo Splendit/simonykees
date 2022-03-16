@@ -15,6 +15,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link RemoveToStringOnStringASTVisitor}.
+ * 
+ * @since 4.9.0
+ *
+ */
 public class RemoveToStringOnStringResolver extends RemoveToStringOnStringASTVisitor implements Resolver {
 
 	public static final String ID = "RemoveToStringOnStringResolver"; //$NON-NLS-1$

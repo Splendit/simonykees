@@ -16,6 +16,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link MultiVariableDeclarationLineASTVisitor}.
+ * 
+ * @since 4.9.0
+ *
+ */
 public class MultiVariableDeclarationLineResolver extends MultiVariableDeclarationLineASTVisitor implements Resolver {
 
 	public static final String ID = "MultiVariableDeclarationLineResolver"; //$NON-NLS-1$
@@ -41,7 +48,7 @@ public class MultiVariableDeclarationLineResolver extends MultiVariableDeclarati
 		}
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(VariableDeclarationStatement variableDeclaration) {
 		if (positionChecker.test(variableDeclaration)) {

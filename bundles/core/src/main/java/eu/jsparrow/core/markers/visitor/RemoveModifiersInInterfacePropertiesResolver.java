@@ -21,6 +21,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link RemoveModifiersInInterfacePropertiesASTVisitor}.
+ * 
+ * @since 4.9.0
+ *
+ */
 public class RemoveModifiersInInterfacePropertiesResolver extends RemoveModifiersInInterfacePropertiesASTVisitor
 		implements Resolver {
 
@@ -94,10 +101,10 @@ public class RemoveModifiersInInterfacePropertiesResolver extends RemoveModifier
 			.build();
 		addMarkerEvent(event);
 	}
-	
+
 	@Override
 	protected void removeModifier(Modifier modifier) {
-		if(positionChecker.test(modifier)) {
+		if (positionChecker.test(modifier)) {
 			super.removeModifier(modifier);
 		}
 	}

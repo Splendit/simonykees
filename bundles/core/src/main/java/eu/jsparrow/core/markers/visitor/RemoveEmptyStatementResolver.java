@@ -15,6 +15,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link RemoveEmptyStatementASTVisitor}.
+ * 
+ * @since 4.9.0
+ *
+ */
 public class RemoveEmptyStatementResolver extends RemoveEmptyStatementASTVisitor implements Resolver {
 	public static final String ID = "RemoveEmptyStatementResolver"; //$NON-NLS-1$
 

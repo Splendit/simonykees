@@ -15,7 +15,15 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
-public class ReplaceStringFormatByFormattedResolver extends ReplaceStringFormatByFormattedASTVisitor implements Resolver {
+/**
+ * A visitor for resolving one issue of type
+ * {@link ReplaceStringFormatByFormattedASTVisitor}.
+ * 
+ * @since 4.9.0
+ *
+ */
+public class ReplaceStringFormatByFormattedResolver extends ReplaceStringFormatByFormattedASTVisitor
+		implements Resolver {
 
 	public static final String ID = "ReplaceStringFormatByFormattedResolver"; //$NON-NLS-1$
 

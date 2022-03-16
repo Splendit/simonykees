@@ -15,6 +15,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link RemoveDoubleNegationASTVisitor}.
+ * 
+ * @since 4.9.0
+ *
+ */
 public class RemoveDoubleNegationResolver extends RemoveDoubleNegationASTVisitor implements Resolver {
 	public static final String ID = "RemoveDoubleNegationResolver"; //$NON-NLS-1$
 

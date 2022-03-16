@@ -18,6 +18,13 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link ReImplementingInterfaceASTVisitor}.
+ * 
+ * @since 4.9.0
+ *
+ */
 public class ReImplementingInterfaceResolver extends ReImplementingInterfaceASTVisitor implements Resolver {
 
 	public static final String ID = "ReImplementingInterfaceResolver"; //$NON-NLS-1$
@@ -35,12 +42,12 @@ public class ReImplementingInterfaceResolver extends ReImplementingInterfaceASTV
 	public RuleDescription getDescription() {
 		return this.description;
 	}
-	
+
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 		List<Type> interfaces = ASTNodeUtil.convertToTypedList(typeDeclaration.superInterfaceTypes(),
 				Type.class);
-		for(Type type : interfaces) {
+		for (Type type : interfaces) {
 			if (positionChecker.test(type)) {
 				super.visit(typeDeclaration);
 				break;
