@@ -64,7 +64,7 @@ class JUnit4AnnotationsAnalyzerVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(SimpleName node) {
-		transformationPossible = ASTNodeUtil.isLabel(node) || analyzeName(node);
+		transformationPossible = analyzeName(node) || ASTNodeUtil.isLabel(node);
 		return false;
 	}
 

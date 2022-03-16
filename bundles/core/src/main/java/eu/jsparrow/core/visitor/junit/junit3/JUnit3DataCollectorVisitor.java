@@ -217,7 +217,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(SimpleName node) {
-		transformationPossible = ASTNodeUtil.isLabel(node) || analyzeName(node);
+		transformationPossible = analyzeName(node) || ASTNodeUtil.isLabel(node);
 		return false;
 	}
 

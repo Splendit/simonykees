@@ -19,7 +19,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
 @SuppressWarnings("nls")
-public class BugfixUnusedFieldAndLabelOfSameNameVisitorTest extends UsesJDTUnitFixture {
+public class UnusedFieldAndLabelOfSameNameVisitorTest extends UsesJDTUnitFixture {
 
 	@AfterEach
 	void tearDown() throws Exception {
