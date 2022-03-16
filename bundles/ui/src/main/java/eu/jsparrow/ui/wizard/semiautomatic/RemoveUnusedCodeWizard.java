@@ -220,7 +220,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 
 		SubMonitor removeUnusedFieldsSubMonitor = subMonitor.split(fieldsSubmonitorSplit);
 		removeUnusedFieldsSubMonitor.setWorkRemaining(selectedJavaElements.size());
-		removeUnusedFieldsSubMonitor.setTaskName("Finding unused fields"); //$NON-NLS-1$
+		removeUnusedFieldsSubMonitor.setTaskName(Messages.RemoveUnusedCodeWizard_findingUnusedFields);
 		List<UnusedFieldWrapper> unusedFields = engine.findUnusedFields(selectedJavaElements,
 				options, removeUnusedFieldsSubMonitor);
 		if (removeUnusedFieldsSubMonitor.isCanceled()) {
@@ -239,7 +239,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 		}
 		SubMonitor removeUnusedMethodsSubMonitor = subMonitor.split(70 - fieldsSubmonitorSplit);
 		removeUnusedMethodsSubMonitor.setWorkRemaining(selectedJavaElements.size());
-		removeUnusedMethodsSubMonitor.setTaskName("Finding unused methods"); //$NON-NLS-1$
+		removeUnusedMethodsSubMonitor.setTaskName(Messages.RemoveUnusedCodeWizard_findingUnusedMethods);
 
 		List<UnusedMethodWrapper> unusedMethods = unusedMethodsEngine.findUnusedMethods(selectedJavaElements,
 				options, removeUnusedMethodsSubMonitor);

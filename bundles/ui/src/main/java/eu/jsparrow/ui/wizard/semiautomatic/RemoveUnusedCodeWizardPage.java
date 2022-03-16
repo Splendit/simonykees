@@ -168,7 +168,7 @@ public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 		fSelectionStatus = new StatusInfo();
 		if (model.getClassMemberTypes()
 			.isEmpty()) {
-			((StatusInfo) fSelectionStatus).setError(Messages.RenameFieldsRuleWizardPage_warning_noFieldSelected);
+			((StatusInfo) fSelectionStatus).setError(Messages.RemoveUnusedCodeWizardPage_atLeastOneOptionNeedToBeSelected);
 		}
 
 		// status of all used components

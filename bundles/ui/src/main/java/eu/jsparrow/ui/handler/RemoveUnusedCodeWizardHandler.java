@@ -74,8 +74,8 @@ public class RemoveUnusedCodeWizardHandler extends AbstractRuleWizardHandler {
 		}
 
 		if (selectedJavaElements.size() != 1) {
-			String title = Messages.RenameFieldsRuleWizardHandler_multipleProjectsSelected;
-			String message = Messages.RenameFieldsRuleWizardHandler_renamingRuleOnOneProjectOnly;
+			String title = Messages.RemoveUnusedCodeWizardHandler_multipleProjectsSelected;
+			String message = Messages.RemoveUnusedCodeWizardHandler_removeUnusedCodeOneProjectOnly;
 			synchronizeWithUIShowSelectionErrorMessage(title, message);
 			return false;
 		}

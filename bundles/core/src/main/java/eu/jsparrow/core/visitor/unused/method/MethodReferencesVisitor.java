@@ -44,7 +44,9 @@ public class MethodReferencesVisitor extends ASTVisitor {
 
 	private static final List<String> supportedTestAnnotations = Collections.unmodifiableList(Arrays.asList(
 			"org.junit.Test", //$NON-NLS-1$
-			"org.junit.jupiter.api.Test")); //$NON-NLS-1$
+			"org.junit.jupiter.api.Test", //$NON-NLS-1$
+			"org.junit.jupiter.params.ParameterizedTest", //$NON-NLS-1$
+			"org.junit.jupiter.api.RepeatedTest")); //$NON-NLS-1$
 
 	public MethodReferencesVisitor(MethodDeclaration methodDeclaration, Map<String, Boolean> optionsMap) {
 		this.optionsMap = optionsMap;

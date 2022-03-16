@@ -432,11 +432,16 @@ public class Messages extends NLS {
 	public static String RemoveUnusedCodeWizard_calculateChangesJobName;
 	public static String RemoveUnusedCodeWizard_collectingTheSelectedCompilationUnitsTaskName;
 	public static String RemoveUnusedCodeWizard_endRefactoringInProjectMessage;
+	public static String RemoveUnusedCodeWizard_findingUnusedFields;
+	public static String RemoveUnusedCodeWizard_findingUnusedMethods;
 	public static String RemoveUnusedCodeWizard_removeUnusedCodeWindowTitle;
 	public static String RemoveUnusedCodeWizard_rulesWithChangesForProjectMessage;
 	public static String RemoveUnusedCodeWizard_startRefactoringInProjectMessage;
 	public static String RemoveUnusedCodeWizard_summaryButtonName;
+	public static String RemoveUnusedCodeWizardHandler_multipleProjectsSelected;
+	public static String RemoveUnusedCodeWizardHandler_removeUnusedCodeOneProjectOnly;
 	public static String RemoveUnusedCodeWizardPage_applyOn;
+	public static String RemoveUnusedCodeWizardPage_atLeastOneOptionNeedToBeSelected;
 	public static String RemoveUnusedCodeWizardPage_pageDescription;
 	public static String RemoveUnusedCodeWizardPage_pageName;
 	public static String RemoveUnusedCodeWizardPage_pageTitle;
