@@ -86,16 +86,14 @@ public class RemoveUnusedFieldsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(Assignment assignment) {
-		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return true;
+		if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+			ExpressionStatement statement = (ExpressionStatement) assignment.getParent();
+			isDesignatedForRemoval(statement).ifPresent(unusedField -> {
+				TextEditGroup editGroup = unusedField.getTextEditGroup((ICompilationUnit) this.getCompilationUnit()
+					.getJavaElement());
+				astRewrite.remove(assignment.getParent(), editGroup);
+			});
 		}
-
-		ExpressionStatement statement = (ExpressionStatement) assignment.getParent();
-		isDesignatedForRemoval(statement).ifPresent(unusedField -> {
-			TextEditGroup editGroup = unusedField.getTextEditGroup((ICompilationUnit) this.getCompilationUnit()
-				.getJavaElement());
-			astRewrite.remove(assignment.getParent(), editGroup);
-		});
 
 		return true;
 	}

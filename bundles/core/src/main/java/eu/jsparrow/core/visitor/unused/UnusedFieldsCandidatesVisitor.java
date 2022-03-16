@@ -1,19 +1,16 @@
 package eu.jsparrow.core.visitor.unused;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
@@ -24,7 +21,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * Analyzes field declarations. Verifies if they are used within the compilation
@@ -63,11 +59,11 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
 
-		if (!hasSelectedAccessModifier(fieldDeclaration)) {
+		if (!BodyDeclarationsUtil.hasSelectedAccessModifier(fieldDeclaration, options)) {
 			return true;
 		}
 
-		boolean hasAnnotations = hasUsefulAnnotations(fieldDeclaration);
+		boolean hasAnnotations = BodyDeclarationsUtil.hasUsefulAnnotations(fieldDeclaration);
 		if (hasAnnotations) {
 			return true;
 		}
@@ -86,7 +82,7 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 				ReferencesVisitor referencesVisitor = new ReferencesVisitor(fragment, typeDeclaration, options);
 				this.compilationUnit.accept(referencesVisitor);
 				if (!referencesVisitor.hasActiveReference() && !referencesVisitor.hasUnresolvedReference()) {
-					markAsUnusedInternally(fieldDeclaration, typeDeclaration, fragment, referencesVisitor);
+					markAsUnusedInternally(fieldDeclaration, fragment, referencesVisitor);
 					/*
 					 * removing multiple fragments from the same field
 					 * declaration may result to incorrect changes.
@@ -99,8 +95,7 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 	}
 
 	private void markAsUnusedInternally(FieldDeclaration fieldDeclaration,
-			AbstractTypeDeclaration typeDeclaration, VariableDeclarationFragment fragment,
-			ReferencesVisitor referencesVisitor) {
+			VariableDeclarationFragment fragment, ReferencesVisitor referencesVisitor) {
 		List<ExpressionStatement> reassignments = referencesVisitor.getReassignments();
 		int modifierFlags = fieldDeclaration.getModifiers();
 		if (Modifier.isPrivate(modifierFlags)) {
@@ -108,9 +103,9 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 					JavaAccessModifier.PRIVATE, fragment, reassignments, Collections.emptyList());
 			unusedPrivateFields.add(unusedField);
 		} else {
-			JavaAccessModifier accessModifier = findAccessModifier(fieldDeclaration);
+			JavaAccessModifier accessModifier = BodyDeclarationsUtil.findAccessModifier(fieldDeclaration);
 			NonPrivateUnusedFieldCandidate candidate = new NonPrivateUnusedFieldCandidate(fragment,
-					compilationUnit, typeDeclaration, accessModifier, reassignments);
+					accessModifier, reassignments);
 			nonPrivateCandidates.add(candidate);
 		}
 	}
@@ -137,44 +132,6 @@ public class UnusedFieldsCandidatesVisitor extends ASTVisitor {
 			}
 		}
 		return false;
-	}
-
-	private boolean hasUsefulAnnotations(FieldDeclaration fieldDeclaration) {
-		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(fieldDeclaration.modifiers(), Annotation.class);
-		for (Annotation annotation : annotations) {
-			ITypeBinding typeBinding = annotation.resolveTypeBinding();
-			if (!ClassRelationUtil.isContentOfTypes(typeBinding,
-					Arrays.asList(java.lang.Deprecated.class.getName(), java.lang.SuppressWarnings.class.getName()))) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean hasSelectedAccessModifier(FieldDeclaration fieldDeclaration) {
-		int modifierFlags = fieldDeclaration.getModifiers();
-		if (Modifier.isPublic(modifierFlags)) {
-			return options.getOrDefault(Constants.PUBLIC_FIELDS, false);
-		} else if (Modifier.isProtected(modifierFlags)) {
-			return options.getOrDefault(Constants.PROTECTED_FIELDS, false);
-		} else if (Modifier.isPrivate(modifierFlags)) {
-			return options.getOrDefault(Constants.PRIVATE_FIELDS, false);
-		} else {
-			return options.getOrDefault(Constants.PACKAGE_PRIVATE_FIELDS, false);
-		}
-	}
-
-	private JavaAccessModifier findAccessModifier(FieldDeclaration fieldDeclaration) {
-		int modifierFlags = fieldDeclaration.getModifiers();
-		if (Modifier.isPrivate(modifierFlags)) {
-			return JavaAccessModifier.PRIVATE;
-		} else if (Modifier.isProtected(modifierFlags)) {
-			return JavaAccessModifier.PROTECTED;
-		} else if (Modifier.isPublic(modifierFlags)) {
-			return JavaAccessModifier.PUBLIC;
-		}
-		return JavaAccessModifier.PACKAGE_PRIVATE;
 	}
 
 	public CompilationUnit getCompilationUnit() {

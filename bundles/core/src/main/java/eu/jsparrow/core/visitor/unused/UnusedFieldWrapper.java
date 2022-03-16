@@ -27,7 +27,7 @@ import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
  * @since 4.8.0
  *
  */
-public class UnusedFieldWrapper {
+public class UnusedFieldWrapper implements UnusedClassMemberWrapper {
 
 	private VariableDeclarationFragment fragment;
 	private List<ExpressionStatement> internalReassignments;
@@ -67,26 +67,32 @@ public class UnusedFieldWrapper {
 		return unusedExternalReferences;
 	}
 
+	@Override
 	public CompilationUnit getCompilationUnit() {
 		return compilationUnit;
 	}
 
-	public JavaAccessModifier getFieldModifier() {
+	@Override
+	public JavaAccessModifier getAccessModifier() {
 		return accessModifier;
 	}
 
+	@Override
 	public IPath getDeclarationPath() {
 		return declarationPath;
 	}
 
-	public String getFieldName() {
-		return this.fieldName;
+	@Override
+	public String getClassMemberIdentifier() {
+		return fieldName;
 	}
 
+	@Override
 	public String getClassDeclarationName() {
 		return classDeclarationName;
 	}
 
+	@Override
 	public List<ICompilationUnit> getTargetICompilationUnits() {
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
 		ICompilationUnit original = (ICompilationUnit) compilationUnit.getJavaElement();

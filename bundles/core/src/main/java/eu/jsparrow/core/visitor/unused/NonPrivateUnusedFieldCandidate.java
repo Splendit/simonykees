@@ -3,8 +3,6 @@ package eu.jsparrow.core.visitor.unused;
 import java.util.List;
 import java.util.Objects;
 
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -22,31 +20,18 @@ import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 public class NonPrivateUnusedFieldCandidate {
 
 	private VariableDeclarationFragment fragment;
-	private CompilationUnit compilationUnit;
-	private AbstractTypeDeclaration typeDeclaration;
 	private JavaAccessModifier accessModifier;
 	private List<ExpressionStatement> internalReassignments;
 
-	public NonPrivateUnusedFieldCandidate(VariableDeclarationFragment fragment, CompilationUnit compilationUnit,
-			AbstractTypeDeclaration typeDeclaration, JavaAccessModifier accessModifier,
+	public NonPrivateUnusedFieldCandidate(VariableDeclarationFragment fragment, JavaAccessModifier accessModifier,
 			List<ExpressionStatement> internalReassignments) {
 		this.fragment = fragment;
-		this.compilationUnit = compilationUnit;
-		this.typeDeclaration = typeDeclaration;
 		this.accessModifier = accessModifier;
 		this.internalReassignments = internalReassignments;
 	}
 
 	public VariableDeclarationFragment getFragment() {
 		return fragment;
-	}
-
-	public CompilationUnit getCompilationUnit() {
-		return compilationUnit;
-	}
-
-	public AbstractTypeDeclaration getTypeDeclaration() {
-		return typeDeclaration;
 	}
 
 	public JavaAccessModifier getAccessModifier() {
@@ -59,7 +44,7 @@ public class NonPrivateUnusedFieldCandidate {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(accessModifier, compilationUnit, fragment, internalReassignments, typeDeclaration);
+		return Objects.hash(accessModifier, fragment, internalReassignments);
 	}
 
 	@Override
@@ -71,9 +56,8 @@ public class NonPrivateUnusedFieldCandidate {
 			return false;
 		}
 		NonPrivateUnusedFieldCandidate other = (NonPrivateUnusedFieldCandidate) obj;
-		return accessModifier == other.accessModifier && Objects.equals(compilationUnit, other.compilationUnit)
+		return accessModifier == other.accessModifier
 				&& Objects.equals(fragment, other.fragment)
-				&& Objects.equals(internalReassignments, other.internalReassignments)
-				&& Objects.equals(typeDeclaration, other.typeDeclaration);
+				&& Objects.equals(internalReassignments, other.internalReassignments);
 	}
 }

@@ -5,8 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -32,8 +31,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import eu.jsparrow.core.rule.impl.unused.RemoveUnusedFieldsRule;
-import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
+import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
@@ -46,7 +45,7 @@ import eu.jsparrow.rules.common.util.RefactoringUtil;
  */
 public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 
-	private Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes;
+	private Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> changes;
 
 	private CheckboxTreeViewer viewer;
 	private IChangePreviewViewer currentPreviewViewer;
@@ -56,18 +55,23 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 	private List<RemoveUnusedCodeDocumentChangeWrapper> changesWrapperList;
 	private RemoveUnusedCodeDocumentChangeWrapper selectedDocWrapper;
 
-	private List<UnusedFieldWrapper> uncheckedFields = new ArrayList<>();
-	private List<UnusedFieldWrapper> recheckedFields = new ArrayList<>();
+	private List<UnusedClassMemberWrapper> uncheckedFields = new ArrayList<>();
+	private List<UnusedClassMemberWrapper> recheckedFields = new ArrayList<>();
 	private Map<IPath, Document> originalDocuments;
+	private Consumer<UnusedClassMemberWrapper>selectionUpdater;
+	private Consumer<UnusedClassMemberWrapper>unselectionUpdater;
 
-	public RemoveUnusedCodeRulePreviewWizardPage(Map<UnusedFieldWrapper, Map<ICompilationUnit, DocumentChange>> changes,
-			Map<IPath, Document> originalDocuments, RemoveUnusedFieldsRule rule1, boolean enabledDiffView) {
+	public RemoveUnusedCodeRulePreviewWizardPage(Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> changes,
+			Map<IPath, Document> originalDocuments, RefactoringRule rule1, String title, boolean enabledDiffView, 
+			Consumer<UnusedClassMemberWrapper>checkUpdater, Consumer<UnusedClassMemberWrapper>uncheckUpdater) {
 		super(rule1.getRuleDescription()
 			.getName());
 		CustomTextEditChangePreviewViewer.setEnableDiffView(enabledDiffView);
 		this.changes = changes;
+		this.selectionUpdater = checkUpdater;
+		this.unselectionUpdater = uncheckUpdater;
 
-		setTitle("Remove unused " + getModifierAsString() + " fields"); //$NON-NLS-1$//$NON-NLS-2$
+		setTitle(title);
 		setDescription(rule1.getRuleDescription()
 			.getDescription());
 		this.originalDocuments = originalDocuments;
@@ -85,9 +89,9 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 		changesWrapperList = new ArrayList<>();
 		changes.entrySet()
 			.stream()
-			.map(Map.Entry::getKey)
-			.forEach(unusedFieldWrapper -> {
-				Map<ICompilationUnit, DocumentChange> changesForField = changes.get(unusedFieldWrapper);
+			.forEach(entry -> {
+				UnusedClassMemberWrapper unusedFieldWrapper = entry.getKey();
+				Map<ICompilationUnit, DocumentChange> changesForField = entry.getValue();
 				if (!changesForField.isEmpty()) {
 					DocumentChange parent = null;
 					ICompilationUnit parentICU = null;
@@ -118,7 +122,7 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 	 * @param changesForField
 	 * @param parent
 	 */
-	private void createDocumentChangeWrapperChildren(UnusedFieldWrapper fieldData, Document originalDocument,
+	private void createDocumentChangeWrapperChildren(UnusedClassMemberWrapper fieldData, Document originalDocument,
 			Map<ICompilationUnit, DocumentChange> changesForField, DocumentChange parent) {
 		RemoveUnusedCodeDocumentChangeWrapper dcw = new RemoveUnusedCodeDocumentChangeWrapper(parent, null,
 				originalDocument, fieldData);
@@ -231,20 +235,18 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 			viewer.setSubtreeChecked(selectedWrapper.getParent(), checked);
 		}
 
-		RemoveUnusedCodeRulePreviewWizard wizard = (RemoveUnusedCodeRulePreviewWizard) getWizard();
-
-		UnusedFieldWrapper selectedFieldData = selectedWrapper.getFieldData();
+		UnusedClassMemberWrapper selectedFieldData = selectedWrapper.getFieldData();
 		if (checked) {
 			markAsNewCheck(selectedFieldData);
-			wizard.addMetaData(selectedFieldData);
+			this.selectionUpdater.accept(selectedFieldData);
 		} else {
 			markAsNewUncheck(selectedFieldData);
-			wizard.removeMetaData(selectedFieldData);
+			this.unselectionUpdater.accept(selectedFieldData);
 		}
 		populatePreviewViewer();
 	}
 
-	private void markAsNewUncheck(UnusedFieldWrapper selectedFieldData) {
+	private void markAsNewUncheck(UnusedClassMemberWrapper selectedFieldData) {
 		if (recheckedFields.contains(selectedFieldData)) {
 			recheckedFields.remove(selectedFieldData);
 		} else if (!uncheckedFields.contains(selectedFieldData)) {
@@ -252,7 +254,7 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 		}
 	}
 
-	private void markAsNewCheck(UnusedFieldWrapper selectedFieldData) {
+	private void markAsNewCheck(UnusedClassMemberWrapper selectedFieldData) {
 		if (uncheckedFields.contains(selectedFieldData)) {
 			uncheckedFields.remove(selectedFieldData);
 		} else if (!recheckedFields.contains(selectedFieldData)) {
@@ -331,25 +333,6 @@ public class RemoveUnusedCodeRulePreviewWizardPage extends WizardPage {
 				((RemoveUnusedCodeRulePreviewWizardPage) page).disposeControl();
 			}
 		}
-	}
-
-	private String getModifierAsString() {
-		StringBuilder sb = new StringBuilder();
-
-		Set<String> modifiers = changes.keySet()
-			.stream()
-			.map(key -> key.getFieldModifier()
-				.toString())
-			.collect(Collectors.toSet());
-
-		modifiers.forEach(modifier -> {
-			if (sb.length() > 0) {
-				sb.append(", "); //$NON-NLS-1$
-			}
-			sb.append(modifier);
-		});
-
-		return sb.toString();
 	}
 
 	/**
