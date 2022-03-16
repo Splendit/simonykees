@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
-import eu.jsparrow.core.rule.impl.RemoveEmptyStatementRule;
+import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.visitor.impl.RemoveToStringOnStringASTVisitor;
 import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
@@ -25,7 +25,7 @@ public class RemoveToStringOnStringResolver extends RemoveToStringOnStringASTVis
 	public RemoveToStringOnStringResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
-			.findByRuleId(RemoveEmptyStatementRule.RULE_ID);
+			.findByRuleId(RemoveToStringOnStringRule.RULE_ID);
 	}
 
 	@Override

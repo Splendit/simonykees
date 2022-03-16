@@ -5,7 +5,6 @@ import java.util.function.Predicate;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
@@ -34,9 +33,10 @@ public class RemoveDoubleNegationResolver extends RemoveDoubleNegationASTVisitor
 	}
 
 	@Override
-	public boolean visit(IfStatement ifStatement) {
-		if (positionChecker.test(ifStatement)) {
-			super.visit(ifStatement);
+	public boolean visit(PrefixExpression prefixExpression) {
+		if (positionChecker.test(prefixExpression)) {
+			super.visit(prefixExpression);
+			return false;
 		}
 		return true;
 	}

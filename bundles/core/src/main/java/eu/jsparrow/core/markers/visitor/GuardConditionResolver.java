@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.GuardConditionRule;
@@ -14,6 +15,7 @@ import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 public class GuardConditionResolver extends GuardConditionASTVisitor implements Resolver {
 
@@ -34,9 +36,16 @@ public class GuardConditionResolver extends GuardConditionASTVisitor implements 
 	}
 
 	@Override
+	public boolean visit(MethodDeclaration methodDeclaration) {
+		return true;
+	}
+	
+	@Override
 	public boolean visit(IfStatement ifStatement) {
 		if (positionChecker.test(ifStatement)) {
-			super.visit(ifStatement);
+			MethodDeclaration methodDeclaration = ASTNodeUtil.getSpecificAncestor(ifStatement, MethodDeclaration.class);
+			super.visit(methodDeclaration);
+			return false;
 		}
 		return true;
 	}

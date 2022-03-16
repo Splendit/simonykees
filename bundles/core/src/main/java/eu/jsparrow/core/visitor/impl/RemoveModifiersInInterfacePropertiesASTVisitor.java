@@ -39,7 +39,7 @@ public class RemoveModifiersInInterfacePropertiesASTVisitor extends AbstractASTR
 		return true;
 	}
 
-	private void removeModifier(Modifier modifier) {
+	protected void removeModifier(Modifier modifier) {
 		astRewrite.remove(modifier, null);
 		onRewrite();
 		addMarkerEvent(modifier);

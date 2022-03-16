@@ -94,4 +94,11 @@ public class RemoveModifiersInInterfacePropertiesResolver extends RemoveModifier
 			.build();
 		addMarkerEvent(event);
 	}
+	
+	@Override
+	protected void removeModifier(Modifier modifier) {
+		if(positionChecker.test(modifier)) {
+			super.removeModifier(modifier);
+		}
+	}
 }
