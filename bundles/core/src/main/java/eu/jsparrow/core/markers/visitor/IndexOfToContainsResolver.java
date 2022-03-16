@@ -116,7 +116,7 @@ public class IndexOfToContainsResolver extends IndexOfToContainsASTVisitor imple
 		contains.setName(ast.newSimpleName("contains")); //$NON-NLS-1$
 		contains.setExpression((Expression) ASTNode.copySubtree(ast, methodExpression));
 		contains.arguments()
-			.add((Expression) ASTNode.copySubtree(ast, methodArgument));
+			.add(ASTNode.copySubtree(ast, methodArgument));
 		return contains;
 	}
 

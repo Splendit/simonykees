@@ -19,26 +19,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.markers.visitor.AvoidConcatenationInLoggingStatementsResolver;
+import eu.jsparrow.core.markers.visitor.CollapseIfStatementsResolver;
 import eu.jsparrow.core.markers.visitor.CollectionRemoveAllResolver;
 import eu.jsparrow.core.markers.visitor.DiamondOperatorResolver;
 import eu.jsparrow.core.markers.visitor.EnumsWithoutEqualsResolver;
 import eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver;
+import eu.jsparrow.core.markers.visitor.GuardConditionResolver;
 import eu.jsparrow.core.markers.visitor.IndexOfToContainsResolver;
 import eu.jsparrow.core.markers.visitor.InefficientConstructorResolver;
 import eu.jsparrow.core.markers.visitor.InsertBreakStatementInLoopsResolver;
 import eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver;
 import eu.jsparrow.core.markers.visitor.MapGetOrDefaultResolver;
+import eu.jsparrow.core.markers.visitor.MultiVariableDeclarationLineResolver;
 import eu.jsparrow.core.markers.visitor.PrimitiveBoxedForStringResolver;
 import eu.jsparrow.core.markers.visitor.PutIfAbsentResolver;
+import eu.jsparrow.core.markers.visitor.ReImplementingInterfaceResolver;
+import eu.jsparrow.core.markers.visitor.RemoveDoubleNegationResolver;
+import eu.jsparrow.core.markers.visitor.RemoveEmptyStatementResolver;
+import eu.jsparrow.core.markers.visitor.RemoveModifiersInInterfacePropertiesResolver;
 import eu.jsparrow.core.markers.visitor.RemoveNewStringConstructorResolver;
 import eu.jsparrow.core.markers.visitor.RemoveNullCheckBeforeInstanceofResolver;
 import eu.jsparrow.core.markers.visitor.RemoveRedundantTypeCastResolver;
+import eu.jsparrow.core.markers.visitor.RemoveToStringOnStringResolver;
 import eu.jsparrow.core.markers.visitor.RemoveUnusedParameterResolver;
+import eu.jsparrow.core.markers.visitor.ReplaceStringFormatByFormattedResolver;
 import eu.jsparrow.core.markers.visitor.StringLiteralEqualityCheckResolver;
 import eu.jsparrow.core.markers.visitor.UseArraysStreamResolver;
 import eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver;
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver;
+import eu.jsparrow.core.markers.visitor.UseListSortResolver;
 import eu.jsparrow.core.markers.visitor.UseStringJoinResolver;
 import eu.jsparrow.core.markers.visitor.arithmetic.ArithmeticAssignmentResolver;
 import eu.jsparrow.core.markers.visitor.factory.methods.CollectionsFactoryMethodsResolver;
@@ -148,6 +158,17 @@ public class ResolverVisitorsFactory {
 		map.put(UseParameterizedQueryResolver.ID, UseParameterizedQueryResolver::new);
 		map.put(UseParameterizedJPAQueryResolver.ID, UseParameterizedJPAQueryResolver::new);
 		map.put(UseParameterizedLDAPQueryResolver.ID, UseParameterizedLDAPQueryResolver::new);
+		map.put(CollapseIfStatementsResolver.ID, CollapseIfStatementsResolver::new);
+		map.put(GuardConditionResolver.ID, GuardConditionResolver::new);
+		map.put(MultiVariableDeclarationLineResolver.ID, MultiVariableDeclarationLineResolver::new);
+		map.put(ReImplementingInterfaceResolver.ID, ReImplementingInterfaceResolver::new);
+		map.put(RemoveDoubleNegationResolver.ID, RemoveDoubleNegationResolver::new);
+		map.put(RemoveEmptyStatementResolver.ID, RemoveEmptyStatementResolver::new);
+		map.put(RemoveModifiersInInterfacePropertiesResolver.ID, RemoveModifiersInInterfacePropertiesResolver::new);
+		map.put(RemoveToStringOnStringResolver.ID, RemoveToStringOnStringResolver::new);
+		map.put(ReplaceStringFormatByFormattedResolver.ID, ReplaceStringFormatByFormattedResolver::new);
+		map.put(UseListSortResolver.ID, UseListSortResolver::new);
+		
 
 		List<MarkerService> markerServices = getExternalRuleServices();
 		markerServices.stream()

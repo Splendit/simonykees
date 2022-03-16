@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+import eu.jsparrow.core.markers.common.UseListSortEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -20,7 +21,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * 
  * @since 3.6.0
  */
-public class UseListSortASTVisitor extends AbstractASTRewriteASTVisitor {
+public class UseListSortASTVisitor extends AbstractASTRewriteASTVisitor implements UseListSortEvent {
 
 	private static final String SORT = "sort"; //$NON-NLS-1$
 	private static final String JAVA_UTIL_LIST = java.util.List.class.getName();
@@ -72,6 +73,7 @@ public class UseListSortASTVisitor extends AbstractASTRewriteASTVisitor {
 			astRewrite.replace(expression, newExpression, null);
 		}
 		onRewrite();
+		addMarkerEvent(methodInvocation);
 
 		return false;
 	}
