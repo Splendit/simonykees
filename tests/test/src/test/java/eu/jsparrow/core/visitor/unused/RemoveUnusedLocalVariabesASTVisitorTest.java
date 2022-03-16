@@ -15,7 +15,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
-@SuppressWarnings("nls")
 class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach

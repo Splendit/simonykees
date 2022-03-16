@@ -1,25 +1,18 @@
 package eu.jsparrow.core.visitor.unused;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
-@SuppressWarnings("nls")
-public class UnusedFieldAndLabelOfSameNameVisitorTest extends UsesJDTUnitFixture {
+class UnusedFieldAndLabelOfSameNameVisitorTest extends UsesJDTUnitFixture {
 
 	@AfterEach
 	void tearDown() throws Exception {
@@ -55,8 +48,7 @@ public class UnusedFieldAndLabelOfSameNameVisitorTest extends UsesJDTUnitFixture
 		List<UnusedFieldWrapper> removedUnusedFields = visitor.getUnusedPrivateFields();
 		assertEquals(1, removedUnusedFields.size());
 		UnusedFieldWrapper unusedFieldWrapper = removedUnusedFields.get(0);
-		String removedUnusedFieldName = unusedFieldWrapper
-			.getFieldName();
+		String removedUnusedFieldName = unusedFieldWrapper.getClassMemberIdentifier();
 		assertEquals("x", removedUnusedFieldName);
 	}
 }

@@ -149,8 +149,7 @@ class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
 		List<UnusedFieldWrapper> removedUnusedFields = visitor.getUnusedPrivateFields();
 		assertEquals(1, removedUnusedFields.size());
 		UnusedFieldWrapper unusedFieldWrapper = removedUnusedFields.get(0);
-		String removedUnusedFieldName = unusedFieldWrapper
-			.getFieldName();
+		String removedUnusedFieldName = unusedFieldWrapper.getClassMemberIdentifier();
 		assertEquals("unusedField", removedUnusedFieldName);
 		List<ExpressionStatement> unusedReassignments = unusedFieldWrapper.getUnusedReassignments();
 		assertEquals(1, unusedReassignments.size());
