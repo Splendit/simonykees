@@ -20,6 +20,9 @@ import eu.jsparrow.core.AbstractRulesTest;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 import eu.jsparrow.core.visitor.unused.UnusedFieldsEngine;
+import eu.jsparrow.core.visitor.unused.method.UnusedMethodWrapper;
+import eu.jsparrow.core.visitor.unused.method.UnusedMethodsEngine;
+import eu.jsparrow.rules.common.RefactoringRule;
 
 public class UnusedFieldsTestHelper {
 
@@ -29,7 +32,7 @@ public class UnusedFieldsTestHelper {
 		 */
 	}
 
-	public static String applyRemoveUnusedFieldRefactoring(RemoveUnusedFieldsRule rule, String packageString,
+	public static String applyRemoveUnusedCodeRefactoring(RefactoringRule rule, String packageString,
 			Path preFile, IPackageFragmentRoot root) throws Exception {
 
 		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
@@ -66,6 +69,25 @@ public class UnusedFieldsTestHelper {
 		options.put("package-private-fields", true);
 		options.put("public-fields", true);
 		return engine.findUnusedFields(compilationUnits, options, subMonitor);
+	}
+	
+	public static List<UnusedMethodWrapper> findMethodsToBeRemoved(String prerulePackage, String postRulePackagePath)
+			throws Exception {
+		IPackageFragmentRoot root = AbstractRulesTest.createRootPackageFragment();
+		IPackageFragment packageFragment = root.createPackageFragment(prerulePackage, true, null);
+		List<ICompilationUnit> compilationUnits = loadCompilationUnits(packageFragment, postRulePackagePath);
+
+		UnusedMethodsEngine engine = new UnusedMethodsEngine("Project");
+		NullProgressMonitor nullProgressMonitor = new NullProgressMonitor();
+		SubMonitor subMonitor = SubMonitor.convert(nullProgressMonitor, 100);
+
+		Map<String, Boolean> options = new HashMap<String, Boolean>();
+		options.put("private-methods", true);
+		options.put("protected-methods", true);
+		options.put("package-private-methods", true);
+		options.put("public-methods", true);
+		options.put("remove-test-code", true);
+		return engine.findUnusedMethods(compilationUnits, options, subMonitor);
 	}
 
 	private static List<ICompilationUnit> loadCompilationUnits(IPackageFragment packageFragment, String packagePath)

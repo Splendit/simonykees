@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.Statement;
 
+import eu.jsparrow.core.markers.common.RemoveDoubleNegationEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
@@ -18,7 +19,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @since 2.7
  *
  */
-public class RemoveDoubleNegationASTVisitor extends AbstractASTRewriteASTVisitor {
+public class RemoveDoubleNegationASTVisitor extends AbstractASTRewriteASTVisitor implements RemoveDoubleNegationEvent {
 
 	@Override
 	public boolean visit(PrefixExpression prefixExpression) {
@@ -28,6 +29,7 @@ public class RemoveDoubleNegationASTVisitor extends AbstractASTRewriteASTVisitor
 			astRewrite.replace(prefixExpression, astRewrite.createCopyTarget(replaceNode), null);
 			saveComments(prefixExpression, replaceNode);
 			onRewrite();
+			addMarkerEvent(prefixExpression);
 		}
 
 		return true;

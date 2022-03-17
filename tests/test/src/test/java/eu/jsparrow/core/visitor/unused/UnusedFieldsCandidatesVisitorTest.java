@@ -86,7 +86,7 @@ class UnusedFieldsCandidatesVisitorTest extends UsesJDTUnitFixture {
 		assertFalse(unusedPrivateFields.isEmpty());
 		assertEquals(1, unusedPrivateFields.size());
 		UnusedFieldWrapper unusedField = unusedPrivateFields.get(0);
-		String unusedFieldName = unusedField.getFieldName();
+		String unusedFieldName = unusedField.getClassMemberIdentifier();
 		assertEquals("unusedPrivate", unusedFieldName);
 	}
 	

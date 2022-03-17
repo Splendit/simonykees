@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.ReImplementingInterfaceEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -24,7 +25,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @author Matthias Webhofer
  * @since 2.1.1
  */
-public class ReImplementingInterfaceASTVisitor extends AbstractASTRewriteASTVisitor {
+public class ReImplementingInterfaceASTVisitor extends AbstractASTRewriteASTVisitor implements ReImplementingInterfaceEvent {
 
 	@Override
 	public boolean visit(TypeDeclaration typeDeclarationNode) {
@@ -46,6 +47,7 @@ public class ReImplementingInterfaceASTVisitor extends AbstractASTRewriteASTVisi
 						duplicateInterfaces.forEach(duplicateInterface -> {
 							interfacesListRewrite.remove(duplicateInterface, null);
 							onRewrite();
+							addMarkerEvent(duplicateInterface);
 						});
 					}
 				}

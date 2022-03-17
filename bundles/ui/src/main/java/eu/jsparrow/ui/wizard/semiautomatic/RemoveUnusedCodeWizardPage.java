@@ -65,6 +65,10 @@ public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 		createClassMemberChoosingPart(composite);
 		createSearchScopeChoosingPart(composite);
 		createSingleCheckBoxSection(composite, 
+				Messages.RemoveUnusedCodeWizardPage_removeUnusedTestsSectionTitle,
+				Messages.RemoveUnusedCodeWizardPage_removeUnusedTestsDescription,
+				controller::removeTestCodeSelectionChanged, false);
+		createSingleCheckBoxSection(composite, 
 				Messages.RemoveUnusedCodeWizardPage_removeInitializersSectionTitle,
 				Messages.RemoveUnusedCodeWizardPage_removeInitializersSectionDescription,
 				controller::removeInitializersWithSideEffectsSelectionChanged, false);
@@ -164,7 +168,7 @@ public class RemoveUnusedCodeWizardPage extends NewElementWizardPage {
 		fSelectionStatus = new StatusInfo();
 		if (model.getClassMemberTypes()
 			.isEmpty()) {
-			((StatusInfo) fSelectionStatus).setError(Messages.RenameFieldsRuleWizardPage_warning_noFieldSelected);
+			((StatusInfo) fSelectionStatus).setError(Messages.RemoveUnusedCodeWizardPage_atLeastOneOptionNeedToBeSelected);
 		}
 
 		// status of all used components

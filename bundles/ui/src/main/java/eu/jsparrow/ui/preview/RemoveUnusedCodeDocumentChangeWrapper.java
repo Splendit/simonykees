@@ -6,7 +6,7 @@ import java.util.List;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
-import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
+import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
 
 /**
  * A wrapper class for storing the relation between document changes and the
@@ -23,30 +23,30 @@ public class RemoveUnusedCodeDocumentChangeWrapper {
 	private String identifier;
 	private String compilationUnitName;
 	private List<RemoveUnusedCodeDocumentChangeWrapper> children = new ArrayList<>();
-	private UnusedFieldWrapper fieldData;
+	private UnusedClassMemberWrapper classMemberdData;
 	private Document originalDocument;
 
 	public RemoveUnusedCodeDocumentChangeWrapper(DocumentChange documentChange,
-			RemoveUnusedCodeDocumentChangeWrapper parent, Document originalDocument, UnusedFieldWrapper fieldData) {
+			RemoveUnusedCodeDocumentChangeWrapper parent, Document originalDocument, UnusedClassMemberWrapper classMemberData) {
 		this.documentChange = documentChange;
 		this.parent = parent;
 		this.isParent = null == parent;
-		this.identifier = fieldData.getFieldName();
-		this.compilationUnitName = fieldData.getClassDeclarationName();
-		this.fieldData = fieldData;
+		this.identifier = classMemberData.getClassMemberIdentifier();
+		this.compilationUnitName = classMemberData.getClassDeclarationName();
+		this.classMemberdData = classMemberData;
 		this.originalDocument = originalDocument;
 	}
 
 	private RemoveUnusedCodeDocumentChangeWrapper(DocumentChange documentChange,
 			RemoveUnusedCodeDocumentChangeWrapper parent, String identifier,
-			String compilationUnitName, Document compilationUnitSource, UnusedFieldWrapper fieldData) {
+			String compilationUnitName, Document compilationUnitSource, UnusedClassMemberWrapper classMemberDataData) {
 		this.documentChange = documentChange;
 		this.parent = parent;
 		this.isParent = null == parent;
 		this.identifier = identifier;
 		this.compilationUnitName = compilationUnitName;
 		this.originalDocument = compilationUnitSource;
-		this.fieldData = fieldData;
+		this.classMemberdData = classMemberDataData;
 	}
 
 	public DocumentChange getDocumentChange() {
@@ -59,7 +59,7 @@ public class RemoveUnusedCodeDocumentChangeWrapper {
 
 	public void addChild(DocumentChange child, String compilationUnitName, Document document) {
 		this.children.add(new RemoveUnusedCodeDocumentChangeWrapper(child, this, this.identifier,
-				compilationUnitName, document, this.fieldData));
+				compilationUnitName, document, this.classMemberdData));
 	}
 
 	public RemoveUnusedCodeDocumentChangeWrapper[] getChildren() {
@@ -82,8 +82,8 @@ public class RemoveUnusedCodeDocumentChangeWrapper {
 		return this.originalDocument;
 	}
 
-	public UnusedFieldWrapper getFieldData() {
-		return fieldData;
+	public UnusedClassMemberWrapper getFieldData() {
+		return classMemberdData;
 	}
 
 }

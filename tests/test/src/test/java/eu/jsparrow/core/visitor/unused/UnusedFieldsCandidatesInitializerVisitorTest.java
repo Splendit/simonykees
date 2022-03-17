@@ -14,8 +14,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
-@SuppressWarnings("nls")
-public class UnusedFieldsCandidatesInitializerVisitorTest extends UsesJDTUnitFixture {
+class UnusedFieldsCandidatesInitializerVisitorTest extends UsesJDTUnitFixture {
 
 	@AfterEach
 	void tearDown() throws Exception {
@@ -95,7 +94,7 @@ public class UnusedFieldsCandidatesInitializerVisitorTest extends UsesJDTUnitFix
 		assertFalse(removedUnusedFields.isEmpty());
 		assertEquals(1, removedUnusedFields.size());
 		String removedUnusedFieldName = removedUnusedFields.get(0)
-			.getFieldName();
+			.getClassMemberIdentifier();
 		assertEquals("unusedField", removedUnusedFieldName);
 	}
 }
