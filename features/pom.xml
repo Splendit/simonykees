@@ -24,8 +24,6 @@
 		<!-- eclipse plugin at least Photon -->
 		<module>feature.photon</module>
 
-		<!-- eclipse plugin at least Photon -->
-		<module>feature.202106</module>
 	</modules>
 
 </project>
