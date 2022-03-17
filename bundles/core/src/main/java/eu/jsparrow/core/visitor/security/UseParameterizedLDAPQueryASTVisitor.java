@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.UseParameterizedQueryEvent;
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
@@ -35,7 +36,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 3.19.0
  *
  */
-public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryASTVisitor {
+public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryASTVisitor implements UseParameterizedQueryEvent {
 
 	private static final String SEARCH = "search"; //$NON-NLS-1$
 	private static final SignatureData OVERLOAD_WITH_NAME_OF_TYPE_NAME = new SignatureData(
@@ -74,7 +75,7 @@ public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryAST
 		listRewrite.insertAfter(searchParameters, filterExpression, null);
 
 		onRewrite();
-
+		addMarkerEvent(methodInvocation);
 		return true;
 	}
 

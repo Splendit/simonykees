@@ -18,10 +18,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class ReImplementingInterfaceRule extends RefactoringRuleImpl<ReImplementingInterfaceASTVisitor> {
 
+	public static final String RULE_ID = "ReImplementingInterface"; //$NON-NLS-1$
+
 	public ReImplementingInterfaceRule() {
 		super();
 		this.visitorClass = ReImplementingInterfaceASTVisitor.class;
-		this.id = "ReImplementingInterface"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.ReImplementingInterfaceRule_name,
 				Messages.ReImplementingInterfaceRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS));

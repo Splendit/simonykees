@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.GuardConditionEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.OperatorUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -30,7 +31,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * 
  * @since 2.7.0
  */
-public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
+public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor implements GuardConditionEvent {
 
 	private static final Code VOID = PrimitiveType.VOID;
 
@@ -384,6 +385,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 			listRewrite.insertAfter(astRewrite.createMoveTarget(statement), ifStatement, null);
 		}
 		onRewrite();
+		addMarkerEvent(ifStatement);
 	}
 
 	private List<Comment> saveComments(IfStatement ifStatement, List<Statement> ifBodyStatements) {

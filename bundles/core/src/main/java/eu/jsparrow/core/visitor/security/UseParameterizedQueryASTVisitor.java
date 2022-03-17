@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.UseParameterizedQueryEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -45,7 +46,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 3.16.0
  *
  */
-public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisitor {
+public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisitor implements UseParameterizedQueryEvent {
 
 	private static final String PREPARED_STATEMENT_QUALIFIED_NAME = java.sql.PreparedStatement.class.getName();
 
@@ -126,6 +127,7 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 			removeGetResultSetInvocation(getResultSetInvocation, methodInvocation);
 		}
 		onRewrite();
+		addMarkerEvent(methodInvocation);
 
 		return true;
 	}

@@ -11,6 +11,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+import eu.jsparrow.core.markers.common.ReplaceStringFormatByFormattedEvent;
+import eu.jsparrow.rules.common.markers.Resolver;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -39,7 +41,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 4.3.0
  * 
  */
-public class ReplaceStringFormatByFormattedASTVisitor extends AbstractASTRewriteASTVisitor {
+public class ReplaceStringFormatByFormattedASTVisitor extends AbstractASTRewriteASTVisitor implements ReplaceStringFormatByFormattedEvent {
 
 	@Override
 	public boolean visit(MethodInvocation invocation) {
@@ -67,6 +69,7 @@ public class ReplaceStringFormatByFormattedASTVisitor extends AbstractASTRewrite
 			}
 			astRewrite.replace(invocation, formattedMethodInvocation, null);
 			onRewrite();
+			addMarkerEvent(invocation);
 		}
 		return true;
 	}

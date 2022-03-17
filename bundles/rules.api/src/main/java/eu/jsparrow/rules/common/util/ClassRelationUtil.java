@@ -764,4 +764,50 @@ public class ClassRelationUtil {
 		return isContentOfType(typeBinding, fullyQualifiedTypeName);
 	}
 
+	/**
+	 * 
+	 * @param type
+	 *            a type binding representing a class.
+	 * @return the list of all super classes that the given type is inheriting
+	 *         from. Does not include the implemented interfaces.
+	 */
+	public static List<ITypeBinding> findSuperClasses(ITypeBinding type) {
+		ITypeBinding iTypeBinding = type;
+		List<ITypeBinding> superClasses = new ArrayList<>();
+		while (true) {
+			ITypeBinding superClass = iTypeBinding.getSuperclass();
+			if (superClass != null) {
+				superClasses.add(superClass);
+			} else {
+				break;
+			}
+
+			iTypeBinding = superClass;
+
+		}
+		return superClasses;
+	}
+
+	/**
+	 * 
+	 * @param type
+	 *            a binding representing a class or an interface.
+	 * @return the list of all interfaces that the given type is implementing. .
+	 */
+	public static List<ITypeBinding> findSuperInterfaces(ITypeBinding type) {
+		List<ITypeBinding> interfaces = new ArrayList<>();
+		for (ITypeBinding interfaceType : type.getInterfaces()) {
+			interfaces.add(interfaceType);
+			List<ITypeBinding> grandParents = findSuperInterfaces(interfaceType);
+			interfaces.addAll(grandParents);
+		}
+		ITypeBinding superClass = type.getSuperclass();
+		if (superClass != null) {
+			List<ITypeBinding> superClassInterfaces = findSuperInterfaces(superClass);
+			interfaces.addAll(superClassInterfaces);
+		}
+
+		return interfaces;
+	}
+
 }

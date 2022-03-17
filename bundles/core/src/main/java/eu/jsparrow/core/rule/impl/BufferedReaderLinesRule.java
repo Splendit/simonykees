@@ -19,9 +19,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class BufferedReaderLinesRule extends RefactoringRuleImpl<BufferedReaderLinesASTVisitor> {
 
+	public  static final String RULE_ID = "BufferedReaderLines"; //$NON-NLS-1$
+
 	public BufferedReaderLinesRule() {
 		this.visitorClass = BufferedReaderLinesASTVisitor.class;
-		this.id = "BufferedReaderLines"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.BufferedReaderLinesRule_name,
 				Messages.BufferedReaderLinesRule_description,
 				Duration.ofMinutes(5),

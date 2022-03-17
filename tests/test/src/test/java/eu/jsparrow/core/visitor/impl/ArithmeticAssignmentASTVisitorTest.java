@@ -9,27 +9,26 @@ import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 
-@SuppressWarnings({ "nls" })
-public class ArithmeticAssignmentASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class ArithmeticAssignmentASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		setVisitor(new ArithmethicAssignmentASTVisitor());
 	}
 
 	@Test
-	public void visit_AssignmentWithAdd_ShouldReplaceAddAssignment() throws Exception {
+	void visit_AssignmentWithAdd_ShouldReplaceAddAssignment() throws Exception {
 		assertChange("int a = 0;  a = a + 3;", "int a = 0;  a += 3;");
 	}
 
 	@Test
-	public void visit_AlreadyAddAssignment_ShouldNotReplace() throws Exception {		
+	void visit_AlreadyAddAssignment_ShouldNotReplace() throws Exception {		
 		assertNoChange("int a = 0;  a += 3;");
 	}
 
 	@Test
-	public void visit_AssignmentWithAdd_ShouldUpdateListeners() throws Exception {
+	void visit_AssignmentWithAdd_ShouldUpdateListeners() throws Exception {
 		ArithmethicAssignmentASTVisitor arithmethicAssignmentVisitor = new ArithmethicAssignmentASTVisitor();
 		ASTRewriteVisitorListenerStub listener = new ASTRewriteVisitorListenerStub();
 		arithmethicAssignmentVisitor.addRewriteListener(listener);

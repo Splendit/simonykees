@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 
+import eu.jsparrow.core.markers.common.OptionalIfPresentEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 
 /**
@@ -24,7 +25,7 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
  * @since 2.6
  *
  */
-public class OptionalIfPresentASTVisitor extends AbstractOptionalASTVisitor {
+public class OptionalIfPresentASTVisitor extends AbstractOptionalASTVisitor implements OptionalIfPresentEvent {
 
 	/**
 	 * Looks for occurrences of optional.isPresent() where the following
@@ -120,6 +121,7 @@ public class OptionalIfPresentASTVisitor extends AbstractOptionalASTVisitor {
 		// Replace the if statement with the new optiona.ifPresent statement
 		astRewrite.replace(ifStatement, optionalIfPresent, null);
 		onRewrite();
+		addMarkerEvent(methodInvocation);
 		saveComments(methodInvocation, ifStatement, lambdaBody, removedNodes);
 		removedNodes.clear();
 		return true;

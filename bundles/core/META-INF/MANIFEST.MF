@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.core
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Core
 Bundle-SymbolicName: eu.jsparrow.core;singleton:=true
-Bundle-Version: 4.8.0.qualifier
+Bundle-Version: 4.9.0.qualifier
 Bundle-Activator: eu.jsparrow.core.Activator
 Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.i18n,
@@ -40,7 +40,10 @@ Export-Package: eu.jsparrow.core;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalo
  eu.jsparrow.core.util;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
  eu.jsparrow.core.visitor;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
  eu.jsparrow.core.markers;x-friends:="eu.jsparrow.ui",
- eu.jsparrow.core.visitor.renaming
+ eu.jsparrow.core.visitor.renaming;x-friends:="eu.jsparrow.ui",
+ eu.jsparrow.core.rule.impl.unused;x-friends:="eu.jsparrow.ui",
+ eu.jsparrow.core.visitor.unused.method;x-friends:="eu.jsparrow.ui",
+ eu.jsparrow.core.visitor.unused;x-friends:="eu.jsparrow.ui"
 Bundle-ClassPath: lib/snakeyaml.jar,
  .
 

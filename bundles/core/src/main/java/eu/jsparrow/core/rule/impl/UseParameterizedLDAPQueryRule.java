@@ -20,9 +20,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class UseParameterizedLDAPQueryRule extends RefactoringRuleImpl<UseParameterizedLDAPQueryASTVisitor> {
 
+	public static final String RULE_ID = "UseParameterizedLDAPQuery"; //$NON-NLS-1$
+
 	public UseParameterizedLDAPQueryRule() {
 		this.visitorClass = UseParameterizedLDAPQueryASTVisitor.class;
-		this.id = "UseParameterizedLDAPQuery"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.UseParameterizedLDAPQueryRule_name,
 				Messages.UseParameterizedLDAPQueryRule_description,
 				Duration.ofMinutes(30),

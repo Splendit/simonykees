@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import eu.jsparrow.core.markers.common.CreateTempFilesUsingJavaNIOEvent;
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -36,7 +37,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @since 3.21.0
  *
  */
-public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTVisitor {
+public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTVisitor implements CreateTempFilesUsingJavaNIOEvent {
 
 	private static final String PATHS_QUALIFIED_NAME = java.nio.file.Paths.class.getName();
 	private static final String FILES_QUALIFIED_NAME = java.nio.file.Files.class.getName();
@@ -203,6 +204,7 @@ public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTV
 
 		astRewrite.replace(replacedCreateTempFileInvocation, toFileInvocation, null);
 		onRewrite();
+		addMarkerEvent(replacedCreateTempFileInvocation);
 	}
 
 	private class TransformationData {

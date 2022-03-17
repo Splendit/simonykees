@@ -39,7 +39,6 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
-@SuppressWarnings("nls")
 public class RenamingTestHelper {
 
 	private RenamingTestHelper() {

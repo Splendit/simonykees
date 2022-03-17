@@ -1,13 +1,31 @@
 package eu.jsparrow.core.visitor.assertj.dedicated;
 
 /**
- * Relevant method names for {@link BooleanAssertionOnInvocationAnalyzer}.
+ * Relevant method names for analyzers like for example
+ * {@link BooleanAssertionOnInvocationAnalyzer}.
  * 
  * @since 4.7.0
  *
  */
 @SuppressWarnings("nls")
 public class Constants {
+
+	public static final String LENGTH = "length";
+	public static final String SIZE = "size";
+
+	/*
+	 * boolean assertions
+	 */
+	public static final String IS_FALSE = "isFalse";
+	public static final String IS_TRUE = "isTrue";
+
+	/*
+	 * assertion methods for all supported types
+	 */
+	public static final String IS_NOT_NULL = "isNotNull";
+	public static final String IS_NOT_SAME_AS = "isNotSameAs";
+	public static final String IS_NULL = "isNull";
+	public static final String IS_SAME_AS = "isSameAs";
 
 	/*
 	 * String methods
@@ -27,6 +45,14 @@ public class Constants {
 	public static final String IS_NOT_EQUAL_TO_IGNORING_CASE = "isNotEqualToIgnoringCase";
 	public static final String MATCHES = "matches";
 	public static final String STARTS_WITH = "startsWith";
+
+	/*
+	 * other relational names
+	 */
+	public static final String IS_LESS_THAN = "isLessThan";
+	public static final String IS_GREATER_THAN = "isGreaterThan";
+	public static final String IS_GREATER_THAN_OR_EQUAL_TO = "isGreaterThanOrEqualTo";
+	public static final String IS_LESS_THAN_OR_EQUAL_TO = "isLessThanOrEqualTo";
 
 	/*
 	 * Iterable
@@ -96,6 +122,25 @@ public class Constants {
 	public static final String JAVA_UTIL = "java.util";
 	public static final String IS_EQUAL_TO = "isEqualTo";
 	public static final String IS_NOT_EQUAL_TO = "isNotEqualTo";
+
+	/*
+	 * Numeric
+	 */
+	public static final String IS_ZERO = "isZero";
+	public static final String IS_NOT_ZERO = "isNotZero";
+	public static final String IS_POSITIVE = "isPositive";
+	public static final String IS_NOT_POSITIVE = "isNotPositive";
+	public static final String IS_NOT_NEGATIVE = "isNotNegative";
+	public static final String IS_NEGATIVE = "isNegative";
+
+	/*
+	 * assertion names starting with hasSize
+	 */
+	public static final String HAS_SIZE_LESS_THAN_OR_EQUAL_TO = "hasSizeLessThanOrEqualTo";
+	public static final String HAS_SIZE_LESS_THAN = "hasSizeLessThan";
+	public static final String HAS_SIZE_GREATER_THAN_OR_EQUAL_TO = "hasSizeGreaterThanOrEqualTo";
+	public static final String HAS_SIZE_GREATER_THAN = "hasSizeGreaterThan";
+	public static final String HAS_SIZE = "hasSize";
 
 	private Constants() {
 		/*
