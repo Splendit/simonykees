@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
@@ -76,7 +77,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 	public ConfigureRenameFieldsRuleWizard(List<ICompilationUnit> selectedJavaElements) {
 		this.selectedJavaElements = selectedJavaElements;
 		setNeedsProgressMonitor(true);
-		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
+		Window.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
 	}
 
 	@Override

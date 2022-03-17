@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
-public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitFixture {
+class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		addDependency("javax.persistence", "persistence-api", "1.0.2");
 		defaultFixture.addImport("javax.persistence.EntityManager");
 		defaultFixture.addImport("javax.persistence.Query");
@@ -18,12 +18,12 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		fixtureProject.clear();
 	}
 
 	@Test
-	public void visit_MethodHasNoExpression_shouldNotTransform() throws Exception {
+	void visit_MethodHasNoExpression_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		Query createQuery(String query) {\n" +
 				"			return null;\n" +
@@ -41,7 +41,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_MethodHasNotRequiredExpressionType_shouldNotTransform() throws Exception {
+	void visit_MethodHasNotRequiredExpressionType_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		static class FakeEntityManager {\n" +
 				"			Query createQuery(String query) {\n" +
@@ -60,7 +60,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_MethodHasNotRequiredName_shouldNotTransform() throws Exception {
+	void visit_MethodHasNotRequiredName_shouldNotTransform() throws Exception {
 		String original = "" +
 				"void test() {\n" +
 				"			String orderId = \"100000000\";\n" +
@@ -74,7 +74,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_QueryWithMissingEqualsOperatorBeforeInput_shouldNotTransform() throws Exception {
+	void visit_QueryWithMissingEqualsOperatorBeforeInput_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		void test() {\n" +
 				"			String orderId = \"1\";\n" +
@@ -88,7 +88,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_EmptyStringLiteralAfterInput_shouldNotTransform() throws Exception {
+	void visit_EmptyStringLiteralAfterInput_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void test() {\n" +
 				"		String orderId = \"1\";\n" +
@@ -103,7 +103,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_StringLiteralWithQuotationMarkAfterInput_shouldNotTransform() throws Exception {
+	void visit_StringLiteralWithQuotationMarkAfterInput_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void test() {\n" +
 				"		String orderId = \"1\";\n" +
@@ -118,7 +118,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_QueryWitMissingSpaceAfterInput_shouldNotTransform() throws Exception {
+	void visit_QueryWitMissingSpaceAfterInput_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void test() {\n" +
 				"		String orderId = \"1\";\n" +
@@ -132,7 +132,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void TestCreateQueryContainingOnlyStringLiterals() throws Exception {
+	void TestCreateQueryContainingOnlyStringLiterals() throws Exception {
 		String original = "" +
 				"		void test() {\n" +
 				"			EntityManager entityManager = null;\n" +
@@ -145,7 +145,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_WhereKeywordNotFound_shouldNotTransform() throws Exception {
+	void visit_WhereKeywordNotFound_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		void test() {\n" +
 				"			String orderId = \"100000000\";\n" +
@@ -161,7 +161,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_QueryDeclaredAsField_shouldNotTransform() throws Exception {
+	void visit_QueryDeclaredAsField_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		private EntityManager entityManager = null;\n" +
 				"		private Query jpqlQuery;\n" +
@@ -176,7 +176,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_QueryUsedAsInvocationArgument_shouldNotTransform() throws Exception {
+	void visit_QueryUsedAsInvocationArgument_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void useQuery(Query jpqlQuery) {\n" +
 				"		}\n" +
@@ -193,7 +193,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_QueryAsInitializerOfOtherVariable_shouldNotTransform() throws Exception {
+	void visit_QueryAsInitializerOfOtherVariable_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void test() {\n" +
 				"		String orderId = \"100000000\";\n" +
@@ -208,7 +208,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_QueryUsedAsAssignementRHS_shouldNotTransform() throws Exception {
+	void visit_QueryUsedAsAssignementRHS_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		void test() {\n" +
 				"			String orderId = \"100000000\";\n" +
@@ -223,7 +223,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_InitializedQueryReAssigned_shouldNotTransform() throws Exception {
+	void visit_InitializedQueryReAssigned_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		void test() {\n" +
 				"			String orderId = \"100000000\";\n" +
@@ -239,7 +239,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_QueryNeverExecuted_shouldNotTransform() throws Exception {
+	void visit_QueryNeverExecuted_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		void test() {\n" +
 				"			String orderId = \"100000000\";\n" +
@@ -253,7 +253,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_QueryWithSetMaxResultNeverExecuted_shouldNotTransform() throws Exception {
+	void visit_QueryWithSetMaxResultNeverExecuted_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		void test() {\n" +
 				"			String orderId = \"100000000\";\n" +
@@ -267,7 +267,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_QueryExecutedMoreThanOnce_shouldNotTransform() throws Exception {
+	void visit_QueryExecutedMoreThanOnce_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		void test() {\n" +
 				"			String orderId = \"100000000\";\n" +
@@ -283,7 +283,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_QueryWithSetParameterInvocation_shouldNotTransform() throws Exception {
+	void visit_QueryWithSetParameterInvocation_shouldNotTransform() throws Exception {
 		String original = ""
 				+ "		void test() {\n" +
 				"			String firstName = \"Max\";\n" +
@@ -300,7 +300,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_QualifiedQueryVariable_shouldNotTransform() throws Exception {
+	void visit_QualifiedQueryVariable_shouldNotTransform() throws Exception {
 
 		String original = "" +
 				"		void test() {\n" +
@@ -319,7 +319,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_QueryVariableWithSubsequentSetParameter_shouldNotTransform() throws Exception {
+	void visit_QueryVariableWithSubsequentSetParameter_shouldNotTransform() throws Exception {
 
 		String original = "" +
 				"	void test() {\n" +
@@ -336,7 +336,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_createQueryInFieldDeclaration_shouldNotTransform() throws Exception {
+	void visit_createQueryInFieldDeclaration_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	EntityManager entityManager = null;\n" +
 				"	String orderId = \"100000000\";		\n" +
@@ -350,7 +350,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_CreateQueryInAssignmentChain_shouldNotTransform() throws Exception {
+	void visit_CreateQueryInAssignmentChain_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		void test() {\n" +
 				"			String orderId = \"100000000\";\n" +
@@ -365,7 +365,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 
 	@Test
-	public void visit_HiddenInitialization_shouldNotTransform() throws Exception {
+	void visit_HiddenInitialization_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void test() {\n" + 
 				"		EntityManager entityManager = null;\n" + 
@@ -381,7 +381,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 	
 	@Test
-	public void visit_HiddenPlusAssign_shouldNotTransform() throws Exception {
+	void visit_HiddenPlusAssign_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void test() {\n" + 
 				"		EntityManager entityManager = null;\n" + 
@@ -399,7 +399,7 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	}
 	
 	@Test
-	public void visit_PlusAssignToNullValue_shouldNotTransform() throws Exception {
+	void visit_PlusAssignToNullValue_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void test() {\n" + 
 				"		EntityManager entityManager = null;\n" + 

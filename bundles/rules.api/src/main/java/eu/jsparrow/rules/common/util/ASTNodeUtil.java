@@ -12,12 +12,15 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Comment;
+import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.LineComment;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -29,6 +32,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -637,4 +641,16 @@ public class ASTNodeUtil {
 				|| nodeType == ASTNode.TYPE_LITERAL);
 	}
 
+	/**
+	 * 
+	 * @param simpleName
+	 *            a {@link SimpleName} to check if it represents a label.
+	 * @return true if the given  {@link SimpleName} is a label.
+	 */
+	public static boolean isLabel(SimpleName simpleName) {
+		StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
+		return locationInParent == LabeledStatement.LABEL_PROPERTY
+				|| locationInParent == ContinueStatement.LABEL_PROPERTY
+				|| locationInParent == BreakStatement.LABEL_PROPERTY;
+	}
 }

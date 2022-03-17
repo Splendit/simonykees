@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.CollapseIfStatementsEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.OperatorUtil;
@@ -44,7 +45,7 @@ import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
  * @since 3.2.0
  *
  */
-public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor {
+public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor implements CollapseIfStatementsEvent {
 
 	private static final String CONDITION_NAME = "condition"; //$NON-NLS-1$
 
@@ -102,6 +103,7 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 		astRewrite.replace(ifStatement.getThenStatement(), astRewrite.createCopyTarget(newBodyStatement),
 				null);
 		saveComments(ifStatement, innerifStatementStatements, newBodyStatement);
+		addMarkerEvent(ifStatement);
 		onRewrite();
 
 		return true;

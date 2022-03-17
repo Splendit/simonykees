@@ -6,16 +6,16 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
-public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
-	public void setUpVisitor() throws Exception {
+	void setUpVisitor() throws Exception {
 		setVisitor(new UseFilesWriteStringASTVisitor());
 		setJavaVersion(JavaCore.VERSION_11);
 	}
 
 	@Test
-	public void visit_TWRUsingNewFileWriter_shouldTransform() throws Exception {
+	void visit_TWRUsingNewFileWriter_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -41,7 +41,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingQualifiedClassNames_shouldTransform() throws Exception {
+	void visit_TWRUsingQualifiedClassNames_shouldTransform() throws Exception {
 		addImports(java.nio.charset.Charset.class,
 				java.nio.charset.StandardCharsets.class);
 
@@ -66,7 +66,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingFileWriterVariable_shouldTransform() throws Exception {
+	void visit_TWRUsingFileWriterVariable_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -93,7 +93,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingFilesNewBufferedWriterAndPathVariable_shouldTransform() throws Exception {
+	void visit_TWRUsingFilesNewBufferedWriterAndPathVariable_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.charset.Charset.class,
 				java.nio.charset.StandardCharsets.class,
@@ -121,7 +121,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingNewFileWriterNotAllResourcesRemoved_shouldTransform() throws Exception {
+	void visit_TWRUsingNewFileWriterNotAllResourcesRemoved_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -148,7 +148,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingFileWriterVariableNotAllResourcesRemoved_shouldTransform() throws Exception {
+	void visit_TWRUsingFileWriterVariableNotAllResourcesRemoved_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -178,7 +178,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingNewFileWriterWithoutCharset_shouldTransform() throws Exception {
+	void visit_TWRUsingNewFileWriterWithoutCharset_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class);
 
@@ -201,7 +201,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingFileWriterVariableWithoutCharset_shouldTransform() throws Exception {
+	void visit_TWRUsingFileWriterVariableWithoutCharset_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class);
 
@@ -225,7 +225,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingFilesNewBufferedWriterOnlyWithPath_shouldTransform() throws Exception {
+	void visit_TWRUsingFilesNewBufferedWriterOnlyWithPath_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.file.Files.class,
 				java.nio.file.Path.class,
@@ -249,7 +249,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingFilesNewBufferedWriterWithStandardCharsetUTF8_shouldTransform() throws Exception {
+	void visit_TWRUsingFilesNewBufferedWriterWithStandardCharsetUTF8_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.charset.StandardCharsets.class,
 				java.nio.file.Files.class,
@@ -275,7 +275,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingFilesNewBufferedWriterWithCharsetAndOpenOptions_shouldTransform() throws Exception {
+	void visit_TWRUsingFilesNewBufferedWriterWithCharsetAndOpenOptions_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.charset.Charset.class,
 				java.nio.charset.StandardCharsets.class,
@@ -310,7 +310,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingFilesNewBufferedWriterWithoutCharsetWithOpenOptions_shouldTransform() throws Exception {
+	void visit_TWRUsingFilesNewBufferedWriterWithoutCharsetWithOpenOptions_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.file.Files.class,
 				java.nio.file.OpenOption.class,
@@ -340,7 +340,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingFilesNewBufferedWriterWithOpenOptionCreate_shouldTransform() throws Exception {
+	void visit_TWRUsingFilesNewBufferedWriterWithOpenOptionCreate_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.file.Files.class,
 				java.nio.file.Path.class,
@@ -367,7 +367,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingFilesNewBufferedWriterWithArrayOfOpenOptions_shouldTransform()
+	void visit_TWRUsingFilesNewBufferedWriterWithArrayOfOpenOptions_shouldTransform()
 			throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.charset.Charset.class,
@@ -402,7 +402,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingFilesNewBufferedWriterRemovingNotAllResources_shouldTransform()
+	void visit_TWRUsingFilesNewBufferedWriterRemovingNotAllResources_shouldTransform()
 			throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.file.Files.class,
@@ -430,7 +430,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_DeclareWriterAsResource_shouldTransform() throws Exception {
+	void visit_DeclareWriterAsResource_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.io.Writer.class,
@@ -458,7 +458,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_FileWriterResourceFromNewFileWithOneStringArgument_shouldTransform() throws Exception {
+	void visit_FileWriterResourceFromNewFileWithOneStringArgument_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.File.class,
 				java.io.FileWriter.class,
@@ -488,7 +488,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_FileWriterResourceFromNewFileWithTwoStringArguments_shouldTransform() throws Exception {
+	void visit_FileWriterResourceFromNewFileWithTwoStringArguments_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.File.class,
 				java.io.FileWriter.class,
@@ -520,7 +520,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_newFileWriterFromNewFileWithOneStringArgument_shouldTransform() throws Exception {
+	void visit_newFileWriterFromNewFileWithOneStringArgument_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.File.class,
 				java.io.FileWriter.class,
@@ -549,7 +549,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_AdditionalNonWriterWriteMethodInvocation_shouldTransform() throws Exception {
+	void visit_AdditionalNonWriterWriteMethodInvocation_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.io.IOException.class);
@@ -558,7 +558,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 				"		String value = \"Hello World!\";\n"
 				+ "		String pathString = \"/home/test/testpath\";\n"
 				+ "		class LocalClass {\n"
-				+ "			public void write(String s) throws IOException {\n"
+				+ "			void write(String s) throws IOException {\n"
 				+ "			}\n"
 				+ "		}\n"
 				+ "		try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString))) {\n"
@@ -571,7 +571,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 				"		String value = \"Hello World!\";\n"
 				+ "		String pathString = \"/home/test/testpath\";\n"
 				+ "		class LocalClass {\n"
-				+ "			public void write(String s) throws IOException {\n"
+				+ "			void write(String s) throws IOException {\n"
 				+ "			}\n"
 				+ "		}\n"
 				+ "		try {\n"
@@ -584,7 +584,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TwoBufferedWritersWriting_shouldTransform() throws Exception {
+	void visit_TwoBufferedWritersWriting_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.file.Files.class,
@@ -614,7 +614,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	 * Bug fix SIM-1918
 	 */
 	@Test
-	public void visit_TWRUsingBufferedWriterConstructorNoCatch_shouldTransform() throws Exception {
+	void visit_TWRUsingBufferedWriterConstructorNoCatch_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -640,7 +640,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	 * Bug fix SIM-1918
 	 */
 	@Test
-	public void visit_TWRUsingTwoBufferedWritersNoCatch_shouldTransform() throws Exception {
+	void visit_TWRUsingTwoBufferedWritersNoCatch_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.file.Files.class,
@@ -666,7 +666,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	 * Bug fix SIM-1918
 	 */
 	@Test
-	public void visit_TWRUsingFilesNewBufferedWriterNoCatch_shouldTransform() throws Exception {
+	void visit_TWRUsingFilesNewBufferedWriterNoCatch_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.charset.Charset.class,
 				java.nio.charset.StandardCharsets.class,
@@ -694,7 +694,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	 * Bug fix SIM-1918
 	 */
 	@Test
-	public void visit_NoCatchNoTryStatementParentBlock_shouldTransform() throws Exception {
+	void visit_NoCatchNoTryStatementParentBlock_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.charset.Charset.class,
 				java.nio.charset.StandardCharsets.class,
@@ -719,7 +719,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_NoCatchNoTryStatementParentBlockTwoBufferedWriters_shouldTransform() throws Exception {
+	void visit_NoCatchNoTryStatementParentBlockTwoBufferedWriters_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.charset.Charset.class,
 				java.nio.charset.StandardCharsets.class,
@@ -752,7 +752,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	 * Bug fix SIM-1918
 	 */
 	@Test
-	public void visit_TWRUsingFilesNewBufferedWriterNoCatchButFinally_shouldTransform() throws Exception {
+	void visit_TWRUsingFilesNewBufferedWriterNoCatchButFinally_shouldTransform() throws Exception {
 
 		addImports(java.io.Writer.class,
 				java.nio.charset.StandardCharsets.class,

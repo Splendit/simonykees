@@ -13,16 +13,13 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -220,7 +217,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(SimpleName node) {
-		transformationPossible = analyzeName(node);
+		transformationPossible = analyzeName(node) || ASTNodeUtil.isLabel(node);
 		return false;
 	}
 
@@ -340,10 +337,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 						&& jUnit3TestCaseSuperTypesToRemove.contains(name.getParent()))
 				|| name.getLocationInParent() == MethodDeclaration.NAME_PROPERTY
 				|| name.getLocationInParent() == MethodInvocation.NAME_PROPERTY
-				|| name.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY
-				|| name.getLocationInParent() == LabeledStatement.LABEL_PROPERTY
-				|| name.getLocationInParent() == ContinueStatement.LABEL_PROPERTY
-				|| name.getLocationInParent() == BreakStatement.LABEL_PROPERTY) {
+				|| name.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY) {
 			return true;
 		}
 		IBinding binding = name.resolveBinding();

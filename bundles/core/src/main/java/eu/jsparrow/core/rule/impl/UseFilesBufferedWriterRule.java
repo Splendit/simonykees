@@ -19,8 +19,10 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class UseFilesBufferedWriterRule extends RefactoringRuleImpl<UseFilesBufferedWriterASTVisitor> {
 
+	public static final String RULE_ID = "UseFilesBufferedWriter"; //$NON-NLS-1$
+
 	public UseFilesBufferedWriterRule() {
-		this.id = "UseFilesBufferedWriter"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.visitorClass = UseFilesBufferedWriterASTVisitor.class;
 		this.ruleDescription = new RuleDescription(Messages.UseFilesBufferedWriterRule_name,
 				Messages.UseFilesBufferedWriterRule_description,

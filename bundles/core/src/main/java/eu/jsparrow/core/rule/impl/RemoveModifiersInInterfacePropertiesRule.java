@@ -20,9 +20,11 @@ import eu.jsparrow.rules.common.Tag;
 public class RemoveModifiersInInterfacePropertiesRule
 		extends RefactoringRuleImpl<RemoveModifiersInInterfacePropertiesASTVisitor> {
 
+	public static final String RULE_ID = "RemoveModifiersInInterfaceProperties"; //$NON-NLS-1$
+
 	public RemoveModifiersInInterfacePropertiesRule() {
 		this.visitorClass = RemoveModifiersInInterfacePropertiesASTVisitor.class;
-		this.id = "RemoveModifiersInInterfaceProperties"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.RemoveModifiersInInterfacePropertiesRule_name,
 				Messages.RemoveModifiersInInterfacePropertiesRule_description, Duration.ofMinutes(1),
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY));

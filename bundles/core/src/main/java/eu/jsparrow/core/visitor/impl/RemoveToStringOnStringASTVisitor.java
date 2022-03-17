@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 
 import eu.jsparrow.core.constants.ReservedNames;
+import eu.jsparrow.core.markers.common.RemoveToStringOnStringEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -27,7 +28,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisitor {
+public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisitor implements RemoveToStringOnStringEvent {
 
 	private static String stringFullyQualifiedName = java.lang.String.class.getName();
 
@@ -95,6 +96,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 		astRewrite.replace(node, astRewrite.createMoveTarget(variableExpression), null);
 		saveComments(node, variableExpression);
 		onRewrite();
+		addMarkerEvent(node);
 
 		return true;
 	}

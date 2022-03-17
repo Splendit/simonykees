@@ -18,11 +18,12 @@ import eu.jsparrow.rules.common.Tag;
  *
  */
 public class GuardConditionRule extends RefactoringRuleImpl<GuardConditionASTVisitor> {
-	
+
+	public static final String RULE_ID = "GuardCondition"; //$NON-NLS-1$
+
 	public GuardConditionRule () {
-		
 		this.visitorClass = GuardConditionASTVisitor.class;
-		this.id = "GuardCondition"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.GuardConditionRule_name,
 				Messages.GuardConditionRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));

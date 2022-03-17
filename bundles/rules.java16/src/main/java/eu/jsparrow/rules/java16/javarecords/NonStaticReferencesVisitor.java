@@ -9,15 +9,12 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -138,15 +135,16 @@ class NonStaticReferencesVisitor extends ASTVisitor {
 	}
 
 	private boolean analyzeSimpleName(SimpleName node) {
+
 		if (node.getLocationInParent() == MethodDeclaration.NAME_PROPERTY ||
 				node.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY ||
-				node.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY ||
-				node.getLocationInParent() == LabeledStatement.LABEL_PROPERTY ||
-				node.getLocationInParent() == ContinueStatement.LABEL_PROPERTY ||
-				node.getLocationInParent() == BreakStatement.LABEL_PROPERTY) {
+				node.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY) {
 			return true;
 		}
-		return analyzeNameBinding(node);
+		if (analyzeNameBinding(node)) {
+			return true;
+		}
+		return ASTNodeUtil.isLabel(node);
 	}
 
 	private boolean analyzeNameBinding(Name name) {

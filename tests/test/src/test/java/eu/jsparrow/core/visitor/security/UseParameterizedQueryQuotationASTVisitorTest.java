@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
-@SuppressWarnings("nls")
-public class UseParameterizedQueryQuotationASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class UseParameterizedQueryQuotationASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
@@ -17,7 +16,7 @@ public class UseParameterizedQueryQuotationASTVisitorTest extends UsesSimpleJDTU
 	}
 
 	@Test
-	public void visit_ExecuteQuery_AllQuotationsWellFormed() throws Exception {
+	void visit_ExecuteQuery_AllQuotationsWellFormed() throws Exception {
 
 		String original = "" +
 				"	String departmentId1 = \"40\";\n" +
@@ -65,7 +64,7 @@ public class UseParameterizedQueryQuotationASTVisitorTest extends UsesSimpleJDTU
 	}
 
 	@Test
-	public void visit_ExecuteQuery_MissingOpeningQuote() throws Exception {
+	void visit_ExecuteQuery_MissingOpeningQuote() throws Exception {
 
 		String original = "" +
 				"	String departmentId1 = \"'40\";\n" +
@@ -112,7 +111,7 @@ public class UseParameterizedQueryQuotationASTVisitorTest extends UsesSimpleJDTU
 	}
 
 	@Test
-	public void visit_ExecuteQuery_MissingClosingQuote() throws Exception {
+	void visit_ExecuteQuery_MissingClosingQuote() throws Exception {
 
 		String original = "" +
 				"	String departmentId1 = \"40'\";\n" +
@@ -159,7 +158,7 @@ public class UseParameterizedQueryQuotationASTVisitorTest extends UsesSimpleJDTU
 	}
 
 	@Test
-	public void visit_ExecuteQuery_SpaceAfterOpeningQuote() throws Exception {
+	void visit_ExecuteQuery_SpaceAfterOpeningQuote() throws Exception {
 		String original = "" +
 				"	String departmentId1 = \"40\";\n" +
 				"	String departmentId2 = \"140\";\n" +
@@ -205,7 +204,7 @@ public class UseParameterizedQueryQuotationASTVisitorTest extends UsesSimpleJDTU
 	}
 
 	@Test
-	public void visit_ExecuteQuery_SpaceBeforeClosingQuot() throws Exception {
+	void visit_ExecuteQuery_SpaceBeforeClosingQuot() throws Exception {
 		String original = "" +
 				"	String departmentId1 = \"40\";\n" +
 				"	String departmentId2 = \"140\";\n" +

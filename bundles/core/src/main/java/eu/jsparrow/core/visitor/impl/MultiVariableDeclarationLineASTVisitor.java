@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.MultiVariableDeclarationLineEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
@@ -25,7 +26,8 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @since 1.2
  *
  */
-public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteASTVisitor {
+public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteASTVisitor
+		implements MultiVariableDeclarationLineEvent {
 
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
@@ -66,7 +68,7 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil
 			.convertToTypedList(variableDeclarationStatement.fragments(), VariableDeclarationFragment.class);
 
-		if(isGeneratedNode(variableDeclarationStatement.getType())) {
+		if (isGeneratedNode(variableDeclarationStatement.getType())) {
 			return true;
 		}
 
@@ -103,10 +105,12 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 			List<VariableDeclarationFragment> fragments) {
 		CommentRewriter helper = getCommentRewriter();
 		List<Comment> linkedComments = fragments.stream()
-			.flatMap(fragment -> helper.findRelatedComments(fragment).stream())
+			.flatMap(fragment -> helper.findRelatedComments(fragment)
+				.stream())
 			.collect(Collectors.toList());
 
-		return helper.findInternalComments(variableDeclarationStatement).stream()
+		return helper.findInternalComments(variableDeclarationStatement)
+			.stream()
 			.filter(comment -> !linkedComments.contains(comment))
 			.collect(Collectors.toList());
 	}
@@ -128,6 +132,7 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 			Collections.reverse(declarations);
 			declarations.forEach(field -> listRewrite.insertAfter(field, declaration, null));
 			onRewrite();
+			addMarkerEvent(declaration);
 		}
 	}
 }
