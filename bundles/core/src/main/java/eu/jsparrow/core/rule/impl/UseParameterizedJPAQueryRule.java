@@ -25,9 +25,10 @@ import eu.jsparrow.rules.common.exception.runtime.ITypeNotFoundRuntimeException;
 public class UseParameterizedJPAQueryRule extends RefactoringRuleImpl<UseParameterizedJPAQueryASTVisitor> {
 	private static final Logger logger = LoggerFactory.getLogger(UseParameterizedJPAQueryRule.class);
 
+	public static final String RULE_ID = "UseParameterizedJPAQuery"; //$NON-NLS-1$
 	public UseParameterizedJPAQueryRule() {
 		this.visitorClass = UseParameterizedJPAQueryASTVisitor.class;
-		this.id = "UseParameterizedJPAQuery"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.UseParameterizedJPAQueryRule_name,
 				Messages.UseParameterizedJPAQueryRule_description,
 				Duration.ofMinutes(10),

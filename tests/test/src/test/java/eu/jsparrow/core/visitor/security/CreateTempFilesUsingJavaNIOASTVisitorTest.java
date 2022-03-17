@@ -5,16 +5,16 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
-public class CreateTempFilesUsingJavaNIOASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class CreateTempFilesUsingJavaNIOASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
-	public void setUpVisitor() throws Exception {
+	void setUpVisitor() throws Exception {
 		setVisitor(new CreateTempFilesUsingJavaNIOASTVisitor());
 		fixture.addImport(java.io.File.class.getName());
 	}
 
 	@Test
-	public void visit_CreateTempFileWithoutDirectory_shouldTransform() throws Exception {
+	void visit_CreateTempFileWithoutDirectory_shouldTransform() throws Exception {
 
 		String original = "" +
 				"		try {\n" +
@@ -31,7 +31,7 @@ public class CreateTempFilesUsingJavaNIOASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_CreateTempFileWithNullAsDirectory_shouldTransform() throws Exception {
+	void visit_CreateTempFileWithNullAsDirectory_shouldTransform() throws Exception {
 
 		String original = "" +
 				"		try {\n" +
@@ -47,7 +47,7 @@ public class CreateTempFilesUsingJavaNIOASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_PathsCannotBeImported_shouldTransform() throws Exception {
+	void visit_PathsCannotBeImported_shouldTransform() throws Exception {
 		String original = "" +
 				"		class Paths {}\n" +
 				"		try {\n" +
@@ -65,7 +65,7 @@ public class CreateTempFilesUsingJavaNIOASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_FilesCannotBeImported_shouldTransform() throws Exception {
+	void visit_FilesCannotBeImported_shouldTransform() throws Exception {
 		String original = "" +
 				"		class Files {}\n" +
 				"		try {\n" +
@@ -82,7 +82,7 @@ public class CreateTempFilesUsingJavaNIOASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_FilesAndPathsImportedOnDemand_shouldTransform() throws Exception {
+	void visit_FilesAndPathsImportedOnDemand_shouldTransform() throws Exception {
 		fixture.addImport("java.nio.file", false, true);
 		String original = "" +
 				"		try {\n" +
@@ -99,7 +99,7 @@ public class CreateTempFilesUsingJavaNIOASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_CreateTempFileWithNewFileAsDirectory_shouldTransform() throws Exception {
+	void visit_CreateTempFileWithNewFileAsDirectory_shouldTransform() throws Exception {
 
 		String original = "" +
 				"		try {\n" +
@@ -116,7 +116,7 @@ public class CreateTempFilesUsingJavaNIOASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_CreateTempFileWithNotNullVariableAsDirectory_shouldTransform() throws Exception {
+	void visit_CreateTempFileWithNotNullVariableAsDirectory_shouldTransform() throws Exception {
 
 		String original = "" +
 				"		try {\n" +
@@ -136,7 +136,7 @@ public class CreateTempFilesUsingJavaNIOASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_DirectoryAssignedToNullAfterUsage_shouldTransform() throws Exception {
+	void visit_DirectoryAssignedToNullAfterUsage_shouldTransform() throws Exception {
 		String original = "" +
 				"		try {\n" +
 				"			File directory = new File(\"/tmp/test/\");\n" +

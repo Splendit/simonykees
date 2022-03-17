@@ -1,24 +1,17 @@
 package eu.jsparrow.core.visitor.renaming;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.visitor.utils.SearchScopeFactory;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
@@ -32,8 +25,6 @@ import eu.jsparrow.rules.common.util.RefactoringUtil;
  *
  */
 public class FieldDeclarationVisitorWrapper {
-
-	private static final Logger logger = LoggerFactory.getLogger(FieldDeclarationVisitorWrapper.class);
 
 	public static final String SCOPE_PROJECT = Messages.RenameFieldsRuleWizardPageModel_scopeOption_project;
 
@@ -52,21 +43,7 @@ public class FieldDeclarationVisitorWrapper {
 			return new IJavaElement[] { javaProject };
 		}
 
-		List<IJavaProject> projectList = new LinkedList<>();
-		try {
-			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace()
-				.getRoot();
-			IProject[] projects = workspaceRoot.getProjects();
-			for (int i = 0; i < projects.length; i++) {
-				IProject project = projects[i];
-				if (project.isOpen() && project.hasNature(JavaCore.NATURE_ID)) {
-					projectList.add(JavaCore.create(project));
-				}
-			}
-		} catch (CoreException e) {
-			logger.error(e.getMessage(), e);
-		}
-		return projectList.toArray(new IJavaElement[0]);
+		return SearchScopeFactory.createWorkspaceSearchScope();
 	}
 
 	/**
@@ -91,17 +68,17 @@ public class FieldDeclarationVisitorWrapper {
 		visitor.updateOptions(options);
 		for (ICompilationUnit compilationUnit : selectedJavaElements) {
 			int status = visit(visitor, compilationUnit);
-			if (status != Status.OK) {
+			if (status != IStatus.OK) {
 				return status;
 			}
 
 			if (child.isCanceled()) {
-				return Status.CANCEL;
+				return IStatus.CANCEL;
 			} else {
 				child.worked(1);
 			}
 		}
-		return Status.OK;
+		return IStatus.OK;
 	}
 
 	/**
@@ -121,21 +98,21 @@ public class FieldDeclarationVisitorWrapper {
 		visitor.updateOptions(options);
 		for (ICompilationUnit compilationUnit : selectedJavaElements) {
 			int status = visit(visitor, compilationUnit);
-			if (status == Status.WARNING) {
+			if (status == IStatus.WARNING) {
 				return status;
 			}
 		}
-		return Status.OK;
+		return IStatus.OK;
 	}
 
 	private int visit(FieldDeclarationASTVisitor visitor, ICompilationUnit compilationUnit) {
 		if (!compilationUnit.getJavaProject()
 			.equals(javaProject)) {
-			return Status.WARNING;
+			return IStatus.WARNING;
 		}
 		CompilationUnit cu = RefactoringUtil.parse(compilationUnit);
 		cu.accept(visitor);
-		return Status.OK;
+		return IStatus.OK;
 	}
 
 	public List<FieldMetaData> getFieldsMetaData() {

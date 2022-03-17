@@ -18,9 +18,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class ReuseRandomObjectsRule extends RefactoringRuleImpl<ReuseRandomObjectsASTVisitor> {
 
+	public static final String RULE_ID = "ReuseRandomObjects"; //$NON-NLS-1$
+
 	public ReuseRandomObjectsRule() {
 		this.visitorClass = ReuseRandomObjectsASTVisitor.class;
-		this.id = "ReuseRandomObjects"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(
 				Messages.ReuseRandomObjectsRule_name,
 				Messages.ReuseRandomObjectsRule_description,

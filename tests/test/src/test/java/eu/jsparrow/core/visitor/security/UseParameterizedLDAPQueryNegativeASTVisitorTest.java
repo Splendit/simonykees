@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
-public class UseParameterizedLDAPQueryNegativeASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class UseParameterizedLDAPQueryNegativeASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
@@ -18,7 +18,7 @@ public class UseParameterizedLDAPQueryNegativeASTVisitorTest extends UsesSimpleJ
 	}
 
 	@Test
-	public void visit_PlusAssignOnFilterNullValue_shouldNotTransform() throws Exception {
+	void visit_PlusAssignOnFilterNullValue_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		String user = null;\n" +
 				"		String pass = null;\n" +
@@ -39,7 +39,7 @@ public class UseParameterizedLDAPQueryNegativeASTVisitorTest extends UsesSimpleJ
 	}
 
 	@Test
-	public void visit_ReassignInitializedFilter_shouldNotTransform() throws Exception {
+	void visit_ReassignInitializedFilter_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		String user = null;\n" +
 				"		String pass = null;\n" +
@@ -60,7 +60,7 @@ public class UseParameterizedLDAPQueryNegativeASTVisitorTest extends UsesSimpleJ
 	}
 
 	@Test
-	public void visit_FilterUsingIntegerInput_shouldNotTransform() throws Exception {
+	void visit_FilterUsingIntegerInput_shouldNotTransform() throws Exception {
 		String original = "" +
 				"			int userId = 11111111;\n" +
 				"			DirContext ctx = null;\n" +
@@ -75,7 +75,7 @@ public class UseParameterizedLDAPQueryNegativeASTVisitorTest extends UsesSimpleJ
 	}
 
 	@Test
-	public void visit_EqualsOperatorNotImmediatelyBefore_shouldNotTransform() throws Exception {
+	void visit_EqualsOperatorNotImmediatelyBefore_shouldNotTransform() throws Exception {
 		String original = "" +
 				"			String userId = null;\n" +
 				"			DirContext ctx = null;\n" +
@@ -90,7 +90,7 @@ public class UseParameterizedLDAPQueryNegativeASTVisitorTest extends UsesSimpleJ
 	}
 
 	@Test
-	public void visit_ClosingParenthesisNotImmediatelyAfter_shouldNotTransform() throws Exception {
+	void visit_ClosingParenthesisNotImmediatelyAfter_shouldNotTransform() throws Exception {
 		String original = "" +
 				"			String userId = null;\n" +
 				"			DirContext ctx = null;\n" +
@@ -105,7 +105,7 @@ public class UseParameterizedLDAPQueryNegativeASTVisitorTest extends UsesSimpleJ
 	}
 
 	@Test
-	public void visit_ConcatenationInAnonymousBlock_shouldNotTransform() throws Exception {
+	void visit_ConcatenationInAnonymousBlock_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		DirContext ctx = null;\n" +
 				"		String filter = \"(&(uid=\";\n" +
@@ -127,7 +127,7 @@ public class UseParameterizedLDAPQueryNegativeASTVisitorTest extends UsesSimpleJ
 	}
 
 	@Test
-	public void visit_FilterInitializationAsMethodArgument_shouldNotTransform() throws Exception {
+	void visit_FilterInitializationAsMethodArgument_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	class FilterInitializationAsMethodArgument {\n" +
 				"\n" +
@@ -153,7 +153,7 @@ public class UseParameterizedLDAPQueryNegativeASTVisitorTest extends UsesSimpleJ
 	}
 
 	@Test
-	public void visit_ConditionalFilterInitialization_shouldNotTransform() throws Exception {
+	void visit_ConditionalFilterInitialization_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	class ConditionalFilterInitialization {\n" +
 				"	\n" +
@@ -178,7 +178,7 @@ public class UseParameterizedLDAPQueryNegativeASTVisitorTest extends UsesSimpleJ
 	}
 
 	@Test
-	public void visit_InvocationAsFilterArgument_shouldNotTransform() throws Exception {
+	void visit_InvocationAsFilterArgument_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	class InvocationAsFilterArgument {\n" + 
 				"\n" + 

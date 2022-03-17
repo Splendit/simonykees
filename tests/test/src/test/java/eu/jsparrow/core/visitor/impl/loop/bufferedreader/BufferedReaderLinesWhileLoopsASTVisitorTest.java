@@ -12,8 +12,7 @@ import eu.jsparrow.core.visitor.loop.bufferedreader.BufferedReaderLinesASTVisito
  * @since 3.3.0
  *
  */
-@SuppressWarnings("nls")
-public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
@@ -23,7 +22,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_usingBufferedReader_shouldTransform() throws Exception {
+	void visit_usingBufferedReader_shouldTransform() throws Exception {
 		String original = "" + 
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n" +
 				"			String line;\n" +
@@ -47,7 +46,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_identifyingLineDeclaration_shouldTransform() throws Exception {
+	void visit_identifyingLineDeclaration_shouldTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+
@@ -78,7 +77,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_multipleDeclarationFragment_shouldTransform() throws Exception {
+	void visit_multipleDeclarationFragment_shouldTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {			\n"
 				+
@@ -104,7 +103,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_missingLinesDeclaration_shouldNotTransform() throws Exception {
+	void visit_missingLinesDeclaration_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		String line;\n" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
@@ -120,7 +119,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_missingBufferDeclaration_shouldNotTransform() throws Exception {
+	void visit_missingBufferDeclaration_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		BufferedReader bufferedReader;\n" +
 				"		try {\n" +
@@ -137,7 +136,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_referencedLineVariable_shouldNotTransform() throws Exception {
+	void visit_referencedLineVariable_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+
@@ -154,7 +153,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_referencedBufferedReader_shouldNotTransform() throws Exception {
+	void visit_referencedBufferedReader_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+
@@ -171,7 +170,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_accessingNonFinalVariablesInLoop_shouldNotTransform() throws Exception {
+	void visit_accessingNonFinalVariablesInLoop_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		String nonFinal = \"\";\n" +
 				"		nonFinal = \"\";\n" +
@@ -189,7 +188,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_missingLineAssignment_shouldNotTransform() throws Exception {
+	void visit_missingLineAssignment_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+
@@ -205,7 +204,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_wrongInfixOperator_shouldNotTransform() throws Exception {
+	void visit_wrongInfixOperator_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+
@@ -221,7 +220,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_missingInfixExpression_shouldNotTransform() throws Exception {
+	void visit_missingInfixExpression_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+
@@ -237,7 +236,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_missingNullLiteral_shouldNotTransform() throws Exception {
+	void visit_missingNullLiteral_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+
@@ -253,7 +252,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_missingAssignment_shouldNotTransform() throws Exception {
+	void visit_missingAssignment_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+
@@ -269,7 +268,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_missingRHSMethodInvocation_shouldNotTransform() throws Exception {
+	void visit_missingRHSMethodInvocation_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+
@@ -285,7 +284,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_missingRHSReadLineInvocation_shouldNotTransform() throws Exception {
+	void visit_missingRHSReadLineInvocation_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+
@@ -301,7 +300,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_missingLHSSimpleName_shouldNotTransform() throws Exception {
+	void visit_missingLHSSimpleName_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+
@@ -319,7 +318,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_loopWithBreakStatement_shouldNotTransform() throws Exception {
+	void visit_loopWithBreakStatement_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+
@@ -338,7 +337,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_usingBufferedReaderInLoopBody_shouldNotTransform() throws Exception {
+	void visit_usingBufferedReaderInLoopBody_shouldNotTransform() throws Exception {
 		String original = ""
 				+ "		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {			\n"
 				+

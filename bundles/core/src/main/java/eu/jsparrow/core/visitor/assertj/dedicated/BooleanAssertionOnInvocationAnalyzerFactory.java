@@ -71,7 +71,7 @@ public class BooleanAssertionOnInvocationAnalyzerFactory {
 	private static final BooleanAssertionOnInvocationAnalyzer STRING_ASSERTIONS_ANALYZER = createStringAssertionsAnalyzer();
 	private static final BooleanAssertionOnInvocationAnalyzer ITERABLE_ASSERTIONS_ANALYZER = createIterableAssertionsAnalyzer();
 	private static final BooleanAssertionOnInvocationAnalyzer MAP_ASSERTIONS_ANALYZER = createMapAssertionsAnalyzer();
-	private static final BooleanAssertionOnInvocationAnalyzer PATH_ASSERTIONS_ANALYZER = new BooleanAssertionAnalyzerForPathMethods();
+	private static final BooleanAssertionOnInvocationAnalyzer PATH_ASSERTIONS_ANALYZER = createPathAssertionAnalyzer();
 	private static final BooleanAssertionOnInvocationAnalyzer FILE_ASSERTIONS_ANALYZER = createFileAssertionsAnalyzer();
 	private static final BooleanAssertionOnInvocationAnalyzer OPTIONAL_ASSERTIONS_ANALYZER = createOptionalAssertionsAnalyzer();
 	private static final BooleanAssertionOnInvocationAnalyzer DATE_AND_TIME_ASSERTIONS_ANALYZER = createDateAndTimeAssertionsAnalyzer();
@@ -125,6 +125,17 @@ public class BooleanAssertionOnInvocationAnalyzerFactory {
 		map2.put(IS_EMPTY, IS_NOT_EMPTY);
 		Map<String, String> negatedMap = map2;
 		return new BooleanAssertionOnInvocationAnalyzer(IS_SUPPORTED_MAP_TYPE, map, negatedMap);
+	}
+
+	private static BooleanAssertionOnInvocationAnalyzer createPathAssertionAnalyzer() {
+		Map<String, String> map = new HashMap<>();
+		map.put(IS_ABSOLUTE, IS_ABSOLUTE);
+		map.put(STARTS_WITH, STARTS_WITH);
+		map.put(ENDS_WITH, ENDS_WITH);
+		HashMap<String, String> negatedMap = new HashMap<>();
+		negatedMap.put(IS_ABSOLUTE, IS_RELATIVE);
+		return new BooleanAssertionOnInvocationAnalyzer(SupportedAssertJAssertThatArgumentTypes.IS_PATH, map,
+				negatedMap);
 	}
 
 	private static BooleanAssertionOnInvocationAnalyzer createFileAssertionsAnalyzer() {

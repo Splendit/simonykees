@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
-public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
-	public void setUpVisitor() throws Exception {
+	void setUpVisitor() throws Exception {
 		setVisitor(new UseParameterizedQueryASTVisitor());
 		fixture.addImport(java.sql.Connection.class.getName());
 		fixture.addImport(java.sql.Statement.class.getName());
@@ -16,7 +16,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_executeQuery_shouldTransform() throws Exception {
+	void visit_executeQuery_shouldTransform() throws Exception {
 
 		String original = "" +
 				"String departmentId = \"40\";\n" +
@@ -57,7 +57,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_executeQuery_assignedToResultSet_shouldTransform() throws Exception {
+	void visit_executeQuery_assignedToResultSet_shouldTransform() throws Exception {
 
 		String original = "" +
 				"String departmentId = \"40\";\n" +
@@ -100,7 +100,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_multipleConcatenationStatements_shouldTransform() throws Exception {
+	void visit_multipleConcatenationStatements_shouldTransform() throws Exception {
 		String original = "" +
 				"try {\n" +
 				"	String departmentId = \"40\";\n" +
@@ -136,7 +136,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_shiftingGetResultSet_shouldTransform() throws Exception {
+	void visit_shiftingGetResultSet_shouldTransform() throws Exception {
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +
@@ -167,7 +167,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_multipleStatementDeclarations_shouldTransform() throws Exception {
+	void visit_multipleStatementDeclarations_shouldTransform() throws Exception {
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +
@@ -196,7 +196,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_multipleConcatenations_shouldTransform() throws Exception {
+	void visit_multipleConcatenations_shouldTransform() throws Exception {
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"String id = \"1\";\n" +
@@ -223,7 +223,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_minimalCase_shouldTransform() throws Exception {
+	void visit_minimalCase_shouldTransform() throws Exception {
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +
@@ -247,7 +247,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_parenthesizedParameterExpression_shouldTransform() throws Exception {
+	void visit_parenthesizedParameterExpression_shouldTransform() throws Exception {
 		String original = "" +
 				"Connection connection = null;\n" +
 				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + (2 + 38) + \"' ORDER BY last_name\";\n"
@@ -269,7 +269,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_resultSetMultipleDeclarationFragments_shouldTransform() throws Exception {
+	void visit_resultSetMultipleDeclarationFragments_shouldTransform() throws Exception {
 		String original = "" +
 				"Connection connection = null;\n" +
 				"long id = 40;\n" +
@@ -295,7 +295,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_primitiveTypeParameters_shouldTransform() throws Exception {
+	void visit_primitiveTypeParameters_shouldTransform() throws Exception {
 		String original = "" +
 				"Connection connection = null;\n" +
 				"long id = 40;\n" +
@@ -319,7 +319,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_discardedResultSet_shouldTransform() throws Exception {
+	void visit_discardedResultSet_shouldTransform() throws Exception {
 		String original = "" +
 				"int id = 40;\n" +
 				"Connection connection = null;\n" +
@@ -344,7 +344,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_multipleParametersMultipleConcatenationLines_shouldTransform() throws Exception {
+	void visit_multipleParametersMultipleConcatenationLines_shouldTransform() throws Exception {
 		String original = "" +
 				"class Foo {\n" +
 				"	public void sampleMethod(Connection connection, String departmentId, int id) throws Exception {\n" +
@@ -373,7 +373,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_infixExpressions_shouldTransform() throws Exception {
+	void visit_infixExpressions_shouldTransform() throws Exception {
 		String original = "" +
 				"class Foo {\n" +
 				"	public void sampleMethod(Connection connection, String departmentId1, String departmentId2) throws Exception {\n"
@@ -418,7 +418,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_VariableDeclarationsAfterCreateStatement_shouldTransform() throws Exception {
+	void visit_VariableDeclarationsAfterCreateStatement_shouldTransform() throws Exception {
 		String original = "" +
 				"Connection connection = null;\n" +
 				"Statement statement;\n" +
@@ -453,7 +453,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_movingStatementDeclarationFragmentAfterParameterDeclarations_shouldTransform() throws Exception {
+	void visit_movingStatementDeclarationFragmentAfterParameterDeclarations_shouldTransform() throws Exception {
 		String original = "" +
 				"Connection connection = null;\n" +
 				"try {\n" +
@@ -479,7 +479,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_ExecuteQueryAsOnlyStatementInNestedBlock_shouldTransform() throws Exception {
+	void visit_ExecuteQueryAsOnlyStatementInNestedBlock_shouldTransform() throws Exception {
 		String original = "" +
 				"class TestExecuteQueryAsOnlyStatementInNestedBlock {\n" +
 				"	void test() {\n" +
@@ -518,7 +518,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_referencingStatementAfterUsage_shouldTransform() throws Exception {
+	void visit_referencingStatementAfterUsage_shouldTransform() throws Exception {
 		String original = "" +
 				"Connection connection = null;\n" +
 				"try {\n" +
@@ -549,7 +549,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_executeUpdate_shouldTransform() throws Exception {
+	void visit_executeUpdate_shouldTransform() throws Exception {
 		String original = "" +
 				"			Connection connection = null;\n" +
 				"			Statement statement;\n" +
@@ -580,7 +580,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void visit_ExecuteQueryArgumentInfixExpression_shouldTransform() throws Exception {
+	void visit_ExecuteQueryArgumentInfixExpression_shouldTransform() throws Exception {
 
 		String original = "" +
 				"		String departmentId1 = \"40\";\n" +
@@ -608,7 +608,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
-	public void test_conflictingImport_shouldTransform() throws Exception {
+	void test_conflictingImport_shouldTransform() throws Exception {
 		fixture.addImport("test.net.sql.PreparedStatement");
 		String original = "" +
 				"String departmentId = \"40\";\n" +

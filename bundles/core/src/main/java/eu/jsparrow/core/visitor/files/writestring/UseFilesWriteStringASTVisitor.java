@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.UseFilesWriteStringEvent;
 import eu.jsparrow.core.visitor.impl.trycatch.TwrCommentsUtil;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -60,7 +61,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @since 3.24.0
  *
  */
-public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
+public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor implements UseFilesWriteStringEvent {
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
@@ -101,6 +102,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 						.createWriteInvocationStatementReplacement(this);
 					astRewrite.replace(data.getWriteInvocationStatementToReplace(), replacementStatement, null);
 					onRewrite();
+					addMarkerEvent(data.getWriteInvocationStatementToReplace());
 				});
 
 			resourcesToRemove.stream()
@@ -125,10 +127,12 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 						previousElement = replacementStatement;
 					}
 					astRewrite.remove(tryStatement, null);
+					addMarkerEvent(tryStatement);
 				} else if (transformationDataList.size() == 1) {
 					ExpressionStatement replacementStatement = transformationDataList.get(0)
 						.createWriteInvocationStatementReplacement(this);
 					astRewrite.replace(tryStatement, replacementStatement, null);
+					addMarkerEvent(tryStatement);
 				} else {
 					AST ast = astRewrite.getAST();
 					Block newBlock = ast.newBlock();
@@ -141,11 +145,13 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 						});
 
 					astRewrite.replace(tryStatement, newBlock, null);
+					addMarkerEvent(tryStatement);
 				}
 			} else {
 				TryStatement newTryStatementWithoutResources = createNewTryStatementWithoutResources(tryStatement,
 						transformationDataList);
 				astRewrite.replace(tryStatement, newTryStatementWithoutResources, null);
+				addMarkerEvent(tryStatement);
 
 			}
 			transformationDataList.stream()

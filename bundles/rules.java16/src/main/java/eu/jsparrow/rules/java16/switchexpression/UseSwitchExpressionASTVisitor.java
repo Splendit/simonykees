@@ -141,6 +141,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			astRewrite.replace(switchStatement, newAssignmentStatement, null);
 		}
 		onRewrite();
+		addMarkerEvent(switchStatement);
 	}
 
 	private boolean hasDefaultClause(SwitchStatement switchStatement) {

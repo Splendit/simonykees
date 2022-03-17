@@ -19,10 +19,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class CreateTempFilesUsingJavaNIORule
 		extends RefactoringRuleImpl<CreateTempFilesUsingJavaNIOASTVisitor> {
+	
+	public static final String RULE_ID = "CreateTempFilesUsingJavaNIO"; //$NON-NLS-1$
 
 	public CreateTempFilesUsingJavaNIORule() {
 		this.visitorClass = CreateTempFilesUsingJavaNIOASTVisitor.class;
-		this.id = "CreateTempFilesUsingJavaNIO"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.CreateTempFilesUsingJavaNioRule_name,
 				Messages.CreateTempFilesUsingJavaNioRule_description,
 				Duration.ofMinutes(5),

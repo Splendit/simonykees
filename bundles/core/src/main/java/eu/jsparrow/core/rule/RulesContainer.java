@@ -118,6 +118,7 @@ import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.rule.impl.UseStringJoinRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
+import eu.jsparrow.core.rule.impl.unused.RemoveUnusedLocalVariablesRule;
 import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
 
@@ -172,6 +173,7 @@ public class RulesContainer {
 				/*
 				 * Coding conventions
 				 */
+				new RemoveUnusedLocalVariablesRule(),
 				new TryWithResourceRule(), new MultiCatchRule(), new FunctionalInterfaceRule(),
 				new CollectionRemoveAllRule(), new ImmutableStaticFinalCollectionsRule(), new DiamondOperatorRule(),
 				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),

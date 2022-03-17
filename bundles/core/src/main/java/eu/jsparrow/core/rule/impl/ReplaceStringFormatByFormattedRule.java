@@ -24,9 +24,11 @@ import eu.jsparrow.rules.common.Tag;
 public class ReplaceStringFormatByFormattedRule
 		extends RefactoringRuleImpl<ReplaceStringFormatByFormattedASTVisitor> {
 
+	public static final String RULE_ID = "ReplaceStringFormatByFormatted"; //$NON-NLS-1$
+
 	public ReplaceStringFormatByFormattedRule() {
 		this.visitorClass = ReplaceStringFormatByFormattedASTVisitor.class;
-		this.id = "ReplaceStringFormatByFormatted"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.ReplaceStringFormatByFormattedRule_name,
 				Messages.ReplaceStringFormatByFormattedRule_description,
 				Duration.ofMinutes(2),

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
-public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
@@ -19,7 +19,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	 * SQL query variable tests
 	 */
 	@Test
-	public void test_missingParameters_shouldNotTransform() throws Exception {
+	void test_missingParameters_shouldNotTransform() throws Exception {
 		String original = "" +
 				"Connection connection = null;\n" +
 				"String query = \"SELECT first_name FROM employee WHERE department_id ='40' ORDER BY last_name\";\n" +
@@ -31,7 +31,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void test_missingQueryDeclaration_shouldNotTransform() throws Exception {
+	void test_missingQueryDeclaration_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class Foo {\n" +
 				"    public void runQuery(String query, Connection connection, String departmentId) throws Exception {\n"
@@ -44,7 +44,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void test_multipleQueryUsages_shouldNotTransform() throws Exception {
+	void test_multipleQueryUsages_shouldNotTransform() throws Exception {
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +
@@ -59,7 +59,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_usingFieldAsQuery_shouldNotTransform() throws Exception {
+	void visit_usingFieldAsQuery_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class Foo {\n" +
 				"    String departmentId = \"40\";\n" +
@@ -74,7 +74,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_consecutiveVariablesAsQueryComponents_shouldNotTransform() throws Exception {
+	void visit_consecutiveVariablesAsQueryComponents_shouldNotTransform() throws Exception {
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +
@@ -89,7 +89,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_queryComponentsStartingWithVariable_shouldNotTransform() throws Exception {
+	void visit_queryComponentsStartingWithVariable_shouldNotTransform() throws Exception {
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +
@@ -103,7 +103,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_variableAsLastQueryComponent_shouldNotTransform() throws Exception {
+	void visit_variableAsLastQueryComponent_shouldNotTransform() throws Exception {
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +
@@ -121,7 +121,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	 * SQL Statement tests
 	 */
 	@Test
-	public void test_storingExecuteResult_shouldNotTransform() throws Exception {
+	void test_storingExecuteResult_shouldNotTransform() throws Exception {
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +
@@ -135,7 +135,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void test_multipleExecutionOfSameQuery_shouldNotTransform() throws Exception {
+	void test_multipleExecutionOfSameQuery_shouldNotTransform() throws Exception {
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +
@@ -150,7 +150,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void test_wrongConnectionType_shouldNotTransform() throws Exception {
+	void test_wrongConnectionType_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class Foo {\n" +
 				"    public void runQuery(String departmentId) throws Exception {\n" +
@@ -172,7 +172,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_missingConnectionCreateStatementInitializer_shouldNotTransform() throws Exception {
+	void visit_missingConnectionCreateStatementInitializer_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class Foo {\n" +
 				"    public void runQuery(Statement statement, String departmentId) throws Exception {\n" +
@@ -185,7 +185,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_sqlStatementAssignmentRHS_shouldNotTransform() throws Exception {
+	void visit_sqlStatementAssignmentRHS_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class Foo {\n" +
 				"    public void runQuery(Connection connection, String departmentId) throws Exception {\n" +
@@ -201,7 +201,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void test_multipleStatementUsages_shouldNotTransform() throws Exception {
+	void test_multipleStatementUsages_shouldNotTransform() throws Exception {
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +
@@ -215,7 +215,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_nonSimpleNameExpression_shouldNotTransform() throws Exception {
+	void visit_nonSimpleNameExpression_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class Foo {\n" +
 				"    public void runQuery(Connection connection, String departmentId) throws Exception {\n" +
@@ -232,7 +232,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_simpleNameSqlStatementInitializer_shouldNotTransform() throws Exception {
+	void visit_simpleNameSqlStatementInitializer_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class Foo {\n" +
 				"    public void runQuery(Statement statement2, Connection connection, String departmentId) throws Exception {\n"
@@ -247,7 +247,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_missingExpressionInExecuteQuery_shouldNotTransform() throws Exception {
+	void visit_missingExpressionInExecuteQuery_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class FakeSqlStatement {\n" +
 				"    public void runQuery(Connection connection, String departmentId) {\n" +
@@ -263,7 +263,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_reassignmentOfSqlStatement_shouldNotTransform() throws Exception {
+	void visit_reassignmentOfSqlStatement_shouldNotTransform() throws Exception {
 		String original = "" +
 				"Connection connection = null;\n" +
 				"long id = 40;\n" +
@@ -282,7 +282,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	 */
 
 	@Test
-	public void test_multipleGetResultSet_shouldNotTransform() throws Exception {
+	void test_multipleGetResultSet_shouldNotTransform() throws Exception {
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +
@@ -298,7 +298,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_usingGetResultSetAsParameter_shouldNotTransform() throws Exception {
+	void visit_usingGetResultSetAsParameter_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class Foo {\n" +
 				"    public void runQuery(Connection connection, String departmentId) throws Exception {\n" +
@@ -315,7 +315,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void test_conflictingRSVariableNames_shouldNotTransform() throws Exception {
+	void test_conflictingRSVariableNames_shouldNotTransform() throws Exception {
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +
@@ -334,7 +334,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_singleVariableDeclarationGetResultSet_shouldNotTransform() throws Exception {
+	void visit_singleVariableDeclarationGetResultSet_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class Foo {\n" +
 				"    public void runQuery(Connection connection, String departmentId) throws Exception {\n" +
@@ -351,7 +351,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_discardedGetResultSet_shouldNotTransform() throws Exception {
+	void visit_discardedGetResultSet_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class Foo {\n" +
 				"    public void runQuery(Connection connection, String departmentId) throws Exception {\n" +
@@ -367,7 +367,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_executeQueryAndGetResultSet_shouldNotTransform() throws Exception {
+	void visit_executeQueryAndGetResultSet_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class Foo {\n" +
 				"    public void runQuery(Connection connection, String departmentId) throws Exception {\n" +
@@ -382,7 +382,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_ExecuteQueryArgumentAsInfixExpression_shouldNotTransform() throws Exception {
+	void visit_ExecuteQueryArgumentAsInfixExpression_shouldNotTransform() throws Exception {
 
 		String original = "" +
 				"String userID = \"100000\";\n" +
@@ -402,7 +402,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_WithStatementAsLocalClass_shouldNotTransform() throws Exception {
+	void visit_WithStatementAsLocalClass_shouldNotTransform() throws Exception {
 
 		String original = "" +
 				"String userID = \"100000\";\n" +
@@ -424,7 +424,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_TwoExecuteArguments_shouldNotTransform() throws Exception {
+	void visit_TwoExecuteArguments_shouldNotTransform() throws Exception {
 
 		String original = "" +
 				"String userID = \"100000\";\n" +
@@ -443,7 +443,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_AssignmentToStatementUsedByMethod_shouldNotTransform() throws Exception {
+	void visit_AssignmentToStatementUsedByMethod_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class TestVariablesBefore {\n" +
 				"	void useStatement(Statement statement) {\n" +
@@ -468,7 +468,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_StatementContainingExecuteQueryNotInBlock_shouldNotTransform() throws Exception {
+	void visit_StatementContainingExecuteQueryNotInBlock_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class TestStatementContainingExecuteQueryNotInBlock {\n" +
 				"	void test() {\n" +
@@ -494,7 +494,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_ConnectionCreateStatementUsedByMethod_shouldNotTransform() throws Exception {
+	void visit_ConnectionCreateStatementUsedByMethod_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class TestVariablesBefore {\n" +
 				"	Statement useStatement(Statement statement) {\n" +
@@ -520,7 +520,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_prepareCallInsteadOfCreateStatement_shouldNotTransform() throws Exception {
+	void visit_prepareCallInsteadOfCreateStatement_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class Test_prepareCallInsteadCreateStatement {\n" +
 				"	void test() {\n" +
@@ -545,7 +545,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_createStatementWithArguments_shouldNotTransform() throws Exception {
+	void visit_createStatementWithArguments_shouldNotTransform() throws Exception {
 		String original = "" +
 				"class Test_createStatementWithArguments {\n" +
 				"	void test() {\n" +
@@ -569,7 +569,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_referencingStatementBeforeUsage_shouldNotTransform() throws Exception {
+	void visit_referencingStatementBeforeUsage_shouldNotTransform() throws Exception {
 		String original = "" +
 				"Connection connection = null;\n" +
 				"try {\n" +
@@ -586,7 +586,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_executeAfterExecuteQuery_shouldNotTransform() throws Exception {
+	void visit_executeAfterExecuteQuery_shouldNotTransform() throws Exception {
 		String original = "" +
 				"			Connection connection = null;\n" +
 				"			Statement statement;\n" +
@@ -605,7 +605,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_ConditionalPlusAssign_shouldNotTransform() throws Exception {
+	void visit_ConditionalPlusAssign_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		Connection connection = null;\n" +
 				"		String query = \"SELECT employee_id, first_name FROM employee WHERE\";\n" +
@@ -626,7 +626,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_ConditionalPlusAssignNotWithinBlock_shouldNotTransform() throws Exception {
+	void visit_ConditionalPlusAssignNotWithinBlock_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		Connection connection = null;\n" +
 				"		String query = \"SELECT employee_id, first_name FROM employee WHERE\";\n" +
@@ -646,7 +646,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_AssignmentAsOtherAssignmentLeftHandSide_shouldNotTransform() throws Exception {
+	void visit_AssignmentAsOtherAssignmentLeftHandSide_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		Connection connection = null;\n" +
 				"		String departmentId1 = \"40\";\n" +
