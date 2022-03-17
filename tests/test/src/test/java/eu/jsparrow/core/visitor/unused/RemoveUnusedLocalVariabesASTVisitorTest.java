@@ -318,9 +318,38 @@ class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 					"			}\n" +
 					"		};"
 	})
-	void visit_ComplexLambdaExpression_shouldTransform(String declarationInitializedWithLambda) throws Exception {
+	void visit_ComplexLambdaExpression_shouldNotTransform(String declarationInitializedWithLambda) throws Exception {
 		fixture.addImport(java.util.function.Supplier.class.getName());
 		assertNoChange(declarationInitializedWithLambda);
+	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"		int[] array = new int[10];\n" +
+					"		array[0] = 1;",
+			"" +
+					"		int[][] array = new int[10][10];\n" +
+					"		array[0][0] = 1;",
+			"" +
+					"		int[] array = new int[10];\n" +
+					"		++array[0];",
+			"" +
+					"		int[] array = new int[10];\n" +
+					"		array[0]++;",
+			"" +
+					"		int[] array = new int[10];\n" +
+					"		--array[0];",
+			"" +
+					"		int[] array = new int[10];\n" +
+					"		array[0]--;",
+	})
+	void visit_OperationsOnArrayElements_shouldTransform(String declarationInitializedWithLambda) throws Exception {
+
+		String original = "{" +
+				declarationInitializedWithLambda +
+				"}";
+		String expected = "{}";
+		assertChange(original, expected);
 	}
 }
