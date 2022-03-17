@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.visitor.DeclaringNodeNotFoundException;
 import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
+import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -76,13 +77,8 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 			return false;
 		}
 
-		Expression expressionToAnalyse = simpleName;
-		while (expressionToAnalyse.getLocationInParent() == ArrayAccess.ARRAY_PROPERTY) {
-			expressionToAnalyse = (ArrayAccess) expressionToAnalyse.getParent();
-		}
-
-		Optional<ExpressionStatement> referencingStatementToRemove = SafelyRemoveable.findReferencingStatementToRemove(
-				expressionToAnalyse, options);
+		Optional<ExpressionStatement> referencingStatementToRemove = findRemoveableStatementReferncingLocalVariable(
+				simpleName);
 		referencingStatementToRemove.ifPresent(reassignments::add);
 		if (referencingStatementToRemove.isPresent()) {
 			return false;
@@ -90,6 +86,21 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 
 		activeReferenceFound = true;
 		return true;
+	}
+
+	Optional<ExpressionStatement> findRemoveableStatementReferncingLocalVariable(final SimpleName simpleName) {
+		Expression expressionToAnalyse = simpleName;
+		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
+		while (expressionToAnalyse.getLocationInParent() == ArrayAccess.ARRAY_PROPERTY) {
+			ArrayAccess arrayAccess = (ArrayAccess) expressionToAnalyse.getParent();
+			if (!removeInitializersSideEffects
+					&& !ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(arrayAccess.getIndex())) {
+				return Optional.empty();
+			}
+			expressionToAnalyse = arrayAccess;
+		}
+		return SafelyRemoveable.findReferencingStatementToRemove(
+				expressionToAnalyse, options);
 	}
 
 	private boolean isTargetLocalVariableReference(SimpleName simpleName)

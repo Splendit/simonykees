@@ -15,7 +15,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
+@SuppressWarnings("nls")
 class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
+
+	private static final String METHOD_WITH_SIDE_EFFECTS = "methodWithSideEffects";
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -204,15 +207,26 @@ class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertNoChange(original);
 	}
 
-	@Test
-	void visit_ReassignmentWithPossibleSideEffects_shouldNotTransform() throws Exception {
+	public static Stream<Arguments> unusedLocalVariablesAndSideEffects() throws Exception {
+		return Stream.of(
+				Arguments.of("" +
+						"				int x;\n" +
+						"				x = " + METHOD_WITH_SIDE_EFFECTS + "();\n"),
+				Arguments.of("" +
+						"				int[] array = new int[10];\n"
+						+ "				array[" + METHOD_WITH_SIDE_EFFECTS + "()] = 1;\n"));
+
+	}
+
+	@ParameterizedTest
+	@MethodSource("unusedLocalVariablesAndSideEffects")
+	void visit_UnusedLocalVariablesAndSideEffects_shouldNotTransform(String codeToKeep) throws Exception {
 		String original = "" +
 				"		class LocalClass {\n" +
 				"			void reassignmentWithPossibleSideEffects() {\n" +
-				"				int x;\n" +
-				"				x = getValue();\n" +
+				codeToKeep +
 				"			}\n" +
-				"			int getValue() {\n" +
+				"			int " + METHOD_WITH_SIDE_EFFECTS + "() {\n" +
 				"				return 0;\n" +
 				"			}\n" +
 				"		}";
@@ -220,18 +234,18 @@ class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertNoChange(original);
 	}
 
-	@Test
-	void visit_RemoveInitializersSideEffectsOption_shouldTransform() throws Exception {
+	@ParameterizedTest
+	@MethodSource("unusedLocalVariablesAndSideEffects")
+	void visit_RemoveInitializersSideEffectsOption_shouldTransform(String codeToRemove) throws Exception {
 		Map<String, Boolean> options = new HashMap<>();
 		options.put(REMOVE_INITIALIZERS_SIDE_EFFECTS, true);
 		setVisitor(new RemoveUnusedLocalVariabesASTVisitor(options));
 		String original = "" +
 				"		class LocalClass {\n" +
 				"			void reassignmentWithPossibleSideEffects() {\n" +
-				"				int x;\n" +
-				"				x = getValue();\n" +
+				codeToRemove +
 				"			}\n" +
-				"			int getValue() {\n" +
+				"			int " + METHOD_WITH_SIDE_EFFECTS + "() {\n" +
 				"				return 0;\n" +
 				"			}\n" +
 				"		}";
@@ -240,7 +254,7 @@ class RemoveUnusedLocalVariabesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"		class LocalClass {\n" +
 				"			void reassignmentWithPossibleSideEffects() {\n" +
 				"			}\n" +
-				"			int getValue() {\n" +
+				"			int " + METHOD_WITH_SIDE_EFFECTS + "() {\n" +
 				"				return 0;\n" +
 				"			}\n" +
 				"		}";
