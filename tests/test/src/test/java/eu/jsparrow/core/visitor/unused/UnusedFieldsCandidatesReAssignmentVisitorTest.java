@@ -41,7 +41,8 @@ class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
 						"unusedField=collection.size();"),
 				Arguments.of("List<String> list=Collections.singletonList(\"s\");", "unusedField=list.size();"),
 				Arguments.of("Map<String, String> map=new HashMap<>();", "unusedField=map.size();"),
-				Arguments.of("HashMap<String, String> map=new HashMap<>();", "unusedField=map.size();"));
+				Arguments.of("HashMap<String, String> map=new HashMap<>();", "unusedField=map.size();"),
+				Arguments.of("HashMap<String, String> map=new HashMap<>();", "this.unusedField=map.size();"));
 	}
 
 	@ParameterizedTest
