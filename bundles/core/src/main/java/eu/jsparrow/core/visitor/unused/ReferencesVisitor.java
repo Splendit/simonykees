@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
+import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
@@ -89,10 +90,14 @@ public class ReferencesVisitor extends ASTVisitor {
 
 		} else if (locationInParent == FieldAccess.NAME_PROPERTY) {
 			FieldAccess fieldAccess = (FieldAccess) simpleName.getParent();
-			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(fieldAccess);
-			reassignment.ifPresent(reassignments::add);
-			if (reassignment.isPresent()) {
-				return false;
+			boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS,
+					false);
+			if (removeInitializersSideEffects || ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(fieldAccess.getExpression())) {
+				Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(fieldAccess);
+				reassignment.ifPresent(reassignments::add);
+				if (reassignment.isPresent()) {
+					return false;
+				}
 			}
 		} else if (locationInParent == QualifiedName.NAME_PROPERTY) {
 			QualifiedName qualifiedName = (QualifiedName) simpleName.getParent();

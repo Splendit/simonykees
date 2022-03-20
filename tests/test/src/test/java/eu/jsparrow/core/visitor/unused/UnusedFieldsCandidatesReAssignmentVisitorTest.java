@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
+@SuppressWarnings("nls")
 class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
 
 	@AfterEach
@@ -160,6 +161,47 @@ class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
 		String expectedRemovedAssignment = "unusedField=(usedField=1);";
 		assertEquals(expectedRemovedAssignment, actualRemovedAssignment);
 	}
+	
+	
+	@Test
+	void testRemoveSideEffectsOfFieldAccess_shouldBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-fields", true);
+		options.put("remove-initializers-side-effects", true);
+		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);
+
+		String originalCode = "" +
+				"	private IntWrapper intWrapper = new IntWrapper();\n"
+				+ "\n"
+				+ "	class IntWrapper {\n"
+				+ "		private int unusedIntWrapperField;\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	IntWrapper getIntWrapper() {\n"
+				+ "		return intWrapper;\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	void reAssignToFieldAccessWithSideEffect() {\n"
+				+ "		getIntWrapper().unusedIntWrapperField = 0;\n"
+				+ "	}";
+
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, originalCode);
+		defaultFixture.accept(visitor);
+
+		List<UnusedFieldWrapper> removedUnusedFields = visitor.getUnusedPrivateFields();
+		assertEquals(1, removedUnusedFields.size());
+		UnusedFieldWrapper unusedFieldWrapper = removedUnusedFields.get(0);
+		String removedUnusedFieldName = unusedFieldWrapper.getClassMemberIdentifier();
+		assertEquals("unusedIntWrapperField", removedUnusedFieldName);
+		List<ExpressionStatement> unusedReassignments = unusedFieldWrapper.getUnusedReassignments();
+		assertEquals(1, unusedReassignments.size());
+		String actualRemovedAssignment = unusedReassignments.get(0)
+			.toString()
+			.trim();
+		String expectedRemovedAssignment = "getIntWrapper().unusedIntWrapperField=0;";
+		assertEquals(expectedRemovedAssignment, actualRemovedAssignment);
+	}
 
 	@Test
 	void testSideEffectsOfReAssignmentNotRemoved_shouldNotBeRemoved() throws Exception {
@@ -174,6 +216,35 @@ class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
 				"	void reAssignmentWithAssignment() {\n" +
 				"		unusedField = (usedField = 1);\n" +
 				"	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, originalCode);
+		defaultFixture.accept(visitor);
+
+		List<UnusedFieldWrapper> removedUnusedFields = visitor.getUnusedPrivateFields();
+		assertTrue(removedUnusedFields.isEmpty());
+	}
+	
+	@Test
+	void testReAssignToFieldAccessWithSideEffect_shouldNotBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-fields", true);
+		options.put("remove-initializers-side-effects", false);
+		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);
+
+		String originalCode = "" +
+				"	private IntWrapper intWrapper = new IntWrapper();\n"
+				+ "\n"
+				+ "	class IntWrapper {\n"
+				+ "		private int unusedIntWrapperField;\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	IntWrapper getIntWrapper() {\n"
+				+ "		return intWrapper;\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	void reAssignToFieldAccessWithSideEffect() {\n"
+				+ "		getIntWrapper().unusedIntWrapperField = 0;\n"
+				+ "	}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, originalCode);
 		defaultFixture.accept(visitor);
