@@ -3,10 +3,14 @@ package eu.jsparrow.core.visitor.unused;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.rule.impl.unused.Constants;
@@ -61,5 +65,42 @@ public class SafelyRemoveable {
 		}
 		Expression initializer = fragment.getInitializer();
 		return initializer == null || ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(initializer);
+	}
+
+	/**
+	 * 
+	 * @param referencingExpression
+	 *            can represent a local variable or a field or an array access
+	 *            on a local variable or a field. Note that this parameter is
+	 *            supposed to be an expression without any side effect.
+	 * @param options
+	 *            is needed to specify whether side effects which may be caused
+	 *            for example by method invocations are relevant or not.
+	 * @return an {@link Optional} storing an {@link ExpressionStatement} if the
+	 *         expression statement containing the reference on the unused local
+	 *         variable or field can be removed without side effect.
+	 */
+	static Optional<ExpressionStatement> findReferencingStatementToRemove(Expression referencingExpression,
+			Map<String, Boolean> options) {
+		StructuralPropertyDescriptor locationInParent = referencingExpression.getLocationInParent();
+		ASTNode referencingExpressionParent = referencingExpression.getParent();
+		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
+		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+			Assignment assignment = (Assignment) referencingExpressionParent;
+			return SafelyRemoveable
+				.findParentStatementInBlock(assignment)
+				.filter(statement -> removeInitializersSideEffects || ExpressionWithoutSideEffectRecursive
+					.isExpressionWithoutSideEffect(assignment.getRightHandSide()));
+		}
+
+		if (locationInParent == PrefixExpression.OPERAND_PROPERTY) {
+			return SafelyRemoveable.findParentStatementInBlock((PrefixExpression) referencingExpressionParent);
+		}
+
+		if (locationInParent == PostfixExpression.OPERAND_PROPERTY) {
+			return SafelyRemoveable.findParentStatementInBlock((PostfixExpression) referencingExpressionParent);
+		}
+
+		return Optional.empty();
 	}
 }
