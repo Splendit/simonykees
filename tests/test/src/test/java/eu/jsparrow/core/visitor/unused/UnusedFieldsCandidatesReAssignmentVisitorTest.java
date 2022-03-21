@@ -161,8 +161,7 @@ class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
 		String expectedRemovedAssignment = "unusedField=(usedField=1);";
 		assertEquals(expectedRemovedAssignment, actualRemovedAssignment);
 	}
-	
-	
+
 	@Test
 	void testRemoveSideEffectsOfFieldAccess_shouldBeRemoved() throws Exception {
 		Map<String, Boolean> options = new HashMap<>();
@@ -184,7 +183,6 @@ class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
 				+ "	void reAssignToFieldAccessWithSideEffect() {\n"
 				+ "		getIntWrapper().unusedIntWrapperField = 0;\n"
 				+ "	}";
-
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, originalCode);
 		defaultFixture.accept(visitor);
@@ -223,7 +221,7 @@ class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
 		List<UnusedFieldWrapper> removedUnusedFields = visitor.getUnusedPrivateFields();
 		assertTrue(removedUnusedFields.isEmpty());
 	}
-	
+
 	@Test
 	void testReAssignToFieldAccessWithSideEffect_shouldNotBeRemoved() throws Exception {
 		Map<String, Boolean> options = new HashMap<>();
@@ -251,5 +249,76 @@ class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
 
 		List<UnusedFieldWrapper> removedUnusedFields = visitor.getUnusedPrivateFields();
 		assertTrue(removedUnusedFields.isEmpty());
+	}
+
+	@Test
+	void testReAsssignmentToSuperClassField_shouldBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("protected-fields", true);
+		options.put("remove-initializers-side-effects", false);
+		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);
+
+		String code = "" +
+				"	class ExampleSuperClass {\n"
+				+ "		protected int unusedField;\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	class ExampleReassigningUnusedSuperField extends ExampleSuperClass {\n"
+				+ "\n"
+				+ "		void reAssignSuperField() {\n"
+				+ "			super.unusedField = 0;\n"
+				+ "		}\n"
+				+ "	}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, code);
+		defaultFixture.accept(visitor);
+
+		List<UnusedFieldWrapper> unusedPrivateFields = visitor.getUnusedPrivateFields();
+		assertTrue(unusedPrivateFields.isEmpty());
+		List<NonPrivateUnusedFieldCandidate> candidates = visitor.getNonPrivateCandidates();
+		assertEquals(1, candidates.size());
+		NonPrivateUnusedFieldCandidate candidate = candidates.get(0);
+		String unusedFieldName = candidate.getFragment()
+			.getName()
+			.getIdentifier();
+		assertEquals("unusedField", unusedFieldName);
+
+		List<ExpressionStatement> internalReassignments = candidate.getInternalReassignments();
+		assertEquals(1, internalReassignments.size());
+		String actualRemovedAssignment = internalReassignments.get(0)
+			.toString()
+			.trim();
+		String expectedRemovedAssignment = "super.unusedField=0;";
+		assertEquals(expectedRemovedAssignment, actualRemovedAssignment);
+	}
+
+	@Test
+	void testReAsssignmentWithSideEffectToSuperClassField_shouldNotBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("protected-fields", true);
+		options.put("remove-initializers-side-effects", false);
+		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);
+
+		String code = "" +
+				"	class ExampleSuperClass {\n"
+				+ "		protected int unusedField;\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	class ExampleReassigningUnusedSuperField extends ExampleSuperClass {\n"
+				+ "\n"
+				+ "		void reAssignSuperField() {\n"
+				+ "			super.unusedField = getValueWithSideEffect();\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "	\n"
+				+ "	int getValueWithSideEffect() {\n"
+				+ "		return 0;\n"
+				+ "	}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, code);
+		defaultFixture.accept(visitor);
+
+		List<UnusedFieldWrapper> unusedPrivateFields = visitor.getUnusedPrivateFields();
+		assertTrue(unusedPrivateFields.isEmpty());
+		List<NonPrivateUnusedFieldCandidate> candidates = visitor.getNonPrivateCandidates();
+		assertTrue(candidates.isEmpty());
 	}
 }

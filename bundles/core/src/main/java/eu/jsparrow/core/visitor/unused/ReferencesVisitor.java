@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,17 +88,24 @@ public class ReferencesVisitor extends ASTVisitor {
 			if (reassignment.isPresent()) {
 				return false;
 			}
-
 		} else if (locationInParent == FieldAccess.NAME_PROPERTY) {
 			FieldAccess fieldAccess = (FieldAccess) simpleName.getParent();
 			boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS,
 					false);
-			if (removeInitializersSideEffects || ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(fieldAccess.getExpression())) {
+			if (removeInitializersSideEffects || ExpressionWithoutSideEffectRecursive
+				.isExpressionWithoutSideEffect(fieldAccess.getExpression())) {
 				Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(fieldAccess);
 				reassignment.ifPresent(reassignments::add);
 				if (reassignment.isPresent()) {
 					return false;
 				}
+			}
+		} else if (locationInParent == SuperFieldAccess.NAME_PROPERTY) {
+			SuperFieldAccess superFieldAccess = (SuperFieldAccess) simpleName.getParent();
+			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(superFieldAccess);
+			reassignment.ifPresent(reassignments::add);
+			if (reassignment.isPresent()) {
+				return false;
 			}
 		} else if (locationInParent == QualifiedName.NAME_PROPERTY) {
 			QualifiedName qualifiedName = (QualifiedName) simpleName.getParent();
@@ -106,7 +114,6 @@ public class ReferencesVisitor extends ASTVisitor {
 			if (reassignment.isPresent()) {
 				return false;
 			}
-
 		}
 
 		activeReferenceFound = true;
