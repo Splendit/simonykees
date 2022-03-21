@@ -77,7 +77,7 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 			return false;
 		}
 
-		Optional<ExpressionStatement> referencingStatementToRemove = findRemoveableStatementReferncingLocalVariable(
+		Optional<ExpressionStatement> referencingStatementToRemove = findRemoveableStatementReferencingLocalVariable(
 				simpleName);
 		referencingStatementToRemove.ifPresent(reassignments::add);
 		if (referencingStatementToRemove.isPresent()) {
@@ -88,19 +88,31 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 		return true;
 	}
 
-	Optional<ExpressionStatement> findRemoveableStatementReferncingLocalVariable(final SimpleName simpleName) {
-		Expression expressionToAnalyse = simpleName;
+	Optional<ExpressionStatement> findRemoveableStatementReferencingLocalVariable(final SimpleName simpleName) {
 		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
+		if (removeInitializersSideEffects) {
+			Expression outermost = findOutermostArrayAccess(simpleName);
+			return SafelyRemoveable.findReferencingStatementToRemove(outermost, options);
+		}
+		Expression expressionToAnalyse = simpleName;
 		while (expressionToAnalyse.getLocationInParent() == ArrayAccess.ARRAY_PROPERTY) {
 			ArrayAccess arrayAccess = (ArrayAccess) expressionToAnalyse.getParent();
-			if (!removeInitializersSideEffects
-					&& !ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(arrayAccess.getIndex())) {
+			if (!ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(arrayAccess.getIndex())) {
 				return Optional.empty();
 			}
 			expressionToAnalyse = arrayAccess;
 		}
 		return SafelyRemoveable.findReferencingStatementToRemove(
 				expressionToAnalyse, options);
+	}
+
+	private Expression findOutermostArrayAccess(final SimpleName arrayAccess) {
+		Expression expressionToAnalyse = arrayAccess;
+		while (expressionToAnalyse.getLocationInParent() == ArrayAccess.ARRAY_PROPERTY) {
+			ArrayAccess parent = (ArrayAccess) expressionToAnalyse.getParent();
+			expressionToAnalyse = parent;
+		}
+		return expressionToAnalyse;
 	}
 
 	private boolean isTargetLocalVariableReference(SimpleName simpleName)

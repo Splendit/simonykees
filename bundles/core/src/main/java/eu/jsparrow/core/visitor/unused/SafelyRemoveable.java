@@ -71,7 +71,8 @@ public class SafelyRemoveable {
 	 * 
 	 * @param referencingExpression
 	 *            can represent a local variable or a field or an array access
-	 *            on a local variable or a field.
+	 *            on a local variable or a field. Note that this parameter is
+	 *            supposed to be an expression without any side effect.
 	 * @param options
 	 *            is needed to specify whether side effects which may be caused
 	 *            for example by method invocations are relevant or not.
@@ -86,14 +87,10 @@ public class SafelyRemoveable {
 		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
 		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) referencingExpressionParent;
-			Optional<ExpressionStatement> optionalParentStatement = SafelyRemoveable
-				.findParentStatementInBlock(assignment);
-			if (optionalParentStatement.isPresent()
-					&& (removeInitializersSideEffects || ExpressionWithoutSideEffectRecursive
-						.isExpressionWithoutSideEffect(assignment.getRightHandSide()))) {
-				return optionalParentStatement;
-			}
-			return Optional.empty();
+			return SafelyRemoveable
+				.findParentStatementInBlock(assignment)
+				.filter(statement -> removeInitializersSideEffects || ExpressionWithoutSideEffectRecursive
+					.isExpressionWithoutSideEffect(assignment.getRightHandSide()));
 		}
 
 		if (locationInParent == PrefixExpression.OPERAND_PROPERTY) {
