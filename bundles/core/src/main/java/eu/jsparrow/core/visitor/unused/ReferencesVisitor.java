@@ -85,27 +85,27 @@ public class ReferencesVisitor extends ASTVisitor {
 		}
 		if (locationInParent == FieldAccess.NAME_PROPERTY) {
 			FieldAccess fieldAccess = (FieldAccess) simpleName.getParent();
-			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(fieldAccess);
+			Optional<ExpressionStatement> reassignment = findSafelyRemovableReassignment(fieldAccess);
 			reassignment.ifPresent(reassignments::add);
 			if (reassignment.isPresent()) {
 				return false;
 			}
 		} else if (locationInParent == SuperFieldAccess.NAME_PROPERTY) {
 			SuperFieldAccess superFieldAccess = (SuperFieldAccess) simpleName.getParent();
-			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(superFieldAccess);
+			Optional<ExpressionStatement> reassignment = findSafelyRemovableReassignment(superFieldAccess);
 			reassignment.ifPresent(reassignments::add);
 			if (reassignment.isPresent()) {
 				return false;
 			}
 		} else if (locationInParent == QualifiedName.NAME_PROPERTY) {
 			QualifiedName qualifiedName = (QualifiedName) simpleName.getParent();
-			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(qualifiedName);
+			Optional<ExpressionStatement> reassignment = findSafelyRemovableReassignment(qualifiedName);
 			reassignment.ifPresent(reassignments::add);
 			if (reassignment.isPresent()) {
 				return false;
 			}
 		} else {
-			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(simpleName);
+			Optional<ExpressionStatement> reassignment = findSafelyRemovableReassignment(simpleName);
 			reassignment.ifPresent(reassignments::add);
 			if (reassignment.isPresent()) {
 				return false;
@@ -116,7 +116,7 @@ public class ReferencesVisitor extends ASTVisitor {
 		return true;
 	}
 
-	private Optional<ExpressionStatement> isSafelyRemovableReassignment(Expression expression) {
+	private Optional<ExpressionStatement> findSafelyRemovableReassignment(Expression expression) {
 
 		if (expression.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) expression.getParent();
