@@ -50,8 +50,13 @@ public class SafelyRemoveable {
 
 			boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS,
 					false);
-			if (removeInitializersSideEffects || ExpressionWithoutSideEffectRecursive
-				.isExpressionWithoutSideEffect(assignment.getRightHandSide())) {
+			if (removeInitializersSideEffects) {
+				return optionalParentStatement;
+			}
+			if (ExpressionWithoutSideEffectRecursive
+				.isExpressionWithoutSideEffect(assignment.getRightHandSide())
+					&& ExpressionWithoutSideEffectRecursive
+						.isExpressionWithoutSideEffect(assignment.getLeftHandSide())) {
 				return optionalParentStatement;
 			}
 		}
@@ -85,6 +90,7 @@ public class SafelyRemoveable {
 		StructuralPropertyDescriptor locationInParent = referencingExpression.getLocationInParent();
 		ASTNode referencingExpressionParent = referencingExpression.getParent();
 		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
+
 		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) referencingExpressionParent;
 			return SafelyRemoveable

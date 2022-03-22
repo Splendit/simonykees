@@ -90,15 +90,10 @@ public class ReferencesVisitor extends ASTVisitor {
 			}
 		} else if (locationInParent == FieldAccess.NAME_PROPERTY) {
 			FieldAccess fieldAccess = (FieldAccess) simpleName.getParent();
-			boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS,
-					false);
-			if (removeInitializersSideEffects || ExpressionWithoutSideEffectRecursive
-				.isExpressionWithoutSideEffect(fieldAccess.getExpression())) {
-				Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(fieldAccess);
-				reassignment.ifPresent(reassignments::add);
-				if (reassignment.isPresent()) {
-					return false;
-				}
+			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(fieldAccess);
+			reassignment.ifPresent(reassignments::add);
+			if (reassignment.isPresent()) {
+				return false;
 			}
 		} else if (locationInParent == SuperFieldAccess.NAME_PROPERTY) {
 			SuperFieldAccess superFieldAccess = (SuperFieldAccess) simpleName.getParent();
