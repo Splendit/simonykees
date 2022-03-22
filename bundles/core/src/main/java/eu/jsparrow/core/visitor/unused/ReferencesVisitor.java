@@ -15,6 +15,8 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -81,14 +83,7 @@ public class ReferencesVisitor extends ASTVisitor {
 		if (locationInParent == VariableDeclarationFragment.NAME_PROPERTY) {
 			return false;
 		}
-		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment) simpleName.getParent();
-			Optional<ExpressionStatement> reassignment = SafelyRemoveable.isSafelyRemovable(assignment, options);
-			reassignment.ifPresent(reassignments::add);
-			if (reassignment.isPresent()) {
-				return false;
-			}
-		} else if (locationInParent == FieldAccess.NAME_PROPERTY) {
+		if (locationInParent == FieldAccess.NAME_PROPERTY) {
 			FieldAccess fieldAccess = (FieldAccess) simpleName.getParent();
 			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(fieldAccess);
 			reassignment.ifPresent(reassignments::add);
@@ -109,6 +104,12 @@ public class ReferencesVisitor extends ASTVisitor {
 			if (reassignment.isPresent()) {
 				return false;
 			}
+		} else {
+			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(simpleName);
+			reassignment.ifPresent(reassignments::add);
+			if (reassignment.isPresent()) {
+				return false;
+			}
 		}
 
 		activeReferenceFound = true;
@@ -116,10 +117,25 @@ public class ReferencesVisitor extends ASTVisitor {
 	}
 
 	private Optional<ExpressionStatement> isSafelyRemovableReassignment(Expression expression) {
+
 		if (expression.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) expression.getParent();
 			return SafelyRemoveable.isSafelyRemovable(assignment, options);
 		}
+
+		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
+		if (removeInitializersSideEffects
+				|| ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(expression)) {
+
+			if (expression.getLocationInParent() == PrefixExpression.OPERAND_PROPERTY) {
+				return SafelyRemoveable.findParentStatementInBlock((PrefixExpression) expression.getParent());
+			}
+
+			if (expression.getLocationInParent() == PostfixExpression.OPERAND_PROPERTY) {
+				return SafelyRemoveable.findParentStatementInBlock((PostfixExpression) expression.getParent());
+			}
+		}
+
 		return Optional.empty();
 	}
 
