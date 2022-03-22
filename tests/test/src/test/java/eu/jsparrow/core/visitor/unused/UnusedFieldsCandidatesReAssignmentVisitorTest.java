@@ -89,6 +89,57 @@ class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
 
 	}
 
+	private static Stream<Arguments> assignmentToPrivateArrayElements() throws Exception {
+		return Stream.of(
+				Arguments.of("private int[] unusedArray = new int[10];",
+						"unusedArray[0]=1;"),
+				Arguments.of("private int[] unusedArray = new int[10];",
+						"++unusedArray[0];"),
+				Arguments.of("private int[] unusedArray = new int[10];",
+						"unusedArray[0]++;"),
+				Arguments.of("private Object o = new Object(); private int[] unusedArray = new int[10];",
+						"unusedArray[0]=o.hashCode();"),
+				Arguments.of("private Object o = new Object(); private int[] unusedArray = new int[10];",
+						"this.unusedArray[0]=o.hashCode();"),
+				Arguments.of("private int[] unusedArray = new int[5][5];",
+						"unusedArray[0][0]=1;"),
+				Arguments.of("private int[] unusedArray = new int[5][5];",
+						"unusedArray[0]=new int[10];"));
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "assignmentToPrivateArrayElements")
+	void testAssignmentToPrivateArrayElements(String fieldDeclarations, String reAssignmentStatement)
+			throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-fields", true);
+		options.put("remove-initializers-side-effects", false);
+		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);
+
+		String originalCode = String.format("" +
+				"	%s\n" +
+				"	void reAssignment() {\n" +
+				"		%s\n" +
+				"	}", fieldDeclarations, reAssignmentStatement);
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, originalCode);
+		defaultFixture.accept(visitor);
+
+		List<UnusedFieldWrapper> removedUnusedFields = visitor.getUnusedPrivateFields();
+		assertEquals(1, removedUnusedFields.size());
+		UnusedFieldWrapper unusedFieldWrapper = removedUnusedFields.get(0);
+		String removedUnusedFieldName = unusedFieldWrapper
+			.getClassMemberIdentifier();
+		assertEquals("unusedArray", removedUnusedFieldName);
+		List<ExpressionStatement> unusedReassignments = unusedFieldWrapper.getUnusedReassignments();
+		assertEquals(1, unusedReassignments.size());
+		String actualRemovedAssignment = unusedReassignments.get(0)
+			.toString()
+			.trim();
+		assertEquals(reAssignmentStatement, actualRemovedAssignment);
+
+	}
+
 	@Test
 	void testReAssignmentNotInBlock_shouldNotBeRemoved() throws Exception {
 		Map<String, Boolean> options = new HashMap<>();
@@ -201,6 +252,42 @@ class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
 		String expectedRemovedAssignment = "getIntWrapper().unusedIntWrapperField=0;";
 		assertEquals(expectedRemovedAssignment, actualRemovedAssignment);
 	}
+	
+	
+	@Test
+	void testRemoveSideEffectsOfArrayAccessAsLeftHandSide_shouldBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-fields", true);
+		options.put("remove-initializers-side-effects", true);
+		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);
+
+		String originalCode = "" +
+				"	private int[] unusedArray = new int[10];\n"
+				+ "	\n"
+				+ "	int getValueWithSideEffects() {\n"
+				+ "		return 0;\n"
+				+ "	}\n"
+				+ "	\n"
+				+ "	void assignmentWithSideEffect() {\n"
+				+ "		unusedArray[getValueWithSideEffects()] = 0;\n"
+				+ "	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, originalCode);
+		defaultFixture.accept(visitor);
+
+		List<UnusedFieldWrapper> removedUnusedFields = visitor.getUnusedPrivateFields();
+		assertEquals(1, removedUnusedFields.size());
+		UnusedFieldWrapper unusedFieldWrapper = removedUnusedFields.get(0);
+		String removedUnusedFieldName = unusedFieldWrapper.getClassMemberIdentifier();
+		assertEquals("unusedArray", removedUnusedFieldName);
+		List<ExpressionStatement> unusedReassignments = unusedFieldWrapper.getUnusedReassignments();
+		assertEquals(1, unusedReassignments.size());
+		String actualRemovedAssignment = unusedReassignments.get(0)
+			.toString()
+			.trim();
+		String expectedRemovedAssignment = "unusedArray[getValueWithSideEffects()]=0;";
+		assertEquals(expectedRemovedAssignment, actualRemovedAssignment);
+	}
 
 	@Test
 	void testSideEffectsOfReAssignmentNotRemoved_shouldNotBeRemoved() throws Exception {
@@ -237,7 +324,6 @@ class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
 		options.put("remove-initializers-side-effects", false);
 		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);
 
-		//String statementToKeep = "getIntWrapper().unusedIntWrapperField = 0;";
 		String originalCode = "" +
 				"	private IntWrapper intWrapper = new IntWrapper();\n"
 				+ "\n"
@@ -250,6 +336,37 @@ class UnusedFieldsCandidatesReAssignmentVisitorTest extends UsesJDTUnitFixture {
 				+ "	}\n"
 				+ "\n"
 				+ "	void reAssignToFieldAccessWithSideEffect() {\n"
+				+ "		" + statementToKeep + "\n"
+				+ "	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, originalCode);
+		defaultFixture.accept(visitor);
+
+		List<UnusedFieldWrapper> removedUnusedFields = visitor.getUnusedPrivateFields();
+		assertTrue(removedUnusedFields.isEmpty());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"unusedArray[getValueWithSideEffects()]=0;",
+			"unusedArray[getValueWithSideEffects()]++;",
+			"++unusedArray[getValueWithSideEffects()];",
+			"unusedArray[0]=getValueWithSideEffects();",
+	})
+	void testArrayAccessAndSideEffects_shouldNotBeRemoved(String statementToKeep) throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-fields", true);
+		options.put("remove-initializers-side-effects", false);
+		UnusedFieldsCandidatesVisitor visitor = new UnusedFieldsCandidatesVisitor(options);
+
+		String originalCode = "" +
+				"	private int[] unusedArray = new int[10];\n"
+				+ "	\n"
+				+ "	int getValueWithSideEffects() {\n"
+				+ "		return 0;\n"
+				+ "	}\n"
+				+ "	\n"
+				+ "	void assignmentWithSideEffect() {\n"
 				+ "		" + statementToKeep + "\n"
 				+ "	}";
 
