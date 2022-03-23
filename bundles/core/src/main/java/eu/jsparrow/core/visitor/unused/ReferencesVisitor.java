@@ -9,15 +9,12 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -27,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
-import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
@@ -86,7 +82,7 @@ public class ReferencesVisitor extends ASTVisitor {
 		}
 
 		Expression outermostExpression = findOutermostExpression(simpleName);
-		Optional<ExpressionStatement> reassignment = findSafelyRemovableReassignment(outermostExpression);
+		Optional<ExpressionStatement> reassignment = SafelyRemoveable.findSafelyRemovableReassignment(outermostExpression, options);
 		reassignment.ifPresent(reassignments::add);
 		if (reassignment.isPresent()) {
 			return false;
@@ -115,29 +111,6 @@ public class ReferencesVisitor extends ASTVisitor {
 		}
 
 		return outermostExpression;
-	}
-
-	private Optional<ExpressionStatement> findSafelyRemovableReassignment(Expression expression) {
-
-		if (expression.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment) expression.getParent();
-			return SafelyRemoveable.isSafelyRemovable(assignment, options);
-		}
-
-		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
-		if (removeInitializersSideEffects
-				|| ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(expression)) {
-
-			if (expression.getLocationInParent() == PrefixExpression.OPERAND_PROPERTY) {
-				return SafelyRemoveable.findParentStatementInBlock((PrefixExpression) expression.getParent());
-			}
-
-			if (expression.getLocationInParent() == PostfixExpression.OPERAND_PROPERTY) {
-				return SafelyRemoveable.findParentStatementInBlock((PostfixExpression) expression.getParent());
-			}
-		}
-
-		return Optional.empty();
 	}
 
 	private boolean isTargetFieldReference(SimpleName simpleName) throws UnresolvedTypeBindingException {
