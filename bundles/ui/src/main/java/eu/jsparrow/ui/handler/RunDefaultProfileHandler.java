@@ -338,8 +338,12 @@ public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 					}
 				};
 
+				Rectangle rectangle = Display.getCurrent()
+					.getPrimaryMonitor()
+					.getBounds();
+
 				// maximizes the RefactoringPreviewWizard
-				dialog.setPageSize(1200, 800);
+				dialog.setPageSize(rectangle.width, rectangle.height);
 				dialog.open();
 			});
 	}
