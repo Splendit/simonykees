@@ -25,7 +25,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.RefactoringPipeline;	
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
@@ -80,7 +80,7 @@ public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 			return null;
 		}
 
-		Job job = new Job("Starting jSparrow with the default profile.") {
+		Job job = new Job(Messages.RunDefaultProfileHandler_startJSparrowWithDefaultProfile) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
