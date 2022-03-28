@@ -1,11 +1,30 @@
 package eu.jsparrow.ui.preference;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.IFontProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.TreeEvent;
+import org.eclipse.swt.events.TreeListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -13,14 +32,19 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.ui.preference.marker.Category;
 import eu.jsparrow.ui.preference.marker.TreeWrapper;
 import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
+import oshi.util.StringUtil;
 
 /**
  * A preference page for activating and deactivating jSparrow Markers.
@@ -31,6 +55,8 @@ import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
 public class SimonykeesMarkersPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	private TreeWrapper treeWrapper;
+	
+	private CheckboxTreeViewer checkboxTreeViewer;
 
 	@Override
 	public void init(IWorkbench workbench) {
@@ -44,14 +70,33 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		mainComposite.setLayoutData(gd);
 		mainComposite.setLayout(new GridLayout(1, true));
+		
+		checkboxTreeViewer = new CheckboxTreeViewer(mainComposite);
+		checkboxTreeViewer.getTree()
+			.setLayoutData(new GridData(GridData.FILL_BOTH));
+		checkboxTreeViewer.setContentProvider(new MarkerContentProvider());
+		checkboxTreeViewer.setLabelProvider(new MarkerLabelProvider());
+		checkboxTreeViewer.setInput("root"); //$NON-NLS-1$
+		
+		checkboxTreeViewer.addCheckStateListener(this::createCheckListener);
+		checkboxTreeViewer.setComparator(new ViewerComparator() {
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				Comparator<MarkerItemWrapper> comparator = Comparator
+						.comparing(MarkerItemWrapper::getName);
+				return comparator.compare((MarkerItemWrapper)e1, (MarkerItemWrapper)e2);
+			}
+		});
+		Map<String, RuleDescription> allMarkerDescriptions = ResolverVisitorsFactory.getAllMarkerDescriptions();
+		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
+		populateCheckboxTreeView(allMarkerDescriptions, allActiveMarkers);
 
 		Group group = new Group(mainComposite, SWT.NONE);
 		group.setText(Messages.SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText);
 		group.setLayout(new GridLayout(1, false));
 		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Map<String, RuleDescription> allMarkerDescriptions = ResolverVisitorsFactory.getAllMarkerDescriptions();
-		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
+
 
 		GridData groupLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		groupLayoutData.heightHint = 400;
@@ -81,6 +126,60 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		return mainComposite;
 	}
 
+	private void populateCheckboxTreeView(Map<String, RuleDescription> allMarkerDescriptions, 
+			List<String> allActiveMarkers) {
+		List<MarkerItemWrapper> allItems = new ArrayList<>();
+		List<String> tags = Arrays.stream(Tag.getAllTags())
+				.filter(StringUtils::isAlphaSpace)
+				.filter(tag -> !"free".equalsIgnoreCase(tag)) //$NON-NLS-1$
+				.sorted()
+				.collect(Collectors.toList());
+			for (String tagValue : tags) {
+				Tag tag = Tag.getTagForName(tagValue);
+				MarkerItemWrapper categoryItem = new MarkerItemWrapper(null, true, tagValue, StringUtils.capitalize(tagValue), new ArrayList<>());
+				
+				allMarkerDescriptions.forEach((key, value) -> {
+					List<Tag>markerTags = value.getTags();
+					if(markerTags.contains(tag)) {
+						categoryItem.addChild(key, value.getName());
+					}
+				});
+				if(!categoryItem.getChildern().isEmpty()) {
+					allItems.add(categoryItem);
+				}
+				
+			}
+
+			MarkerItemWrapper java16 = new MarkerItemWrapper(null, true, "java 16", "Java 16", new ArrayList<>()); //$NON-NLS-1$ //$NON-NLS-2$
+			allItems.add(java16);
+			Map<String, RuleDescription> java11PlusItems = findByJavaVersion(allMarkerDescriptions, Arrays.asList(12, 13, 14, 15, 16));
+			java11PlusItems.forEach((key, value) -> {
+				java16.addChild(key, value.getName());
+			});
+			MarkerItemWrapper[]input = allItems.toArray(new MarkerItemWrapper[] {});
+			checkboxTreeViewer.setInput(input);
+	}
+	
+	private Map<String, RuleDescription> findByJavaVersion(Map<String, RuleDescription> allMarkerDescriptions,
+			List<Integer> versions) {
+		Map<String, RuleDescription> map = new HashMap<>();
+		for (Map.Entry<String, RuleDescription> entry : allMarkerDescriptions.entrySet()) {
+			RuleDescription description = entry.getValue();
+
+			for (Tag ruleTag : description.getTags()) {
+				boolean matched = ruleTag.getTagNames()
+					.stream()
+					.filter(StringUtils::isNumeric)
+					.map(Integer::parseInt)
+					.anyMatch(versions::contains);
+				if (matched) {
+					map.put(entry.getKey(), description);
+				}
+			}
+		}
+		return map;
+	}
+
 	protected void addActiveMarker(String markerId) {
 		SimonykeesPreferenceManager.addActiveMarker(markerId);
 	}
@@ -95,6 +194,20 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		thisButton.setText(name);
 		thisButton.addListener(SWT.MouseDown, event -> treeWrapper.bulkUpdateAllCategories(turn));
 	}
+	
+	private void createCheckListener(CheckStateChangedEvent event) {
+		MarkerItemWrapper wrapper =(MarkerItemWrapper)event.getElement();
+		boolean checked = event.getChecked();
+		checkboxTreeViewer.setSubtreeChecked(wrapper, checked);
+		if(wrapper.isParent()) {
+			List<MarkerItemWrapper> children = wrapper.getChildern();
+			for(MarkerItemWrapper item : children) {
+				// Update the preference store for this item. 
+			}
+		} else {
+			// Update the preference store
+		}
+	}
 
 	@Override
 	protected void performDefaults() {
@@ -106,5 +219,96 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 				treeWrapper.setEnabledByMarkerId(marker, true);
 			}
 		}
+	}
+	
+	class MarkerContentProvider implements ITreeContentProvider {
+
+		@Override
+		public Object[] getElements(Object inputElement) {
+			Comparator<MarkerItemWrapper>comparator = Comparator
+					.comparing(MarkerItemWrapper::getName);
+			if(inputElement instanceof MarkerItemWrapper[]) {
+				Arrays.asList((MarkerItemWrapper[])inputElement)
+				.sort(comparator);
+				return (MarkerItemWrapper[])inputElement;
+			}
+			return new Object[] {};
+		}
+
+		@Override
+		public Object[] getChildren(Object parentElement) {
+			if(parentElement instanceof MarkerItemWrapper) {
+				MarkerItemWrapper markerItemWrapper = (MarkerItemWrapper)parentElement;
+				return markerItemWrapper.getChildern().toArray();
+			}
+			return new Object[] {};
+		}
+
+		@Override
+		public Object getParent(Object element) {
+			return ((MarkerItemWrapper)element).getParent();
+		}
+
+		@Override
+		public boolean hasChildren(Object element) {
+			Object[] children = getChildren(element);
+			return children != null && children.length > 0;
+		}
+		
+	}
+	
+	class MarkerItemWrapper {
+		private MarkerItemWrapper parent;
+		private boolean isParent;
+		private String markerId;
+		private String name;
+		private List<MarkerItemWrapper> childern = new ArrayList<>();
+		
+		public MarkerItemWrapper(MarkerItemWrapper parent, boolean isParent, 
+				String markerId, String name,
+				List<MarkerItemWrapper> childern) {
+			this.parent = parent;
+			this.isParent = isParent;
+			this.markerId = markerId;
+			this.name = name;
+			this.childern = childern;
+		}
+		public MarkerItemWrapper getParent() {
+			return parent;
+		}
+		public boolean isParent() {
+			return isParent;
+		}
+		public String getMarkerId() {
+			return markerId;
+		}
+		public String getName() {
+			return name;
+		}
+		public List<MarkerItemWrapper> getChildern() {
+			return childern;
+		}
+		
+		public void addChild(String markerId, String markerName) {
+			MarkerItemWrapper item = new MarkerItemWrapper(this, false, markerId, markerName, new ArrayList<>());
+			this.childern.add(item);
+		}
+	}
+	
+	public class MarkerLabelProvider extends LabelProvider implements IFontProvider {
+
+		@Override 
+		public String getText(Object object) {
+			MarkerItemWrapper item = (MarkerItemWrapper)object;
+			String name = item.getName();
+			return StringUtils.capitalize(name);
+		}
+		
+		@Override
+		public Font getFont(Object element) {
+			return JFaceResources.getFontRegistry()
+					.getItalic(JFaceResources.DIALOG_FONT);
+		}
+		
 	}
 }
