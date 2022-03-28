@@ -41,6 +41,8 @@
 					label="%command.label.rename_fields_rule_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.RemoveUnusedCodeWizardHandler"
 					label="%command.label.remove_unused_code_rule_wizard" style="push" />
+				<command commandId="eu.jsparrow.ui.EditProfilesHandler"
+					label="%command.label.edit_profiles" style="push" />
 			</menu>
 		</menuContribution>
 		<menuContribution
@@ -56,6 +58,8 @@
 					label="%command.label.rename_fields_rule_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.RemoveUnusedCodeWizardHandler"
 					label="%command.label.remove_unused_code_rule_wizard" style="push" />
+				<command commandId="eu.jsparrow.ui.EditProfilesHandler"
+					label="%command.label.edit_profiles" style="push" />
 			</menu>
 		</menuContribution>
 		<menuContribution
@@ -71,6 +75,8 @@
 					label="%command.label.rename_fields_rule_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.RemoveUnusedCodeWizardHandler"
 					label="%command.label.remove_unused_code_rule_wizard" style="push" />
+				<command commandId="eu.jsparrow.ui.EditProfilesHandler"
+					label="%command.label.edit_profiles" style="push" />
 			</menu>
 		</menuContribution>
 	</extension>
@@ -85,6 +91,8 @@
 			id="eu.jsparrow.ui.RenameFieldsRuleWizardHandler" name="%command.name.rename_fields_wizard_handler" />
 		<command defaultHandler="eu.jsparrow.ui.handler.RemoveUnusedCodeWizardHandler"
 			id="eu.jsparrow.ui.RemoveUnusedCodeWizardHandler" name="%command.name.remove_unused_code_wizard_handler" />
+		<command defaultHandler="eu.jsparrow.ui.handler.EditProfilesHandler"
+			id="eu.jsparrow.ui.EditProfilesHandler" name="%command.name.edit_profiles_handler" />
 		<command defaultHandler="eu.jsparrow.ui.handler.WelcomeHandler"
            id="eu.jsparrow.ui.handler.WelcomeHandler" name="jSparrow Dashboard" />
 	</extension>
