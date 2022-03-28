@@ -25,7 +25,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.refactorer.RefactoringPipeline;	
+import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
@@ -42,6 +42,13 @@ import eu.jsparrow.ui.wizard.impl.RunDefaultProfileImplicitWizard;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
+/**
+ * Starts the refactoring process with the rules from the selected in default
+ * profile.
+ * 
+ * @since 4.10.0
+ *
+ */
 public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunDefaultProfileHandler.class);

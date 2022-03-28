@@ -15,6 +15,13 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 
+/**
+ * Computes refactoring with a given list of rules. Does NOT open any UI
+ * wizards.
+ * 
+ * @since 4.10.0
+ *
+ */
 public class RunDefaultProfileImplicitWizard extends AbstractRuleWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunDefaultProfileImplicitWizard.class);
