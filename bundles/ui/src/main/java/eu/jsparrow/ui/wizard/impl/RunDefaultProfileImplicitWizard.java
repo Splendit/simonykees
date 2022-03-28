@@ -16,8 +16,8 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 
 /**
- * Computes refactoring with a given list of rules. Does NOT open any UI
- * wizards.
+ * Computes refactoring with a given list of rules and opens the Preview Wizard.
+ * Does NOT open the Select Rules wizard.
  * 
  * @since 4.10.0
  *
