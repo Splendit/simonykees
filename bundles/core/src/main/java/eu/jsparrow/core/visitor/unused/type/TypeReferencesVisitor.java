@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,10 +16,9 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
- * Finds the references of a field declaration in a compilation unit. Determines
- * whether the reference is a safely removable reassignment.
+ * Finds out whether there are references to a specified type declaration.
  * 
- * @since 4.8.0
+ * @since 4.10.0
  *
  */
 public class TypeReferencesVisitor extends ASTVisitor {
@@ -28,12 +28,12 @@ public class TypeReferencesVisitor extends ASTVisitor {
 	private AbstractTypeDeclaration targetTypeDeclaration;
 	private String targetTypeIdentifier;
 
-	private boolean typeReferencefound = false;
+	private boolean typeReferenceFound = false;
 	private boolean unresolvedReferenceFound = false;
 	private ITypeBinding targetTypeBinding;
 
 	/**
-	 * private instance method "getNonParameterizedTypeErasure" of class
+	 * Private instance method "getNonParameterizedTypeErasure" of class
 	 * ChainAssertJAssertThatStatementsASTVisitor has been copied to here and
 	 * the static modifier has been added.
 	 */
@@ -55,13 +55,13 @@ public class TypeReferencesVisitor extends ASTVisitor {
 
 	@Override
 	public boolean preVisit2(ASTNode node) {
-		return !typeReferencefound && !unresolvedReferenceFound;
+		return !typeReferenceFound && !unresolvedReferenceFound;
 	}
 
 	@Override
 	public boolean visit(SimpleName simpleName) {
 		try {
-			typeReferencefound = isTargetTypeReference(simpleName);
+			typeReferenceFound = isTargetTypeReference(simpleName);
 		} catch (UnresolvedTypeBindingException | UnexpectedKindOfBindingException e) {
 			logger.debug(e.getMessage(), e);
 			unresolvedReferenceFound = true;
@@ -69,7 +69,12 @@ public class TypeReferencesVisitor extends ASTVisitor {
 		return false;
 	}
 
-	private boolean isTargetTypeReference(SimpleName simpleName) throws UnresolvedTypeBindingException, UnexpectedKindOfBindingException {
+	private boolean isTargetTypeReference(SimpleName simpleName)
+			throws UnresolvedTypeBindingException, UnexpectedKindOfBindingException {
+		
+		if(simpleName.getLocationInParent() == TypeDeclaration.NAME_PROPERTY) {
+			return false;
+		}
 		String identifier = simpleName.getIdentifier();
 		if (!identifier.equals(targetTypeIdentifier)) {
 			return false;
@@ -108,8 +113,8 @@ public class TypeReferencesVisitor extends ASTVisitor {
 		throw new UnexpectedKindOfBindingException("Unexpected or unknown kind of binding."); //$NON-NLS-1$
 	}
 
-	public boolean classReferenceFound() {
-		return typeReferencefound;
+	public boolean typeReferenceFound() {
+		return typeReferenceFound;
 	}
 
 	public boolean hasUnresolvedReference() {

@@ -65,6 +65,16 @@ public class BodyDeclarationsUtil {
 			} else {
 				return options.getOrDefault(Constants.PACKAGE_PRIVATE_FIELDS, false);
 			}
+		} else if (methodDeclaration.getNodeType() == ASTNode.TYPE_DECLARATION) {
+			if (Modifier.isPublic(modifierFlags)) {
+				return options.getOrDefault(Constants.PUBLIC_CLASSES, false);
+			} else if (Modifier.isProtected(modifierFlags)) {
+				return options.getOrDefault(Constants.PROTECTED_CLASSES, false);
+			} else if (Modifier.isPrivate(modifierFlags)) {
+				return options.getOrDefault(Constants.PRIVATE_CLASSES, false);
+			} else {
+				return options.getOrDefault(Constants.PACKAGE_PRIVATE_CLASSES, false);
+			}
 		}
 		return false;
 
