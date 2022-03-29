@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -59,6 +61,53 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 		String removedUnusedTypeName = removedUnusedTypes.get(0)
 			.getClassMemberIdentifier();
 		assertEquals(unusedTypeName, removedUnusedTypeName);
+	}
+
+	@Test
+	void testLocalClassDeclaration_shouldBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("local-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String methodWithUusedLocalTypeDeclaration = "" +
+				"	void unusedLocalType() {\n" +
+				"		class UnusedLocalClass {\n" +
+				"\n" +
+				"		}\n" +
+				"	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, methodWithUusedLocalTypeDeclaration);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedLocalTypes();
+		assertEquals(1, removedUnusedTypes.size());
+		String removedUnusedTypeName = removedUnusedTypes.get(0)
+			.getClassMemberIdentifier();
+		assertEquals("UnusedLocalClass", removedUnusedTypeName);
+	}
+
+	@Disabled("local interface declaration is not recognized and therefore not removed.")
+	@Test
+	void testLocalInterfaceDeclaration_shouldBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("local-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String methodWithUusedLocalTypeDeclaration = "" +
+				"	void unusedLocalType() {\n" +
+				"		interface UnusedLocalInterface {\n" +
+				"\n" +
+				"		}\n" +
+				"	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, methodWithUusedLocalTypeDeclaration);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedLocalTypes();
+		assertEquals(1, removedUnusedTypes.size());
+		String removedUnusedTypeName = removedUnusedTypes.get(0)
+			.getClassMemberIdentifier();
+		assertEquals("UnusedLocalInterface", removedUnusedTypeName);
 	}
 
 	private static Stream<Arguments> nonPrivateModifiers() throws Exception {
@@ -228,4 +277,23 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 
 	}
 
+	@Test
+	void testLocalClassOptionFalse_shouldNotBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("local-classes", false);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String methodWithUusedLocalTypeDeclaration = "" +
+				"	void unusedLocalType() {\n" +
+				"		class UnusedLocalClass {\n" +
+				"\n" +
+				"		}\n" +
+				"	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, methodWithUusedLocalTypeDeclaration);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedLocalTypes();
+		assertTrue(removedUnusedTypes.isEmpty());
+	}
 }

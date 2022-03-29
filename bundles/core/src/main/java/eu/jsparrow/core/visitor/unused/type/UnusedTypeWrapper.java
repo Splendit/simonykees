@@ -119,7 +119,7 @@ public class UnusedTypeWrapper implements UnusedClassMemberWrapper {
 	@Override
 	public String toString() {
 		return String.format(
-				"UnusedFieldWrapper [fieldName=%s, fragment=%s, accessModifier=%s, declarationPath=%s, classDeclarationName=%s]", //$NON-NLS-1$
+				"UnusedTypeWrapper [typeName=%s, typeDeclaration=%s, accessModifier=%s, declarationPath=%s, classDeclarationName=%s]", //$NON-NLS-1$
 				typeName, typeDeclaration, accessModifier, declarationPath, classDeclarationName);
 	}
 }
