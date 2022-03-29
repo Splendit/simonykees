@@ -145,6 +145,54 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 	@ParameterizedTest
 	@ValueSource(strings = {
 			"" +
+					"			ClassReferencingItself referencingItself;",
+			"" +
+					"			ClassReferencingItself getNullValue() {\n" +
+					"				return null;\n" +
+					"			}",
+			"" +
+					"			void use(ClassReferencingItself usedByItself) {\n" +
+					"			}",
+			"" +
+					"			void test() {\n" +
+					"				referencingItself = null;\n" +
+					"			}\n" +
+					"\n" +
+					"			ClassReferencingItself referencingItself;",
+			"" +
+					"			Object callDefaultConstructor() {\n" +
+					"				return new ClassReferencingItself();\n" +
+					"			}",
+			"" +
+					"			Object o = getNullValue();\n" +
+					"\n" +
+					"			ClassReferencingItself getNullValue() {\n" +
+					"				return null;\n" +
+					"			}",
+
+	})
+	void testPrivateNestedClassReferencingItself_shouldNotBeRemoved(String referenceOnItself)
+			throws Exception {
+
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classReferencingItself = "" +
+				"		private class ClassReferencingItself {\n" +
+				referenceOnItself + "\n" +
+				"		}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classReferencingItself);
+		defaultFixture.accept(visitor);
+
+		List<NonPrivateUnusedTypeCandidate> unusedTypeCandidates = visitor.getNonPrivateCandidates();
+		assertTrue(unusedTypeCandidates.isEmpty());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
 					"		UnusedClass: while (true)\n" +
 					"			break UnusedClass;",
 			"" +
