@@ -2,11 +2,12 @@ package eu.jsparrow.ui.preference;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,10 +22,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.TreeEvent;
-import org.eclipse.swt.events.TreeListener;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -32,8 +30,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -41,10 +37,8 @@ import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
-import eu.jsparrow.ui.preference.marker.Category;
 import eu.jsparrow.ui.preference.marker.TreeWrapper;
 import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
-import oshi.util.StringUtil;
 
 /**
  * A preference page for activating and deactivating jSparrow Markers.
@@ -77,8 +71,11 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		checkboxTreeViewer.setContentProvider(new MarkerContentProvider());
 		checkboxTreeViewer.setLabelProvider(new MarkerLabelProvider());
 		checkboxTreeViewer.setInput("root"); //$NON-NLS-1$
-		
-		checkboxTreeViewer.addCheckStateListener(this::createCheckListener);
+
+		Map<String, RuleDescription> allMarkerDescriptions = ResolverVisitorsFactory.getAllMarkerDescriptions();
+		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
+		List<MarkerItemWrapper> allItems = populateCheckboxTreeView(allMarkerDescriptions, allActiveMarkers);
+		checkboxTreeViewer.addCheckStateListener(event -> this.createCheckListener(event, allItems));
 		checkboxTreeViewer.setComparator(new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
@@ -87,9 +84,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 				return comparator.compare((MarkerItemWrapper)e1, (MarkerItemWrapper)e2);
 			}
 		});
-		Map<String, RuleDescription> allMarkerDescriptions = ResolverVisitorsFactory.getAllMarkerDescriptions();
-		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
-		populateCheckboxTreeView(allMarkerDescriptions, allActiveMarkers);
+
 
 		Group group = new Group(mainComposite, SWT.NONE);
 		group.setText(Messages.SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText);
@@ -126,7 +121,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		return mainComposite;
 	}
 
-	private void populateCheckboxTreeView(Map<String, RuleDescription> allMarkerDescriptions, 
+	private List<MarkerItemWrapper> populateCheckboxTreeView(Map<String, RuleDescription> allMarkerDescriptions, 
 			List<String> allActiveMarkers) {
 		List<MarkerItemWrapper> allItems = new ArrayList<>();
 		List<String> tags = Arrays.stream(Tag.getAllTags())
@@ -134,30 +129,61 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 				.filter(tag -> !"free".equalsIgnoreCase(tag)) //$NON-NLS-1$
 				.sorted()
 				.collect(Collectors.toList());
-			for (String tagValue : tags) {
-				Tag tag = Tag.getTagForName(tagValue);
-				MarkerItemWrapper categoryItem = new MarkerItemWrapper(null, true, tagValue, StringUtils.capitalize(tagValue), new ArrayList<>());
-				
-				allMarkerDescriptions.forEach((key, value) -> {
-					List<Tag>markerTags = value.getTags();
-					if(markerTags.contains(tag)) {
-						categoryItem.addChild(key, value.getName());
-					}
-				});
-				if(!categoryItem.getChildern().isEmpty()) {
-					allItems.add(categoryItem);
+		for (String tagValue : tags) {
+			Tag tag = Tag.getTagForName(tagValue);
+			MarkerItemWrapper categoryItem = new MarkerItemWrapper(null, true, tagValue, StringUtils.capitalize(tagValue), new ArrayList<>());
+			
+			allMarkerDescriptions.forEach((key, value) -> {
+				List<Tag>markerTags = value.getTags();
+				if(markerTags.contains(tag)) {
+					categoryItem.addChild(key, value.getName());
 				}
-				
-			}
-
-			MarkerItemWrapper java16 = new MarkerItemWrapper(null, true, "java 16", "Java 16", new ArrayList<>()); //$NON-NLS-1$ //$NON-NLS-2$
-			allItems.add(java16);
-			Map<String, RuleDescription> java11PlusItems = findByJavaVersion(allMarkerDescriptions, Arrays.asList(12, 13, 14, 15, 16));
-			java11PlusItems.forEach((key, value) -> {
-				java16.addChild(key, value.getName());
 			});
-			MarkerItemWrapper[]input = allItems.toArray(new MarkerItemWrapper[] {});
-			checkboxTreeViewer.setInput(input);
+			if(!categoryItem.getChildern().isEmpty()) {
+				allItems.add(categoryItem);
+			}
+		}
+
+		MarkerItemWrapper java16 = new MarkerItemWrapper(null, true, "java 16", "Java 16", new ArrayList<>()); //$NON-NLS-1$ //$NON-NLS-2$
+		allItems.add(java16);
+		Map<String, RuleDescription> java11PlusItems = findByJavaVersion(allMarkerDescriptions, Arrays.asList(12, 13, 14, 15, 16));
+		java11PlusItems.forEach((key, value) -> java16.addChild(key, value.getName()));
+		MarkerItemWrapper[]input = allItems.toArray(new MarkerItemWrapper[] {});
+		checkboxTreeViewer.setInput(input);
+		
+
+		
+		allItems.stream()
+			.flatMap(itemWrapper -> itemWrapper.getChildern().stream())
+			.forEach(itemWrapper -> {
+				String id = itemWrapper.getMarkerId();
+				if(allActiveMarkers.contains(id)) {
+					checkboxTreeViewer.setSubtreeChecked(itemWrapper, true);
+				}
+			});
+		allItems.stream()
+		.forEach(itemWrapper -> {
+			
+			List<MarkerItemWrapper> children = itemWrapper.getChildern();
+			
+			boolean allChecked = children.stream()
+				.allMatch(child -> checkboxTreeViewer.getChecked(child));
+			boolean noneChecked = children.stream()
+					.noneMatch(child -> checkboxTreeViewer.getChecked(child));
+			if(allChecked) {
+				checkboxTreeViewer.setChecked(itemWrapper, true);
+				checkboxTreeViewer.setGrayed(itemWrapper, false);
+			} else if (noneChecked) {
+				checkboxTreeViewer.setChecked(itemWrapper, false);
+				checkboxTreeViewer.setGrayed(itemWrapper, false);
+			} else {
+				checkboxTreeViewer.setChecked(itemWrapper, true);
+				checkboxTreeViewer.setGrayed(itemWrapper, true);
+			}
+		});
+		
+		return allItems;
+
 	}
 	
 	private Map<String, RuleDescription> findByJavaVersion(Map<String, RuleDescription> allMarkerDescriptions,
@@ -195,18 +221,59 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		thisButton.addListener(SWT.MouseDown, event -> treeWrapper.bulkUpdateAllCategories(turn));
 	}
 	
-	private void createCheckListener(CheckStateChangedEvent event) {
+	private void createCheckListener(CheckStateChangedEvent event, List<MarkerItemWrapper>allItems) {
 		MarkerItemWrapper wrapper =(MarkerItemWrapper)event.getElement();
 		boolean checked = event.getChecked();
 		checkboxTreeViewer.setSubtreeChecked(wrapper, checked);
+		Set<String> updated = new HashSet<>();
+		
 		if(wrapper.isParent()) {
 			List<MarkerItemWrapper> children = wrapper.getChildern();
 			for(MarkerItemWrapper item : children) {
 				// Update the preference store for this item. 
+				updated.add(item.getMarkerId());
+				if(checked) {
+					SimonykeesPreferenceManager.addActiveMarker(item.getMarkerId());
+				} else {
+					SimonykeesPreferenceManager.removeActiveMarker(item.getMarkerId());
+				}
 			}
+			
 		} else {
-			// Update the preference store
+			updated.add(wrapper.getMarkerId());
+			if(checked) {
+				SimonykeesPreferenceManager.addActiveMarker(wrapper.getMarkerId());
+			} else {
+				SimonykeesPreferenceManager.removeActiveMarker(wrapper.getMarkerId());
+			}
 		}
+		
+		allItems.stream()
+			.flatMap(item -> item.getChildern().stream())
+			.filter(item -> updated.contains(item.getMarkerId()))
+			.forEach(item -> checkboxTreeViewer.setChecked(item, checked));
+		
+		allItems.stream()
+			.forEach(itemWrapper -> {
+				
+				List<MarkerItemWrapper> children = itemWrapper.getChildern();
+				
+				boolean allChecked = children.stream()
+					.allMatch(child -> checkboxTreeViewer.getChecked(child));
+				boolean noneChecked = children.stream()
+						.noneMatch(child -> checkboxTreeViewer.getChecked(child));
+				if(allChecked) {
+					checkboxTreeViewer.setChecked(itemWrapper, true);
+					checkboxTreeViewer.setGrayed(itemWrapper, false);
+				} else if (noneChecked) {
+					checkboxTreeViewer.setChecked(itemWrapper, false);
+					checkboxTreeViewer.setGrayed(itemWrapper, false);
+				} else {
+					checkboxTreeViewer.setChecked(itemWrapper, true);
+					checkboxTreeViewer.setGrayed(itemWrapper, true);
+				}
+			});
+		
 	}
 
 	@Override
