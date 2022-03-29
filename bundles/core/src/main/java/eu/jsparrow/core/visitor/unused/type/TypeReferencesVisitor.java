@@ -3,11 +3,19 @@ package eu.jsparrow.core.visitor.unused.type;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,10 +79,18 @@ public class TypeReferencesVisitor extends ASTVisitor {
 
 	private boolean isTargetTypeReference(SimpleName simpleName)
 			throws UnresolvedTypeBindingException, UnexpectedKindOfBindingException {
-		
-		if(simpleName.getLocationInParent() == TypeDeclaration.NAME_PROPERTY) {
+
+		if (simpleName.getLocationInParent() == TypeDeclaration.NAME_PROPERTY ||
+				simpleName.getLocationInParent() == EnumDeclaration.NAME_PROPERTY ||
+				simpleName.getLocationInParent() == EnumConstantDeclaration.NAME_PROPERTY ||
+				simpleName.getLocationInParent() == AnnotationTypeDeclaration.NAME_PROPERTY ||
+				simpleName.getLocationInParent() == AnnotationTypeMemberDeclaration.NAME_PROPERTY ||
+				simpleName.getLocationInParent() == MethodDeclaration.NAME_PROPERTY ||
+				simpleName.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY ||
+				simpleName.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY) {
 			return false;
 		}
+
 		String identifier = simpleName.getIdentifier();
 		if (!identifier.equals(targetTypeIdentifier)) {
 			return false;

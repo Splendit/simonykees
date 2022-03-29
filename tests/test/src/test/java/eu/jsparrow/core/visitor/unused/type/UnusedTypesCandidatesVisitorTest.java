@@ -296,4 +296,62 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedLocalTypes();
 		assertTrue(removedUnusedTypes.isEmpty());
 	}
+
+	@Test
+	void testClassWithConstructorDeclaration_shouldBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classWithConstructorDeclaration = "" +
+				"	private class UnusedClass {\n"
+				+ "		UnusedClass() {\n"
+				+ "		}\n"
+				+ "	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithConstructorDeclaration);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertEquals(1, removedUnusedTypes.size());
+		String removedUnusedTypeName = removedUnusedTypes.get(0)
+			.getClassMemberIdentifier();
+		assertEquals("UnusedClass", removedUnusedTypeName);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"	void exampleMethod(int parameter) {\n" +
+					"		\n" +
+					"	}",
+			"" +
+					"	enum ExampleEnum {\n" +
+					"		ENTRY;\n" +
+					"	}",
+			"" +
+					"	@interface ExampleAnnotation {\n" +
+					"		String value();\n" +
+					"	}",
+	})
+	void testUnusedClassAndDeclaration_shouldBeRemoved(String additionalDeclaration) throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classWithConstructorDeclaration = "" +
+				additionalDeclaration + "\n" +
+				"	\n" +
+				"	private class UnusedClass {\n" +
+				"	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithConstructorDeclaration);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertEquals(1, removedUnusedTypes.size());
+		String removedUnusedTypeName = removedUnusedTypes.get(0)
+			.getClassMemberIdentifier();
+		assertEquals("UnusedClass", removedUnusedTypeName);
+	}
 }
