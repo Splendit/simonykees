@@ -7,23 +7,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
-import org.eclipse.jface.viewers.IFontProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -38,6 +32,9 @@ import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.ui.preference.marker.MarkerContentProvider;
+import eu.jsparrow.ui.preference.marker.MarkerItemWrapper;
+import eu.jsparrow.ui.preference.marker.MarkerLabelProvider;
 import eu.jsparrow.ui.preference.marker.TreeWrapper;
 import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
 
@@ -309,121 +306,9 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		}
 	}
 
-	class MarkerContentProvider implements ITreeContentProvider {
 
-		@Override
-		public Object[] getElements(Object inputElement) {
-			Comparator<MarkerItemWrapper> comparator = Comparator
-				.comparing(MarkerItemWrapper::getName);
-			if (inputElement instanceof MarkerItemWrapper[]) {
-				Arrays.asList((MarkerItemWrapper[]) inputElement)
-					.sort(comparator);
-				return (MarkerItemWrapper[]) inputElement;
-			}
-			return new Object[] {};
-		}
 
-		@Override
-		public Object[] getChildren(Object parentElement) {
-			if (parentElement instanceof MarkerItemWrapper) {
-				MarkerItemWrapper markerItemWrapper = (MarkerItemWrapper) parentElement;
-				return markerItemWrapper.getChildern()
-					.toArray();
-			}
-			return new Object[] {};
-		}
+	
 
-		@Override
-		public Object getParent(Object element) {
-			return ((MarkerItemWrapper) element).getParent();
-		}
-
-		@Override
-		public boolean hasChildren(Object element) {
-			Object[] children = getChildren(element);
-			return children != null && children.length > 0;
-		}
-
-	}
-
-	class MarkerItemWrapper {
-		private MarkerItemWrapper parent;
-		private boolean isParent;
-		private String markerId;
-		private String name;
-		private List<MarkerItemWrapper> childern = new ArrayList<>();
-
-		public MarkerItemWrapper(MarkerItemWrapper parent, boolean isParent,
-				String markerId, String name,
-				List<MarkerItemWrapper> childern) {
-			this.parent = parent;
-			this.isParent = isParent;
-			this.markerId = markerId;
-			this.name = name;
-			this.childern = childern;
-		}
-
-		public MarkerItemWrapper getParent() {
-			return parent;
-		}
-
-		public boolean isParent() {
-			return isParent;
-		}
-
-		public String getMarkerId() {
-			return markerId;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public List<MarkerItemWrapper> getChildern() {
-			return childern;
-		}
-
-		public void addChild(String markerId, String markerName) {
-			MarkerItemWrapper item = new MarkerItemWrapper(this, false, markerId, markerName, new ArrayList<>());
-			this.childern.add(item);
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + Objects.hash(isParent, markerId, name);
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			MarkerItemWrapper other = (MarkerItemWrapper) obj;
-			return isParent == other.isParent && Objects.equals(markerId, other.markerId)
-					&& Objects.equals(name, other.name);
-		}
-	}
-
-	public class MarkerLabelProvider extends LabelProvider implements IFontProvider {
-
-		@Override
-		public String getText(Object object) {
-			MarkerItemWrapper item = (MarkerItemWrapper) object;
-			String name = item.getName();
-			return StringUtils.capitalize(name);
-		}
-
-		@Override
-		public Font getFont(Object element) {
-			return JFaceResources.getFontRegistry()
-				.getItalic(JFaceResources.DIALOG_FONT);
-		}
-
-	}
+	
 }
