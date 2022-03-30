@@ -3,7 +3,6 @@ package eu.jsparrow.core.visitor.unused.type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -58,45 +57,61 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 
-		boolean hasAnnotations = BodyDeclarationsUtil.hasUsefulAnnotations(typeDeclaration);
-		if (hasAnnotations) {
-			return true;
-		}
-
 		TypeDeclarationStatement typeDeclarationStatement = ASTNodeUtil.getSpecificAncestor(typeDeclaration,
 				TypeDeclarationStatement.class);
+
 		if (typeDeclarationStatement != null) {
 			boolean localClassOption = options.getOrDefault(Constants.LOCAL_CLASSES, false);
 			if (!localClassOption) {
 				return false;
 			}
-			if (containsUnsupportedDeclarations(typeDeclaration)) {
-				return true;
-			}
-			TypeReferencesVisitor referencesVisitor = new TypeReferencesVisitor(typeDeclaration);
-			typeDeclarationStatement.getParent()
-				.accept(referencesVisitor);
-			if (!referencesVisitor.typeReferenceFound() && !referencesVisitor.hasUnresolvedReference()) {
-				UnusedTypeWrapper unusedField = new UnusedTypeWrapper(compilationUnit,
-						JavaAccessModifier.PRIVATE, typeDeclaration);
-				unusedLocalTypes.add(unusedField);
-				return false;
-			}
-		} else {
-			if (!BodyDeclarationsUtil.hasSelectedAccessModifier(typeDeclaration, options)) {
-				return true;
-			}
-			if (containsUnsupportedDeclarations(typeDeclaration)) {
-				return true;
-			}
-			TypeReferencesVisitor referencesVisitor = new TypeReferencesVisitor(typeDeclaration);
-			this.compilationUnit.accept(referencesVisitor);
-			if (!referencesVisitor.typeReferenceFound() && !referencesVisitor.hasUnresolvedReference()) {
-				markAsUnusedInternally(typeDeclaration);
-				return false;
-			}
+		} else if (!BodyDeclarationsUtil.hasSelectedAccessModifier(typeDeclaration, options)) {
+			return true;
 		}
-		return true;
+
+		ASTNode typeReferencesScope = typeDeclarationStatement != null ? typeDeclarationStatement.getParent()
+				: compilationUnit;
+
+		if (!isSupportedUnusedType(typeDeclaration, typeReferencesScope)) {
+			return true;
+		}
+
+		if (typeDeclarationStatement != null) {
+			UnusedTypeWrapper unusedTypeWrapper = new UnusedTypeWrapper(compilationUnit,
+					JavaAccessModifier.PRIVATE, typeDeclaration);
+			unusedLocalTypes.add(unusedTypeWrapper);
+			return false;
+		}
+
+		int modifierFlags = typeDeclaration.getModifiers();
+		if (Modifier.isPrivate(modifierFlags)) {
+			UnusedTypeWrapper unusedTypeWrapper = new UnusedTypeWrapper(compilationUnit,
+					JavaAccessModifier.PRIVATE, typeDeclaration);
+			unusedPrivateTypes.add(unusedTypeWrapper);
+			return false;
+		}
+
+		JavaAccessModifier accessModifier = BodyDeclarationsUtil.findAccessModifier(typeDeclaration);
+		NonPrivateUnusedTypeCandidate candidate = new NonPrivateUnusedTypeCandidate(typeDeclaration,
+				accessModifier);
+		nonPrivateCandidates.add(candidate);
+		return false;
+
+	}
+
+	private boolean isSupportedUnusedType(AbstractTypeDeclaration typeDeclaration, ASTNode typeReferencesScope) {
+		boolean hasAnnotations = BodyDeclarationsUtil.hasUsefulAnnotations(typeDeclaration);
+		if (hasAnnotations) {
+			return false;
+		}
+
+		if (containsUnsupportedDeclarations(typeDeclaration)) {
+			return false;
+		}
+
+		TypeReferencesVisitor typeReferencesVisitor = new TypeReferencesVisitor(typeDeclaration);
+		typeReferencesScope.accept(typeReferencesVisitor);
+		return !typeReferencesVisitor.typeReferenceFound() && !typeReferencesVisitor.hasUnresolvedReference();
 	}
 
 	private boolean containsUnsupportedDeclarations(AbstractTypeDeclaration typeDeclaration) {
@@ -115,20 +130,6 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 			}
 		}
 		return false;
-	}
-
-	private void markAsUnusedInternally(AbstractTypeDeclaration typeDeclaration) {
-		int modifierFlags = typeDeclaration.getModifiers();
-		if (Modifier.isPrivate(modifierFlags)) {
-			UnusedTypeWrapper unusedField = new UnusedTypeWrapper(compilationUnit,
-					JavaAccessModifier.PRIVATE, typeDeclaration);
-			unusedPrivateTypes.add(unusedField);
-		} else {
-			JavaAccessModifier accessModifier = BodyDeclarationsUtil.findAccessModifier(typeDeclaration);
-			NonPrivateUnusedTypeCandidate candidate = new NonPrivateUnusedTypeCandidate(typeDeclaration,
-					accessModifier);
-			nonPrivateCandidates.add(candidate);
-		}
 	}
 
 	public CompilationUnit getCompilationUnit() {

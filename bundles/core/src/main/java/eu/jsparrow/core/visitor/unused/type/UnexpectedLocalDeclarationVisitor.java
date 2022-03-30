@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.unused.type;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
@@ -11,6 +12,11 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
  */
 public class UnexpectedLocalDeclarationVisitor extends ASTVisitor {
 	private boolean unexpectedLocalDeclarationFound;
+
+	@Override
+	public boolean preVisit2(ASTNode node) {
+		return !unexpectedLocalDeclarationFound;
+	}
 
 	@Override
 	public boolean visit(AnonymousClassDeclaration node) {

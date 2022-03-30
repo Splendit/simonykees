@@ -354,4 +354,91 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 			.getClassMemberIdentifier();
 		assertEquals("UnusedClass", removedUnusedTypeName);
 	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"			enum Enum {\n" +
+					"				ENTRY;\n" +
+					"			}",
+			"" +
+					"			class InnermostClass {\n" +
+					"			}",
+			"" +
+					"			Object o = new Object() {\n" +
+					"			};",
+			"" +
+					"			void methodWithLocalClass() {\n" +
+					"				class LocalClass {\n" +
+					"				}\n" +
+					"			}",
+			"" +
+					"			{\n" +
+					"				class LocalClass {\n" +
+					"				}\n" +
+					"			}",
+	})
+	void testClassContainingUnsupportedDeclaration_shouldNotBeRemoved(String unsupportedDeclaration) throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classWithUnsupportedDeclaration = "" +
+				"		private class ClassWithUnuspportedDeclaration {\n" +
+				unsupportedDeclaration + "\n" +
+				"		}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithUnsupportedDeclaration);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertTrue(removedUnusedTypes.isEmpty());
+
+	}
+
+	@Test
+	void testClassWithAnnotation_shouldNotBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classWithAnnotation = "" +
+				"	@interface KeepMe {		\n" +
+				"	}\n" +
+				"	@KeepMe\n" +
+				"	private class ClassWithAnnotation {\n" +
+				"	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithAnnotation);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertTrue(removedUnusedTypes.isEmpty());
+
+	}
+
+	@Test
+	void testClassWithUndefinedVariable_shouldNotBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classWithAnnotation = "" +
+				"	private class ClassWithUndefinedVariable {\n"
+				+ "		\n"
+				+ "		Object returnUndefinedVariable() {\n"
+				+ "			\n"
+				+ "			return ClassWithUndefinedVariable;\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithAnnotation);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertTrue(removedUnusedTypes.isEmpty());
+
+	}
+
 }
