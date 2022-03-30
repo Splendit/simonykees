@@ -26,7 +26,6 @@ import eu.jsparrow.ui.preference.marker.CheckboxTreeViewerWrapper;
 import eu.jsparrow.ui.preference.marker.MarkerContentProvider;
 import eu.jsparrow.ui.preference.marker.MarkerItemWrapper;
 import eu.jsparrow.ui.preference.marker.MarkerLabelProvider;
-import eu.jsparrow.ui.preference.marker.TreeWrapper;
 import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
 
 /**
@@ -37,7 +36,6 @@ import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
  */
 public class SimonykeesMarkersPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	private TreeWrapper treeWrapper;
 	private CheckboxTreeViewerWrapper treeViewerWrapper;
 
 	@Override
@@ -97,8 +95,8 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		Composite bulkActionsComposite = new Composite(mainComposite, SWT.NONE);
 		bulkActionsComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		bulkActionsComposite.setLayout(new GridLayout(2, false));
-		addButton(bulkActionsComposite, Messages.SimonykeesMarkersPreferencePage_enableAll, true, treeWrapper);
-		addButton(bulkActionsComposite, Messages.SimonykeesMarkersPreferencePage_disableAll, false, treeWrapper);
+		addButton(bulkActionsComposite, Messages.SimonykeesMarkersPreferencePage_enableAll, true, treeViewerWrapper);
+		addButton(bulkActionsComposite, Messages.SimonykeesMarkersPreferencePage_disableAll, false, treeViewerWrapper);
 
 		return mainComposite;
 	}
@@ -111,22 +109,19 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		SimonykeesPreferenceManager.removeActiveMarker(markerId);
 	}
 
-	protected void addButton(Composite composite, String name, boolean turn, TreeWrapper treeWrapper) {
+	protected void addButton(Composite composite, String name, boolean turn, CheckboxTreeViewerWrapper treeWrapper) {
 		Button thisButton = new Button(composite, SWT.PUSH);
 		thisButton.setLayoutData(new GridData(SWT.DEFAULT, SWT.DEFAULT, false, false));
 		thisButton.setText(name);
-		thisButton.addListener(SWT.MouseDown, event -> treeWrapper.bulkUpdateAllCategories(turn));
+		thisButton.addListener(SWT.MouseDown, event -> treeWrapper.bulkUpdate(turn));
 	}
 
 	@Override
 	protected void performDefaults() {
 		super.performDefaults();
-		if (treeWrapper != null) {
-			treeWrapper.bulkUpdateAllCategories(false);
+		if (treeViewerWrapper != null) {
 			DefaultActiveMarkers defaultMarkers = new DefaultActiveMarkers();
-			for (String marker : defaultMarkers.getActiveMarkers()) {
-				treeWrapper.setEnabledByMarkerId(marker, true);
-			}
+			treeViewerWrapper.selectMarkers(defaultMarkers.getActiveMarkers());
 		}
 	}
 

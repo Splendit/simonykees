@@ -67,6 +67,20 @@ public class CheckboxTreeViewerWrapper {
 
 	}
 
+	public void selectMarkers(List<String> allActiveMarkers) {
+		bulkUpdate(false);
+
+		allItems.stream()
+			.flatMap(item -> item.getChildern()
+				.stream())
+			.filter(item -> allActiveMarkers.contains(item.getMarkerId()))
+			.forEach(item -> this.persistMarkerItemSelection(true, item));
+
+		udpateMarkerItemSelection(allActiveMarkers);
+		updateCategorySelection();
+
+	}
+
 	private void udpateMarkerItemSelection(List<String> allActiveMarkers) {
 		allItems.stream()
 			.flatMap(itemWrapper -> itemWrapper.getChildern()
@@ -100,12 +114,11 @@ public class CheckboxTreeViewerWrapper {
 			});
 	}
 
-	public Map<String, RuleDescription> findByJavaVersion(Map<String, RuleDescription> allMarkerDescriptions,
+	private Map<String, RuleDescription> findByJavaVersion(Map<String, RuleDescription> allMarkerDescriptions,
 			List<Integer> versions) {
 		Map<String, RuleDescription> map = new HashMap<>();
 		for (Map.Entry<String, RuleDescription> entry : allMarkerDescriptions.entrySet()) {
 			RuleDescription description = entry.getValue();
-
 			for (Tag ruleTag : description.getTags()) {
 				boolean matched = ruleTag.getTagNames()
 					.stream()
@@ -121,21 +134,21 @@ public class CheckboxTreeViewerWrapper {
 	}
 
 	public void createCheckListener(CheckStateChangedEvent event) {
-		MarkerItemWrapper wrapper = (MarkerItemWrapper) event.getElement();
+		MarkerItemWrapper treeEntryWrapper = (MarkerItemWrapper) event.getElement();
 		boolean checked = event.getChecked();
-		checkboxTreeViewer.setSubtreeChecked(wrapper, checked);
+		checkboxTreeViewer.setSubtreeChecked(treeEntryWrapper, checked);
 		Set<String> updated = new HashSet<>();
 
-		if (wrapper.isParent()) {
-			List<MarkerItemWrapper> children = wrapper.getChildern();
+		if (treeEntryWrapper.isParent()) {
+			List<MarkerItemWrapper> children = treeEntryWrapper.getChildern();
 			for (MarkerItemWrapper item : children) {
 				// Update the preference store for this item.
 				updated.add(item.getMarkerId());
-				updateMarkerItemSelection(checked, item);
+				persistMarkerItemSelection(checked, item);
 			}
 		} else {
-			updated.add(wrapper.getMarkerId());
-			updateMarkerItemSelection(checked, wrapper);
+			updated.add(treeEntryWrapper.getMarkerId());
+			persistMarkerItemSelection(checked, treeEntryWrapper);
 		}
 
 		allItems.stream()
@@ -147,7 +160,7 @@ public class CheckboxTreeViewerWrapper {
 		updateCategorySelection();
 	}
 
-	private void updateMarkerItemSelection(boolean checked, MarkerItemWrapper item) {
+	private void persistMarkerItemSelection(boolean checked, MarkerItemWrapper item) {
 		if (checked) {
 			SimonykeesPreferenceManager.addActiveMarker(item.getMarkerId());
 		} else {
@@ -168,25 +181,30 @@ public class CheckboxTreeViewerWrapper {
 		for (MarkerItemWrapper item : allItems) {
 			boolean categoryMatch = StringUtils.contains(StringUtils.lowerCase(item.getName()),
 					StringUtils.lowerCase(searchText));
-
 			List<MarkerItemWrapper> children = item.getChildern();
 			for (MarkerItemWrapper child : children) {
-				boolean markerMatch = StringUtils.contains(StringUtils.lowerCase(child.getName()),
+				boolean markerMatch = StringUtils.contains(
+						StringUtils.lowerCase(child.getName()),
 						StringUtils.lowerCase(searchText));
-				
-				if (categoryMatch || markerMatch) {
-					boolean alreadyInResult = searchResult.stream()
-							.anyMatch(r ->  r.getMarkerId().equals(child.getMarkerId()));
-					if(!alreadyInResult) {
-						searchResult.add(child);
-					}
-					
+				boolean alreadyInResult = searchResult.stream()
+					.anyMatch(r -> r.getMarkerId()
+						.equals(child.getMarkerId()));
+				if ((categoryMatch || markerMatch) && !alreadyInResult) {
+					searchResult.add(child);
 				}
 			}
 		}
 		checkboxTreeViewer.setInput(searchResult.toArray(new MarkerItemWrapper[] {}));
 		udpateMarkerItemSelection(SimonykeesPreferenceManager.getAllActiveMarkers());
 		updateCategorySelection();
-		
+
+	}
+
+	public void bulkUpdate(boolean selection) {
+		allItems.stream()
+			.flatMap(item -> item.getChildern()
+				.stream())
+			.forEach(item -> this.persistMarkerItemSelection(selection, item));
+		allItems.forEach(item -> checkboxTreeViewer.setSubtreeChecked(item, selection));
 	}
 }
