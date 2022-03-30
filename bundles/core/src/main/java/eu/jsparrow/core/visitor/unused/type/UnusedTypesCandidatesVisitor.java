@@ -3,11 +3,13 @@ package eu.jsparrow.core.visitor.unused.type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -54,16 +56,6 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 	}
 
 	@Override
-	public boolean visit(TypeDeclarationStatement typeDeclarationStatement) {
-		return true;
-	}
-	
-	@Override
-	public boolean visit(Block block) {
-		return true;
-	}
-	
-	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 
 		boolean hasAnnotations = BodyDeclarationsUtil.hasUsefulAnnotations(typeDeclaration);
@@ -78,6 +70,9 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 			if (!localClassOption) {
 				return false;
 			}
+			if (containsUnsupportedDeclarations(typeDeclaration)) {
+				return true;
+			}
 			TypeReferencesVisitor referencesVisitor = new TypeReferencesVisitor(typeDeclaration);
 			typeDeclarationStatement.getParent()
 				.accept(referencesVisitor);
@@ -91,6 +86,9 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 			if (!BodyDeclarationsUtil.hasSelectedAccessModifier(typeDeclaration, options)) {
 				return true;
 			}
+			if (containsUnsupportedDeclarations(typeDeclaration)) {
+				return true;
+			}
 			TypeReferencesVisitor referencesVisitor = new TypeReferencesVisitor(typeDeclaration);
 			this.compilationUnit.accept(referencesVisitor);
 			if (!referencesVisitor.typeReferenceFound() && !referencesVisitor.hasUnresolvedReference()) {
@@ -99,6 +97,24 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 			}
 		}
 		return true;
+	}
+
+	private boolean containsUnsupportedDeclarations(AbstractTypeDeclaration typeDeclaration) {
+		List<BodyDeclaration> bodyDeclarations = ASTNodeUtil.convertToTypedList(typeDeclaration.bodyDeclarations(),
+				BodyDeclaration.class);
+		for (BodyDeclaration bodyDeclaration : bodyDeclarations) {
+			if (bodyDeclaration.getNodeType() != ASTNode.FIELD_DECLARATION &&
+					bodyDeclaration.getNodeType() != ASTNode.METHOD_DECLARATION &&
+					bodyDeclaration.getNodeType() != ASTNode.INITIALIZER) {
+				return true;
+			}
+			UnexpectedLocalDeclarationVisitor unexpectedLocalDeclarationVisitor = new UnexpectedLocalDeclarationVisitor();
+			bodyDeclaration.accept(unexpectedLocalDeclarationVisitor);
+			if (unexpectedLocalDeclarationVisitor.isUnexpectedLocalDeclarationFound()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void markAsUnusedInternally(AbstractTypeDeclaration typeDeclaration) {
