@@ -7,12 +7,17 @@ import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.slf4j.Logger;
@@ -38,7 +43,7 @@ public class TypeReferencesVisitor extends ASTVisitor {
 
 	private boolean typeReferenceFound = false;
 	private boolean unresolvedReferenceFound = false;
-	private ITypeBinding targetTypeBinding;
+	private ITypeBinding targetTypeBindingErasure;
 
 	/**
 	 * Private instance method "getNonParameterizedTypeErasure" of class
@@ -58,12 +63,32 @@ public class TypeReferencesVisitor extends ASTVisitor {
 
 		SimpleName name = targetTypeDeclaration.getName();
 		this.targetTypeIdentifier = name.getIdentifier();
-		this.targetTypeBinding = getNonParameterizedTypeErasure(this.targetTypeDeclaration.resolveBinding());
+		this.targetTypeBindingErasure = getNonParameterizedTypeErasure(this.targetTypeDeclaration.resolveBinding());
 	}
 
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		return !typeReferenceFound && !unresolvedReferenceFound;
+	}
+
+	@Override
+	public boolean visit(ThisExpression node) {
+		if (isActiveThisReference(node)) {
+			typeReferenceFound = true;
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isActiveThisReference(ThisExpression thisExpression) {
+
+		ITypeBinding thisTypeBindingErasure = getNonParameterizedTypeErasure(thisExpression.resolveTypeBinding());
+		if (ClassRelationUtil.compareITypeBinding(thisTypeBindingErasure, targetTypeBindingErasure)) {
+			StructuralPropertyDescriptor locationInParent = thisExpression.getLocationInParent();
+			return locationInParent != FieldAccess.EXPRESSION_PROPERTY &&
+					locationInParent != MethodInvocation.EXPRESSION_PROPERTY;
+		}
+		return false;
 	}
 
 	@Override
@@ -80,7 +105,8 @@ public class TypeReferencesVisitor extends ASTVisitor {
 	private boolean isTargetTypeReference(SimpleName simpleName)
 			throws UnresolvedTypeBindingException, UnexpectedKindOfBindingException {
 
-		if (simpleName.getLocationInParent() == TypeDeclaration.NAME_PROPERTY ||
+		if (simpleName.getLocationInParent() == PackageDeclaration.NAME_PROPERTY ||
+				simpleName.getLocationInParent() == TypeDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == EnumDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == EnumConstantDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == AnnotationTypeDeclaration.NAME_PROPERTY ||
@@ -88,11 +114,6 @@ public class TypeReferencesVisitor extends ASTVisitor {
 				simpleName.getLocationInParent() == MethodDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY) {
-			return false;
-		}
-
-		String identifier = simpleName.getIdentifier();
-		if (!identifier.equals(targetTypeIdentifier)) {
 			return false;
 		}
 
@@ -110,18 +131,20 @@ public class TypeReferencesVisitor extends ASTVisitor {
 		}
 		if (kind == IBinding.TYPE) {
 			ITypeBinding typeBinding = getNonParameterizedTypeErasure((ITypeBinding) binding);
-			return ClassRelationUtil.compareITypeBinding(typeBinding, targetTypeBinding);
+			return ClassRelationUtil.compareITypeBinding(typeBinding, targetTypeBindingErasure);
 		}
 		if (kind == IBinding.VARIABLE) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
 			if (variableBinding.isField()) {
 				ITypeBinding declaringClass = getNonParameterizedTypeErasure(variableBinding.getDeclaringClass());
-				if (ClassRelationUtil.compareITypeBinding(declaringClass, targetTypeBinding)) {
-					return true;
+				if (ClassRelationUtil.compareITypeBinding(declaringClass, targetTypeBindingErasure)) {
+					AbstractTypeDeclaration typeDeclarationSurroundingSimpleName = ASTNodeUtil
+						.getSpecificAncestor(simpleName, AbstractTypeDeclaration.class);
+					return typeDeclarationSurroundingSimpleName != targetTypeDeclaration;
 				}
 			}
 			ITypeBinding variableType = getNonParameterizedTypeErasure(variableBinding.getType());
-			return ClassRelationUtil.compareITypeBinding(variableType, targetTypeBinding);
+			return ClassRelationUtil.compareITypeBinding(variableType, targetTypeBindingErasure);
 		}
 		if (kind == IBinding.METHOD) {
 			return false;

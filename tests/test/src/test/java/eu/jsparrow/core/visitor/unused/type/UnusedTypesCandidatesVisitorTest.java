@@ -441,4 +441,80 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 
 	}
 
+	@Test
+	void testClassWithActiveThisReference_shouldNotBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classWithActiveThisReference = "" +
+				"		private class ClassWithActiveThisReference {\n" +
+				"			Object o = this;\n" +
+				"		}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithActiveThisReference);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertTrue(removedUnusedTypes.isEmpty());
+
+	}
+
+	@Test
+	void testClassWithThisOfEnclosingClass_shouldBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classWithThisOfEnclosingClass = "" +
+				"	class EnclosingClass {\n" +
+				"		private class ClassReferencingThisOfEnclosingClass {\n" +
+				"			Object o = EnclosingClass.this;\n" +
+				"		}\n" +
+				"	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithThisOfEnclosingClass);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertEquals(1, removedUnusedTypes.size());
+		String removedUnusedTypeName = removedUnusedTypes.get(0)
+			.getClassMemberIdentifier();
+		assertEquals("ClassReferencingThisOfEnclosingClass", removedUnusedTypeName);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"			void callDoSomething() {\n" +
+					"				this.doSomething();\n" +
+					"			}\n" +
+					"\n" +
+					"			void doSomething() {\n" +
+					"			}",
+			"" +
+					"			int x = 0;\n" +
+					"			int y = this.x;",
+	})
+	void testClassWithThisAsMemberQualifier_shouldBeRemoved(String members) throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classWithThisAsMemberQualifier = "" +
+				"		private class ClassWithMemberAccessQualifiedByThis {\n" +
+				"\n" +
+				members + "\n" +
+				"		}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithThisAsMemberQualifier);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertEquals(1, removedUnusedTypes.size());
+		String removedUnusedTypeName = removedUnusedTypes.get(0)
+			.getClassMemberIdentifier();
+		assertEquals("ClassWithMemberAccessQualifiedByThis", removedUnusedTypeName);
+	}
+
 }
