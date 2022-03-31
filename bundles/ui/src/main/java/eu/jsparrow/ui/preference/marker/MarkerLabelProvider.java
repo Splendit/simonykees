@@ -6,6 +6,12 @@ import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Font;
 
+/**
+ * A label provider for the markers preference page tree.
+ * 
+ * @since 4.10.0
+ *
+ */
 public class MarkerLabelProvider extends LabelProvider implements IFontProvider {
 
 	@Override

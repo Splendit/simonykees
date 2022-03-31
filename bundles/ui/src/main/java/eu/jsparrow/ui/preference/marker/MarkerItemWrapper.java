@@ -3,6 +3,13 @@ package eu.jsparrow.ui.preference.marker;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A recursive data structure for the nodes of the {@link CheckboxTreeViewer} of
+ * the markers preference page.
+ * 
+ * @since 4.10.0
+ *
+ */
 public class MarkerItemWrapper {
 	private MarkerItemWrapper parent;
 	private boolean isParent;

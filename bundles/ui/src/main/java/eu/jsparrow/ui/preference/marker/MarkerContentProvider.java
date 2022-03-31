@@ -5,7 +5,13 @@ import java.util.Comparator;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
-public 	class MarkerContentProvider implements ITreeContentProvider {
+/**
+ * A content provider for the markers preference page tree.
+ * 
+ * @since 4.10.0
+ *
+ */
+public class MarkerContentProvider implements ITreeContentProvider {
 
 	@Override
 	public Object[] getElements(Object inputElement) {

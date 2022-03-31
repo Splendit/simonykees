@@ -538,6 +538,7 @@ public class Messages extends NLS {
 	public static String SimonykeesMarkersPreferencePage_disableAll;
 	public static String SimonykeesMarkersPreferencePage_enableAll;
 	public static String SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText;
+	public static String SimonykeesMarkersPreferencePage_searchLabelMessage;
 	public static String SimonykeesMessageDialog_bugreport_email;
 	public static String SimonykeesMessageDialog_default_error_message;
 	public static String SimonykeesMessageDialog_open_browser_error_message;

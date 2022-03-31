@@ -63,7 +63,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		searchComposite.setLayout(new GridLayout(1, true));
 
 		Text searchField = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
-		searchField.setMessage("Search");
+		searchField.setMessage(Messages.SimonykeesMarkersPreferencePage_searchLabelMessage);
 		GridData searchFieldGridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
 		searchFieldGridData.widthHint = 180;
 		searchField.setLayoutData(searchFieldGridData);

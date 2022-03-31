@@ -17,8 +17,18 @@ import org.eclipse.swt.widgets.Text;
 
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.ui.preference.SimonykeesMarkersPreferencePage;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 
+/**
+ * Wraps a {@link CheckboxTreeViewer} that is used for de/activating markers in
+ * the {@link SimonykeesMarkersPreferencePage}. Provides functionalities for
+ * performing bulk updates in the tree and also for searching markers by
+ * name/tag.
+ * 
+ * @since 4.10.0
+ *
+ */
 public class CheckboxTreeViewerWrapper {
 
 	private CheckboxTreeViewer checkboxTreeViewer;
@@ -28,6 +38,17 @@ public class CheckboxTreeViewerWrapper {
 		this.checkboxTreeViewer = checkboxTreeViewer;
 	}
 
+	/**
+	 * Creates an entry in the tree for each marker. Markers are grouped in
+	 * subtrees by their {@link Tag}s. Markers that contain multiple tags are
+	 * shown in the all the corresponding subtrees.
+	 * 
+	 * @param allMarkerDescriptions
+	 *            a map all marker IDs to their corresponding rule description.
+	 * @param allActiveMarkers
+	 *            the list of all markers that are activated. This can always be
+	 *            taken from {@link SimonykeesPreferenceManager}.
+	 */
 	public void populateCheckboxTreeView(Map<String, RuleDescription> allMarkerDescriptions,
 			List<String> allActiveMarkers) {
 
@@ -67,6 +88,12 @@ public class CheckboxTreeViewerWrapper {
 
 	}
 
+	/**
+	 * Activates the given list of markers and deactivates the rest.
+	 * 
+	 * @param allActiveMarkers
+	 *            the marker IDs to be activated.
+	 */
 	public void selectMarkers(List<String> allActiveMarkers) {
 		bulkUpdate(false);
 
@@ -133,6 +160,14 @@ public class CheckboxTreeViewerWrapper {
 		return map;
 	}
 
+	/**
+	 * Creates a listener to check and uncheck markers in the
+	 * {@link CheckboxTreeViewer}. Markers with the same ID occurring in
+	 * multiple subtrees are simultaneously checked/unchecked.
+	 * 
+	 * @param event
+	 *            the generated event.
+	 */
 	public void createCheckListener(CheckStateChangedEvent event) {
 		MarkerItemWrapper treeEntryWrapper = (MarkerItemWrapper) event.getElement();
 		boolean checked = event.getChecked();
@@ -168,6 +203,14 @@ public class CheckboxTreeViewerWrapper {
 		}
 	}
 
+	/**
+	 * The listener functionality for modifying the search field in
+	 * {@link SimonykeesMarkersPreferencePage}. As soon as the search field is
+	 * modified, the tree view is converted into a flat view.
+	 * 
+	 * @param modifyEvent
+	 *            the generated event.
+	 */
 	public void createSearchFieldModifyListener(ModifyEvent modifyEvent) {
 		Text source = (Text) modifyEvent.getSource();
 		String searchText = source.getText();
@@ -187,8 +230,8 @@ public class CheckboxTreeViewerWrapper {
 						StringUtils.lowerCase(child.getName()),
 						StringUtils.lowerCase(searchText));
 				boolean alreadyInResult = searchResult.stream()
-					.anyMatch(r -> r.getMarkerId()
-						.equals(child.getMarkerId()));
+					.map(MarkerItemWrapper::getMarkerId)
+					.anyMatch(r -> r.equals(child.getMarkerId()));
 				if ((categoryMatch || markerMatch) && !alreadyInResult) {
 					searchResult.add(child);
 				}
@@ -200,6 +243,13 @@ public class CheckboxTreeViewerWrapper {
 
 	}
 
+	/**
+	 * Activates or deactivates all the entries of the
+	 * {@link CheckboxTreeViewer}. The preference store is updated accordingly.
+	 * 
+	 * @param selection
+	 *            whether the markers should be activated or deactivated.
+	 */
 	public void bulkUpdate(boolean selection) {
 		allItems.stream()
 			.flatMap(item -> item.getChildern()
