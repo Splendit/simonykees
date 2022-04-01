@@ -10,7 +10,6 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
@@ -23,7 +22,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.exception.visitor.UnexpectedKindOfBindingException;
 import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -51,7 +49,7 @@ public class TypeReferencesVisitor extends ASTVisitor {
 	 * the static modifier has been added.
 	 */
 	private static ITypeBinding getNonParameterizedTypeErasure(ITypeBinding typeBinding) {
-		ITypeBinding erasure = typeBinding.getErasure();
+		ITypeBinding erasure = typeBinding;
 		while (erasure.isParameterizedType()) {
 			erasure = erasure.getErasure();
 		}
@@ -60,7 +58,6 @@ public class TypeReferencesVisitor extends ASTVisitor {
 
 	public TypeReferencesVisitor(AbstractTypeDeclaration targetTypeDeclaration) {
 		this.targetTypeDeclaration = targetTypeDeclaration;
-
 		SimpleName name = targetTypeDeclaration.getName();
 		this.targetTypeIdentifier = name.getIdentifier();
 		this.targetTypeBindingErasure = getNonParameterizedTypeErasure(this.targetTypeDeclaration.resolveBinding());
@@ -72,17 +69,44 @@ public class TypeReferencesVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(PackageDeclaration node) {
+		return false;
+	}
+
+	@Override
 	public boolean visit(ThisExpression node) {
-		if (isActiveThisReference(node)) {
-			typeReferenceFound = true;
+		try {
+			if (isActiveThisReference(node)) {
+				typeReferenceFound = true;
+				return false;
+			}
+		} catch (UnresolvedTypeBindingException e) {
+			logger.debug(e.getMessage(), e);
+			unresolvedReferenceFound = true;
 			return false;
 		}
 		return true;
 	}
 
-	private boolean isActiveThisReference(ThisExpression thisExpression) {
+	@Override
+	public boolean visit(SimpleName simpleName) {
+		try {
+			typeReferenceFound = isTargetTypeReference(simpleName);
+		} catch (UnresolvedTypeBindingException e) {
+			logger.debug(e.getMessage(), e);
+			unresolvedReferenceFound = true;
+		}
+		return false;
+	}
 
-		ITypeBinding thisTypeBindingErasure = getNonParameterizedTypeErasure(thisExpression.resolveTypeBinding());
+	private boolean isActiveThisReference(ThisExpression thisExpression) throws UnresolvedTypeBindingException {
+
+		ITypeBinding typeBinding = thisExpression.resolveTypeBinding();
+		if (typeBinding == null) {
+			throw new UnresolvedTypeBindingException("The binding of the reference candidate cannot be resolved."); //$NON-NLS-1$
+		}
+
+		ITypeBinding thisTypeBindingErasure = getNonParameterizedTypeErasure(typeBinding);
 		if (ClassRelationUtil.compareITypeBinding(thisTypeBindingErasure, targetTypeBindingErasure)) {
 			StructuralPropertyDescriptor locationInParent = thisExpression.getLocationInParent();
 			return locationInParent != FieldAccess.EXPRESSION_PROPERTY &&
@@ -91,22 +115,10 @@ public class TypeReferencesVisitor extends ASTVisitor {
 		return false;
 	}
 
-	@Override
-	public boolean visit(SimpleName simpleName) {
-		try {
-			typeReferenceFound = isTargetTypeReference(simpleName);
-		} catch (UnresolvedTypeBindingException | UnexpectedKindOfBindingException e) {
-			logger.debug(e.getMessage(), e);
-			unresolvedReferenceFound = true;
-		}
-		return false;
-	}
-
 	private boolean isTargetTypeReference(SimpleName simpleName)
-			throws UnresolvedTypeBindingException, UnexpectedKindOfBindingException {
+			throws UnresolvedTypeBindingException {
 
-		if (simpleName.getLocationInParent() == PackageDeclaration.NAME_PROPERTY ||
-				simpleName.getLocationInParent() == TypeDeclaration.NAME_PROPERTY ||
+		if (simpleName.getLocationInParent() == TypeDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == EnumDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == EnumConstantDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == AnnotationTypeDeclaration.NAME_PROPERTY ||
@@ -114,6 +126,11 @@ public class TypeReferencesVisitor extends ASTVisitor {
 				simpleName.getLocationInParent() == MethodDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY) {
+			return false;
+		}
+
+		if (!simpleName.getIdentifier()
+			.equals(targetTypeIdentifier)) {
 			return false;
 		}
 
@@ -126,30 +143,12 @@ public class TypeReferencesVisitor extends ASTVisitor {
 		}
 
 		int kind = binding.getKind();
-		if (kind == IBinding.PACKAGE) {
+		if (kind != IBinding.TYPE) {
 			return false;
 		}
-		if (kind == IBinding.TYPE) {
-			ITypeBinding typeBinding = getNonParameterizedTypeErasure((ITypeBinding) binding);
-			return ClassRelationUtil.compareITypeBinding(typeBinding, targetTypeBindingErasure);
-		}
-		if (kind == IBinding.VARIABLE) {
-			IVariableBinding variableBinding = (IVariableBinding) binding;
-			if (variableBinding.isField()) {
-				ITypeBinding declaringClass = getNonParameterizedTypeErasure(variableBinding.getDeclaringClass());
-				if (ClassRelationUtil.compareITypeBinding(declaringClass, targetTypeBindingErasure)) {
-					AbstractTypeDeclaration typeDeclarationSurroundingSimpleName = ASTNodeUtil
-						.getSpecificAncestor(simpleName, AbstractTypeDeclaration.class);
-					return typeDeclarationSurroundingSimpleName != targetTypeDeclaration;
-				}
-			}
-			ITypeBinding variableType = getNonParameterizedTypeErasure(variableBinding.getType());
-			return ClassRelationUtil.compareITypeBinding(variableType, targetTypeBindingErasure);
-		}
-		if (kind == IBinding.METHOD) {
-			return false;
-		}
-		throw new UnexpectedKindOfBindingException("Unexpected or unknown kind of binding."); //$NON-NLS-1$
+		ITypeBinding typeBinding = getNonParameterizedTypeErasure((ITypeBinding) binding);
+		return ClassRelationUtil.compareITypeBinding(typeBinding, targetTypeBindingErasure);
+
 	}
 
 	public boolean typeReferenceFound() {

@@ -517,4 +517,147 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 		assertEquals("ClassWithMemberAccessQualifiedByThis", removedUnusedTypeName);
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"		int getXOfNestedInnerOfNewNestedOuter() {\n" +
+					"			return new NestedOuter().nestedInner.x;\n" +
+					"		}\n" +
+					"\n" +
+					"		public class NestedOuter {\n" +
+					"			NestedInner nestedInner = new NestedInner();\n" +
+					"\n" +
+					"			private class NestedInner {\n" +
+					"				int x = 0;\n" +
+					"			}\n" +
+					"		}",
+			"" +
+					"		public class NestedOuter {\n" +
+					"\n" +
+					"			private class NestedInner {\n" +
+					"				int getXOfNestedInnerOfNewNestedOuter() {\n" +
+					"					return new NestedOuter().nestedInner.x;\n" +
+					"				}\n" +
+					"\n" +
+					"				int x = 0;\n" +
+					"			}\n" +
+					"\n" +
+					"			NestedInner nestedInner = new NestedInner();\n" +
+					"		}",
+			"" +
+					"	int x = NestedClass.NestedClassWithStaticField.ZERO;\n" +
+					"\n" +
+					"	static class NestedClass {\n" +
+					"		private static class NestedClassWithStaticField {\n" +
+					"			static final int ZERO = 0;\n" +
+					"		}\n" +
+					"	}",
+			"" +
+					"	int x = NestedClass.NestedClassWithStaticMethod.getZero();\n" +
+					"\n" +
+					"	static class NestedClass {\n" +
+					"		private static class NestedClassWithStaticMethod {\n" +
+					"			static int getZero() {\n" +
+					"				return 0;\n" +
+					"			}\n" +
+					"		}\n" +
+					"	}\n" +
+					"",
+	})
+	void testClassWithMembersReferencedOutside_shouldNotBeRemoved(String classWithMembersReferencedOutside)
+			throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithMembersReferencedOutside);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertTrue(removedUnusedTypes.isEmpty());
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"wrapperFields.wrapperOfInteger",
+			"wrapperFields.wrapperOfWildCard",
+			"wrapperFields.wrapperOfWildCardExtendsCharSequence",
+			"wrapperFields.wrapperOfWildCardSuperCharSequence",
+			"wrapperFields.getWrapperOfWildCardExtendsCharSequence()",
+	})
+	void researchGenerics_shouldNotBeRemoved(String initializer)
+			throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String code = "" +
+				"	WrapperFields wrapperFields = new WrapperFields();\n"
+				+ "\n"
+				+ "	Object o = " + initializer + ";\n"
+				+ "\n"
+				+ "	class WrapperFields {\n"
+				+ "		Wrapper<Integer> wrapperOfInteger;\n"
+				+ "		Wrapper<?> wrapperOfWildCard;\n"
+				+ "		Wrapper<? extends CharSequence> wrapperOfWildCardExtendsCharSequence;\n"
+				+ "		Wrapper<? super CharSequence> wrapperOfWildCardSuperCharSequence;\n"
+				+ "\n"
+				+ "		<T extends Wrapper<? extends CharSequence>> T getWrapperOfWildCardExtendsCharSequence() {\n"
+				+ "			return null;\n"
+				+ "		}\n"
+				+ "\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	private class Wrapper<T> {\n"
+				+ "		T value;\n"
+				+ "	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, code);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertTrue(removedUnusedTypes.isEmpty());
+
+	}
+
+	/**
+	 * TODO: replace this test by a rules test where
+	 * SubclassOfClassWithStaticMethod is declared in another compilation unit.
+	 */
+	@Test
+	void testWitjImportedStaticMethodOfSubClass_shouldNotBeRemoved() throws Exception {
+
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("package-private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		/**
+		 * Problematic testing method, but demonstrating that type reference can
+		 * already be found at the level of import declarations!
+		 */
+		defaultFixture.addImport("fixturepackage." + DEFAULT_TYPE_DECLARATION_NAME +
+				".SubclassOfClassWithStaticMethod.getZero", true, false);
+
+		String classWithAnnotation = "" +
+				"	int x = getZero();\n"
+				+ "\n"
+				+ "	static class NestedClassWithStaticMethod {\n"
+				+ "		static int getZero() {\n"
+				+ "			return 0;\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	public static class SubclassOfClassWithStaticMethod extends NestedClassWithStaticMethod {\n"
+				+ "\n"
+				+ "	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithAnnotation);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertTrue(removedUnusedTypes.isEmpty());
+
+	}
+
 }
