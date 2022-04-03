@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -58,6 +59,22 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
+
+		if (typeDeclaration.getLocationInParent() == CompilationUnit.TYPES_PROPERTY) {
+			IJavaElement javaElement = compilationUnit.getJavaElement();
+			String mainClassName = javaElement.getElementName();
+			int lastIndexOfFileExtension = mainClassName.lastIndexOf(".java"); //$NON-NLS-1$
+			mainClassName = mainClassName.substring(0, lastIndexOfFileExtension);
+			if (typeDeclaration.getName()
+				.getIdentifier()
+				.equals(mainClassName)) {
+				int topLevelTypesCount = compilationUnit.types()
+					.size();
+				if (topLevelTypesCount > 1) {
+					return true;
+				}
+			}
+		}
 
 		TypeDeclarationStatement typeDeclarationStatement = ASTNodeUtil.getSpecificAncestor(typeDeclaration,
 				TypeDeclarationStatement.class);
