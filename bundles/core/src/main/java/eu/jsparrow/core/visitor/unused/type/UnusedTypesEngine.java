@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.visitor.renaming.ReferenceSearchMatch;
 import eu.jsparrow.core.visitor.unused.JavaElementSearchEngine;
 import eu.jsparrow.core.visitor.utils.SearchScopeFactory;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 public class UnusedTypesEngine {
@@ -101,6 +102,11 @@ public class UnusedTypesEngine {
 	private UnusedTypeReferenceSearchResult searchReferences(AbstractTypeDeclaration typeDeclaration,
 			IJavaProject project,
 			Map<IPath, CompilationUnit> cache) {
+		CompilationUnit compilationUnitEnclosingType = ASTNodeUtil.getSpecificAncestor(typeDeclaration,
+				CompilationUnit.class);
+		if(compilationUnitEnclosingType == null) {
+			return new UnusedTypeReferenceSearchResult(false, true);
+		}
 		IJavaElement[] searchScope = createSearchScope(scope, project);
 		JavaElementSearchEngine referencesSearchEngine = new JavaElementSearchEngine(searchScope);
 		SimpleName name = typeDeclaration.getName();
@@ -116,13 +122,14 @@ public class UnusedTypesEngine {
 		if (!references.isPresent()) {
 			return new UnusedTypeReferenceSearchResult(false, true);
 		}
+
 		Set<ICompilationUnit> targetICUs = referencesSearchEngine.getTargetIJavaElements();
 
 		for (ICompilationUnit iCompilationUnit : targetICUs) {
 			IPath path = iCompilationUnit.getPath();
 			CompilationUnit compilationUnit = cache.computeIfAbsent(path,
 					iPath -> RefactoringUtil.parse(iCompilationUnit));
-			TypeReferencesVisitor visitor = new TypeReferencesVisitor(typeDeclaration);
+			TypeReferencesVisitor visitor = new TypeReferencesVisitor(typeDeclaration, compilationUnitEnclosingType);
 			compilationUnit.accept(visitor);
 			if (visitor.typeReferenceFound() || visitor.hasUnresolvedReference()) {
 				return new UnusedTypeReferenceSearchResult(true, false);
