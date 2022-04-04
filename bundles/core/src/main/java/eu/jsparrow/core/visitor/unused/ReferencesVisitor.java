@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,41 +80,37 @@ public class ReferencesVisitor extends ASTVisitor {
 		if (locationInParent == VariableDeclarationFragment.NAME_PROPERTY) {
 			return false;
 		}
-		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment) simpleName.getParent();
-			Optional<ExpressionStatement> reassignment = SafelyRemoveable.isSafelyRemovable(assignment, options);
-			reassignment.ifPresent(reassignments::add);
-			if (reassignment.isPresent()) {
-				return false;
-			}
 
-		} else if (locationInParent == FieldAccess.NAME_PROPERTY) {
-			FieldAccess fieldAccess = (FieldAccess) simpleName.getParent();
-			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(fieldAccess);
-			reassignment.ifPresent(reassignments::add);
-			if (reassignment.isPresent()) {
-				return false;
-			}
-		} else if (locationInParent == QualifiedName.NAME_PROPERTY) {
-			QualifiedName qualifiedName = (QualifiedName) simpleName.getParent();
-			Optional<ExpressionStatement> reassignment = isSafelyRemovableReassignment(qualifiedName);
-			reassignment.ifPresent(reassignments::add);
-			if (reassignment.isPresent()) {
-				return false;
-			}
-
+		Expression outermostExpression = findOutermostExpression(simpleName);
+		Optional<ExpressionStatement> reassignment = SafelyRemoveable.findSafelyRemovableReassignment(outermostExpression, options);
+		reassignment.ifPresent(reassignments::add);
+		if (reassignment.isPresent()) {
+			return false;
 		}
 
 		activeReferenceFound = true;
 		return true;
 	}
 
-	private Optional<ExpressionStatement> isSafelyRemovableReassignment(Expression expression) {
-		if (expression.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment) expression.getParent();
-			return SafelyRemoveable.isSafelyRemovable(assignment, options);
+	Expression findOutermostExpression(SimpleName simpleName) {
+		StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
+		Expression outermostExpression;
+
+		if (locationInParent == FieldAccess.NAME_PROPERTY) {
+			outermostExpression = (FieldAccess) simpleName.getParent();
+		} else if (locationInParent == SuperFieldAccess.NAME_PROPERTY) {
+			outermostExpression = (SuperFieldAccess) simpleName.getParent();
+		} else if (locationInParent == QualifiedName.NAME_PROPERTY) {
+			outermostExpression = (QualifiedName) simpleName.getParent();
+		} else {
+			outermostExpression = simpleName;
 		}
-		return Optional.empty();
+
+		while (outermostExpression.getLocationInParent() == ArrayAccess.ARRAY_PROPERTY) {
+			outermostExpression = (ArrayAccess) outermostExpression.getParent();
+		}
+
+		return outermostExpression;
 	}
 
 	private boolean isTargetFieldReference(SimpleName simpleName) throws UnresolvedTypeBindingException {
