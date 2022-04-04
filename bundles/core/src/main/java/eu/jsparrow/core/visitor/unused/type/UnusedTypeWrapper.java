@@ -82,7 +82,8 @@ public class UnusedTypeWrapper implements UnusedClassMemberWrapper {
 		// because there are no external references
 		// as soon as there is any reference on a type declaration, it cannot be
 		// removed.
-		return Collections.emptyList();
+		
+		return Collections.singletonList((ICompilationUnit)compilationUnit.getJavaElement()) ;
 	}
 
 	public TextEditGroup getTextEditGroup(ICompilationUnit iCompilationUnit) {
