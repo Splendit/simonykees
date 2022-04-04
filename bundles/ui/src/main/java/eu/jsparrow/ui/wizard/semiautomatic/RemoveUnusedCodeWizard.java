@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
@@ -36,7 +35,6 @@ import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedFieldsRule;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedMethodsRule;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedTypesRule;
-import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 import eu.jsparrow.core.visitor.unused.UnusedFieldsEngine;
 import eu.jsparrow.core.visitor.unused.method.UnusedMethodWrapper;
@@ -146,16 +144,19 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 
 				boolean fieldsChecked = hasClassMemberOptionsChecked(model, "fields"); //$NON-NLS-1$
 				boolean methodsChecked = hasClassMemberOptionsChecked(model, "methods"); //$NON-NLS-1$
+				boolean typesChecked = hasClassMemberOptionsChecked(model, "class"); //$NON-NLS-1$
 
-				int fieldsSubmonitorSplit = calcFieldsSubMonitorSplit(fieldsChecked, methodsChecked);
+				int fieldsSubmonitorSplit = calcFieldsSubMonitorSplit(fieldsChecked, methodsChecked, typesChecked);
+				int typesSubmonitorSplit = calcFieldsSubMonitorSplit(typesChecked, methodsChecked, typesChecked);
+				int methodSubmonitorSplit = 70 - (fieldsSubmonitorSplit + typesSubmonitorSplit);
 
 				Map<String, Boolean> options = model.getOptionsMap();
 
 				List<UnusedFieldWrapper> unusedFields = findUnusedFields(engine, subMonitor, fieldsSubmonitorSplit,
 						options);
 				List<UnusedMethodWrapper> unusedMethods = findUnusedMethods(unusedMethodsEngine, subMonitor,
-						fieldsSubmonitorSplit, options);
-				List<UnusedTypeWrapper> unusedTypes = findUnusedTypes(unusedTypeEngine, subMonitor, 10, options);
+						methodSubmonitorSplit, options);
+				List<UnusedTypeWrapper> unusedTypes = findUnusedTypes(unusedTypeEngine, subMonitor, typesSubmonitorSplit, options);
 
 				if (unusedFields.isEmpty() && unusedMethods.isEmpty() && unusedTypes.isEmpty()) {
 					WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
@@ -240,13 +241,13 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	}
 
 	private List<UnusedMethodWrapper> findUnusedMethods(UnusedMethodsEngine unusedMethodsEngine,
-			SubMonitor subMonitor, int fieldsSubmonitorSplit,
+			SubMonitor subMonitor, int methodsSubmonitorSplit,
 			Map<String, Boolean> options) {
 		boolean methodsChecked = hasClassMemberOptionsChecked(model, "methods"); //$NON-NLS-1$
 		if (!methodsChecked) {
 			return Collections.emptyList();
 		}
-		SubMonitor removeUnusedMethodsSubMonitor = subMonitor.split(70 - fieldsSubmonitorSplit);
+		SubMonitor removeUnusedMethodsSubMonitor = subMonitor.split(methodsSubmonitorSplit);
 		removeUnusedMethodsSubMonitor.setWorkRemaining(selectedJavaElements.size());
 		removeUnusedMethodsSubMonitor.setTaskName(Messages.RemoveUnusedCodeWizard_findingUnusedMethods);
 
@@ -260,14 +261,14 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	}
 	
 	private List<UnusedTypeWrapper> findUnusedTypes(UnusedTypesEngine unusedTypeEngine, SubMonitor subMonitor,
-			int i, Map<String, Boolean> options) {
+			int typesSubmonitorSplit, Map<String, Boolean> options) {
 		
 
 		if(!hasClassMemberOptionsChecked(model, "class")) {
 			return Collections.emptyList();
 		}
 		
-		SubMonitor removeUnusedTypesSubMonitor = subMonitor.split(10);
+		SubMonitor removeUnusedTypesSubMonitor = subMonitor.split(typesSubmonitorSplit);
 		removeUnusedTypesSubMonitor.setWorkRemaining(selectedJavaElements.size());
 		removeUnusedTypesSubMonitor.setTaskName("Finding unused types");
 		
@@ -290,11 +291,15 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 			.anyMatch(value -> value);
 	}
 
-	private int calcFieldsSubMonitorSplit(boolean fieldsChecked, boolean methodsChecked) {
-		if (fieldsChecked && methodsChecked) {
-			return 30;
-		} else if (fieldsChecked) {
-			return 70;
+	private int calcFieldsSubMonitorSplit(boolean fieldsChecked, boolean methodsChecked, boolean typesChecked) {
+		if(fieldsChecked) {
+			if(methodsChecked && typesChecked) {
+				return 20;
+			} else if(methodsChecked || typesChecked) {
+				return 30;
+			} else {
+				return 70;
+			}
 		} else {
 			return 0;
 		}
