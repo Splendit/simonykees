@@ -28,8 +28,6 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 
-	private static final boolean USE_EXTENDED = false;
-
 	private CompilationUnit compilationUnit;
 	private Map<String, Boolean> options;
 
@@ -128,17 +126,7 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 			return false;
 		}
 
-		/*
-		 * TODO: discuss advantages/disadvantages and decide whether to use
-		 * TypeReferencesVisitorExtended or TypeReferencesVisitor.
-		 */
-		if (USE_EXTENDED) {
-			TypeReferencesVisitorExtended typeReferencesVisitor = new TypeReferencesVisitorExtended(typeDeclaration);
-			typeReferencesScope.accept(typeReferencesVisitor);
-			return !typeReferencesVisitor.typeReferenceFound() && !typeReferencesVisitor.hasUnresolvedReference();
-		}
-
-		TypeReferencesVisitor typeReferencesVisitor = new TypeReferencesVisitor(typeDeclaration);
+		TypeReferencesVisitor typeReferencesVisitor = new TypeReferencesVisitor(typeDeclaration, compilationUnit);
 		typeReferencesScope.accept(typeReferencesVisitor);
 		return !typeReferencesVisitor.typeReferenceFound() && !typeReferencesVisitor.hasUnresolvedReference();
 	}

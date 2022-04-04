@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -12,19 +13,17 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * Finds out whether there are references to a specified type declaration.
@@ -34,33 +33,19 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  */
 public class TypeReferencesVisitor extends ASTVisitor {
 
-	private static final Logger logger = LoggerFactory.getLogger(TypeReferencesVisitor.class);
-
-	private AbstractTypeDeclaration targetTypeDeclaration;
+	private final AbstractTypeDeclaration targetTypeDeclaration;
+	private final CompilationUnit targetTypeDeclarationCompilationUnit;
 	private String targetTypeIdentifier;
 
 	private boolean typeReferenceFound = false;
 	private boolean unresolvedReferenceFound = false;
-	private ITypeBinding targetTypeBindingErasure;
 
-	/**
-	 * Private instance method "getNonParameterizedTypeErasure" of class
-	 * ChainAssertJAssertThatStatementsASTVisitor has been copied to here and
-	 * the static modifier has been added.
-	 */
-	private static ITypeBinding getNonParameterizedTypeErasure(ITypeBinding typeBinding) {
-		ITypeBinding erasure = typeBinding;
-		while (erasure.isParameterizedType()) {
-			erasure = erasure.getErasure();
-		}
-		return erasure;
-	}
-
-	public TypeReferencesVisitor(AbstractTypeDeclaration targetTypeDeclaration) {
+	public TypeReferencesVisitor(AbstractTypeDeclaration targetTypeDeclaration,
+			CompilationUnit targetTypeDeclarationCompilationUnit) {
 		this.targetTypeDeclaration = targetTypeDeclaration;
+		this.targetTypeDeclarationCompilationUnit = targetTypeDeclarationCompilationUnit;
 		SimpleName name = targetTypeDeclaration.getName();
 		this.targetTypeIdentifier = name.getIdentifier();
-		this.targetTypeBindingErasure = getNonParameterizedTypeErasure(this.targetTypeDeclaration.resolveBinding());
 	}
 
 	@Override
@@ -75,80 +60,99 @@ public class TypeReferencesVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(ThisExpression node) {
-		try {
-			if (isActiveThisReference(node)) {
-				typeReferenceFound = true;
-				return false;
-			}
-		} catch (UnresolvedTypeBindingException e) {
-			logger.debug(e.getMessage(), e);
+		ITypeBinding typeBinding = node.resolveTypeBinding();
+		if (typeBinding == null) {
 			unresolvedReferenceFound = true;
-			return false;
+		} else if (isActiveThisReference(node, typeBinding)) {
+			typeReferenceFound = true;
 		}
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean visit(SimpleName simpleName) {
-		try {
-			typeReferenceFound = isTargetTypeReference(simpleName);
-		} catch (UnresolvedTypeBindingException e) {
-			logger.debug(e.getMessage(), e);
+		if (!isDeclarationNameProperty(simpleName) && simpleName.getIdentifier()
+			.equals(targetTypeIdentifier)) {
+			IBinding binding = simpleName.resolveBinding();
+			if (binding != null) {
+				typeReferenceFound = isActiveReferenceByName(simpleName, binding);
+
+			} else if (!ASTNodeUtil.isLabel(simpleName)) {
+				unresolvedReferenceFound = true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean visit(QualifiedName qualifiedName) {
+		IBinding binding = qualifiedName.resolveBinding();
+		if (binding == null) {
 			unresolvedReferenceFound = true;
+			return false;
 		}
-		return false;
+
+		if (binding.getKind() == IBinding.PACKAGE) {
+			return false;
+		}
+
+		String simpleNameIdentifier = qualifiedName.getName()
+			.getIdentifier();
+		if (simpleNameIdentifier.equals(targetTypeIdentifier) && isActiveReferenceByName(qualifiedName, binding)) {
+			typeReferenceFound = true;
+			return false;
+		}
+
+		return true;
 	}
 
-	private boolean isActiveThisReference(ThisExpression thisExpression) throws UnresolvedTypeBindingException {
+	private boolean isActiveThisReference(ThisExpression thisExpression, ITypeBinding typeBinding) {
 
-		ITypeBinding typeBinding = thisExpression.resolveTypeBinding();
-		if (typeBinding == null) {
-			throw new UnresolvedTypeBindingException("The binding of the reference candidate cannot be resolved."); //$NON-NLS-1$
+		if (!isBindingReferencingTargetType(typeBinding)) {
+			return false;
 		}
 
-		ITypeBinding thisTypeBindingErasure = getNonParameterizedTypeErasure(typeBinding);
-		if (ClassRelationUtil.compareITypeBinding(thisTypeBindingErasure, targetTypeBindingErasure)) {
-			StructuralPropertyDescriptor locationInParent = thisExpression.getLocationInParent();
-			return locationInParent != FieldAccess.EXPRESSION_PROPERTY &&
-					locationInParent != MethodInvocation.EXPRESSION_PROPERTY;
-		}
-		return false;
+		StructuralPropertyDescriptor locationInParent = thisExpression.getLocationInParent();
+		return locationInParent != FieldAccess.EXPRESSION_PROPERTY &&
+				locationInParent != MethodInvocation.EXPRESSION_PROPERTY;
+
 	}
 
-	private boolean isTargetTypeReference(SimpleName simpleName)
-			throws UnresolvedTypeBindingException {
-
-		if (simpleName.getLocationInParent() == TypeDeclaration.NAME_PROPERTY ||
+	private boolean isDeclarationNameProperty(SimpleName simpleName) {
+		return simpleName.getLocationInParent() == TypeDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == EnumDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == EnumConstantDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == AnnotationTypeDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == AnnotationTypeMemberDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == MethodDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY ||
-				simpleName.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY) {
-			return false;
-		}
+				simpleName.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY;
+	}
 
-		if (!simpleName.getIdentifier()
-			.equals(targetTypeIdentifier)) {
-			return false;
-		}
-
-		IBinding binding = simpleName.resolveBinding();
-		if (binding == null) {
-			if (ASTNodeUtil.isLabel(simpleName)) {
-				return false;
-			}
-			throw new UnresolvedTypeBindingException("The binding of the reference candidate cannot be resolved."); //$NON-NLS-1$
-		}
-
+	private boolean isActiveReferenceByName(Name name, IBinding binding) {
 		int kind = binding.getKind();
 		if (kind != IBinding.TYPE) {
 			return false;
 		}
-		ITypeBinding typeBinding = getNonParameterizedTypeErasure((ITypeBinding) binding);
-		return ClassRelationUtil.compareITypeBinding(typeBinding, targetTypeBindingErasure);
+		if (!isBindingReferencingTargetType((ITypeBinding) binding)) {
+			return false;
+		}
 
+		if (name.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY
+				|| name.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY) {
+			AbstractTypeDeclaration enclosingTypeDeclaration = ASTNodeUtil
+				.getSpecificAncestor(name, AbstractTypeDeclaration.class);
+			boolean isEnclosedByTargetType = enclosingTypeDeclaration == targetTypeDeclaration;
+			if (isEnclosedByTargetType) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private boolean isBindingReferencingTargetType(ITypeBinding typeBinding) {
+		return targetTypeDeclarationCompilationUnit.findDeclaringNode(typeBinding) == targetTypeDeclaration;
 	}
 
 	public boolean typeReferenceFound() {
