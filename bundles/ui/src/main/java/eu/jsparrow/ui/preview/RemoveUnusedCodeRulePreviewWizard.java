@@ -65,18 +65,15 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	private StandaloneStatisticsMetadata standaloneStatisticsMetadata;
 
 	public RemoveUnusedCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline, 
-			StandaloneStatisticsMetadata standaloneStatisticsMetadata, 
-			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges,
-			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> methodDocumentChanges,
-			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> unusedTypeChanges,
+			StandaloneStatisticsMetadata standaloneStatisticsMetadata,
 			List<ICompilationUnit> targetCompilationUnits, 
 			RemoveUnusedFieldsRule rule,
 			RemoveUnusedMethodsRule unusedMethodsRule, 
-			RemoveUnusedTypesRule unusedTypesRule) {
+			RemoveUnusedTypesRule unusedTypesRule) throws JavaModelException {
 		this.refactoringPipeline = refactoringPipeline;
-		this.documentChanges = documentChanges;
-		this.methodDocumentChanges = methodDocumentChanges;
-		this.typeDocumentChanges = unusedTypeChanges;
+		this.documentChanges = rule.computeDocumentChangesPerField();
+		this.methodDocumentChanges = unusedMethodsRule.computeDocumentChangesPerMethod();
+		this.typeDocumentChanges = unusedTypesRule.computeDocumentChangesPerType();
 		this.targetCompilationUnits = targetCompilationUnits;
 		this.originalDocuments = targetCompilationUnits.stream()
 			.map(ICompilationUnit::getPrimary)

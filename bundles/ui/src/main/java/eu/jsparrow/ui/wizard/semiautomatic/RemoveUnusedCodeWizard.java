@@ -336,24 +336,6 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	}
 
 	private void createAndShowPreviewWizard() {
-		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> changes;
-		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> unusedMethodChanges;
-		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> unusedTypeChanges;
-		try {
-			changes = rule.computeDocumentChangesPerField();
-			unusedMethodChanges = unusedMethodsRule.computeDocumentChangesPerMethod();
-			unusedTypeChanges = unusedTypesRule.computeDocumentChangesPerType();
-			synchronizeWithUIShowRefactoringPreviewWizard(changes, unusedMethodChanges, unusedTypeChanges);
-		} catch (JavaModelException e) {
-			logger.error("Cannot create document for displaying changes - {} ", e.getMessage(), e); //$NON-NLS-1$
-		}
-
-	}
-
-	private void synchronizeWithUIShowRefactoringPreviewWizard(
-			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> unusedFieldChanges,
-			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> unusedMethodChanges, 
-			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> unusedTypeChanges) {
 
 		String message = NLS.bind(Messages.RemoveUnusedCodeWizard_endRefactoringInProjectMessage, this.getClass()
 			.getSimpleName(), selectedJavaProject.getElementName());
@@ -372,10 +354,17 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 				StandaloneStatisticsMetadata standaloneStatisticsMetadata = prepareStatisticsMetadata(
 						Collections.singletonList(selectedJavaProject));
 				List<ICompilationUnit> targetCompilationUnits = new ArrayList<>(allTargetCompilationUnits);
-				RemoveUnusedCodeRulePreviewWizard removeUnusedCodePreviewWizard = new RemoveUnusedCodeRulePreviewWizard(
-						refactoringPipeline,
-						standaloneStatisticsMetadata, unusedFieldChanges, unusedMethodChanges, unusedTypeChanges, targetCompilationUnits,
-						rule, unusedMethodsRule, unusedTypesRule);
+				RemoveUnusedCodeRulePreviewWizard removeUnusedCodePreviewWizard;
+				try {
+					removeUnusedCodePreviewWizard = new RemoveUnusedCodeRulePreviewWizard(
+							refactoringPipeline,
+							standaloneStatisticsMetadata, targetCompilationUnits,
+							rule, unusedMethodsRule, unusedTypesRule);
+				} catch (JavaModelException e) {
+					logger.error("Cannot create document for displaying changes - {} ", e.getMessage(), e); //$NON-NLS-1$
+					return;
+				}
+
 				final WizardDialog dialog = new WizardDialog(shell, removeUnusedCodePreviewWizard) {
 					@Override
 					protected void nextPressed() {
