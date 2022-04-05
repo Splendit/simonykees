@@ -232,6 +232,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 			refactoringPipeline.updateInitialSourceMap();
 			try {
 				refactoringPipeline.doRefactoring(monitor);
+				this.statisticsSection.updateForSelected();
 				if (monitor.isCanceled()) {
 					refactoringPipeline.clearStates();
 				}

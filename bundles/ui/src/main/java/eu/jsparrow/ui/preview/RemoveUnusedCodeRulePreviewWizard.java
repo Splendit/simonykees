@@ -287,6 +287,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 			refactoringPipeline.updateInitialSourceMap();
 			try {
 				refactoringPipeline.doRefactoring(monitor);
+				statisticsSection.updateForSelected();
 				if (monitor.isCanceled()) {
 					refactoringPipeline.clearStates();
 				}
