@@ -28,16 +28,21 @@ import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.license.api.LicenseType;
+import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
+import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
- * A wizard for displaying the changes made by rules that remove unused fields, methods, or classes. 
+ * A wizard for displaying the changes made by rules that remove unused fields,
+ * methods, or classes.
  * 
  * @since 4.8.0
  *
@@ -59,12 +64,14 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	private RefactoringSummaryWizardPage summaryPage;
 	private StatisticsSection statisticsSection;
 	private StandaloneStatisticsMetadata standaloneStatisticsMetadata;
+	private LicenseUtil licenseUtil = LicenseUtil.get();
+	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
 
-	public RemoveUnusedCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline, 
-			StandaloneStatisticsMetadata standaloneStatisticsMetadata, 
+	public RemoveUnusedCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline,
+			StandaloneStatisticsMetadata standaloneStatisticsMetadata,
 			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> methodDocumentChanges,
-			List<ICompilationUnit> targetCompilationUnits, 
+			List<ICompilationUnit> targetCompilationUnits,
 			RemoveUnusedFieldsRule rule,
 			RemoveUnusedMethodsRule unusedMethodsRule) {
 		this.refactoringPipeline = refactoringPipeline;
@@ -192,6 +199,20 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
+	@Override
+	public boolean canFinish() {
+		if (licenseUtil.isFreeLicense()) {
+			return super.canFinish();
+		}
+
+		LicenseValidationResult result = licenseUtil.getValidationResult();
+		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
+			return super.canFinish();
+		}
+		boolean enoughCredit = payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
+		return enoughCredit && super.canFinish();
+	}
+
 	/**
 	 * If page contains unchecked fields, remove uncheckedFields from metadata,
 	 * create and set to refactoringPipeline new RefactoringStates without
@@ -229,6 +250,8 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	private void commitChanges() {
 		try {
 			refactoringPipeline.commitRefactoring();
+			int sum = payPerUseCalculator.findTotalRequiredCredit(refactoringPipeline.getRules());
+			licenseUtil.reserveQuantity(sum);
 			Activator.setRunning(false);
 		} catch (RefactoringException | ReconcileException e) {
 			WizardMessageDialog.synchronizeWithUIShowError(e);
