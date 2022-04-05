@@ -130,7 +130,8 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		if (!privateChanges.isEmpty()) {
 			addPage(new RenamingRulePreviewWizardPage(privateChanges, originalDocuments, rule, canFinish()));
 		}
-		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsSection);
+		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model, canFinish(),
+				statisticsSection);
 		addPage(summaryPage);
 	}
 
@@ -174,7 +175,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		}
 		return true;
 	}
-	
+
 	@Override
 	public boolean performCancel() {
 		refactoringPipeline.clearStates();
