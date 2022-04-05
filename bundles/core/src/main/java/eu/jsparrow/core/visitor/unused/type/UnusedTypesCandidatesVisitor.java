@@ -32,6 +32,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 
 	private CompilationUnit compilationUnit;
+	private String mainClassName;
 	private Map<String, Boolean> options;
 
 	private List<UnusedTypeWrapper> unusedPrivateTypes = new ArrayList<>();
@@ -50,6 +51,10 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
+		IJavaElement javaElement = compilationUnit.getJavaElement();
+		String javaElementName = javaElement.getElementName();
+		int lastIndexOfFileExtension = javaElementName.lastIndexOf(".java"); //$NON-NLS-1$
+		this.mainClassName = javaElementName.substring(0, lastIndexOfFileExtension);
 		return true;
 	}
 
@@ -61,22 +66,6 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 
-		if (typeDeclaration.getLocationInParent() == CompilationUnit.TYPES_PROPERTY) {
-			IJavaElement javaElement = compilationUnit.getJavaElement();
-			String mainClassName = javaElement.getElementName();
-			int lastIndexOfFileExtension = mainClassName.lastIndexOf(".java"); //$NON-NLS-1$
-			mainClassName = mainClassName.substring(0, lastIndexOfFileExtension);
-			if (typeDeclaration.getName()
-				.getIdentifier()
-				.equals(mainClassName)) {
-				int topLevelTypesCount = compilationUnit.types()
-					.size();
-				if (topLevelTypesCount > 1) {
-					return true;
-				}
-			}
-		}
-
 		TypeDeclarationStatement typeDeclarationStatement = ASTNodeUtil.getSpecificAncestor(typeDeclaration,
 				TypeDeclarationStatement.class);
 
@@ -85,22 +74,33 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 			if (!localClassOption) {
 				return false;
 			}
-		} else if (!BodyDeclarationsUtil.hasSelectedAccessModifier(typeDeclaration, options)) {
-			return true;
-		}
-
-		ASTNode typeReferencesScope = typeDeclarationStatement != null ? typeDeclarationStatement.getParent()
-				: compilationUnit;
-
-		if (!analyzeUnusedTypeCandidate(typeDeclaration, typeReferencesScope)) {
-			return true;
-		}
-
-		if (typeDeclarationStatement != null) {
+			if (!analyzeUnusedTypeCandidate(typeDeclaration, typeDeclarationStatement.getParent())) {
+				return true;
+			}
 			UnusedTypeWrapper unusedTypeWrapper = new UnusedTypeWrapper(compilationUnit,
 					JavaAccessModifier.PRIVATE, typeDeclaration);
 			unusedLocalTypes.add(unusedTypeWrapper);
 			return false;
+		}
+
+		if (!BodyDeclarationsUtil.hasSelectedAccessModifier(typeDeclaration, options)) {
+			return true;
+		}
+		
+		if (typeDeclaration.getLocationInParent() == CompilationUnit.TYPES_PROPERTY) {
+			String typeDeclarationIdentifier = typeDeclaration.getName()
+				.getIdentifier();
+			if (typeDeclarationIdentifier.equals(mainClassName)) {
+				int topLevelTypesCount = compilationUnit.types()
+					.size();
+				if (topLevelTypesCount > 1) {
+					return true;
+				}
+			}
+		}
+
+		if (!analyzeUnusedTypeCandidate(typeDeclaration, compilationUnit)) {
+			return true;
 		}
 
 		int modifierFlags = typeDeclaration.getModifiers();
@@ -140,17 +140,22 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 	}
 
 	private boolean isSupportedBodyDeclaration(BodyDeclaration bodyDeclaration) {
-		if (bodyDeclaration.getNodeType() == ASTNode.FIELD_DECLARATION) {
-			if (UsefulAnnotations.hasUsefulAnnotations((FieldDeclaration) bodyDeclaration)) {
-				return false;
-			}
-		} else if (bodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
-			if (UsefulAnnotations.hasUsefulAnnotations((MethodDeclaration) bodyDeclaration)) {
-				return false;
-			}
-		} else if (bodyDeclaration.getNodeType() != ASTNode.INITIALIZER) {
+		if (bodyDeclaration.getNodeType() != ASTNode.FIELD_DECLARATION &&
+				bodyDeclaration.getNodeType() != ASTNode.METHOD_DECLARATION &&
+				bodyDeclaration.getNodeType() != ASTNode.INITIALIZER) {
 			return false;
 		}
+
+		if (bodyDeclaration.getNodeType() == ASTNode.FIELD_DECLARATION
+				&& UsefulAnnotations.hasUsefulAnnotations((FieldDeclaration) bodyDeclaration)) {
+			return false;
+		}
+
+		if (bodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION
+				&& UsefulAnnotations.hasUsefulAnnotations((MethodDeclaration) bodyDeclaration)) {
+			return false;
+		}
+
 		UnexpectedLocalDeclarationVisitor unexpectedLocalDeclarationVisitor = new UnexpectedLocalDeclarationVisitor();
 		bodyDeclaration.accept(unexpectedLocalDeclarationVisitor);
 		return !unexpectedLocalDeclarationVisitor.isUnexpectedLocalDeclarationFound();
