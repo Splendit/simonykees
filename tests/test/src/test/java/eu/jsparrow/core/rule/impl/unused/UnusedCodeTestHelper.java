@@ -22,11 +22,13 @@ import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 import eu.jsparrow.core.visitor.unused.UnusedFieldsEngine;
 import eu.jsparrow.core.visitor.unused.method.UnusedMethodWrapper;
 import eu.jsparrow.core.visitor.unused.method.UnusedMethodsEngine;
+import eu.jsparrow.core.visitor.unused.type.UnusedTypeWrapper;
+import eu.jsparrow.core.visitor.unused.type.UnusedTypesEngine;
 import eu.jsparrow.rules.common.RefactoringRule;
 
-public class UnusedFieldsTestHelper {
+public class UnusedCodeTestHelper {
 
-	private UnusedFieldsTestHelper() {
+	private UnusedCodeTestHelper() {
 		/*
 		 * Hide default constructor.
 		 */

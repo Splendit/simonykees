@@ -84,10 +84,10 @@ class RemoveUnusedFieldsRuleTest extends SingleRuleTest {
 		Path preRule = getPreRuleFile("unused/UnusedFields.java");
 		Path postRule = getPostRuleFile("UnusedFields.java", "unused");
 		
-		List<UnusedFieldWrapper> unusedFields = UnusedFieldsTestHelper.findFieldsToBeRemoved(PRERULE_UNUSED_PACKAGE, PRERULE_DIRECTORY);
+		List<UnusedFieldWrapper> unusedFields = UnusedCodeTestHelper.findFieldsToBeRemoved(PRERULE_UNUSED_PACKAGE, PRERULE_DIRECTORY);
 		RemoveUnusedFieldsRule rule = new RemoveUnusedFieldsRule(unusedFields);
 		
-		String refactoring = UnusedFieldsTestHelper.applyRemoveUnusedCodeRefactoring(rule, "eu.jsparrow.sample.preRule.unused", preRule, root);
+		String refactoring = UnusedCodeTestHelper.applyRemoveUnusedCodeRefactoring(rule, "eu.jsparrow.sample.preRule.unused", preRule, root);
 		String postRulePackage = getPostRulePackage("unused");
 		String actual = StringUtils.replace(refactoring, "package eu.jsparrow.sample.preRule.unused",
 				postRulePackage);
