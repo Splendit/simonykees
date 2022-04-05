@@ -51,10 +51,16 @@ public class UnusedTypesEngine {
 
 			UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(optionsMap);
 			compilationUnit.accept(visitor);
-			List<UnusedTypeWrapper> unusedPrivateMethods = visitor.getUnusedPrivateTypes();
+			List<UnusedTypeWrapper> unusedPrivateTypes = visitor.getUnusedPrivateTypes();
 			visitor.getUnusedLocalTypes();
-			if (!unusedPrivateMethods.isEmpty()) {
-				list.addAll(unusedPrivateMethods);
+			if (!unusedPrivateTypes.isEmpty()) {
+				list.addAll(unusedPrivateTypes);
+				targetCompilationUnits.add(icu);
+			}
+			
+			List<UnusedTypeWrapper> unusedLocalTypes = visitor.getUnusedLocalTypes();
+			if(!unusedLocalTypes.isEmpty()) {
+				list.addAll(unusedLocalTypes);
 				targetCompilationUnits.add(icu);
 			}
 

@@ -7,10 +7,12 @@ import java.util.Optional;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.text.edits.TextEditGroup;
 
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -51,7 +53,12 @@ public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (designated != null) {
 			TextEditGroup editGroup = designated.getTextEditGroup((ICompilationUnit) getCompilationUnit()
 				.getJavaElement());
-			astRewrite.remove(typeDeclaration, editGroup);
+			ASTNode nodeToRemove = typeDeclaration;
+			if (nodeToRemove.getLocationInParent() == TypeDeclarationStatement.DECLARATION_PROPERTY) {
+				astRewrite.remove(typeDeclaration.getParent(), editGroup);
+			} else {
+				astRewrite.remove(typeDeclaration, editGroup);
+			}
 			onRewrite();
 		}
 		return true;
