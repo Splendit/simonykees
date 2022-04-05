@@ -11,6 +11,8 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
@@ -18,6 +20,7 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.core.visitor.unused.BodyDeclarationsUtil;
+import eu.jsparrow.core.visitor.unused.UsefulAnnotations;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -89,7 +92,7 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 		ASTNode typeReferencesScope = typeDeclarationStatement != null ? typeDeclarationStatement.getParent()
 				: compilationUnit;
 
-		if (!isSupportedUnusedType(typeDeclaration, typeReferencesScope)) {
+		if (!analyzeUnusedTypeCandidate(typeDeclaration, typeReferencesScope)) {
 			return true;
 		}
 
@@ -116,14 +119,19 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 
 	}
 
-	private boolean isSupportedUnusedType(AbstractTypeDeclaration typeDeclaration, ASTNode typeReferencesScope) {
+	private boolean analyzeUnusedTypeCandidate(AbstractTypeDeclaration typeDeclaration, ASTNode typeReferencesScope) {
 		boolean hasAnnotations = BodyDeclarationsUtil.hasUsefulAnnotations(typeDeclaration);
 		if (hasAnnotations) {
 			return false;
 		}
 
-		if (containsUnsupportedDeclarations(typeDeclaration)) {
-			return false;
+		List<BodyDeclaration> bodyDeclarations = ASTNodeUtil.convertToTypedList(typeDeclaration.bodyDeclarations(),
+				BodyDeclaration.class);
+
+		for (BodyDeclaration bodyDeclaration : bodyDeclarations) {
+			if (!isSupportedBodyDeclaration(bodyDeclaration)) {
+				return false;
+			}
 		}
 
 		TypeReferencesVisitor typeReferencesVisitor = new TypeReferencesVisitor(typeDeclaration, compilationUnit);
@@ -131,22 +139,21 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 		return !typeReferencesVisitor.typeReferenceFound() && !typeReferencesVisitor.hasUnresolvedReference();
 	}
 
-	private boolean containsUnsupportedDeclarations(AbstractTypeDeclaration typeDeclaration) {
-		List<BodyDeclaration> bodyDeclarations = ASTNodeUtil.convertToTypedList(typeDeclaration.bodyDeclarations(),
-				BodyDeclaration.class);
-		for (BodyDeclaration bodyDeclaration : bodyDeclarations) {
-			if (bodyDeclaration.getNodeType() != ASTNode.FIELD_DECLARATION &&
-					bodyDeclaration.getNodeType() != ASTNode.METHOD_DECLARATION &&
-					bodyDeclaration.getNodeType() != ASTNode.INITIALIZER) {
-				return true;
+	private boolean isSupportedBodyDeclaration(BodyDeclaration bodyDeclaration) {
+		if (bodyDeclaration.getNodeType() == ASTNode.FIELD_DECLARATION) {
+			if (UsefulAnnotations.hasUsefulAnnotations((FieldDeclaration) bodyDeclaration)) {
+				return false;
 			}
-			UnexpectedLocalDeclarationVisitor unexpectedLocalDeclarationVisitor = new UnexpectedLocalDeclarationVisitor();
-			bodyDeclaration.accept(unexpectedLocalDeclarationVisitor);
-			if (unexpectedLocalDeclarationVisitor.isUnexpectedLocalDeclarationFound()) {
-				return true;
+		} else if (bodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
+			if (UsefulAnnotations.hasUsefulAnnotations((MethodDeclaration) bodyDeclaration)) {
+				return false;
 			}
+		} else if (bodyDeclaration.getNodeType() != ASTNode.INITIALIZER) {
+			return false;
 		}
-		return false;
+		UnexpectedLocalDeclarationVisitor unexpectedLocalDeclarationVisitor = new UnexpectedLocalDeclarationVisitor();
+		bodyDeclaration.accept(unexpectedLocalDeclarationVisitor);
+		return !unexpectedLocalDeclarationVisitor.isUnexpectedLocalDeclarationFound();
 	}
 
 	public CompilationUnit getCompilationUnit() {
