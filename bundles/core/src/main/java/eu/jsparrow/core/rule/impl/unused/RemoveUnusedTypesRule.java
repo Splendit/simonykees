@@ -32,7 +32,7 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 
 	public RemoveUnusedTypesRule(List<UnusedTypeWrapper> unusedTypes) {
 		this.visitorClass = RemoveUnusedTypesASTVisitor.class;
-		this.id = "RemoveUnusedTypesRule"; //$NON-NLS-1$
+		this.id = "RemoveUnusedTypes"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription("Remove Unused Types", //$NON-NLS-1$
 				"Finds and removes types that are not used.", Duration.ofMinutes(2), //$NON-NLS-1$
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
