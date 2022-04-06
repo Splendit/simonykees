@@ -18,10 +18,13 @@ public class NonPrivateUnusedTypeCandidate {
 
 	private AbstractTypeDeclaration typeDeclaration;
 	private JavaAccessModifier accessModifier;
+	private boolean mainType;
 
-	public NonPrivateUnusedTypeCandidate(AbstractTypeDeclaration typeDeclaration, JavaAccessModifier accessModifier) {
+	public NonPrivateUnusedTypeCandidate(AbstractTypeDeclaration typeDeclaration, JavaAccessModifier accessModifier,
+			boolean mainType) {
 		this.typeDeclaration = typeDeclaration;
 		this.accessModifier = accessModifier;
+		this.mainType = mainType;
 	}
 
 	public AbstractTypeDeclaration getTypeDeclaration() {
@@ -30,6 +33,10 @@ public class NonPrivateUnusedTypeCandidate {
 
 	public JavaAccessModifier getAccessModifier() {
 		return accessModifier;
+	}
+
+	public boolean isMainType() {
+		return mainType;
 	}
 
 	@Override

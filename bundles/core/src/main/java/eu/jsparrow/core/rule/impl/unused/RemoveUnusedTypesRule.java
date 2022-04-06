@@ -86,8 +86,16 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 
 	private void addDeclarationTextEdits(UnusedTypeWrapper unusedMethod, ICompilationUnit iCompilationUnit,
 			AbstractTypeDeclaration declaration, DocumentChange documentChange) {
-		int offset = declaration.getStartPosition();
-		int length = declaration.getLength();
+		int offset;
+		int length;
+		if(unusedMethod.isMainType()) {
+			offset = 0;
+			length = unusedMethod.getCompilationUnit().getLength();
+		} else {
+			offset = declaration.getStartPosition();
+			length = declaration.getLength();
+		}
+
 		IPath declarationPath = unusedMethod.getDeclarationPath();
 		IPath currentPath = iCompilationUnit.getPath();
 		if (currentPath.equals(declarationPath)) {

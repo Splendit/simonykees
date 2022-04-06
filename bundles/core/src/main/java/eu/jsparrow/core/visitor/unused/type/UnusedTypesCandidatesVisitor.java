@@ -78,7 +78,7 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 				return true;
 			}
 			UnusedTypeWrapper unusedTypeWrapper = new UnusedTypeWrapper(compilationUnit,
-					JavaAccessModifier.PRIVATE, typeDeclaration);
+					JavaAccessModifier.PRIVATE, typeDeclaration, false);
 			unusedLocalTypes.add(unusedTypeWrapper);
 			return false;
 		}
@@ -86,16 +86,14 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 		if (!BodyDeclarationsUtil.hasSelectedAccessModifier(typeDeclaration, options)) {
 			return true;
 		}
-		
-		if (typeDeclaration.getLocationInParent() == CompilationUnit.TYPES_PROPERTY) {
-			String typeDeclarationIdentifier = typeDeclaration.getName()
-				.getIdentifier();
-			if (typeDeclarationIdentifier.equals(mainClassName)) {
-				int topLevelTypesCount = compilationUnit.types()
-					.size();
-				if (topLevelTypesCount > 1) {
-					return true;
-				}
+
+		boolean flagMainType = isMainType(typeDeclaration);
+
+		if (flagMainType) {
+			int topLevelTypesCount = compilationUnit.types()
+				.size();
+			if (topLevelTypesCount > 1) {
+				return true;
 			}
 		}
 
@@ -106,17 +104,26 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 		int modifierFlags = typeDeclaration.getModifiers();
 		if (Modifier.isPrivate(modifierFlags)) {
 			UnusedTypeWrapper unusedTypeWrapper = new UnusedTypeWrapper(compilationUnit,
-					JavaAccessModifier.PRIVATE, typeDeclaration);
+					JavaAccessModifier.PRIVATE, typeDeclaration, false);
 			unusedPrivateTypes.add(unusedTypeWrapper);
 			return false;
 		}
 
 		JavaAccessModifier accessModifier = BodyDeclarationsUtil.findAccessModifier(typeDeclaration);
 		NonPrivateUnusedTypeCandidate candidate = new NonPrivateUnusedTypeCandidate(typeDeclaration,
-				accessModifier);
+				accessModifier, flagMainType);
 		nonPrivateCandidates.add(candidate);
 		return false;
 
+	}
+
+	private boolean isMainType(TypeDeclaration typeDeclaration) {
+		if (typeDeclaration.getLocationInParent() != CompilationUnit.TYPES_PROPERTY) {
+			return false;
+		}
+		String typeDeclarationIdentifier = typeDeclaration.getName()
+			.getIdentifier();
+		return typeDeclarationIdentifier.equals(mainClassName);
 	}
 
 	private boolean analyzeUnusedTypeCandidate(AbstractTypeDeclaration typeDeclaration, ASTNode typeReferencesScope) {

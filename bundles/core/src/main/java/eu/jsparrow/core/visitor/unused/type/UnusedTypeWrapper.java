@@ -34,9 +34,10 @@ public class UnusedTypeWrapper implements UnusedClassMemberWrapper {
 	private String classDeclarationName;
 	private Map<IPath, TextEditGroup> textEditGroups = new HashMap<>();
 	private String typeName;
+	private boolean mainType;
 
 	public UnusedTypeWrapper(CompilationUnit compilationUnit, JavaAccessModifier modifier,
-			AbstractTypeDeclaration typeDeclaration) {
+			AbstractTypeDeclaration typeDeclaration, boolean mainType) {
 		this.compilationUnit = compilationUnit;
 		IJavaElement javaElement = compilationUnit.getJavaElement();
 		this.declarationPath = javaElement.getPath();
@@ -45,7 +46,7 @@ public class UnusedTypeWrapper implements UnusedClassMemberWrapper {
 		this.accessModifier = modifier;
 		SimpleName name = typeDeclaration.getName();
 		this.typeName = name.getIdentifier();
-
+		this.mainType = mainType;
 	}
 
 	public AbstractTypeDeclaration getTypeDeclaration() {
@@ -77,13 +78,17 @@ public class UnusedTypeWrapper implements UnusedClassMemberWrapper {
 		return classDeclarationName;
 	}
 
+	public boolean isMainType() {
+		return mainType;
+	}
+
 	@Override
 	public List<ICompilationUnit> getTargetICompilationUnits() {
 		// because there are no external references
 		// as soon as there is any reference on a type declaration, it cannot be
 		// removed.
-		
-		return Collections.singletonList((ICompilationUnit)compilationUnit.getJavaElement()) ;
+
+		return Collections.singletonList((ICompilationUnit) compilationUnit.getJavaElement());
 	}
 
 	public TextEditGroup getTextEditGroup(ICompilationUnit iCompilationUnit) {

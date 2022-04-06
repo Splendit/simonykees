@@ -11,14 +11,17 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.text.edits.TextEditGroup;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 
+	private CompilationUnit compilationUnit;
 	private List<UnusedTypeWrapper> unusedTypes;
 	private Map<AbstractTypeDeclaration, UnusedTypeWrapper> relevantDeclarations;
 
@@ -28,7 +31,7 @@ public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
-
+		this.compilationUnit = compilationUnit;
 		IPath currentPath = compilationUnit.getJavaElement()
 			.getPath();
 
@@ -58,6 +61,11 @@ public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 				astRewrite.remove(typeDeclaration.getParent(), editGroup);
 			} else {
 				astRewrite.remove(typeDeclaration, editGroup);
+			}
+			if (designated.isMainType()) {
+				astRewrite.remove(compilationUnit.getPackage(), editGroup);
+				ASTNodeUtil.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
+					.forEach(importDeclaration -> astRewrite.remove(importDeclaration, editGroup));
 			}
 			onRewrite();
 		}

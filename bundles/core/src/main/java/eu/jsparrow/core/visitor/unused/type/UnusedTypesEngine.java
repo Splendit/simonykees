@@ -98,7 +98,7 @@ public class UnusedTypesEngine {
 			if (!searchResult.isMainSourceReferenceFound()
 					&& !searchResult.isInvalidSearchEngineResult()) {
 				UnusedTypeWrapper unusedMethodWrapper = new UnusedTypeWrapper(compilationUnit,
-						candidate.getAccessModifier(), typeDeclaration);
+						candidate.getAccessModifier(), typeDeclaration, candidate.isMainType());
 				list.add(unusedMethodWrapper);
 			}
 		}
