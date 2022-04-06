@@ -97,9 +97,9 @@ public class UnusedTypesEngine {
 			UnusedTypeReferenceSearchResult searchResult = searchReferences(typeDeclaration, javaProject, cache);
 			if (!searchResult.isMainSourceReferenceFound()
 					&& !searchResult.isInvalidSearchEngineResult()) {
-				UnusedTypeWrapper unusedMethodWrapper = new UnusedTypeWrapper(compilationUnit,
+				UnusedTypeWrapper unusedTypeWrapper = new UnusedTypeWrapper(compilationUnit,
 						candidate.getAccessModifier(), typeDeclaration, candidate.isMainType());
-				list.add(unusedMethodWrapper);
+				list.add(unusedTypeWrapper);
 			}
 		}
 		return list;
@@ -116,7 +116,7 @@ public class UnusedTypesEngine {
 		IJavaElement[] searchScope = createSearchScope(scope, project);
 		JavaElementSearchEngine referencesSearchEngine = new JavaElementSearchEngine(searchScope);
 		SimpleName name = typeDeclaration.getName();
-		String methodIdentifier = name.getIdentifier();
+		String typeIdentifier = name.getIdentifier();
 		ITypeBinding typeBinding = typeDeclaration.resolveBinding();
 		if (typeBinding == null) {
 			return new UnusedTypeReferenceSearchResult(false, true);
@@ -124,7 +124,7 @@ public class UnusedTypesEngine {
 		IJavaElement javaElement = typeBinding.getJavaElement();
 		SearchPattern searchPattern = SearchPattern.createPattern(javaElement, IJavaSearchConstants.REFERENCES);
 		Optional<List<ReferenceSearchMatch>> references = referencesSearchEngine.findReferences(searchPattern,
-				methodIdentifier);
+				typeIdentifier);
 		if (!references.isPresent()) {
 			return new UnusedTypeReferenceSearchResult(false, true);
 		}

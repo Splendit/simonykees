@@ -55,26 +55,26 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 			throws JavaModelException {
 		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> map = new HashMap<>();
 		for (UnusedTypeWrapper unusedType : unusedTypes) {
-			Map<ICompilationUnit, DocumentChange> documentChanges = computeDocumentChangesForUnusedMethod(
+			Map<ICompilationUnit, DocumentChange> documentChanges = computeDocumentChangesForUnusedType(
 					unusedType);
 			map.put(unusedType, documentChanges);
 		}
 		return map;
 	}
 
-	private Map<ICompilationUnit, DocumentChange> computeDocumentChangesForUnusedMethod(
-			UnusedTypeWrapper unusedMethod) throws JavaModelException {
+	private Map<ICompilationUnit, DocumentChange> computeDocumentChangesForUnusedType(
+			UnusedTypeWrapper unusedTypeWrapper) throws JavaModelException {
 
-		List<ICompilationUnit> targetCompilationUnits = unusedMethod.getTargetICompilationUnits();
+		List<ICompilationUnit> targetCompilationUnits = unusedTypeWrapper.getTargetICompilationUnits();
 		Map<ICompilationUnit, DocumentChange> documentChanges = new HashMap<>();
 		for (ICompilationUnit targetICU : targetCompilationUnits) {
-			TextEditGroup editGroup = unusedMethod.getTextEditGroup(targetICU);
+			TextEditGroup editGroup = unusedTypeWrapper.getTextEditGroup(targetICU);
 			if (!editGroup.isEmpty()) {
-				AbstractTypeDeclaration declaration = unusedMethod.getTypeDeclaration();
+				AbstractTypeDeclaration declaration = unusedTypeWrapper.getTypeDeclaration();
 				DocumentChange documentChange = DocumentChangeUtil.createDocumentChange(targetICU);
 				TextEdit rootEdit = new MultiTextEdit();
 				documentChange.setEdit(rootEdit);
-				addDeclarationTextEdits(unusedMethod, targetICU, declaration, documentChange);
+				addDeclarationTextEdits(unusedTypeWrapper, targetICU, declaration, documentChange);
 
 				documentChange.setTextType("java"); //$NON-NLS-1$
 				documentChanges.put(targetICU, documentChange);
@@ -84,19 +84,19 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 		return documentChanges;
 	}
 
-	private void addDeclarationTextEdits(UnusedTypeWrapper unusedMethod, ICompilationUnit iCompilationUnit,
+	private void addDeclarationTextEdits(UnusedTypeWrapper unusedTypeWrapper, ICompilationUnit iCompilationUnit,
 			AbstractTypeDeclaration declaration, DocumentChange documentChange) {
 		int offset;
 		int length;
-		if(unusedMethod.isMainType()) {
+		if(unusedTypeWrapper.isMainType()) {
 			offset = 0;
-			length = unusedMethod.getCompilationUnit().getLength();
+			length = unusedTypeWrapper.getCompilationUnit().getLength();
 		} else {
 			offset = declaration.getStartPosition();
 			length = declaration.getLength();
 		}
 
-		IPath declarationPath = unusedMethod.getDeclarationPath();
+		IPath declarationPath = unusedTypeWrapper.getDeclarationPath();
 		IPath currentPath = iCompilationUnit.getPath();
 		if (currentPath.equals(declarationPath)) {
 			DeleteEdit declDeleteEdit = new DeleteEdit(offset, length);
