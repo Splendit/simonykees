@@ -1,21 +1,26 @@
 package eu.jsparrow.core.rule.impl.unused;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
 import eu.jsparrow.core.visitor.unused.type.RemoveUnusedTypesASTVisitor;
@@ -23,11 +28,13 @@ import eu.jsparrow.core.visitor.unused.type.UnusedTypeWrapper;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypesASTVisitor> {
 
+	private static final Logger logger = LoggerFactory.getLogger(RemoveUnusedTypesRule.class);
 	private List<UnusedTypeWrapper> unusedTypes;
 
 	public RemoveUnusedTypesRule(List<UnusedTypeWrapper> unusedTypes) {
@@ -111,6 +118,29 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 	public void addUnusedType(UnusedClassMemberWrapper unusedType) {
 		if (unusedType instanceof UnusedTypeWrapper) {
 			this.unusedTypes.add((UnusedTypeWrapper) unusedType);
+		}
+	}
+
+	public void deleteEmptyCompilationUnits() throws RefactoringException {
+		List<ICompilationUnit> unableToRemove = new ArrayList<>();
+		for(UnusedTypeWrapper typeWrapper : unusedTypes) {
+			if(typeWrapper.isMainType()) {
+				CompilationUnit compilationUnit = typeWrapper.getCompilationUnit();
+				ICompilationUnit icu = (ICompilationUnit) compilationUnit.getJavaElement();
+				try {
+					icu.delete(true, null);
+				} catch (JavaModelException e) {
+					logger.error("Cannot delete {}.", icu.getElementName(), e); //$NON-NLS-1$
+					unableToRemove.add(icu);
+				}
+			}
+		}
+		if(!unableToRemove.isEmpty()) {
+			String names = unableToRemove.stream()
+					.map(ICompilationUnit::getElementName)
+					.collect(Collectors.joining(System.lineSeparator()));
+			String message = String.join(System.lineSeparator(), "The following compilation units could not be removed:", names); //$NON-NLS-1$
+			throw new RefactoringException(message);
 		}
 	}
 }

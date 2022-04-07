@@ -5,17 +5,31 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,9 +39,11 @@ import eu.jsparrow.common.SingleRuleTest;
 import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedTypesRule;
 import eu.jsparrow.core.rule.impl.unused.UnusedCodeTestHelper;
+import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.core.visitor.unused.type.UnusedTypeWrapper;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.rules.common.exception.RefactoringException;
 
 class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 
@@ -111,4 +127,54 @@ class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 		assertEquals(expected, actual);
 	}
 
+	@Test
+	void deleteCompilationUnits_shouldInvokeDelete() throws Exception {
+		CompilationUnit compilationUnit = mock(CompilationUnit.class);
+		ICompilationUnit icu = mock(ICompilationUnit.class);
+		AbstractTypeDeclaration type = mock(TypeDeclaration.class);
+		when(type.getName()).thenReturn(mock(SimpleName.class));
+		when(compilationUnit.getJavaElement()).thenReturn(icu);
+		when(icu.getElementName()).thenReturn("ToBeDeleted");
+		List<UnusedTypeWrapper> unusedTypes = new ArrayList<>();
+		UnusedTypeWrapper wrapper = new UnusedTypeWrapper(compilationUnit, JavaAccessModifier.PUBLIC, type, true);
+		unusedTypes.add(wrapper);
+		RemoveUnusedTypesRule rule = new RemoveUnusedTypesRule(unusedTypes);
+		rule.deleteEmptyCompilationUnits();
+		verify(icu).delete(true, null);
+	}
+
+	@Test
+	void deleteCompilationUnits_shouldNotDelete() throws Exception {
+		List<UnusedTypeWrapper> unusedTypes = new ArrayList<>();
+		CompilationUnit compilationUnit = mock(CompilationUnit.class);
+		ICompilationUnit icu = mock(ICompilationUnit.class);
+		AbstractTypeDeclaration type = mock(TypeDeclaration.class);
+		when(type.getName()).thenReturn(mock(SimpleName.class));
+		when(compilationUnit.getJavaElement()).thenReturn(icu);
+		when(icu.getElementName()).thenReturn("ToBeDeleted");
+		UnusedTypeWrapper wrapper = new UnusedTypeWrapper(compilationUnit, JavaAccessModifier.PUBLIC, type, false);
+		unusedTypes.add(wrapper);
+		RemoveUnusedTypesRule rule = new RemoveUnusedTypesRule(unusedTypes);
+		rule.deleteEmptyCompilationUnits();
+		verify(compilationUnit, times(1)).getJavaElement();
+		verify(icu, never()).delete(true, null);
+	}
+
+	@Test
+	void deleteCompilationUnits_shouldThrowException() throws Exception {
+		List<UnusedTypeWrapper> unusedTypes = new ArrayList<>();
+		CompilationUnit compilationUnit = mock(CompilationUnit.class);
+		ICompilationUnit icu = mock(ICompilationUnit.class);
+		AbstractTypeDeclaration type = mock(TypeDeclaration.class);
+		when(type.getName()).thenReturn(mock(SimpleName.class));
+		when(compilationUnit.getJavaElement()).thenReturn(icu);
+		when(icu.getElementName()).thenReturn("ToBeDeleted");
+		doThrow(JavaModelException.class).when(icu).delete(true, null);
+		UnusedTypeWrapper wrapper = new UnusedTypeWrapper(compilationUnit, JavaAccessModifier.PUBLIC, type, true);
+		unusedTypes.add(wrapper);
+		RemoveUnusedTypesRule rule = new RemoveUnusedTypesRule(unusedTypes);
+		assertThrows(RefactoringException.class, 
+				() -> rule.deleteEmptyCompilationUnits(),  
+				() -> "The following compilation units could not be removed:\nToBeDeleted");
+	}
 }

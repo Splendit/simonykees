@@ -272,6 +272,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	private void commitChanges() {
 		try {
 			refactoringPipeline.commitRefactoring();
+			unusedTypesRule.deleteEmptyCompilationUnits();
 			Activator.setRunning(false);
 		} catch (RefactoringException | ReconcileException e) {
 			WizardMessageDialog.synchronizeWithUIShowError(e);
