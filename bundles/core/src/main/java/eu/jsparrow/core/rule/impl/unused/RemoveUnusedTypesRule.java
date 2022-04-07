@@ -19,8 +19,6 @@ import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
 import eu.jsparrow.core.visitor.unused.type.RemoveUnusedTypesASTVisitor;
@@ -34,7 +32,6 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypesASTVisitor> {
 
-	private static final Logger logger = LoggerFactory.getLogger(RemoveUnusedTypesRule.class);
 	private List<UnusedTypeWrapper> unusedTypes;
 
 	public RemoveUnusedTypesRule(List<UnusedTypeWrapper> unusedTypes) {
@@ -130,7 +127,6 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 				try {
 					icu.delete(true, null);
 				} catch (JavaModelException e) {
-					logger.error("Cannot delete {}.", icu.getElementName(), e); //$NON-NLS-1$
 					unableToRemove.add(icu);
 				}
 			}
