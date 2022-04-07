@@ -141,7 +141,7 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 			}
 		}
 
-		TypeReferencesVisitor typeReferencesVisitor = new TypeReferencesVisitor(typeDeclaration, compilationUnit);
+		TypeReferencesVisitor typeReferencesVisitor = new TypeReferencesVisitor(typeDeclaration);
 		typeReferencesScope.accept(typeReferencesVisitor);
 		return !typeReferencesVisitor.typeReferenceFound() && !typeReferencesVisitor.hasUnresolvedReference();
 	}

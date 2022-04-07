@@ -57,9 +57,9 @@ public class UnusedTypesEngine {
 				list.addAll(unusedPrivateTypes);
 				targetCompilationUnits.add(icu);
 			}
-			
+
 			List<UnusedTypeWrapper> unusedLocalTypes = visitor.getUnusedLocalTypes();
-			if(!unusedLocalTypes.isEmpty()) {
+			if (!unusedLocalTypes.isEmpty()) {
 				list.addAll(unusedLocalTypes);
 				targetCompilationUnits.add(icu);
 			}
@@ -108,11 +108,7 @@ public class UnusedTypesEngine {
 	private UnusedTypeReferenceSearchResult searchReferences(AbstractTypeDeclaration typeDeclaration,
 			IJavaProject project,
 			Map<IPath, CompilationUnit> cache) {
-		CompilationUnit compilationUnitEnclosingType = ASTNodeUtil.getSpecificAncestor(typeDeclaration,
-				CompilationUnit.class);
-		if(compilationUnitEnclosingType == null) {
-			return new UnusedTypeReferenceSearchResult(false, true);
-		}
+
 		IJavaElement[] searchScope = createSearchScope(scope, project);
 		JavaElementSearchEngine referencesSearchEngine = new JavaElementSearchEngine(searchScope);
 		SimpleName name = typeDeclaration.getName();
@@ -123,10 +119,16 @@ public class UnusedTypesEngine {
 		}
 		IJavaElement javaElement = typeBinding.getJavaElement();
 		SearchPattern searchPattern = SearchPattern.createPattern(javaElement, IJavaSearchConstants.REFERENCES);
-		Optional<List<ReferenceSearchMatch>> references = referencesSearchEngine.findReferences(searchPattern,
-				typeIdentifier);
-		if (!references.isPresent()) {
+
+		List<ReferenceSearchMatch> references = referencesSearchEngine.findReferences(searchPattern,
+				typeIdentifier)
+			.orElse(null);
+
+		if (references == null) {
 			return new UnusedTypeReferenceSearchResult(false, true);
+		}
+		if (references.isEmpty()) {
+			return new UnusedTypeReferenceSearchResult(false, false);
 		}
 
 		Set<ICompilationUnit> targetICUs = referencesSearchEngine.getTargetIJavaElements();
@@ -135,13 +137,15 @@ public class UnusedTypesEngine {
 			IPath path = iCompilationUnit.getPath();
 			CompilationUnit compilationUnit = cache.computeIfAbsent(path,
 					iPath -> RefactoringUtil.parse(iCompilationUnit));
-			TypeReferencesVisitor visitor = new TypeReferencesVisitor(typeDeclaration, compilationUnitEnclosingType);
+			TypeReferencesVisitor visitor = new TypeReferencesVisitor(typeDeclaration);
+
 			compilationUnit.accept(visitor);
 			if (visitor.typeReferenceFound() || visitor.hasUnresolvedReference()) {
 				return new UnusedTypeReferenceSearchResult(true, false);
 			}
 		}
 		return new UnusedTypeReferenceSearchResult(false, false);
+
 	}
 
 	private IJavaElement[] createSearchScope(String modelSearchScope, IJavaProject javaProject) {

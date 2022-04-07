@@ -85,7 +85,12 @@ class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-			"HelloWorld"
+			"HelloWorld",
+			"CompleteCompilationUnitToRemove",
+			"ClassUsedAsFieldInSamePackage",
+			"ClassUsedAsFieldInOtherPackage",
+			"ClassExtendedInSamePackage",
+			"ClassExtendedInOtherPackage",
 	})
 	void testTransformation(String className) throws Exception {
 		String preRuleFilePath = String.format("unused/types/%s.java", className);

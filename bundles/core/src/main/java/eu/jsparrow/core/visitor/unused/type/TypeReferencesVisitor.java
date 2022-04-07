@@ -5,7 +5,6 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -24,6 +23,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * Finds out whether there are references to a specified type declaration.
@@ -34,18 +34,30 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 public class TypeReferencesVisitor extends ASTVisitor {
 
 	private final AbstractTypeDeclaration targetTypeDeclaration;
-	private final CompilationUnit targetTypeDeclarationCompilationUnit;
 	private String targetTypeIdentifier;
+	private ITypeBinding targetTypeErasure;
 
 	private boolean typeReferenceFound = false;
 	private boolean unresolvedReferenceFound = false;
 
-	public TypeReferencesVisitor(AbstractTypeDeclaration targetTypeDeclaration,
-			CompilationUnit targetTypeDeclarationCompilationUnit) {
+	/**
+	 * Private instance method "getNonParameterizedTypeErasure" of class
+	 * ChainAssertJAssertThatStatementsASTVisitor has been copied to here and
+	 * the static modifier has been added.
+	 */
+	private static ITypeBinding getNonParameterizedTypeErasure(ITypeBinding typeBinding) {
+		ITypeBinding erasure = typeBinding;
+		while (erasure.isParameterizedType()) {
+			erasure = erasure.getErasure();
+		}
+		return erasure;
+	}
+
+	public TypeReferencesVisitor(AbstractTypeDeclaration targetTypeDeclaration) {
 		this.targetTypeDeclaration = targetTypeDeclaration;
-		this.targetTypeDeclarationCompilationUnit = targetTypeDeclarationCompilationUnit;
 		SimpleName name = targetTypeDeclaration.getName();
 		this.targetTypeIdentifier = name.getIdentifier();
+		this.targetTypeErasure = getNonParameterizedTypeErasure(targetTypeDeclaration.resolveBinding());
 	}
 
 	@Override
@@ -152,7 +164,8 @@ public class TypeReferencesVisitor extends ASTVisitor {
 	}
 
 	private boolean isBindingReferencingTargetType(ITypeBinding typeBinding) {
-		return targetTypeDeclarationCompilationUnit.findDeclaringNode(typeBinding) == targetTypeDeclaration;
+		ITypeBinding typeErasure = getNonParameterizedTypeErasure(typeBinding);
+		return ClassRelationUtil.compareITypeBinding(typeErasure, targetTypeErasure);
 	}
 
 	public boolean typeReferenceFound() {
