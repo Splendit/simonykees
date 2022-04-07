@@ -29,6 +29,7 @@ import eu.jsparrow.core.markers.visitor.IndexOfToContainsResolver;
 import eu.jsparrow.core.markers.visitor.InefficientConstructorResolver;
 import eu.jsparrow.core.markers.visitor.InsertBreakStatementInLoopsResolver;
 import eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver;
+import eu.jsparrow.core.markers.visitor.MakeFieldsAndVariablesFinalResolver;
 import eu.jsparrow.core.markers.visitor.MapGetOrDefaultResolver;
 import eu.jsparrow.core.markers.visitor.MultiVariableDeclarationLineResolver;
 import eu.jsparrow.core.markers.visitor.PrimitiveBoxedForStringResolver;
@@ -168,6 +169,7 @@ public class ResolverVisitorsFactory {
 		map.put(RemoveToStringOnStringResolver.ID, RemoveToStringOnStringResolver::new);
 		map.put(ReplaceStringFormatByFormattedResolver.ID, ReplaceStringFormatByFormattedResolver::new);
 		map.put(UseListSortResolver.ID, UseListSortResolver::new);
+		map.put(MakeFieldsAndVariablesFinalResolver.ID, MakeFieldsAndVariablesFinalResolver::new);
 		
 
 		List<MarkerService> markerServices = getExternalRuleServices();
