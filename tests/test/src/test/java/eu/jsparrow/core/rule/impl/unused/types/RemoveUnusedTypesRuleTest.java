@@ -107,6 +107,9 @@ class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 			"ClassUsedAsFieldInOtherPackage",
 			"ClassExtendedInSamePackage",
 			"ClassExtendedInOtherPackage",
+			"ClassUsingClasses",
+			"ClassWithNestedClasses",
+			"ClassWithLocalClasses",
 	})
 	void testTransformation(String className) throws Exception {
 		String preRuleFilePath = String.format("unused/types/%s.java", className);
