@@ -13,7 +13,11 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerResolution2;
 import org.eclipse.ui.IWorkbenchPage;
@@ -30,7 +34,7 @@ import eu.jsparrow.ui.util.LicenseUtil;
  * @since 4.0.0
  *
  */
-public class JSparrowMarkerResolution implements IMarkerResolution2 {
+public class JSparrowMarkerResolution implements IMarkerResolution2, IJavaCompletionProposal {
 
 	private int offset;
 	private int newLength;
@@ -100,5 +104,46 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 		job.setUser(false);
 		job.setPriority(Job.SHORT);
 		job.schedule();
+	}
+
+	@Override
+	public void apply(IDocument document) {
+		/*
+		 * Auto generated method
+		 */
+	}
+
+	@Override
+	public Point getSelection(IDocument document) {
+		/*
+		 * Auto generated method
+		 */
+		return null;
+	}
+
+	@Override
+	public String getAdditionalProposalInfo() {
+		/*
+		 * Auto generated method
+		 */
+		return null;
+	}
+
+	@Override
+	public String getDisplayString() {
+		return name;
+	}
+
+	@Override
+	public IContextInformation getContextInformation() {
+		/*
+		 * Auto generated method
+		 */
+		return null;
+	}
+
+	@Override
+	public int getRelevance() {
+		return 10;
 	}
 }
