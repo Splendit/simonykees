@@ -28,7 +28,7 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 		fixtureProject.clear();
 	}
 
-	private static Stream<Arguments> privateNestedTypeDeclarations() throws Exception {
+	private static Stream<Arguments> emptyNestedTypeDeclarations() throws Exception {
 		return Stream.of(
 				Arguments.of(
 						"" +
@@ -46,8 +46,8 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@ParameterizedTest
-	@MethodSource(value = "privateNestedTypeDeclarations")
-	void testPrivateNestedTypeDeclarations_shouldBeRemoved(String unusedTypeDeclaration, String unusedTypeName)
+	@MethodSource(value = "emptyNestedTypeDeclarations")
+	void testEmptyNestedTypeDeclarations_shouldBeRemoved(String unusedTypeDeclaration, String unusedTypeName)
 			throws Exception {
 		Map<String, Boolean> options = new HashMap<>();
 		options.put("private-classes", true);
@@ -64,7 +64,7 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	void testLocalClassDeclaration_shouldBeRemoved() throws Exception {
+	void testEmptyLocalClassDeclaration_shouldBeRemoved() throws Exception {
 		Map<String, Boolean> options = new HashMap<>();
 		options.put("local-classes", true);
 		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
@@ -163,11 +163,6 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 			"" +
 					"		class SubclassOfUsedClass extends UsedClass {\n" +
 					"		}",
-			"" +
-					"		java.util.List<UsedClass> usedClassList;",
-			"" +
-					"		class WrapperOfUsedClass<T extends UsedClass> {\n" +
-					"		}",
 
 	})
 	void testPrivateNestedClassReferenceBySimpleName_shouldNotBeRemoved(String referenceBySimpleName)
@@ -186,9 +181,34 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, code);
 		defaultFixture.accept(visitor);
+		assertTrue(visitor.getUnusedPrivateTypes()
+			.isEmpty());
+	}
 
-		List<NonPrivateUnusedTypeCandidate> unusedTypeCandidates = visitor.getNonPrivateCandidates();
-		assertTrue(unusedTypeCandidates.isEmpty());
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"UsedClass",
+			"? extends UsedClass",
+			"? super UsedClass",
+	})
+	void testPrivateNestedClassUsedAsTypeArgument_shouldNotBeRemoved(String typeArgument)
+			throws Exception {
+
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		defaultFixture.addImport(java.util.List.class.getName());
+		String code = "" +
+				"		List<" + typeArgument + "> usedClassList;\n" +
+				"\n" +
+				"		private class UsedClass {\n" +
+				"		}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, code);
+		defaultFixture.accept(visitor);
+		assertTrue(visitor.getUnusedPrivateTypes()
+			.isEmpty());
 	}
 
 	@ParameterizedTest
@@ -203,22 +223,9 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 					"			void use(ClassReferencingItself usedByItself) {\n" +
 					"			}",
 			"" +
-					"			void test() {\n" +
-					"				referencingItself = null;\n" +
-					"			}\n" +
-					"\n" +
-					"			ClassReferencingItself referencingItself;",
-			"" +
 					"			Object callDefaultConstructor() {\n" +
 					"				return new ClassReferencingItself();\n" +
 					"			}",
-			"" +
-					"			Object o = getNullValue();\n" +
-					"\n" +
-					"			ClassReferencingItself getNullValue() {\n" +
-					"				return null;\n" +
-					"			}",
-
 	})
 	void testPrivateNestedClassReferencingItself_shouldNotBeRemoved(String referenceOnItself)
 			throws Exception {
@@ -234,9 +241,8 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classReferencingItself);
 		defaultFixture.accept(visitor);
-
-		List<NonPrivateUnusedTypeCandidate> unusedTypeCandidates = visitor.getNonPrivateCandidates();
-		assertTrue(unusedTypeCandidates.isEmpty());
+		assertTrue(visitor.getUnusedPrivateTypes()
+			.isEmpty());
 	}
 
 	@ParameterizedTest
@@ -322,19 +328,21 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 	@ParameterizedTest
 	@ValueSource(strings = {
 			"" +
-					"	void exampleMethod(int parameter) {\n" +
-					"		\n" +
+					"	@interface ExampleAnnotation {\n" +
+					"		String value();\n" +
 					"	}",
 			"" +
 					"	enum ExampleEnum {\n" +
 					"		ENTRY;\n" +
 					"	}",
 			"" +
-					"	@interface ExampleAnnotation {\n" +
-					"		String value();\n" +
+					"	class ExampleClass {\n" +
 					"	}",
+			"" +
+					"	interface ExampleInterface {\n"
+					+ "	}",
 	})
-	void testUnusedClassAndDeclaration_shouldBeRemoved(String additionalDeclaration) throws Exception {
+	void testUnusedNestedClassAmongOtherNestedTypes_shouldBeRemoved(String additionalDeclaration) throws Exception {
 		Map<String, Boolean> options = new HashMap<>();
 		options.put("private-classes", true);
 		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
@@ -358,12 +366,41 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 	@ParameterizedTest
 	@ValueSource(strings = {
 			"" +
-					"			enum Enum {\n" +
-					"				ENTRY;\n" +
-					"			}",
+					"	@interface ExampleAnnotation {\n" +
+					"		String value();\n" +
+					"	}",
 			"" +
-					"			class InnermostClass {\n" +
-					"			}",
+					"	enum ExampleEnum {\n" +
+					"		ENTRY;\n" +
+					"	}",
+			"" +
+					"	class ExampleClass {\n" +
+					"	}",
+			"" +
+					"	interface ExampleInterface {\n"
+					+ "	}",
+
+	})
+	void testClassWithNestedTypeDeclarations_shouldNotBeRemoved(String unsupportedDeclaration) throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classWithUnsupportedDeclaration = "" +
+				"	private class ClassWithNestedTypeDeclarations {\n" +
+				unsupportedDeclaration + "\n" +
+				"	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithUnsupportedDeclaration);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertTrue(removedUnusedTypes.isEmpty());
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
 			"" +
 					"			Object o = new Object() {\n" +
 					"			};",
@@ -378,7 +415,8 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 					"				}\n" +
 					"			}",
 	})
-	void testClassContainingUnsupportedDeclaration_shouldNotBeRemoved(String unsupportedDeclaration) throws Exception {
+	void testClassWithMembersContainingUnsupportedDeclaration_shouldNotBeRemoved(String unsupportedDeclaration)
+			throws Exception {
 		Map<String, Boolean> options = new HashMap<>();
 		options.put("private-classes", true);
 		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
@@ -389,6 +427,100 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 				"		}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithUnsupportedDeclaration);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertTrue(removedUnusedTypes.isEmpty());
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"		@KeepMe\n" +
+					"		int x;",
+			"" +
+					"		@KeepMe\n" +
+					"		void doNothing() {\n" +
+					"		}",
+			"" +
+					"		void doNothing(@KeepMe int x) {\n" +
+					"		}",
+	})
+	void testClassWithAnnotatedMember_shouldNotBeRemoved(String annotatedMember)
+			throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classWithUnsupportedDeclaration = "" +
+				"	@interface KeepMe {		\n" +
+				"	}\n" +
+				"	private class ClassWithAnnotatedMember {\n" +
+				annotatedMember + "\n" +
+				"	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithUnsupportedDeclaration);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertTrue(removedUnusedTypes.isEmpty());
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"		@SuppressWarnings(\"unused\")\n" +
+					"		private int i;",
+			"" +
+					"		@SuppressWarnings(\"unused\")\n" +
+					"		private void privateUnusedMethod() {\n" +
+					"		}",
+			"" +
+					"		void methodWithUnusedParameter(@SuppressWarnings(\"unused\") int unusedParameter) {\n" +
+					"		}",
+
+	})
+	void testUnusedNestedClassWithMembersHavingSuppressWarnings_shouldBeRemoved(
+			String memberWithHavingSuppressWarnings)
+			throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String unusedClassWithMemberContainingSuppressWarnings = "" +
+				"	private class UnusedClass {\n" +
+				memberWithHavingSuppressWarnings + "\n" +
+				"	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME,
+				unusedClassWithMemberContainingSuppressWarnings);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertEquals(1, removedUnusedTypes.size());
+		String removedUnusedTypeName = removedUnusedTypes.get(0)
+			.getClassMemberIdentifier();
+		assertEquals("UnusedClass", removedUnusedTypeName);
+	}
+
+	@Test
+	void testLocalClassWithAnonymousClass_shouldNotBeRemoved()
+			throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("local-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String methodWithLocalClass = "" +
+				"	void methodWithLocalClass() {\n"
+				+ "		class LocalClassWithAnonymousClass {\n"
+				+ "			Object o = new Object() {\n"
+				+ "			};\n"
+				+ "		}\n"
+				+ "	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, methodWithLocalClass);
 		defaultFixture.accept(visitor);
 
 		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
@@ -441,16 +573,39 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 
 	}
 
-	@Test
-	void testClassWithActiveThisReference_shouldNotBeRemoved() throws Exception {
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"this",
+			"ClassWithActiveThisReference.this",
+	})
+	void testClassWithActiveThisReference_shouldNotBeRemoved(String activeThisReference) throws Exception {
 		Map<String, Boolean> options = new HashMap<>();
 		options.put("private-classes", true);
 		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
 
 		String classWithActiveThisReference = "" +
 				"		private class ClassWithActiveThisReference {\n" +
-				"			Object o = this;\n" +
+				"			Object o = " + activeThisReference + ";\n" +
 				"		}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithActiveThisReference);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertTrue(removedUnusedTypes.isEmpty());
+
+	}
+
+	@Test
+	void testClassWithThisReferenceOfUndefinedClass_shouldNotBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classWithActiveThisReference = "" +
+				"	private class ClassWithThisReferenceOfUndefinedClass {\n" +
+				"		Object o = UndefinedClass.this;\n" +
+				"	}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithActiveThisReference);
 		defaultFixture.accept(visitor);
@@ -517,142 +672,20 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 		assertEquals("ClassWithMemberAccessQualifiedByThis", removedUnusedTypeName);
 	}
 
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"" +
-					"		int getXOfNestedInnerOfNewNestedOuter() {\n" +
-					"			return new NestedOuter().nestedInner.x;\n" +
-					"		}\n" +
-					"\n" +
-					"		public class NestedOuter {\n" +
-					"			NestedInner nestedInner = new NestedInner();\n" +
-					"\n" +
-					"			private class NestedInner {\n" +
-					"				int x = 0;\n" +
-					"			}\n" +
-					"		}",
-			"" +
-					"		public class NestedOuter {\n" +
-					"\n" +
-					"			private class NestedInner {\n" +
-					"				int getXOfNestedInnerOfNewNestedOuter() {\n" +
-					"					return new NestedOuter().nestedInner.x;\n" +
-					"				}\n" +
-					"\n" +
-					"				int x = 0;\n" +
-					"			}\n" +
-					"\n" +
-					"			NestedInner nestedInner = new NestedInner();\n" +
-					"		}",
-			"" +
-					"	int x = NestedClass.NestedClassWithStaticField.ZERO;\n" +
-					"\n" +
-					"	static class NestedClass {\n" +
-					"		private static class NestedClassWithStaticField {\n" +
-					"			static final int ZERO = 0;\n" +
-					"		}\n" +
-					"	}",
-			"" +
-					"	int x = NestedClass.NestedClassWithStaticMethod.getZero();\n" +
-					"\n" +
-					"	static class NestedClass {\n" +
-					"		private static class NestedClassWithStaticMethod {\n" +
-					"			static int getZero() {\n" +
-					"				return 0;\n" +
-					"			}\n" +
-					"		}\n" +
-					"	}\n" +
-					"",
-	})
-	void testClassWithMembersReferencedOutside_shouldNotBeRemoved(String classWithMembersReferencedOutside)
-			throws Exception {
-		Map<String, Boolean> options = new HashMap<>();
-		options.put("private-classes", true);
-		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
-
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithMembersReferencedOutside);
-		defaultFixture.accept(visitor);
-
-		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
-		assertTrue(removedUnusedTypes.isEmpty());
-
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"wrapperFields.wrapperOfInteger",
-			"wrapperFields.wrapperOfWildCard",
-			"wrapperFields.wrapperOfWildCardExtendsCharSequence",
-			"wrapperFields.wrapperOfWildCardSuperCharSequence",
-			"wrapperFields.getWrapperOfWildCardExtendsCharSequence()",
-	})
-	void researchGenerics_shouldNotBeRemoved(String initializer)
-			throws Exception {
-		Map<String, Boolean> options = new HashMap<>();
-		options.put("private-classes", true);
-		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
-
-		String code = "" +
-				"	WrapperFields wrapperFields = new WrapperFields();\n"
-				+ "\n"
-				+ "	Object o = " + initializer + ";\n"
-				+ "\n"
-				+ "	class WrapperFields {\n"
-				+ "		Wrapper<Integer> wrapperOfInteger;\n"
-				+ "		Wrapper<?> wrapperOfWildCard;\n"
-				+ "		Wrapper<? extends CharSequence> wrapperOfWildCardExtendsCharSequence;\n"
-				+ "		Wrapper<? super CharSequence> wrapperOfWildCardSuperCharSequence;\n"
-				+ "\n"
-				+ "		<T extends Wrapper<? extends CharSequence>> T getWrapperOfWildCardExtendsCharSequence() {\n"
-				+ "			return null;\n"
-				+ "		}\n"
-				+ "\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	private class Wrapper<T> {\n"
-				+ "		T value;\n"
-				+ "	}";
-
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, code);
-		defaultFixture.accept(visitor);
-
-		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
-		assertTrue(removedUnusedTypes.isEmpty());
-
-	}
-
-	/**
-	 * TODO: replace this test by a rules test where
-	 * SubclassOfClassWithStaticMethod is declared in another compilation unit.
-	 */
 	@Test
-	void testWitjImportedStaticMethodOfSubClass_shouldNotBeRemoved() throws Exception {
-
+	void testGenericClassReferencedByField_shouldNotBeRemoved()
+			throws Exception {
 		Map<String, Boolean> options = new HashMap<>();
-		options.put("package-private-classes", true);
+		options.put("private-classes", true);
 		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
 
-		/**
-		 * Problematic testing method, but demonstrating that type reference can
-		 * already be found at the level of import declarations!
-		 */
-		defaultFixture.addImport("fixturepackage." + DEFAULT_TYPE_DECLARATION_NAME +
-				".SubclassOfClassWithStaticMethod.getZero", true, false);
+		String genericClassReferencedByField = "" +
+				"	private Wrapper<Integer> integerWrapper;\n" +
+				"	private class Wrapper<T> {\n" +
+				"		\n" +
+				"	}";
 
-		String classWithAnnotation = "" +
-				"	int x = getZero();\n"
-				+ "\n"
-				+ "	static class NestedClassWithStaticMethod {\n"
-				+ "		static int getZero() {\n"
-				+ "			return 0;\n"
-				+ "		}\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	public static class SubclassOfClassWithStaticMethod extends NestedClassWithStaticMethod {\n"
-				+ "\n"
-				+ "	}";
-
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classWithAnnotation);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, genericClassReferencedByField);
 		defaultFixture.accept(visitor);
 
 		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
@@ -660,4 +693,147 @@ class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 
 	}
 
+	@Test
+	void testClassAndFieldWithSameName_shouldBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classAndFieldWithSameName = "" +
+				"	private class UnusedClass {" +
+				"	}\n" +
+				"	int UnusedClass = 0;\n" +
+				"	int x = UnusedClass;";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, classAndFieldWithSameName);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertEquals(1, removedUnusedTypes.size());
+		String removedUnusedTypeName = removedUnusedTypes.get(0)
+			.getClassMemberIdentifier();
+		assertEquals("UnusedClass", removedUnusedTypeName);
+	}
+
+	@Test
+	void testClassReferencingOtherClassWithSameName_shouldBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classReferencingOtherClassWithSameName = "" +
+				"	class Example1 {\n"
+				+ "		private class UnusedClass {\n"
+				+ "			Example2.UnusedClass unusedClassFromExample2;\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "	class Example2 {\n"
+				+ "		class UnusedClass {\n"
+				+ "		}\n"
+				+ "	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME,
+				classReferencingOtherClassWithSameName);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertEquals(1, removedUnusedTypes.size());
+		String removedUnusedTypeName = removedUnusedTypes.get(0)
+			.getClassMemberIdentifier();
+		assertEquals("UnusedClass", removedUnusedTypeName);
+	}
+
+	@Test
+	void testClassReferencingQualifiedStaticMethodWithinItself_shouldBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classReferencingStaticMethodFieldWithinItself = "" +
+				"	private static class UnusedClass {\n"
+				+ "		static void staticMethod() {\n"
+				+ "			\n"
+				+ "		}\n"
+				+ "		void useStaticMethod() {\n"
+				+ "			UnusedClass.staticMethod();\n"
+				+ "		}\n"
+				+ "	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME,
+				classReferencingStaticMethodFieldWithinItself);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertEquals(1, removedUnusedTypes.size());
+		String removedUnusedTypeName = removedUnusedTypes.get(0)
+			.getClassMemberIdentifier();
+		assertEquals("UnusedClass", removedUnusedTypeName);
+	}
+
+	@Test
+	void testClassReferencingQualifiedStaticFieldWithinItself_shouldBeRemoved() throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		String classReferencingStaticFieldWithinItself = "" +
+				"	private static class UnusedClass {\n"
+				+ "		static final int ZERO = 0;\n"
+				+ "		int useStaticField() {\n"
+				+ "			return UnusedClass.ZERO;\n"
+				+ "		}\n"
+				+ "	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME,
+				classReferencingStaticFieldWithinItself);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertEquals(1, removedUnusedTypes.size());
+		String removedUnusedTypeName = removedUnusedTypes.get(0)
+			.getClassMemberIdentifier();
+		assertEquals("UnusedClass", removedUnusedTypeName);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			""
+					+ "		int x = ClassDeclaringZERO.ZERO;\n"
+					+ "\n"
+					+ "		private static class ClassDeclaringZERO {\n"
+					+ "			private static final int ZERO = 0;\n"
+					+ "\n"
+					+ "		}",
+			""
+					+ "		int x = ClassDeclaringGetZero.getZero();\n"
+					+ "\n"
+					+ "		private static class ClassDeclaringGetZero {\n"
+					+ "			static int getZero() {\n"
+					+ "				return 0;\n"
+					+ "			}\n"
+					+ "		}",
+			""
+					+ "		int x = EnclosingNestedClass.ClassDeclaringGetZero.getZero();\n"
+					+ "\n"
+					+ "		static class EnclosingNestedClass {\n"
+					+ "			private static class ClassDeclaringGetZero {\n"
+					+ "				static int getZero() {\n"
+					+ "					return 0;\n"
+					+ "				}\n"
+					+ "			}\n"
+					+ "		}",
+	})
+	void testClassWithStaticMembersReferencedOutside_shouldNotBeRemoved(String classWithStaticMembersReferencedOutside)
+			throws Exception {
+		Map<String, Boolean> options = new HashMap<>();
+		options.put("private-classes", true);
+		UnusedTypesCandidatesVisitor visitor = new UnusedTypesCandidatesVisitor(options);
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME,
+				classWithStaticMembersReferencedOutside);
+		defaultFixture.accept(visitor);
+
+		List<UnusedTypeWrapper> removedUnusedTypes = visitor.getUnusedPrivateTypes();
+		assertTrue(removedUnusedTypes.isEmpty());
+	}
 }
