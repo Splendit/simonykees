@@ -38,6 +38,7 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	public boolean visit(TypeDeclaration node) {
 
 		List<MethodDeclaration> methods = Arrays.asList(node.getMethods());
+		methods = filterMethodDeclarations(methods);
 		ITypeBinding typeBinding = node.resolveBinding();
 		addOverrideAnnotation(node, methods, typeBinding);
 		return true;
@@ -47,6 +48,7 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	public boolean visit(AnonymousClassDeclaration node) {
 		List<MethodDeclaration> methods = ASTNodeUtil.convertToTypedList(node.bodyDeclarations(),
 				MethodDeclaration.class);
+		methods = filterMethodDeclarations(methods);
 		ITypeBinding typeBinding = node.resolveBinding();
 		addOverrideAnnotation(node, methods, typeBinding);
 		return true;
@@ -56,9 +58,14 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	public boolean visit(EnumDeclaration node) {
 		List<MethodDeclaration> methods = ASTNodeUtil.convertToTypedList(node.bodyDeclarations(),
 				MethodDeclaration.class);
+		methods = filterMethodDeclarations(methods);
 		ITypeBinding typeBinding = node.resolveBinding();
 		addOverrideAnnotation(node, methods, typeBinding);
 		return true;
+	}
+	
+	protected List<MethodDeclaration> filterMethodDeclarations(List<MethodDeclaration> methodDeclarations) { 
+		return methodDeclarations;
 	}
 
 	/**

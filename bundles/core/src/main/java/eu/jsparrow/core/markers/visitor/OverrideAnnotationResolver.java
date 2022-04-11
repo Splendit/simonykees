@@ -1,6 +1,8 @@
 package eu.jsparrow.core.markers.visitor;
 
+import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -33,18 +35,17 @@ public class OverrideAnnotationResolver extends OverrideAnnotationRuleASTVisitor
 	}
 
 	@Override
-	public boolean visit(MethodDeclaration methodDeclaration) {
-		SimpleName name = methodDeclaration.getName();
-		if (positionChecker.test(name)) {
-			super.visit(methodDeclaration);
-		}
-		return true;
+	public void addMarkerEvent(MethodDeclaration node) {
+		SimpleName name = node.getName();
+		RefactoringMarkerEvent event = RefactoringMarkerEventFactory.createEventForNode(getCompilationUnit(), name, ID,
+				description);
+		addMarkerEvent(event);
 	}
 
 	@Override
-	public void addMarkerEvent(MethodDeclaration node) {
-		SimpleName name = node.getName();
-		RefactoringMarkerEvent event = RefactoringMarkerEventFactory.createEventForNode(getCompilationUnit(), name, ID, description);
-		addMarkerEvent(event);
+	protected List<MethodDeclaration> filterMethodDeclarations(List<MethodDeclaration> methodDeclarations) {
+		return methodDeclarations.stream()
+			.filter(method -> positionChecker.test(method.getName()))
+			.collect(Collectors.toList());
 	}
 }
