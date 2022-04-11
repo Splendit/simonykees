@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import eu.jsparrow.core.markers.common.OverrideAnnotationEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -28,7 +29,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 1.2
  *
  */
-public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisitor {
+public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisitor implements OverrideAnnotationEvent{
 
 	private static final String OVERRIDE_SIMPLE_NAME = java.lang.Override.class.getSimpleName();
 	private static final String JAVA_LANG_OVERRIDE = java.lang.Override.class.getName();
@@ -105,6 +106,7 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 					.insertFirst(NodeBuilder.newMarkerAnnotation(node.getAST(), node.getAST()
 						.newName(OVERRIDE_SIMPLE_NAME)), null);
 				onRewrite();
+				addMarkerEvent(method);
 			});
 	}
 

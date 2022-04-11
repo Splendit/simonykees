@@ -21,10 +21,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class PrimitiveObjectUseEqualsRule extends RefactoringRuleImpl<PrimitiveObjectUseEqualsASTVisitor> {
 
+	public static final String RULE_ID = "PrimitiveObjectUseEquals"; //$NON-NLS-1$
+
 	public PrimitiveObjectUseEqualsRule() {
 		super();
 		this.visitorClass = PrimitiveObjectUseEqualsASTVisitor.class;
-		this.id = "PrimitiveObjectUseEquals"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.PrimitiveObjectUseEqualsRule_name,
 				Messages.PrimitiveObjectUseEqualsRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.STRING_MANIPULATION));

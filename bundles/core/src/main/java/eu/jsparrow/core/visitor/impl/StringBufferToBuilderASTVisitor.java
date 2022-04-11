@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.StringBufferToBuilderEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -34,7 +35,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @author Matthias Webhofer
  * @since 2.1.1
  */
-public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisitor {
+public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisitor implements StringBufferToBuilderEvent {
 
 	/*** FIELDS FOR TYPE CHECK ***/
 
@@ -172,6 +173,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 						astRewrite.replace(declaration, newDeclaration, null);
 						getCommentRewriter().saveRelatedComments(declaration);
 						onRewrite();
+						addMarkerEvent(declaration);
 					}
 				}
 			}

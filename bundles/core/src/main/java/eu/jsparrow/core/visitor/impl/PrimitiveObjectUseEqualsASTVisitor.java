@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 
+import eu.jsparrow.core.markers.common.PrimitiveObjectUseEqualsEvent;
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -35,7 +36,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @author Hans-Jörg Schrödl
  * @since 2.1.1
  */
-public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
+public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVisitor implements PrimitiveObjectUseEqualsEvent {
 
 	private static final String BYTE_FULLY_QUALIFIED_NAME = java.lang.Byte.class.getName();
 	private static final String CHAR_FULLY_QUALIFIED_NAME = java.lang.Character.class.getName();
@@ -69,6 +70,7 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 		astRewrite.replace(infixExpression, replaceNode, null);
 		saveComments(infixExpression);
 		onRewrite();
+		addMarkerEvent(infixExpression);
 		return true;
 	}
 
