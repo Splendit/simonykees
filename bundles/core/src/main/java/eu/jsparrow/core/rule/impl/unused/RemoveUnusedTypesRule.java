@@ -129,6 +129,8 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 				try {
 					icu.delete(true, null);
 				} catch (JavaModelException e) {
+					String message = String.format("Cannot delete %s. %s.", icu.getElementName(), e.getMessage());//$NON-NLS-1$
+					logger.error(message, e);
 					unableToRemove.add(icu);
 				}
 			}
@@ -145,9 +147,8 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 		if (!unableToRemove.isEmpty()) {
 			String names = unableToRemove.stream()
 				.map(ICompilationUnit::getElementName)
-				.collect(Collectors.joining(System.lineSeparator()));
-			String message = String.join(System.lineSeparator(),
-					"The following compilation units could not be removed:", names); //$NON-NLS-1$
+				.collect(Collectors.joining(",")); //$NON-NLS-1$
+			String message = "The following compilation units could not be removed: " + names; //$NON-NLS-1$
 			throw new RefactoringException(message);
 		}
 	}

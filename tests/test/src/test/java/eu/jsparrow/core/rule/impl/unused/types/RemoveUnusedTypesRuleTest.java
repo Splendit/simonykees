@@ -213,7 +213,7 @@ class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 		when(type.getName()).thenReturn(mock(SimpleName.class));
 		when(compilationUnit.getJavaElement()).thenReturn(icu);
 		when(icu.getElementName()).thenReturn("ToBeDeleted");
-		doThrow(JavaModelException.class).when(icu).delete(true, null);
+		doThrow(new JavaModelException(new RuntimeException("Permission denied"), 985)).when(icu).delete(true, null);
 		UnusedTypeWrapper wrapper = new UnusedTypeWrapper(compilationUnit, JavaAccessModifier.PUBLIC, type, true);
 		unusedTypes.add(wrapper);
 		RemoveUnusedTypesRule rule = new RemoveUnusedTypesRule(unusedTypes);
