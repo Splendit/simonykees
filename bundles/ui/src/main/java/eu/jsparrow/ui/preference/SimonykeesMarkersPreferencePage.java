@@ -37,7 +37,7 @@ import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
 public class SimonykeesMarkersPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	private CheckboxTreeViewerWrapper treeViewerWrapper;
-
+	private Text searchField;
 	@Override
 	public void init(IWorkbench workbench) {
 		// required by the parent
@@ -62,7 +62,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		searchComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		searchComposite.setLayout(new GridLayout(1, true));
 
-		Text searchField = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
+		searchField = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
 		searchField.setMessage(Messages.SimonykeesMarkersPreferencePage_searchLabelMessage);
 		GridData searchFieldGridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
 		searchFieldGridData.widthHint = 180;
@@ -123,6 +123,11 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 			DefaultActiveMarkers defaultMarkers = new DefaultActiveMarkers();
 			treeViewerWrapper.selectMarkers(defaultMarkers.getActiveMarkers());
 		}
+	}
+
+	public void setSearchField(String string) {
+		searchField.setText(string);
+		
 	}
 
 

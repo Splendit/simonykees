@@ -18,9 +18,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class ReorderModifiersRule extends RefactoringRuleImpl<ReorderModifiersASTVisitor> {
 
+	public static final String RULE_ID = "ReorderModifiers"; //$NON-NLS-1$
+
 	public ReorderModifiersRule() {
 		this.visitorClass = ReorderModifiersASTVisitor.class;
-		this.id = "ReorderModifiers"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.ReorderModifiersRule_name,
 				Messages.ReorderModifiersRule_description, Duration.ofMinutes(2), Tag.READABILITY,
 				Tag.CODING_CONVENTIONS);
