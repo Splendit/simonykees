@@ -55,6 +55,29 @@ public class UnusedCodeTestHelper {
 		return compilationUnit.getSource();
 	}
 
+	public static List<ICompilationUnit> applyRemoveUnusedCodeRefactoring(RefactoringRule rule, String packageString,
+			List<Path> preFiles, IPackageFragmentRoot root) throws Exception {
+
+		List<ICompilationUnit> compilationUnits = new ArrayList<>();
+		for (Path preFile : preFiles) {
+			IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
+			String fileName = preFile.getFileName()
+				.toString();
+			String content = new String(Files.readAllBytes(preFile), StandardCharsets.UTF_8);
+			ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);
+			compilationUnits.add(compilationUnit);
+		}
+
+		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(Arrays.asList(rule));
+		IProgressMonitor monitor = new NullProgressMonitor();
+
+		refactoringPipeline.prepareRefactoring(compilationUnits, monitor);
+		refactoringPipeline.doRefactoring(monitor);
+		refactoringPipeline.commitRefactoring();
+
+		return compilationUnits;
+	}
+
 	public static List<UnusedFieldWrapper> findFieldsToBeRemoved(String prerulePackage, String postRulePackagePath)
 			throws Exception {
 		IPackageFragmentRoot root = AbstractRulesTest.createRootPackageFragment();

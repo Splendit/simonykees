@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
@@ -23,10 +22,10 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.core.visitor.renaming.ReferenceSearchMatch;
 import eu.jsparrow.core.visitor.unused.JavaElementSearchEngine;
 import eu.jsparrow.core.visitor.utils.SearchScopeFactory;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 public class UnusedTypesEngine {
@@ -65,7 +64,8 @@ public class UnusedTypesEngine {
 			}
 
 			List<NonPrivateUnusedTypeCandidate> nonPrivateCandidates = visitor.getNonPrivateCandidates();
-			List<UnusedTypeWrapper> nonPrivate = filterUnusedTypes(compilationUnit, nonPrivateCandidates, cache);
+			List<UnusedTypeWrapper> nonPrivate = filterUnusedTypes(compilationUnit, nonPrivateCandidates, cache,
+					optionsMap);
 			if (!nonPrivate.isEmpty()) {
 				targetCompilationUnits.add(icu);
 			}
@@ -88,26 +88,41 @@ public class UnusedTypesEngine {
 	}
 
 	private List<UnusedTypeWrapper> filterUnusedTypes(CompilationUnit compilationUnit,
-			List<NonPrivateUnusedTypeCandidate> nonPrivateCandidates, Map<IPath, CompilationUnit> cache) {
+			List<NonPrivateUnusedTypeCandidate> nonPrivateCandidates, Map<IPath, CompilationUnit> cache,
+			Map<String, Boolean> optionsMap) {
 		List<UnusedTypeWrapper> list = new ArrayList<>();
 		IJavaElement javaElement = compilationUnit.getJavaElement();
 		IJavaProject javaProject = javaElement.getJavaProject();
+		List<IPath> testReferencePathsAlreadyUsed = new ArrayList<>();
 		for (NonPrivateUnusedTypeCandidate candidate : nonPrivateCandidates) {
+
 			AbstractTypeDeclaration typeDeclaration = candidate.getTypeDeclaration();
-			UnusedTypeReferenceSearchResult searchResult = searchReferences(typeDeclaration, javaProject, cache);
+			UnusedTypeReferenceSearchResult searchResult = searchReferences(typeDeclaration, javaProject, cache,
+					optionsMap, testReferencePathsAlreadyUsed);
 			if (!searchResult.isMainSourceReferenceFound()
 					&& !searchResult.isInvalidSearchEngineResult()) {
+				List<TestReferenceOnType> testReferencesOnType = searchResult.getTestReferencesOnType();
 				UnusedTypeWrapper unusedTypeWrapper = new UnusedTypeWrapper(compilationUnit,
-						candidate.getAccessModifier(), typeDeclaration, candidate.isMainType());
+						candidate.getAccessModifier(), typeDeclaration, candidate.isMainType(),
+						testReferencesOnType);
 				list.add(unusedTypeWrapper);
+				if (!testReferencesOnType.isEmpty()) {
+					testReferencesOnType.stream()
+						.map(TestReferenceOnType::getICompilationUnit)
+						.map(ICompilationUnit::getPath)
+						.forEach(testReferencePathsAlreadyUsed::add);
+				}
 			}
 		}
 		return list;
 	}
 
-	private UnusedTypeReferenceSearchResult searchReferences(AbstractTypeDeclaration typeDeclaration,
+	private UnusedTypeReferenceSearchResult searchReferences(
+			AbstractTypeDeclaration typeDeclaration,
 			IJavaProject project,
-			Map<IPath, CompilationUnit> cache) {
+			Map<IPath, CompilationUnit> cache,
+			Map<String, Boolean> optionsMap,
+			List<IPath> testReferencePathsAlreadyUsed) {
 
 		IJavaElement[] searchScope = createSearchScope(scope, project);
 		JavaElementSearchEngine referencesSearchEngine = new JavaElementSearchEngine(searchScope);
@@ -131,20 +146,33 @@ public class UnusedTypesEngine {
 			return new UnusedTypeReferenceSearchResult(false, false);
 		}
 
+		boolean removeTestCodeOption = optionsMap.getOrDefault(Constants.REMOVE_TEST_CODE, false);
+		if (!removeTestCodeOption) {
+			return new UnusedTypeReferenceSearchResult(true, false);
+		}
+
 		Set<ICompilationUnit> targetICUs = referencesSearchEngine.getTargetIJavaElements();
+		List<TestReferenceOnType> testReferencesOnType = new ArrayList<>();
 
 		for (ICompilationUnit iCompilationUnit : targetICUs) {
 			IPath path = iCompilationUnit.getPath();
+			if (testReferencePathsAlreadyUsed.contains(path)) {
+				return new UnusedTypeReferenceSearchResult(true, false);
+			}
 			CompilationUnit compilationUnit = cache.computeIfAbsent(path,
 					iPath -> RefactoringUtil.parse(iCompilationUnit));
-			TypeReferencesVisitor visitor = new TypeReferencesVisitor(typeDeclaration);
 
-			compilationUnit.accept(visitor);
-			if (visitor.typeReferenceFound() || visitor.hasUnresolvedReference()) {
+			JUnitTestMethodVisitor testMethodVisitor = new JUnitTestMethodVisitor();
+
+			compilationUnit.accept(testMethodVisitor);
+
+			if (testMethodVisitor.isJUnitTestCaseFound()) {
+				testReferencesOnType.add(new TestReferenceOnType(compilationUnit, iCompilationUnit));
+			} else {
 				return new UnusedTypeReferenceSearchResult(true, false);
 			}
 		}
-		return new UnusedTypeReferenceSearchResult(false, false);
+		return new UnusedTypeReferenceSearchResult(false, false, testReferencesOnType);
 
 	}
 

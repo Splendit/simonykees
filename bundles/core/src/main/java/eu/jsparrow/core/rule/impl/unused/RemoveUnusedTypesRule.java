@@ -22,6 +22,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
 import eu.jsparrow.core.visitor.unused.type.RemoveUnusedTypesASTVisitor;
+import eu.jsparrow.core.visitor.unused.type.TestReferenceOnType;
 import eu.jsparrow.core.visitor.unused.type.UnusedTypeWrapper;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
@@ -92,9 +93,10 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 			AbstractTypeDeclaration declaration, DocumentChange documentChange) {
 		int offset;
 		int length;
-		if(unusedTypeWrapper.isMainType()) {
+		if (unusedTypeWrapper.isMainType()) {
 			offset = 0;
-			length = unusedTypeWrapper.getCompilationUnit().getLength();
+			length = unusedTypeWrapper.getCompilationUnit()
+				.getLength();
 		} else {
 			offset = declaration.getStartPosition();
 			length = declaration.getLength();
@@ -120,8 +122,8 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 
 	public void deleteEmptyCompilationUnits() throws RefactoringException {
 		List<ICompilationUnit> unableToRemove = new ArrayList<>();
-		for(UnusedTypeWrapper typeWrapper : unusedTypes) {
-			if(typeWrapper.isMainType()) {
+		for (UnusedTypeWrapper typeWrapper : unusedTypes) {
+			if (typeWrapper.isMainType()) {
 				CompilationUnit compilationUnit = typeWrapper.getCompilationUnit();
 				ICompilationUnit icu = (ICompilationUnit) compilationUnit.getJavaElement();
 				try {
@@ -130,12 +132,22 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 					unableToRemove.add(icu);
 				}
 			}
+			List<TestReferenceOnType> testReferencesOnType = typeWrapper.getTestReferencesOnType();
+			for (TestReferenceOnType testReference : testReferencesOnType) {
+				ICompilationUnit icu = testReference.getICompilationUnit();
+				try {
+					icu.delete(true, null);
+				} catch (JavaModelException e) {
+					unableToRemove.add(icu);
+				}
+			}
 		}
-		if(!unableToRemove.isEmpty()) {
+		if (!unableToRemove.isEmpty()) {
 			String names = unableToRemove.stream()
-					.map(ICompilationUnit::getElementName)
-					.collect(Collectors.joining(System.lineSeparator()));
-			String message = String.join(System.lineSeparator(), "The following compilation units could not be removed:", names); //$NON-NLS-1$
+				.map(ICompilationUnit::getElementName)
+				.collect(Collectors.joining(System.lineSeparator()));
+			String message = String.join(System.lineSeparator(),
+					"The following compilation units could not be removed:", names); //$NON-NLS-1$
 			throw new RefactoringException(message);
 		}
 	}

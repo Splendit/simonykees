@@ -55,7 +55,10 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 		String javaElementName = javaElement.getElementName();
 		int lastIndexOfFileExtension = javaElementName.lastIndexOf(".java"); //$NON-NLS-1$
 		this.mainClassName = javaElementName.substring(0, lastIndexOfFileExtension);
-		return true;
+
+		JUnitNamesVisitor jUnitTestReferencesVisitor = new JUnitNamesVisitor();
+		compilationUnit.accept(jUnitTestReferencesVisitor);
+		return !jUnitTestReferencesVisitor.isJUnitReferenceFound();
 	}
 
 	@Override

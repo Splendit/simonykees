@@ -31,6 +31,7 @@ public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
+		super.visit(compilationUnit);
 		this.compilationUnit = compilationUnit;
 		IPath currentPath = compilationUnit.getJavaElement()
 			.getPath();
@@ -40,12 +41,27 @@ public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 		for (UnusedTypeWrapper unusedTypeWrapper : unusedTypes) {
 			IPath path = unusedTypeWrapper.getDeclarationPath();
 			if (path.equals(currentPath)) {
-				AbstractTypeDeclaration declaration = unusedTypeWrapper.getTypeDeclaration();
-				declarations.put(declaration, unusedTypeWrapper);
+				if (unusedTypeWrapper.isMainType()) {
+					removeAllContent(unusedTypeWrapper);
+					return false;
+				} else {
+					AbstractTypeDeclaration declaration = unusedTypeWrapper.getTypeDeclaration();
+					declarations.put(declaration, unusedTypeWrapper);
+				}
+			} else {
+				List<TestReferenceOnType> testReferencesOnType = unusedTypeWrapper.getTestReferencesOnType();
+				boolean isTestToRemove = testReferencesOnType.stream()
+					.map(TestReferenceOnType::getICompilationUnit)
+					.map(ICompilationUnit::getPath)
+					.anyMatch(currentPath::equals);
+				if(isTestToRemove) {
+					removeAllContent(unusedTypeWrapper);
+					return false;
+				}
 			}
 		}
 		this.relevantDeclarations = declarations;
-		return super.visit(compilationUnit);
+		return true;
 
 	}
 
@@ -70,6 +86,20 @@ public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 			onRewrite();
 		}
 		return true;
+	}
+
+	private void removeAllContent(UnusedTypeWrapper unusedTypeWrapper) {
+		TextEditGroup editGroup = unusedTypeWrapper.getTextEditGroup((ICompilationUnit) getCompilationUnit()
+			.getJavaElement());
+		astRewrite.remove(compilationUnit.getPackage(), editGroup);
+
+		ASTNodeUtil.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
+			.forEach(importDeclaration -> astRewrite.remove(importDeclaration, editGroup));
+
+		ASTNodeUtil.convertToTypedList(compilationUnit.types(), AbstractTypeDeclaration.class)
+			.forEach(typeDeclaration -> astRewrite.remove(typeDeclaration, editGroup));
+
+		onRewrite();
 	}
 
 	private Optional<UnusedTypeWrapper> isDesignatedForRemoval(AbstractTypeDeclaration typeDeclaration,

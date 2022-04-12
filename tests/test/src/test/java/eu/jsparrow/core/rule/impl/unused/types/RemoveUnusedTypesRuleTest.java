@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,6 +46,7 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 
+@SuppressWarnings("nls")
 class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 
 	private static final String PRERULE_UNUSED_PACKAGE = "eu.jsparrow.sample.preRule.unused.types";
@@ -128,6 +130,45 @@ class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	void testClassesUsedByTestsOnly() throws Exception {
+		
+		String className = "ClassesUsedByTestExclusively";
+		String testClassName = "TestUsingNestedClasses";
+		
+		String preRuleFilePath = String.format("unused/types/%s.java", className);		
+		String preRuleTestFilePath = String.format("unused/types/%s.java", testClassName);		
+		
+		Path preRule = getPreRuleFile(preRuleFilePath);
+		Path preRuleTest = getPreRuleFile(preRuleTestFilePath);
+		
+		Path postRule = getPostRuleFile(className + ".java", "unused/types");
+		Path postRuleTest = getPostRuleFile(testClassName + ".java", "unused/types");
+		
+		List<UnusedTypeWrapper> unusedTypes = UnusedCodeTestHelper.findTypesToBeRemoved(PRERULE_UNUSED_PACKAGE,
+				PRERULE_DIRECTORY);
+		RemoveUnusedTypesRule rule = new RemoveUnusedTypesRule(unusedTypes);
+		List<Path> preRuleFiles = Arrays.asList(preRule, preRuleTest);
+		
+		List<ICompilationUnit> iCompilationUnits = UnusedCodeTestHelper.applyRemoveUnusedCodeRefactoring(rule,
+				"eu.jsparrow.sample.preRule.unused.types", preRuleFiles, root);
+		
+		String postRulePackage = getPostRulePackage("unused.types");
+		
+		String refactoring = iCompilationUnits.get(0).getSource();		
+		String actual = StringUtils.replace(refactoring, "package eu.jsparrow.sample.preRule.unused.types",
+				postRulePackage);
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+		
+		
+		String refactoringTest = iCompilationUnits.get(1).getSource();
+		String actualTest = StringUtils.replace(refactoringTest, "package eu.jsparrow.sample.preRule.unused.types",
+				postRulePackage);
+		String expectedTest = new String(Files.readAllBytes(postRuleTest), StandardCharsets.UTF_8);
+		assertEquals(expectedTest, actualTest);		
 	}
 
 	@Test
