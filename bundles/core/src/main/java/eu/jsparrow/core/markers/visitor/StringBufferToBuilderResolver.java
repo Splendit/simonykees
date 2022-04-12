@@ -13,6 +13,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link StringBufferToBuilderASTVisitor}.
+ * 
+ * @since 4.10.0
+ *
+ */
 public class StringBufferToBuilderResolver extends StringBufferToBuilderASTVisitor implements Resolver {
 
 	public static final String ID = "StringBufferToBuilderResolver"; //$NON-NLS-1$

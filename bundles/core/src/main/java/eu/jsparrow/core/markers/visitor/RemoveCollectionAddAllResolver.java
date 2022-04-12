@@ -14,6 +14,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link RemoveCollectionAddAllASTVisitor}.
+ * 
+ * @since 4.10.0
+ *
+ */
 public class RemoveCollectionAddAllResolver extends RemoveCollectionAddAllASTVisitor implements Resolver {
 
 	public static final String ID = "RemoveCollectionAddAllResolver"; //$NON-NLS-1$

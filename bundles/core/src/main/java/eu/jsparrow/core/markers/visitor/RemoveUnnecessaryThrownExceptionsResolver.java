@@ -16,6 +16,13 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link RemoveUnnecessaryThrownExceptionsASTVisitor}.
+ * 
+ * @since 4.10.0
+ *
+ */
 public class RemoveUnnecessaryThrownExceptionsResolver extends RemoveUnnecessaryThrownExceptionsASTVisitor
 		implements Resolver {
 	public static final String ID = "RemoveUnnecessaryThrownExceptionsResolver"; //$NON-NLS-1$

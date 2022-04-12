@@ -13,6 +13,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link UseOffsetBasedStringMethodsASTVisitor}.
+ * 
+ * @since 4.10.0
+ *
+ */
 public class UseOffsetBasedStringMethodsResolver extends UseOffsetBasedStringMethodsASTVisitor implements Resolver {
 
 	public static final String ID = "UseOffsetBasedStringMethodsResolver"; //$NON-NLS-1$

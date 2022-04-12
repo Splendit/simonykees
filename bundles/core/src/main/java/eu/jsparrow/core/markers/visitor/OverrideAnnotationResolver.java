@@ -16,6 +16,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link OverrideAnnotationRuleASTVisitor}.
+ * 
+ * @since 4.10.0
+ *
+ */
 public class OverrideAnnotationResolver extends OverrideAnnotationRuleASTVisitor implements Resolver {
 
 	public static final String ID = "OverrideAnnotationResolver"; //$NON-NLS-1$
