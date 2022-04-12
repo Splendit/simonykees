@@ -128,8 +128,8 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 		// 'c'.equals('d') doesn't work
 		List<Integer> forbiddenNodeTypes = Arrays.asList(ASTNode.NUMBER_LITERAL, ASTNode.BOOLEAN_LITERAL,
 				ASTNode.CHARACTER_LITERAL);
-		return !forbiddenNodeTypes.stream()
-			.anyMatch(x -> x == leftOperand.getNodeType() || x == rightOperand.getNodeType());
+		return forbiddenNodeTypes.stream()
+			.noneMatch(x -> x == leftOperand.getNodeType() || x == rightOperand.getNodeType());
 	}
 
 }

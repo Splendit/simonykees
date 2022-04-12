@@ -117,7 +117,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 					Expression.class);
 			arguments.stream()
 				.filter(argument -> ASTNode.SIMPLE_NAME == argument.getNodeType())
-				.map(argument -> (SimpleName) argument)
+				.map(SimpleName.class::cast)
 				.forEach(argumentSimpleName -> {
 					ITypeBinding argumentTypeBinding = argumentSimpleName.resolveTypeBinding();
 					if (ClassRelationUtil.isContentOfTypes(argumentTypeBinding, STRINGBUFFER_TYPE_LIST)) {
@@ -216,7 +216,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 	private static boolean isExpressionOf(Expression astNode, String assignedType,
 			ChildPropertyDescriptor locationInAncestor) {
 		if (astNode.getLocationInParent() == locationInAncestor) {
-			Expression expression = (Expression) astNode;
+			Expression expression = astNode;
 			ITypeBinding typeBinding = expression.resolveTypeBinding();
 			return typeBinding == null || ClassRelationUtil.isContentOfType(typeBinding, assignedType);
 		}
@@ -443,7 +443,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 			ListRewrite newCreationArguments = astRewrite.getListRewrite(newCreation,
 					ClassInstanceCreation.ARGUMENTS_PROPERTY);
 			ASTNodeUtil.convertToTypedList(oldCreation.arguments(), Expression.class)
-				.forEach(argument -> newCreationArguments.insertLast(astRewrite.createCopyTarget((ASTNode) argument),
+				.forEach(argument -> newCreationArguments.insertLast(astRewrite.createCopyTarget(argument),
 						null));
 		}
 
