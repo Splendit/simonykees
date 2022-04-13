@@ -85,12 +85,28 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 				documentChange.setEdit(rootEdit);
 				addDeclarationTextEdits(unusedTypeWrapper, targetICU, declaration, documentChange);
 
+				unusedTypeWrapper.getTestReferencesOnType()
+					.stream()
+					.filter(externalreference -> comparePaths(targetICU.getPath(), externalreference))
+					.forEach(externalReference -> addTestReferencesTextEdits(documentChange, externalReference));
 				documentChange.setTextType("java"); //$NON-NLS-1$
 				documentChanges.put(targetICU, documentChange);
 			}
 		}
 
 		return documentChanges;
+	}
+
+	private void addTestReferencesTextEdits(DocumentChange documentChange, TestReferenceOnType externalReference) {
+		CompilationUnit cu = externalReference.getCompilationUnit();
+		DeleteEdit deleteEdit = new DeleteEdit(0, cu.getLength());
+		documentChange.addEdit(deleteEdit);
+	}
+
+	private boolean comparePaths(IPath path, TestReferenceOnType externalReference) {
+		CompilationUnit cu = externalReference.getCompilationUnit();
+		ICompilationUnit icu = (ICompilationUnit) cu.getJavaElement();
+		return path.equals(icu.getPath());
 	}
 
 	private void addDeclarationTextEdits(UnusedTypeWrapper unusedTypeWrapper, ICompilationUnit iCompilationUnit,
@@ -144,6 +160,8 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 				try {
 					icu.delete(true, null);
 				} catch (JavaModelException e) {
+					String message = String.format("Cannot delete %s. %s.", icu.getElementName(), e.getMessage());//$NON-NLS-1$
+					logger.error(message, e);
 					unableToRemove.add(icu);
 				}
 			}

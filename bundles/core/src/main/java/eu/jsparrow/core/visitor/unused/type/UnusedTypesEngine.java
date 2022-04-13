@@ -70,11 +70,12 @@ public class UnusedTypesEngine {
 				targetCompilationUnits.add(icu);
 			}
 
-			/*
-			 * In case we want to support test references, here we have to
-			 * analyze whether the external reference is inside a test case or
-			 * not.
-			 */
+			for (UnusedTypeWrapper unusedNonPrivateType : nonPrivate) {
+				List<TestReferenceOnType> tests = unusedNonPrivateType.getTestReferencesOnType();
+				for (TestReferenceOnType test : tests) {
+					targetCompilationUnits.add(test.getICompilationUnit());
+				}
+			}
 
 			list.addAll(nonPrivate);
 			if (subMonitor.isCanceled()) {

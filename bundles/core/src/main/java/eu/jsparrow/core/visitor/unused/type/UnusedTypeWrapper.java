@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.unused.type;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -95,11 +96,15 @@ public class UnusedTypeWrapper implements UnusedClassMemberWrapper {
 
 	@Override
 	public List<ICompilationUnit> getTargetICompilationUnits() {
-		// because there are no external references
-		// as soon as there is any reference on a type declaration, it cannot be
-		// removed.
+		List<ICompilationUnit> compilationUnits = new ArrayList<>();
+		ICompilationUnit original = (ICompilationUnit) compilationUnit.getJavaElement();
+		compilationUnits.add(original);
 
-		return Collections.singletonList((ICompilationUnit) compilationUnit.getJavaElement());
+		for (TestReferenceOnType externalTestReference : this.testReferencesOnType) {
+			ICompilationUnit iCompilationUnit = externalTestReference.getICompilationUnit();
+			compilationUnits.add(iCompilationUnit);
+		}
+		return Collections.unmodifiableList(compilationUnits);
 	}
 
 	public TextEditGroup getTextEditGroup(ICompilationUnit iCompilationUnit) {
