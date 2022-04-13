@@ -58,7 +58,7 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 
 		JUnitNamesVisitor jUnitTestReferencesVisitor = new JUnitNamesVisitor();
 		compilationUnit.accept(jUnitTestReferencesVisitor);
-		return !jUnitTestReferencesVisitor.isJUnitReferenceFound();
+		return !jUnitTestReferencesVisitor.isJUnitNameFound();
 	}
 
 	@Override

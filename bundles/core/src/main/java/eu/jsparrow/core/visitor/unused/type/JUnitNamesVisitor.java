@@ -1,7 +1,10 @@
 package eu.jsparrow.core.visitor.unused.type;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 
 import eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName;
@@ -22,20 +25,39 @@ public class JUnitNamesVisitor extends ASTVisitor {
 	private boolean jUnitReferenceFound = false;
 
 	@Override
+	public boolean preVisit2(ASTNode node) {
+		return !jUnitReferenceFound;
+	}
+
+	@Override
+	public boolean visit(PackageDeclaration node) {
+		if (isJUnitName(node.getName())) {
+			jUnitReferenceFound = true;
+		}
+		return false;
+	}
+
+	@Override
 	public boolean visit(ImportDeclaration node) {
-		jUnitReferenceFound = RegexJUnitQualifiedName.isJUnitName(node.getName()
-			.getFullyQualifiedName());
+		if (isJUnitName(node.getName())) {
+			jUnitReferenceFound = true;
+		}
 		return false;
 	}
 
 	@Override
 	public boolean visit(QualifiedName node) {
-		jUnitReferenceFound = RegexJUnitQualifiedName.isJUnitName(node.getFullyQualifiedName());
+		if (isJUnitName(node)) {
+			jUnitReferenceFound = true;
+		}
 		return false;
 	}
 
-	public boolean isJUnitReferenceFound() {
-		return jUnitReferenceFound;
+	private boolean isJUnitName(Name name) {
+		return RegexJUnitQualifiedName.isJUnitName(name.getFullyQualifiedName());
 	}
 
+	public boolean isJUnitNameFound() {
+		return jUnitReferenceFound;
+	}
 }
