@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -48,6 +49,13 @@ class JUnitNamesVisitorTest extends UsesJDTUnitFixture {
 		options.put("package-private-classes", true);
 		options.put("public-classes", true);
 		return options;
+	}
+
+	@BeforeEach
+	public void setUp() throws Exception {
+		addDependency("junit", "junit", "4.13");
+		addDependency("org.junit.jupiter", "junit-jupiter-api", "5.4.0");
+		addDependency("org.junit.jupiter", "junit-jupiter-params", "5.7.0");
 	}
 
 	@AfterEach
@@ -160,7 +168,7 @@ class JUnitNamesVisitorTest extends UsesJDTUnitFixture {
 
 	@ParameterizedTest
 	@MethodSource(value = "jUnitTestAnnotationQualifiedNames")
-	void visit_UnusedTypesAndJUnitAnnotations_shouldNotBeRemoved(String name)
+	void visit_UnusedTypesAndJUnitTestAnnotationImports_shouldNotBeRemoved(String name)
 			throws Exception {
 
 		defaultFixture.addImport(name);
