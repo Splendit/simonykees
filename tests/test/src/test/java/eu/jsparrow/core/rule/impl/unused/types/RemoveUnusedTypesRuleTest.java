@@ -46,7 +46,6 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 
-@SuppressWarnings("nls")
 class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 
 	private static final String PRERULE_UNUSED_PACKAGE = "eu.jsparrow.sample.preRule.unused.types";

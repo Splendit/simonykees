@@ -10,8 +10,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.text.edits.TextEditGroup;
@@ -24,6 +27,8 @@ public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 	private CompilationUnit compilationUnit;
 	private List<UnusedTypeWrapper> unusedTypes;
 	private Map<AbstractTypeDeclaration, UnusedTypeWrapper> relevantDeclarations;
+	private Map<MethodDeclaration, UnusedTypeWrapper> relevantTestCaseDeclarations;
+	private Map<ImportDeclaration, UnusedTypeWrapper> relevantImportDeclarations;
 
 	public RemoveUnusedTypesASTVisitor(List<UnusedTypeWrapper> unusedTypes) {
 		this.unusedTypes = unusedTypes;
@@ -37,7 +42,8 @@ public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 			.getPath();
 
 		Map<AbstractTypeDeclaration, UnusedTypeWrapper> declarations = new HashMap<>();
-
+		Map<MethodDeclaration, UnusedTypeWrapper> testCaseDeclarations = new HashMap<>();
+		Map<ImportDeclaration, UnusedTypeWrapper> importDeclarations = new HashMap<>();
 		for (UnusedTypeWrapper unusedTypeWrapper : unusedTypes) {
 			IPath path = unusedTypeWrapper.getDeclarationPath();
 			if (path.equals(currentPath)) {
@@ -50,19 +56,37 @@ public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 				}
 			} else {
 				List<TestReferenceOnType> testReferencesOnType = unusedTypeWrapper.getTestReferencesOnType();
-				boolean isTestToRemove = testReferencesOnType.stream()
-					.map(TestReferenceOnType::getICompilationUnit)
-					.map(ICompilationUnit::getPath)
-					.anyMatch(currentPath::equals);
-				if(isTestToRemove) {
-					removeAllContent(unusedTypeWrapper);
-					return false;
+				for (TestReferenceOnType testReferenceOnType : testReferencesOnType) {
+					IPath testPath = testReferenceOnType.getICompilationUnit()
+						.getPath();
+					if (currentPath.equals(testPath)) {
+						testReferenceOnType.getTestTypesReferencingType()
+							.forEach(type -> declarations.put(type, unusedTypeWrapper));
+						testReferenceOnType.getTestMethodsReferencingType()
+							.forEach(method -> testCaseDeclarations.put(method, unusedTypeWrapper));
+						testReferenceOnType.getUnusedTypeImportDeclarations()
+							.forEach(importDeclaration -> importDeclarations.put(importDeclaration,
+									unusedTypeWrapper));
+					}
 				}
 			}
 		}
+		this.relevantImportDeclarations = importDeclarations;
 		this.relevantDeclarations = declarations;
+		this.relevantTestCaseDeclarations = testCaseDeclarations;
 		return true;
+	}
 
+	@Override
+	public boolean visit(ImportDeclaration importDeclaration) {
+		UnusedTypeWrapper designated = isDesignatedForRemoval(importDeclaration, relevantImportDeclarations)
+			.orElse(null);
+		if (designated != null) {
+			TextEditGroup editGroup = designated.getTextEditGroup((ICompilationUnit) getCompilationUnit()
+				.getJavaElement());
+			astRewrite.remove(importDeclaration, editGroup);
+		}
+		return false;
 	}
 
 	@Override
@@ -84,6 +108,18 @@ public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 					.forEach(importDeclaration -> astRewrite.remove(importDeclaration, editGroup));
 			}
 			onRewrite();
+		}
+		return true;
+	}
+
+	@Override
+	public boolean visit(MethodDeclaration methodDeclaration) {
+		UnusedTypeWrapper designated = isDesignatedForRemoval(methodDeclaration, relevantTestCaseDeclarations)
+			.orElse(null);
+		if (designated != null) {
+			TextEditGroup editGroup = designated.getTextEditGroup((ICompilationUnit) getCompilationUnit()
+				.getJavaElement());
+			astRewrite.remove(methodDeclaration, editGroup);
 		}
 		return true;
 	}
@@ -111,6 +147,37 @@ public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 			UnusedTypeWrapper unusedTypeWrapper = entry.getValue();
 			if (typeBinding.isEqualTo(unusedTypeBinding)) {
 				return Optional.of(unusedTypeWrapper);
+			}
+		}
+		return Optional.empty();
+	}
+
+	private Optional<UnusedTypeWrapper> isDesignatedForRemoval(MethodDeclaration methodDeclaration,
+			Map<MethodDeclaration, UnusedTypeWrapper> map) {
+		IMethodBinding methodBinding = methodDeclaration.resolveBinding();
+		for (Map.Entry<MethodDeclaration, UnusedTypeWrapper> entry : map.entrySet()) {
+			MethodDeclaration relevantDeclaration = entry.getKey();
+			IMethodBinding unusedMethodBinding = relevantDeclaration.resolveBinding();
+			UnusedTypeWrapper unusedMethod = entry.getValue();
+			if (unusedMethodBinding.isEqualTo(methodBinding)) {
+				return Optional.of(unusedMethod);
+			}
+		}
+		return Optional.empty();
+	}
+
+	private Optional<UnusedTypeWrapper> isDesignatedForRemoval(ImportDeclaration importDeclaration,
+			Map<ImportDeclaration, UnusedTypeWrapper> map) {
+		IBinding importBinding = importDeclaration.resolveBinding();
+		if (importBinding == null) {
+			return Optional.empty();
+		}
+		for (Map.Entry<ImportDeclaration, UnusedTypeWrapper> entry : map.entrySet()) {
+			ImportDeclaration relevantDeclaration = entry.getKey();
+			IBinding unusedTypeImportBinding = relevantDeclaration.resolveBinding();
+			UnusedTypeWrapper unusedType = entry.getValue();
+			if (importBinding.isEqualTo(unusedTypeImportBinding)) {
+				return Optional.of(unusedType);
 			}
 		}
 		return Optional.empty();

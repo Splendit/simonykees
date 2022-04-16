@@ -16,6 +16,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -168,13 +170,31 @@ public class UnusedTypesEngine {
 			compilationUnit.accept(testMethodVisitor);
 
 			if (testMethodVisitor.isJUnitTestCaseFound()) {
-				testReferencesOnType.add(new TestReferenceOnType(compilationUnit, iCompilationUnit));
+				TestReferenceOnType referenceOnTest = createReferenceOnTestInstance(typeBinding, compilationUnit, iCompilationUnit);
+				testReferencesOnType.add(referenceOnTest);
 			} else {
 				return new UnusedTypeReferenceSearchResult(true, false);
 			}
 		}
 		return new UnusedTypeReferenceSearchResult(false, false, testReferencesOnType);
 
+	}
+
+	private TestReferenceOnType createReferenceOnTestInstance(ITypeBinding typeBinding, CompilationUnit compilationUnit,
+			ICompilationUnit iCompilationUnit) {
+		String typeName = typeBinding.getErasure().getQualifiedName();
+		ReferencesInTestAnalyzerVisitor visitor = new ReferencesInTestAnalyzerVisitor(typeName);
+		compilationUnit.accept(visitor);
+		
+		if(visitor.isMainTopLevelTypeDesignated()) {
+			return new TestReferenceOnType(compilationUnit, iCompilationUnit, true, visitor.getTypesWithReferencesToUnusedType(), Collections.emptySet(), Collections.emptySet());
+		}
+		
+		Set<MethodDeclaration> testCases = visitor.getTestMethodsHavingUnusedTypeReferences();
+		Set<AbstractTypeDeclaration> types = visitor.getTypesWithReferencesToUnusedType();
+		Set<ImportDeclaration> imports = visitor.getUnusedTypeImports();
+		
+		return new TestReferenceOnType(compilationUnit, iCompilationUnit, false, types, testCases, imports);
 	}
 
 	private IJavaElement[] createSearchScope(String modelSearchScope, IJavaProject javaProject) {

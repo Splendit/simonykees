@@ -98,9 +98,29 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 	}
 
 	private void addTestReferencesTextEdits(DocumentChange documentChange, TestReferenceOnType externalReference) {
+
 		CompilationUnit cu = externalReference.getCompilationUnit();
-		DeleteEdit deleteEdit = new DeleteEdit(0, cu.getLength());
-		documentChange.addEdit(deleteEdit);
+		if (externalReference.isRemoveEntireTest()) {
+			DeleteEdit deleteEdit = new DeleteEdit(0, cu.getLength());
+			documentChange.addEdit(deleteEdit);
+		} else {
+			externalReference.getUnusedTypeImportDeclarations()
+				.forEach(unusedImport -> {
+					DeleteEdit deleteEdit = new DeleteEdit(unusedImport.getStartPosition(), unusedImport.getLength());
+					documentChange.addEdit(deleteEdit);
+				});
+			externalReference.getTestTypesReferencingType()
+				.forEach(type -> {
+					DeleteEdit deleteEdit = new DeleteEdit(type.getStartPosition(), type.getLength());
+					documentChange.addEdit(deleteEdit);
+				});
+			externalReference.getTestMethodsReferencingType()
+				.forEach(method -> {
+					DeleteEdit deleteEdit = new DeleteEdit(method.getStartPosition(), method.getLength());
+					documentChange.addEdit(deleteEdit);
+				});
+		}
+
 	}
 
 	private boolean comparePaths(IPath path, TestReferenceOnType externalReference) {
@@ -146,23 +166,13 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 			if (typeWrapper.isMainType()) {
 				CompilationUnit compilationUnit = typeWrapper.getCompilationUnit();
 				ICompilationUnit icu = (ICompilationUnit) compilationUnit.getJavaElement();
-				try {
-					icu.delete(true, null);
-				} catch (JavaModelException e) {
-					String message = String.format("Cannot delete %s. %s.", icu.getElementName(), e.getMessage());//$NON-NLS-1$
-					logger.error(message, e);
-					unableToRemove.add(icu);
-				}
+				deleteICompilationUnit(icu, unableToRemove);
 			}
 			List<TestReferenceOnType> testReferencesOnType = typeWrapper.getTestReferencesOnType();
 			for (TestReferenceOnType testReference : testReferencesOnType) {
-				ICompilationUnit icu = testReference.getICompilationUnit();
-				try {
-					icu.delete(true, null);
-				} catch (JavaModelException e) {
-					String message = String.format("Cannot delete %s. %s.", icu.getElementName(), e.getMessage());//$NON-NLS-1$
-					logger.error(message, e);
-					unableToRemove.add(icu);
+				if (testReference.isRemoveEntireTest()) {
+					ICompilationUnit icu = testReference.getICompilationUnit();
+					deleteICompilationUnit(icu, unableToRemove);
 				}
 			}
 		}
@@ -172,6 +182,16 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 				.collect(Collectors.joining(",")); //$NON-NLS-1$
 			String message = "The following compilation units could not be removed: " + names; //$NON-NLS-1$
 			throw new RefactoringException(message);
+		}
+	}
+
+	private void deleteICompilationUnit(ICompilationUnit icu, List<ICompilationUnit> unableToRemove) {
+		try {
+			icu.delete(true, null);
+		} catch (JavaModelException e) {
+			String message = String.format("Cannot delete %s. %s.", icu.getElementName(), e.getMessage());//$NON-NLS-1$
+			logger.error(message, e);
+			unableToRemove.add(icu);
 		}
 	}
 }

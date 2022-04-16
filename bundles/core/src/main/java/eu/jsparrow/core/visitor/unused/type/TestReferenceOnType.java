@@ -1,10 +1,11 @@
 package eu.jsparrow.core.visitor.unused.type;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 /**
@@ -15,14 +16,25 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
  */
 public class TestReferenceOnType {
 
-	private final boolean removeEntireTest = true;
-	private final List<MethodDeclaration> testMethodsReferencingType = new ArrayList<>();
+	private boolean removeEntireTest = true;
+	private Set<MethodDeclaration> testMethodsReferencingType;
+	private Set<AbstractTypeDeclaration> testTypesReferencingType;
+	private Set<ImportDeclaration> unusedTypeImportDeclarations;
 	private final CompilationUnit compilationUnit;
 	private final ICompilationUnit iCompilationUnit;
 
-	public TestReferenceOnType(CompilationUnit compilationUnit, ICompilationUnit iCompilationUnit) {
+	public TestReferenceOnType(CompilationUnit compilationUnit,
+			ICompilationUnit iCompilationUnit,
+			boolean removeEntireTest,
+			Set<AbstractTypeDeclaration> typeDeclarations,
+			Set<MethodDeclaration> methodDeclarations,
+			Set<ImportDeclaration> unusedTypeImportDeclarations) {
 		this.compilationUnit = compilationUnit;
 		this.iCompilationUnit = iCompilationUnit;
+		this.removeEntireTest = removeEntireTest;
+		this.testTypesReferencingType = typeDeclarations;
+		this.testMethodsReferencingType = methodDeclarations;
+		this.unusedTypeImportDeclarations = unusedTypeImportDeclarations;
 	}
 
 	public CompilationUnit getCompilationUnit() {
@@ -37,7 +49,16 @@ public class TestReferenceOnType {
 		return removeEntireTest;
 	}
 
-	public List<MethodDeclaration> getTestMethodsReferencingType() {
+	public Set<MethodDeclaration> getTestMethodsReferencingType() {
 		return testMethodsReferencingType;
 	}
+
+	public Set<AbstractTypeDeclaration> getTestTypesReferencingType() {
+		return testTypesReferencingType;
+	}
+
+	public Set<ImportDeclaration> getUnusedTypeImportDeclarations() {
+		return unusedTypeImportDeclarations;
+	}
+
 }
