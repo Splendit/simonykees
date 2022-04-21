@@ -20,7 +20,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import eu.jsparrow.common.UsesJDTUnitFixture;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
-@SuppressWarnings("nls")
 class JUnitNamesVisitorTest extends UsesJDTUnitFixture {
 
 	private static final String UNUSED_NESTED_TYPES = "" +
@@ -52,7 +51,7 @@ class JUnitNamesVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		addDependency("junit", "junit", "4.13");
 		addDependency("org.junit.jupiter", "junit-jupiter-api", "5.4.0");
 		addDependency("org.junit.jupiter", "junit-jupiter-params", "5.7.0");

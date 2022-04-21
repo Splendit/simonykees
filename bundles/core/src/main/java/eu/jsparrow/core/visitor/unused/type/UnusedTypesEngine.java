@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.core.visitor.renaming.ReferenceSearchMatch;
 import eu.jsparrow.core.visitor.unused.JavaElementSearchEngine;
+import eu.jsparrow.core.visitor.unused.method.UnusedMethodWrapper;
 import eu.jsparrow.core.visitor.utils.SearchScopeFactory;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
@@ -45,7 +47,7 @@ public class UnusedTypesEngine {
 	}
 
 	public List<UnusedTypeWrapper> findUnusedTypes(List<ICompilationUnit> selectedJavaElements,
-			Map<String, Boolean> optionsMap, SubMonitor subMonitor) {
+			Map<String, Boolean> optionsMap, SubMonitor subMonitor, List<UnusedMethodWrapper> unusedMethods) {
 
 		Map<IPath, CompilationUnit> cache = new HashMap<>();
 		List<UnusedTypeWrapper> list = new ArrayList<>();
@@ -64,7 +66,8 @@ public class UnusedTypesEngine {
 
 			List<UnusedTypeWrapper> unusedLocalTypes = visitor.getUnusedLocalTypes();
 			if (!unusedLocalTypes.isEmpty()) {
-				list.addAll(unusedLocalTypes);
+				List<UnusedTypeWrapper> filtered = filterRemovedWithUnusedMethods(unusedLocalTypes, unusedMethods);
+				list.addAll(filtered);
 				targetCompilationUnits.add(icu);
 			}
 
@@ -95,6 +98,29 @@ public class UnusedTypesEngine {
 		return list;
 	}
 
+	private List<UnusedTypeWrapper> filterRemovedWithUnusedMethods(List<UnusedTypeWrapper> unusedLocalTypes,
+			List<UnusedMethodWrapper> unusedMethods) {
+		List<UnusedTypeWrapper> filtered = new ArrayList<>();
+		for (UnusedTypeWrapper unusedType : unusedLocalTypes) {
+			AbstractTypeDeclaration typeDeclaration = unusedType.getTypeDeclaration();
+			MethodDeclaration outerMethod = ASTNodeUtil.getSpecificAncestor(typeDeclaration, MethodDeclaration.class);
+			if (outerMethod == null) {
+				filtered.add(unusedType);
+			} else {
+				IMethodBinding outerMethodBinding = outerMethod.resolveBinding();
+				boolean match = unusedMethods.stream()
+					.map(UnusedMethodWrapper::getMethodDeclaration)
+					.map(MethodDeclaration::resolveBinding)
+					.anyMatch(binding -> binding.isEqualTo(outerMethodBinding));
+				if (!match) {
+					filtered.add(unusedType);
+				}
+			}
+
+		}
+		return filtered;
+	}
+
 	private List<UnusedTypeWrapper> filterUnusedTypes(CompilationUnit compilationUnit,
 			List<NonPrivateUnusedTypeCandidate> nonPrivateCandidates, Map<IPath, CompilationUnit> cache,
 			Map<String, Boolean> optionsMap) {
@@ -112,7 +138,7 @@ public class UnusedTypesEngine {
 				UnusedTypeWrapper unusedTypeWrapper = new UnusedTypeWrapper(compilationUnit,
 						candidate.getAccessModifier(), typeDeclaration, candidate.isMainType(),
 						testReferencesOnType);
-				if(!hasOverlapping(list, testReferencesOnType)) {
+				if (!hasOverlapping(list, testReferencesOnType)) {
 					list.add(unusedTypeWrapper);
 				}
 			}
@@ -121,49 +147,54 @@ public class UnusedTypesEngine {
 	}
 
 	private boolean hasOverlapping(List<UnusedTypeWrapper> list, List<TestReferenceOnType> testReferencesOnType) {
-		for(TestReferenceOnType testReference : testReferencesOnType) {
+		for (TestReferenceOnType testReference : testReferencesOnType) {
 			Set<MethodDeclaration> tests = testReference.getTestMethodsReferencingType();
 			boolean overlappingTest = list.stream()
-				.flatMap(unusedType -> unusedType.getTestReferencesOnType().stream())
-				.flatMap(testReferenceWrapper -> testReferenceWrapper.getTestMethodsReferencingType().stream())
+				.flatMap(unusedType -> unusedType.getTestReferencesOnType()
+					.stream())
+				.flatMap(testReferenceWrapper -> testReferenceWrapper.getTestMethodsReferencingType()
+					.stream())
 				.anyMatch(tests::contains);
-			if(overlappingTest) {
+			if (overlappingTest) {
 				return true;
 			}
-			
+
 			List<AbstractTypeDeclaration> types = testReference.getTestTypesReferencingType()
-					.stream()
-					.flatMap(type -> findAllEnclosingTypes(type).stream())
-					.collect(Collectors.toList());
-			
+				.stream()
+				.flatMap(type -> findAllEnclosingTypes(type).stream())
+				.collect(Collectors.toList());
+
 			boolean overlappingTestTypes = list.stream()
-					.flatMap(unusedType -> unusedType.getTestReferencesOnType().stream())
-					.flatMap(testReferenceWrapper -> testReferenceWrapper.getTestTypesReferencingType().stream())
-					.anyMatch(types::contains);
-			if(overlappingTestTypes) {
+				.flatMap(unusedType -> unusedType.getTestReferencesOnType()
+					.stream())
+				.flatMap(testReferenceWrapper -> testReferenceWrapper.getTestTypesReferencingType()
+					.stream())
+				.anyMatch(types::contains);
+			if (overlappingTestTypes) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
-	public List<UnusedTypeWrapper> findTestOverlappings(List<UnusedTypeWrapper> allUnusedTypes, List<UnusedTypeWrapper> newUnusedTypes) {
+
+	public List<UnusedTypeWrapper> findTestOverlappings(List<UnusedTypeWrapper> allUnusedTypes,
+			List<UnusedTypeWrapper> newUnusedTypes) {
 		List<UnusedTypeWrapper> overlappings = new ArrayList<>();
-		for(UnusedTypeWrapper newUnusedType : newUnusedTypes) {
+		for (UnusedTypeWrapper newUnusedType : newUnusedTypes) {
 			List<TestReferenceOnType> testReferences = newUnusedType.getTestReferencesOnType();
-			if(hasOverlapping(allUnusedTypes, testReferences)) {
+			if (hasOverlapping(allUnusedTypes, testReferences)) {
 				overlappings.add(newUnusedType);
 			}
 		}
 		return overlappings;
 	}
-	
+
 	private List<AbstractTypeDeclaration> findAllEnclosingTypes(AbstractTypeDeclaration type) {
 		List<AbstractTypeDeclaration> types = new ArrayList<>();
 		ASTNode node = type;
 		while (true) {
 			AbstractTypeDeclaration enclosing = ASTNodeUtil.getSpecificAncestor(node, AbstractTypeDeclaration.class);
-			if(enclosing == null) {
+			if (enclosing == null) {
 				break;
 			}
 			types.add(enclosing);
@@ -218,7 +249,8 @@ public class UnusedTypesEngine {
 			compilationUnit.accept(testMethodVisitor);
 
 			if (testMethodVisitor.isJUnitTestCaseFound()) {
-				TestReferenceOnType referenceOnTest = createReferenceOnTestInstance(typeBinding, compilationUnit, iCompilationUnit);
+				TestReferenceOnType referenceOnTest = createReferenceOnTestInstance(typeBinding, compilationUnit,
+						iCompilationUnit);
 				testReferencesOnType.add(referenceOnTest);
 			} else {
 				return new UnusedTypeReferenceSearchResult(true, false);
@@ -230,18 +262,20 @@ public class UnusedTypesEngine {
 
 	private TestReferenceOnType createReferenceOnTestInstance(ITypeBinding typeBinding, CompilationUnit compilationUnit,
 			ICompilationUnit iCompilationUnit) {
-		String typeName = typeBinding.getErasure().getQualifiedName();
+		String typeName = typeBinding.getErasure()
+			.getQualifiedName();
 		ReferencesInTestAnalyzerVisitor visitor = new ReferencesInTestAnalyzerVisitor(typeName);
 		compilationUnit.accept(visitor);
-		
-		if(visitor.isMainTopLevelTypeDesignated()) {
-			return new TestReferenceOnType(compilationUnit, iCompilationUnit, true, visitor.getTypesWithReferencesToUnusedType(), Collections.emptySet(), Collections.emptySet());
+
+		if (visitor.isMainTopLevelTypeDesignated()) {
+			return new TestReferenceOnType(compilationUnit, iCompilationUnit, true,
+					visitor.getTypesWithReferencesToUnusedType(), Collections.emptySet(), Collections.emptySet());
 		}
-		
+
 		Set<MethodDeclaration> testCases = visitor.getTestMethodsHavingUnusedTypeReferences();
 		Set<AbstractTypeDeclaration> types = visitor.getTypesWithReferencesToUnusedType();
 		Set<ImportDeclaration> imports = visitor.getUnusedTypeImports();
-		
+
 		return new TestReferenceOnType(compilationUnit, iCompilationUnit, false, types, testCases, imports);
 	}
 

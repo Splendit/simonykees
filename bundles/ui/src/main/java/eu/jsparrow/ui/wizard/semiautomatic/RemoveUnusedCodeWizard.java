@@ -156,7 +156,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 						options);
 				List<UnusedMethodWrapper> unusedMethods = findUnusedMethods(unusedMethodsEngine, subMonitor,
 						methodSubmonitorSplit, options);
-				List<UnusedTypeWrapper> unusedTypes = findUnusedTypes(unusedTypeEngine, subMonitor, typesSubmonitorSplit, options);
+				List<UnusedTypeWrapper> unusedTypes = findUnusedTypes(unusedTypeEngine, subMonitor, typesSubmonitorSplit, options, unusedMethods);
 
 				if (unusedFields.isEmpty() && unusedMethods.isEmpty() && unusedTypes.isEmpty()) {
 					WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
@@ -261,7 +261,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	}
 	
 	private List<UnusedTypeWrapper> findUnusedTypes(UnusedTypesEngine unusedTypeEngine, SubMonitor subMonitor,
-			int typesSubmonitorSplit, Map<String, Boolean> options) {
+			int typesSubmonitorSplit, Map<String, Boolean> options, List<UnusedMethodWrapper> unusedMethods) {
 		
 
 		if(!hasClassMemberOptionsChecked(model, "class")) {
@@ -272,7 +272,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 		removeUnusedTypesSubMonitor.setWorkRemaining(selectedJavaElements.size());
 		removeUnusedTypesSubMonitor.setTaskName("Finding unused types");
 		
-		List<UnusedTypeWrapper> unusedTypes = unusedTypeEngine.findUnusedTypes(selectedJavaElements, options, removeUnusedTypesSubMonitor);
+		List<UnusedTypeWrapper> unusedTypes = unusedTypeEngine.findUnusedTypes(selectedJavaElements, options, removeUnusedTypesSubMonitor, unusedMethods);
 		
 		if(removeUnusedTypesSubMonitor.isCanceled()) {
 			return Collections.emptyList();

@@ -8,4 +8,9 @@ public class ClassWithLocalClasses {
 
 		UsedLocalClass usedLocalClass;
 	}
+
+	private void unusedPrivateMethodWithLocalClasses() {
+		class UsedLocalClassInPrivateUnusedMethod {
+		}
+	}
 }

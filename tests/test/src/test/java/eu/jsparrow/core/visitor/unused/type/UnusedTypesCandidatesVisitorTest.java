@@ -20,7 +20,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
-@SuppressWarnings("nls")
 class UnusedTypesCandidatesVisitorTest extends UsesJDTUnitFixture {
 
 	@AfterEach

@@ -20,7 +20,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import eu.jsparrow.common.UsesJDTUnitFixture;
 import eu.jsparrow.jdtunit.JdtUnitException;
 
-@SuppressWarnings("nls")
 class JUnitTestMethodVisitorTest extends UsesJDTUnitFixture {
 
 	private void createCompilationUnitRecognizedAsJUnit3Test(String testMethod)

@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,6 +99,17 @@ public class UnusedCodeTestHelper {
 
 	public static List<UnusedMethodWrapper> findMethodsToBeRemoved(String prerulePackage, String postRulePackagePath)
 			throws Exception {
+		Map<String, Boolean> options = new HashMap<String, Boolean>();
+		options.put("private-methods", true);
+		options.put("protected-methods", true);
+		options.put("package-private-methods", true);
+		options.put("public-methods", true);
+		options.put("remove-test-code", true);
+		return findMethodsToBeRemoved(prerulePackage, postRulePackagePath, options);
+	}
+	
+	private static List<UnusedMethodWrapper> findMethodsToBeRemoved(String prerulePackage, String postRulePackagePath, Map<String, Boolean> options)
+			throws Exception {
 		IPackageFragmentRoot root = AbstractRulesTest.createRootPackageFragment();
 		IPackageFragment packageFragment = root.createPackageFragment(prerulePackage, true, null);
 		List<ICompilationUnit> compilationUnits = loadCompilationUnits(packageFragment, postRulePackagePath);
@@ -105,13 +117,6 @@ public class UnusedCodeTestHelper {
 		UnusedMethodsEngine engine = new UnusedMethodsEngine("Project");
 		NullProgressMonitor nullProgressMonitor = new NullProgressMonitor();
 		SubMonitor subMonitor = SubMonitor.convert(nullProgressMonitor, 100);
-
-		Map<String, Boolean> options = new HashMap<String, Boolean>();
-		options.put("private-methods", true);
-		options.put("protected-methods", true);
-		options.put("package-private-methods", true);
-		options.put("public-methods", true);
-		options.put("remove-test-code", true);
 		return engine.findUnusedMethods(compilationUnits, options, subMonitor);
 	}
 
@@ -132,7 +137,9 @@ public class UnusedCodeTestHelper {
 		options.put("package-private-classes", true);
 		options.put("public-classes", true);
 		options.put("remove-test-code", true);
-		return engine.findUnusedTypes(compilationUnits, options, subMonitor);
+		options.put("private-methods", true);
+		List<UnusedMethodWrapper> unusedMethods = findMethodsToBeRemoved(prerulePackage, postRulePackagePath, options);
+		return engine.findUnusedTypes(compilationUnits, options, subMonitor, unusedMethods);
 	}
 
 	private static List<ICompilationUnit> loadCompilationUnits(IPackageFragment packageFragment, String packagePath)
