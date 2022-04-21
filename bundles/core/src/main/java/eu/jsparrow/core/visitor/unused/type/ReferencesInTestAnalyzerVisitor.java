@@ -110,7 +110,7 @@ public class ReferencesInTestAnalyzerVisitor extends ASTVisitor {
 				return Optional.ofNullable(outermost);
 			}
 			outermost = enclosingMethod;
-			node = outermost;
+			node = enclosingMethod;
 		}
 	}
 
@@ -164,7 +164,7 @@ public class ReferencesInTestAnalyzerVisitor extends ASTVisitor {
 		AbstractTypeDeclaration topLevelClass = enclosingType;
 		while (enclosingType != null) {
 			topLevelClass = enclosingType;
-			enclosingType = ASTNodeUtil.getSpecificAncestor(nestedType, AbstractTypeDeclaration.class);
+			enclosingType = ASTNodeUtil.getSpecificAncestor(enclosingType, AbstractTypeDeclaration.class);
 		}
 		return topLevelTypeReferences.contains(topLevelClass);
 	}

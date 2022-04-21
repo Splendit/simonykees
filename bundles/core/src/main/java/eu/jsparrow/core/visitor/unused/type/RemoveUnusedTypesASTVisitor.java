@@ -102,11 +102,11 @@ public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 			} else {
 				astRewrite.remove(typeDeclaration, editGroup);
 			}
-			if (designated.isMainType()) {
-				astRewrite.remove(compilationUnit.getPackage(), editGroup);
-				ASTNodeUtil.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
-					.forEach(importDeclaration -> astRewrite.remove(importDeclaration, editGroup));
-			}
+//			if (designated.isMainType()) {
+//				astRewrite.remove(compilationUnit.getPackage(), editGroup);
+//				ASTNodeUtil.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
+//					.forEach(importDeclaration -> astRewrite.remove(importDeclaration, editGroup));
+//			}
 			onRewrite();
 		}
 		return true;

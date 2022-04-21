@@ -7,12 +7,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -28,6 +30,7 @@ import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.core.visitor.renaming.ReferenceSearchMatch;
 import eu.jsparrow.core.visitor.unused.JavaElementSearchEngine;
 import eu.jsparrow.core.visitor.utils.SearchScopeFactory;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 public class UnusedTypesEngine {
@@ -68,6 +71,8 @@ public class UnusedTypesEngine {
 			List<NonPrivateUnusedTypeCandidate> nonPrivateCandidates = visitor.getNonPrivateCandidates();
 			List<UnusedTypeWrapper> nonPrivate = filterUnusedTypes(compilationUnit, nonPrivateCandidates, cache,
 					optionsMap);
+			List<UnusedTypeWrapper> overlappings = this.findTestOverlappings(list, nonPrivate);
+			nonPrivate.removeAll(overlappings);
 			if (!nonPrivate.isEmpty()) {
 				targetCompilationUnits.add(icu);
 			}
@@ -96,36 +101,82 @@ public class UnusedTypesEngine {
 		List<UnusedTypeWrapper> list = new ArrayList<>();
 		IJavaElement javaElement = compilationUnit.getJavaElement();
 		IJavaProject javaProject = javaElement.getJavaProject();
-		List<IPath> testReferencePathsAlreadyUsed = new ArrayList<>();
 		for (NonPrivateUnusedTypeCandidate candidate : nonPrivateCandidates) {
 
 			AbstractTypeDeclaration typeDeclaration = candidate.getTypeDeclaration();
 			UnusedTypeReferenceSearchResult searchResult = searchReferences(typeDeclaration, javaProject, cache,
-					optionsMap, testReferencePathsAlreadyUsed);
+					optionsMap);
 			if (!searchResult.isMainSourceReferenceFound()
 					&& !searchResult.isInvalidSearchEngineResult()) {
 				List<TestReferenceOnType> testReferencesOnType = searchResult.getTestReferencesOnType();
 				UnusedTypeWrapper unusedTypeWrapper = new UnusedTypeWrapper(compilationUnit,
 						candidate.getAccessModifier(), typeDeclaration, candidate.isMainType(),
 						testReferencesOnType);
-				list.add(unusedTypeWrapper);
-				if (!testReferencesOnType.isEmpty()) {
-					testReferencesOnType.stream()
-						.map(TestReferenceOnType::getICompilationUnit)
-						.map(ICompilationUnit::getPath)
-						.forEach(testReferencePathsAlreadyUsed::add);
+				if(!hasOverlapping(list, testReferencesOnType)) {
+					list.add(unusedTypeWrapper);
 				}
 			}
 		}
 		return list;
 	}
 
+	private boolean hasOverlapping(List<UnusedTypeWrapper> list, List<TestReferenceOnType> testReferencesOnType) {
+		for(TestReferenceOnType testReference : testReferencesOnType) {
+			Set<MethodDeclaration> tests = testReference.getTestMethodsReferencingType();
+			boolean overlappingTest = list.stream()
+				.flatMap(unusedType -> unusedType.getTestReferencesOnType().stream())
+				.flatMap(testReferenceWrapper -> testReferenceWrapper.getTestMethodsReferencingType().stream())
+				.anyMatch(tests::contains);
+			if(overlappingTest) {
+				return true;
+			}
+			
+			List<AbstractTypeDeclaration> types = testReference.getTestTypesReferencingType()
+					.stream()
+					.flatMap(type -> findAllEnclosingTypes(type).stream())
+					.collect(Collectors.toList());
+			
+			boolean overlappingTestTypes = list.stream()
+					.flatMap(unusedType -> unusedType.getTestReferencesOnType().stream())
+					.flatMap(testReferenceWrapper -> testReferenceWrapper.getTestTypesReferencingType().stream())
+					.anyMatch(types::contains);
+			if(overlappingTestTypes) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public List<UnusedTypeWrapper> findTestOverlappings(List<UnusedTypeWrapper> allUnusedTypes, List<UnusedTypeWrapper> newUnusedTypes) {
+		List<UnusedTypeWrapper> overlappings = new ArrayList<>();
+		for(UnusedTypeWrapper newUnusedType : newUnusedTypes) {
+			List<TestReferenceOnType> testReferences = newUnusedType.getTestReferencesOnType();
+			if(hasOverlapping(allUnusedTypes, testReferences)) {
+				overlappings.add(newUnusedType);
+			}
+		}
+		return overlappings;
+	}
+	
+	private List<AbstractTypeDeclaration> findAllEnclosingTypes(AbstractTypeDeclaration type) {
+		List<AbstractTypeDeclaration> types = new ArrayList<>();
+		ASTNode node = type;
+		while (true) {
+			AbstractTypeDeclaration enclosing = ASTNodeUtil.getSpecificAncestor(node, AbstractTypeDeclaration.class);
+			if(enclosing == null) {
+				break;
+			}
+			types.add(enclosing);
+			node = enclosing;
+		}
+		return types;
+	}
+
 	private UnusedTypeReferenceSearchResult searchReferences(
 			AbstractTypeDeclaration typeDeclaration,
 			IJavaProject project,
 			Map<IPath, CompilationUnit> cache,
-			Map<String, Boolean> optionsMap,
-			List<IPath> testReferencePathsAlreadyUsed) {
+			Map<String, Boolean> optionsMap) {
 
 		IJavaElement[] searchScope = createSearchScope(scope, project);
 		JavaElementSearchEngine referencesSearchEngine = new JavaElementSearchEngine(searchScope);
@@ -159,9 +210,6 @@ public class UnusedTypesEngine {
 
 		for (ICompilationUnit iCompilationUnit : targetICUs) {
 			IPath path = iCompilationUnit.getPath();
-			if (testReferencePathsAlreadyUsed.contains(path)) {
-				return new UnusedTypeReferenceSearchResult(true, false);
-			}
 			CompilationUnit compilationUnit = cache.computeIfAbsent(path,
 					iPath -> RefactoringUtil.parse(iCompilationUnit));
 
