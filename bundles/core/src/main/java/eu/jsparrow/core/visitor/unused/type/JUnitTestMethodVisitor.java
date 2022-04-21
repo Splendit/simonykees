@@ -13,7 +13,7 @@ import eu.jsparrow.core.visitor.unused.method.MethodReferencesVisitor;
  * Visitor to verify whether a compilation unit is used for running JUnit3 or
  * JUnit4 or JUnit Jupiter tests.
  * 
- *
+ * @since 4.10.0
  */
 public class JUnitTestMethodVisitor extends ASTVisitor {
 	private boolean jUnitTestMethodFound;

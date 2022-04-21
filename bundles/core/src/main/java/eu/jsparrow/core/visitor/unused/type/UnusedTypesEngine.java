@@ -35,6 +35,12 @@ import eu.jsparrow.core.visitor.utils.SearchScopeFactory;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
+/**
+ * An engine to find unused types.
+ * 
+ * @since 4.10.0
+ *
+ */
 public class UnusedTypesEngine {
 
 	private static final Logger logger = LoggerFactory.getLogger(UnusedTypesEngine.class);
@@ -116,7 +122,6 @@ public class UnusedTypesEngine {
 					filtered.add(unusedType);
 				}
 			}
-
 		}
 		return filtered;
 	}

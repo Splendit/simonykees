@@ -4,6 +4,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Wraps the results found by the search engine when finding the references of a
+ * type.
+ * 
+ * @since 4.10.0
+ *
+ */
 public class UnusedTypeReferenceSearchResult {
 
 	private boolean mainSourceReferenceFound;

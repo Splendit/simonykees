@@ -26,6 +26,7 @@ import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
 import eu.jsparrow.core.visitor.unused.type.RemoveUnusedTypesASTVisitor;
 import eu.jsparrow.core.visitor.unused.type.TestReferenceOnType;
 import eu.jsparrow.core.visitor.unused.type.UnusedTypeWrapper;
+import eu.jsparrow.core.visitor.unused.type.UnusedTypesEngine;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
@@ -33,6 +34,15 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Finds and removes unused types.
+ * 
+ * @see RemoveUnusedTypesASTVisitor
+ * @see UnusedTypesEngine
+ * 
+ * @since 4.10.0
+ *
+ */
 public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypesASTVisitor> {
 
 	private static final Logger logger = LoggerFactory.getLogger(RemoveUnusedTypesRule.class);

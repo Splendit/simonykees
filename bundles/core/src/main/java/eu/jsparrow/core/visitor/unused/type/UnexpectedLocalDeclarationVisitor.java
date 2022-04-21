@@ -8,6 +8,8 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 /**
  * Verifies whether a given {@link ASTNode} contains an unexpected
  * {@link AnonymousClassDeclaration} or {@link TypeDeclarationStatement}
+ * 
+ * @since 4.10.0
  *
  */
 public class UnexpectedLocalDeclarationVisitor extends ASTVisitor {

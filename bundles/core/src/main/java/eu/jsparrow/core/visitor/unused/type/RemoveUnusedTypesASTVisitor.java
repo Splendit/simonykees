@@ -22,6 +22,12 @@ import org.eclipse.text.edits.TextEditGroup;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * The main visitor for removing unused types from a compilation unit. 
+ * 
+ * @since 4.10.0
+ *
+ */
 public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private CompilationUnit compilationUnit;
@@ -102,11 +108,6 @@ public class RemoveUnusedTypesASTVisitor extends AbstractASTRewriteASTVisitor {
 			} else {
 				astRewrite.remove(typeDeclaration, editGroup);
 			}
-//			if (designated.isMainType()) {
-//				astRewrite.remove(compilationUnit.getPackage(), editGroup);
-//				ASTNodeUtil.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
-//					.forEach(importDeclaration -> astRewrite.remove(importDeclaration, editGroup));
-//			}
 			onRewrite();
 		}
 		return true;

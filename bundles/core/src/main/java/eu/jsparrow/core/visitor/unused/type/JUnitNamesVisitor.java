@@ -19,7 +19,7 @@ import eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName;
  * utility class functionalities used by JUnit tests, which may also prohibit
  * removing type declarations declared in the given compilation unit.
  * 
- *
+ * @since 4.10.0
  */
 public class JUnitNamesVisitor extends ASTVisitor {
 	private boolean jUnitReferenceFound = false;
