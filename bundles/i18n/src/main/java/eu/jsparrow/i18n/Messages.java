@@ -500,6 +500,7 @@ public class Messages extends NLS {
 	public static String ReplaceStreamCollectByToListRule_name;
 	public static String ReuseRandomObjectsRule_description;
 	public static String ReuseRandomObjectsRule_name;
+	public static String RunDefaultProfileHandler_startJSparrowWithDefaultProfile;
 	public static String SelectRulesWizardHandler_allready_running;
 	public static String SelectRulesWizardHandler_finishButtonText;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
@@ -538,6 +539,7 @@ public class Messages extends NLS {
 	public static String SimonykeesMarkersPreferencePage_disableAll;
 	public static String SimonykeesMarkersPreferencePage_enableAll;
 	public static String SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText;
+	public static String SimonykeesMarkersPreferencePage_searchLabelMessage;
 	public static String SimonykeesMessageDialog_bugreport_email;
 	public static String SimonykeesMessageDialog_default_error_message;
 	public static String SimonykeesMessageDialog_open_browser_error_message;

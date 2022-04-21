@@ -23,8 +23,9 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
- * Analyzes the references of an unused type in a test class. Determines which parts of the 
- * test class should be suggested for removal to gether with the relevant unused type. 
+ * Analyzes the references of an unused type in a test class. Determines which
+ * parts of the test class should be suggested for removal to gether with the
+ * relevant unused type.
  * 
  * @since 4.10.0
  *

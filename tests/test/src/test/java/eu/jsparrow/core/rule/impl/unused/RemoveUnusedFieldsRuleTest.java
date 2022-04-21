@@ -25,6 +25,7 @@ import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
+@SuppressWarnings("nls")
 class RemoveUnusedFieldsRuleTest extends SingleRuleTest {
 
 	private static final String PRERULE_UNUSED_PACKAGE = "eu.jsparrow.sample.preRule.unused";

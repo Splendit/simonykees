@@ -30,7 +30,7 @@ import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * Finds and remove unused methods.
+ * Finds and removes unused methods.
  * 
  * @see RemoveUnusedMethodsASTVisitor
  * @see UnusedMethodsEngine

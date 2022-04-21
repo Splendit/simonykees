@@ -1,6 +1,6 @@
 package eu.jsparrow.ui.handler;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -202,7 +202,7 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 	private IStatus startSelectRulesWizard(Map<IJavaProject, List<IJavaElement>> selectedJavaElements,
 			IProgressMonitor monitor, RefactoringPipeline refactoringPipeline) {
 		try {
-			List<ICompilationUnit> compilationUnits = new LinkedList<>();
+			List<ICompilationUnit> compilationUnits = new ArrayList<>();
 			for (Map.Entry<IJavaProject, List<IJavaElement>> entry : selectedJavaElements.entrySet()) {
 				SelectRulesWizard.collectICompilationUnits(compilationUnits, entry.getValue(),
 						monitor);

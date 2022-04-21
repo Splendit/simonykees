@@ -290,7 +290,7 @@ public class SimonykeesPreferenceManager {
 		profiles.clear();
 		loadProfilesFromStore();
 	}
-	
+
 	public static List<String> getAllActiveMarkers() {
 		String value = store.getString(SimonykeesPreferenceConstants.ACTIVE_MARKERS);
 		if (value == null || value.isEmpty()) {
@@ -298,29 +298,30 @@ public class SimonykeesPreferenceManager {
 		}
 		return Arrays.asList(value.split(",")); //$NON-NLS-1$
 	}
-	
-	public static void setAllActiveMarkers(List<String>activeMarkers) {
+
+	public static void setAllActiveMarkers(List<String> activeMarkers) {
 		String newValue = String.join(",", activeMarkers); //$NON-NLS-1$
-		store.setValue(SimonykeesPreferenceConstants.ACTIVE_MARKERS, newValue);		
+		store.setValue(SimonykeesPreferenceConstants.ACTIVE_MARKERS, newValue);
+
 	}
-	
+
 	public static String getDefaultActiveMarkers() {
 		DefaultActiveMarkers defaultMarkers = new DefaultActiveMarkers();
 		return String.join(",", defaultMarkers.getActiveMarkers()); //$NON-NLS-1$
 	}
-	
-	public static  void addActiveMarker(String marker) {
+
+	public static void addActiveMarker(String marker) {
 		List<String> activeMarkers = new ArrayList<>(getAllActiveMarkers());
-		if(activeMarkers.contains(marker)) {
+		if (activeMarkers.contains(marker)) {
 			return;
 		}
 		activeMarkers.add(marker);
 		setAllActiveMarkers(activeMarkers);
 	}
-	
+
 	public static void removeActiveMarker(String marker) {
 		List<String> activeMarkers = new ArrayList<>(getAllActiveMarkers());
-		if(activeMarkers.remove(marker)) {
+		if (activeMarkers.remove(marker)) {
 			setAllActiveMarkers(activeMarkers);
 		}
 	}

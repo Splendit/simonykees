@@ -18,10 +18,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class StringBufferToBuilderRule extends RefactoringRuleImpl<StringBufferToBuilderASTVisitor> {
 
+	public static final String RULE_ID = "StringBufferToBuilder"; //$NON-NLS-1$
+
 	public StringBufferToBuilderRule() {
 		super();
 		this.visitorClass = StringBufferToBuilderASTVisitor.class;
-		this.id = "StringBufferToBuilder"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.StringBufferToBuilderRule_name,
 				Messages.StringBufferToBuilderRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE, Tag.STRING_MANIPULATION));

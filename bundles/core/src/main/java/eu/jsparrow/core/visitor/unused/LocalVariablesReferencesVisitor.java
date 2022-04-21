@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.visitor.DeclaringNodeNotFoundException;
 import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
-import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -77,8 +76,13 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 			return false;
 		}
 
-		Optional<ExpressionStatement> referencingStatementToRemove = findRemoveableStatementReferencingLocalVariable(
-				simpleName);
+		Expression outermostExpression = simpleName;
+		while (outermostExpression.getLocationInParent() == ArrayAccess.ARRAY_PROPERTY) {
+			outermostExpression = (ArrayAccess) outermostExpression.getParent();
+		}
+
+		Optional<ExpressionStatement> referencingStatementToRemove = SafelyRemoveable
+			.findSafelyRemovableReassignment(outermostExpression, options);
 		referencingStatementToRemove.ifPresent(reassignments::add);
 		if (referencingStatementToRemove.isPresent()) {
 			return false;
@@ -86,33 +90,6 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 
 		activeReferenceFound = true;
 		return true;
-	}
-
-	Optional<ExpressionStatement> findRemoveableStatementReferencingLocalVariable(final SimpleName simpleName) {
-		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
-		if (removeInitializersSideEffects) {
-			Expression outermost = findOutermostArrayAccess(simpleName);
-			return SafelyRemoveable.findReferencingStatementToRemove(outermost, options);
-		}
-		Expression expressionToAnalyse = simpleName;
-		while (expressionToAnalyse.getLocationInParent() == ArrayAccess.ARRAY_PROPERTY) {
-			ArrayAccess arrayAccess = (ArrayAccess) expressionToAnalyse.getParent();
-			if (!ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(arrayAccess.getIndex())) {
-				return Optional.empty();
-			}
-			expressionToAnalyse = arrayAccess;
-		}
-		return SafelyRemoveable.findReferencingStatementToRemove(
-				expressionToAnalyse, options);
-	}
-
-	private Expression findOutermostArrayAccess(final SimpleName arrayAccess) {
-		Expression expressionToAnalyse = arrayAccess;
-		while (expressionToAnalyse.getLocationInParent() == ArrayAccess.ARRAY_PROPERTY) {
-			ArrayAccess parent = (ArrayAccess) expressionToAnalyse.getParent();
-			expressionToAnalyse = parent;
-		}
-		return expressionToAnalyse;
 	}
 
 	private boolean isTargetLocalVariableReference(SimpleName simpleName)

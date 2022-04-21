@@ -32,7 +32,7 @@ public class JSparrowMarkerResolutionGenerator implements IMarkerResolutionGener
 
 	@Override
 	public IMarkerResolution[] getResolutions(IMarker marker) {
-		return new IMarkerResolution[] { new JSparrowMarkerResolution(marker, eventManager) };
+		return new IMarkerResolution[] { new JSparrowMarkerResolution(marker, eventManager), new JSparrowMarkerDeactivationResolution(marker)};
 
 	}
 
