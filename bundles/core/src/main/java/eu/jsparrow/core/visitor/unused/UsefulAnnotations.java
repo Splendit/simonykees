@@ -14,6 +14,14 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Provides functionalities to verify whether a Java element contains
+ * annotations that are tolerated to be removed together with the unused element
+ * they are annotating.
+ * 
+ * @since 4.10.0
+ *
+ */
 public class UsefulAnnotations {
 
 	private static final List<String> IGNORED_ANNOTATIONS = Collections.unmodifiableList(

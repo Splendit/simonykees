@@ -57,7 +57,7 @@ public class DefaultOptions {
 		options.put(PACKAGE_PRIVATE_METHODS, false);
 		options.put(PUBLIC_METHODS, false);
 
-		options.put(LOCAL_CLASSES, false);
+		options.put(LOCAL_CLASSES, true);
 		options.put(PRIVATE_CLASSES, true);
 		options.put(PROTECTED_CLASSES, false);
 		options.put(PACKAGE_PRIVATE_CLASSES, false);

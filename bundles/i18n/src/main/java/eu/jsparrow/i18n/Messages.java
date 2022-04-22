@@ -456,6 +456,8 @@ public class Messages extends NLS {
 	public static String RemoveUnusedLocalVariablesRule_name;
 	public static String RemoveUnusedParameterRule_description;
 	public static String RemoveUnusedParameterRule_name;
+	public static String RemoveUnusedTypesRule_description;
+	public static String RemoveUnusedTypesRule_name;
 	public static String RenameFieldsRuleWizard_taskName_collectingUnits;
 	public static String RenameFieldsRuleWizardHandler_multipleProjectsSelected;
 	public static String RenameFieldsRuleWizardHandler_performFinish_jobName;

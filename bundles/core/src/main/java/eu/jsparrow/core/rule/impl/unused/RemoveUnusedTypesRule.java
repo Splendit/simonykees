@@ -27,6 +27,7 @@ import eu.jsparrow.core.visitor.unused.type.RemoveUnusedTypesASTVisitor;
 import eu.jsparrow.core.visitor.unused.type.TestReferenceOnType;
 import eu.jsparrow.core.visitor.unused.type.UnusedTypeWrapper;
 import eu.jsparrow.core.visitor.unused.type.UnusedTypesEngine;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
@@ -52,8 +53,8 @@ public class RemoveUnusedTypesRule extends RefactoringRuleImpl<RemoveUnusedTypes
 	public RemoveUnusedTypesRule(List<UnusedTypeWrapper> unusedTypes) {
 		this.visitorClass = RemoveUnusedTypesASTVisitor.class;
 		this.id = "RemoveUnusedTypes"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription("Remove Unused Types", //$NON-NLS-1$
-				"Finds and removes types that are not used.", Duration.ofMinutes(2), //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.RemoveUnusedTypesRule_name,
+				Messages.RemoveUnusedTypesRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
 		this.unusedTypes = unusedTypes;
 	}

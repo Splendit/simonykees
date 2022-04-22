@@ -7,7 +7,7 @@ import eu.jsparrow.rules.common.exception.SimonykeesException;
 /**
  * Indicates that an {@link ITypeBinding} cannot be resolved or found.
  * 
- * @since 4.8.0
+ * @since 4.10.0
  *
  */
 public class UnexpectedKindOfBindingException extends SimonykeesException {
