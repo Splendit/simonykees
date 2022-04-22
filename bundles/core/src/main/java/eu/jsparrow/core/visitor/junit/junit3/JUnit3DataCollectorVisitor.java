@@ -64,7 +64,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	private static final String VOID = "void"; //$NON-NLS-1$
 	static final String SET_UP = "setUp"; //$NON-NLS-1$
 	static final String TEAR_DOWN = "tearDown"; //$NON-NLS-1$
-	static final String TEST = "test"; //$NON-NLS-1$
+	public static final String TEST = "test"; //$NON-NLS-1$
 
 	private final CompilationUnit compilationUnit;
 	private final Junit3MigrationConfiguration migrationConfiguration;
@@ -221,7 +221,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		return false;
 	}
 
-	private Optional<SimpleType> findTestCaseAsSuperType(TypeDeclaration node) {
+	public static Optional<SimpleType> findTestCaseAsSuperType(TypeDeclaration node) {
 
 		Type superclassType = node.getSuperclassType();
 		if (superclassType != null && superclassType.getNodeType() == ASTNode.SIMPLE_TYPE) {
@@ -235,7 +235,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		return Optional.empty();
 	}
 
-	private boolean isValidJUnit3TestCaseSubclass(TypeDeclaration testCaseSubclassDeclaration) {
+	public static boolean isValidJUnit3TestCaseSubclass(TypeDeclaration testCaseSubclassDeclaration) {
 		int modifiers = testCaseSubclassDeclaration.getModifiers();
 		if (Modifier.isAbstract(modifiers)) {
 			return false;
@@ -288,7 +288,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		return false;
 	}
 
-	private static boolean isTestMethodDeclaration(MethodDeclaration junitTestCaseMethodDeclaration) {
+	public static boolean isTestMethodDeclaration(MethodDeclaration junitTestCaseMethodDeclaration) {
 
 		IMethodBinding methodBinding = junitTestCaseMethodDeclaration.resolveBinding();
 		if (methodBinding.getParameterTypes().length != 0) {

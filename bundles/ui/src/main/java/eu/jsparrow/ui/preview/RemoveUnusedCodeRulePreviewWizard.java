@@ -24,6 +24,7 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedFieldsRule;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedMethodsRule;
+import eu.jsparrow.core.rule.impl.unused.RemoveUnusedTypesRule;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
 import eu.jsparrow.i18n.ExceptionMessages;
@@ -58,6 +59,9 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 
 	private Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> methodDocumentChanges;
 	private RemoveUnusedMethodsRule unusedMethodsRule;
+	
+	private Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> typeDocumentChanges;
+	private RemoveUnusedTypesRule unusedTypesRule;
 
 	private List<ICompilationUnit> targetCompilationUnits;
 	private Map<IPath, Document> originalDocuments;
@@ -67,16 +71,16 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
 
-	public RemoveUnusedCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline,
+	public RemoveUnusedCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline, 
 			StandaloneStatisticsMetadata standaloneStatisticsMetadata,
-			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges,
-			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> methodDocumentChanges,
-			List<ICompilationUnit> targetCompilationUnits,
+			List<ICompilationUnit> targetCompilationUnits, 
 			RemoveUnusedFieldsRule rule,
-			RemoveUnusedMethodsRule unusedMethodsRule) {
+			RemoveUnusedMethodsRule unusedMethodsRule, 
+			RemoveUnusedTypesRule unusedTypesRule) throws JavaModelException {
 		this.refactoringPipeline = refactoringPipeline;
-		this.documentChanges = documentChanges;
-		this.methodDocumentChanges = methodDocumentChanges;
+		this.documentChanges = rule.computeDocumentChangesPerField();
+		this.methodDocumentChanges = unusedMethodsRule.computeDocumentChangesPerMethod();
+		this.typeDocumentChanges = unusedTypesRule.computeDocumentChangesPerType();
 		this.targetCompilationUnits = targetCompilationUnits;
 		this.originalDocuments = targetCompilationUnits.stream()
 			.map(ICompilationUnit::getPrimary)
@@ -85,6 +89,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 		this.standaloneStatisticsMetadata = standaloneStatisticsMetadata;
 		this.rule = rule;
 		this.unusedMethodsRule = unusedMethodsRule;
+		this.unusedTypesRule = unusedTypesRule;
 		setNeedsProgressMonitor(true);
 	}
 
@@ -108,8 +113,8 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	public void addPages() {
 		RefactoringPreviewWizardModel model = new RefactoringPreviewWizardModel();
 		Map<ICompilationUnit, DocumentChange> changesPerRule = refactoringPipeline.getChangesForRule(rule);
-		Map<ICompilationUnit, DocumentChange> methodChangesPerRule = refactoringPipeline
-			.getChangesForRule(unusedMethodsRule);
+		Map<ICompilationUnit, DocumentChange> methodChangesPerRule = refactoringPipeline.getChangesForRule(unusedMethodsRule);
+		Map<ICompilationUnit, DocumentChange> typeChangesPerRule = refactoringPipeline.getChangesForRule(unusedTypesRule);
 
 		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(
 				documentChanges,
@@ -136,6 +141,15 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> privateMethodChanges = filterChangesByModifier(
 				methodDocumentChanges,
 				JavaAccessModifier.PRIVATE);
+		
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> publicTypeChanges = filterChangesByModifier(typeDocumentChanges,
+				JavaAccessModifier.PUBLIC);
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> protectedTypeChanges = filterChangesByModifier(typeDocumentChanges,
+				JavaAccessModifier.PROTECTED);
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> packagePrivateTypeChanges = filterChangesByModifier(typeDocumentChanges,
+				JavaAccessModifier.PACKAGE_PRIVATE);
+		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> privateTypeChanges = filterChangesByModifier(typeDocumentChanges,
+				JavaAccessModifier.PRIVATE);
 
 		model.addRule(rule);
 		changesPerRule.keySet()
@@ -145,6 +159,10 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 		methodChangesPerRule.keySet()
 			.stream()
 			.forEach(x -> model.addFileToRule(unusedMethodsRule, x.getHandleIdentifier()));
+		model.addRule(unusedTypesRule);
+		typeChangesPerRule.keySet()
+			.stream()
+			.forEach(x -> model.addFileToRule(unusedTypesRule, x.getHandleIdentifier()));
 		if (!publicChanges.isEmpty()) {
 			String title = Messages.RemoveUnusedCodeRulePreviewWizard_removeUnusedPublicFields_pageTitle;
 			addPage(new RemoveUnusedCodeRulePreviewWizardPage(publicChanges, originalDocuments, rule, title,
@@ -200,9 +218,32 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 					unusedMethodsRule, title, canFinish(),
 					this::addUnusedMethodData, this::removeUnusedMethodData));
 		}
-
-		this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(),
-				standaloneStatisticsMetadata, statisticsSection);
+		
+		if (!publicTypeChanges.isEmpty()) {
+			String title = "Remove Unused Public Types";
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(publicTypeChanges, originalDocuments, unusedTypesRule, title, canFinish(),
+					this::addUnusedTypeData, this::removeUnusedTypeData));
+		}
+		
+		if (!protectedTypeChanges.isEmpty()) {
+			String title = "Remove Unused Protected Types";
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(protectedTypeChanges, originalDocuments, unusedTypesRule, title, canFinish(),
+					this::addUnusedTypeData, this::removeUnusedTypeData));
+		}
+		
+		if (!packagePrivateTypeChanges.isEmpty()) {
+			String title = "Remove Unused Package Private Types";
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(packagePrivateTypeChanges, originalDocuments, unusedTypesRule, title, canFinish(),
+					this::addUnusedTypeData, this::removeUnusedTypeData));
+		}
+		
+		if (!privateTypeChanges.isEmpty()) {
+			String title = "Remove Unused Private Types";
+			addPage(new RemoveUnusedCodeRulePreviewWizardPage(privateTypeChanges, originalDocuments, unusedTypesRule, title, canFinish(),
+					this::addUnusedTypeData, this::removeUnusedTypeData));
+		}
+		
+		this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), standaloneStatisticsMetadata, statisticsSection); 
 		addPage(summaryPage);
 	}
 
@@ -270,6 +311,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 			refactoringPipeline.commitRefactoring();
 			int sum = payPerUseCalculator.findTotalRequiredCredit(refactoringPipeline.getRules());
 			licenseUtil.reserveQuantity(sum);
+			unusedTypesRule.deleteEmptyCompilationUnits();
 			Activator.setRunning(false);
 		} catch (RefactoringException | ReconcileException e) {
 			WizardMessageDialog.synchronizeWithUIShowError(e);
@@ -401,6 +443,14 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 
 	public void addUnusedMethodData(UnusedClassMemberWrapper unusedMethod) {
 		this.unusedMethodsRule.addUnusedMethod(unusedMethod);
+	}
+
+	public void removeUnusedTypeData(UnusedClassMemberWrapper unusedType) {
+		this.unusedTypesRule.dropUnusedType(unusedType);
+	}
+
+	public void addUnusedTypeData(UnusedClassMemberWrapper unusedType) {
+		this.unusedTypesRule.addUnusedType(unusedType);
 	}
 
 	public RefactoringSummaryWizardPage getSummaryPage() {
