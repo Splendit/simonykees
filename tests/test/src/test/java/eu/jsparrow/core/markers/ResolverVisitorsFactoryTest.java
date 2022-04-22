@@ -21,7 +21,7 @@ class ResolverVisitorsFactoryTest {
 		List<String> allIds = new ArrayList<String>(ResolverVisitorsFactory.getAllMarkerDescriptions().keySet());
 		List<AbstractASTRewriteASTVisitor> allResovlers = ResolverVisitorsFactory
 			.getAllResolvers(allIds, node -> true);
-		assertEquals(76, allResovlers.size());
+		assertEquals(72, allResovlers.size());
 	}
 
 	@Test
