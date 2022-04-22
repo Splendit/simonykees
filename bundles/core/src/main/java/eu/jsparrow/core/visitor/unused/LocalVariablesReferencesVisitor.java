@@ -7,22 +7,19 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.visitor.DeclaringNodeNotFoundException;
 import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
-import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -79,7 +76,13 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 			return false;
 		}
 
-		Optional<ExpressionStatement> referencingStatementToRemove = findReferencingStatementToRemove(simpleName);
+		Expression outermostExpression = simpleName;
+		while (outermostExpression.getLocationInParent() == ArrayAccess.ARRAY_PROPERTY) {
+			outermostExpression = (ArrayAccess) outermostExpression.getParent();
+		}
+
+		Optional<ExpressionStatement> referencingStatementToRemove = SafelyRemoveable
+			.findSafelyRemovableReassignment(outermostExpression, options);
 		referencingStatementToRemove.ifPresent(reassignments::add);
 		if (referencingStatementToRemove.isPresent()) {
 			return false;
@@ -87,33 +90,6 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 
 		activeReferenceFound = true;
 		return true;
-	}
-
-	Optional<ExpressionStatement> findReferencingStatementToRemove(SimpleName simpleName) {
-		StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
-		ASTNode simpleNameParent = simpleName.getParent();
-		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
-		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment) simpleNameParent;
-			Optional<ExpressionStatement> optionalParentStatement = SafelyRemoveable
-				.findParentStatementInBlock(assignment);
-			if (optionalParentStatement.isPresent()
-					&& (removeInitializersSideEffects || ExpressionWithoutSideEffectRecursive
-						.isExpressionWithoutSideEffect(assignment.getRightHandSide()))) {
-				return optionalParentStatement;
-			}
-			return Optional.empty();
-		}
-
-		if (locationInParent == PrefixExpression.OPERAND_PROPERTY) {
-			return SafelyRemoveable.findParentStatementInBlock((PrefixExpression) simpleNameParent);
-		}
-
-		if (locationInParent == PostfixExpression.OPERAND_PROPERTY) {
-			return SafelyRemoveable.findParentStatementInBlock((PostfixExpression) simpleNameParent);
-		}
-
-		return Optional.empty();
 	}
 
 	private boolean isTargetLocalVariableReference(SimpleName simpleName)

@@ -50,6 +50,9 @@ public class RefactoringSummaryWizardPageModel extends AbstractSummaryWizardPage
 	}
 
 	private void addRulesPerFile() {
+		if (changedFiles.isEmpty()) {
+			return;
+		}
 		ChangedFilesModel firstFile = changedFiles.get(0);
 		firstFile.getRules()
 			.forEach(rule -> rulesPerFile.add(rule));

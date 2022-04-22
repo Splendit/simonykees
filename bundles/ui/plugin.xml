@@ -31,6 +31,8 @@
 					<reference definitionId="eu.jsparrow.ui.filter.menuItemFilter">
 					</reference>
 				</visibleWhen>
+				<command commandId="eu.jsparrow.ui.RunDefaultProfileHandler"
+					label="%command.label.run_default_profile" style="push" />
 				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler"
 					label="%command.label.select_rules_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler"
@@ -39,11 +41,15 @@
 					label="%command.label.rename_fields_rule_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.RemoveUnusedCodeWizardHandler"
 					label="%command.label.remove_unused_code_rule_wizard" style="push" />
+				<command commandId="eu.jsparrow.ui.EditProfilesHandler"
+					label="%command.label.edit_profiles" style="push" />
 			</menu>
 		</menuContribution>
 		<menuContribution
 			locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?endof=group.edit">
 			<menu icon="icons/jsparrow-icon-16-003.png" label="%menu.label">
+				<command commandId="eu.jsparrow.ui.RunDefaultProfileHandler"
+					label="%command.label.run_default_profile" style="push" />
 				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler"
 					label="%command.label.select_rules_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler"
@@ -52,11 +58,15 @@
 					label="%command.label.rename_fields_rule_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.RemoveUnusedCodeWizardHandler"
 					label="%command.label.remove_unused_code_rule_wizard" style="push" />
+				<command commandId="eu.jsparrow.ui.EditProfilesHandler"
+					label="%command.label.edit_profiles" style="push" />
 			</menu>
 		</menuContribution>
 		<menuContribution
 			locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.refactoring.menu">
 			<menu icon="icons/jsparrow-icon-16-003.png" label="%menu.label">
+				<command commandId="eu.jsparrow.ui.RunDefaultProfileHandler"
+					label="%command.label.run_default_profile" style="push" />
 				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler"
 					label="%command.label.select_rules_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler"
@@ -65,10 +75,14 @@
 					label="%command.label.rename_fields_rule_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.RemoveUnusedCodeWizardHandler"
 					label="%command.label.remove_unused_code_rule_wizard" style="push" />
+				<command commandId="eu.jsparrow.ui.EditProfilesHandler"
+					label="%command.label.edit_profiles" style="push" />
 			</menu>
 		</menuContribution>
 	</extension>
 	<extension point="org.eclipse.ui.commands">
+		<command defaultHandler="eu.jsparrow.ui.handler.RunDefaultProfileHandler"
+			id="eu.jsparrow.ui.RunDefaultProfileHandler" name="%command.name.run_default_profile_wizard_handler" />
 		<command defaultHandler="eu.jsparrow.ui.handler.SelectRulesWizardHandler"
 			id="eu.jsparrow.ui.SelectRulesWizardHandler" name="%command.name.select_rules_wizard_handler" />
 		<command defaultHandler="eu.jsparrow.ui.handler.LoggerRuleWizardHandler"
@@ -77,6 +91,8 @@
 			id="eu.jsparrow.ui.RenameFieldsRuleWizardHandler" name="%command.name.rename_fields_wizard_handler" />
 		<command defaultHandler="eu.jsparrow.ui.handler.RemoveUnusedCodeWizardHandler"
 			id="eu.jsparrow.ui.RemoveUnusedCodeWizardHandler" name="%command.name.remove_unused_code_wizard_handler" />
+		<command defaultHandler="eu.jsparrow.ui.handler.EditProfilesHandler"
+			id="eu.jsparrow.ui.EditProfilesHandler" name="%command.name.edit_profiles_handler" />
 		<command defaultHandler="eu.jsparrow.ui.handler.WelcomeHandler"
            id="eu.jsparrow.ui.handler.WelcomeHandler" name="jSparrow Dashboard" />
 	</extension>

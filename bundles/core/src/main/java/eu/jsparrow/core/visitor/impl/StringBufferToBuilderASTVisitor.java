@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.StringBufferToBuilderEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -34,7 +35,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @author Matthias Webhofer
  * @since 2.1.1
  */
-public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisitor {
+public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisitor implements StringBufferToBuilderEvent {
 
 	/*** FIELDS FOR TYPE CHECK ***/
 
@@ -116,7 +117,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 					Expression.class);
 			arguments.stream()
 				.filter(argument -> ASTNode.SIMPLE_NAME == argument.getNodeType())
-				.map(argument -> (SimpleName) argument)
+				.map(SimpleName.class::cast)
 				.forEach(argumentSimpleName -> {
 					ITypeBinding argumentTypeBinding = argumentSimpleName.resolveTypeBinding();
 					if (ClassRelationUtil.isContentOfTypes(argumentTypeBinding, STRINGBUFFER_TYPE_LIST)) {
@@ -172,6 +173,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 						astRewrite.replace(declaration, newDeclaration, null);
 						getCommentRewriter().saveRelatedComments(declaration);
 						onRewrite();
+						addMarkerEvent(declaration);
 					}
 				}
 			}
@@ -214,7 +216,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 	private static boolean isExpressionOf(Expression astNode, String assignedType,
 			ChildPropertyDescriptor locationInAncestor) {
 		if (astNode.getLocationInParent() == locationInAncestor) {
-			Expression expression = (Expression) astNode;
+			Expression expression = astNode;
 			ITypeBinding typeBinding = expression.resolveTypeBinding();
 			return typeBinding == null || ClassRelationUtil.isContentOfType(typeBinding, assignedType);
 		}
@@ -441,7 +443,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 			ListRewrite newCreationArguments = astRewrite.getListRewrite(newCreation,
 					ClassInstanceCreation.ARGUMENTS_PROPERTY);
 			ASTNodeUtil.convertToTypedList(oldCreation.arguments(), Expression.class)
-				.forEach(argument -> newCreationArguments.insertLast(astRewrite.createCopyTarget((ASTNode) argument),
+				.forEach(argument -> newCreationArguments.insertLast(astRewrite.createCopyTarget(argument),
 						null));
 		}
 

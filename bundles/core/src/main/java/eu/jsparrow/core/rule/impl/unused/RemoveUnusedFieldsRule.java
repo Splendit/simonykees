@@ -78,7 +78,7 @@ public class RemoveUnusedFieldsRule extends RefactoringRuleImpl<RemoveUnusedFiel
 
 	}
 
-	public Map<ICompilationUnit, DocumentChange> computeDocumentChangesForUnusedField(UnusedFieldWrapper unusedField)
+	private Map<ICompilationUnit, DocumentChange> computeDocumentChangesForUnusedField(UnusedFieldWrapper unusedField)
 			throws JavaModelException {
 		List<ICompilationUnit> targetCompilationUnits = unusedField.getTargetICompilationUnits();
 		Map<ICompilationUnit, DocumentChange> documentChanges = new HashMap<>();

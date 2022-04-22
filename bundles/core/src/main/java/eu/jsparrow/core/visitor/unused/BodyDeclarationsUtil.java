@@ -42,32 +42,54 @@ public class BodyDeclarationsUtil {
 		return JavaAccessModifier.PACKAGE_PRIVATE;
 	}
 
-	public static boolean hasSelectedAccessModifier(BodyDeclaration methodDeclaration, Map<String, Boolean> options) {
-		int modifierFlags = methodDeclaration.getModifiers();
-
-		if (methodDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
-			if (Modifier.isPublic(modifierFlags)) {
-				return options.getOrDefault(Constants.PUBLIC_METHODS, false);
-			} else if (Modifier.isProtected(modifierFlags)) {
-				return options.getOrDefault(Constants.PROTECTED_METHODS, false);
-			} else if (Modifier.isPrivate(modifierFlags)) {
-				return options.getOrDefault(Constants.PRIVATE_METHODS, false);
-			} else {
-				return options.getOrDefault(Constants.PACKAGE_PRIVATE_METHODS, false);
-			}
-		} else if (methodDeclaration.getNodeType() == ASTNode.FIELD_DECLARATION) {
-			if (Modifier.isPublic(modifierFlags)) {
-				return options.getOrDefault(Constants.PUBLIC_FIELDS, false);
-			} else if (Modifier.isProtected(modifierFlags)) {
-				return options.getOrDefault(Constants.PROTECTED_FIELDS, false);
-			} else if (Modifier.isPrivate(modifierFlags)) {
-				return options.getOrDefault(Constants.PRIVATE_FIELDS, false);
-			} else {
-				return options.getOrDefault(Constants.PACKAGE_PRIVATE_FIELDS, false);
-			}
+	public static boolean hasSelectedAccessModifier(BodyDeclaration bodyDeclaration, Map<String, Boolean> options) {
+		int modifierFlags = bodyDeclaration.getModifiers();
+		switch (bodyDeclaration.getNodeType()) {
+		case ASTNode.METHOD_DECLARATION:
+			return hasSelectedMethodDeclarationAccessModifier(options, modifierFlags);
+		case ASTNode.FIELD_DECLARATION:
+			return hasSelectedFieldDeclarationAccessModifier(options, modifierFlags);
+		case ASTNode.TYPE_DECLARATION:
+			return hasSelectedTypeDeclarationAccessModifier(options, modifierFlags);
+		default:
+			return false;
 		}
-		return false;
+	}
 
+	private static boolean hasSelectedTypeDeclarationAccessModifier(Map<String, Boolean> options, int modifierFlags) {
+		if (Modifier.isPublic(modifierFlags)) {
+			return options.getOrDefault(Constants.PUBLIC_CLASSES, false);
+		} else if (Modifier.isProtected(modifierFlags)) {
+			return options.getOrDefault(Constants.PROTECTED_CLASSES, false);
+		} else if (Modifier.isPrivate(modifierFlags)) {
+			return options.getOrDefault(Constants.PRIVATE_CLASSES, false);
+		} else {
+			return options.getOrDefault(Constants.PACKAGE_PRIVATE_CLASSES, false);
+		}
+	}
+
+	private static boolean hasSelectedFieldDeclarationAccessModifier(Map<String, Boolean> options, int modifierFlags) {
+		if (Modifier.isPublic(modifierFlags)) {
+			return options.getOrDefault(Constants.PUBLIC_FIELDS, false);
+		} else if (Modifier.isProtected(modifierFlags)) {
+			return options.getOrDefault(Constants.PROTECTED_FIELDS, false);
+		} else if (Modifier.isPrivate(modifierFlags)) {
+			return options.getOrDefault(Constants.PRIVATE_FIELDS, false);
+		} else {
+			return options.getOrDefault(Constants.PACKAGE_PRIVATE_FIELDS, false);
+		}
+	}
+
+	private static boolean hasSelectedMethodDeclarationAccessModifier(Map<String, Boolean> options, int modifierFlags) {
+		if (Modifier.isPublic(modifierFlags)) {
+			return options.getOrDefault(Constants.PUBLIC_METHODS, false);
+		} else if (Modifier.isProtected(modifierFlags)) {
+			return options.getOrDefault(Constants.PROTECTED_METHODS, false);
+		} else if (Modifier.isPrivate(modifierFlags)) {
+			return options.getOrDefault(Constants.PRIVATE_METHODS, false);
+		} else {
+			return options.getOrDefault(Constants.PACKAGE_PRIVATE_METHODS, false);
+		}
 	}
 
 	public static boolean hasUsefulAnnotations(BodyDeclaration methodDeclaration) {

@@ -50,6 +50,11 @@ public class RemoveUnusedCodeWizardPageModel {
 		options.add(PROTECTED_METHODS);
 		options.add(PACKAGE_PRIVATE_METHODS);
 		options.add(PUBLIC_METHODS);
+		options.add(LOCAL_CLASSES);
+		options.add(PRIVATE_CLASSES);
+		options.add(PROTECTED_CLASSES);
+		options.add(PACKAGE_PRIVATE_CLASSES);
+		options.add(PUBLIC_CLASSES);
 		return Collections.unmodifiableList(options);
 	}
 
@@ -110,7 +115,6 @@ public class RemoveUnusedCodeWizardPageModel {
 		map.put(Constants.PUBLIC_FIELDS, removePublicFields);
 		map.put(Constants.PACKAGE_PRIVATE_FIELDS, removePackagePrivateFields);
 
-		
 		boolean removePrivateMethods = selectedClassMemberTypes.contains(PRIVATE_METHODS);
 		boolean removeProtectedMeMethods = selectedClassMemberTypes.contains(PROTECTED_METHODS);
 		boolean removePublicMethods = selectedClassMemberTypes.contains(PUBLIC_METHODS);
@@ -120,10 +124,16 @@ public class RemoveUnusedCodeWizardPageModel {
 		map.put(Constants.PUBLIC_METHODS, removePublicMethods);
 		map.put(Constants.PACKAGE_PRIVATE_METHODS, removePackagePrivateMethods);
 
-		map.put(Constants.PRIVATE_CLASSES, false);
-		map.put(Constants.PROTECTED_CLASSES, false);
-		map.put(Constants.PUBLIC_CLASSES, false);
-		map.put(Constants.PACKAGE_PRIVATE_CLASSES, false);
+		boolean removeLocalClasses = selectedClassMemberTypes.contains(LOCAL_CLASSES);
+		boolean removePrivateClasses = selectedClassMemberTypes.contains(PRIVATE_CLASSES);
+		boolean removeProtectedClasses = selectedClassMemberTypes.contains(PROTECTED_CLASSES);
+		boolean removePublicClasses = selectedClassMemberTypes.contains(PUBLIC_CLASSES);
+		boolean removePackagePrivateClasses = selectedClassMemberTypes.contains(PACKAGE_PRIVATE_CLASSES);
+		map.put(Constants.LOCAL_CLASSES, removeLocalClasses);
+		map.put(Constants.PRIVATE_CLASSES, removePrivateClasses);
+		map.put(Constants.PROTECTED_CLASSES, removeProtectedClasses);
+		map.put(Constants.PUBLIC_CLASSES, removePublicClasses);
+		map.put(Constants.PACKAGE_PRIVATE_CLASSES, removePackagePrivateClasses);
 
 		map.put(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, removeInitializersWithSideEffects);
 		map.put(Constants.REMOVE_TEST_CODE, removeTestCode);

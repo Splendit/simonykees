@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import eu.jsparrow.common.SingleRuleTest;
 import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedMethodsRule;
-import eu.jsparrow.core.rule.impl.unused.UnusedFieldsTestHelper;
+import eu.jsparrow.core.rule.impl.unused.UnusedCodeTestHelper;
 import eu.jsparrow.core.visitor.unused.method.UnusedMethodWrapper;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
@@ -104,10 +104,10 @@ class RemoveUnusedMethodsRuleTest extends SingleRuleTest {
 		Path preRule = getPreRuleFile(preRuleFilePath);
 		Path postRule = getPostRuleFile(className + ".java", "unused/methods");
 		
-		List<UnusedMethodWrapper> unusedFields = UnusedFieldsTestHelper.findMethodsToBeRemoved(PRERULE_UNUSED_PACKAGE, PRERULE_DIRECTORY);
-		RemoveUnusedMethodsRule rule = new RemoveUnusedMethodsRule(unusedFields);
+		List<UnusedMethodWrapper> unusedMethods = UnusedCodeTestHelper.findMethodsToBeRemoved(PRERULE_UNUSED_PACKAGE, PRERULE_DIRECTORY);
+		RemoveUnusedMethodsRule rule = new RemoveUnusedMethodsRule(unusedMethods);
 		
-		String refactoring = UnusedFieldsTestHelper.applyRemoveUnusedCodeRefactoring(rule, "eu.jsparrow.sample.preRule.unused.methods", preRule, root);
+		String refactoring = UnusedCodeTestHelper.applyRemoveUnusedCodeRefactoring(rule, "eu.jsparrow.sample.preRule.unused.methods", preRule, root);
 		String postRulePackage = getPostRulePackage("unused.methods");
 		String actual = StringUtils.replace(refactoring, "package eu.jsparrow.sample.preRule.unused.methods",
 				postRulePackage); 

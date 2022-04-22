@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.impl;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 
+import eu.jsparrow.core.markers.common.RemoveExplicitCallToSuperEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
@@ -14,7 +15,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @since 2.7.0
  *
  */
-public class RemoveExplicitCallToSuperASTVisitor extends AbstractASTRewriteASTVisitor {
+public class RemoveExplicitCallToSuperASTVisitor extends AbstractASTRewriteASTVisitor implements RemoveExplicitCallToSuperEvent {
 
 	@Override
 	public boolean visit(SuperConstructorInvocation node) {
@@ -36,6 +37,7 @@ public class RemoveExplicitCallToSuperASTVisitor extends AbstractASTRewriteASTVi
 
 		astRewrite.remove(node, null);
 		onRewrite();
+		addMarkerEvent(node);
 		return false;
 	}
 }

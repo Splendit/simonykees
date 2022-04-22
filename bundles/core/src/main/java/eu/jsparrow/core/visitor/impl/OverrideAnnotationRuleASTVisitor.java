@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import eu.jsparrow.core.markers.common.OverrideAnnotationEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -28,7 +29,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 1.2
  *
  */
-public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisitor {
+public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisitor implements OverrideAnnotationEvent{
 
 	private static final String OVERRIDE_SIMPLE_NAME = java.lang.Override.class.getSimpleName();
 	private static final String JAVA_LANG_OVERRIDE = java.lang.Override.class.getName();
@@ -37,6 +38,7 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	public boolean visit(TypeDeclaration node) {
 
 		List<MethodDeclaration> methods = Arrays.asList(node.getMethods());
+		methods = filterMethodDeclarations(methods);
 		ITypeBinding typeBinding = node.resolveBinding();
 		addOverrideAnnotation(node, methods, typeBinding);
 		return true;
@@ -46,6 +48,7 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	public boolean visit(AnonymousClassDeclaration node) {
 		List<MethodDeclaration> methods = ASTNodeUtil.convertToTypedList(node.bodyDeclarations(),
 				MethodDeclaration.class);
+		methods = filterMethodDeclarations(methods);
 		ITypeBinding typeBinding = node.resolveBinding();
 		addOverrideAnnotation(node, methods, typeBinding);
 		return true;
@@ -55,9 +58,14 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	public boolean visit(EnumDeclaration node) {
 		List<MethodDeclaration> methods = ASTNodeUtil.convertToTypedList(node.bodyDeclarations(),
 				MethodDeclaration.class);
+		methods = filterMethodDeclarations(methods);
 		ITypeBinding typeBinding = node.resolveBinding();
 		addOverrideAnnotation(node, methods, typeBinding);
 		return true;
+	}
+	
+	protected List<MethodDeclaration> filterMethodDeclarations(List<MethodDeclaration> methodDeclarations) { 
+		return methodDeclarations;
 	}
 
 	/**
@@ -105,6 +113,7 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 					.insertFirst(NodeBuilder.newMarkerAnnotation(node.getAST(), node.getAST()
 						.newName(OVERRIDE_SIMPLE_NAME)), null);
 				onRewrite();
+				addMarkerEvent(method);
 			});
 	}
 

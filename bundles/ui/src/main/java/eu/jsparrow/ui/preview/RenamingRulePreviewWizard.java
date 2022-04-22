@@ -27,18 +27,22 @@ import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.license.api.LicenseType;
+import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
+import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
  * Wizard that holds {@link RenamingRulePreviewWizardPage} for
- * {@link FieldsRenamingRule}. On Finish it commits all wanted renaming
- * changes to {@link CompilationUnit}s.
+ * {@link FieldsRenamingRule}. On Finish it commits all wanted renaming changes
+ * to {@link CompilationUnit}s.
  * 
  * @author Andreja Sambolec, Matthias Webhofer
  * @since 2.3.0
@@ -57,6 +61,8 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	private Map<IPath, Document> originalDocuments;
 	private RenamingRuleSummaryWizardPage summaryPage;
 	private StatisticsSection statisticsSection;
+	private LicenseUtil licenseUtil = LicenseUtil.get();
+	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
 
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
@@ -124,7 +130,8 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		if (!privateChanges.isEmpty()) {
 			addPage(new RenamingRulePreviewWizardPage(privateChanges, originalDocuments, rule, canFinish()));
 		}
-		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsSection);
+		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model, canFinish(),
+				statisticsSection);
 		addPage(summaryPage);
 	}
 
@@ -136,6 +143,20 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				.getFieldModifier()
 				.equals(modifier))
 			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+	}
+
+	@Override
+	public boolean canFinish() {
+		if (licenseUtil.isFreeLicense()) {
+			return super.canFinish();
+		}
+
+		LicenseValidationResult result = licenseUtil.getValidationResult();
+		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
+			return super.canFinish();
+		}
+		boolean enoughCredit = payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
+		return enoughCredit && super.canFinish();
 	}
 
 	/**
@@ -154,7 +175,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		}
 		return true;
 	}
-	
+
 	@Override
 	public boolean performCancel() {
 		refactoringPipeline.clearStates();
@@ -175,6 +196,8 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	private void commitChanges() {
 		try {
 			refactoringPipeline.commitRefactoring();
+			int sum = payPerUseCalculator.findTotalRequiredCredit(refactoringPipeline.getRules());
+			licenseUtil.reserveQuantity(sum);
 			Activator.setRunning(false);
 		} catch (RefactoringException | ReconcileException e) {
 			WizardMessageDialog.synchronizeWithUIShowError(e);
@@ -210,6 +233,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 			refactoringPipeline.updateInitialSourceMap();
 			try {
 				refactoringPipeline.doRefactoring(monitor);
+				this.statisticsSection.updateForSelected();
 				if (monitor.isCanceled()) {
 					refactoringPipeline.clearStates();
 				}

@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
 
+import eu.jsparrow.core.markers.common.StatementLambdaToExpressionEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -35,7 +36,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 1.2
  *
  */
-public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteASTVisitor {
+public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteASTVisitor implements StatementLambdaToExpressionEvent {
 
 	@Override
 	public boolean visit(LambdaExpression lambdaExpression) {
@@ -66,6 +67,7 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 			astRewrite.replace(block, expressionToUse, null);
 			getCommentRewriter().saveCommentsInParentStatement(block);
 			onRewrite();
+			addMarkerEvent(lambdaExpression);
 		}
 		return true;
 	}

@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.ReorderModifiersEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -23,7 +24,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 3.6.0
  *
  */
-public class ReorderModifiersASTVisitor extends AbstractASTRewriteASTVisitor {
+public class ReorderModifiersASTVisitor extends AbstractASTRewriteASTVisitor implements ReorderModifiersEvent {
 
 	private static final Map<String, Integer> MODIFIER_RANKING;
 	static {
@@ -83,9 +84,10 @@ public class ReorderModifiersASTVisitor extends AbstractASTRewriteASTVisitor {
 		modifiers.sort(comparator);
 
 		for (Modifier modifier : modifiers) {
-			listRewrite.insertLast((Modifier) astRewrite.createMoveTarget(modifier), null);
+			listRewrite.insertLast(astRewrite.createMoveTarget(modifier), null);
 		}
 		onRewrite();
+		addMarkerEvent(modifiers);
 	}
 
 	private boolean isSorted(List<Modifier> modifiers, Comparator<Modifier> modifierComparator) {

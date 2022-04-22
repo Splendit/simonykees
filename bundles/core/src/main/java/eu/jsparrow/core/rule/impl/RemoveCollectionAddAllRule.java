@@ -18,9 +18,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class RemoveCollectionAddAllRule extends RefactoringRuleImpl<RemoveCollectionAddAllASTVisitor> {
 
+	public static final String RULE_ID = "RemoveCollectionAddAll"; //$NON-NLS-1$
+
 	public RemoveCollectionAddAllRule() {
 		this.visitorClass = RemoveCollectionAddAllASTVisitor.class;
-		this.id = "RemoveCollectionAddAll"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.RemoveCollectionAddAllRule_name,
 				Messages.RemoveCollectionAddAllRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_2, Tag.READABILITY));
