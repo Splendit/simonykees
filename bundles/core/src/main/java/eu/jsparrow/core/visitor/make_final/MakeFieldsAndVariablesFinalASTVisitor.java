@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import eu.jsparrow.core.markers.common.MakeFieldsAndVariablesFinalEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -29,7 +30,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  *
  * @since 3.12.0
  */
-public class MakeFieldsAndVariablesFinalASTVisitor extends AbstractASTRewriteASTVisitor {
+public class MakeFieldsAndVariablesFinalASTVisitor extends AbstractASTRewriteASTVisitor implements MakeFieldsAndVariablesFinalEvent {
 
 	private Set<FieldDeclaration> finalCandidateFields = new HashSet<>();
 
@@ -85,6 +86,7 @@ public class MakeFieldsAndVariablesFinalASTVisitor extends AbstractASTRewriteAST
 		astRewrite.getListRewrite(fieldDeclaration, FieldDeclaration.MODIFIERS2_PROPERTY)
 			.insertLast(createFinalModifier(), null);
 		onRewrite();
+		addMarkerEvent(fieldDeclaration);
 
 		return true;
 	}
@@ -105,6 +107,7 @@ public class MakeFieldsAndVariablesFinalASTVisitor extends AbstractASTRewriteAST
 		astRewrite.getListRewrite(variableDeclarationStatement, VariableDeclarationStatement.MODIFIERS2_PROPERTY)
 			.insertLast(createFinalModifier(), null);
 		onRewrite();
+		addMarkerEvent(variableDeclarationStatement);
 
 		return true;
 	}

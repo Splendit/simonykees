@@ -20,10 +20,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class StatementLambdaToExpressionRule extends RefactoringRuleImpl<StatementLambdaToExpressionASTVisitor> {
 
+	public static final String RULE_ID = "StatementLambdaToExpression"; //$NON-NLS-1$
+
 	public StatementLambdaToExpressionRule() {
 		super();
 		this.visitorClass = StatementLambdaToExpressionASTVisitor.class;
-		this.id = "StatementLambdaToExpression"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.StatementLambdaToExpressionRule_name,
 				Messages.StatementLambdaToExpressionRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA));

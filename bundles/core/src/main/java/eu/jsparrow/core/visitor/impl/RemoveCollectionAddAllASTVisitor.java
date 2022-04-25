@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.RemoveCollectionAddAllEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -51,7 +52,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * 
  * @since 3.15.0
  */
-public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisitor {
+public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisitor implements RemoveCollectionAddAllEvent {
 
 	private static final String JAVA_UTIL_COLLECTION = java.util.Collection.class.getName();
 
@@ -226,6 +227,7 @@ public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisit
 
 		astRewrite.remove(expressionStatement, null);
 		onRewrite();
+		addMarkerEvent(expressionStatement);
 	}
 
 	private class AddAllAnalysisResult {

@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 
+import eu.jsparrow.core.markers.common.UseOffsetBasedStringMethodsEvent;
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -49,7 +50,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.21.0
  *
  */
-public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTVisitor {
+public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTVisitor implements UseOffsetBasedStringMethodsEvent {
 
 	private static final String SUBSTRING = "substring"; //$NON-NLS-1$
 	private static final String STARTS_WITH = "startsWith"; //$NON-NLS-1$
@@ -112,6 +113,7 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 		}
 
 		onRewrite();
+		addMarkerEvent(node);
 		return true;
 	}
 

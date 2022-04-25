@@ -25,6 +25,7 @@ public class Constants {
 	public static final String PACKAGE_PRIVATE_METHODS = "package-private-methods";
 	public static final String PUBLIC_METHODS = "public-methods";
 
+	public static final String LOCAL_CLASSES = "local-classes";
 	public static final String PRIVATE_CLASSES = "private-classes";
 	public static final String PROTECTED_CLASSES = "protected-classes";
 	public static final String PACKAGE_PRIVATE_CLASSES = "package-private-classes";
