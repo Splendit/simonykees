@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.markers.common.ReplaceStringFormatByFormattedEvent;
-import eu.jsparrow.rules.common.markers.Resolver;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;

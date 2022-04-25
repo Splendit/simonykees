@@ -12,8 +12,9 @@ public class RemoveUnusedCodeWizardPageConstants {
 	public static final String WORKSPACE = "Workspace";
 	public static final String PROJECT = "Project";
 	public static final String PUBLIC_CLASSES = "public classes";
-	public static final String PACKAGE_PROTECTED_CLASSES = "package-protected classes";
+	public static final String PACKAGE_PRIVATE_CLASSES = "package-private classes";
 	public static final String PROTECTED_CLASSES = "protected classes";
+	public static final String LOCAL_CLASSES = "local classes";
 	public static final String PRIVATE_CLASSES = "private classes";
 	public static final String PUBLIC_METHODS = "public methods";
 	public static final String PACKAGE_PRIVATE_METHODS = "package-private methods";

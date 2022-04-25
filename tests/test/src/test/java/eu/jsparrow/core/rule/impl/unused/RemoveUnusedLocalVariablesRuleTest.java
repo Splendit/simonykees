@@ -33,6 +33,7 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
+@SuppressWarnings("nls")
 class RemoveUnusedLocalVariablesRuleTest extends SingleRuleTest {
 
 	private RemoveUnusedLocalVariablesRule rule;

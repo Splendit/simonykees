@@ -136,7 +136,7 @@ public class MethodReferencesVisitor extends ASTVisitor {
 		return optionsMap.getOrDefault(Constants.REMOVE_TEST_CODE, false);
 	}
 
-	private boolean isTestAnnotatedMethod(MethodDeclaration methodDeclaration) {
+	public static boolean isTestAnnotatedMethod(MethodDeclaration methodDeclaration) {
 		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(methodDeclaration.modifiers(), Annotation.class);
 		for (Annotation annotation : annotations) {
 			ITypeBinding typeBinding = annotation.resolveTypeBinding();

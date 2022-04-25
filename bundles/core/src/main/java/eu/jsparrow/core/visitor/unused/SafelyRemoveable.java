@@ -7,6 +7,8 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.rule.impl.unused.Constants;
@@ -46,8 +48,13 @@ public class SafelyRemoveable {
 
 			boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS,
 					false);
-			if (removeInitializersSideEffects || ExpressionWithoutSideEffectRecursive
-				.isExpressionWithoutSideEffect(assignment.getRightHandSide())) {
+			if (removeInitializersSideEffects) {
+				return optionalParentStatement;
+			}
+			if (ExpressionWithoutSideEffectRecursive
+				.isExpressionWithoutSideEffect(assignment.getRightHandSide())
+					&& ExpressionWithoutSideEffectRecursive
+						.isExpressionWithoutSideEffect(assignment.getLeftHandSide())) {
 				return optionalParentStatement;
 			}
 		}
@@ -62,4 +69,44 @@ public class SafelyRemoveable {
 		Expression initializer = fragment.getInitializer();
 		return initializer == null || ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(initializer);
 	}
+
+	/**
+	 * 
+	 * @param expression
+	 *            can represent a local variable or a field or an array access
+	 *            on a local variable or a field.
+	 * @param options
+	 *            is needed to specify whether side effects which may be caused
+	 *            for example by method invocations are relevant or not.
+	 * @return an {@link Optional} storing an {@link ExpressionStatement}
+	 *         representing an assignment statement or an increment statement or
+	 *         a decrement statement without any relevant side effect. As soon
+	 *         as any relevant side effect is found in the corresponding
+	 *         expression, an empty {@link Optional} is returned.
+	 * 
+	 */
+	static Optional<ExpressionStatement> findSafelyRemovableReassignment(Expression expression,
+			Map<String, Boolean> options) {
+
+		if (expression.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+			Assignment assignment = (Assignment) expression.getParent();
+			return SafelyRemoveable.isSafelyRemovable(assignment, options);
+		}
+
+		boolean removeInitializersSideEffects = options.getOrDefault(Constants.REMOVE_INITIALIZERS_SIDE_EFFECTS, false);
+		if (removeInitializersSideEffects
+				|| ExpressionWithoutSideEffectRecursive.isExpressionWithoutSideEffect(expression)) {
+
+			if (expression.getLocationInParent() == PrefixExpression.OPERAND_PROPERTY) {
+				return SafelyRemoveable.findParentStatementInBlock((PrefixExpression) expression.getParent());
+			}
+
+			if (expression.getLocationInParent() == PostfixExpression.OPERAND_PROPERTY) {
+				return SafelyRemoveable.findParentStatementInBlock((PostfixExpression) expression.getParent());
+			}
+		}
+
+		return Optional.empty();
+	}
+
 }
