@@ -261,7 +261,7 @@
 			<plugin>
 				<groupId>eu.jsparrow</groupId>
 				<artifactId>jsparrow-maven-plugin</artifactId>
-				<version>3.16.0</version>
+				<version>3.17.0</version>
 			</plugin>
 
 			<plugin>
