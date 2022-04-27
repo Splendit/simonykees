@@ -3,6 +3,7 @@ package eu.jsparrow.sample.postRule.allRules;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -131,7 +132,7 @@ public class StringBuildingLoopRule {
 	public String collectingArrayOfNumbers(String input) {
 		final Double[] arrayOfStrings = { 2.1, 3.5 };
 		String result = Arrays.stream(arrayOfStrings)
-			.map(Object::toString)
+			.map(Objects::toString)
 			.collect(Collectors.joining());
 		return result;
 	}
@@ -218,7 +219,7 @@ public class StringBuildingLoopRule {
 	public String colectionOfIntegers(String input) {
 		final List<Integer> collectionOfints = new ArrayList<>();
 		String result = collectionOfints.stream()
-			.map(Object::toString)
+			.map(Objects::toString)
 			.collect(Collectors.joining());
 		return result;
 	}
@@ -226,7 +227,7 @@ public class StringBuildingLoopRule {
 	public String colectionOfDoubles(String input) {
 		final List<Double> collectionOfints = new ArrayList<>();
 		String result = collectionOfints.stream()
-			.map(Object::toString)
+			.map(Objects::toString)
 			.collect(Collectors.joining());
 		return result;
 	}

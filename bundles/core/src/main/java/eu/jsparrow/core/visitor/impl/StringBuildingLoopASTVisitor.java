@@ -120,6 +120,7 @@ import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
  */
 public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStreamASTVisitor {
 
+	private static final String JAVA_UTIL_OBJECTS = java.util.Objects.class.getName();
 	private static final String COLLECTORS_QUALIFIED_NAME = java.util.stream.Collectors.class.getName();
 	private static final String ARRAYS_QUALIFIED_NAME = java.util.Arrays.class.getName();
 	private static final String COLLECT = "collect"; //$NON-NLS-1$
@@ -157,6 +158,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		boolean continueVisiting = super.visit(compilationUnit);
 		if (continueVisiting) {
 			verifyImport(compilationUnit, ARRAYS_QUALIFIED_NAME);
+			verifyImport(compilationUnit, JAVA_UTIL_OBJECTS);
 			verifyImport(compilationUnit, COLLECTORS_QUALIFIED_NAME);
 		}
 		return continueVisiting;
@@ -206,11 +208,11 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 				streamExpression = createStreamFromArray(loopExpression, loopNode);
 				concatUsingCollectorsJoining(loopNode, resultVariable, streamExpression);
 			} else if (isArrayOfNumbers(loopExpressionTypeBinding)) {
-				// Arrays.stream(expression)).map(Object::toString)
+				// Arrays.stream(expression)).map(Objects::toString)
 				streamExpression = createStreamFromNumbersArray(loopExpression, loopNode);
 				concatUsingCollectorsJoining(loopNode, resultVariable, streamExpression);
 			} else if (isCollectionOfNumbers(loopExpressionTypeBinding)) {
-				// expression.stream().map(Object::toString)
+				// expression.stream().map(Objects::toString)
 				streamExpression = createStreamFromNumbersCollection(loopExpression);
 				concatUsingCollectorsJoining(loopNode, resultVariable, streamExpression);
 			} else {
@@ -500,8 +502,10 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		mapToString.setExpression(stream);
 
 		ExpressionMethodReference methodReference = ast.newExpressionMethodReference();
-		methodReference.setExpression(ast.newSimpleName(Object.class.getSimpleName()));
+		Name objectsName = addImport(JAVA_UTIL_OBJECTS, loopExpression);
+		methodReference.setExpression(objectsName);
 		methodReference.setName(ast.newSimpleName(TO_STRING));
+		
 
 		ListRewrite argRewriter = astRewrite.getListRewrite(mapToString, MethodInvocation.ARGUMENTS_PROPERTY);
 		argRewriter.insertFirst(methodReference, null);
@@ -629,7 +633,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 	 * @param loopExpression
 	 *            a node representing a collection
 	 * @return an expression of the form
-	 *         {@code [loopExpression].stream().map(Object::toString)}
+	 *         {@code [loopExpression].stream().map(Objects::toString)}
 	 */
 	private MethodInvocation createStreamFromNumbersCollection(Expression loopExpression) {
 		AST ast = astRewrite.getAST();
@@ -639,8 +643,10 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		mapToString.setExpression(stream);
 
 		ExpressionMethodReference methodReference = ast.newExpressionMethodReference();
-		methodReference.setExpression(ast.newSimpleName(Object.class.getSimpleName()));
+		Name objectsName = addImport(JAVA_UTIL_OBJECTS, loopExpression);
+		methodReference.setExpression(objectsName);
 		methodReference.setName(ast.newSimpleName(TO_STRING));
+		
 
 		ListRewrite argRewriter = astRewrite.getListRewrite(mapToString, MethodInvocation.ARGUMENTS_PROPERTY);
 		argRewriter.insertFirst(methodReference, null);
