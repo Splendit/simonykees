@@ -30,11 +30,6 @@ public class RemoveRedundantCloseRulesTest extends SingleRuleTest {
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
-	/**
-	 * This test is expected to fail as soon as the corresponding
-	 * AST-rewrite-visitor has been implemented for
-	 * {@link RemoveRedundantCloseRule}.
-	 */
 	@Test
 	void testTransformationWithDefaultFile() throws Exception {
 		Path preRule = getPreRuleFile(SAMPLE_FILE);

@@ -10,7 +10,6 @@ public class TestRemoveRedundantCloseRule {
 	void readFirstLineFromFile(String path) {
 		try (BufferedReader br = new BufferedReader(new FileReader(path))) {
 			System.out.println("First line: " + br.readLine());
-			br.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
