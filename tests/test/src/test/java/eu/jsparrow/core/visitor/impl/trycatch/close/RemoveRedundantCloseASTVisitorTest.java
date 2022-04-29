@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl;
+package eu.jsparrow.core.visitor.impl.trycatch.close;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
