@@ -1,7 +1,7 @@
 Manifest-VERSION: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
-Bundle-SymbolicName: eu.jsparrow.jdt.ls.core;singleton:=true
+Bundle-SymbolicName: eu.jsparrow.lsp;singleton:=true
 Bundle-Version: 0.0.1.qualifier
 Bundle-Activator: eu.jsparrow.jdt.ls.core.internal.JavaLanguageServerPlugin
 Bundle-RequiredExecutionEnvironment: JavaSE-11
@@ -10,6 +10,7 @@ Import-Package: org.osgi.framework;version="1.3.0"
 Bundle-ActivationPolicy: lazy
 Require-Bundle: 
  eu.jsparrow.core,
+ eu.jsparrow.rules.api,
  org.eclipse.core.runtime;bundle-version="3.12.0",
  org.eclipse.core.resources,
  org.eclipse.core.net,

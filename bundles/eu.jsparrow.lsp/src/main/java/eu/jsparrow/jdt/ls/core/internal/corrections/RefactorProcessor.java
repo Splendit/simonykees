@@ -110,7 +110,10 @@ import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver;
+import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
 import eu.jsparrow.jdt.ls.core.internal.JavaLanguageServerPlugin;
+import eu.jsparrow.jdt.ls.core.internal.corrections.proposals.ASTRewriteCorrectionProposal;
 import eu.jsparrow.jdt.ls.core.internal.corrections.proposals.ASTRewriteRemoveImportsCorrectionProposal;
 import eu.jsparrow.jdt.ls.core.internal.corrections.proposals.CUCorrectionProposal;
 import eu.jsparrow.jdt.ls.core.internal.corrections.proposals.ChangeCorrectionProposal;
@@ -498,6 +501,19 @@ public class RefactorProcessor {
 		 * 		-> Is it more convenient for us to use ASTRewriteCorrectionProposal? 
 		 * 
 		 */
+		FunctionalInterfaceResolver r = new FunctionalInterfaceResolver(node -> true);
+		CompilationUnit root = context.getASTRoot();
+		ASTRewrite rewrite = ASTRewrite.create(root.getAST());
+		r.setASTRewrite(rewrite);
+		cic.accept(r);
+		
+		ASTRewriteCorrectionProposal rewriteProposal = new ASTRewriteCorrectionProposal(
+				r.getDescription().getName(), 
+				CodeActionKind.Refactor, 
+				context.getCompilationUnit(), 
+				rewrite, 
+				IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION);
+		
 		IProposableFix fix = LambdaExpressionsFixCore.createConvertToLambdaFix(cic);
 		if (fix == null) {
 			return false;
@@ -512,6 +528,7 @@ public class RefactorProcessor {
 		options.put(CleanUpConstants.USE_LAMBDA, CleanUpOptionsCore.TRUE);
 		FixCorrectionProposal proposal = new FixCorrectionProposal(fix, new LambdaExpressionsCleanUpCore(options), IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION, context, CodeActionKind.Refactor);
 		resultingCollections.add(proposal);
+		resultingCollections.add(rewriteProposal);
 		return true;
 	}
 
