@@ -91,6 +91,7 @@ public class JavaLanguageServerPlugin extends Plugin {
 	private ProjectsManager projectsManager;
 	
 	private JSparrowLanguageServer protocol;
+	private DiagnosticsState nonProjectDiagnosticsState;
 	
 	public static JavaLanguageServerPlugin getInstance() {
 		return pluginInstance;
@@ -152,7 +153,7 @@ public class JavaLanguageServerPlugin extends Plugin {
 			logException(e.getMessage(), e);
 		}
 //		contentProviderManager = new ContentProviderManager(preferenceManager);
-//		nonProjectDiagnosticsState = new DiagnosticsState();
+		nonProjectDiagnosticsState = new DiagnosticsState();
 		logInfo(getClass() + " is started");
 //		configureProxy();
 		// turn off substring code completion if isn't explicitly set
@@ -368,5 +369,9 @@ public class JavaLanguageServerPlugin extends Plugin {
 			return protocol.getClientConnection();
 		}
 		return null;
+	}
+	
+	public static DiagnosticsState getNonProjectDiagnosticsState() {
+		return pluginInstance.nonProjectDiagnosticsState;
 	}
 }

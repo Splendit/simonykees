@@ -61,7 +61,7 @@ public class JSparrowLanguageServer extends BaseJDTLanguageServer implements Lan
 	private WorkspaceDiagnosticsHandler workspaceDiagnosticsHandler;
 	private ClasspathUpdateHandler classpathUpdateHandler;
 	private JVMConfigurator jvmConfigurator;
-	private WorkspaceExecuteCommandHandler commandHandler;
+//	private WorkspaceExecuteCommandHandler commandHandler;
 
 //	private ProgressReporterManager progressReporterManager;
 	/**
@@ -93,15 +93,11 @@ public class JSparrowLanguageServer extends BaseJDTLanguageServer implements Lan
 	};
 	
 	public JSparrowLanguageServer(ProjectsManager projects, PreferenceManager preferenceManager) {
-		this(projects, preferenceManager, WorkspaceExecuteCommandHandler.getInstance());
-	}
-
-	public JSparrowLanguageServer(ProjectsManager projects, PreferenceManager preferenceManager, WorkspaceExecuteCommandHandler commandHandler) {
 		this.pm = projects;
 		this.preferenceManager = preferenceManager;
 		this.jvmConfigurator = new JVMConfigurator();
 		JavaRuntime.addVMInstallChangedListener(jvmConfigurator);
-		this.commandHandler = commandHandler;
+//		this.commandHandler = commandHandler;
 	}
 	
 	public void connectClient(JavaLanguageClient remoteProxy) {

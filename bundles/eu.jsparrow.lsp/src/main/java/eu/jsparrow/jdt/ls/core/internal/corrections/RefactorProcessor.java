@@ -150,11 +150,6 @@ public class RefactorProcessor {
 
 			boolean noErrorsAtLocation = noErrorsAtLocation(locations, coveringNode);
 			if (noErrorsAtLocation) {
-				boolean problemsAtLocation = locations.length != 0;
-				getExtractVariableProposal(params, context, problemsAtLocation, proposals);
-				getExtractMethodProposal(params, context, coveringNode, problemsAtLocation, proposals);
-				getExtractFieldProposal(params, context, problemsAtLocation, proposals);
-				getInlineProposal(context, coveringNode, proposals);
 
 				getConvertAnonymousToNestedProposals(params, context, coveringNode, proposals);
 				getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, proposals);
@@ -166,24 +161,14 @@ public class RefactorProcessor {
 				getAddStaticImportProposals(context, coveringNode, proposals);
 
 				getConvertForLoopProposal(context, coveringNode, proposals);
-				getAssignToVariableProposals(context, coveringNode, locations, proposals, params);
-				getIntroduceParameterProposals(params, context, coveringNode, locations, proposals);
+
 			}
 			return proposals;
 		}
 		return Collections.emptyList();
 	}
 
-	private boolean getIntroduceParameterProposals(CodeActionParams params, IInvocationContext context, ASTNode coveringNode, IProblemLocationCore[] locations, ArrayList<ChangeCorrectionProposal> resultingCollections) throws CoreException {
-		if (resultingCollections == null) {
-			return false;
-		}
-		CUCorrectionProposal proposal = RefactorProposalUtility.getIntroduceParameterRefactoringProposals(params, context, coveringNode, this.preferenceManager.getClientPreferences().isAdvancedIntroduceParameterRefactoringSupported(), locations);
-		if (proposal != null) {
-			return resultingCollections.add(proposal);
-		}
-		return false;
-	}
+	
 
 	private boolean getInverseLocalVariableProposals(CodeActionParams params, IInvocationContext context, ASTNode covering, Collection<ChangeCorrectionProposal> proposals) {
 		if (proposals == null) {
@@ -244,166 +229,7 @@ public class RefactorProcessor {
 	}
 
 
-	private boolean getExtractVariableProposal(CodeActionParams params, IInvocationContext context, boolean problemsAtLocation, Collection<ChangeCorrectionProposal> proposals) throws CoreException {
-		if (proposals == null) {
-			return false;
-		}
-
-		List<CUCorrectionProposal> newProposals = null;
-		if (this.preferenceManager.getClientPreferences().isAdvancedExtractRefactoringSupported()) {
-			newProposals = RefactorProposalUtility.getExtractVariableCommandProposals(params, context, problemsAtLocation, this.preferenceManager.getClientPreferences().isExtractVariableInferSelectionSupported());
-		} else {
-			newProposals = RefactorProposalUtility.getExtractVariableProposals(params, context, problemsAtLocation, this.preferenceManager.getClientPreferences().isExtractVariableInferSelectionSupported());
-		}
-
-		if (newProposals == null || newProposals.isEmpty()) {
-			return false;
-		}
-
-		proposals.addAll(newProposals);
-		return true;
-	}
-
-	private boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, IProblemLocationCore[] locations, Collection<ChangeCorrectionProposal> resultingCollections, CodeActionParams params) {
-		try {
-			Map formatterOptions = null;
-			CUCorrectionProposal proposal = RefactorProposalUtility.getAssignVariableProposal(params, context, locations != null && locations.length != 0, formatterOptions,
-					this.preferenceManager.getClientPreferences().isAdvancedExtractRefactoringSupported(), locations);
-			if (proposal != null) {
-				resultingCollections.add(proposal);
-			}
-			proposal = RefactorProposalUtility.getAssignFieldProposal(params, context, locations != null && locations.length != 0, formatterOptions,
-					this.preferenceManager.getClientPreferences().isAdvancedExtractRefactoringSupported(), locations);
-			if (proposal != null) {
-				resultingCollections.add(proposal);
-			}
-		} catch (CoreException e) {
-			JavaLanguageServerPlugin.logException(e);
-		}
-		return true;
-	}
-
-	private boolean getExtractMethodProposal(CodeActionParams params, IInvocationContext context, ASTNode coveringNode, boolean problemsAtLocation, Collection<ChangeCorrectionProposal> proposals) throws CoreException {
-		if (proposals == null) {
-			return false;
-		}
-
-		CUCorrectionProposal proposal = null;
-		if (this.preferenceManager.getClientPreferences().isAdvancedExtractRefactoringSupported()) {
-			proposal = RefactorProposalUtility.getExtractMethodCommandProposal(params, context, coveringNode, problemsAtLocation, this.preferenceManager.getClientPreferences().isExtractMethodInferSelectionSupported());
-		} else {
-			proposal = RefactorProposalUtility.getExtractMethodProposal(params, context, coveringNode, problemsAtLocation, this.preferenceManager.getClientPreferences().isExtractMethodInferSelectionSupported());
-		}
-
-		if (proposal == null) {
-			return false;
-		}
-
-		proposals.add(proposal);
-		return true;
-	}
-
-	private boolean getExtractFieldProposal(CodeActionParams params, IInvocationContext context, boolean problemsAtLocation, Collection<ChangeCorrectionProposal> proposals) throws CoreException {
-		if (proposals == null) {
-			return false;
-		}
-
-		CUCorrectionProposal proposal = RefactorProposalUtility.getGenericExtractFieldProposal(params, context, problemsAtLocation, null, null, this.preferenceManager.getClientPreferences().isAdvancedExtractRefactoringSupported(), this.preferenceManager.getClientPreferences().isExtractFieldInferSelectionSupported());
-
-		if (proposal == null) {
-			return false;
-		}
-
-		proposals.add(proposal);
-		return true;
-	}
-
-
-	private boolean getInlineProposal(IInvocationContext context, ASTNode node, Collection<ChangeCorrectionProposal> resultingCollections) {
-		if (resultingCollections == null) {
-			return false;
-		}
-
-		if (!(node instanceof SimpleName)) {
-			return false;
-		}
-
-		SimpleName name= (SimpleName) node;
-		IBinding binding = name.resolveBinding();
-		try {
-			if (binding instanceof IVariableBinding) {
-				IVariableBinding varBinding = (IVariableBinding) binding;
-				if (varBinding.isParameter()) {
-					return false;
-				}
-
-				if (varBinding.isField()) {
-					// Inline Constant (static final field)
-					if (RefactoringAvailabilityTesterCore.isInlineConstantAvailable((IField) varBinding.getJavaElement())) {
-						InlineConstantRefactoring refactoring = new InlineConstantRefactoring(context.getCompilationUnit(), context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
-						if (refactoring != null && refactoring.checkInitialConditions(new NullProgressMonitor()).isOK() && refactoring.getReferences(new NullProgressMonitor(), new RefactoringStatus()).length > 0) {
-							refactoring.setRemoveDeclaration(refactoring.isDeclarationSelected());
-							refactoring.setReplaceAllReferences(refactoring.isDeclarationSelected());
-							CheckConditionsOperation check = new CheckConditionsOperation(refactoring, CheckConditionsOperation.FINAL_CONDITIONS);
-							final CreateChangeOperation create = new CreateChangeOperation(check, RefactoringStatus.FATAL);
-							create.run(new NullProgressMonitor());
-							String label = ActionMessages.InlineConstantRefactoringAction_label;
-							int relevance = IProposalRelevance.INLINE_LOCAL;
-							ChangeCorrectionProposal proposal = new ChangeCorrectionProposal(label, CodeActionKind.RefactorInline, create.getChange(), relevance);
-							resultingCollections.add(proposal);
-							return true;
-						}
-					}
-
-					return false;
-				}
-
-				ASTNode decl= context.getASTRoot().findDeclaringNode(varBinding);
-				if (!(decl instanceof VariableDeclarationFragment) || decl.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-					return false;
-				}
-
-				// Inline Local Variable
-				if (binding.getJavaElement() instanceof ILocalVariable && RefactoringAvailabilityTesterCore.isInlineTempAvailable((ILocalVariable) binding.getJavaElement())) {
-					InlineTempRefactoring refactoring= new InlineTempRefactoring((VariableDeclaration) decl);
-					boolean status;
-					try {
-						status = refactoring.checkAllConditions(new NullProgressMonitor()).isOK();
-					} catch (Exception e) {
-						// ignore
-						status = false;
-					}
-					if (status && refactoring.getReferences().length > 0) {
-						String label = CorrectionMessages.QuickAssistProcessor_inline_local_description;
-						int relevance = IProposalRelevance.INLINE_LOCAL;
-						RefactoringCorrectionProposal proposal = new RefactoringCorrectionProposal(label, CodeActionKind.RefactorInline, context.getCompilationUnit(), refactoring, relevance);
-						resultingCollections.add(proposal);
-						return true;
-					}
-				}
-			} else if (binding instanceof IMethodBinding) {
-				// Inline Method
-				if (RefactoringAvailabilityTesterCore.isInlineMethodAvailable((IMethod) binding.getJavaElement())) {
-					InlineMethodRefactoring refactoring = InlineMethodRefactoring.create(context.getCompilationUnit(), context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
-					if (refactoring != null && refactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
-						CheckConditionsOperation check = new CheckConditionsOperation(refactoring, CheckConditionsOperation.FINAL_CONDITIONS);
-						final CreateChangeOperation create = new CreateChangeOperation(check, RefactoringStatus.FATAL);
-						create.run(new NullProgressMonitor());
-						String label = ActionMessages.InlineMethodRefactoringAction_label;
-						int relevance = IProposalRelevance.INLINE_LOCAL;
-						ChangeCorrectionProposal proposal = new ChangeCorrectionProposal(label, CodeActionKind.RefactorInline, create.getChange(), relevance);
-						resultingCollections.add(proposal);
-						return true;
-					}
-				}
-			}
-		} catch (CoreException e) {
-			JavaLanguageServerPlugin.log(e);
-		}
-
-		return false;
-	}
-
+	
 
 	private boolean getConvertAnonymousToNestedProposals(CodeActionParams params, IInvocationContext context, ASTNode node, Collection<ChangeCorrectionProposal> proposals) throws CoreException {
 		if (proposals == null) {
@@ -523,11 +349,6 @@ public class RefactorProcessor {
 			return true;
 		}
 
-		Map<String, String> options = new HashMap<>();
-		options.put(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptionsCore.TRUE);
-		options.put(CleanUpConstants.USE_LAMBDA, CleanUpOptionsCore.TRUE);
-		FixCorrectionProposal proposal = new FixCorrectionProposal(fix, new LambdaExpressionsCleanUpCore(options), IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION, context, CodeActionKind.Refactor);
-		resultingCollections.add(proposal);
 		resultingCollections.add(rewriteProposal);
 		return true;
 	}
