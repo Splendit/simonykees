@@ -43,6 +43,7 @@
 		<!-- standalone -->
 		<module>standalone</module>
 		<module>crypto</module>
+		<module>eu.jsparrow.lsp</module>
 	</modules>
 
 	<build>
