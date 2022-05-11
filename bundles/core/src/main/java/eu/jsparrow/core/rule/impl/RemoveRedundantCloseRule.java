@@ -28,8 +28,8 @@ public class RemoveRedundantCloseRule extends RefactoringRuleImpl<RemoveRedundan
 		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.RemoveRedundantCloseRule_name,
 				Messages.RemoveRedundantCloseRule_description,
-				Duration.ofMinutes(15),
-				Arrays.asList(Tag.JAVA_1_7, Tag.IO_OPERATIONS, Tag.SECURITY));
+				Duration.ofMinutes(2),
+				Arrays.asList(Tag.JAVA_1_7, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 	}
 
 	@Override
