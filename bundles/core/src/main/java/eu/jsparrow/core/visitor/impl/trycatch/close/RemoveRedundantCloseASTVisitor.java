@@ -27,7 +27,10 @@ public class RemoveRedundantCloseASTVisitor extends AbstractASTRewriteASTVisitor
 
 		resourceDeclarations
 			.forEach(resourceDeclaration -> findRedundantCloseStatementToRemove(node, resourceDeclaration)
-				.ifPresent(closeStatement -> astRewrite.remove(closeStatement, null)));
+				.ifPresent(closeStatement -> {
+					astRewrite.remove(closeStatement, null);
+					onRewrite();
+				}));
 
 		return true;
 	}
@@ -67,10 +70,10 @@ public class RemoveRedundantCloseASTVisitor extends AbstractASTRewriteASTVisitor
 			return Optional.empty();
 		}
 		ExpressionStatement expressionStatement = (ExpressionStatement) methodInvocation.getParent();
-		if(expressionStatement.getParent() != tryStatementBody) {
+		if (expressionStatement.getParent() != tryStatementBody) {
 			return Optional.empty();
 		}
-		
+
 		if (!methodInvocation.getName()
 			.getIdentifier()
 			.equals(CLOSE)) {

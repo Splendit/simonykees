@@ -7,20 +7,25 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+
+/**
+ * Intended to be used to visit the body of a Try With Resources statement in
+ * order to find out the last reference on a given resource declaration.
+ *
+ */
 class LastReferenceOnResourceVisitor extends ASTVisitor {
 	private final CompilationUnit compilationUnit;
 	private final VariableDeclarationFragment resourceDeclaration;
-	private final SimpleName declarationFragmentName;
 	private final String resourceIdentifier;
 	private SimpleName lastReference = null;
 
 	LastReferenceOnResourceVisitor(VariableDeclarationFragment resourceDeclaration, CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
 		this.resourceDeclaration = resourceDeclaration;
-		this.declarationFragmentName = resourceDeclaration.getName();
-		this.resourceIdentifier = declarationFragmentName.getIdentifier();
+		this.resourceIdentifier = resourceDeclaration.getName()
+			.getIdentifier();
 	}
 
 	@Override
@@ -32,22 +37,22 @@ class LastReferenceOnResourceVisitor extends ASTVisitor {
 	}
 
 	private boolean isReference(SimpleName simpleName) {
-		if (simpleName == declarationFragmentName) {
-			return false;
-		}
+
 		if (!simpleName.getIdentifier()
 			.equals(resourceIdentifier)) {
 			return false;
 		}
+
+		if (ASTNodeUtil.isLabel(simpleName)) {
+			return false;
+		}
+
 		IBinding binding = simpleName.resolveBinding();
 		if (binding == null) {
 			return false;
 		}
-		if (binding.getKind() != IBinding.VARIABLE) {
-			return false;
-		}
-		IVariableBinding variableBinding = (IVariableBinding) binding;
-		return compilationUnit.findDeclaringNode(variableBinding) == resourceDeclaration;
+		
+		return compilationUnit.findDeclaringNode(binding) == resourceDeclaration;
 	}
 
 	public Optional<SimpleName> getLastReference() {
