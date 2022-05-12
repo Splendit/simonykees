@@ -16,6 +16,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * This visitor looks for redundant close statements in Try-With-Resource statements and removes them if possible.
+ * 
+ * @since 4.11.0
+ *
+ */
 public class RemoveRedundantCloseASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final String CLOSE = "close"; //$NON-NLS-1$

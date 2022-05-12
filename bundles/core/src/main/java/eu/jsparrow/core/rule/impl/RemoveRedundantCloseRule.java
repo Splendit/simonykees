@@ -12,11 +12,9 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 /**
- * @see TryWithResourceASTVisitor
+ * @see RemoveRedundantCloseASTVisitor
  * 
- * @author Martin Huter
- * @since 0.9
- *
+ * @since 4.11.0
  */
 public class RemoveRedundantCloseRule extends RefactoringRuleImpl<RemoveRedundantCloseASTVisitor> {
 

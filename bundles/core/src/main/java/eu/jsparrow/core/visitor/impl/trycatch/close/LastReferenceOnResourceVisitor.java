@@ -13,6 +13,8 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 /**
  * Intended to be used to visit the body of a Try With Resources statement in
  * order to find out the last reference on a given resource declaration.
+ * 
+ * @since 4.11.0
  *
  */
 class LastReferenceOnResourceVisitor extends ASTVisitor {
