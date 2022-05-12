@@ -17,7 +17,8 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * This visitor looks for redundant close statements in Try-With-Resource statements and removes them if possible.
+ * This visitor looks for redundant close statements in Try-With-Resource
+ * statements and removes them if possible.
  * 
  * @since 4.11.0
  *
@@ -30,25 +31,27 @@ public class RemoveRedundantCloseASTVisitor extends AbstractASTRewriteASTVisitor
 	public boolean visit(TryStatement node) {
 
 		List<VariableDeclarationFragment> resourceDeclarations = collectResourceDeclarations(node);
-
-		resourceDeclarations
-			.forEach(resourceDeclaration -> findRedundantCloseStatementToRemove(node, resourceDeclaration)
+		for (VariableDeclarationFragment resourceDeclaration : resourceDeclarations) {
+			findRedundantCloseStatementToRemove(node, resourceDeclaration)
 				.ifPresent(closeStatement -> {
 					astRewrite.remove(closeStatement, null);
 					onRewrite();
-				}));
+				});
+		}
 
 		return true;
 	}
 
 	private List<VariableDeclarationFragment> collectResourceDeclarations(TryStatement tryStatement) {
-		if (tryStatement.resources()
-			.isEmpty()) {
+
+		List<VariableDeclarationExpression> resources = ASTNodeUtil.convertToTypedList(tryStatement.resources(),
+				VariableDeclarationExpression.class);
+
+		if (resources.isEmpty()) {
 			return Collections.emptyList();
 		}
-		return ASTNodeUtil
-			.convertToTypedList(tryStatement.resources(),
-					VariableDeclarationExpression.class)
+
+		return resources
 			.stream()
 			.flatMap(resource -> ASTNodeUtil.convertToTypedList(resource.fragments(), VariableDeclarationFragment.class)
 				.stream())

@@ -97,7 +97,7 @@ class RemoveRedundantCloseASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_ResourceClosedWithinIfStatement_shouldNotTransform() throws Exception {
 
@@ -114,7 +114,7 @@ class RemoveRedundantCloseASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_ResourceClosedWithinLambdaBody_shouldNotTransform() throws Exception {
 
@@ -134,7 +134,22 @@ class RemoveRedundantCloseASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertNoChange(original);
 	}
-	
+
+	@Test
+	void visit_ConditionalCloseNotInBlock_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "	void conditionalCloseNotInBlock(String path) {\n"
+				+ "\n"
+				+ "		try (BufferedReader br = new BufferedReader(new FileReader(path))) {\n"
+				+ "			if(true)  br.close();\n"
+				+ "		} catch (IOException e) {\n"
+				+ "			e.printStackTrace();\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
 	@Test
 	void visit_CallClosewithArgument_shouldNotTransform() throws Exception {
 
@@ -161,7 +176,7 @@ class RemoveRedundantCloseASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertNoChange(original);
 	}
-
+	
 	@Test
 	void visit_CallSkipMethod_shouldNotTransform() throws Exception {
 
@@ -169,6 +184,22 @@ class RemoveRedundantCloseASTVisitorTest extends UsesJDTUnitFixture {
 				+ "	void skipMethodInvocationOnResource(String path) {\n"
 				+ "		try (BufferedReader br = new BufferedReader(new FileReader(path))) {\n"
 				+ "			br.skip(10);\n"
+				+ "		} catch (IOException e) {\n"
+				+ "			e.printStackTrace();\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_ResourceNotDeclaredInHeader_shouldNotTransform() throws Exception {
+
+		String original = ""
+				+ "	void resourceNotDeclaredInHeader(String path) {\n"
+				+ "		try {\n"
+				+ "			BufferedReader br = new BufferedReader(new FileReader(path));\n"
+				+ "			br.close();\n"
 				+ "		} catch (IOException e) {\n"
 				+ "			e.printStackTrace();\n"
 				+ "		}\n"
