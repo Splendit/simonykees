@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.resources.IWorkspace;
@@ -37,21 +38,8 @@ import org.eclipse.jdt.internal.codeassist.impl.AssistOptions;
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCommon;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettingsConstants;
-
-import eu.jsparrow.jdt.ls.core.internal.ServiceStatus;
-
-import eu.jsparrow.jdt.ls.core.internal.ConnectionStreamFactory;
-import eu.jsparrow.jdt.ls.core.internal.JDTEnvironmentUtils;
-import eu.jsparrow.jdt.ls.core.internal.ParentProcessWatcher;
-import eu.jsparrow.jdt.ls.core.internal.JavaClientConnection.JavaLanguageClient;
-import eu.jsparrow.jdt.ls.core.internal.handlers.JSparrowLanguageServer;
-
-import org.eclipse.lsp4j.DidChangeWatchedFilesRegistrationOptions;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.jsonrpc.MessageConsumer;
-
-import eu.jsparrow.jdt.ls.core.internal.managers.ISourceDownloader;
-import eu.jsparrow.jdt.ls.core.internal.managers.MavenSourceDownloader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -59,6 +47,11 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.common.base.Throwables;
 
+import eu.jsparrow.jdt.ls.core.internal.JavaClientConnection.JavaLanguageClient;
+import eu.jsparrow.jdt.ls.core.internal.handlers.JSparrowLanguageServer;
+import eu.jsparrow.jdt.ls.core.internal.managers.ContentProviderManager;
+import eu.jsparrow.jdt.ls.core.internal.managers.ISourceDownloader;
+import eu.jsparrow.jdt.ls.core.internal.managers.MavenSourceDownloader;
 import eu.jsparrow.jdt.ls.core.internal.managers.ProjectsManager;
 import eu.jsparrow.jdt.ls.core.internal.managers.StandardProjectsManager;
 import eu.jsparrow.jdt.ls.core.internal.preferences.PreferenceManager;
@@ -90,6 +83,7 @@ public class JavaLanguageServerPlugin extends Plugin {
 	private PreferenceManager preferenceManager;
 	private ProjectsManager projectsManager;
 	
+	private ContentProviderManager contentProviderManager;
 	private JSparrowLanguageServer protocol;
 	private DiagnosticsState nonProjectDiagnosticsState;
 	
@@ -152,7 +146,7 @@ public class JavaLanguageServerPlugin extends Plugin {
 		} catch (CoreException e) {
 			logException(e.getMessage(), e);
 		}
-//		contentProviderManager = new ContentProviderManager(preferenceManager);
+		contentProviderManager = new ContentProviderManager(preferenceManager);
 		nonProjectDiagnosticsState = new DiagnosticsState();
 		logInfo(getClass() + " is started");
 //		configureProxy();
@@ -175,7 +169,7 @@ public class JavaLanguageServerPlugin extends Plugin {
 				AsynchronousSocketChannel socketChannel = serverSocket.accept().get();
 				InputStream in = Channels.newInputStream(socketChannel);
 				OutputStream out = Channels.newOutputStream(socketChannel);
-				Function<MessageConsumer, MessageConsumer> messageConsumer = it -> it;
+				UnaryOperator<MessageConsumer> messageConsumer = it -> it;
 				launcher = Launcher.createIoLauncher(protocol, JavaLanguageClient.class, in, out, executorService, messageConsumer);
 			} catch (InterruptedException | ExecutionException e) {
 				throw new RuntimeException("Error when opening a socket channel at " + host + ":" + port + ".", e);
@@ -320,6 +314,22 @@ public class JavaLanguageServerPlugin extends Plugin {
 				.getMembersOrderPreferenceCacheCommon();
 		preferenceCache.install();
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+	 */
+	@Override
+	public void stop(BundleContext bundleContext) throws Exception {
+		logInfo(getClass() + " is stopping:");
+		JavaLanguageServerPlugin.pluginInstance = null;
+		JavaLanguageServerPlugin.context = null;
+		ResourcesPlugin.getWorkspace().removeSaveParticipant(IConstants.PLUGIN_ID);
+		projectsManager = null;
+		contentProviderManager = null;
+		languageServer = null;
+	}
+
 
 	public static void sendStatus(ServiceStatus serverStatus, String status) {
 		if (pluginInstance != null && pluginInstance.protocol != null) {
@@ -373,5 +383,13 @@ public class JavaLanguageServerPlugin extends Plugin {
 	
 	public static DiagnosticsState getNonProjectDiagnosticsState() {
 		return pluginInstance.nonProjectDiagnosticsState;
+	}
+	
+
+	/**
+	 * @return
+	 */
+	public static ContentProviderManager getContentProviderManager() {
+		return pluginInstance.contentProviderManager;
 	}
 }
