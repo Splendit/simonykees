@@ -20,13 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -38,7 +35,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.manipulation.CoreASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
-
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionContext;
 import org.eclipse.lsp4j.CodeActionKind;
@@ -54,11 +50,9 @@ import com.google.gson.JsonElement;
 
 import eu.jsparrow.jdt.ls.core.internal.ChangeUtil;
 import eu.jsparrow.jdt.ls.core.internal.JDTUtils;
-import eu.jsparrow.jdt.ls.core.internal.JavaCodeActionKind;
 import eu.jsparrow.jdt.ls.core.internal.JavaLanguageServerPlugin;
 import eu.jsparrow.jdt.ls.core.internal.corrections.DiagnosticsHelper;
 import eu.jsparrow.jdt.ls.core.internal.corrections.InnovationContext;
-import eu.jsparrow.jdt.ls.core.internal.corrections.QuickFixProcessor;
 import eu.jsparrow.jdt.ls.core.internal.corrections.RefactorProcessor;
 import eu.jsparrow.jdt.ls.core.internal.corrections.proposals.ChangeCorrectionProposal;
 import eu.jsparrow.jdt.ls.core.internal.preferences.PreferenceManager;
@@ -71,21 +65,14 @@ public class CodeActionHandler {
 		= new ResponseStore<>(ForkJoinPool.commonPool().getParallelism());
 	public static final String COMMAND_ID_APPLY_EDIT = "java.apply.workspaceEdit";
 
-	private QuickFixProcessor quickFixProcessor;
 	private RefactorProcessor refactorProcessor;
-//	private QuickAssistProcessor quickAssistProcessor;
-//	private SourceAssistProcessor sourceAssistProcessor;
-//	private NonProjectFixProcessor nonProjectFixProcessor;
+
 
 	private PreferenceManager preferenceManager;
 
 	public CodeActionHandler(PreferenceManager preferenceManager) {
 		this.preferenceManager = preferenceManager;
-		this.quickFixProcessor = new QuickFixProcessor();
-//		this.sourceAssistProcessor = new SourceAssistProcessor(preferenceManager);
-//		this.quickAssistProcessor = new QuickAssistProcessor(preferenceManager);
 		this.refactorProcessor = new RefactorProcessor(preferenceManager);
-//		this.nonProjectFixProcessor = new NonProjectFixProcessor(preferenceManager);
 	}
 
 	public List<Either<Command, CodeAction>> getCodeActionCommands(CodeActionParams params, IProgressMonitor monitor) {
@@ -147,7 +134,6 @@ public class CodeActionHandler {
 			List<String> defaultCodeActionKinds = Arrays.asList(
 				CodeActionKind.QuickFix,
 				CodeActionKind.Refactor,
-//				JavaCodeActionKind.QUICK_ASSIST,
 				CodeActionKind.Source
 			);
 			codeActionKinds.addAll(defaultCodeActionKinds);
@@ -156,17 +142,7 @@ public class CodeActionHandler {
 		List<Either<Command, CodeAction>> codeActions = new ArrayList<>();
 		List<ChangeCorrectionProposal> proposals = new ArrayList<>();
 		ChangeCorrectionProposalComparator comparator = new ChangeCorrectionProposalComparator();
-		if (containsKind(codeActionKinds, CodeActionKind.QuickFix)) {
-			try {
-//				codeActions.addAll(nonProjectFixProcessor.getCorrections(params, context, locations));
-				List<ChangeCorrectionProposal> quickfixProposals = this.quickFixProcessor.getCorrections(context, locations);
-				Set<ChangeCorrectionProposal> quickSet = new TreeSet<>(comparator);
-				quickSet.addAll(quickfixProposals);
-				proposals.addAll(quickSet);
-			} catch (CoreException e) {
-				JavaLanguageServerPlugin.logException("Problem resolving quick fix code actions", e);
-			}
-		}
+
 		if (monitor.isCanceled()) {
 			return Collections.emptyList();
 		}
@@ -183,15 +159,7 @@ public class CodeActionHandler {
 		if (monitor.isCanceled()) {
 			return Collections.emptyList();
 		}
-//		if (containsKind(codeActionKinds, JavaCodeActionKind.QUICK_ASSIST)) {
-//			try {
-//				List<ChangeCorrectionProposal> quickassistProposals = this.quickAssistProcessor.getAssists(params, context, locations);
-//				quickassistProposals.sort(comparator);
-//				proposals.addAll(quickassistProposals);
-//			} catch (CoreException e) {
-//				JavaLanguageServerPlugin.logException("Problem resolving quick assist code actions", e);
-//			}
-//		}
+
 		if (monitor.isCanceled()) {
 			return Collections.emptyList();
 		}
@@ -208,9 +176,7 @@ public class CodeActionHandler {
 		if (monitor.isCanceled()) {
 			return Collections.emptyList();
 		}
-//		if (containsKind(codeActionKinds, CodeActionKind.Source)) {
-//			codeActions.addAll(sourceAssistProcessor.getSourceActionCommands(params, context, locations, monitor));
-//		}
+
 		if (monitor.isCanceled()) {
 			return Collections.emptyList();
 		}
@@ -258,9 +224,6 @@ public class CodeActionHandler {
 		} else if (proposal instanceof RefactoringCorrectionCommandProposal) {
 			RefactoringCorrectionCommandProposal commandProposal = (RefactoringCorrectionCommandProposal) proposal;
 			command = new Command(name, commandProposal.getCommand(), commandProposal.getCommandArguments());
-//		} else if (proposal instanceof AssignToVariableAssistCommandProposal) {
-//			AssignToVariableAssistCommandProposal commandProposal = (AssignToVariableAssistCommandProposal) proposal;
-//			command = new Command(name, commandProposal.getCommand(), commandProposal.getCommandArguments());
 		} else {
 			if (!this.preferenceManager.getClientPreferences().isResolveCodeActionSupported()) {
 				WorkspaceEdit edit = ChangeUtil.convertToWorkspaceEdit(proposal.getChange());

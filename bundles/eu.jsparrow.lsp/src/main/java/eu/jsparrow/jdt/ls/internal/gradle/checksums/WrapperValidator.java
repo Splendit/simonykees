@@ -40,7 +40,6 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
-import eu.jsparrow.jdt.ls.core.internal.ExceptionFactory;
 import eu.jsparrow.jdt.ls.core.internal.IConstants;
 import eu.jsparrow.jdt.ls.core.internal.JavaLanguageServerPlugin;
 import eu.jsparrow.jdt.ls.core.internal.JobHelpers;
@@ -87,98 +86,6 @@ public class WrapperValidator {
 
 	public WrapperValidator() {
 		this(QUEUE_LENGTH);
-	}
-
-	public ValidationResult checkWrapper(String baseDir) throws CoreException {
-		Path wrapperJar = Paths.get(baseDir, GRADLE_WRAPPER_JAR);
-		if (!wrapperJar.toFile().exists()) {
-			throw ExceptionFactory.newException(wrapperJar.toString() + " doesn't exist.");
-		}
-		if (!downloaded.get() || allowed.isEmpty()) {
-			loadInternalChecksums();
-			File versionFile = getVersionCacheFile();
-			if (!versionFile.exists()) {
-				JobHelpers.waitForLoadingGradleVersionJob();
-			}
-			if (versionFile.exists()) {
-				InputStreamReader reader = null;
-				try {
-					reader = new InputStreamReader(new FileInputStream(versionFile), Charsets.UTF_8);
-					String json = CharStreams.toString(reader);
-					Gson gson = new GsonBuilder().create();
-					TypeToken<List<Map<String, String>>> typeToken = new TypeToken<>() {
-					};
-					List<Map<String, String>> versions = gson.fromJson(json, typeToken.getType());
-					//@formatter:off
-					ImmutableList<String> urls = FluentIterable
-						.from(versions)
-						.filter(new Predicate<Map<String, String>>() {
-							@Override
-							public boolean apply(Map<String, String> input) {
-								return input.get(WRAPPER_CHECKSUM_URL) != null;
-							}
-						})
-						.transform(new Function<Map<String, String>, String>() {
-							@Override
-							public String apply(Map<String, String> input) {
-								return input.get(WRAPPER_CHECKSUM_URL);
-							}
-						})
-					.toList();
-					// @formatter:on
-					DownloadChecksumJob downloadJob = new DownloadChecksumJob();
-					int count = 0;
-					File cacheDir = getSha256CacheFile();
-					for (String wrapperChecksumUrl : urls) {
-						try {
-							if (WrapperValidator.wrapperChecksumUrls.contains(wrapperChecksumUrl)) {
-								continue;
-							}
-							String fileName = getFileName(wrapperChecksumUrl);
-							if (fileName == null) {
-								continue;
-							}
-							File sha256File = new File(cacheDir, fileName);
-							if (!sha256File.exists() || sha256File.lastModified() < versionFile.lastModified()) {
-								count++;
-								if (count > queueLength) {
-									downloadJob.schedule();
-									downloadJob = new DownloadChecksumJob();
-									count = 0;
-								}
-								downloadJob.add(wrapperChecksumUrl);
-							} else {
-								String sha256 = read(sha256File);
-								allowed.add(sha256);
-							}
-						} catch (Exception e) {
-							JavaLanguageServerPlugin.logException(e.getMessage(), e);
-						}
-					}
-					if (!downloadJob.isEmpty()) {
-						downloadJob.schedule();
-					}
-					JobHelpers.waitForJobs(DownloadChecksumJob.WRAPPER_VALIDATOR_JOBS, new NullProgressMonitor());
-					downloaded.set(true);
-				} catch (IOException | OperationCanceledException e) {
-					throw ExceptionFactory.newException(e);
-				} finally {
-					try {
-						Closeables.close(reader, false);
-					} catch (IOException e) {
-						// ignore
-					}
-				}
-			} else {
-				updateGradleVersionsFile();
-			}
-		}
-		try {
-			String sha256 = hashProvider.getChecksum(wrapperJar.toFile());
-			return new ValidationResult(wrapperJar.toString(), sha256, allowed.contains(sha256));
-		} catch (IOException e) {
-			throw ExceptionFactory.newException(e);
-		}
 	}
 
 	private void loadInternalChecksums() {

@@ -398,12 +398,12 @@ public final class JDTUtils {
 	 * @param uri
 	 * @return either a class file or compilation unit
 	 */
-	/*
+
 	public static ITypeRoot resolveTypeRoot(String uriString) {
 		return resolveTypeRoot(uriString, false, null);
 	}
-	*/
 
+	
 	/**
 	 * Convenience method that combines {@link #resolveClassFile(String)} and
 	 * {@link #resolveCompilationUnit(String)}.
@@ -413,7 +413,7 @@ public final class JDTUtils {
 	 * @param monitor
 	 * @return either a class file or compilation unit
 	 */
-	/*
+
 	public static ITypeRoot resolveTypeRoot(String uriString, boolean returnCompilationUnit, IProgressMonitor monitor) {
 		URI uri = toURI(uriString);
 		if (uri == null) {
@@ -445,8 +445,6 @@ public final class JDTUtils {
 		}
 		return resolveCompilationUnit(uri);
 	}
-	
-	*/
 
 	public static void discardClassFileWorkingCopy(ITypeRoot unit) {
 		try {

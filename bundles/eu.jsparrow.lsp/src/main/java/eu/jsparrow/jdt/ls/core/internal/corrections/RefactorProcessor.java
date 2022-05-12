@@ -24,18 +24,13 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.ILocalVariable;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -45,33 +40,24 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodReference;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.manipulation.CleanUpContextCore;
 import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
 import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
 import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -80,41 +66,19 @@ import org.eclipse.jdt.internal.corext.fix.ICleanUpCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
-//import org.eclipse.jdt.ls.core.internal.JavaLanguageServerPlugin;
-//import org.eclipse.jdt.ls.core.internal.corrections.proposals.ASTRewriteRemoveImportsCorrectionProposal;
-//import org.eclipse.jdt.ls.core.internal.corrections.proposals.CUCorrectionProposal;
-//import org.eclipse.jdt.ls.core.internal.corrections.proposals.ChangeCorrectionProposal;
-//import org.eclipse.jdt.ls.core.internal.corrections.proposals.FixCorrectionProposal;
-//import org.eclipse.jdt.ls.core.internal.corrections.proposals.IProposalRelevance;
-//import org.eclipse.jdt.ls.core.internal.corrections.proposals.RefactoringCorrectionProposal;
-//import org.eclipse.jdt.ls.core.internal.corrections.proposals.TypeChangeCorrectionProposal;
-//import org.eclipse.jdt.ls.core.internal.preferences.PreferenceManager;
-//import org.eclipse.jdt.ls.core.internal.text.correction.ActionMessages;
-//import org.eclipse.jdt.ls.core.internal.text.correction.RefactorProposalUtility;
-//import org.eclipse.jdt.ls.core.internal.text.correction.RefactoringCorrectionCommandProposal;
 import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.CodeActionParams;
-import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
-import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver;
-import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
-import eu.jsparrow.jdt.ls.core.internal.JavaLanguageServerPlugin;
 import eu.jsparrow.jdt.ls.core.internal.corrections.proposals.ASTRewriteCorrectionProposal;
-import eu.jsparrow.jdt.ls.core.internal.corrections.proposals.ASTRewriteRemoveImportsCorrectionProposal;
 import eu.jsparrow.jdt.ls.core.internal.corrections.proposals.CUCorrectionProposal;
 import eu.jsparrow.jdt.ls.core.internal.corrections.proposals.ChangeCorrectionProposal;
 import eu.jsparrow.jdt.ls.core.internal.corrections.proposals.FixCorrectionProposal;
@@ -122,7 +86,6 @@ import eu.jsparrow.jdt.ls.core.internal.corrections.proposals.IProposalRelevance
 import eu.jsparrow.jdt.ls.core.internal.corrections.proposals.RefactoringCorrectionProposal;
 import eu.jsparrow.jdt.ls.core.internal.corrections.proposals.TypeChangeCorrectionProposal;
 import eu.jsparrow.jdt.ls.core.internal.preferences.PreferenceManager;
-import eu.jsparrow.jdt.ls.core.internal.text.correction.ActionMessages;
 import eu.jsparrow.jdt.ls.core.internal.text.correction.RefactorProposalUtility;
 import eu.jsparrow.jdt.ls.core.internal.text.correction.RefactoringCorrectionCommandProposal;
 
@@ -151,14 +114,10 @@ public class RefactorProcessor {
 			boolean noErrorsAtLocation = noErrorsAtLocation(locations, coveringNode);
 			if (noErrorsAtLocation) {
 
-				getConvertAnonymousToNestedProposals(params, context, coveringNode, proposals);
 				getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, proposals);
 				getConvertLambdaToAnonymousClassCreationsProposals(context, coveringNode, proposals);
 
-				getConvertVarTypeToResolvedTypeProposal(context, coveringNode, proposals);
 				getConvertResolvedTypeToVarTypeProposal(context, coveringNode, proposals);
-
-				getAddStaticImportProposals(context, coveringNode, proposals);
 
 				getConvertForLoopProposal(context, coveringNode, proposals);
 
@@ -228,28 +187,6 @@ public class RefactorProcessor {
 		return true;
 	}
 
-
-	
-
-	private boolean getConvertAnonymousToNestedProposals(CodeActionParams params, IInvocationContext context, ASTNode node, Collection<ChangeCorrectionProposal> proposals) throws CoreException {
-		if (proposals == null) {
-			return false;
-		}
-
-		RefactoringCorrectionProposal proposal = null;
-		if (this.preferenceManager.getClientPreferences().isAdvancedExtractRefactoringSupported()) {
-			proposal = getConvertAnonymousToNestedProposal(params, context, node, true /*returnAsCommand*/);
-		} else {
-			proposal = getConvertAnonymousToNestedProposal(params, context, node, false /*returnAsCommand*/);
-		}
-
-		if (proposal == null) {
-			return false;
-		}
-
-		proposals.add(proposal);
-		return true;
-	}
 
 	public static RefactoringCorrectionProposal getConvertAnonymousToNestedProposal(CodeActionParams params, IInvocationContext context, final ASTNode node, boolean returnAsCommand) throws CoreException {
 		String label = CorrectionMessages.QuickAssistProcessor_convert_anonym_to_nested;
@@ -333,17 +270,21 @@ public class RefactorProcessor {
 		r.setASTRewrite(rewrite);
 		cic.accept(r);
 		
+		try {
+			TextEdit edits = rewrite.rewriteAST();
+			if(!edits.hasChildren()) { // FIXME: find a better way to check whether there was a finding or not. 
+				return false;
+			}
+		} catch (JavaModelException | IllegalArgumentException e) {
+			e.printStackTrace();
+		}
+		
 		ASTRewriteCorrectionProposal rewriteProposal = new ASTRewriteCorrectionProposal(
 				r.getDescription().getName(), 
 				CodeActionKind.Refactor, 
 				context.getCompilationUnit(), 
 				rewrite, 
 				IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION);
-		
-		IProposableFix fix = LambdaExpressionsFixCore.createConvertToLambdaFix(cic);
-		if (fix == null) {
-			return false;
-		}
 
 		if (resultingCollections == null) {
 			return true;
@@ -381,65 +322,7 @@ public class RefactorProcessor {
 		return true;
 	}
 
-	private static boolean getConvertVarTypeToResolvedTypeProposal(IInvocationContext context, ASTNode node, Collection<ChangeCorrectionProposal> proposals) {
-		CompilationUnit astRoot = context.getASTRoot();
-		IJavaElement root = astRoot.getJavaElement();
-		if (root == null) {
-			return false;
-		}
-		IJavaProject javaProject = root.getJavaProject();
-		if (javaProject == null) {
-			return false;
-		}
-		if (!JavaModelUtil.is10OrHigher(javaProject)) {
-			return false;
-		}
-
-		SimpleName name = getSimpleNameForVariable(node);
-		if (name == null) {
-			return false;
-		}
-
-		IBinding binding = name.resolveBinding();
-		if (!(binding instanceof IVariableBinding)) {
-			return false;
-		}
-		IVariableBinding varBinding = (IVariableBinding) binding;
-		if (varBinding.isField() || varBinding.isParameter()) {
-			return false;
-		}
-
-		ASTNode varDeclaration = astRoot.findDeclaringNode(varBinding);
-		if (varDeclaration == null) {
-			return false;
-		}
-
-		ITypeBinding typeBinding = varBinding.getType();
-		if (typeBinding == null || typeBinding.isAnonymous() || typeBinding.isIntersectionType() || typeBinding.isWildcardType()) {
-			return false;
-		}
-
-		Type type = null;
-		if (varDeclaration instanceof SingleVariableDeclaration) {
-			type = ((SingleVariableDeclaration) varDeclaration).getType();
-		} else if (varDeclaration instanceof VariableDeclarationFragment) {
-			ASTNode parent = varDeclaration.getParent();
-			if (parent instanceof VariableDeclarationStatement) {
-				type = ((VariableDeclarationStatement) parent).getType();
-			} else if (parent instanceof VariableDeclarationExpression) {
-				type = ((VariableDeclarationExpression) parent).getType();
-			}
-		}
-		if (type == null || !type.isVar()) {
-			return false;
-		}
-
-		TypeChangeCorrectionProposal proposal = new TypeChangeCorrectionProposal(context.getCompilationUnit(), varBinding, astRoot, typeBinding, false, IProposalRelevance.CHANGE_VARIABLE);
-		proposal.setKind(CodeActionKind.Refactor);
-		proposals.add(proposal);
-		return true;
-	}
-
+	
 	private static SimpleName getSimpleNameForVariable(ASTNode node) {
 		if (!(node instanceof SimpleName)) {
 			return null;
@@ -564,193 +447,6 @@ public class RefactorProcessor {
 		proposal.setKind(CodeActionKind.Refactor);
 		proposals.add(proposal);
 		return true;
-	}
-
-
-	/**
-	 * Create static import proposal, which converts invocations to static import.
-	 *
-	 * @param context
-	 *            the invocation context
-	 * @param node
-	 *            the node to work on
-	 * @param proposals
-	 *            the receiver of proposals, may be {@code null}
-	 * @return {@code true} if the operation could or has been performed,
-	 *         {@code false otherwise}
-	 */
-	private static boolean getAddStaticImportProposals(IInvocationContext context, ASTNode node, Collection<ChangeCorrectionProposal> proposals) {
-		if (!(node instanceof SimpleName)) {
-			return false;
-		}
-
-		final SimpleName name = (SimpleName) node;
-		final IBinding binding;
-		final ITypeBinding declaringClass;
-
-		// get bindings for method invocation or variable access
-
-		if (name.getParent() instanceof MethodInvocation) {
-			MethodInvocation mi = (MethodInvocation) name.getParent();
-
-			Expression expression = mi.getExpression();
-			if (expression == null || expression.equals(name)) {
-				return false;
-			}
-
-			binding = mi.resolveMethodBinding();
-			if (binding == null) {
-				return false;
-			}
-
-			declaringClass = ((IMethodBinding) binding).getDeclaringClass();
-		} else if (name.getParent() instanceof QualifiedName) {
-			QualifiedName qn = (QualifiedName) name.getParent();
-
-			if (name.equals(qn.getQualifier()) || qn.getParent() instanceof ImportDeclaration) {
-				return false;
-			}
-
-			binding = qn.resolveBinding();
-			if (!(binding instanceof IVariableBinding)) {
-				return false;
-			}
-			declaringClass = ((IVariableBinding) binding).getDeclaringClass();
-		} else {
-			return false;
-		}
-
-		// at this point binding cannot be null
-
-		if (!Modifier.isStatic(binding.getModifiers())) {
-			// only work with static bindings
-			return false;
-		}
-
-		boolean needImport = false;
-		if (!isDirectlyAccessible(name, declaringClass)) {
-			if (Modifier.isPrivate(declaringClass.getModifiers())) {
-				return false;
-			}
-			needImport = true;
-		}
-
-		if (proposals == null) {
-			return true; // return early, just testing if we could do it
-		}
-
-		try {
-			ImportRewrite importRewrite = StubUtility.createImportRewrite(context.getCompilationUnit(), true);
-			ASTRewrite astRewrite = ASTRewrite.create(node.getAST());
-			ASTRewrite astRewriteReplaceAllOccurrences = ASTRewrite.create(node.getAST());
-
-			ImportRemover remover = new ImportRemover(context.getCompilationUnit().getJavaProject(), context.getASTRoot());
-			ImportRemover removerAllOccurences = new ImportRemover(context.getCompilationUnit().getJavaProject(), context.getASTRoot());
-			MethodInvocation mi = null;
-			QualifiedName qn = null;
-			if (name.getParent() instanceof MethodInvocation) {
-				mi = (MethodInvocation) name.getParent();
-				// convert the method invocation
-				astRewrite.remove(mi.getExpression(), null);
-				remover.registerRemovedNode(mi.getExpression());
-				removerAllOccurences.registerRemovedNode(mi.getExpression());
-				mi.typeArguments().forEach(typeObject -> {
-					Type type = (Type) typeObject;
-					astRewrite.remove(type, null);
-					remover.registerRemovedNode(type);
-					removerAllOccurences.registerRemovedNode(type);
-				});
-			} else if (name.getParent() instanceof QualifiedName) {
-				qn = (QualifiedName) name.getParent();
-				// convert the field access
-				astRewrite.replace(qn, ASTNodeFactory.newName(node.getAST(), name.getFullyQualifiedName()), null);
-				remover.registerRemovedNode(qn);
-				removerAllOccurences.registerRemovedNode(qn);
-			} else {
-				return false;
-			}
-
-			MethodInvocation miFinal = mi;
-			name.getRoot().accept(new ASTVisitor() {
-				@Override
-				public boolean visit(MethodInvocation methodInvocation) {
-					Expression methodInvocationExpression = methodInvocation.getExpression();
-					if (methodInvocationExpression == null) {
-						return super.visit(methodInvocation);
-					}
-
-					if (methodInvocationExpression instanceof Name) {
-						String fullyQualifiedName = ((Name) methodInvocationExpression).getFullyQualifiedName();
-						if (miFinal != null && miFinal.getExpression() instanceof Name && ((Name) miFinal.getExpression()).getFullyQualifiedName().equals(fullyQualifiedName)
-								&& miFinal.getName().getIdentifier().equals(methodInvocation.getName().getIdentifier())) {
-							methodInvocation.typeArguments().forEach(type -> {
-								astRewriteReplaceAllOccurrences.remove((Type) type, null);
-								removerAllOccurences.registerRemovedNode((Type) type);
-							});
-							astRewriteReplaceAllOccurrences.remove(methodInvocationExpression, null);
-							removerAllOccurences.registerRemovedNode(methodInvocationExpression);
-						}
-					}
-
-					return super.visit(methodInvocation);
-				}
-			});
-			QualifiedName qnFinal = qn;
-			name.getRoot().accept(new ASTVisitor() {
-				@Override
-				public boolean visit(QualifiedName qualifiedName) {
-					if (qnFinal != null && qualifiedName.getFullyQualifiedName().equals(qnFinal.getFullyQualifiedName())) {
-						astRewriteReplaceAllOccurrences.replace(qualifiedName, ASTNodeFactory.newName(node.getAST(), name.getFullyQualifiedName()), null);
-						removerAllOccurences.registerRemovedNode(qualifiedName);
-					}
-					return super.visit(qualifiedName);
-				}
-			});
-
-			if (needImport) {
-				importRewrite.addStaticImport(binding);
-			}
-
-			ASTRewriteRemoveImportsCorrectionProposal proposal= new ASTRewriteRemoveImportsCorrectionProposal(CorrectionMessages.QuickAssistProcessor_convert_to_static_import, CodeActionKind.Refactor, context.getCompilationUnit(), astRewrite,
-					IProposalRelevance.ADD_STATIC_IMPORT);
-			proposal.setImportRewrite(importRewrite);
-			proposal.setImportRemover(remover);
-			proposals.add(proposal);
-			ASTRewriteRemoveImportsCorrectionProposal proposalReplaceAllOccurrences= new ASTRewriteRemoveImportsCorrectionProposal(CorrectionMessages.QuickAssistProcessor_convert_to_static_import_replace_all, CodeActionKind.Refactor, context.getCompilationUnit(), astRewriteReplaceAllOccurrences,
-					IProposalRelevance.ADD_STATIC_IMPORT);
-			proposalReplaceAllOccurrences.setImportRewrite(importRewrite);
-			proposalReplaceAllOccurrences.setImportRemover(removerAllOccurences);
-			proposals.add(proposalReplaceAllOccurrences);
-		} catch (IllegalArgumentException e) {
-			// Wrong use of ASTRewrite or ImportRewrite API, see bug 541586
-			JavaLanguageServerPlugin.logException("Failed to get static import proposal", e);
-			return false;
-		} catch (JavaModelException e) {
-			return false;
-		}
-
-		return true;
-	}
-
-	private static boolean isDirectlyAccessible(ASTNode nameNode, ITypeBinding declaringClass) {
-		ASTNode node = nameNode.getParent();
-		while (node != null) {
-
-			if (node instanceof AbstractTypeDeclaration) {
-				ITypeBinding binding = ((AbstractTypeDeclaration) node).resolveBinding();
-				if (binding != null && binding.isSubTypeCompatible(declaringClass)) {
-					return true;
-				}
-			} else if (node instanceof AnonymousClassDeclaration) {
-				ITypeBinding binding = ((AnonymousClassDeclaration) node).resolveBinding();
-				if (binding != null && binding.isSubTypeCompatible(declaringClass)) {
-					return true;
-				}
-			}
-
-			node = node.getParent();
-		}
-		return false;
 	}
 
 	private static boolean getConvertForLoopProposal(IInvocationContext context, ASTNode node, Collection<ChangeCorrectionProposal> resultingCollections) {
