@@ -99,9 +99,9 @@ public abstract class ProjectsManager implements ISaveParticipant, IProjectsMana
 
 	public enum CHANGE_TYPE {
 		CREATED, CHANGED, DELETED
-	};
+	}
 
-	public ProjectsManager(PreferenceManager preferenceManager) {
+	protected ProjectsManager(PreferenceManager preferenceManager) {
 		this.preferenceManager = preferenceManager;
 	}
 

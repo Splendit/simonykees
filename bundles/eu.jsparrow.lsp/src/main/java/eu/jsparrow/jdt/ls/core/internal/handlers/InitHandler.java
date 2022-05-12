@@ -17,7 +17,6 @@ package eu.jsparrow.jdt.ls.core.internal.handlers;
 import static eu.jsparrow.jdt.ls.core.internal.JavaLanguageServerPlugin.logException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -36,19 +35,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
-import eu.jsparrow.jdt.ls.core.internal.JavaClientConnection;
-import eu.jsparrow.jdt.ls.core.internal.JavaLanguageServerPlugin;
-import eu.jsparrow.jdt.ls.core.internal.JobHelpers;
-import eu.jsparrow.jdt.ls.core.internal.ProjectUtils;
-import eu.jsparrow.jdt.ls.core.internal.ServiceStatus;
-import eu.jsparrow.jdt.ls.core.internal.managers.ProjectsManager;
-import eu.jsparrow.jdt.ls.core.internal.preferences.PreferenceManager;
-import eu.jsparrow.jdt.ls.core.internal.preferences.Preferences;
-import eu.jsparrow.jdt.ls.internal.gradle.checksums.WrapperValidator;
 import org.eclipse.lsp4j.CodeActionOptions;
-import org.eclipse.lsp4j.CodeLensOptions;
 import org.eclipse.lsp4j.DocumentFilter;
-import org.eclipse.lsp4j.DocumentOnTypeFormattingOptions;
 import org.eclipse.lsp4j.ExecuteCommandOptions;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
@@ -64,10 +52,20 @@ import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
+import eu.jsparrow.jdt.ls.core.internal.JavaClientConnection;
+import eu.jsparrow.jdt.ls.core.internal.JavaLanguageServerPlugin;
+import eu.jsparrow.jdt.ls.core.internal.JobHelpers;
+import eu.jsparrow.jdt.ls.core.internal.ProjectUtils;
+import eu.jsparrow.jdt.ls.core.internal.ServiceStatus;
+import eu.jsparrow.jdt.ls.core.internal.managers.ProjectsManager;
+import eu.jsparrow.jdt.ls.core.internal.preferences.PreferenceManager;
+import eu.jsparrow.jdt.ls.core.internal.preferences.Preferences;
+import eu.jsparrow.jdt.ls.internal.gradle.checksums.WrapperValidator;
+
 /**
  * Handler for the VS Code extension initialization
  */
-final public class InitHandler extends BaseInitHandler {
+public final class InitHandler extends BaseInitHandler {
 	private static final String BUNDLES_KEY = "bundles";
 
 	private JavaClientConnection connection;
@@ -100,27 +98,6 @@ final public class InitHandler extends BaseInitHandler {
 	@Override
 	public void registerCapabilities(InitializeResult initializeResult) {
 		ServerCapabilities capabilities = new ServerCapabilities();
-//		if (!preferenceManager.getClientPreferences().isCompletionDynamicRegistered()) {
-//			capabilities.setCompletionProvider(CompletionHandler.DEFAULT_COMPLETION_OPTIONS);
-//		}
-		if (!preferenceManager.getClientPreferences().isFormattingDynamicRegistrationSupported()) {
-			capabilities.setDocumentFormattingProvider(Boolean.TRUE);
-		}
-		if (!preferenceManager.getClientPreferences().isRangeFormattingDynamicRegistrationSupported()) {
-			capabilities.setDocumentRangeFormattingProvider(Boolean.TRUE);
-		}
-		if (!preferenceManager.getClientPreferences().isOnTypeFormattingDynamicRegistrationSupported()) {
-			capabilities.setDocumentOnTypeFormattingProvider(new DocumentOnTypeFormattingOptions(";", Arrays.asList("\n", "}")));
-		}
-		if (!preferenceManager.getClientPreferences().isCodeLensDynamicRegistrationSupported()) {
-			capabilities.setCodeLensProvider(new CodeLensOptions(true));
-		}
-//		if (!preferenceManager.getClientPreferences().isSignatureHelpDynamicRegistrationSupported()) {
-//			capabilities.setSignatureHelpProvider(SignatureHelpHandler.createOptions());
-//		}
-//		if (!preferenceManager.getClientPreferences().isRenameDynamicRegistrationSupported()) {
-//			capabilities.setRenameProvider(RenameHandler.createOptions());
-//		}
 		if (!preferenceManager.getClientPreferences().isCodeActionDynamicRegistered()) {
 			if (preferenceManager.getClientPreferences().isResolveCodeActionSupported()) {
 				CodeActionOptions codeActionOptions = new CodeActionOptions();
@@ -142,33 +119,11 @@ final public class InitHandler extends BaseInitHandler {
 				capabilities.setExecuteCommandProvider(new ExecuteCommandOptions(new ArrayList<>(staticCommands)));
 			}
 		}
-		if (!preferenceManager.getClientPreferences().isWorkspaceSymbolDynamicRegistered()) {
-			capabilities.setWorkspaceSymbolProvider(Boolean.TRUE);
-		}
-		if (!preferenceManager.getClientPreferences().isClientDocumentSymbolProviderRegistered() && !preferenceManager.getClientPreferences().isDocumentSymbolDynamicRegistered()) {
-			capabilities.setDocumentSymbolProvider(Boolean.TRUE);
-		}
-		if (!preferenceManager.getClientPreferences().isDefinitionDynamicRegistered()) {
-			capabilities.setDefinitionProvider(Boolean.TRUE);
-		}
-		if (!preferenceManager.getClientPreferences().isTypeDefinitionDynamicRegistered()) {
-			capabilities.setTypeDefinitionProvider(Boolean.TRUE);
-		}
+
 		if (!preferenceManager.getClientPreferences().isClientHoverProviderRegistered() && !preferenceManager.getClientPreferences().isHoverDynamicRegistered()) {
 			capabilities.setHoverProvider(Boolean.TRUE);
 		}
-		if (!preferenceManager.getClientPreferences().isReferencesDynamicRegistered()) {
-			capabilities.setReferencesProvider(Boolean.TRUE);
-		}
-		if (!preferenceManager.getClientPreferences().isDocumentHighlightDynamicRegistered()) {
-			capabilities.setDocumentHighlightProvider(Boolean.TRUE);
-		}
-		if (!preferenceManager.getClientPreferences().isFoldgingRangeDynamicRegistered()) {
-			capabilities.setFoldingRangeProvider(Boolean.TRUE);
-		}
-		if (!preferenceManager.getClientPreferences().isImplementationDynamicRegistered()) {
-			capabilities.setImplementationProvider(Boolean.TRUE);
-		}
+
 		if (!preferenceManager.getClientPreferences().isSelectionRangeDynamicRegistered()) {
 			capabilities.setSelectionRangeProvider(Boolean.TRUE);
 		}

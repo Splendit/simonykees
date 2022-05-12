@@ -46,10 +46,10 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.core.BinaryMember;
-import eu.jsparrow.jdt.ls.core.internal.handlers.CompletionResolveHandler;
+//import eu.jsparrow.jdt.ls.core.internal.handlers.CompletionResolveHandler;
 import eu.jsparrow.jdt.ls.core.internal.hover.JavaElementLabels;
-import eu.jsparrow.jdt.ls.core.internal.javadoc.JavaDocSnippetStringEvaluator;
-import eu.jsparrow.jdt.ls.core.internal.javadoc.JavadocContentAccess2;
+//import eu.jsparrow.jdt.ls.core.internal.javadoc.JavaDocSnippetStringEvaluator;
+//import eu.jsparrow.jdt.ls.core.internal.javadoc.JavadocContentAccess2;
 import eu.jsparrow.jdt.ls.core.internal.managers.IBuildSupport;
 import eu.jsparrow.jdt.ls.core.internal.preferences.PreferenceManager;
 import org.eclipse.jface.text.IRegion;
@@ -147,12 +147,12 @@ public class HoverInfoProvider {
 				if (monitor.isCanceled()) {
 					return cancelled(res);
 				}
-				MarkedString javadoc = computeJavadoc(curr);
-				String value = javadoc == null ? null : javadoc.getValue();
-				if (value != null && !value.isBlank()) {
-					value = fixSnippet(value);
-					res.add(Either.forLeft(value));
-				}
+//				MarkedString javadoc = computeJavadoc(curr);
+//				String value = javadoc == null ? null : javadoc.getValue();
+//				if (value != null && !value.isBlank()) {
+//					value = fixSnippet(value);
+//					res.add(Either.forLeft(value));
+//				}
 			}
 		} catch (Exception e) {
 			JavaLanguageServerPlugin.logException("Error computing hover", e);
@@ -164,21 +164,21 @@ public class HoverInfoProvider {
 	}
 
 	private String fixSnippet(String value) {
-		if (value.contains(JavaDocSnippetStringEvaluator.SNIPPET)) {
-			StringBuilder builder = new StringBuilder();
-			value.lines().forEach((line) -> {
-				if (line.contains(JavaDocSnippetStringEvaluator.SNIPPET)) {
-					line = line.stripLeading();
-					if (line.startsWith(JavaDocSnippetStringEvaluator.SNIPPET)) {
-						line = line.replaceFirst(JavaDocSnippetStringEvaluator.SNIPPET, "");
-						line = replaceLeadingSpaces(line);
-					}
-				}
-				builder.append(line);
-				builder.append(MARKDOWN_LINEBREAK);
-			});
-			value = builder.toString();
-		}
+//		if (value.contains(JavaDocSnippetStringEvaluator.SNIPPET)) {
+//			StringBuilder builder = new StringBuilder();
+//			value.lines().forEach((line) -> {
+//				if (line.contains(JavaDocSnippetStringEvaluator.SNIPPET)) {
+//					line = line.stripLeading();
+//					if (line.startsWith(JavaDocSnippetStringEvaluator.SNIPPET)) {
+//						line = line.replaceFirst(JavaDocSnippetStringEvaluator.SNIPPET, "");
+//						line = replaceLeadingSpaces(line);
+//					}
+//				}
+//				builder.append(line);
+//				builder.append(MARKDOWN_LINEBREAK);
+//			});
+//			value = builder.toString();
+//		}
 		return value;
 	}
 
@@ -294,37 +294,37 @@ public class HoverInfoProvider {
 		return null;
 	}
 
-	public static MarkedString computeJavadoc(IJavaElement element) throws CoreException {
-		IMember member = null;
-		String result = null;
-		if (element instanceof ITypeParameter) {
-			member= ((ITypeParameter) element).getDeclaringMember();
-		} else if (element instanceof IMember) {
-			member= (IMember) element;
-		} else if (element instanceof IPackageFragment) {
-			Reader r = JavadocContentAccess2.getMarkdownContentReader(element);
-			if (r != null) {
-				result = getString(r);
-			}
-		}
-		if (member != null) {
-			Reader r = JavadocContentAccess2.getMarkdownContentReader(member);
-			if (r != null) {
-				result = getString(r);
-			}
-			if (member instanceof IMethod) {
-				String defaultValue = getDefaultValue((IMethod) member);
-				if (defaultValue != null) {
-					if (JavaLanguageServerPlugin.getPreferencesManager().getClientPreferences().isSupportsCompletionDocumentationMarkdown()) {
-						result = (result == null ? CompletionResolveHandler.EMPTY_STRING : result) + "\n" + CompletionResolveHandler.DEFAULT + defaultValue;
-					} else {
-						result = (result == null ? CompletionResolveHandler.EMPTY_STRING : result) + CompletionResolveHandler.DEFAULT + defaultValue;
-					}
-				}
-			}
-		}
-		return result != null ? new MarkedString(LANGUAGE_ID, result) : null;
-	}
+//	public static MarkedString computeJavadoc(IJavaElement element) throws CoreException {
+//		IMember member = null;
+//		String result = null;
+//		if (element instanceof ITypeParameter) {
+//			member= ((ITypeParameter) element).getDeclaringMember();
+//		} else if (element instanceof IMember) {
+//			member= (IMember) element;
+//		} else if (element instanceof IPackageFragment) {
+//			Reader r = JavadocContentAccess2.getMarkdownContentReader(element);
+//			if (r != null) {
+//				result = getString(r);
+//			}
+//		}
+//		if (member != null) {
+//			Reader r = JavadocContentAccess2.getMarkdownContentReader(member);
+//			if (r != null) {
+//				result = getString(r);
+//			}
+//			if (member instanceof IMethod) {
+//				String defaultValue = getDefaultValue((IMethod) member);
+//				if (defaultValue != null) {
+//					if (JavaLanguageServerPlugin.getPreferencesManager().getClientPreferences().isSupportsCompletionDocumentationMarkdown()) {
+//						result = (result == null ? CompletionResolveHandler.EMPTY_STRING : result) + "\n" + CompletionResolveHandler.DEFAULT + defaultValue;
+//					} else {
+//						result = (result == null ? CompletionResolveHandler.EMPTY_STRING : result) + CompletionResolveHandler.DEFAULT + defaultValue;
+//					}
+//				}
+//			}
+//		}
+//		return result != null ? new MarkedString(LANGUAGE_ID, result) : null;
+//	}
 
 	/**
 	 * Gets the reader content as a String

@@ -130,6 +130,7 @@ import eu.jsparrow.jdt.ls.core.internal.handlers.JsonRpcHelpers;
 import eu.jsparrow.jdt.ls.core.internal.hover.JavaElementLabelComposer;
 import eu.jsparrow.jdt.ls.core.internal.hover.JavaElementLabels;
 import eu.jsparrow.jdt.ls.core.internal.javadoc.JavaElementLinks;
+import eu.jsparrow.jdt.ls.core.internal.managers.ContentProviderManager;
 import eu.jsparrow.jdt.ls.core.internal.managers.ProjectsManager;
 import eu.jsparrow.jdt.ls.core.internal.preferences.PreferenceManager;
 
