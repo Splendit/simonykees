@@ -59,6 +59,7 @@ import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver;
 import eu.jsparrow.core.markers.visitor.UseListSortResolver;
 import eu.jsparrow.core.markers.visitor.UseOffsetBasedStringMethodsResolver;
+import eu.jsparrow.core.markers.visitor.UsePredefinedStandardCharsetResolver;
 import eu.jsparrow.core.markers.visitor.UseStringJoinResolver;
 import eu.jsparrow.core.markers.visitor.arithmetic.ArithmeticAssignmentResolver;
 import eu.jsparrow.core.markers.visitor.factory.methods.CollectionsFactoryMethodsResolver;
@@ -188,6 +189,7 @@ public class ResolverVisitorsFactory {
 		map.put(StatementLambdaToExpressionResolver.ID, StatementLambdaToExpressionResolver::new);
 		map.put(StringBufferToBuilderResolver.ID, StringBufferToBuilderResolver::new);
 		map.put(UseOffsetBasedStringMethodsResolver.ID, UseOffsetBasedStringMethodsResolver::new);
+		map.put(UsePredefinedStandardCharsetResolver.ID, UsePredefinedStandardCharsetResolver::new);
 
 		List<MarkerService> markerServices = getExternalRuleServices();
 		markerServices.stream()

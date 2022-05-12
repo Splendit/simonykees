@@ -20,9 +20,11 @@ import eu.jsparrow.rules.common.Tag;
 public class UsePredefinedStandardCharsetRule
 		extends RefactoringRuleImpl<UsePredefinedStandardCharsetASTVisitor> {
 
+	public static final String RULE_ID = "UsePredefinedStandardCharset"; //$NON-NLS-1$
+
 	public UsePredefinedStandardCharsetRule() {
 		this.visitorClass = UsePredefinedStandardCharsetASTVisitor.class;
-		this.id = "UsePredefinedStandardCharset"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.UsePredefinedStandardCharsetRule_name,
 				Messages.UsePredefinedStandardCharsetRule_description,
 				Duration.ofMinutes(2),

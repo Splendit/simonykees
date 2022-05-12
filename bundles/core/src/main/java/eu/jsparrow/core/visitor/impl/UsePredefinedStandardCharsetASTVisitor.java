@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
+import eu.jsparrow.core.markers.common.UsePredefinedStandardCharsetEvent;
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -44,7 +45,8 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.21.0
  *
  */
-public class UsePredefinedStandardCharsetASTVisitor extends AbstractAddImportASTVisitor {
+public class UsePredefinedStandardCharsetASTVisitor extends AbstractAddImportASTVisitor
+		implements UsePredefinedStandardCharsetEvent {
 
 	private static final String STANDARD_CHARSETS_QUALIFIED_NAME = java.nio.charset.StandardCharsets.class.getName();
 	private static final Class<String> STRING = java.lang.String.class;
@@ -73,7 +75,7 @@ public class UsePredefinedStandardCharsetASTVisitor extends AbstractAddImportAST
 	@Override
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
-		if(methodBinding == null) {
+		if (methodBinding == null) {
 			return true;
 		}
 		if (!charsetForName.isEquivalentTo(methodBinding)) {
@@ -101,5 +103,6 @@ public class UsePredefinedStandardCharsetASTVisitor extends AbstractAddImportAST
 				charsetConstantSimpleName);
 		this.astRewrite.replace(forNameInvocation, charsetConstantQualifiedName, null);
 		onRewrite();
+		addMarkerEvent(forNameInvocation);
 	}
 }
