@@ -56,6 +56,7 @@ import eu.jsparrow.core.markers.visitor.ReorderModifiersResolver;
 import eu.jsparrow.core.markers.visitor.ReplaceStringFormatByFormattedResolver;
 import eu.jsparrow.core.markers.visitor.StatementLambdaToExpressionResolver;
 import eu.jsparrow.core.markers.visitor.StringBufferToBuilderResolver;
+import eu.jsparrow.core.markers.visitor.StringFormatLineSeparatorResolver;
 import eu.jsparrow.core.markers.visitor.StringLiteralEqualityCheckResolver;
 import eu.jsparrow.core.markers.visitor.UseArraysStreamResolver;
 import eu.jsparrow.core.markers.visitor.UseCollectionsSingletonListResolver;
@@ -198,6 +199,7 @@ public class ResolverVisitorsFactory {
 		map.put(DateDeprecatedResolver.ID, DateDeprecatedResolver::new);
 		map.put(FlatMapInsteadOfNestedLoopsResolver.ID, FlatMapInsteadOfNestedLoopsResolver::new);
 		map.put(ImmutableStaticFinalCollectionsResolver.ID, ImmutableStaticFinalCollectionsResolver::new);
+		map.put(StringFormatLineSeparatorResolver.ID, StringFormatLineSeparatorResolver::new);
 
 		List<MarkerService> markerServices = getExternalRuleServices();
 		markerServices.stream()

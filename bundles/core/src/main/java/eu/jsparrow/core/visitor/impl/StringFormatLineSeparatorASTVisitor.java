@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
+import eu.jsparrow.core.markers.common.StringFormatLineSeparatorEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -23,7 +24,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 0.9.2
  *
  */
-public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVisitor {
+public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVisitor implements StringFormatLineSeparatorEvent {
 
 	private static String stringFullyQualifiedName = java.lang.String.class.getName();
 	private static String localeFullyQualifiedName = java.util.Locale.class.getName();
@@ -70,6 +71,7 @@ public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVi
 					astRewrite.replace(formatString, newFormatString, null);
 					getCommentRewriter().saveCommentsInParentStatement(formatString);
 					onRewrite();
+					addMarkerEvent(formatString);
 				}
 			}
 		}
