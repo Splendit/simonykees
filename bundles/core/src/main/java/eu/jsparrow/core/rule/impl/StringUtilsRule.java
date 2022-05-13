@@ -25,6 +25,7 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> {
 
+	public static final String RULE_ID = "StringUtils"; //$NON-NLS-1$
 	private static final String STRING_UTILS_QUALIFIED_NAME = org.apache.commons.lang3.StringUtils.class.getName();
 
 	@SuppressWarnings("nls")
@@ -50,7 +51,7 @@ public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> 
 
 	public StringUtilsRule() {
 		this.visitorClass = StringUtilsASTVisitor.class;
-		this.id = "StringUtils"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.StringUtilsRule_name, Messages.StringUtilsRule_description,
 				Duration.ofMinutes(10), Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION));
 	}

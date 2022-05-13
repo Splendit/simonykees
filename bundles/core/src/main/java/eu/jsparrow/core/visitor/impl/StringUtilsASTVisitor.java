@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Statement;
 
+import eu.jsparrow.core.markers.common.StringUtilsEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -25,7 +26,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @author Martin Huter
  * @since 0.9
  */
-public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
+public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor implements StringUtilsEvent {
 
 	private static final String STRING_FULLY_QUALIFIED_NAME = java.lang.String.class.getName();
 	private static final String STRING_UTILS_FULLY_QUALIFIED_NAME = org.apache.commons.lang3.StringUtils.class
@@ -118,6 +119,7 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 					.insertFirst(ASTNode.copySubtree(currentAST, node.getExpression()), null);
 				saveComments(node);
 				onRewrite();
+				addMarkerEvent(node);
 			}
 		}
 		return true;
