@@ -19,12 +19,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.markers.visitor.AvoidConcatenationInLoggingStatementsResolver;
+import eu.jsparrow.core.markers.visitor.BracketsToControlResolver;
 import eu.jsparrow.core.markers.visitor.CollapseIfStatementsResolver;
 import eu.jsparrow.core.markers.visitor.CollectionRemoveAllResolver;
+import eu.jsparrow.core.markers.visitor.DateDeprecatedResolver;
 import eu.jsparrow.core.markers.visitor.DiamondOperatorResolver;
 import eu.jsparrow.core.markers.visitor.EnumsWithoutEqualsResolver;
+import eu.jsparrow.core.markers.visitor.FlatMapInsteadOfNestedLoopsResolver;
 import eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver;
 import eu.jsparrow.core.markers.visitor.GuardConditionResolver;
+import eu.jsparrow.core.markers.visitor.ImmutableStaticFinalCollectionsResolver;
 import eu.jsparrow.core.markers.visitor.IndexOfToContainsResolver;
 import eu.jsparrow.core.markers.visitor.InefficientConstructorResolver;
 import eu.jsparrow.core.markers.visitor.InsertBreakStatementInLoopsResolver;
@@ -190,6 +194,10 @@ public class ResolverVisitorsFactory {
 		map.put(StringBufferToBuilderResolver.ID, StringBufferToBuilderResolver::new);
 		map.put(UseOffsetBasedStringMethodsResolver.ID, UseOffsetBasedStringMethodsResolver::new);
 		map.put(UsePredefinedStandardCharsetResolver.ID, UsePredefinedStandardCharsetResolver::new);
+		map.put(BracketsToControlResolver.ID, BracketsToControlResolver::new);
+		map.put(DateDeprecatedResolver.ID, DateDeprecatedResolver::new);
+		map.put(FlatMapInsteadOfNestedLoopsResolver.ID, FlatMapInsteadOfNestedLoopsResolver::new);
+		map.put(ImmutableStaticFinalCollectionsResolver.ID, ImmutableStaticFinalCollectionsResolver::new);
 
 		List<MarkerService> markerServices = getExternalRuleServices();
 		markerServices.stream()

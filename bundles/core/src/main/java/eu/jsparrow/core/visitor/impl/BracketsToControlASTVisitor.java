@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import eu.jsparrow.core.markers.common.BracketsToControlEvent;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -21,7 +22,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 0.9
  *
  */
-public class BracketsToControlASTVisitor extends AbstractASTRewriteASTVisitor {
+public class BracketsToControlASTVisitor extends AbstractASTRewriteASTVisitor implements BracketsToControlEvent {
 
 	private static final Predicate<Statement> NOT_BLOCK_TEST = nodeToTest -> !(nodeToTest instanceof Block);
 	private static final Predicate<Statement> NOT_BLOCK_TEST_FOR_ELSE = nodeToTest -> nodeToTest != null
@@ -69,6 +70,7 @@ public class BracketsToControlASTVisitor extends AbstractASTRewriteASTVisitor {
 			astRewrite.remove(body, null);
 			astRewrite.set(body.getParent(), body.getLocationInParent(), wrappingBlock, null);
 			onRewrite();
+			addMarkerEvent(body);
 		}
 	}
 }
