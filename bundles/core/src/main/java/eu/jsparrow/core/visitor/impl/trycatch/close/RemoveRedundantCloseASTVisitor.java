@@ -1,12 +1,15 @@
 package eu.jsparrow.core.visitor.impl.trycatch.close;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -45,18 +48,57 @@ public class RemoveRedundantCloseASTVisitor extends AbstractASTRewriteASTVisitor
 
 	private List<VariableDeclarationFragment> collectResourceDeclarations(TryStatement tryStatement) {
 
-		List<VariableDeclarationExpression> resources = ASTNodeUtil.convertToTypedList(tryStatement.resources(),
-				VariableDeclarationExpression.class);
+		List<ASTNode> resourcesASTNodes = ASTNodeUtil.convertToTypedList(tryStatement.resources(),
+				ASTNode.class);
 
-		if (resources.isEmpty()) {
+		if (resourcesASTNodes.isEmpty()) {
 			return Collections.emptyList();
 		}
 
-		return resources
-			.stream()
-			.flatMap(resource -> ASTNodeUtil.convertToTypedList(resource.fragments(), VariableDeclarationFragment.class)
-				.stream())
-			.collect(Collectors.toList());
+		List<VariableDeclarationFragment> resources = new ArrayList<>();
+		for (ASTNode resourceASTNode : resourcesASTNodes) {
+			if (resourceASTNode.getNodeType() == ASTNode.VARIABLE_DECLARATION_EXPRESSION) {
+				VariableDeclarationExpression variableDeclarationexpresson = (VariableDeclarationExpression) resourceASTNode;
+				ASTNodeUtil
+					.convertToTypedList(variableDeclarationexpresson.fragments(), VariableDeclarationFragment.class)
+					.forEach(resources::add);
+
+			} else if (resourceASTNode.getNodeType() == ASTNode.SIMPLE_NAME) {
+				SimpleName simpleName = (SimpleName) resourceASTNode;
+				findLocalVariableDeclarationFragment(simpleName)
+					.ifPresent(resources::add);
+			}
+		}
+		return resources;
+	}
+
+	private Optional<VariableDeclarationFragment> findLocalVariableDeclarationFragment(SimpleName simpleName) {
+		IBinding binding = simpleName.resolveBinding();
+		if (binding == null) {
+			return Optional.empty();
+		}
+
+		if (binding.getKind() != IBinding.VARIABLE) {
+			return Optional.empty();
+		}
+
+		IVariableBinding variableBinding = (IVariableBinding) binding;
+		if (variableBinding.isField()) {
+			return Optional.empty();
+		}
+
+		ASTNode declaringNode = getCompilationUnit().findDeclaringNode(variableBinding);
+		if (declaringNode == null) {
+			return Optional.empty();
+		}
+
+		if (declaringNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+			return Optional.empty();
+		}
+
+		VariableDeclarationFragment localVariableDeclarationFragment = (VariableDeclarationFragment) declaringNode;
+		return Optional.of(localVariableDeclarationFragment);
+
 	}
 
 	private Optional<ExpressionStatement> findRedundantCloseStatementToRemove(TryStatement tryStatement,

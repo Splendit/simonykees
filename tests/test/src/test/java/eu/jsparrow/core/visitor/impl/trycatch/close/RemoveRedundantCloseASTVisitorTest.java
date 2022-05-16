@@ -176,7 +176,7 @@ class RemoveRedundantCloseASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_CallSkipMethod_shouldNotTransform() throws Exception {
 
@@ -199,6 +199,86 @@ class RemoveRedundantCloseASTVisitorTest extends UsesJDTUnitFixture {
 				+ "	void resourceNotDeclaredInHeader(String path) {\n"
 				+ "		try {\n"
 				+ "			BufferedReader br = new BufferedReader(new FileReader(path));\n"
+				+ "			br.close();\n"
+				+ "		} catch (IOException e) {\n"
+				+ "			e.printStackTrace();\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_SimpleNameOfResourceInTWRHeader_shouldTransform() throws Exception {
+		String original = ""
+				+ "	void simpleNameOfResourceInTWRHeader(String path) throws Exception {\n"
+				+ "		BufferedReader br = new BufferedReader(new FileReader(path));\n"
+				+ "		try (br) {\n"
+				+ "			br.close();\n"
+				+ "		} catch (IOException e) {\n"
+				+ "			e.printStackTrace();\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = ""
+				+ "	void simpleNameOfResourceInTWRHeader(String path) throws Exception {\n"
+				+ "		BufferedReader br = new BufferedReader(new FileReader(path));\n"
+				+ "		try (br) {\n"
+				+ "		} catch (IOException e) {\n"
+				+ "			e.printStackTrace();\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_QualifiedResourceFieldNameInTWRHeader_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "	void qualifiedResourceFieldNamenTWRHeader(String path) throws Exception {\n"
+				+ "		BufferedReaderWrapper wrapper = new BufferedReaderWrapper();\n"
+				+ "		wrapper.br = new BufferedReader(new FileReader(path));\n"
+				+ "		try (wrapper.br) {\n"
+				+ "			wrapper.br.close();\n"
+				+ "		} catch (IOException e) {\n"
+				+ "			e.printStackTrace();\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	static class BufferedReaderWrapper {\n"
+				+ "		BufferedReader br;\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_SimpleResourceFieldNameInTWRHeader_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "	class TestWithResourceAsfield {\n"
+				+ "		final BufferedReader br;\n"
+				+ "\n"
+				+ "		TestWithResourceAsfield(BufferedReader br) {\n"
+				+ "			this.br = br;\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		void simpleResourceFieldNameInTWRHeader() {\n"
+				+ "			try (br) {\n"
+				+ "				br.close();\n"
+				+ "			} catch (IOException e) {\n"
+				+ "				e.printStackTrace();\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_ResourceAsFormalParameter_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "	void resourceAsFormalParameter(BufferedReader br) {\n"
+				+ "		try (br) {\n"
 				+ "			br.close();\n"
 				+ "		} catch (IOException e) {\n"
 				+ "			e.printStackTrace();\n"
