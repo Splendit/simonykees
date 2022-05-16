@@ -9,7 +9,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
  * An interface to add {@link RefactoringMarkerEvent}s for
  * {@link OverrideAnnotationRuleASTVisitor}.
  * 
- * @since 4.10.0
+ * @since 4.11.0
  *
  */
 public interface UsePredefinedStandardCharsetEvent {
@@ -17,7 +17,8 @@ public interface UsePredefinedStandardCharsetEvent {
 	/**
 	 * 
 	 * @param MethodInvocation
-	 *            the method invocation to be replaced by the qualified name of the char set constant
+	 *            the method invocation to be replaced by the qualified name of
+	 *            the char set constant
 	 */
 	default void addMarkerEvent(MethodInvocation methodInvocation) {
 	}

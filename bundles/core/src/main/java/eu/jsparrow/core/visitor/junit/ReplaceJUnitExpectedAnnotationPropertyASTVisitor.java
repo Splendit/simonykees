@@ -49,7 +49,8 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 3.24.0
  *
  */
-public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractReplaceExpectedASTVisitor implements ReplaceJUnitExpectedAnnotationPropertyEvent {
+public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractReplaceExpectedASTVisitor
+		implements ReplaceJUnitExpectedAnnotationPropertyEvent {
 
 	protected static final String EXCEPTION_TYPE_NAME = java.lang.Exception.class.getName();
 	public static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
@@ -109,7 +110,7 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 	private Optional<ASTNode> findNodeThrowingException(MethodDeclaration methodDeclaration,
 			ITypeBinding exceptionType) {
 		Block body = methodDeclaration.getBody();
-		if(body == null) {
+		if (body == null) {
 			return Optional.empty();
 		}
 		List<ExpressionStatement> expressionStatements = ASTNodeUtil.returnTypedList(body.statements(),

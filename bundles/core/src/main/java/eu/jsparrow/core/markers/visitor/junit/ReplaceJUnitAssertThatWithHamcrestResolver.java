@@ -14,7 +14,15 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
-public class ReplaceJUnitAssertThatWithHamcrestResolver extends ReplaceJUnitAssertThatWithHamcrestASTVisitor implements Resolver {
+/**
+ * A visitor for resolving one issue of type
+ * {@link ReplaceJUnitAssertThatWithHamcrestASTVisitor}.
+ * 
+ * @since 4.11.0
+ *
+ */
+public class ReplaceJUnitAssertThatWithHamcrestResolver extends ReplaceJUnitAssertThatWithHamcrestASTVisitor
+		implements Resolver {
 
 	public static final String ID = "ReplaceJUnitAssertThatWithHamcrestResolver"; //$NON-NLS-1$
 
@@ -54,7 +62,7 @@ public class ReplaceJUnitAssertThatWithHamcrestResolver extends ReplaceJUnitAsse
 				description);
 		addMarkerEvent(event);
 	}
-	
+
 	@Override
 	public void addMarkerEvent(MethodInvocation node) {
 		RefactoringMarkerEvent event = RefactoringMarkerEventFactory.createEventForNode(getCompilationUnit(), node, ID,

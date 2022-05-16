@@ -44,7 +44,8 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.29.0
  *
  */
-public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImportASTVisitor implements ReplaceJUnitAssertThatWithHamcrestEvent {
+public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImportASTVisitor
+		implements ReplaceJUnitAssertThatWithHamcrestEvent {
 
 	private static final String ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
 	private static final String ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT = "org.hamcrest.MatcherAssert.assertThat"; //$NON-NLS-1$

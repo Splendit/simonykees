@@ -34,7 +34,8 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 4.0.0
  * 
  */
-public class UseDedicatedAssertionsASTVisitor extends AbstractAddImportASTVisitor implements UseDedicatedAssertionsEvent {
+public class UseDedicatedAssertionsASTVisitor extends AbstractAddImportASTVisitor
+		implements UseDedicatedAssertionsEvent {
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {

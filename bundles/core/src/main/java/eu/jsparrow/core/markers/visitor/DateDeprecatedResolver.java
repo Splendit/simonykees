@@ -13,6 +13,12 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type {@link DateDeprecatedASTVisitor}.
+ * 
+ * @since 4.11.0
+ *
+ */
 public class DateDeprecatedResolver extends DateDeprecatedASTVisitor implements Resolver {
 	public static final String ID = "DateDeprecatedResolver"; //$NON-NLS-1$
 

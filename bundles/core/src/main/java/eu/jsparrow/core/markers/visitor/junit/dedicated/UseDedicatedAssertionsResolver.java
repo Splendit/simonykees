@@ -13,6 +13,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link UseDedicatedAssertionsASTVisitor}.
+ * 
+ * @since 4.11.0
+ *
+ */
 public class UseDedicatedAssertionsResolver extends UseDedicatedAssertionsASTVisitor implements Resolver {
 
 	public static final String ID = "UseDedicatedAssertionsResolver"; //$NON-NLS-1$
@@ -38,7 +45,7 @@ public class UseDedicatedAssertionsResolver extends UseDedicatedAssertionsASTVis
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void addMarkerEvent(MethodInvocation node) {
 		RefactoringMarkerEvent event = RefactoringMarkerEventFactory.createEventForNode(getCompilationUnit(), node, ID,

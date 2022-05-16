@@ -14,7 +14,15 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
-public class ImmutableStaticFinalCollectionsResolver extends ImmutableStaticFinalCollectionsASTVisitor implements Resolver {
+/**
+ * A visitor for resolving one issue of type
+ * {@link ImmutableStaticFinalCollectionsASTVisitor}.
+ * 
+ * @since 4.11.0
+ *
+ */
+public class ImmutableStaticFinalCollectionsResolver extends ImmutableStaticFinalCollectionsASTVisitor
+		implements Resolver {
 
 	public static final String ID = "ImmutableStaticFinalCollectionsResolver"; //$NON-NLS-1$
 
@@ -35,10 +43,10 @@ public class ImmutableStaticFinalCollectionsResolver extends ImmutableStaticFina
 
 	@Override
 	public boolean visit(VariableDeclarationFragment fragmentNode) {
-		if(positionChecker.test(fragmentNode)) {
-			return super.visit(fragmentNode); 
+		if (positionChecker.test(fragmentNode)) {
+			return super.visit(fragmentNode);
 		}
-		
+
 		return true;
 	}
 

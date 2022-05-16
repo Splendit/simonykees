@@ -24,7 +24,8 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 0.9.2
  *
  */
-public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVisitor implements StringFormatLineSeparatorEvent {
+public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVisitor
+		implements StringFormatLineSeparatorEvent {
 
 	private static String stringFullyQualifiedName = java.lang.String.class.getName();
 	private static String localeFullyQualifiedName = java.util.Locale.class.getName();

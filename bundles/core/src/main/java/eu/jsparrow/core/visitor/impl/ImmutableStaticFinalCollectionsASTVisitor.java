@@ -49,7 +49,8 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @author Matthias Webhofer
  * @since 2.1.1
  */
-public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImportASTVisitor implements ImmutableStaticFinalCollectionsEvent {
+public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImportASTVisitor
+		implements ImmutableStaticFinalCollectionsEvent {
 
 	/*** METHOD NAMES ***/
 

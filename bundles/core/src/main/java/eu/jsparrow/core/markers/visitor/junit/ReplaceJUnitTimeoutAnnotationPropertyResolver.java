@@ -16,7 +16,15 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
-public class ReplaceJUnitTimeoutAnnotationPropertyResolver extends ReplaceJUnitTimeoutAnnotationPropertyASTVisitor implements Resolver {
+/**
+ * A visitor for resolving one issue of type
+ * {@link ReplaceJUnitTimeoutAnnotationPropertyASTVisitor}.
+ * 
+ * @since 4.11.0
+ *
+ */
+public class ReplaceJUnitTimeoutAnnotationPropertyResolver extends ReplaceJUnitTimeoutAnnotationPropertyASTVisitor
+		implements Resolver {
 
 	public static final String ID = "ReplaceJUnitTimeoutAnnotationPropertyResolver"; //$NON-NLS-1$
 
@@ -55,7 +63,7 @@ public class ReplaceJUnitTimeoutAnnotationPropertyResolver extends ReplaceJUnitT
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void addMarkerEvent(NormalAnnotation node) {
 		RefactoringMarkerEvent event = RefactoringMarkerEventFactory.createEventForNode(getCompilationUnit(), node, ID,

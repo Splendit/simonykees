@@ -13,6 +13,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link FlatMapInsteadOfNestedLoopsASTVisitor}.
+ * 
+ * @since 4.11.0
+ *
+ */
 public class FlatMapInsteadOfNestedLoopsResolver extends FlatMapInsteadOfNestedLoopsASTVisitor implements Resolver {
 
 	public static final String ID = "FlatMapInsteadOfNestedLoopsResolver"; //$NON-NLS-1$

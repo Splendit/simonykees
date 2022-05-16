@@ -207,7 +207,6 @@ public class ResolverVisitorsFactory {
 		map.put(ImmutableStaticFinalCollectionsResolver.ID, ImmutableStaticFinalCollectionsResolver::new);
 		map.put(StringFormatLineSeparatorResolver.ID, StringFormatLineSeparatorResolver::new);
 		map.put(StringUtilsResolver.ID, StringUtilsResolver::new);
-		
 		map.put(ReplaceJUnitExpectedAnnotationPropertyResolver.ID, ReplaceJUnitExpectedAnnotationPropertyResolver::new);
 		map.put(ReplaceJUnitExpectedExceptionResolver.ID, ReplaceJUnitExpectedExceptionResolver::new);
 		map.put(ReplaceJUnitAssertThatWithHamcrestResolver.ID, ReplaceJUnitAssertThatWithHamcrestResolver::new);

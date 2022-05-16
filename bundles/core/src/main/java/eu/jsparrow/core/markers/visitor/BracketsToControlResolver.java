@@ -18,6 +18,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link BracketsToControlASTVisitor}.
+ * 
+ * @since 4.11.0
+ *
+ */
 public class BracketsToControlResolver extends BracketsToControlASTVisitor implements Resolver {
 	public static final String ID = "BracketsToControlResolver"; //$NON-NLS-1$
 

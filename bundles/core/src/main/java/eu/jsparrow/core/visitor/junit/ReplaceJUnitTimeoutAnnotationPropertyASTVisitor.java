@@ -55,7 +55,8 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.26.0
  *
  */
-public class ReplaceJUnitTimeoutAnnotationPropertyASTVisitor extends AbstractAddImportASTVisitor implements ReplaceJUnitTimeoutAnnotationPropertyEvent {
+public class ReplaceJUnitTimeoutAnnotationPropertyASTVisitor extends AbstractAddImportASTVisitor
+		implements ReplaceJUnitTimeoutAnnotationPropertyEvent {
 
 	public static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
 	private static final String ASSERT_TIMEOUT = "org.junit.jupiter.api.Assertions.assertTimeout"; //$NON-NLS-1$

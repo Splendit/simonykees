@@ -16,8 +16,15 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link StringFormatLineSeparatorASTVisitor}.
+ * 
+ * @since 4.11.0
+ *
+ */
 public class StringFormatLineSeparatorResolver extends StringFormatLineSeparatorASTVisitor implements Resolver {
-	
+
 	public static final String ID = "StringFormatLineSeparatorResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
@@ -38,7 +45,8 @@ public class StringFormatLineSeparatorResolver extends StringFormatLineSeparator
 	public boolean visit(MethodInvocation methodInvocation) {
 		@SuppressWarnings("unchecked")
 		List<Expression> arguments = methodInvocation.arguments();
-		boolean match = arguments.stream().anyMatch(positionChecker::test);
+		boolean match = arguments.stream()
+			.anyMatch(positionChecker::test);
 		if (match) {
 			super.visit(methodInvocation);
 		}

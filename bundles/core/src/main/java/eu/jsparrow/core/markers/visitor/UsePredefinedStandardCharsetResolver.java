@@ -17,7 +17,7 @@ import eu.jsparrow.rules.common.markers.Resolver;
  * A visitor for resolving one issue of type
  * {@link UsePredefinedStandardCharsetASTVisitor}.
  * 
- * @since 4.10.0
+ * @since 4.11.0
  *
  */
 public class UsePredefinedStandardCharsetResolver extends UsePredefinedStandardCharsetASTVisitor implements Resolver {
@@ -37,7 +37,7 @@ public class UsePredefinedStandardCharsetResolver extends UsePredefinedStandardC
 	public RuleDescription getDescription() {
 		return this.description;
 	}
-	
+
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		if (positionChecker.test(methodInvocation)) {

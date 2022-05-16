@@ -20,7 +20,14 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
-public class ReplaceJUnitExpectedExceptionResolver extends ReplaceJUnitExpectedExceptionASTVisitor implements Resolver  {
+/**
+ * A visitor for resolving one issue of type
+ * {@link ReplaceJUnitExpectedExceptionASTVisitor}.
+ * 
+ * @since 4.11.0
+ *
+ */
+public class ReplaceJUnitExpectedExceptionResolver extends ReplaceJUnitExpectedExceptionASTVisitor implements Resolver {
 	public static final String ID = "ReplaceJUnitExpectedExceptionResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
@@ -54,7 +61,7 @@ public class ReplaceJUnitExpectedExceptionResolver extends ReplaceJUnitExpectedE
 	public boolean visit(MethodDeclaration methodDeclaration) {
 		HelperVisitor visitor = new HelperVisitor();
 		methodDeclaration.accept(visitor);
-		if(visitor.hasMatch()) {
+		if (visitor.hasMatch()) {
 			return super.visit(methodDeclaration);
 		}
 		return true;
@@ -66,40 +73,39 @@ public class ReplaceJUnitExpectedExceptionResolver extends ReplaceJUnitExpectedE
 				description);
 		addMarkerEvent(event);
 	}
-	
-	
+
 	class HelperVisitor extends ASTVisitor {
 		private boolean match = false;
-		
+
 		@Override
 		public boolean preVisit2(ASTNode node) {
 			return !match;
 		}
-		
+
 		@Override
 		public boolean visit(MethodInvocation methodInvocation) {
-			if(positionChecker.test(methodInvocation)) {
+			if (positionChecker.test(methodInvocation)) {
 				this.match = true;
 			}
 			return true;
 		}
-		
+
 		@Override
 		public boolean visit(ClassInstanceCreation classInstanceCreation) {
-			if(positionChecker.test(classInstanceCreation)) {
+			if (positionChecker.test(classInstanceCreation)) {
 				this.match = true;
 			}
 			return true;
 		}
-		
+
 		@Override
 		public boolean visit(ThrowStatement throwStatement) {
-			if(positionChecker.test(throwStatement)) {
+			if (positionChecker.test(throwStatement)) {
 				this.match = true;
 			}
 			return true;
 		}
-		
+
 		public boolean hasMatch() {
 			return this.match;
 		}

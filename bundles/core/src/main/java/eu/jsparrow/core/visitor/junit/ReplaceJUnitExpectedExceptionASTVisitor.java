@@ -69,7 +69,8 @@ import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
  * @since 3.24.0
  *
  */
-public class ReplaceJUnitExpectedExceptionASTVisitor extends AbstractReplaceExpectedASTVisitor implements ReplaceJUnitExpectedExceptionEvent {
+public class ReplaceJUnitExpectedExceptionASTVisitor extends AbstractReplaceExpectedASTVisitor
+		implements ReplaceJUnitExpectedExceptionEvent {
 
 	private static final String GET_MESSAGE = "getMessage"; //$NON-NLS-1$
 	private static final String ASSERT_TRUE = "assertTrue"; //$NON-NLS-1$
@@ -173,7 +174,7 @@ public class ReplaceJUnitExpectedExceptionASTVisitor extends AbstractReplaceExpe
 	private boolean analyzeUsagesOfExpectedException(MethodDeclaration methodDeclaration,
 			ExpectedExceptionVisitor visitor) {
 		Block body = methodDeclaration.getBody();
-		if(body == null) {
+		if (body == null) {
 			return false;
 		}
 		body.accept(visitor);
