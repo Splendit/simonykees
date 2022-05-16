@@ -34,6 +34,7 @@ public class RemoveRedundantCloseASTVisitor extends AbstractASTRewriteASTVisitor
 		for (VariableDeclarationFragment resourceDeclaration : resourceDeclarations) {
 			findRedundantCloseStatementToRemove(node, resourceDeclaration)
 				.ifPresent(closeStatement -> {
+					getCommentRewriter().saveRelatedComments(closeStatement);
 					astRewrite.remove(closeStatement, null);
 					onRewrite();
 				});
