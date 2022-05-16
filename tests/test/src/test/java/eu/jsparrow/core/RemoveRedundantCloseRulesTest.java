@@ -35,7 +35,7 @@ public class RemoveRedundantCloseRulesTest extends SingleRuleTest {
 		rule = new RemoveRedundantCloseRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
-	
+
 	@Test
 	void test_ruleId() {
 		String ruleId = rule.getId();
@@ -52,8 +52,6 @@ public class RemoveRedundantCloseRulesTest extends SingleRuleTest {
 		assertThat(description.getDescription(),
 				equalTo("This rule looks for redundant 'close()'-invocations on resources used within try-with-resource statements and tries to remove them."));
 	}
-
-
 
 	@Test
 	void testTransformationWithDefaultFile() throws Exception {
