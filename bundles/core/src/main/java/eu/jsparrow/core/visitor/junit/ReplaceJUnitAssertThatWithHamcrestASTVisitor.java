@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 
+import eu.jsparrow.core.markers.common.ReplaceJUnitAssertThatWithHamcrestEvent;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
@@ -43,7 +44,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.29.0
  *
  */
-public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImportASTVisitor {
+public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImportASTVisitor implements ReplaceJUnitAssertThatWithHamcrestEvent {
 
 	private static final String ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
 	private static final String ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT = "org.hamcrest.MatcherAssert.assertThat"; //$NON-NLS-1$
@@ -80,6 +81,7 @@ public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImp
 		newImportDeclaration.setName(ast.newName(ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT));
 		astRewrite.replace(importDeclaration, newImportDeclaration, null);
 		onRewrite();
+		addMarkerEvent(importDeclaration);
 		this.updatedAssertThatStaticImport = true;
 		return true;
 	}
@@ -105,6 +107,7 @@ public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImp
 				newExpression.ifPresent(
 						name -> {
 							onRewrite();
+							addMarkerEvent(methodInvocation);
 							astRewrite.set(methodInvocation, MethodInvocation.EXPRESSION_PROPERTY, name, null);
 						});
 			}
@@ -113,6 +116,7 @@ public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImp
 			Name newExpression = addImport(ORG_HAMCREST_MATCHER_ASSERT, expression);
 			astRewrite.replace(expression, newExpression, null);
 			onRewrite();
+			addMarkerEvent(methodInvocation);
 		}
 		return true;
 	}

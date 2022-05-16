@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
+import eu.jsparrow.core.markers.common.ReplaceJUnitExpectedAnnotationPropertyEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -48,7 +49,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 3.24.0
  *
  */
-public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractReplaceExpectedASTVisitor {
+public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractReplaceExpectedASTVisitor implements ReplaceJUnitExpectedAnnotationPropertyEvent {
 
 	protected static final String EXCEPTION_TYPE_NAME = java.lang.Exception.class.getName();
 	public static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
@@ -162,10 +163,14 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 
 		ExpressionStatement assertionStatement = ast.newExpressionStatement(assertThrows);
 		astRewrite.replace(nodeThrowingException.getParent(), assertionStatement, null);
+		addMarkerEvent(annotation);
 
 		TestMethodUtil.removeAnnotationProperty(astRewrite, annotation, expectedException);
 		onRewrite();
 
 	}
 
+	protected void updateAssertThrowsQualifiedName(String qualifiedName) {
+		this.assertThrowsQualifiedName = qualifiedName;
+	}
 }

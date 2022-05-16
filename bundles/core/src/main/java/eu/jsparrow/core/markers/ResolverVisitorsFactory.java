@@ -72,6 +72,11 @@ import eu.jsparrow.core.markers.visitor.factory.methods.CollectionsFactoryMethod
 import eu.jsparrow.core.markers.visitor.files.UseFilesBufferedReaderResolver;
 import eu.jsparrow.core.markers.visitor.files.UseFilesBufferedWriterResolver;
 import eu.jsparrow.core.markers.visitor.files.writestring.UseFilesWriteStringResolver;
+import eu.jsparrow.core.markers.visitor.junit.ReplaceJUnitAssertThatWithHamcrestResolver;
+import eu.jsparrow.core.markers.visitor.junit.ReplaceJUnitExpectedAnnotationPropertyResolver;
+import eu.jsparrow.core.markers.visitor.junit.ReplaceJUnitExpectedExceptionResolver;
+import eu.jsparrow.core.markers.visitor.junit.ReplaceJUnitTimeoutAnnotationPropertyResolver;
+import eu.jsparrow.core.markers.visitor.junit.dedicated.UseDedicatedAssertionsResolver;
 import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachCollectResolver;
 import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachIfWrapperToFilterResolver;
 import eu.jsparrow.core.markers.visitor.lambdaforeach.LambdaForEachMapResolver;
@@ -202,6 +207,12 @@ public class ResolverVisitorsFactory {
 		map.put(ImmutableStaticFinalCollectionsResolver.ID, ImmutableStaticFinalCollectionsResolver::new);
 		map.put(StringFormatLineSeparatorResolver.ID, StringFormatLineSeparatorResolver::new);
 		map.put(StringUtilsResolver.ID, StringUtilsResolver::new);
+		
+		map.put(ReplaceJUnitExpectedAnnotationPropertyResolver.ID, ReplaceJUnitExpectedAnnotationPropertyResolver::new);
+		map.put(ReplaceJUnitExpectedExceptionResolver.ID, ReplaceJUnitExpectedExceptionResolver::new);
+		map.put(ReplaceJUnitAssertThatWithHamcrestResolver.ID, ReplaceJUnitAssertThatWithHamcrestResolver::new);
+		map.put(ReplaceJUnitTimeoutAnnotationPropertyResolver.ID, ReplaceJUnitTimeoutAnnotationPropertyResolver::new);
+		map.put(UseDedicatedAssertionsResolver.ID, UseDedicatedAssertionsResolver::new);
 
 		List<MarkerService> markerServices = getExternalRuleServices();
 		markerServices.stream()
