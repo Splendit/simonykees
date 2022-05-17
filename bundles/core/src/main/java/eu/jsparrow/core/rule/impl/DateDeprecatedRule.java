@@ -20,9 +20,10 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class DateDeprecatedRule extends RefactoringRuleImpl<DateDeprecatedASTVisitor> {
 
+	public static final String RULE_ID = "DateDeprecated"; //$NON-NLS-1$
 	public DateDeprecatedRule() {
 		this.visitorClass = DateDeprecatedASTVisitor.class;
-		this.id = "DateDeprecated"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.DateDeprecatedRule_name,
 				Messages.DateDeprecatedRule_description, Duration.ofMinutes(1),
 				Arrays.asList(Tag.JAVA_1_1, Tag.FORMATTING, Tag.READABILITY));
