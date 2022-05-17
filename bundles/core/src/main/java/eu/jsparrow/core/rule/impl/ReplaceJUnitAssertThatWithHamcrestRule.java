@@ -26,9 +26,11 @@ public class ReplaceJUnitAssertThatWithHamcrestRule
 	private static final String MIN_HAMCREST_VERSION = "1.3"; //$NON-NLS-1$
 	private static final String ORG_HAMCREST_MATCHER_ASSERT = "org.hamcrest.MatcherAssert"; //$NON-NLS-1$
 
+	public static final String RULE_ID = "ReplaceJUnitAssertThatWithHamcrest"; //$NON-NLS-1$
+
 	public ReplaceJUnitAssertThatWithHamcrestRule() {
 		this.visitorClass = ReplaceJUnitAssertThatWithHamcrestASTVisitor.class;
-		this.id = "ReplaceJUnitAssertThatWithHamcrest"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(
 				Messages.ReplaceJUnitAssertThatWithHamcrestRule_name,
 				Messages.ReplaceJUnitAssertThatWithHamcrestRule_description,

@@ -29,15 +29,17 @@ public class ReplaceJUnitExpectedExceptionRule
 	private static final String MIN_JUNIT_5_VERSION = "5.0.0"; //$NON-NLS-1$
 	private static final String JUPITER_ASSERT_THROWS = "org.junit.jupiter.api.Assertions.assertThrows"; //$NON-NLS-1$
 	private static final String JUNIT_ASSERT_THROWS = "org.junit.Assert.assertThrows"; //$NON-NLS-1$
+	public static final String RULE_ID = "ReplaceJUnitExpectedException"; //$NON-NLS-1$
 	private String assertThrowsQualifiedName = JUNIT_ASSERT_THROWS;
 
 	public ReplaceJUnitExpectedExceptionRule() {
 		this.visitorClass = ReplaceJUnitExpectedExceptionASTVisitor.class;
-		this.id = "ReplaceJUnitExpectedException"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(
 				Messages.ReplaceExpectedExceptionRule_name,
 				Messages.ReplaceExpectedExceptionRule_description,
-				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY));
+				Duration.ofMinutes(5),
+				Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY));
 	}
 
 	@Override

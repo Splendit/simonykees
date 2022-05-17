@@ -19,10 +19,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class StringFormatLineSeparatorRule extends RefactoringRuleImpl<StringFormatLineSeparatorASTVisitor> {
 
+	public static final String RULE_ID = "StringFormatLineSeparator"; //$NON-NLS-1$
+
 	public StringFormatLineSeparatorRule() {
 		super();
 		this.visitorClass = StringFormatLineSeparatorASTVisitor.class;
-		this.id = "StringFormatLineSeparator"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.StringFormatLineSeparatorRule_name,
 				Messages.StringFormatLineSeparatorRule_description, Duration.ofMinutes(1),
 				Arrays.asList(Tag.JAVA_1_5, Tag.STRING_MANIPULATION));
