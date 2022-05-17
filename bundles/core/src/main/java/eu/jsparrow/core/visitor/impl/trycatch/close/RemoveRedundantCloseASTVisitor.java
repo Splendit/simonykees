@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.core.markers.common.RemoveRedundantCloseEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -26,7 +27,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 4.11.0
  *
  */
-public class RemoveRedundantCloseASTVisitor extends AbstractASTRewriteASTVisitor {
+public class RemoveRedundantCloseASTVisitor extends AbstractASTRewriteASTVisitor implements RemoveRedundantCloseEvent {
 
 	private static final String CLOSE = "close"; //$NON-NLS-1$
 
@@ -36,17 +37,19 @@ public class RemoveRedundantCloseASTVisitor extends AbstractASTRewriteASTVisitor
 		List<VariableDeclarationFragment> resourceDeclarations = collectResourceDeclarations(node);
 		for (VariableDeclarationFragment resourceDeclaration : resourceDeclarations) {
 			findRedundantCloseStatementToRemove(node, resourceDeclaration)
-				.ifPresent(closeStatement -> {
-					getCommentRewriter().saveRelatedComments(closeStatement);
-					astRewrite.remove(closeStatement, null);
-					onRewrite();
-				});
+				.ifPresent(this::transform);
 		}
-
 		return true;
 	}
 
-	private List<VariableDeclarationFragment> collectResourceDeclarations(TryStatement tryStatement) {
+	protected void transform(ExpressionStatement closeStatement) {
+		getCommentRewriter().saveRelatedComments(closeStatement);
+		astRewrite.remove(closeStatement, null);
+		addMarkerEvent(closeStatement);
+		onRewrite();
+	}
+
+	protected List<VariableDeclarationFragment> collectResourceDeclarations(TryStatement tryStatement) {
 
 		List<ASTNode> resourcesASTNodes = ASTNodeUtil.convertToTypedList(tryStatement.resources(),
 				ASTNode.class);
@@ -101,7 +104,7 @@ public class RemoveRedundantCloseASTVisitor extends AbstractASTRewriteASTVisitor
 
 	}
 
-	private Optional<ExpressionStatement> findRedundantCloseStatementToRemove(TryStatement tryStatement,
+	protected Optional<ExpressionStatement> findRedundantCloseStatementToRemove(TryStatement tryStatement,
 			VariableDeclarationFragment resourceDeclaration) {
 
 		LastReferenceOnResourceVisitor lastReferenceVisitor = new LastReferenceOnResourceVisitor(resourceDeclaration,

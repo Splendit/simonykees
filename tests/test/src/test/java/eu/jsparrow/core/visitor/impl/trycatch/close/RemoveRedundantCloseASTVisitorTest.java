@@ -17,7 +17,6 @@ class RemoveRedundantCloseASTVisitorTest extends UsesJDTUnitFixture {
 		defaultFixture.addImport(java.io.BufferedReader.class.getName());
 		defaultFixture.addImport(java.io.FileReader.class.getName());
 		defaultFixture.addImport(java.io.IOException.class.getName());
-
 	}
 
 	@AfterEach
