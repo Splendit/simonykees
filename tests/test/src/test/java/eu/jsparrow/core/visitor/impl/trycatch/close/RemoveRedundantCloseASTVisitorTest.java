@@ -98,7 +98,7 @@ class RemoveRedundantCloseASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	void visit_ResourceClosedWithinIfStatement_shouldNotTransform() throws Exception {
+	void visit_ResourceClosedWithinIfStatement_shouldTransform() throws Exception {
 
 		String original = ""
 				+ "	void closeStatementInsideIfStatement(String path) {\n"
@@ -111,7 +111,17 @@ class RemoveRedundantCloseASTVisitorTest extends UsesJDTUnitFixture {
 				+ "		}\n"
 				+ "	}";
 
-		assertNoChange(original);
+		String expected = ""
+				+ "	void closeStatementInsideIfStatement(String path) {\n"
+				+ "		try (BufferedReader br = new BufferedReader(new FileReader(path))) {\n"
+				+ "			if (true) {\n"
+				+ "			}\n"
+				+ "		} catch (IOException e) {\n"
+				+ "			e.printStackTrace();\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertChange(original, expected);
 	}
 
 	@Test
@@ -250,7 +260,7 @@ class RemoveRedundantCloseASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_SimpleResourceFieldNameInTWRHeader_shouldNotTransform() throws Exception {
 		String original = ""
@@ -272,7 +282,7 @@ class RemoveRedundantCloseASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_ResourceAsFormalParameter_shouldNotTransform() throws Exception {
 		String original = ""

@@ -125,7 +125,7 @@ public class RemoveRedundantCloseASTVisitor extends AbstractASTRewriteASTVisitor
 			return Optional.empty();
 		}
 		ExpressionStatement expressionStatement = (ExpressionStatement) methodInvocation.getParent();
-		if (expressionStatement.getParent() != tryStatementBody) {
+		if (expressionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return Optional.empty();
 		}
 
@@ -140,5 +140,4 @@ public class RemoveRedundantCloseASTVisitor extends AbstractASTRewriteASTVisitor
 		}
 		return Optional.of(expressionStatement);
 	}
-
 }
