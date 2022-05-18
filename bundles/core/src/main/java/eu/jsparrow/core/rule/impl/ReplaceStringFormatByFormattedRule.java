@@ -37,6 +37,6 @@ public class ReplaceStringFormatByFormattedRule
 
 	@Override
 	protected String provideRequiredJavaVersion() {
-		return JavaCore.VERSION_15;
+		return "15";
 	}
 }

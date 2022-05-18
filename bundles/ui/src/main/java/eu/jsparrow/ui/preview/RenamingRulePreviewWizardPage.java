@@ -160,7 +160,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		 * sets height relation between children to be 1:3 when it has two
 		 * children
 		 */
-		sashForm.setWeights(1, 3);
+		sashForm.setWeights(new int[] { 1, 3 });
 	}
 
 	/**
