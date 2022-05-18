@@ -86,6 +86,7 @@ import eu.jsparrow.core.rule.impl.ReplaceJUnitAssertThatWithHamcrestRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedAnnotationPropertyRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedExceptionRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitTimeoutAnnotationPropertyRule;
+import eu.jsparrow.core.rule.impl.ReplaceRequestMappingAnnotationRule;
 import eu.jsparrow.core.rule.impl.ReplaceStreamCollectByToListRule;
 import eu.jsparrow.core.rule.impl.ReplaceStringFormatByFormattedRule;
 import eu.jsparrow.core.rule.impl.ReuseRandomObjectsRule;
@@ -193,6 +194,7 @@ public class RulesContainer {
 				new UsePredefinedStandardCharsetRule(),
 				new UseFilesWriteStringRule(),
 				new RemoveRedundantCloseRule(),
+				new ReplaceRequestMappingAnnotationRule(),
 
 				/*
 				 * Security
