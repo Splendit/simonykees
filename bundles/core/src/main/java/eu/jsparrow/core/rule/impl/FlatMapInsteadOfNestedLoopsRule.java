@@ -18,10 +18,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class FlatMapInsteadOfNestedLoopsRule extends RefactoringRuleImpl<FlatMapInsteadOfNestedLoopsASTVisitor> {
 
+	public static final String RULE_ID = "FlatMapInsteadOfNestedLoops"; //$NON-NLS-1$
+
 	public FlatMapInsteadOfNestedLoopsRule() {
 		super();
 		this.visitorClass = FlatMapInsteadOfNestedLoopsASTVisitor.class;
-		this.id = "FlatMapInsteadOfNestedLoops"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.FlatMapInsteadOfNestedLoopsRule_name,
 				Messages.FlatMapInsteadOfNestedLoopsRule_description, Duration.ofMinutes(15),
 				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP));

@@ -418,6 +418,8 @@ public class Messages extends NLS {
 	public static String RemoveNullCheckBeforeInstanceofResolver_name;
 	public static String RemoveNullCheckBeforeInstanceofRule_description;
 	public static String RemoveNullCheckBeforeInstanceofRule_name;
+	public static String RemoveRedundantCloseRule_description;
+	public static String RemoveRedundantCloseRule_name;
 	public static String RemoveRedundantTypeCastRule_description;
 	public static String RemoveRedundantTypeCastRule_name;
 	public static String RemoveUnusedCodeRulePreviewWizard_removeUnusedPackagePrivateFields_pageTitle;

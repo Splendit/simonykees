@@ -25,14 +25,16 @@ public class ReplaceJUnitTimeoutAnnotationPropertyRule
 
 	private static final String MIN_JUNIT_5_VERSION = "5.0.0"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
+	public static final String RULE_ID = "ReplaceJUnitTimeoutAnnotationProperty"; //$NON-NLS-1$
 
 	public ReplaceJUnitTimeoutAnnotationPropertyRule() {
 		this.visitorClass = ReplaceJUnitTimeoutAnnotationPropertyASTVisitor.class;
-		this.id = "ReplaceJUnitTimeoutAnnotationProperty"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(
 				Messages.ReplaceJUnitTimeoutAnnotationPropertyRule_name,
 				Messages.ReplaceJUnitTimeoutAnnotationPropertyRule_description,
-				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY));
+				Duration.ofMinutes(5),
+				Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY));
 	}
 
 	@Override
@@ -42,7 +44,7 @@ public class ReplaceJUnitTimeoutAnnotationPropertyRule
 		 */
 		return JavaCore.VERSION_1_8;
 	}
-	
+
 	@Override
 	public String requiredLibraries() {
 		return "JUnit 5"; //$NON-NLS-1$

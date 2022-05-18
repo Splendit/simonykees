@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.markers.common.DateDeprecatedEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -47,7 +48,7 @@ import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
  * @since 2.5
  *
  */
-public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
+public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor implements DateDeprecatedEvent {
 
 	private static final Logger logger = LoggerFactory.getLogger(DateDeprecatedASTVisitor.class);
 
@@ -200,6 +201,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		astRewrite.replace(fragment, astRewrite.createCopyTarget(dateName), null);
 		this.scope.addName(fieldDeclaration, calendarName);
 		onRewrite();
+		addMarkerEvent(node);
 		CommentRewriter commentRewriter = getCommentRewriter();
 		List<Comment> relatedComments = commentRewriter.findRelatedComments(node);
 		Collections.reverse(relatedComments);
@@ -249,6 +251,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		}
 
 		onRewrite();
+		addMarkerEvent(node);
 		this.scope.addName(scope, calendarName);
 	}
 
