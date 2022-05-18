@@ -21,7 +21,6 @@ public class TestTryWithResourceRule {
 		try (BufferedReader br = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
 				BufferedReader br2 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
 				Closeable cl = new BufferedReader(new FileReader(path))) {
-			br.close();
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
