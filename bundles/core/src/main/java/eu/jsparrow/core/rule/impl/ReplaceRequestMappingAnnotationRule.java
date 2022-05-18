@@ -22,8 +22,8 @@ import eu.jsparrow.rules.common.Tag;
 public class ReplaceRequestMappingAnnotationRule
 		extends RefactoringRuleImpl<ReplaceRequestMappingAnnotationASTVisitor> {
 
-	private static final String SPRING_MIN_VERSION = "4.3"; //$NON-NLS-1$
-	private static final String REQUEST_MAPPING_ANNOTATION = "org.springframework.web.bind.annotation.RequestMapping;"; //$NON-NLS-1$
+	private static final String SPRING_MIN_VERSION = "4.3.0"; //$NON-NLS-1$
+	private static final String REQUEST_MAPPING_ANNOTATION = "org.springframework.web.bind.annotation.RequestMapping"; //$NON-NLS-1$
 	public static final String RULE_ID = "ReplaceRequestMappingAnnotation"; //$NON-NLS-1$
 
 	public ReplaceRequestMappingAnnotationRule() {
