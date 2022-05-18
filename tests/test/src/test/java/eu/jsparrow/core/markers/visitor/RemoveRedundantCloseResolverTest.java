@@ -80,8 +80,10 @@ class RemoveRedundantCloseResolverTest extends UsesJDTUnitFixture {
 		assertEquals(1, events.size());
 		RefactoringMarkerEvent event = events.get(0);
 		String description = ""
-				+ "This rule looks for redundant 'close()'-invocations on resources used within try-with-resource statements "
-				+ "and tries to remove them.";
+				+ "In Java, the try-with-resource statements are able to automatically close "
+				+ "the resources which are defined in the try-with-resource header. Thus, any "
+				+ "explicit 'close()' invocation in the try block is redundant and potentially confusing. "
+				+ "This rule eliminates redundant resource 'close()' invocations.";
 		
 		assertAll(
 				() -> assertEquals("Remove Redundant Close", event.getName()),

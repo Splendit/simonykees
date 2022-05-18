@@ -22,8 +22,7 @@ import eu.jsparrow.core.rule.impl.RemoveRedundantCloseRule;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-@SuppressWarnings("nls")
-public class RemoveRedundantCloseRulesTest extends SingleRuleTest {
+class RemoveRedundantCloseRulesTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE = "TestRemoveRedundantCloseRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "removeRedundantClose";
@@ -50,7 +49,10 @@ public class RemoveRedundantCloseRulesTest extends SingleRuleTest {
 				contains(Tag.JAVA_1_7, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
-				equalTo("This rule looks for redundant 'close()'-invocations on resources used within try-with-resource statements and tries to remove them."));
+				equalTo("In Java, the try-with-resource statements are able to automatically close "
+						+ "the resources which are defined in the try-with-resource header. Thus, any "
+						+ "explicit 'close()' invocation in the try block is redundant and potentially "
+						+ "confusing. This rule eliminates redundant resource 'close()' invocations."));
 	}
 
 	@Test

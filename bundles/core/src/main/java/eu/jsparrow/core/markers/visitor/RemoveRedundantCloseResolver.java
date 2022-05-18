@@ -16,6 +16,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.Resolver;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link RemoveRedundantCloseASTVisitor}.
+ * 
+ * @since 4.11.0
+ *
+ */
 public class RemoveRedundantCloseResolver extends RemoveRedundantCloseASTVisitor implements Resolver {
 
 	public static final String ID = "RemoveRedundantCloseResolver"; //$NON-NLS-1$
