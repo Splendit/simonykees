@@ -21,6 +21,7 @@ import eu.jsparrow.core.rule.impl.unused.Constants;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.core.visitor.unused.BodyDeclarationsUtil;
 import eu.jsparrow.core.visitor.unused.UsefulAnnotations;
+import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -117,7 +118,6 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 				accessModifier, flagMainType);
 		nonPrivateCandidates.add(candidate);
 		return false;
-
 	}
 
 	private boolean isMainType(TypeDeclaration typeDeclaration) {
@@ -161,9 +161,12 @@ public class UnusedTypesCandidatesVisitor extends ASTVisitor {
 			return false;
 		}
 
-		if (bodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION
-				&& UsefulAnnotations.hasUsefulAnnotations((MethodDeclaration) bodyDeclaration)) {
-			return false;
+		if (bodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
+			MethodDeclaration methodDeclaration = (MethodDeclaration) bodyDeclaration;
+			if (UsefulAnnotations.hasUsefulAnnotations(methodDeclaration)
+					|| MethodDeclarationUtils.isMainMethod(methodDeclaration)) {
+				return false;
+			}
 		}
 
 		UnexpectedLocalDeclarationVisitor unexpectedLocalDeclarationVisitor = new UnexpectedLocalDeclarationVisitor();

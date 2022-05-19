@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.ImmutableStaticFinalCollectionsEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -48,7 +49,8 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @author Matthias Webhofer
  * @since 2.1.1
  */
-public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImportASTVisitor {
+public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImportASTVisitor
+		implements ImmutableStaticFinalCollectionsEvent {
 
 	/*** METHOD NAMES ***/
 
@@ -171,6 +173,7 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 						.getIdentifier();
 					initializersToReplace.put(fieldName, initializer);
 					methodNames.put(fieldName, methodNameString);
+					addMarkerEvent(fragmentNode);
 					return false;
 				}
 			}
