@@ -85,7 +85,7 @@ public class UnusedMethodsCandidateVisitor extends ASTVisitor {
 			return false;
 		}
 
-		if (MethodDeclarationUtils.isJavaApplicationMainMethod(compilationUnit, methodDeclaration)) {
+		if (MethodDeclarationUtils.isMainMethod(methodDeclaration)) {
 			return false;
 		}
 

@@ -21,12 +21,13 @@ import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 public class ImmutableStaticFinalCollectionsRule
 		extends RefactoringRuleImpl<ImmutableStaticFinalCollectionsASTVisitor> {
 
+	public static final String RULE_ID = "ImmutableStaticFinalCollections"; //$NON-NLS-1$
 	private String javaVersion;
 
 	public ImmutableStaticFinalCollectionsRule() {
 		super();
 		this.visitorClass = ImmutableStaticFinalCollectionsASTVisitor.class;
-		this.id = "ImmutableStaticFinalCollections"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.ImmutableStaticFinalCollectionsRule_name,
 				Messages.ImmutableStaticFinalCollectionsRule_description, Duration.ofMinutes(10),
 				Arrays.asList(Tag.JAVA_1_2, Tag.CODING_CONVENTIONS));

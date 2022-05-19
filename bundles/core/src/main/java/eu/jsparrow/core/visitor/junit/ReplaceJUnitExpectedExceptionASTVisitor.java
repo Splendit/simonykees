@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.ReplaceJUnitExpectedExceptionEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
@@ -68,7 +69,8 @@ import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
  * @since 3.24.0
  *
  */
-public class ReplaceJUnitExpectedExceptionASTVisitor extends AbstractReplaceExpectedASTVisitor {
+public class ReplaceJUnitExpectedExceptionASTVisitor extends AbstractReplaceExpectedASTVisitor
+		implements ReplaceJUnitExpectedExceptionEvent {
 
 	private static final String GET_MESSAGE = "getMessage"; //$NON-NLS-1$
 	private static final String ASSERT_TRUE = "assertTrue"; //$NON-NLS-1$
@@ -172,7 +174,7 @@ public class ReplaceJUnitExpectedExceptionASTVisitor extends AbstractReplaceExpe
 	private boolean analyzeUsagesOfExpectedException(MethodDeclaration methodDeclaration,
 			ExpectedExceptionVisitor visitor) {
 		Block body = methodDeclaration.getBody();
-		if(body == null) {
+		if (body == null) {
 			return false;
 		}
 		body.accept(visitor);
@@ -262,6 +264,7 @@ public class ReplaceJUnitExpectedExceptionASTVisitor extends AbstractReplaceExpe
 			ExpressionStatement assertionStatement = ast.newExpressionStatement(assertThrows);
 			astRewrite.replace(nodeThrowingException.getParent(), assertionStatement, null);
 			astRewrite.remove(expectExceptionInvocation.getParent(), null);
+			addMarkerEvent(nodeThrowingException);
 			onRewrite();
 		} else {
 			VariableDeclarationFragment fragment = ast.newVariableDeclarationFragment();
@@ -287,7 +290,7 @@ public class ReplaceJUnitExpectedExceptionASTVisitor extends AbstractReplaceExpe
 			String getCauseIdentifier = "getCause"; //$NON-NLS-1$
 			createAssertThatInvocations(methodDeclaration, expectedCauseMatchers, exceptionIdentifier,
 					getCauseIdentifier);
-
+			addMarkerEvent(nodeThrowingException);
 			onRewrite();
 		}
 	}
@@ -351,6 +354,10 @@ public class ReplaceJUnitExpectedExceptionASTVisitor extends AbstractReplaceExpe
 			suffix++;
 		}
 		return name;
+	}
+
+	protected void updateAssertThrowsQualifiedName(String qualifiedName) {
+		this.assertThrowsQualifiedName = qualifiedName;
 	}
 
 }

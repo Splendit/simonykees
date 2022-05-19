@@ -75,7 +75,7 @@ public class JSparrowMarkerDeactivationResolution implements IMarkerResolution2,
 
 	@Override
 	public Image getImage() {
-		return JSparrowImages.JSPARROW_ACTIVE_16;
+		return JSparrowImages.JSPARROW_DEACTIVATE_16;
 	}
 
 	@Override

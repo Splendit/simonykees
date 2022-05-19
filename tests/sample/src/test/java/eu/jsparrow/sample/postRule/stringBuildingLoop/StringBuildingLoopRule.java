@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 @SuppressWarnings({"nls", "unused"})
 public class StringBuildingLoopRule {
@@ -138,7 +139,7 @@ public class StringBuildingLoopRule {
 	public String collectingArrayOfNumbers(String input) {
 		Double[] arrayOfStrings = {2.1, 3.5};
 		String result = Arrays.stream(arrayOfStrings)
-			.map(Object::toString)
+			.map(Objects::toString)
 			.collect(Collectors.joining());
 		return result;
 	}
@@ -227,7 +228,7 @@ public class StringBuildingLoopRule {
 	public String colectionOfIntegers(String input) {
 		List<Integer> collectionOfints = new ArrayList<>();
 		String result = collectionOfints.stream()
-			.map(Object::toString)
+			.map(Objects::toString)
 			.collect(Collectors.joining());
 		return result;
 	}
@@ -235,7 +236,7 @@ public class StringBuildingLoopRule {
 	public String colectionOfDoubles(String input) {
 		List<Double> collectionOfints = new ArrayList<>();
 		String result = collectionOfints.stream()
-			.map(Object::toString)
+			.map(Objects::toString)
 			.collect(Collectors.joining());
 		return result;
 	}

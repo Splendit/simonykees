@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 
+import eu.jsparrow.core.markers.common.UseDedicatedAssertionsEvent;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
@@ -33,7 +34,8 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 4.0.0
  * 
  */
-public class UseDedicatedAssertionsASTVisitor extends AbstractAddImportASTVisitor {
+public class UseDedicatedAssertionsASTVisitor extends AbstractAddImportASTVisitor
+		implements UseDedicatedAssertionsEvent {
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
@@ -82,6 +84,7 @@ public class UseDedicatedAssertionsASTVisitor extends AbstractAddImportASTVisito
 
 			astRewrite.replace(node, methodInvocationReplacement, null);
 			onRewrite();
+			addMarkerEvent(node);
 		}
 		return true;
 	}

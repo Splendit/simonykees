@@ -70,6 +70,7 @@ import eu.jsparrow.core.rule.impl.RemoveExplicitCallToSuperRule;
 import eu.jsparrow.core.rule.impl.RemoveModifiersInInterfacePropertiesRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
 import eu.jsparrow.core.rule.impl.RemoveNullCheckBeforeInstanceofRule;
+import eu.jsparrow.core.rule.impl.RemoveRedundantCloseRule;
 import eu.jsparrow.core.rule.impl.RemoveRedundantTypeCastRule;
 import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
@@ -191,6 +192,7 @@ public class RulesContainer {
 				new UseFilesBufferedReaderRule(), new UseFilesBufferedWriterRule(),
 				new UsePredefinedStandardCharsetRule(),
 				new UseFilesWriteStringRule(),
+				new RemoveRedundantCloseRule(),
 
 				/*
 				 * Security
