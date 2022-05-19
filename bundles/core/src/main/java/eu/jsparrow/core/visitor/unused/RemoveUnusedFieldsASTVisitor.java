@@ -12,6 +12,8 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -97,6 +99,34 @@ public class RemoveUnusedFieldsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		return true;
 	}
+	
+	@Override
+	public boolean visit(PrefixExpression prefixExpression) {
+		if (prefixExpression.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+			ExpressionStatement statement = (ExpressionStatement) prefixExpression.getParent();
+			isDesignatedForRemoval(statement).ifPresent(unusedField -> {
+				TextEditGroup editGroup = unusedField.getTextEditGroup((ICompilationUnit) this.getCompilationUnit()
+					.getJavaElement());
+				astRewrite.remove(prefixExpression.getParent(), editGroup);
+			});
+		}
+
+		return true;
+	}
+	
+	@Override
+	public boolean visit(PostfixExpression postfixExpression) {
+		if (postfixExpression.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+			ExpressionStatement statement = (ExpressionStatement) postfixExpression.getParent();
+			isDesignatedForRemoval(statement).ifPresent(unusedField -> {
+				TextEditGroup editGroup = unusedField.getTextEditGroup((ICompilationUnit) this.getCompilationUnit()
+					.getJavaElement());
+				astRewrite.remove(postfixExpression.getParent(), editGroup);
+			});
+		}
+
+		return true;
+	}
 
 	private Map<ExpressionStatement, UnusedFieldWrapper> findReassignmentsOfExternalField(
 			UnusedFieldWrapper unusedField, IPath currentPath) {
@@ -149,4 +179,5 @@ public class RemoveUnusedFieldsASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 		return Optional.empty();
 	}
+
 }

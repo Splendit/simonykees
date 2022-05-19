@@ -418,6 +418,8 @@ public class Messages extends NLS {
 	public static String RemoveNullCheckBeforeInstanceofResolver_name;
 	public static String RemoveNullCheckBeforeInstanceofRule_description;
 	public static String RemoveNullCheckBeforeInstanceofRule_name;
+	public static String RemoveRedundantCloseRule_description;
+	public static String RemoveRedundantCloseRule_name;
 	public static String RemoveRedundantTypeCastRule_description;
 	public static String RemoveRedundantTypeCastRule_name;
 	public static String RemoveUnusedCodeRulePreviewWizard_removeUnusedPackagePrivateFields_pageTitle;
@@ -456,6 +458,8 @@ public class Messages extends NLS {
 	public static String RemoveUnusedLocalVariablesRule_name;
 	public static String RemoveUnusedParameterRule_description;
 	public static String RemoveUnusedParameterRule_name;
+	public static String RemoveUnusedTypesRule_description;
+	public static String RemoveUnusedTypesRule_name;
 	public static String RenameFieldsRuleWizard_taskName_collectingUnits;
 	public static String RenameFieldsRuleWizardHandler_multipleProjectsSelected;
 	public static String RenameFieldsRuleWizardHandler_performFinish_jobName;
@@ -500,6 +504,7 @@ public class Messages extends NLS {
 	public static String ReplaceStreamCollectByToListRule_name;
 	public static String ReuseRandomObjectsRule_description;
 	public static String ReuseRandomObjectsRule_name;
+	public static String RunDefaultProfileHandler_startJSparrowWithDefaultProfile;
 	public static String SelectRulesWizardHandler_allready_running;
 	public static String SelectRulesWizardHandler_finishButtonText;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
@@ -538,6 +543,7 @@ public class Messages extends NLS {
 	public static String SimonykeesMarkersPreferencePage_disableAll;
 	public static String SimonykeesMarkersPreferencePage_enableAll;
 	public static String SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText;
+	public static String SimonykeesMarkersPreferencePage_searchLabelMessage;
 	public static String SimonykeesMessageDialog_bugreport_email;
 	public static String SimonykeesMessageDialog_default_error_message;
 	public static String SimonykeesMessageDialog_open_browser_error_message;

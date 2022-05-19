@@ -32,6 +32,9 @@ public class RenamingSummaryWizardPageModel extends AbstractSummaryWizardPageMod
 	}
 
 	private void addRulesPerFile() {
+		if (changedFiles.isEmpty()) {
+			return;
+		}
 		ChangedNamesInFileModel firstFile = changedFiles.get(0);
 		firstFile.getRenamings()
 			.forEach(rule -> rulesPerFile.add(rule));

@@ -68,7 +68,7 @@ class EnhancedForLoopToStreamForEachResolverTest extends UsesSimpleJDTUnitFixtur
 				+ "\n"
 				+ "This makes code more readable and can be combined with other stream functions such as filter and map.";
 		assertAll(
-				() -> assertEquals("Replace For-Loop with Stream::forEach", event.getName()),
+				() -> assertEquals("Replace For-Loop with Iterable::forEach", event.getName()),
 				() -> assertEquals(description, event.getMessage()), 
 				() -> assertEquals("EnhancedForLoopToStreamForEachResolver", event.getResolver()),
 				() -> assertEquals(description, event.getCodePreview()),

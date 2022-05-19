@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
@@ -35,11 +34,13 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedFieldsRule;
 import eu.jsparrow.core.rule.impl.unused.RemoveUnusedMethodsRule;
-import eu.jsparrow.core.visitor.unused.UnusedClassMemberWrapper;
+import eu.jsparrow.core.rule.impl.unused.RemoveUnusedTypesRule;
 import eu.jsparrow.core.visitor.unused.UnusedFieldWrapper;
 import eu.jsparrow.core.visitor.unused.UnusedFieldsEngine;
 import eu.jsparrow.core.visitor.unused.method.UnusedMethodWrapper;
 import eu.jsparrow.core.visitor.unused.method.UnusedMethodsEngine;
+import eu.jsparrow.core.visitor.unused.type.UnusedTypeWrapper;
+import eu.jsparrow.core.visitor.unused.type.UnusedTypesEngine;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
@@ -72,6 +73,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	private RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 	private RemoveUnusedFieldsRule rule;
 	private RemoveUnusedMethodsRule unusedMethodsRule;
+	private RemoveUnusedTypesRule unusedTypesRule;
 	private Image windowDefaultImage;
 	private Set<ICompilationUnit> allTargetCompilationUnits = new HashSet<>();
 
@@ -136,22 +138,27 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 				preRefactoring();
 				UnusedFieldsEngine engine = new UnusedFieldsEngine(scope);
 				UnusedMethodsEngine unusedMethodsEngine = new UnusedMethodsEngine(scope);
+				UnusedTypesEngine unusedTypeEngine = new UnusedTypesEngine(scope);
 
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
 				boolean fieldsChecked = hasClassMemberOptionsChecked(model, "fields"); //$NON-NLS-1$
 				boolean methodsChecked = hasClassMemberOptionsChecked(model, "methods"); //$NON-NLS-1$
+				boolean typesChecked = hasClassMemberOptionsChecked(model, "class"); //$NON-NLS-1$
 
-				int fieldsSubmonitorSplit = calcFieldsSubMonitorSplit(fieldsChecked, methodsChecked);
+				int fieldsSubmonitorSplit = calcFieldsSubMonitorSplit(fieldsChecked, methodsChecked, typesChecked);
+				int typesSubmonitorSplit = calcFieldsSubMonitorSplit(typesChecked, methodsChecked, typesChecked);
+				int methodSubmonitorSplit = 70 - (fieldsSubmonitorSplit + typesSubmonitorSplit);
 
 				Map<String, Boolean> options = model.getOptionsMap();
 
 				List<UnusedFieldWrapper> unusedFields = findUnusedFields(engine, subMonitor, fieldsSubmonitorSplit,
 						options);
 				List<UnusedMethodWrapper> unusedMethods = findUnusedMethods(unusedMethodsEngine, subMonitor,
-						fieldsSubmonitorSplit, options);
+						methodSubmonitorSplit, options);
+				List<UnusedTypeWrapper> unusedTypes = findUnusedTypes(unusedTypeEngine, subMonitor, typesSubmonitorSplit, options, unusedMethods);
 
-				if (unusedFields.isEmpty() && unusedMethods.isEmpty()) {
+				if (unusedFields.isEmpty() && unusedMethods.isEmpty() && unusedTypes.isEmpty()) {
 					WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
 					return Status.CANCEL_STATUS;
 				}
@@ -161,11 +168,14 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 
 				rule = new RemoveUnusedFieldsRule(unusedFields);
 				unusedMethodsRule = new RemoveUnusedMethodsRule(unusedMethods);
-				refactoringPipeline.setRules(Arrays.asList(rule, unusedMethodsRule));
+				unusedTypesRule = new RemoveUnusedTypesRule(unusedTypes);
+				refactoringPipeline.setRules(Arrays.asList(rule, unusedMethodsRule, unusedTypesRule));
 				Set<ICompilationUnit> targetCompilationUnits = engine.getTargetCompilationUnits();
 				Set<ICompilationUnit> targetUnusedMethodsCUs = unusedMethodsEngine.getTargetCompilationUnits();
+				Set<ICompilationUnit> targetUnusedTypesCUs = unusedTypeEngine.getTargetCompilationUnits();
 				allTargetCompilationUnits.addAll(targetCompilationUnits);
 				allTargetCompilationUnits.addAll(targetUnusedMethodsCUs);
+				allTargetCompilationUnits.addAll(targetUnusedTypesCUs);
 				if (allTargetCompilationUnits.isEmpty()) {
 					return Status.CANCEL_STATUS;
 				}
@@ -231,13 +241,13 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	}
 
 	private List<UnusedMethodWrapper> findUnusedMethods(UnusedMethodsEngine unusedMethodsEngine,
-			SubMonitor subMonitor, int fieldsSubmonitorSplit,
+			SubMonitor subMonitor, int methodsSubmonitorSplit,
 			Map<String, Boolean> options) {
 		boolean methodsChecked = hasClassMemberOptionsChecked(model, "methods"); //$NON-NLS-1$
 		if (!methodsChecked) {
 			return Collections.emptyList();
 		}
-		SubMonitor removeUnusedMethodsSubMonitor = subMonitor.split(70 - fieldsSubmonitorSplit);
+		SubMonitor removeUnusedMethodsSubMonitor = subMonitor.split(methodsSubmonitorSplit);
 		removeUnusedMethodsSubMonitor.setWorkRemaining(selectedJavaElements.size());
 		removeUnusedMethodsSubMonitor.setTaskName(Messages.RemoveUnusedCodeWizard_findingUnusedMethods);
 
@@ -248,6 +258,27 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 			return Collections.emptyList();
 		}
 		return unusedMethods;
+	}
+	
+	private List<UnusedTypeWrapper> findUnusedTypes(UnusedTypesEngine unusedTypeEngine, SubMonitor subMonitor,
+			int typesSubmonitorSplit, Map<String, Boolean> options, List<UnusedMethodWrapper> unusedMethods) {
+		
+
+		if(!hasClassMemberOptionsChecked(model, "class")) {
+			return Collections.emptyList();
+		}
+		
+		SubMonitor removeUnusedTypesSubMonitor = subMonitor.split(typesSubmonitorSplit);
+		removeUnusedTypesSubMonitor.setWorkRemaining(selectedJavaElements.size());
+		removeUnusedTypesSubMonitor.setTaskName("Finding unused types");
+		
+		List<UnusedTypeWrapper> unusedTypes = unusedTypeEngine.findUnusedTypes(selectedJavaElements, options, removeUnusedTypesSubMonitor, unusedMethods);
+		
+		if(removeUnusedTypesSubMonitor.isCanceled()) {
+			return Collections.emptyList();
+		}
+		
+		return unusedTypes;
 	}
 
 	private boolean hasClassMemberOptionsChecked(RemoveUnusedCodeWizardPageModel model, String classMember) {
@@ -260,11 +291,15 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 			.anyMatch(value -> value);
 	}
 
-	private int calcFieldsSubMonitorSplit(boolean fieldsChecked, boolean methodsChecked) {
-		if (fieldsChecked && methodsChecked) {
-			return 30;
-		} else if (fieldsChecked) {
-			return 70;
+	private int calcFieldsSubMonitorSplit(boolean fieldsChecked, boolean methodsChecked, boolean typesChecked) {
+		if(fieldsChecked) {
+			if(methodsChecked && typesChecked) {
+				return 20;
+			} else if(methodsChecked || typesChecked) {
+				return 30;
+			} else {
+				return 70;
+			}
 		} else {
 			return 0;
 		}
@@ -306,21 +341,6 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	}
 
 	private void createAndShowPreviewWizard() {
-		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> changes;
-		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> unusedMethodChanges;
-		try {
-			changes = rule.computeDocumentChangesPerField();
-			unusedMethodChanges = unusedMethodsRule.computeDocumentChangesPerMethod();
-			synchronizeWithUIShowRefactoringPreviewWizard(changes, unusedMethodChanges);
-		} catch (JavaModelException e) {
-			logger.error("Cannot create document for displaying changes - {} ", e.getMessage(), e); //$NON-NLS-1$
-		}
-
-	}
-
-	private void synchronizeWithUIShowRefactoringPreviewWizard(
-			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> unusedFieldChanges,
-			Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> unusedMethodChanges) {
 
 		String message = NLS.bind(Messages.RemoveUnusedCodeWizard_endRefactoringInProjectMessage, this.getClass()
 			.getSimpleName(), selectedJavaProject.getElementName());
@@ -339,10 +359,17 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 				StandaloneStatisticsMetadata standaloneStatisticsMetadata = prepareStatisticsMetadata(
 						Collections.singletonList(selectedJavaProject));
 				List<ICompilationUnit> targetCompilationUnits = new ArrayList<>(allTargetCompilationUnits);
-				RemoveUnusedCodeRulePreviewWizard removeUnusedCodePreviewWizard = new RemoveUnusedCodeRulePreviewWizard(
-						refactoringPipeline,
-						standaloneStatisticsMetadata, unusedFieldChanges, unusedMethodChanges, targetCompilationUnits,
-						rule, unusedMethodsRule);
+				RemoveUnusedCodeRulePreviewWizard removeUnusedCodePreviewWizard;
+				try {
+					removeUnusedCodePreviewWizard = new RemoveUnusedCodeRulePreviewWizard(
+							refactoringPipeline,
+							standaloneStatisticsMetadata, targetCompilationUnits,
+							rule, unusedMethodsRule, unusedTypesRule);
+				} catch (JavaModelException e) {
+					logger.error("Cannot create document for displaying changes - {} ", e.getMessage(), e); //$NON-NLS-1$
+					return;
+				}
+
 				final WizardDialog dialog = new WizardDialog(shell, removeUnusedCodePreviewWizard) {
 					@Override
 					protected void nextPressed() {

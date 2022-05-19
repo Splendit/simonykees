@@ -20,10 +20,10 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class BracketsToControlRule extends RefactoringRuleImpl<BracketsToControlASTVisitor> {
 
+	public static final String RULE_ID = "BracketsToControl"; //$NON-NLS-1$
 	public BracketsToControlRule() {
-		super();
 		this.visitorClass = BracketsToControlASTVisitor.class;
-		this.id = "BracketsToControl"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.BracketsToControlRule_name,
 				Messages.BracketsToControlRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_1, Tag.FORMATTING, Tag.READABILITY));

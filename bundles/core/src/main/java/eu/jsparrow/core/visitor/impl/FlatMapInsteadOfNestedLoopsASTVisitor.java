@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.FlatMapInsteadOfNestedLoopsEvent;
 import eu.jsparrow.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.visitor.lambdaforeach.AbstractLambdaForEachASTVisitor;
@@ -42,7 +43,8 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @author Matthias Webhofer, Ardit Ymeri
  * @since 2.1.1
  */
-public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEachASTVisitor {
+public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEachASTVisitor
+		implements FlatMapInsteadOfNestedLoopsEvent {
 
 	private int depthCount = 0;
 	LinkedList<MethodInvocation> methodInvocationExpressionList = new LinkedList<>();
@@ -264,6 +266,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 				astRewrite.replace(methodInvocationNode, newMethodInvocation, null);
 				onRewrite();
+				addMarkerEvent(methodInvocationNode);
 				saveComments(methodInvocationNode);
 
 				innerMostMethodInvocation = null;

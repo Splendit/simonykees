@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 
+import eu.jsparrow.core.markers.common.RemoveUnnecessaryThrownExceptionsEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -30,7 +31,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 2.7.0
  *
  */
-public class RemoveUnnecessaryThrownExceptionsASTVisitor extends AbstractASTRewriteASTVisitor {
+public class RemoveUnnecessaryThrownExceptionsASTVisitor extends AbstractASTRewriteASTVisitor implements RemoveUnnecessaryThrownExceptionsEvent {
 
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
@@ -60,6 +61,7 @@ public class RemoveUnnecessaryThrownExceptionsASTVisitor extends AbstractASTRewr
 		for (Type type : toBeRemoved) {
 			astRewrite.remove(type, null);
 			onRewrite();
+			addMarkerEvent(type);
 		}
 
 		return true;

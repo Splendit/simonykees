@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.standalone
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Standalone
 Bundle-SymbolicName: eu.jsparrow.standalone;singleton:=true
-Bundle-Version: 4.9.0.qualifier
+Bundle-Version: 4.11.0.qualifier
 Bundle-Activator: eu.jsparrow.standalone.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

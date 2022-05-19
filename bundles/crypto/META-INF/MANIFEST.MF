@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.crypto
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow :: crypto
 Bundle-SymbolicName: eu.jsparrow.crypto
-Bundle-Version: 4.9.0.qualifier
+Bundle-Version: 4.11.0.qualifier
 Bundle-Activator: eu.jsparrow.crypto.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.osgi.framework;version="1.3.0"

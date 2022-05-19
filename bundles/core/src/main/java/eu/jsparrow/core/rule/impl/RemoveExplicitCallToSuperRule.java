@@ -19,9 +19,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class RemoveExplicitCallToSuperRule extends RefactoringRuleImpl<RemoveExplicitCallToSuperASTVisitor> {
 
+	public static final String RULE_ID = "RemoveExplicitCallToSuper"; //$NON-NLS-1$
+
 	public RemoveExplicitCallToSuperRule() {
 		this.visitorClass = RemoveExplicitCallToSuperASTVisitor.class;
-		this.id = "RemoveExplicitCallToSuper"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.RemoveExplicitCallToSuperRule_name,
 				Messages.RemoveExplicitCallToSuperRule_description, Duration.ofMinutes(1),
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY));

@@ -1,5 +1,8 @@
 package eu.jsparrow.core;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -7,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,9 +19,10 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.common.SingleRuleTest;
 import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamForEachRule;
+import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
 
-@SuppressWarnings("nls")
-public class EnhancedForLoopToStreamForEachRulesTest extends SingleRuleTest {
+class EnhancedForLoopToStreamForEachRulesTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE = "EnhancedForLoopToStreamForEachRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "enhancedForLoopToStreamForEach";
@@ -31,7 +36,30 @@ public class EnhancedForLoopToStreamForEachRulesTest extends SingleRuleTest {
 	}
 
 	@Test
-	public void testTransformationWithDefaultFile() throws Exception {
+	void test_ruleId() {
+		String ruleId = rule.getId();
+		assertThat(ruleId, equalTo("EnhancedForLoopToStreamForEach"));
+	}
+
+	@Test
+	void test_ruleDescription() {
+		RuleDescription description = rule.getRuleDescription();
+		assertThat(description.getName(), equalTo("Replace For-Loop with Iterable::forEach"));
+		assertThat(description.getTags(),
+				contains(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP));
+		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(15)));
+		String ruleDescription = ""
+				+ "Enhanced For-Loops can be replaced by forEach().\n"
+				+ "\n"
+				+ "For example 'for(Item item: items) { }' becomes 'items.forEach()'.\n"
+				+ "\n"
+				+ "This makes code more readable and can be combined with other stream functions such as filter and map.";
+		assertThat(description.getDescription(),
+				equalTo(ruleDescription));
+	}
+
+	@Test
+	void testTransformationWithDefaultFile() throws Exception {
 		loadUtilities();
 		Path preRule = getPreRuleFile(SAMPLE_FILE);
 		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
@@ -43,7 +71,7 @@ public class EnhancedForLoopToStreamForEachRulesTest extends SingleRuleTest {
 	}
 
 	@Test
-	public void calculateEnabledForProjectShouldBeEnabled() {
+	void calculateEnabledForProjectShouldBeEnabled() {
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 
 		rule.calculateEnabledForProject(testProject);
@@ -52,7 +80,7 @@ public class EnhancedForLoopToStreamForEachRulesTest extends SingleRuleTest {
 	}
 
 	@Test
-	public void calculateEnabledForProjectShouldBeDisabled() {
+	void calculateEnabledForProjectShouldBeDisabled() {
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
 
 		rule.calculateEnabledForProject(testProject);
