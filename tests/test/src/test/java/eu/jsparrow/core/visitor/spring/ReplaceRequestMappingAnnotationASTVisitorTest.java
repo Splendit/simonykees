@@ -1,8 +1,13 @@
 package eu.jsparrow.core.visitor.spring;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
@@ -21,21 +26,32 @@ public class ReplaceRequestMappingAnnotationASTVisitorTest extends UsesJDTUnitFi
 		fixtureProject.clear();
 	}
 
-	@Test
-	public void visit_RequestMappingWithRequestMethodGet_shouldTransform() throws Exception {
+	private static Stream<Arguments> mapToAnnotationReplacement() throws Exception {
+		return Stream.of(
+				Arguments.of("GET", "GetMapping"),
+				Arguments.of("PUT", "PutMapping"),
+				Arguments.of("POST", "PostMapping"),
+				Arguments.of("PATCH", "PatchMapping"),
+				Arguments.of("DELETE", "DeleteMapping"));
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "mapToAnnotationReplacement")
+	public void visit_RequestMappingWithRequestMethodGet_shouldTransform(String requestMethod,
+			String annotationReplacement) throws Exception {
 
 		defaultFixture.addImport("org.springframework.web.bind.annotation.RequestMethod");
-		String original = "" +
-				"	@RequestMapping(value = \"/hello\", method = RequestMethod.GET)\n"
+		String original = String.format("" +
+				"	@RequestMapping(value = \"/hello\", method = RequestMethod.%s)\n"
 				+ "	public String hello(@RequestParam String name) {\n"
-				+ "		return String.format(\"Hello %s!\", name);\n"
-				+ "	}";
+				+ "		return \"Hello \" + name + \"!\";\n"
+				+ "	}", requestMethod);
 
-		String expected = "" +
-				"	@GetMapping(value = \"/hello\")\n"
+		String expected = String.format("" +
+				"	@%s(value = \"/hello\")\n"
 				+ "	public String hello(@RequestParam String name) {\n"
-				+ "		return String.format(\"Hello %s!\", name);\n"
-				+ "	}";
+				+ "		return \"Hello \" + name + \"!\";\n"
+				+ "	}", annotationReplacement);
 
 		assertChange(original, expected);
 	}

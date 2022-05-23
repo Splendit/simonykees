@@ -1,6 +1,9 @@
 package eu.jsparrow.core.visitor.spring;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -8,9 +11,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
@@ -21,17 +22,30 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImportASTVisitor {
-
+	private static final String WEB_BIND_ANNOTATION_PACKAGE_PREFIX = "org.springframework.web.bind.annotation."; //$NON-NLS-1$
+	private static final String REQUEST_MAPPING = WEB_BIND_ANNOTATION_PACKAGE_PREFIX + "RequestMapping"; //$NON-NLS-1$
+	private static final String REQUEST_METHOD = WEB_BIND_ANNOTATION_PACKAGE_PREFIX + "RequestMethod"; //$NON-NLS-1$
 	private static final String GET = "GET"; //$NON-NLS-1$
-	private static final String GET_MAPPING = "org.springframework.web.bind.annotation.GetMapping"; //$NON-NLS-1$
+	private static final String GET_MAPPING = "GetMapping"; //$NON-NLS-1$
+	private static final String PUT = "PUT"; //$NON-NLS-1$
+	private static final String PUT_MAPPING = "PutMapping"; //$NON-NLS-1$
+	private static final String POST = "POST"; //$NON-NLS-1$
+	private static final String POST_MAPPING = "PostMapping"; //$NON-NLS-1$
+	private static final String PATCH = "PATCH"; //$NON-NLS-1$
+	private static final String PATCH_MAPPING = "PatchMapping"; //$NON-NLS-1$
+	private static final String DELETE = "DELETE"; //$NON-NLS-1$
+	private static final String DELETE_MAPPING = "DeleteMapping"; //$NON-NLS-1$
 	private static final String METHOD = "method"; //$NON-NLS-1$
-	private static final String REQUEST_MAPPING = "org.springframework.web.bind.annotation.RequestMapping"; //$NON-NLS-1$
-	private static final String REQUEST_METHOD = "org.springframework.web.bind.annotation.RequestMethod"; //$NON-NLS-1$
+	private static final Map<String, String> MAP_TO_NEW_ANNOTATION;
 
-	@Override
-	public boolean visit(ImportDeclaration node) {
-		IBinding binding = node.resolveBinding();
-		return true;
+	static {
+		Map<String, String> tmpMap = new HashMap<>();
+		tmpMap.put(GET, WEB_BIND_ANNOTATION_PACKAGE_PREFIX + GET_MAPPING);
+		tmpMap.put(PUT, WEB_BIND_ANNOTATION_PACKAGE_PREFIX + PUT_MAPPING);
+		tmpMap.put(POST, WEB_BIND_ANNOTATION_PACKAGE_PREFIX + POST_MAPPING);
+		tmpMap.put(PATCH, WEB_BIND_ANNOTATION_PACKAGE_PREFIX + PATCH_MAPPING);
+		tmpMap.put(DELETE, WEB_BIND_ANNOTATION_PACKAGE_PREFIX + DELETE_MAPPING);
+		MAP_TO_NEW_ANNOTATION = Collections.unmodifiableMap(tmpMap);
 	}
 
 	@Override
@@ -88,11 +102,12 @@ public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImport
 		} else {
 			return true;
 		}
-
-		if (!requestMethodIdentifier.equals(GET)) {
+		
+		if(!MAP_TO_NEW_ANNOTATION.containsKey(requestMethodIdentifier)) {
 			return true;
 		}
-		String newAnnotationQualifiedTypeName = GET_MAPPING;
+		String newAnnotationQualifiedTypeName = MAP_TO_NEW_ANNOTATION.get(requestMethodIdentifier);
+		
 		List<MemberValuePair> memberValuePairsToCopy = memberValuePairs.stream()
 			.filter(memberValuePair -> memberValuePair != methodPair)
 			.collect(Collectors.toList());
