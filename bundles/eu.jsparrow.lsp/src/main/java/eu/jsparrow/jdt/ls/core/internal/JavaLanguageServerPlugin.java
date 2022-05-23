@@ -50,6 +50,7 @@ import com.google.common.base.Throwables;
 import eu.jsparrow.jdt.ls.core.internal.JavaClientConnection.JavaLanguageClient;
 import eu.jsparrow.jdt.ls.core.internal.handlers.JSparrowLanguageServer;
 import eu.jsparrow.jdt.ls.core.internal.managers.ContentProviderManager;
+import eu.jsparrow.jdt.ls.core.internal.managers.DigestStore;
 import eu.jsparrow.jdt.ls.core.internal.managers.ISourceDownloader;
 import eu.jsparrow.jdt.ls.core.internal.managers.MavenSourceDownloader;
 import eu.jsparrow.jdt.ls.core.internal.managers.ProjectsManager;
@@ -82,6 +83,7 @@ public class JavaLanguageServerPlugin extends Plugin {
 
 	private PreferenceManager preferenceManager;
 	private ProjectsManager projectsManager;
+	private DigestStore digestStore;
 	
 	private ContentProviderManager contentProviderManager;
 	private JSparrowLanguageServer protocol;
@@ -140,7 +142,7 @@ public class JavaLanguageServerPlugin extends Plugin {
 				.getNode(JavaManipulation.getPreferenceNodeId());
 		fDefaultPreferenceStore.put(JavaManipulationPlugin.CODEASSIST_FAVORITE_STATIC_MEMBERS, "");
 
-//		digestStore = new DigestStore(getStateLocation().toFile());
+		digestStore = new DigestStore(getStateLocation().toFile());
 		try {
 			ResourcesPlugin.getWorkspace().addSaveParticipant(IConstants.PLUGIN_ID, projectsManager);
 		} catch (CoreException e) {
@@ -356,6 +358,10 @@ public class JavaLanguageServerPlugin extends Plugin {
 			}
 			logException(message, ex);
 		}
+	}
+
+	public static DigestStore getDigestStore() {
+		return pluginInstance.digestStore;
 	}
 
 	public static InputStream getIn() {

@@ -72,11 +72,11 @@ public class MavenProjectImporter extends AbstractProjectImporter {
 	private Set<MavenProjectInfo> projectInfos = null;
 
 	private IProjectConfigurationManager configurationManager;
-//	private DigestStore digestStore;
+	private DigestStore digestStore;
 
 	public MavenProjectImporter() {
 		this.configurationManager = MavenPlugin.getProjectConfigurationManager();
-//		this.digestStore = JavaLanguageServerPlugin.getDigestStore();
+		this.digestStore = JavaLanguageServerPlugin.getDigestStore();
 	}
 
 	@Override
@@ -179,7 +179,7 @@ public class MavenProjectImporter extends AbstractProjectImporter {
 				}
 			}
 			if (container == null) {
-//				digestStore.updateDigest(pom.toPath());
+				digestStore.updateDigest(pom.toPath());
 				toImport.add(projectInfo);
 			} else {
 				IProject project = container.getProject();
@@ -188,7 +188,7 @@ public class MavenProjectImporter extends AbstractProjectImporter {
 					projects.add(container.getProject());
 				} else if (project != null) {
 					//Project doesn't have the Maven nature, so we (re)import it
-//					digestStore.updateDigest(pom.toPath());
+					digestStore.updateDigest(pom.toPath());
 					// need to delete project due to m2e failing to create if linked and not the same name
 					project.delete(IProject.FORCE | IProject.NEVER_DELETE_PROJECT_CONTENT, subMonitor.split(5));
 					toImport.add(projectInfo);
