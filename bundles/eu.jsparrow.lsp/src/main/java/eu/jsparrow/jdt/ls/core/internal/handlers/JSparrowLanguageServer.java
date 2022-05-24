@@ -339,16 +339,6 @@ public class JSparrowLanguageServer extends BaseJDTLanguageServer implements Lan
 		} catch (Exception e) {
 			JavaLanguageServerPlugin.logException(e.getMessage(), e);
 		}
-//		try {
-//			boolean autoBuildChanged = ProjectsManager.setAutoBuilding(preferenceManager.getPreferences().isAutobuildEnabled());
-//			if (jvmChanged) {
-//				buildWorkspace(Either.forLeft(true));
-//			} else if (autoBuildChanged) {
-//				buildWorkspace(Either.forLeft(false));
-//			}
-//		} catch (CoreException e) {
-//			JavaLanguageServerPlugin.logException(e.getMessage(), e);
-//		}
 		logInfo(">> New configuration: " + settings);
 		
 	}
