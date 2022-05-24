@@ -87,6 +87,11 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
+			<version>4.2.9.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
 			<version>5.3.19</version>
 		</dependency>
 	</dependencies>
@@ -414,6 +419,16 @@
 						</goals>
 						<configuration>
 							<artifact>org.assertj:assertj-core:3.22.0</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>springframework-4.2.9.RELEASE</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.springframework:spring-web:4.2.9.RELEASE</artifact>
 						</configuration>
 					</execution>
 					<execution>

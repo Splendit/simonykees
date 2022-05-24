@@ -33,13 +33,13 @@ public class ReplaceRequestMappingAnnotationRule
 				Messages.ReplaceRequestMappingAnnotationRule_name,
 				Messages.ReplaceRequestMappingAnnotationRule_description,
 				Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_8, Tag.CODING_CONVENTIONS));
+				Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 	}
 
 	@Override
 	protected String provideRequiredJavaVersion() {
 
-		return JavaCore.VERSION_1_8;
+		return JavaCore.VERSION_1_5;
 	}
 
 	@Override
