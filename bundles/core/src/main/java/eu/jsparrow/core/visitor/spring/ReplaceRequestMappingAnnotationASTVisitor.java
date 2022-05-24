@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MemberValuePair;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -50,6 +51,10 @@ public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImport
 
 	@Override
 	public boolean visit(NormalAnnotation node) {
+		if(node.getLocationInParent() != MethodDeclaration.MODIFIERS2_PROPERTY) {
+			return true;
+		}
+		
 		IAnnotationBinding annotationBinding = node.resolveAnnotationBinding();
 		if (annotationBinding == null) {
 			return true;
