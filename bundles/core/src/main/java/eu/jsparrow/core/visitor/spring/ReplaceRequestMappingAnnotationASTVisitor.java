@@ -19,10 +19,11 @@ import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+import eu.jsparrow.core.markers.common.ReplaceRequestMappingAnnotationEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
-public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImportASTVisitor {
+public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImportASTVisitor implements ReplaceRequestMappingAnnotationEvent {
 	private static final String WEB_BIND_ANNOTATION_PACKAGE_PREFIX = "org.springframework.web.bind.annotation."; //$NON-NLS-1$
 	private static final String REQUEST_MAPPING = WEB_BIND_ANNOTATION_PACKAGE_PREFIX + "RequestMapping"; //$NON-NLS-1$
 	private static final String REQUEST_METHOD = WEB_BIND_ANNOTATION_PACKAGE_PREFIX + "RequestMethod"; //$NON-NLS-1$
@@ -121,6 +122,7 @@ public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImport
 				newAnnotationQualifiedTypeName, memberValuePairsToCopy);
 
 		astRewrite.replace(node, annotationReplacement, null);
+		addMarkerEvent(node);
 		onRewrite();
 		return true;
 	}
