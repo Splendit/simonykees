@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.eclipse.jdt.ls.core" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="eu.jsparrow.jdt.ls.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.eclipse.jdt.ls.core" id="org.eclipse.jdt.ls.core.importers" name="JDT LS Project Importers"/>
+         <meta.schema plugin="eu.jsparrow.jdt.ls.core" id="eu.jsparrow.jdt.ls.core.importers" name="JDT LS Project Importers"/>
       </appinfo>
       <documentation>
          This extension point represents different kinds of project importers for the JDT LS.
-Each extension must implement &lt;code&gt;org.eclipse.jdt.ls.core.internal.IProjectImporter&lt;/code&gt;.
+Each extension must implement &lt;code&gt;eu.jsparrow.jdt.ls.core.internal.IProjectImporter&lt;/code&gt;.
       </documentation>
    </annotation>
 
@@ -55,7 +55,7 @@ Each extension must implement &lt;code&gt;org.eclipse.jdt.ls.core.internal.IProj
                   the class that implements this project importer.  The class must implement IProjectImporter
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.jdt.ls.core.internal.IProjectImporter"/>
+                  <meta.attribute kind="java" basedOn=":eu.jsparrow.jdt.ls.core.internal.IProjectImporter"/>
                </appinfo>
             </annotation>
          </attribute>
