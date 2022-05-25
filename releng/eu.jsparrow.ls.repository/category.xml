@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <bundle id="eu.jsparrow.lsp" version="0.0.0">
+      <category name="jsparrow.ls"/>
+   </bundle>
+   <category-def name="jsparrow.ls" label="jSparrow Language Server"/>
+</site>

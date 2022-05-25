@@ -17,5 +17,7 @@
 	<modules>
 		<module>eu.jsparrow.product</module>
 		<module>eu.jsparrow.site.photon</module>
+		<module>eu.jsparrow.ls.repository</module>
+		<module>eu.jsparrow.jdt.ls.product</module>
 	</modules>
 </project>
