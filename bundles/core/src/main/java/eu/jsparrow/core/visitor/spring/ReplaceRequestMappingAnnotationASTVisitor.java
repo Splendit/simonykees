@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.spring;
 
 import java.util.Collections;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,29 @@ import eu.jsparrow.core.markers.common.ReplaceRequestMappingAnnotationEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
-public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImportASTVisitor implements ReplaceRequestMappingAnnotationEvent {
+/**
+ * This visitor looks for '@RequestMapping' annotations on methods. If the given
+ * annotation specifies a certain request method like {@code RequestMethod.GET}
+ * or {@code RequestMethod.POST}, then it can be replaced by one of the
+ * corresponding short cut annotations like '@GetMapping' or '@PostMapping'.
+ * <p>
+ * Example:
+ * 
+ * <pre>
+ * &#64;RequestMapping(value = "/hello", method = RequestMethod.GET
+ * </pre>
+ * 
+ * can be replaced by
+ * 
+ * <pre>
+ * &#64;GetMapping(value = "/hello"
+ * </pre>
+ * 
+ * @since 4.12.0
+ * 
+ */
+public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImportASTVisitor
+		implements ReplaceRequestMappingAnnotationEvent {
 	private static final String WEB_BIND_ANNOTATION_PACKAGE_PREFIX = "org.springframework.web.bind.annotation."; //$NON-NLS-1$
 	private static final String REQUEST_MAPPING = WEB_BIND_ANNOTATION_PACKAGE_PREFIX + "RequestMapping"; //$NON-NLS-1$
 	private static final String REQUEST_METHOD = WEB_BIND_ANNOTATION_PACKAGE_PREFIX + "RequestMethod"; //$NON-NLS-1$
@@ -52,10 +75,10 @@ public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImport
 
 	@Override
 	public boolean visit(NormalAnnotation node) {
-		if(node.getLocationInParent() != MethodDeclaration.MODIFIERS2_PROPERTY) {
+		if (node.getLocationInParent() != MethodDeclaration.MODIFIERS2_PROPERTY) {
 			return true;
 		}
-		
+
 		IAnnotationBinding annotationBinding = node.resolveAnnotationBinding();
 		if (annotationBinding == null) {
 			return true;
@@ -108,12 +131,12 @@ public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImport
 		} else {
 			return true;
 		}
-		
-		if(!MAP_TO_NEW_ANNOTATION.containsKey(requestMethodIdentifier)) {
+
+		if (!MAP_TO_NEW_ANNOTATION.containsKey(requestMethodIdentifier)) {
 			return true;
 		}
 		String newAnnotationQualifiedTypeName = MAP_TO_NEW_ANNOTATION.get(requestMethodIdentifier);
-		
+
 		List<MemberValuePair> memberValuePairsToCopy = memberValuePairs.stream()
 			.filter(memberValuePair -> memberValuePair != methodPair)
 			.collect(Collectors.toList());
