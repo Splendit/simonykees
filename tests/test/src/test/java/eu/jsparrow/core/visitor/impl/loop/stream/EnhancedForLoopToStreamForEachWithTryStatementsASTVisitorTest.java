@@ -284,4 +284,38 @@ class EnhancedForLoopToStreamForEachWithTryStatementsASTVisitorTest extends Uses
 		assertChange(original, expected);
 
 	}
+	
+	
+	@Test
+	void visit_CatchClauseException_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.io.BufferedReader.class.getName());
+		defaultFixture.addImport(java.io.FileReader.class.getName());
+		defaultFixture.addImport(java.io.IOException.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+		
+		String original = "" +
+				"	void test(List<FileReader> fileReaderList) {\n"
+				+ "\n"
+				+ "		for (FileReader fileReader : fileReaderList) {\n"
+				+ "			try (BufferedReader br = new BufferedReader(fileReader)) {\n"
+				+ "\n"
+				+ "			} catch (Exception e) {\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+		
+		String expected = "" +
+				"	void test(List<FileReader> fileReaderList) {\n"
+				+ "\n"
+				+ "		fileReaderList.forEach(fileReader -> {\n"
+				+ "			try (BufferedReader br = new BufferedReader(fileReader)) {\n"
+				+ "\n"
+				+ "			} catch (Exception e) {\n"
+				+ "			}\n"
+				+ "		});\n"
+				+ "	}";
+		
+		assertChange(original, expected);
+	}
+		
 }

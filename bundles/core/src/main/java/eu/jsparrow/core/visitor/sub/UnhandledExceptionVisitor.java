@@ -114,7 +114,7 @@ public class UnhandledExceptionVisitor extends ASTVisitor {
 			for (ITypeBinding exception : exceptions) {
 				if ((ClassRelationUtil.isInheritingContentOfTypes(exception, CHECKED_EXCEPTION_TYPE_LIST)
 						|| ClassRelationUtil.isContentOfTypes(exception, CHECKED_EXCEPTION_TYPE_LIST))
-						&& !currentHandledExceptionsTypes.contains(exception.getQualifiedName())) {
+						&& !checkForException(exception)) {
 					containsCheckedException = true;
 					return false;
 				}
@@ -122,6 +122,11 @@ public class UnhandledExceptionVisitor extends ASTVisitor {
 		}
 
 		return true;
+	}
+
+	private boolean checkForException(ITypeBinding exception) {
+		return ClassRelationUtil.isContentOfTypes(exception, currentHandledExceptionsTypes) ||
+				ClassRelationUtil.isInheritingContentOfTypes(exception, currentHandledExceptionsTypes);
 	}
 
 	protected boolean checkResourcesForAutoCloseException(TryStatement tryStatementNode) {
