@@ -1,13 +1,16 @@
 package eu.jsparrow.core.visitor.sub;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -27,6 +30,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  */
 public class UnhandledExceptionVisitor extends ASTVisitor {
 
+	private static final String CLOSE = "close"; //$NON-NLS-1$
 	private static final String CHECKED_EXCEPTION_SUPERTYPE = java.lang.Exception.class.getName();
 	private static final List<String> CHECKED_EXCEPTION_TYPE_LIST = Collections
 		.singletonList(CHECKED_EXCEPTION_SUPERTYPE);
@@ -44,7 +48,7 @@ public class UnhandledExceptionVisitor extends ASTVisitor {
 			.filter(Objects::nonNull)
 			.forEach(exceptionVariableBinding -> currentHandledExceptionsTypes.add(exceptionVariableBinding.getType()
 				.getQualifiedName()));
-		return true;
+		return checkResourcesForAutoCloseException(tryStatementNode);
 	}
 
 	@Override
@@ -96,6 +100,40 @@ public class UnhandledExceptionVisitor extends ASTVisitor {
 		}
 
 		return true;
+	}
+
+	protected boolean checkResourcesForAutoCloseException(TryStatement tryStatementNode) {
+		List<Expression> resources = ASTNodeUtil.convertToTypedList(tryStatementNode.resources(), Expression.class);
+		for (Expression resource : resources) {
+			if (!checkResourceForAutoCloseException(resource)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean checkResourceForAutoCloseException(Expression resource) {
+		ITypeBinding typeBinding = resource.resolveTypeBinding();
+		IMethodBinding declaredCloseMethod = findDeclaredCloseMethod(typeBinding).orElse(null);
+		if (declaredCloseMethod != null) {
+			return checkForExceptions(declaredCloseMethod);
+		}
+		List<ITypeBinding> ancestors = ClassRelationUtil.findAncestors(typeBinding);
+		for (ITypeBinding ancestor : ancestors) {
+			IMethodBinding closeMethodOfAncestor = findDeclaredCloseMethod(ancestor).orElse(null);
+			if (closeMethodOfAncestor != null && checkForExceptions(closeMethodOfAncestor)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private Optional<IMethodBinding> findDeclaredCloseMethod(ITypeBinding typeBinding) {
+		return Arrays.stream(typeBinding.getDeclaredMethods())
+			.filter(methodBinding -> methodBinding.getName()
+				.equals(CLOSE))
+			.filter(methodBinding -> methodBinding.getParameterTypes().length == 0)
+			.findFirst();
 	}
 
 	@Override
