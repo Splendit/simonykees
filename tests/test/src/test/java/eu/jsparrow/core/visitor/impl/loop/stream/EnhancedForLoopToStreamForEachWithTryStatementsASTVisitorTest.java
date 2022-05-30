@@ -218,4 +218,70 @@ class EnhancedForLoopToStreamForEachWithTryStatementsASTVisitorTest extends Uses
 
 		assertNoChange(original);
 	}
+	
+	
+	@Test
+	void visit_CatchClauseWithUnionType_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.io.BufferedReader.class.getName());
+		defaultFixture.addImport(java.io.FileReader.class.getName());
+		defaultFixture.addImport(java.io.IOException.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+
+		String typeDeclarations = "\n"
+						+ "	class Closeable1 extends BufferedReader {\n"
+						+ "\n"
+						+ "		public Closeable1(FileReader in) {\n"
+						+ "			super(in);\n"
+						+ "		}\n"
+						+ "\n"
+						+ "		@Override\n"
+						+ "		public void close() throws Exception1 {\n"
+						+ "			throw new Exception1();\n"
+						+ "		}\n"
+						+ "	}\n"
+						+ "\n"
+						+ "	class Closeable2 extends BufferedReader {\n"
+						+ "		public Closeable2(FileReader in) {\n"
+						+ "			super(in);\n"
+						+ "		}\n"
+						+ "\n"
+						+ "		@Override\n"
+						+ "		public void close() throws Exception2 {\n"
+						+ "			throw new Exception2();\n"
+						+ "		}\n"
+						+ "	}\n"
+						+ "\n"
+						+ "	static class Exception1 extends IOException {\n"
+						+ "	}\n"
+						+ "\n"
+						+ "	static class Exception2 extends IOException {\n"
+						+ "	}";
+		
+		String original = "" +
+				"	void testUseBufferedReaderWithoutException(List<FileReader> fileReaderList) {\n"
+				+ "\n"
+				+ "		for (FileReader fileReader : fileReaderList) {\n"
+				+ "			try (Closeable1 c1 = new Closeable1(fileReader); Closeable2 c2 = new Closeable2(fileReader);) {\n"
+				+ "\n"
+				+ "			} catch (Exception1 | Exception2 e) {\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ typeDeclarations;
+		
+		String expected = "" +
+				"	void testUseBufferedReaderWithoutException(List<FileReader> fileReaderList) {\n"
+				+ "\n"
+				+ "		fileReaderList.forEach(fileReader -> {\n"
+				+ "			try (Closeable1 c1 = new Closeable1(fileReader); Closeable2 c2 = new Closeable2(fileReader);) {\n"
+				+ "\n"
+				+ "			} catch (Exception1 | Exception2 e) {\n"
+				+ "			}\n"
+				+ "		});\n"
+				+ "	}\n"
+				+ typeDeclarations;
+		
+		assertChange(original, expected);
+
+	}
 }

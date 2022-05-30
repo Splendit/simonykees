@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.sub;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -14,8 +16,11 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.UnionType;
 
 import eu.jsparrow.core.visitor.loop.stream.StreamForEachCheckValidStatementASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -41,14 +46,31 @@ public class UnhandledExceptionVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(TryStatement tryStatementNode) {
-		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class)
+		collectHandledExceptionTypes(tryStatementNode)
 			.stream()
-			.map(catchClause -> catchClause.getException()
-				.resolveBinding())
+			.map(Type::resolveBinding)
 			.filter(Objects::nonNull)
-			.forEach(exceptionVariableBinding -> currentHandledExceptionsTypes.add(exceptionVariableBinding.getType()
+			.forEach(exceptionVariableBinding -> currentHandledExceptionsTypes.add(exceptionVariableBinding
 				.getQualifiedName()));
 		return checkResourcesForAutoCloseException(tryStatementNode);
+	}
+
+	private static List<Type> collectHandledExceptionTypes(TryStatement tryStatementNode) {
+		List<Type> exceptionTypes = new ArrayList<>();
+		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class)
+			.stream()
+			.map(CatchClause::getException)
+			.map(SingleVariableDeclaration::getType)
+			.forEach(exceptionType -> {
+				if (exceptionType.getNodeType() == ASTNode.UNION_TYPE) {
+					UnionType unionType = (UnionType) exceptionType;
+					exceptionTypes.addAll(ASTNodeUtil.convertToTypedList(unionType.types(), Type.class));
+				} else {
+					exceptionTypes.add(exceptionType);
+				}
+			});
+
+		return exceptionTypes;
 	}
 
 	@Override
