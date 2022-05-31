@@ -35,7 +35,7 @@ public class ReplaceRequestMappingAnnotationRule
 				Messages.ReplaceRequestMappingAnnotationRule_name,
 				Messages.ReplaceRequestMappingAnnotationRule_description,
 				Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+				Arrays.asList(Tag.JAVA_1_5, Tag.SPRING, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 	}
 
 	@Override

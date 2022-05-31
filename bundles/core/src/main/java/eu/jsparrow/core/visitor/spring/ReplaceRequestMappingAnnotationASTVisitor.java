@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.markers.common.ReplaceRequestMappingAnnotationEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
@@ -79,17 +80,11 @@ public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImport
 			return true;
 		}
 
-		IAnnotationBinding annotationBinding = node.resolveAnnotationBinding();
-		if (annotationBinding == null) {
+		if (!ClassRelationUtil.isContentOfType(node.resolveTypeBinding(), REQUEST_MAPPING)) {
 			return true;
 		}
-		ITypeBinding annotationType = annotationBinding.getAnnotationType();
-		String annotationTypeQualifiedName = annotationType.getQualifiedName();
-		if (!annotationTypeQualifiedName.equals(REQUEST_MAPPING)) {
-			return true;
-		}
-		List<MemberValuePair> memberValuePairs = ASTNodeUtil.convertToTypedList(node.values(), MemberValuePair.class);
 
+		List<MemberValuePair> memberValuePairs = ASTNodeUtil.convertToTypedList(node.values(), MemberValuePair.class);
 		MemberValuePair methodPair = memberValuePairs.stream()
 			.filter(memberValuePair -> memberValuePair.getName()
 				.getIdentifier()
@@ -103,8 +98,6 @@ public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImport
 
 		Expression methodValue = methodPair.getValue();
 
-		String requestMethodIdentifier;
-
 		if (methodValue.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
 			ArrayInitializer arrayInitializer = (ArrayInitializer) methodValue;
 			List<Expression> expressions = ASTNodeUtil.convertToTypedList(arrayInitializer.expressions(),
@@ -115,12 +108,11 @@ public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImport
 			methodValue = expressions.get(0);
 		}
 
-		String methodValueTypeQualifiedName = methodValue.resolveTypeBinding()
-			.getQualifiedName();
-		if (!methodValueTypeQualifiedName.equals(REQUEST_METHOD)) {
+		if (!ClassRelationUtil.isContentOfType(methodValue.resolveTypeBinding(), REQUEST_METHOD)) {
 			return true;
 		}
 
+		String requestMethodIdentifier;
 		if (methodValue.getNodeType() == ASTNode.QUALIFIED_NAME) {
 			QualifiedName qualifiedName = (QualifiedName) methodValue;
 			requestMethodIdentifier = qualifiedName.getName()
@@ -166,5 +158,4 @@ public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImport
 
 		return annotationReplacement;
 	}
-
 }

@@ -83,7 +83,7 @@ class ReplaceRequestMappingAnnotationRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace Request Mapping Annotation"));
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+				contains(Tag.JAVA_1_5, Tag.SPRING, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
 				equalTo("Version 4.3 of the Spring Framework introduced annotations like '@GetMapping' or '@PostMapping'"

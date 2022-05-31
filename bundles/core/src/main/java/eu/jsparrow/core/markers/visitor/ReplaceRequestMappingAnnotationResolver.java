@@ -44,7 +44,7 @@ public class ReplaceRequestMappingAnnotationResolver extends ReplaceRequestMappi
 		if (positionChecker.test(normalAnnotation)) {
 			super.visit(normalAnnotation);
 		}
-		return true;
+		return false;
 	}
 
 	@Override
