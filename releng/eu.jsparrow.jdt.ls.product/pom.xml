@@ -36,6 +36,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-p2-director-plugin</artifactId>
+				<version>${tycho.version}</version>
 				<configuration>
 					<formats>
 						<macosx>tar.gz</macosx>
@@ -43,9 +44,6 @@
 					<products>
 						<product>
 							<id>languageServer.product</id>
-						</product>
-						<product>
-							<id>syntaxServer.product</id>
 						</product>
 					</products>
 				</configuration>

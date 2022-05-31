@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
-import org.eclipse.jdt.internal.corext.dom.TypeAnnotationRewrite;
+//import org.eclipse.jdt.internal.corext.dom.TypeAnnotationRewrite;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore.InsertTypeArgumentsVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 
@@ -162,16 +162,16 @@ public class TypeChangeCorrectionProposal extends ASTRewriteCorrectionProposal {
 			}
 
 			if (declNode instanceof MethodDeclaration) {
-				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
-				Type origReturnType= methodDecl.getReturnType2();
-				rewrite.set(methodDecl, MethodDeclaration.RETURN_TYPE2_PROPERTY, type, null);
-				DimensionRewrite.removeAllChildren(methodDecl, MethodDeclaration.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
-				TypeAnnotationRewrite.removePureTypeAnnotations(methodDecl, MethodDeclaration.MODIFIERS2_PROPERTY, rewrite, null);
-				// add javadoc tag
-				Javadoc javadoc= methodDecl.getJavadoc();
-				if (javadoc != null && origReturnType != null && origReturnType.isPrimitiveType()
-						&& ((PrimitiveType) origReturnType).getPrimitiveTypeCode() == PrimitiveType.VOID) {
-
+//				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
+//				Type origReturnType= methodDecl.getReturnType2();
+//				rewrite.set(methodDecl, MethodDeclaration.RETURN_TYPE2_PROPERTY, type, null);
+//				DimensionRewrite.removeAllChildren(methodDecl, MethodDeclaration.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
+//				TypeAnnotationRewrite.removePureTypeAnnotations(methodDecl, MethodDeclaration.MODIFIERS2_PROPERTY, rewrite, null);
+//				// add javadoc tag
+//				Javadoc javadoc= methodDecl.getJavadoc();
+//				if (javadoc != null && origReturnType != null && origReturnType.isPrimitiveType()
+//						&& ((PrimitiveType) origReturnType).getPrimitiveTypeCode() == PrimitiveType.VOID) {
+//
 //					TagElement returnTag= JavadocTagsSubProcessor.findTag(javadoc, TagElement.TAG_RETURN, null);
 //					if (returnTag == null) {
 //						returnTag= ast.newTagElement();
@@ -182,7 +182,7 @@ public class TypeChangeCorrectionProposal extends ASTRewriteCorrectionProposal {
 //						ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 //						JavadocTagsSubProcessor.insertTag(tagsRewriter, returnTag, null);
 //					}
-				}
+//				}
 
 			} else if (declNode instanceof AnnotationTypeMemberDeclaration) {
 				AnnotationTypeMemberDeclaration methodDecl= (AnnotationTypeMemberDeclaration) declNode;
@@ -206,7 +206,7 @@ public class TypeChangeCorrectionProposal extends ASTRewriteCorrectionProposal {
 					} else {
 						rewrite.set(fieldDecl, FieldDeclaration.TYPE_PROPERTY, type, null);
 						DimensionRewrite.removeAllChildren(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
-						TypeAnnotationRewrite.removePureTypeAnnotations(fieldDecl, FieldDeclaration.MODIFIERS2_PROPERTY, rewrite, null);
+//						TypeAnnotationRewrite.removePureTypeAnnotations(fieldDecl, FieldDeclaration.MODIFIERS2_PROPERTY, rewrite, null);
 					}
 				} else if (parent instanceof VariableDeclarationStatement) {
 					VariableDeclarationStatement varDecl= (VariableDeclarationStatement) parent;
@@ -230,10 +230,10 @@ public class TypeChangeCorrectionProposal extends ASTRewriteCorrectionProposal {
 						DimensionRewrite.removeAllChildren(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
 						if (fIsNewTypeVar) {
 							handledInferredParameterizedType(parent, declNode, ast, rewrite, imports, context);
-							TypeAnnotationRewrite.removePureTypeAnnotations(parent, VariableDeclarationStatement.MODIFIERS2_PROPERTY, rewrite, null);
-							if (oldType != null) {
-								remover.registerRemovedNode(oldType);
-							}
+//							TypeAnnotationRewrite.removePureTypeAnnotations(parent, VariableDeclarationStatement.MODIFIERS2_PROPERTY, rewrite, null);
+//							if (oldType != null) {
+//								remover.registerRemovedNode(oldType);
+//							}
 						}
 					}
 				} else if (parent instanceof VariableDeclarationExpression) {
@@ -243,10 +243,10 @@ public class TypeChangeCorrectionProposal extends ASTRewriteCorrectionProposal {
 					DimensionRewrite.removeAllChildren(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
 					if (fIsNewTypeVar) {
 						handledInferredParameterizedType(parent, declNode, ast, rewrite, imports, context);
-						TypeAnnotationRewrite.removePureTypeAnnotations(parent, VariableDeclarationExpression.MODIFIERS2_PROPERTY, rewrite, null);
-						if (oldType != null) {
-							remover.registerRemovedNode(oldType);
-						}
+//						TypeAnnotationRewrite.removePureTypeAnnotations(parent, VariableDeclarationExpression.MODIFIERS2_PROPERTY, rewrite, null);
+//						if (oldType != null) {
+//							remover.registerRemovedNode(oldType);
+//						}
 					}
 				}
 			} else if (declNode instanceof SingleVariableDeclaration) {
@@ -254,12 +254,12 @@ public class TypeChangeCorrectionProposal extends ASTRewriteCorrectionProposal {
 				Type oldType = (Type) rewrite.get(variableDeclaration, SingleVariableDeclaration.TYPE_PROPERTY);
 				rewrite.set(variableDeclaration, SingleVariableDeclaration.TYPE_PROPERTY, type, null);
 				DimensionRewrite.removeAllChildren(declNode, SingleVariableDeclaration.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
-				TypeAnnotationRewrite.removePureTypeAnnotations(declNode, SingleVariableDeclaration.MODIFIERS2_PROPERTY, rewrite, null);
-				if (fIsNewTypeVar) {
-					if (oldType != null) {
-						remover.registerRemovedNode(oldType);
-					}
-				}
+//				TypeAnnotationRewrite.removePureTypeAnnotations(declNode, SingleVariableDeclaration.MODIFIERS2_PROPERTY, rewrite, null);
+//				if (fIsNewTypeVar) {
+//					if (oldType != null) {
+//						remover.registerRemovedNode(oldType);
+//					}
+//				}
 			}
 
 			return rewrite;

@@ -138,8 +138,8 @@
 
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>11</maven.compiler.source>
 
 		<jsparrow.qualifier.quotes></jsparrow.qualifier.quotes>
 		<jsparrow.qualifier.noProguard></jsparrow.qualifier.noProguard>
@@ -223,6 +223,22 @@
 			<id>mylyn</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/mylyn/releases/latest/</url>
+		</repository>
+		
+		<repository>
+			<id>jboss</id>
+			<layout>p2</layout>
+			<url>https://jbosstools.github.io/m2e-apt/updates/1.5.4/</url>
+		</repository>
+		<repository>
+			<id>2021-12</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/releases/2021-12/</url>
+		</repository>
+		<repository>
+			<id>2021-12-updates</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/eclipse/updates/4.22</url>
 		</repository>
 	</repositories>
 
