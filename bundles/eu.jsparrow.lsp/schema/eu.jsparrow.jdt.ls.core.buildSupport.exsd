@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.eclipse.jdt.ls.core" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="eu.jsparrow.jdt.ls.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.eclipse.jdt.ls.core" id="org.eclipse.jdt.ls.core.buildSupport" name="Build Support"/>
+         <meta.schema plugin="eu.jsparrow.jdt.ls.core" id="eu.jsparrow.jdt.ls.core.buildSupport" name="Build Support"/>
       </appinfo>
       <documentation>
          This extension point represents different kinds of project build supporters for the JDT LS.
-Each extension must implement &lt;code&gt;org.eclipse.jdt.ls.core.internal.managers.IBuildSupport&lt;/code&gt;.
+Each extension must implement &lt;code&gt;eu.jsparrow.jdt.ls.core.internal.managers.IBuildSupport&lt;/code&gt;.
       </documentation>
    </annotation>
 
@@ -60,7 +60,7 @@ Each extension must implement &lt;code&gt;org.eclipse.jdt.ls.core.internal.manag
                   The class that implements this build support.  The class must implement IBuildSupport.
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.jdt.ls.core.internal.managers.IBuildSupport"/>
+                  <meta.attribute kind="java" basedOn=":eu.jsparrow.jdt.ls.core.internal.managers.IBuildSupport"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -85,7 +85,7 @@ Each extension must implement &lt;code&gt;org.eclipse.jdt.ls.core.internal.manag
 &lt;pre&gt;
    &lt;extension
       id=&quot;buildSupport&quot;
-         point=&quot;org.eclipse.jdt.ls.core.buildSupport&quot;&gt;
+         point=&quot;eu.jsparrow.jdt.ls.core.buildSupport&quot;&gt;
          &lt;buildSupport
           id=&quot;someBuildSupport&quot;
           order=&quot;200&quot;

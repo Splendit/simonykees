@@ -5,7 +5,7 @@ public class IConstants {
 	/**
 	 * Plugin id
 	 */
-	public static final String PLUGIN_ID = "eu.jsparrow.lsp";
+	public static final String PLUGIN_ID = "eu.jsparrow.jdt.ls.core";
 
 	/**
 	 * Is workspace initialized

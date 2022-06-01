@@ -263,7 +263,7 @@ public class JSparrowLanguageServer extends BaseJDTLanguageServer implements Lan
 	}
 	
 	private CodeActionOptions getCodeActionOptions() {
-		String[] kinds = { CodeActionKind.QuickFix, CodeActionKind.Refactor, CodeActionKind.RefactorExtract, CodeActionKind.RefactorInline, CodeActionKind.RefactorRewrite, CodeActionKind.Source, CodeActionKind.SourceOrganizeImports };
+		String[] kinds = { CodeActionKind.QuickFix, CodeActionKind.Refactor };
 		List<String> codeActionKinds = new ArrayList<>();
 		for (String kind : kinds) {
 			if (preferenceManager.getClientPreferences().isSupportedCodeActionKind(kind)) {
