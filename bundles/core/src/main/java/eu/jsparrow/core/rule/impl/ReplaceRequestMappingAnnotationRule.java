@@ -40,7 +40,6 @@ public class ReplaceRequestMappingAnnotationRule
 
 	@Override
 	protected String provideRequiredJavaVersion() {
-
 		return JavaCore.VERSION_1_5;
 	}
 
