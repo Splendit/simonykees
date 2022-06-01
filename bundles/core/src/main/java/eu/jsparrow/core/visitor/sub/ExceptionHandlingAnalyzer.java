@@ -30,10 +30,11 @@ public class ExceptionHandlingAnalyzer {
 	public static boolean checkThrowStatement(ASTNode outermostAncestor, ThrowStatement throwStatement) {
 		ITypeBinding exceptionTypeBinding = throwStatement.getExpression()
 			.resolveTypeBinding();
-		return checkException(outermostAncestor, throwStatement, exceptionTypeBinding);
+		return analyzeExceptionHandling(outermostAncestor, throwStatement, exceptionTypeBinding);
 	}
 
-	private static boolean checkException(ASTNode outermostAncestor, ASTNode node, ITypeBinding exceptionTypeBinding) {
+	private static boolean analyzeExceptionHandling(ASTNode outermostAncestor, ASTNode node,
+			ITypeBinding exceptionTypeBinding) {
 		if (exceptionTypeBinding == null) {
 			return false;
 		}
@@ -48,10 +49,10 @@ public class ExceptionHandlingAnalyzer {
 			return true;
 		}
 
-		return recursiveCheckExceptionHandling(outermostAncestor, node, exceptionTypeBinding);
+		return analyzeExceptionHandlingRecursively(outermostAncestor, node, exceptionTypeBinding);
 	}
 
-	private static boolean recursiveCheckExceptionHandling(ASTNode excludedAncestor, ASTNode node,
+	private static boolean analyzeExceptionHandlingRecursively(ASTNode excludedAncestor, ASTNode node,
 			ITypeBinding exceptionTypeBinding) {
 		ASTNode parent = node.getParent();
 		TryStatement tryStatement = null;
@@ -71,7 +72,7 @@ public class ExceptionHandlingAnalyzer {
 				ClassRelationUtil.isInheritingContentOfTypes(exceptionTypeBinding, currentHandledExceptionsTypes)) {
 			return true;
 		}
-		return recursiveCheckExceptionHandling(excludedAncestor, tryStatement, exceptionTypeBinding);
+		return analyzeExceptionHandlingRecursively(excludedAncestor, tryStatement, exceptionTypeBinding);
 	}
 
 	private static List<String> collectHandledExceptionTypes(TryStatement tryStatementNode) {
@@ -93,6 +94,24 @@ public class ExceptionHandlingAnalyzer {
 			.map(Type::resolveBinding)
 			.filter(Objects::nonNull)
 			.map(ITypeBinding::getQualifiedName)
+			.collect(Collectors.toList());
+	}
+
+	// ???
+	static List<String> collectHandledExceptionsForAutomaticClose(ASTNode excludedAncestor,
+			TryStatement tryStatementNode) {
+		List<TryStatement> tryStatements = new ArrayList<>();
+		tryStatements.add(tryStatementNode);
+		ASTNode parent = tryStatementNode.getParent();
+		while (parent != null && parent != excludedAncestor) {
+			if (parent.getLocationInParent() == TryStatement.BODY_PROPERTY) {
+				tryStatements.add((TryStatement) parent.getParent());
+			}
+			parent = parent.getParent();
+		}
+
+		return tryStatements.stream()
+			.flatMap(tryStatement -> collectHandledExceptionTypes(tryStatementNode).stream())
 			.collect(Collectors.toList());
 	}
 

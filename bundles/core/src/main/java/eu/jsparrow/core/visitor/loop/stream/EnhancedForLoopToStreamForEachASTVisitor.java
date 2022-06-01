@@ -60,8 +60,8 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 		Statement statement = enhancedForStatementNode.getBody();
 		SimpleName parameterName = parameter.getName();
 		ITypeBinding parameterTypeBinding = parameterName.resolveTypeBinding();
-		
-		if(isGeneratedNode(parameterType)) {
+
+		if (isGeneratedNode(parameterType)) {
 			return;
 		}
 
@@ -296,7 +296,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 	 */
 	private boolean isStatementValid(Statement statement, SimpleName parameter) {
 		StreamForEachCheckValidStatementASTVisitor statementVisitor = new StreamForEachCheckValidStatementASTVisitor(
-				parameter);
+				statement.getParent(), parameter);
 		statement.accept(statementVisitor);
 		return statementVisitor.isStatementsValid();
 	}
