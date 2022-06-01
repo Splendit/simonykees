@@ -225,4 +225,241 @@ class EnhancedForLoopToStreamForEachExceptionsASTVisitorTest extends UsesJDTUnit
 		assertChange(original, expected);
 	}
 
+	/**
+	 * Transformation to invalid code.
+	 * <p>
+	 * This test is expected to fail as soon as the corresponding corner case
+	 * will have been fixed.
+	 */
+	@Test
+	void visit_CornerCaseAfterCatchClauseWithUnionType_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.List.class.getName());
+		String original = "" +
+				"	void tryUseStringMethods(List<String> strings) throws Exception {\n"
+				+ "\n"
+				+ "		for (String s : strings) {\n"
+				+ "			try {\n"
+				+ "				useString1(s);\n"
+				+ "				useString2(s);\n"
+				+ "			} catch (Exception1 | Exception2 e) {\n"
+				+ "			}\n"
+				+ "			useString2(s);\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	void useString1(String s) throws Exception1 {\n"
+				+ "		throw new Exception1();\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	void useString2(String s) throws Exception2 {\n"
+				+ "		throw new Exception2();\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	static class Exception1 extends Exception {\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	static class Exception2 extends Exception {\n"
+				+ "	}";
+
+		String expected = "" +
+				"	void tryUseStringMethods(List<String> strings) throws Exception {\n"
+				+ "\n"
+				+ "		 strings.forEach(s -> {\n"
+				+ "			try {\n"
+				+ "				useString1(s);\n"
+				+ "				useString2(s);\n"
+				+ "			} catch (Exception1 | Exception2 e) {\n"
+				+ "			}\n"
+				+ "			useString2(s);\n"
+				+ "		});\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	void useString1(String s) throws Exception1 {\n"
+				+ "		throw new Exception1();\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	void useString2(String s) throws Exception2 {\n"
+				+ "		throw new Exception2();\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	static class Exception1 extends Exception {\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	static class Exception2 extends Exception {\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	/**
+	 * Transformation to invalid code.
+	 * <p>
+	 * This test is expected to fail as soon as the corresponding corner case
+	 * will have been fixed.
+	 */
+	@Test
+	void visit_MethodThrowingExceptionInCatchBlock_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.List.class.getName());
+
+		String original = "" +
+				"	void tryUseStringMethods(List<String> strings) throws Exception {\n"
+				+ "\n"
+				+ "		for (String s : strings) {\n"
+				+ "			try {\n"
+				+ "				useString(s);\n"
+				+ "			} catch (Exception e) {\n"
+				+ "				useString(s);\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	void useString(String s) throws Exception {\n"
+				+ "		throw new Exception();\n"
+				+ "	}";
+
+		String expected = "" +
+				"	void tryUseStringMethods(List<String> strings) throws Exception {\n"
+				+ "\n"
+				+ "		 strings.forEach(s -> {\n"
+				+ "			try {\n"
+				+ "				useString(s);\n"
+				+ "			} catch (Exception e) {\n"
+				+ "				useString(s);\n"
+				+ "			}\n"
+				+ "		});\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	void useString(String s) throws Exception {\n"
+				+ "		throw new Exception();\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	/**
+	 * Transformation to invalid code.
+	 * <p>
+	 * This test is expected to fail as soon as the corresponding corner case
+	 * will have been fixed.
+	 */
+	@Test
+	void visit_MethodThrowingExceptionInFinallyBlock_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.List.class.getName());
+
+		String original = "" +
+				"	void tryUseStringMethods(List<String> strings) throws Exception {\n"
+				+ "\n"
+				+ "		for (String s : strings) {\n"
+				+ "			try {\n"
+				+ "				useString(s);\n"
+				+ "			} catch (Exception e) {\n"
+				+ "				\n"
+				+ "			} finally {\n"
+				+ "				useString(s);\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	void useString(String s) throws Exception {\n"
+				+ "		throw new Exception();\n"
+				+ "	}";
+
+		String expected = "" +
+				"	void tryUseStringMethods(List<String> strings) throws Exception {\n"
+				+ "\n"
+				+ "		strings.forEach(s -> {\n"
+				+ "			try {\n"
+				+ "				useString(s);\n"
+				+ "			} catch (Exception e) {\n"
+				+ "				\n"
+				+ "			} finally {\n"
+				+ "				useString(s);\n"
+				+ "			}\n"
+				+ "		});\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	void useString(String s) throws Exception {\n"
+				+ "		throw new Exception();\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	/**
+	 * Transformation to valid code, yet worth being discussed whether this
+	 * should be transformed.
+	 */
+	@Test
+	void visit_MethodThrowingError_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.util.List.class.getName());
+
+		String original = "" +
+				"	void tryUseStringMethod(List<String> strings) {\n"
+				+ "		for (String s : strings) {\n"
+				+ "			useString(s);\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	void useString(String s) throws Error {\n"
+				+ "		throw new Error();\n"
+				+ "	}";
+
+		String expected = "" +
+				"	void tryUseStringMethod(List<String> strings) {\n"
+				+ "		 strings.forEach(s -> {\n"
+				+ "			useString(s);\n"
+				+ "		});\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	void useString(String s) throws Error {\n"
+				+ "		throw new Error();\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	/**
+	 * Transformation is not carried out although it should be carried out.
+	 * <p>
+	 * This test is expected to fail as soon as the corresponding corner case
+	 * will have been fixed.
+	 */
+	@Test
+	void visit_ThrowingHandledException_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.util.List.class.getName());
+
+		String original = "" +
+				"	void tryUseStringMethods(List<String> strings) {\n"
+				+ "\n"
+				+ "		for (String s : strings) {\n"
+				+ "			try {\n"
+				+ "				throw new Exception();\n"
+				+ "			} catch (Exception e) {\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	/**
+	 * Transformation is not carried out although it should be carried out.
+	 * <p>
+	 * This test is expected to fail as soon as the corresponding corner case
+	 * will have been fixed.
+	 */
+	@Test
+	void visit_ThrowingRuntimeException_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.util.List.class.getName());
+
+		String original = "" +
+				"	void throwRuntimeExceptionForEachString(List<String> strings) {\n"
+				+ "\n"
+				+ "		for (String s : strings) {\n"
+				+ "			throw new RuntimeException();\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
 }
