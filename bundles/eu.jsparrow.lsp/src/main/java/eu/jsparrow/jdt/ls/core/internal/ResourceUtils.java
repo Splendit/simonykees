@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
+import org.eclipse.core.internal.utils.FileUtil;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -87,14 +88,24 @@ public class ResourceUtils {
 		return uri;
 	}
 
-	public static boolean isContainedIn(IPath location, Collection<IPath> removedRootPaths) {
-		// TODO Auto-generated method stub
-		return false;
+	public static IPath canonicalFilePathFromURI(String uriStr) {
+		URI uri = URI.create(uriStr);
+		if ("file".equals(uri.getScheme())) {
+			return FileUtil.canonicalPath(Path.fromOSString(Paths.get(uri).toString()));
+		}
+		return null;
 	}
 
-	public static IPath canonicalFilePathFromURI(String uri) {
-		// TODO Auto-generated method stub
-		return null;
+	public static boolean isContainedIn(IPath location, Collection<IPath> paths) {
+		if (location == null || paths == null || paths.isEmpty()) {
+			return false;
+		}
+		for (IPath path : paths) {
+			if (path.isPrefixOf(location)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
