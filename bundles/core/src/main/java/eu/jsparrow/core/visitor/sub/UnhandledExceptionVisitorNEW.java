@@ -40,12 +40,13 @@ public class UnhandledExceptionVisitorNEW extends ASTVisitor {
 	private static final List<String> CHECKED_EXCEPTION_TYPE_LIST = Collections
 		.singletonList(CHECKED_EXCEPTION_SUPERTYPE);
 
+	private final ASTNode excludedAncestor;
 	protected boolean containsCheckedException = false;
 	protected boolean containsThrowStatement = false;
 	protected List<String> currentHandledExceptionsTypes = new LinkedList<>();
-	
+
 	public UnhandledExceptionVisitorNEW(ASTNode excludedAncestor) {
-		
+		this.excludedAncestor = excludedAncestor;
 	}
 
 	@Override
@@ -169,7 +170,9 @@ public class UnhandledExceptionVisitorNEW extends ASTVisitor {
 
 	@Override
 	public boolean visit(ThrowStatement throwStatementNode) {
-		containsThrowStatement = true;
+		if (!ExceptionHandlingAnalyzer.checkThrowStatement(excludedAncestor, throwStatementNode)) {
+			containsThrowStatement = true;
+		}
 		return false;
 	}
 

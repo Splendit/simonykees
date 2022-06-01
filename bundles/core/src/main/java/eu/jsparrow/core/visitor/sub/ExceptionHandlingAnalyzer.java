@@ -27,13 +27,13 @@ public class ExceptionHandlingAnalyzer {
 	private static final String RUNTIME_EXCEPTION = java.lang.RuntimeException.class.getName();
 	private static final List<String> RUNTIME_EXCEPTION_LIST = Collections.singletonList(CHECKED_EXCEPTION_SUPERTYPE);
 
-	public static boolean checkThrowStatement(ASTNode outermostAncestor, ThrowStatement throwStatement) {
+	public static boolean checkThrowStatement(ASTNode excludedAncestor, ThrowStatement throwStatement) {
 		ITypeBinding exceptionTypeBinding = throwStatement.getExpression()
 			.resolveTypeBinding();
-		return analyzeExceptionHandling(outermostAncestor, throwStatement, exceptionTypeBinding);
+		return analyzeExceptionHandling(excludedAncestor, throwStatement, exceptionTypeBinding);
 	}
 
-	private static boolean analyzeExceptionHandling(ASTNode outermostAncestor, ASTNode node,
+	private static boolean analyzeExceptionHandling(ASTNode excludedAncestor, ASTNode node,
 			ITypeBinding exceptionTypeBinding) {
 		if (exceptionTypeBinding == null) {
 			return false;
@@ -49,7 +49,7 @@ public class ExceptionHandlingAnalyzer {
 			return true;
 		}
 
-		return analyzeExceptionHandlingRecursively(outermostAncestor, node, exceptionTypeBinding);
+		return analyzeExceptionHandlingRecursively(excludedAncestor, node, exceptionTypeBinding);
 	}
 
 	private static boolean analyzeExceptionHandlingRecursively(ASTNode excludedAncestor, ASTNode node,

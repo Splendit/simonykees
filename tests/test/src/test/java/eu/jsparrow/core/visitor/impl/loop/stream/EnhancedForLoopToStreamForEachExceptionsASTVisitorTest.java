@@ -418,18 +418,12 @@ class EnhancedForLoopToStreamForEachExceptionsASTVisitorTest extends UsesJDTUnit
 		assertChange(original, expected);
 	}
 
-	/**
-	 * Transformation is not carried out although it should be carried out.
-	 * <p>
-	 * This test is expected to fail as soon as the corresponding corner case
-	 * will have been fixed.
-	 */
 	@Test
 	void visit_ThrowingHandledException_shouldTransform() throws Exception {
 		defaultFixture.addImport(java.util.List.class.getName());
 
 		String original = "" +
-				"	void tryUseStringMethods(List<String> strings) {\n"
+				"	void throwAndCatchExceptionForEachString(List<String> strings) {\n"
 				+ "\n"
 				+ "		for (String s : strings) {\n"
 				+ "			try {\n"
@@ -439,15 +433,20 @@ class EnhancedForLoopToStreamForEachExceptionsASTVisitorTest extends UsesJDTUnit
 				+ "		}\n"
 				+ "	}";
 
-		assertNoChange(original);
+		String expected = "" +
+				"	void throwAndCatchExceptionForEachString(List<String> strings) {\n"
+				+ "\n"
+				+ "		strings.forEach(s -> {\n"
+				+ "			try {\n"
+				+ "				throw new Exception();\n"
+				+ "			} catch (Exception e) {\n"
+				+ "			}\n"
+				+ "		});\n"
+				+ "	}";
+
+		assertChange(original, expected);
 	}
 
-	/**
-	 * Transformation is not carried out although it should be carried out.
-	 * <p>
-	 * This test is expected to fail as soon as the corresponding corner case
-	 * will have been fixed.
-	 */
 	@Test
 	void visit_ThrowingRuntimeException_shouldTransform() throws Exception {
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -459,7 +458,30 @@ class EnhancedForLoopToStreamForEachExceptionsASTVisitorTest extends UsesJDTUnit
 				+ "			throw new RuntimeException();\n"
 				+ "		}\n"
 				+ "	}";
+		
+		String expected = "" +
+				"	void throwRuntimeExceptionForEachString(List<String> strings) {\n"
+				+ "\n"
+				+ "		strings.forEach(s -> {\n"
+				+ "			throw new RuntimeException();\n"
+				+ "		});\n"
+				+ "	}";
 
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_ThrowingUnhandledException_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.List.class.getName());
+
+		String original = "" +
+				"	void throwUnhandledExceptionForEachString(List<String> strings) {\n"
+				+ "\n"
+				+ "		for (String s : strings) {\n"
+				+ "			throw new Exception();\n"
+				+ "		}\n"
+				+ "	}";
+		
 		assertNoChange(original);
 	}
 }
