@@ -225,12 +225,6 @@ class EnhancedForLoopToStreamForEachExceptionsASTVisitorTest extends UsesJDTUnit
 		assertChange(original, expected);
 	}
 
-	/**
-	 * Transformation to invalid code.
-	 * <p>
-	 * This test is expected to fail as soon as the corresponding corner case
-	 * will have been fixed.
-	 */
 	@Test
 	void visit_CornerCaseAfterCatchClauseWithUnionType_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -261,42 +255,9 @@ class EnhancedForLoopToStreamForEachExceptionsASTVisitorTest extends UsesJDTUnit
 				+ "	static class Exception2 extends Exception {\n"
 				+ "	}";
 
-		String expected = "" +
-				"	void tryUseStringMethods(List<String> strings) throws Exception {\n"
-				+ "\n"
-				+ "		 strings.forEach(s -> {\n"
-				+ "			try {\n"
-				+ "				useString1(s);\n"
-				+ "				useString2(s);\n"
-				+ "			} catch (Exception1 | Exception2 e) {\n"
-				+ "			}\n"
-				+ "			useString2(s);\n"
-				+ "		});\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	void useString1(String s) throws Exception1 {\n"
-				+ "		throw new Exception1();\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	void useString2(String s) throws Exception2 {\n"
-				+ "		throw new Exception2();\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	static class Exception1 extends Exception {\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	static class Exception2 extends Exception {\n"
-				+ "	}";
-
-		assertChange(original, expected);
+		assertNoChange(original);
 	}
 
-	/**
-	 * Transformation to invalid code.
-	 * <p>
-	 * This test is expected to fail as soon as the corresponding corner case
-	 * will have been fixed.
-	 */
 	@Test
 	void visit_MethodThrowingExceptionInCatchBlock_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -317,31 +278,9 @@ class EnhancedForLoopToStreamForEachExceptionsASTVisitorTest extends UsesJDTUnit
 				+ "		throw new Exception();\n"
 				+ "	}";
 
-		String expected = "" +
-				"	void tryUseStringMethods(List<String> strings) throws Exception {\n"
-				+ "\n"
-				+ "		 strings.forEach(s -> {\n"
-				+ "			try {\n"
-				+ "				useString(s);\n"
-				+ "			} catch (Exception e) {\n"
-				+ "				useString(s);\n"
-				+ "			}\n"
-				+ "		});\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	void useString(String s) throws Exception {\n"
-				+ "		throw new Exception();\n"
-				+ "	}";
-
-		assertChange(original, expected);
+		assertNoChange(original);
 	}
 
-	/**
-	 * Transformation to invalid code.
-	 * <p>
-	 * This test is expected to fail as soon as the corresponding corner case
-	 * will have been fixed.
-	 */
 	@Test
 	void visit_MethodThrowingExceptionInFinallyBlock_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -364,25 +303,7 @@ class EnhancedForLoopToStreamForEachExceptionsASTVisitorTest extends UsesJDTUnit
 				+ "		throw new Exception();\n"
 				+ "	}";
 
-		String expected = "" +
-				"	void tryUseStringMethods(List<String> strings) throws Exception {\n"
-				+ "\n"
-				+ "		strings.forEach(s -> {\n"
-				+ "			try {\n"
-				+ "				useString(s);\n"
-				+ "			} catch (Exception e) {\n"
-				+ "				\n"
-				+ "			} finally {\n"
-				+ "				useString(s);\n"
-				+ "			}\n"
-				+ "		});\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	void useString(String s) throws Exception {\n"
-				+ "		throw new Exception();\n"
-				+ "	}";
-
-		assertChange(original, expected);
+		assertNoChange(original);
 	}
 
 	/**
@@ -418,58 +339,41 @@ class EnhancedForLoopToStreamForEachExceptionsASTVisitorTest extends UsesJDTUnit
 		assertChange(original, expected);
 	}
 
-	@Test
-	void visit_ThrowingHandledException_shouldTransform() throws Exception {
+	@ParameterizedTest
+	@ValueSource(strings = {
+			""
+					+ "			try {\n"
+					+ "				throw new Exception();\n"
+					+ "			} catch (Exception e) {\n"
+					+ "			}",
+			""
+					+ "			throw new RuntimeException();",
+			""
+					+ "			throw new IllegalArgumentException();",
+			""
+					+ "			throw new Error();"
+	})
+	void visit_ThrowStatementInsideLoopBody_shouldTransform(String codeInsideLoopBody) throws Exception {
 		defaultFixture.addImport(java.util.List.class.getName());
-
 		String original = "" +
-				"	void throwAndCatchExceptionForEachString(List<String> strings) {\n"
+				"	void throwStatementInsideLoopBody(List<String> strings) {\n"
 				+ "\n"
 				+ "		for (String s : strings) {\n"
-				+ "			try {\n"
-				+ "				throw new Exception();\n"
-				+ "			} catch (Exception e) {\n"
-				+ "			}\n"
+				+ codeInsideLoopBody + "\n"
 				+ "		}\n"
 				+ "	}";
 
 		String expected = "" +
-				"	void throwAndCatchExceptionForEachString(List<String> strings) {\n"
+				"	void throwStatementInsideLoopBody(List<String> strings) {\n"
 				+ "\n"
 				+ "		strings.forEach(s -> {\n"
-				+ "			try {\n"
-				+ "				throw new Exception();\n"
-				+ "			} catch (Exception e) {\n"
-				+ "			}\n"
+				+ codeInsideLoopBody + "\n"
 				+ "		});\n"
 				+ "	}";
 
 		assertChange(original, expected);
 	}
 
-	@Test
-	void visit_ThrowingRuntimeException_shouldTransform() throws Exception {
-		defaultFixture.addImport(java.util.List.class.getName());
-
-		String original = "" +
-				"	void throwRuntimeExceptionForEachString(List<String> strings) {\n"
-				+ "\n"
-				+ "		for (String s : strings) {\n"
-				+ "			throw new RuntimeException();\n"
-				+ "		}\n"
-				+ "	}";
-		
-		String expected = "" +
-				"	void throwRuntimeExceptionForEachString(List<String> strings) {\n"
-				+ "\n"
-				+ "		strings.forEach(s -> {\n"
-				+ "			throw new RuntimeException();\n"
-				+ "		});\n"
-				+ "	}";
-
-		assertChange(original, expected);
-	}
-	
 	@Test
 	void visit_ThrowingUnhandledException_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -481,7 +385,7 @@ class EnhancedForLoopToStreamForEachExceptionsASTVisitorTest extends UsesJDTUnit
 				+ "			throw new Exception();\n"
 				+ "		}\n"
 				+ "	}";
-		
+
 		assertNoChange(original);
 	}
 }
