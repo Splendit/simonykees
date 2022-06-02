@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
-public class ReplaceRequestMappingAnnotationASTVisitorTest extends UsesJDTUnitFixture {
+class ReplaceRequestMappingAnnotationASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
@@ -37,7 +37,7 @@ public class ReplaceRequestMappingAnnotationASTVisitorTest extends UsesJDTUnitFi
 
 	@ParameterizedTest
 	@MethodSource(value = "mapToAnnotationReplacement")
-	public void visit_RequestMappingWithRequestMethodGet_shouldTransform(String requestMethod,
+	void visit_RequestMappingWithRequestMethodGet_shouldTransform(String requestMethod,
 			String annotationReplacement) throws Exception {
 
 		defaultFixture.addImport("org.springframework.web.bind.annotation.RequestMethod");
@@ -57,7 +57,7 @@ public class ReplaceRequestMappingAnnotationASTVisitorTest extends UsesJDTUnitFi
 	}
 
 	@Test
-	public void visit_RequestMethodGetInArrayInitializer_shouldTransform() throws Exception {
+	void visit_RequestMethodGetInArrayInitializer_shouldTransform() throws Exception {
 
 		defaultFixture.addImport("org.springframework.web.bind.annotation.RequestMethod");
 		String original = "" +
@@ -76,7 +76,7 @@ public class ReplaceRequestMappingAnnotationASTVisitorTest extends UsesJDTUnitFi
 	}
 
 	@Test
-	public void visit_StaticImportOfRequestMethodGet_shouldTransform() throws Exception {
+	void visit_StaticImportOfRequestMethodGet_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.springframework.web.bind.annotation.RequestMethod.GET", true, false);
 		String original = "" +
 				"	@RequestMapping(value = \"/hello\", method = GET)\n"
@@ -94,7 +94,7 @@ public class ReplaceRequestMappingAnnotationASTVisitorTest extends UsesJDTUnitFi
 	}
 
 	@Test
-	public void visit_RequestMappingNotSpring_shouldNotTransform() throws Exception {
+	void visit_RequestMappingNotSpring_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.springframework.web.bind.annotation.RequestMethod");
 		String original = "" +
 				"	@RequestMapping(value = \"/hello\", method = RequestMethod.GET)\n"
@@ -111,7 +111,7 @@ public class ReplaceRequestMappingAnnotationASTVisitorTest extends UsesJDTUnitFi
 	}
 
 	@Test
-	public void visit_NoRequestMethodFound_shouldNotTransform() throws Exception {
+	void visit_NoRequestMethodFound_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.springframework.web.bind.annotation.RequestMethod");
 		String original = "" +
 				"	@RequestMapping(value = \"/hello\")\n"
@@ -123,7 +123,7 @@ public class ReplaceRequestMappingAnnotationASTVisitorTest extends UsesJDTUnitFi
 	}
 
 	@Test
-	public void visit_MultipleRequestMethods_shouldNotTransform() throws Exception {
+	void visit_MultipleRequestMethods_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.springframework.web.bind.annotation.RequestMethod");
 
 		String original = "" +
@@ -136,7 +136,7 @@ public class ReplaceRequestMappingAnnotationASTVisitorTest extends UsesJDTUnitFi
 	}
 
 	@Test
-	public void visit_NotSupportedRequestMethod_shouldNotTransform() throws Exception {
+	void visit_NotSupportedRequestMethod_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.springframework.web.bind.annotation.RequestMethod");
 
 		String original = "" +
@@ -149,12 +149,41 @@ public class ReplaceRequestMappingAnnotationASTVisitorTest extends UsesJDTUnitFi
 	}
 
 	@Test
-	public void visit_RequestMappingAnnotationOnType_shouldNotTransform() throws Exception {
+	void visit_RequestMappingAnnotationOnType_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.springframework.web.bind.annotation.RequestMethod");
 		String original = "" +
 				"@RequestMapping(value = \"/hello\", method = RequestMethod.GET)\n"
 				+ "public class Test_RequestMappingAnnotationOnType {\n"
 				+ "\n"
+				+ "}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_postMethodWithConsumesProperty_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.springframework.web.bind.annotation.RequestMethod");
+		String original = ""
+				+ "@RequestMapping(value = \"/hello\", method = RequestMethod.POST, consumes=\"text/json\")\n"
+				+ "public String hello(@RequestParam String name) {\n"
+				+ "	return String.format(\"Hello %s!\", name);\n"
+				+ "}";
+		String expected = ""
+				+ "@PostMapping(value = \"/hello\", consumes=\"text/json\")\n"
+				+ "public String hello(@RequestParam String name) {\n"
+				+ "	return String.format(\"Hello %s!\", name);\n"
+				+ "}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_getMethodWithConsumesProperty_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("org.springframework.web.bind.annotation.RequestMethod");
+		String original = ""
+				+ "@RequestMapping(value = \"/hello\", method = RequestMethod.GET, consumes=\"text/json\")\n"
+				+ "public String hello(@RequestParam String name) {\n"
+				+ "	return String.format(\"Hello %s!\", name);\n"
 				+ "}";
 
 		assertNoChange(original);
