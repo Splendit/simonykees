@@ -175,24 +175,6 @@ public class ExceptionHandlingAnalyzer {
 			.collect(Collectors.toList());
 	}
 
-	// ???
-	static List<String> collectHandledExceptionsForAutomaticClose(ASTNode excludedAncestor,
-			TryStatement tryStatementNode) {
-		List<TryStatement> tryStatements = new ArrayList<>();
-		tryStatements.add(tryStatementNode);
-		ASTNode parent = tryStatementNode.getParent();
-		while (parent != null && parent != excludedAncestor) {
-			if (parent.getLocationInParent() == TryStatement.BODY_PROPERTY) {
-				tryStatements.add((TryStatement) parent.getParent());
-			}
-			parent = parent.getParent();
-		}
-
-		return tryStatements.stream()
-			.flatMap(tryStatement -> collectHandledExceptionTypes(tryStatementNode).stream())
-			.collect(Collectors.toList());
-	}
-
 	private ExceptionHandlingAnalyzer() {
 		/*
 		 * private default constructor to hide implicit public one

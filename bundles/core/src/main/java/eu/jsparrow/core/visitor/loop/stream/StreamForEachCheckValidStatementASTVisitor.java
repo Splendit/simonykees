@@ -144,7 +144,8 @@ public class StreamForEachCheckValidStatementASTVisitor extends UnhandledExcepti
 	}
 
 	public boolean isStatementsValid() {
-		return !containsBreakStatement && !containsContinueStatement && !containsReturnStatement
-				&& !containsCheckedException && !containsThrowStatement && invalidVariables.isEmpty();
+		return !containsUnhandledException() &&
+				!containsBreakStatement && !containsContinueStatement && !containsReturnStatement &&
+				invalidVariables.isEmpty();
 	}
 }

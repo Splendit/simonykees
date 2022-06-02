@@ -388,4 +388,110 @@ class EnhancedForLoopToStreamForEachExceptionsASTVisitorTest extends UsesJDTUnit
 
 		assertNoChange(original);
 	}
+
+	@Test
+	void visit_NestedTryStatements_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.util.List.class.getName());
+
+		String declarations = ""
+				+ "	void useString(String s) throws Exception1, Exception2, Exception3 {\n"
+				+ "		throw new Exception1();\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	static class Exception1 extends Exception {\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	static class Exception2 extends Exception {\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	static class Exception3 extends Exception {\n"
+				+ "	}";
+
+		String nestedTryStatements = ""
+				+ "			try {\n"
+				+ "				try {\n"
+				+ "					try {\n"
+				+ "						useString(s);\n"
+				+ "					} catch (Exception1 e) {\n"
+				+ "					}\n"
+				+ "				} catch (Exception2 e) {\n"
+				+ "\n"
+				+ "				}\n"
+				+ "			} catch (Exception3 e) {\n"
+				+ "\n"
+				+ "			}";
+
+		String original = "" +
+				"	void nestedTryStatements(List<String> strings) {\n"
+				+ "\n"
+				+ "		for (String s : strings) {\n"
+				+ nestedTryStatements
+				+ "\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "	\n"
+				+ declarations;
+
+		String expected = "" +
+				"	void nestedTryStatements(List<String> strings) {\n"
+				+ "\n"
+				+ "		 strings.forEach(s -> {\n"
+				+ nestedTryStatements
+				+ "\n"
+				+ "		});\n"
+				+ "	}\n"
+				+ "	\n"
+				+ declarations;
+
+		assertChange(original, expected);
+
+	}
+
+	@Test
+	void visit_UnhandledExceptionInAnonymousClass_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.util.List.class.getName());
+
+		String anonymousClassMembers = ""
+				+ "				{\n"
+				+ "					useString(s);\n"
+				+ "				}\n"
+				+ "\n"
+				+ "				@Override\n"
+				+ "				public void close() throws Exception {\n"
+				+ "\n"
+				+ "				};\n"
+				+ "\n"
+				+ "				void useString(String s) throws Exception {\n"
+				+ "\n"
+				+ "				}\n"
+				+ "\n";
+
+		String original = ""
+				+ "	void unhandledExeptionInAnonymousClass(List<String> strings) {\n"
+				+ "\n"
+				+ "		for (String s : strings) {\n"
+				+ "			try (AutoCloseable closeable = new AutoCloseable() {\n"
+				+ anonymousClassMembers
+				+ "			}) {\n"
+				+ "			} catch (Exception e) {\n"
+				+ "\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = ""
+				+ "	void unhandledExeptionInAnonymousClass(List<String> strings) {\n"
+				+ "\n"
+				+ "		strings.forEach(s -> {\n"
+				+ "			try (AutoCloseable closeable = new AutoCloseable() {\n"
+				+ anonymousClassMembers
+				+ "			}) {\n"
+				+ "			} catch (Exception e) {\n"
+				+ "\n"
+				+ "			}\n"
+				+ "		});\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
 }

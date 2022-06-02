@@ -16,8 +16,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
  */
 public class UnhandledExceptionVisitorNEW extends ASTVisitor {
 	private final ASTNode excludedAncestor;
-	protected boolean containsCheckedException = false;
-	protected boolean containsThrowStatement = false;
+	private boolean containsCheckedException = false;
 
 	public UnhandledExceptionVisitorNEW(ASTNode excludedAncestor) {
 		this.excludedAncestor = excludedAncestor;
@@ -54,13 +53,13 @@ public class UnhandledExceptionVisitorNEW extends ASTVisitor {
 	@Override
 	public boolean visit(ThrowStatement throwStatementNode) {
 		if (!ExceptionHandlingAnalyzer.checkThrowStatement(excludedAncestor, throwStatementNode)) {
-			containsThrowStatement = true;
+			containsCheckedException = true;
 			return false;
 		}
 		return true;
 	}
 
-	public boolean throwsException() {
+	public boolean containsUnhandledException() {
 		return containsCheckedException;
 	}
 }
