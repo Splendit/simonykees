@@ -85,12 +85,14 @@ class ReplaceRequestMappingAnnotationRuleTest extends SingleRuleTest {
 		assertThat(description.getTags(),
 				contains(Tag.JAVA_1_5, Tag.SPRING, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
+		String descriptionText = ""
+				+ "The Spring Framework 4.3 introduced some composed annotations like '@GetMapping', '@PostMapping', "
+				+ "etc, as an alternative of '@RequestMapping(method=...)' for annotating HTTP request handlers. "
+				+ "Accordingly, this rule replaces the '@RequestMapping' annotations with their equivalent dedicated "
+				+ "alternatives, for example, '@RequestMapping(value = \"/hello\", method = RequestMethod.GET)' is "
+				+ "replaced by '@GetMapping(value = \"/hello\")'.";
 		assertThat(description.getDescription(),
-				equalTo("Version 4.3 of the Spring Framework introduced annotations like '@GetMapping' or '@PostMapping'"
-						+ " to be used instead of '@RequestMapping' when a certain request method is specified."
-						+ " Accordingly, this rule tries to replace annotations."
-						+ " For example,  '@RequestMapping(value = \"/hello\", method = RequestMethod.GET)'"
-						+ " can be replaced by '@GetMapping(value = \"/hello\")'."));
+				equalTo(descriptionText));
 	}
 
 	@Test
