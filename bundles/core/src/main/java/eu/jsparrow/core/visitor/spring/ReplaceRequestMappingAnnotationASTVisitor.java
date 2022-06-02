@@ -60,7 +60,6 @@ public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImport
 	private static final String DELETE_MAPPING = "DeleteMapping"; //$NON-NLS-1$
 	private static final String METHOD = "method"; //$NON-NLS-1$
 	private static final Map<String, String> MAP_TO_NEW_ANNOTATION;
-	private static final String CONSUMES = "consumes"; //$NON-NLS-1$
 
 	static {
 		Map<String, String> tmpMap = new HashMap<>();
@@ -121,12 +120,6 @@ public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImport
 		} else {
 			return true;
 		}
-
-		boolean unsupportedAttribute = usesUnsupportedAttribute(memberValuePairs, requestMethodIdentifier);
-		if (unsupportedAttribute) {
-			return true;
-		}
-
 		if (!MAP_TO_NEW_ANNOTATION.containsKey(requestMethodIdentifier)) {
 			return true;
 		}
@@ -143,16 +136,6 @@ public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImport
 		addMarkerEvent(node);
 		onRewrite();
 		return true;
-	}
-
-	private boolean usesUnsupportedAttribute(List<MemberValuePair> memberValuePairs, String requestMethodIdentifier) {
-		if (GET.equals(requestMethodIdentifier)) {
-			return memberValuePairs.stream()
-				.map(MemberValuePair::getName)
-				.map(SimpleName::getIdentifier)
-				.anyMatch(CONSUMES::equals);
-		}
-		return false;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

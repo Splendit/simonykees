@@ -87,7 +87,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>4.2.9.RELEASE</version>
+			<version>4.3.4.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -422,13 +422,13 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>springframework-4.2.9.RELEASE</id>
+						<id>springframework-4.3.4.RELEASE</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
 						</goals>
 						<configuration>
-							<artifact>org.springframework:spring-web:4.2.9.RELEASE</artifact>
+							<artifact>org.springframework:spring-web:4.3.4.RELEASE</artifact>
 						</configuration>
 					</execution>
 					<execution>

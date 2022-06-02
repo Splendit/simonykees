@@ -176,16 +176,4 @@ class ReplaceRequestMappingAnnotationASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
-
-	@Test
-	void visit_getMethodWithConsumesProperty_shouldNotTransform() throws Exception {
-		defaultFixture.addImport("org.springframework.web.bind.annotation.RequestMethod");
-		String original = ""
-				+ "@RequestMapping(value = \"/hello\", method = RequestMethod.GET, consumes=\"text/json\")\n"
-				+ "public String hello(@RequestParam String name) {\n"
-				+ "	return String.format(\"Hello %s!\", name);\n"
-				+ "}";
-
-		assertNoChange(original);
-	}
 }

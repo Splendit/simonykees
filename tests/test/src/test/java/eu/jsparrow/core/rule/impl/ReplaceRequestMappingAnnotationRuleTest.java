@@ -40,6 +40,11 @@ class ReplaceRequestMappingAnnotationRuleTest extends SingleRuleTest {
 	}
 
 	@Test
+	void test_requiredLibraries() throws Exception {
+		assertThat(rule.requiredLibraries(), equalTo("Spring Web 4.3.5 or later"));
+	}
+	
+	@Test
 	void calculateEnabledForProjectShouldBeEnabled() throws Exception {
 		addToClasspath(testProject,
 				asList(generateMavenEntryFromDepedencyString("org.springframework", "spring-web", "5.3.19")));
@@ -64,7 +69,7 @@ class ReplaceRequestMappingAnnotationRuleTest extends SingleRuleTest {
 	@Test
 	void calculateEnabledForProjectShouldBeDisabledForJava5() throws Exception {
 		addToClasspath(testProject,
-				asList(generateMavenEntryFromDepedencyString("org.springframework", "spring-web", "4.2.9.RELEASE")));
+				asList(generateMavenEntryFromDepedencyString("org.springframework", "spring-web", "4.3.4.RELEASE")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
 
 		rule.calculateEnabledForProject(testProject);

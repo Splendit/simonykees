@@ -24,7 +24,7 @@ import eu.jsparrow.rules.common.Tag;
 public class ReplaceRequestMappingAnnotationRule
 		extends RefactoringRuleImpl<ReplaceRequestMappingAnnotationASTVisitor> {
 
-	private static final String SPRING_MIN_VERSION = "4.3.0"; //$NON-NLS-1$
+	private static final String SPRING_MIN_VERSION = "4.3.5"; //$NON-NLS-1$
 	private static final String REQUEST_MAPPING_ANNOTATION = "org.springframework.web.bind.annotation.RequestMapping"; //$NON-NLS-1$
 	public static final String RULE_ID = "ReplaceRequestMappingAnnotation"; //$NON-NLS-1$
 
@@ -45,7 +45,7 @@ public class ReplaceRequestMappingAnnotationRule
 
 	@Override
 	public String requiredLibraries() {
-		return "Spring 4.3 or later"; //$NON-NLS-1$
+		return "Spring Web 4.3.5 or later"; //$NON-NLS-1$
 	}
 
 	@Override
