@@ -88,6 +88,8 @@ import eu.jsparrow.jdt.ls.core.internal.corrections.proposals.TypeChangeCorrecti
 import eu.jsparrow.jdt.ls.core.internal.preferences.PreferenceManager;
 import eu.jsparrow.jdt.ls.core.internal.text.correction.RefactorProposalUtility;
 import eu.jsparrow.jdt.ls.core.internal.text.correction.RefactoringCorrectionCommandProposal;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
+import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 
 /**
  * RefactorProcessor
@@ -254,33 +256,23 @@ public class RefactorProcessor {
 		if (cic == null) {
 			return false;
 		}
+		
+		FunctionalInterfaceResolver resolver = new FunctionalInterfaceResolver(node -> true);
+		RefactoringMarkers listener = RefactoringMarkers.getFor("FunctionalInterfaceResolver");
+		resolver.addMarkerListener(listener);
 
-		/*
-		 * TODO: 
-		 * 1. Replace the LambdaExpressionsFixCore with a jSparrow Resolver Instance.
-		 * 2. How to create a FixCorrectionProposal with from the results of a resolver.  
-		 * 		-> Go through all the methods defined in FixCorrectionProposals and its parents. 
-		 * 		-> study all the methods that are related to textEdits, document changes, positions, etc,
-		 * 		-> Is it more convenient for us to use ASTRewriteCorrectionProposal? 
-		 * 
-		 */
-		FunctionalInterfaceResolver r = new FunctionalInterfaceResolver(node -> true);
 		CompilationUnit root = context.getASTRoot();
 		ASTRewrite rewrite = ASTRewrite.create(root.getAST());
-		r.setASTRewrite(rewrite);
-		cic.accept(r);
-		
-		try {
-			TextEdit edits = rewrite.rewriteAST();
-			if(!edits.hasChildren()) { // FIXME: find a better way to check whether there was a finding or not. 
-				return false;
-			}
-		} catch (JavaModelException | IllegalArgumentException e) {
-			e.printStackTrace();
+		resolver.setASTRewrite(rewrite);
+		root.accept(resolver);
+
+		List<RefactoringMarkerEvent> events = listener.getEvents();
+		if(events.isEmpty()) {
+			return false;
 		}
-		
+
 		ASTRewriteCorrectionProposal rewriteProposal = new ASTRewriteCorrectionProposal(
-				r.getDescription().getName(), 
+				resolver.getDescription().getName(), 
 				CodeActionKind.Refactor, 
 				context.getCompilationUnit(), 
 				rewrite, 
