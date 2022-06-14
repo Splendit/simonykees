@@ -4,7 +4,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Registration
 Bundle-SymbolicName: eu.jsparrow.registration
 Bundle-Version: 4.11.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: eu.jsparrow.license.api,
  eu.jsparrow.i18n,
  eu.jsparrow.logging,

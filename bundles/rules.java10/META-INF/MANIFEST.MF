@@ -4,7 +4,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: jsparrow :: rules java10
 Bundle-SymbolicName: eu.jsparrow.rules.java10
 Bundle-Version: 4.11.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.i18n,

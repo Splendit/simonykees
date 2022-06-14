@@ -4,7 +4,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow I18n
 Bundle-SymbolicName: eu.jsparrow.i18n
 Bundle-Version: 4.11.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.eclipse.osgi;bundle-version="[3.10.0,4.0.0)"
 Export-Package: eu.jsparrow.i18n
 Bundle-ActivationPolicy: lazy
