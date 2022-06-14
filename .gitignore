@@ -3,6 +3,8 @@ bin/
 tmp/
 lib/
 !bundles/license.netlicensing/lib/netlicensing-client-*.jar
+!bundles/lsp/lib/jsoup-*.jar
+!bundles/lsp/lib/remark-*.jar
 *.tmp
 *.bak
 *.swp
