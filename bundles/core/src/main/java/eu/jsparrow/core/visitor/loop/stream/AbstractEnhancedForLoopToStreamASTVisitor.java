@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import eu.jsparrow.core.markers.common.EnhancedForLoopToStreamEvent;
 import eu.jsparrow.core.visitor.lambdaforeach.AbstractLambdaForEachASTVisitor;
 import eu.jsparrow.core.visitor.sub.EffectivelyFinalVisitor;
-import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitorNEW;
+import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
@@ -104,7 +104,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 	/**
 	 * Checks whether the given expression contains a method invocation which
 	 * throws an unchecked exception. Makes use of
-	 * {@link UnhandledExceptionVisitorNEW}.
+	 * {@link UnhandledExceptionVisitor}.
 	 * 
 	 * @param expression
 	 *            the expression to be checked
@@ -113,7 +113,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 	 *         or {@code false} otherwise.
 	 */
 	protected boolean throwsException(ASTNode expression) {
-		UnhandledExceptionVisitorNEW visitor = new UnhandledExceptionVisitorNEW(expression);
+		UnhandledExceptionVisitor visitor = new UnhandledExceptionVisitor(expression);
 		expression.accept(visitor);
 		return visitor.containsUnhandledException();
 	}

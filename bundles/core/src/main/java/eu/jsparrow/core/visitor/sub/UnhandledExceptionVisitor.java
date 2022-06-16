@@ -14,11 +14,11 @@ import org.eclipse.jdt.core.dom.TryStatement;
  * @since 2.1.1
  *
  */
-public class UnhandledExceptionVisitorNEW extends ASTVisitor {
+public class UnhandledExceptionVisitor extends ASTVisitor {
 	private final ASTNode excludedAncestor;
 	private boolean containsCheckedException = false;
 
-	public UnhandledExceptionVisitorNEW(ASTNode excludedAncestor) {
+	public UnhandledExceptionVisitor(ASTNode excludedAncestor) {
 		this.excludedAncestor = excludedAncestor;
 	}
 

@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import eu.jsparrow.core.markers.common.BufferedReaderLinesEvent;
 import eu.jsparrow.core.visitor.sub.ExternalNonEffectivelyFinalReferencesVisitor;
 import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
-import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitorNEW;
+import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -131,7 +131,7 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 			return;
 		}
 
-		UnhandledExceptionVisitorNEW unhnadledExceptionsVisitor = new UnhandledExceptionVisitorNEW(body);
+		UnhandledExceptionVisitor unhnadledExceptionsVisitor = new UnhandledExceptionVisitor(body);
 		body.accept(unhnadledExceptionsVisitor);
 		if(unhnadledExceptionsVisitor.containsUnhandledException()) {
 			return;
