@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.common.UsesJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.bufferedreader.BufferedReaderLinesASTVisitor;
 
+@SuppressWarnings("nls")
 class BufferedReaderLinesExceptionASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
@@ -24,13 +25,9 @@ class BufferedReaderLinesExceptionASTVisitorTest extends UsesJDTUnitFixture {
 		fixtureProject.clear();
 	}
 
-	/**
-	 * Transformation to invalid code.<br>
-	 * This test is expected to fail as soon as the corresponding bug has been
-	 * fixed.
-	 */
 	@Test
 	void visit_InvocationThrowingExceptionInFinallyBlock_shouldNotTransform() throws Exception {
+		
 		String original = "" +
 				"	void useLineThrowingExceptionInFinallyBlock(Path path) {\n"
 				+ "\n"
@@ -53,28 +50,7 @@ class BufferedReaderLinesExceptionASTVisitorTest extends UsesJDTUnitFixture {
 				+ "		throw new Exception();\n"
 				+ "	}";
 
-		String expected = ""
-				+ "	void useLineThrowingExceptionInFinallyBlock(Path path) {\n"
-				+ "\n"
-				+ "		try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {\n"
-				+ "			bufferedReader.lines().forEach(line -> {\n"
-				+ "				try {\n"
-				+ "					useLineThrowingException(line);\n"
-				+ "				} catch (Exception exc) {\n"
-				+ "\n"
-				+ "				} finally {\n"
-				+ "					useLineThrowingException(\"\");\n"
-				+ "				}\n"
-				+ "			});\n"
-				+ "		} catch (Exception e) {\n"
-				+ "		}\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	void useLineThrowingException(String line) throws Exception {\n"
-				+ "		throw new Exception();\n"
-				+ "	}";
-
-		assertChange(original, expected);
+		assertNoChange(original);
 	}
 
 	/**
@@ -104,8 +80,7 @@ class BufferedReaderLinesExceptionASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertNoChange(original);
 	}
-	
-	
+
 	/**
 	 * Code is not transformed although it should be transformed.<br>
 	 * This test is expected to fail as soon as the corresponding bug has been

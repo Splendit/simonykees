@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.common.UsesJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamFindFirstASTVisitor;
 
+
+@SuppressWarnings("nls")
 class EnhancedForLoopToStreamFindFirstExceptionASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
@@ -19,15 +21,10 @@ class EnhancedForLoopToStreamFindFirstExceptionASTVisitorTest extends UsesJDTUni
 		fixtureProject.clear();
 	}
 
-	/**
-	 * Not transformed although it should be transformed.<br>
-	 * This test is expected to fail as soon as the corresponding bug has been
-	 * fixed.
-	 */
 	@Test
-	void visit_loopWithBreakToAllMatch_shouldTransform() throws Exception {
+	void visit_loopWithBreakToFindFirst_shouldTransform() throws Exception {
 
-		defaultFixture.addImport("java.util.List");
+		defaultFixture.addImport("java.util.List");		
 		String original = "" +
 				"	String loopWithBreakToFindFirstWithRuntimeException(List<String> strings) {\n"
 				+ "		String result = \"\";\n"
@@ -43,7 +40,17 @@ class EnhancedForLoopToStreamFindFirstExceptionASTVisitorTest extends UsesJDTUni
 				+ "	boolean checkStringThrowingRuntimeException(String s) throws RuntimeException {\n"
 				+ "		throw new RuntimeException();\n"
 				+ "	}";
+		
+		String expected = "" +
+				"	String loopWithBreakToFindFirstWithRuntimeException(List<String> strings) {\n"
+				+ "		String result = strings.stream().filter(string -> checkStringThrowingRuntimeException(string)).findFirst().orElse(\"\");\n"
+				+ "		return result;\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	boolean checkStringThrowingRuntimeException(String s) throws RuntimeException {\n"
+				+ "		throw new RuntimeException();\n"
+				+ "	}";
 
-		assertNoChange(original);
+		assertChange(original, expected);
 	}
 }

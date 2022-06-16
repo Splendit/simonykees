@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import eu.jsparrow.core.visitor.sub.ExternalNonEffectivelyFinalReferencesVisitor;
 import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
 import eu.jsparrow.core.visitor.sub.ReferencedFieldsVisitor;
-import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
+import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitorNEW;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -52,9 +52,9 @@ public class AbstractOptionalASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	protected boolean containsUnhandledException(Statement thenStatement) {
-		UnhandledExceptionVisitor visitor = new UnhandledExceptionVisitor();
+		UnhandledExceptionVisitorNEW visitor = new UnhandledExceptionVisitorNEW(thenStatement);
 		thenStatement.accept(visitor);
-		return visitor.throwsException();
+		return visitor.containsUnhandledException();
 	}
 
 	protected boolean containsFlowControlStatement(Statement thenStatement) {
