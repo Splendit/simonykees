@@ -47,7 +47,23 @@ class EnhancedForLoopToStreamTakeWhileExceptionsASTVisitorTest extends UsesJDTUn
 				+ "		return s != null;\n"
 				+ "	}";
 
-		assertNoChange(original);
+		String expected = "" +
+				"	void loopHandledThrowExceptionAfterFirstIf() throws Exception {\n"
+				+ "\n"
+				+ "		final List<String> strings = new ArrayList<>();\n"
+				+ "		strings.stream().takeWhile(string -> checkString(string)).forEach(string -> {\n"
+				+ "			try {\n"
+				+ "				throw new Exception();\n"
+				+ "			} catch (Exception exc) {\n"
+				+ "			}\n"
+				+ "		});\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	boolean checkString(String s) {\n"
+				+ "		return s != null;\n"
+				+ "	}";
+
+		assertChange(original, expected);
 	}
 
 	@Test
@@ -125,11 +141,6 @@ class EnhancedForLoopToStreamTakeWhileExceptionsASTVisitorTest extends UsesJDTUn
 		assertNoChange(original);
 	}
 
-	/**
-	 * Not Transformed but should be transformed.<br>
-	 * This test is expected to fail as soon as the corresponding bug has been
-	 * fixed.
-	 */
 	@Test
 	void visit_ThrowRuntimeExceptionAfterFirstIf_shouldTransform() throws Exception {
 		String original = "" +
@@ -153,7 +164,25 @@ class EnhancedForLoopToStreamTakeWhileExceptionsASTVisitorTest extends UsesJDTUn
 				+ "\n"
 				+ "	}";
 
-		assertNoChange(original);
+		String expected = "" +
+				"	void loopStatementThrowRuntimeExceptionAfterFirstIf() {\n"
+				+ "\n"
+				+ "		final List<String> strings = new ArrayList<>();\n"
+				+ "		strings.stream().takeWhile(string -> checkString(string)).forEach(string -> {\n"
+				+ "			useString(string);\n"
+				+ "			throw new RuntimeException();\n"
+				+ "		});\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	boolean checkString(String s) {\n"
+				+ "		return true;\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	void useString(String s) {\n"
+				+ "\n"
+				+ "	}";
+
+		assertChange(original, expected);
 	}
 
 	@Test

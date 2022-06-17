@@ -216,7 +216,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 	}
 
 	@Test
-	public void visit_havingThrowStatement_shouldNotTransform() throws Exception {
+	public void visit_havingThrowExceptionStatement_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		List<String> values = new ArrayList<>();" +
 				"		for(String value : values) {\n" +
@@ -224,7 +224,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 				"				break;\n" +
 				"			}\n" +
 				"			System.out.println(value);\n" +
-				"			throw new RuntimeException();\n" + // <--
+				"			throw new Exception();\n" + // <--
 				"		}");
 	}
 

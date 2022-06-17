@@ -20,7 +20,6 @@ public class FlowBreakersVisitor extends ASTVisitor {
 	private boolean hasReturn = false;
 	private boolean hasBreak = false;
 	private boolean hasContinue = false;
-	private boolean hasThrow = false;
 
 	@Override
 	public boolean preVisit2(ASTNode node) {
@@ -30,12 +29,6 @@ public class FlowBreakersVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(ReturnStatement returnStatement) {
 		hasReturn = true;
-		return false;
-	}
-
-	@Override
-	public boolean visit(ThrowStatement throwStatement) {
-		hasThrow = true;
 		return false;
 	}
 
@@ -52,7 +45,7 @@ public class FlowBreakersVisitor extends ASTVisitor {
 	}
 
 	public boolean hasFlowBreakerStatement() {
-		return hasReturn || hasBreak || hasContinue || hasThrow;
+		return hasReturn || hasBreak || hasContinue;
 	}
 
 }

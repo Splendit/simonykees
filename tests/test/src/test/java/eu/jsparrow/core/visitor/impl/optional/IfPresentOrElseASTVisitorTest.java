@@ -63,7 +63,7 @@ class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"			System.out.print(value);\n" +
 				"		} else {\n" +
 				"			System.out.println(\"No value\");\n" +
-				"			throw new RuntimeException();\n" +
+				"			throw new Exception();\n" +
 				"		}");
 	}
 

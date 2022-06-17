@@ -42,8 +42,8 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * An {@link AbstractASTRewriteASTVisitor} for replacing loops iterating over
- * the lines of a file through a {@link java.io.BufferedReader} by a stream generated 
- * from {@link java.io.BufferedReader#lines}
+ * the lines of a file through a {@link java.io.BufferedReader} by a stream
+ * generated from {@link java.io.BufferedReader#lines}
  * <p/>
  * For example, the following:
  * 
@@ -79,15 +79,16 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(ForStatement forLoop) {
 		Statement body = forLoop.getBody();
 		Expression expression = forLoop.getExpression();
-		if(expression == null) {
+		if (expression == null) {
 			return true;
 		}
-		if(!forLoop.updaters().isEmpty()) {
+		if (!forLoop.updaters()
+			.isEmpty()) {
 			return true;
 		}
 		analyseLoop(forLoop, expression, body);
@@ -113,11 +114,11 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 
 		VariableDeclarationFragment lineDeclaration = preconditionVisitor.getLineDeclaration();
-		if (lineDeclaration.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY && 
+		if (lineDeclaration.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY &&
 				lineDeclaration.getLocationInParent() != VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
 			return;
 		}
-		
+
 		ExternalNonEffectivelyFinalReferencesVisitor visitor = new ExternalNonEffectivelyFinalReferencesVisitor(
 				Collections.singletonList(lineName.getIdentifier()));
 		body.accept(visitor);
@@ -133,7 +134,7 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		UnhandledExceptionVisitor unhnadledExceptionsVisitor = new UnhandledExceptionVisitor(body);
 		body.accept(unhnadledExceptionsVisitor);
-		if(unhnadledExceptionsVisitor.containsUnhandledException()) {
+		if (unhnadledExceptionsVisitor.containsUnhandledException()) {
 			return;
 		}
 
@@ -174,19 +175,19 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	private void removeFragment(VariableDeclarationFragment lineDeclaration) {
-		if(lineDeclaration.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {			
+		if (lineDeclaration.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
 			CommentRewriter commentRewriter = getCommentRewriter();
 			ASTNode parent = lineDeclaration.getParent();
 			VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) parent;
 			if (declarationStatement.fragments()
-					.size() == 1) {
+				.size() == 1) {
 				List<Comment> comments = commentRewriter.findRelatedComments(declarationStatement);
 				commentRewriter.saveBeforeStatement(declarationStatement, comments);
 				astRewrite.remove(declarationStatement, null);
 				return;
 			}
 			astRewrite.remove(lineDeclaration, null);
-			commentRewriter.saveCommentsInParentStatement(lineDeclaration);			
+			commentRewriter.saveCommentsInParentStatement(lineDeclaration);
 		}
 	}
 

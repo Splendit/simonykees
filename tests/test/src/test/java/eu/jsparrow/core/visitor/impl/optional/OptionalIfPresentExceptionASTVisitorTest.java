@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.common.UsesJDTUnitFixture;
 import eu.jsparrow.core.visitor.optional.OptionalIfPresentASTVisitor;
 
-@SuppressWarnings("nls")
 class OptionalIfPresentExceptionASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
@@ -62,11 +61,6 @@ class OptionalIfPresentExceptionASTVisitorTest extends UsesJDTUnitFixture {
 		assertNoChange(original);
 	}
 
-	/**
-	 * Not transformed but should be transformed.<br>
-	 * This test is expected to fail as soon as the corresponding bug has been
-	 * fixed.
-	 */
 	@Test
 	void visit_ifPresentAndBlankHandledThrowStatement_shouldTransform() throws Exception {
 
@@ -79,19 +73,25 @@ class OptionalIfPresentExceptionASTVisitorTest extends UsesJDTUnitFixture {
 				+ "					throw new Exception();\n"
 				+ "				}\n"
 				+ "			} catch (Exception exc) {\n"
-				+ "\n"
 				+ "			}\n"
 				+ "		}\n"
 				+ "	}";
 
-		assertNoChange(original);
+		String expected = "" +
+				"	public void ifPresentAndBlankHandledThrowStatement(Optional<String> optional) {\n"
+				+ "		optional.ifPresent(value -> {\n"
+				+ "			try {\n"
+				+ "				if (value.isBlank()) {\n"
+				+ "					throw new Exception();\n"
+				+ "				}\n"
+				+ "			} catch (Exception exc) {\n"
+				+ "			}\n"
+				+ "		});"
+				+ "	}";
+
+		assertChange(original, expected);
 	}
 
-	/**
-	 * Not transformed but should be transformed.<br>
-	 * This test is expected to fail as soon as the corresponding bug has been
-	 * fixed.
-	 */
 	@Test
 	void visit_ifPresentAndBlankThrowRuntimeException_shouldTransform() throws Exception {
 		String original = "" +
@@ -104,13 +104,18 @@ class OptionalIfPresentExceptionASTVisitorTest extends UsesJDTUnitFixture {
 				+ "		}\n"
 				+ "	}";
 
-		assertNoChange(original);
+		String expected = "" +
+				"	public void ifPresentAndBlankThrowRuntimeException(Optional<String> optional) {\n"
+				+ "		optional.ifPresent(value -> {\n"
+				+ "			if (value.isBlank()) {\n"
+				+ "				throw new RuntimeException();\n"
+				+ "			}\n"
+				+ "		});"
+				+ "	}";
+
+		assertChange(original, expected);
 	}
-	
-	
-	/**
-	 * Not transformed. OK
-	 */
+
 	@Test
 	void visit_ifPresentAndBlankThrowException_shouldNotTransform() throws Exception {
 		String original = "" +
