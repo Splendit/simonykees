@@ -418,6 +418,8 @@ public class Messages extends NLS {
 	public static String RemoveNullCheckBeforeInstanceofResolver_name;
 	public static String RemoveNullCheckBeforeInstanceofRule_description;
 	public static String RemoveNullCheckBeforeInstanceofRule_name;
+	public static String RemoveRedundantCloseRule_description;
+	public static String RemoveRedundantCloseRule_name;
 	public static String RemoveRedundantTypeCastRule_description;
 	public static String RemoveRedundantTypeCastRule_name;
 	public static String RemoveUnusedCodeRulePreviewWizard_removeUnusedPackagePrivateFields_pageTitle;
@@ -496,6 +498,8 @@ public class Messages extends NLS {
 	public static String ReplaceExpectedExceptionRule_name;
 	public static String ReplaceJUnitTimeoutAnnotationPropertyRule_description;
 	public static String ReplaceJUnitTimeoutAnnotationPropertyRule_name;
+	public static String ReplaceRequestMappingAnnotationRule_description;
+	public static String ReplaceRequestMappingAnnotationRule_name;
 	public static String ReplaceStringFormatByFormattedRule_description;
 	public static String ReplaceStringFormatByFormattedRule_name;
 	public static String ReplaceStreamCollectByToListRule_description;

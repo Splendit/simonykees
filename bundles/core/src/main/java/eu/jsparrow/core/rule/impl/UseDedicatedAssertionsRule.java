@@ -30,9 +30,11 @@ public class UseDedicatedAssertionsRule
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
 
+	public static final String RULE_ID = "UseDedicatedAssertions"; //$NON-NLS-1$
+
 	public UseDedicatedAssertionsRule() {
 		this.visitorClass = UseDedicatedAssertionsASTVisitor.class;
-		this.id = "UseDedicatedAssertions"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(
 				Messages.UseDedicatedAssertionsRule_name,
 				Messages.UseDedicatedAssertionsRule_description,

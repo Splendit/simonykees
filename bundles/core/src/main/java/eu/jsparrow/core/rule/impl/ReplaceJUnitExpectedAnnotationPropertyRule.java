@@ -32,9 +32,11 @@ public class ReplaceJUnitExpectedAnnotationPropertyRule
 	private static final String JUNIT_ASSERT_THROWS = "org.junit.Assert.assertThrows"; //$NON-NLS-1$
 	private String assertThrowsQualifiedName = JUNIT_ASSERT_THROWS;
 
+	public static final String RULE_ID = "ReplaceJUnitExpectedAnnotationProperty"; //$NON-NLS-1$
+
 	public ReplaceJUnitExpectedAnnotationPropertyRule() {
 		this.visitorClass = ReplaceJUnitExpectedAnnotationPropertyASTVisitor.class;
-		this.id = "ReplaceJUnitExpectedAnnotationProperty"; //$NON-NLS-1$
+		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(
 				Messages.ReplaceExpectedAnnotationPropertyRule_name,
 				Messages.ReplaceExpectedAnnotationPropertyRule_description,
@@ -77,6 +79,10 @@ public class ReplaceJUnitExpectedAnnotationPropertyRule
 				assertThrowsQualifiedName);
 		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
 		return visitor;
+	}
+
+	public String getAssertThrowsQualifiedName() {
+		return this.assertThrowsQualifiedName;
 	}
 
 }

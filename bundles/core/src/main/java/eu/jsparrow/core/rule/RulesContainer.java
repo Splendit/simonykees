@@ -70,6 +70,7 @@ import eu.jsparrow.core.rule.impl.RemoveExplicitCallToSuperRule;
 import eu.jsparrow.core.rule.impl.RemoveModifiersInInterfacePropertiesRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
 import eu.jsparrow.core.rule.impl.RemoveNullCheckBeforeInstanceofRule;
+import eu.jsparrow.core.rule.impl.RemoveRedundantCloseRule;
 import eu.jsparrow.core.rule.impl.RemoveRedundantTypeCastRule;
 import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
@@ -85,6 +86,7 @@ import eu.jsparrow.core.rule.impl.ReplaceJUnitAssertThatWithHamcrestRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedAnnotationPropertyRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedExceptionRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitTimeoutAnnotationPropertyRule;
+import eu.jsparrow.core.rule.impl.ReplaceRequestMappingAnnotationRule;
 import eu.jsparrow.core.rule.impl.ReplaceStreamCollectByToListRule;
 import eu.jsparrow.core.rule.impl.ReplaceStringFormatByFormattedRule;
 import eu.jsparrow.core.rule.impl.ReuseRandomObjectsRule;
@@ -191,6 +193,8 @@ public class RulesContainer {
 				new UseFilesBufferedReaderRule(), new UseFilesBufferedWriterRule(),
 				new UsePredefinedStandardCharsetRule(),
 				new UseFilesWriteStringRule(),
+				new RemoveRedundantCloseRule(),
+				new ReplaceRequestMappingAnnotationRule(),
 
 				/*
 				 * Security

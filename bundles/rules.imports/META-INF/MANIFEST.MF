@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.rules.imports
 Bundle-ManifestVersion: 2
 Bundle-Name: jsparrow :: rules imports
 Bundle-SymbolicName: eu.jsparrow.rules.imports
-Bundle-Version: 4.11.0.qualifier
+Bundle-Version: 4.12.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Require-Bundle: eu.jsparrow.logging,
