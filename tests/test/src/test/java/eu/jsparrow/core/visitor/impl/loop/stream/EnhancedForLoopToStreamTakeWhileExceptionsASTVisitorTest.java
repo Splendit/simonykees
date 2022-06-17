@@ -50,11 +50,6 @@ class EnhancedForLoopToStreamTakeWhileExceptionsASTVisitorTest extends UsesJDTUn
 		assertNoChange(original);
 	}
 
-	/**
-	 * Transformed to invalid code.<br>
-	 * This test is expected to fail as soon as the corresponding bug has been
-	 * fixed.
-	 */
 	@Test
 	void visit_IfConditionWithException_shouldNotTransform() throws Exception {
 		String original = "" +
@@ -77,31 +72,9 @@ class EnhancedForLoopToStreamTakeWhileExceptionsASTVisitorTest extends UsesJDTUn
 				+ "\n"
 				+ "	}";
 
-		String expected = "" +
-				"	void loppIfConditionWithException() throws Exception {\n"
-				+ "\n"
-				+ "		final List<String> strings = new ArrayList<>();\n"
-				+ "		strings.stream().takeWhile(string -> checkStringWithException(string)).forEach(string -> {\n"
-				+ "			useString(string);\n"
-				+ "		});\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	boolean checkStringWithException(String s) throws Exception {\n"
-				+ "		throw new Exception();\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	void useString(String s) {\n"
-				+ "\n"
-				+ "	}";
-
-		assertChange(original, expected);
+		assertNoChange(original);
 	}
 
-	/**
-	 * Transformed to invalid code.<br>
-	 * This test is expected to fail as soon as the corresponding bug has been
-	 * fixed.
-	 */
 	@Test
 	void visit_StatementWithExceptionAfterFirstIf_shouldNotTransform() throws Exception {
 		String original = "" +
@@ -123,24 +96,8 @@ class EnhancedForLoopToStreamTakeWhileExceptionsASTVisitorTest extends UsesJDTUn
 				+ "	void useStringWithException(String s) throws Exception {\n"
 				+ "		throw new Exception();\n"
 				+ "	}";
-		String expected = "" +
-				"	void loopStatementWithExceptionAfterFirstIf() throws Exception {\n"
-				+ "\n"
-				+ "		final List<String> strings = new ArrayList<>();\n"
-				+ "		strings.stream().takeWhile(string -> checkString(string)).forEach(string -> {\n"
-				+ "			useStringWithException(string);\n"
-				+ "		});\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	boolean checkString(String s) {\n"
-				+ "		return true;\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	void useStringWithException(String s) throws Exception {\n"
-				+ "		throw new Exception();\n"
-				+ "	}";
 
-		assertChange(original, expected);
+		assertNoChange(original);
 	}
 
 	@Test
@@ -199,11 +156,6 @@ class EnhancedForLoopToStreamTakeWhileExceptionsASTVisitorTest extends UsesJDTUn
 		assertNoChange(original);
 	}
 
-	/**
-	 * Transformed to invalid code.<br>
-	 * This test is expected to fail as soon as the corresponding bug has been
-	 * fixed.
-	 */
 	@Test
 	void visit_UnhandledCloseExceptionAfterFirstIf_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("java.io.BufferedReader");
@@ -226,22 +178,8 @@ class EnhancedForLoopToStreamTakeWhileExceptionsASTVisitorTest extends UsesJDTUn
 				+ "	boolean checkFileReader(FileReader fileReader) {\n"
 				+ "		return true;\n"
 				+ "	}";
-		
-		String expected = "" +
-				"	void loopStatementThrowRuntimeExceptionAfterFirstIf(List<FileReader> fileReaderList) throws IOException {\n"
-				+ "\n"
-				+ "		fileReaderList.stream().takeWhile(fileReader -> checkFileReader(fileReader)).forEach(fileReader -> {\n"
-				+ "			try (BufferedReader br = new BufferedReader(fileReader)) {\n"
-				+ "\n"
-				+ "			}\n"
-				+ "		});\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	boolean checkFileReader(FileReader fileReader) {\n"
-				+ "		return true;\n"
-				+ "	}";
 
-		assertChange(original, expected);
+		assertNoChange(original);
 	}
 
 }

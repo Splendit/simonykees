@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 
 import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
+import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -44,7 +45,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 
 		SingleVariableDeclaration loopParameter = enhancedForStatement.getParameter();
 		Type parameterType = loopParameter.getType();
-		if(isGeneratedNode(parameterType)) {
+		if (isGeneratedNode(parameterType)) {
 			return true;
 		}
 		Expression loopExpression = enhancedForStatement.getExpression();
@@ -86,7 +87,17 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 			return true;
 		}
 
-		if (containsFlowBreakerStatements(bodyStatements.subList(1, bodyStatements.size()))) {
+		IfStatement ifStatement = (IfStatement) firstStatement;
+		if (containsUnhandledException(ifStatement.getExpression(), ifStatement)) {
+			return true;
+		}
+
+		List<Statement> statementsAfterIf = bodyStatements.subList(1, bodyStatements.size());
+		if (containsFlowBreakerStatements(statementsAfterIf)) {
+			return true;
+		}
+
+		if (containsUnhandledException(statementsAfterIf, body)) {
 			return true;
 		}
 
@@ -94,7 +105,6 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 			return false;
 		}
 
-		IfStatement ifStatement = (IfStatement) firstStatement;
 		ExpressionStatement streamStatement = createStreamStatement(loopParameter.getName(), loopExpression,
 				ifStatement, body);
 		astRewrite.replace(enhancedForStatement, streamStatement, null);
@@ -103,6 +113,22 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 		onRewrite();
 
 		return true;
+	}
+
+	boolean containsUnhandledException(ASTNode node, ASTNode excludedAncestor) {
+		UnhandledExceptionVisitor visitor = new UnhandledExceptionVisitor(excludedAncestor);
+		node.accept(visitor);
+		return visitor.containsUnhandledException();
+
+	}
+
+	boolean containsUnhandledException(List<Statement> statements, ASTNode excludedAncestor) {
+		for (Statement statement : statements) {
+			if (containsUnhandledException(statement, excludedAncestor)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void saveComments(EnhancedForStatement enhancedForStatement, Expression loopExpression,
