@@ -93,13 +93,32 @@ class OptionalIfPresentExceptionASTVisitorTest extends UsesJDTUnitFixture {
 	 * fixed.
 	 */
 	@Test
-	void visit_ifNotPresentAndBlankThrowRuntimeException_shouldTransform() throws Exception {
+	void visit_ifPresentAndBlankThrowRuntimeException_shouldTransform() throws Exception {
 		String original = "" +
 				"	public void ifPresentAndBlankThrowRuntimeException(Optional<String> optional) {\n"
 				+ "		if (optional.isPresent()) {\n"
 				+ "			final String value = optional.get();\n"
 				+ "			if (value.isBlank()) {\n"
 				+ "				throw new RuntimeException();\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+	
+	
+	/**
+	 * Not transformed. OK
+	 */
+	@Test
+	void visit_ifPresentAndBlankThrowException_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	public void ifPresentAndBlankThrowException(Optional<String> optional) throws Exception {\n"
+				+ "		if (optional.isPresent()) {\n"
+				+ "			final String value = optional.get();\n"
+				+ "			if (value.isBlank()) {\n"
+				+ "				throw new Exception();\n"
 				+ "			}\n"
 				+ "		}\n"
 				+ "	}";

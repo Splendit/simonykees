@@ -27,7 +27,7 @@ class BufferedReaderLinesExceptionASTVisitorTest extends UsesJDTUnitFixture {
 
 	@Test
 	void visit_InvocationThrowingExceptionInFinallyBlock_shouldNotTransform() throws Exception {
-		
+
 		String original = "" +
 				"	void useLineThrowingExceptionInFinallyBlock(Path path) {\n"
 				+ "\n"
@@ -48,6 +48,41 @@ class BufferedReaderLinesExceptionASTVisitorTest extends UsesJDTUnitFixture {
 				+ "\n"
 				+ "	void useLineThrowingException(String line) throws Exception {\n"
 				+ "		throw new Exception();\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_WhileLoopWithThrowException_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void whileLoopWithThrowException(Path path) throws Exception {\n"
+				+ "		final BufferedReader bufferedReader = Files.newBufferedReader(path);\n"
+				+ "		String line;\n"
+				+ "		while ((line = bufferedReader.readLine()) != null) {\n"
+				+ "			System.out.println(line);\n"
+				+ "			throw new Exception();\n"
+				+ "		}\n"
+				+ "	}	";
+
+		assertNoChange(original);
+	}
+	
+	/**
+	 * Code is not transformed although it should be transformed.<br>
+	 * This test is expected to fail as soon as the corresponding bug has been
+	 * fixed.
+	 */
+	@Test
+	void visit_WhileLoopWithThrowRuntimeException_shouldTransform() throws Exception {
+		String original = "" +
+				"	void whileLoopWithThrowRuntimeException(Path path) throws Exception {\n"
+				+ "		final BufferedReader bufferedReader = Files.newBufferedReader(path);\n"
+				+ "		String line;\n"
+				+ "		while ((line = bufferedReader.readLine()) != null) {\n"
+				+ "			System.out.println(line);\n"
+				+ "			throw new RuntimeException();\n"
+				+ "		}\n"
 				+ "	}";
 
 		assertNoChange(original);

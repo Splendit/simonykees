@@ -143,4 +143,23 @@ class OptionalIfPresentOrElseExceptionASTVisitorTest extends UsesJDTUnitFixture 
 
 		assertNoChange(original);
 	}
+	
+	
+	/**
+	 * Not transformed. OK
+	 */
+	@Test
+	void visit_ifNotPresentThrowException_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	public void ifNotPresentThrowRuntimeException(Optional<String> optional) throws Exception {\n"
+				+ "		if (optional.isPresent()) {\n"
+				+ "			final String value = optional.get();\n"
+				+ "			System.out.println(value);\n"
+				+ "		} else {\n"
+				+ "			throw new Exception();\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
 }
