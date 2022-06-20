@@ -2,7 +2,7 @@ Manifest-VERSION: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: eu.jsparrow.lsp;singleton:=true
-Bundle-Version: 4.11.0.qualifier
+Bundle-Version: 4.12.0.qualifier
 Bundle-Activator: eu.jsparrow.jdt.ls.core.internal.JavaLanguageServerPlugin
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Localization: plugin
