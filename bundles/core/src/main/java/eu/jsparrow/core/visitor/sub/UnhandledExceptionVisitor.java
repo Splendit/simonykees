@@ -18,6 +18,24 @@ public class UnhandledExceptionVisitor extends ASTVisitor {
 	private final ASTNode excludedAncestor;
 	private boolean containsCheckedException = false;
 
+	/**
+	 * 
+	 * @param node
+	 *            visited by UnhandledExceptionVisitor to find out whether it
+	 *            contains any Exception which are not handled properly.
+	 * @param excludedAncestor
+	 *            excludedAncestor is the ASTNode inside which it is analyzed
+	 *            whether a certain exception can be handled or not.
+	 * 
+	 * @return true if all possible exceptions can be handled inside the node
+	 *         specified by the argument for excludedAncestor, otherwise false.
+	 */
+	public static boolean analyzeExceptionHandling(ASTNode node, ASTNode excludedAncestor) {
+		UnhandledExceptionVisitor unhandledExceptionVisitor = new UnhandledExceptionVisitor(excludedAncestor);
+		node.accept(unhandledExceptionVisitor);
+		return !unhandledExceptionVisitor.containsUnhandledException();
+	}
+
 	public UnhandledExceptionVisitor(ASTNode excludedAncestor) {
 		this.excludedAncestor = excludedAncestor;
 	}

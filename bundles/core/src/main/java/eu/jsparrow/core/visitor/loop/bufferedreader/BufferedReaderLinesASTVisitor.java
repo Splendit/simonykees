@@ -132,9 +132,7 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 			return;
 		}
 
-		UnhandledExceptionVisitor unhnadledExceptionsVisitor = new UnhandledExceptionVisitor(body);
-		body.accept(unhnadledExceptionsVisitor);
-		if (unhnadledExceptionsVisitor.containsUnhandledException()) {
+		if(!UnhandledExceptionVisitor.analyzeExceptionHandling(body, loop)) {
 			return;
 		}
 

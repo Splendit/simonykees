@@ -88,7 +88,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 		}
 
 		IfStatement ifStatement = (IfStatement) firstStatement;
-		if (containsUnhandledException(ifStatement.getExpression(), ifStatement)) {
+		if (!UnhandledExceptionVisitor.analyzeExceptionHandling(firstStatement, ifStatement)) {
 			return true;
 		}
 
@@ -115,16 +115,9 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 		return true;
 	}
 
-	boolean containsUnhandledException(ASTNode node, ASTNode excludedAncestor) {
-		UnhandledExceptionVisitor visitor = new UnhandledExceptionVisitor(excludedAncestor);
-		node.accept(visitor);
-		return visitor.containsUnhandledException();
-
-	}
-
-	boolean containsUnhandledException(List<Statement> statements, ASTNode excludedAncestor) {
+	private boolean containsUnhandledException(List<Statement> statements, Block excludedAncestor) {
 		for (Statement statement : statements) {
-			if (containsUnhandledException(statement, excludedAncestor)) {
+			if (!UnhandledExceptionVisitor.analyzeExceptionHandling(statement, excludedAncestor)) {
 				return true;
 			}
 		}

@@ -34,7 +34,7 @@ public class ExceptionHandlingAnalyzer {
 	private static final String RUNTIME_EXCEPTION = java.lang.RuntimeException.class.getName();
 	private static final List<String> RUNTIME_EXCEPTION_LIST = Collections.singletonList(RUNTIME_EXCEPTION);
 
-	public static boolean checkResourcesForAutoCloseException(ASTNode excludedAncestor, TryStatement tryStatementNode) {
+	static boolean checkResourcesForAutoCloseException(ASTNode excludedAncestor, TryStatement tryStatementNode) {
 		List<Expression> resources = ASTNodeUtil.convertToTypedList(tryStatementNode.resources(), Expression.class);
 		for (Expression resource : resources) {
 			if (!checkResourceForAutoCloseException(excludedAncestor, resource)) {
@@ -61,7 +61,7 @@ public class ExceptionHandlingAnalyzer {
 		return false;
 	}
 
-	private static Optional<IMethodBinding> findDeclaredCloseMethod(ITypeBinding typeBinding) {
+	static Optional<IMethodBinding> findDeclaredCloseMethod(ITypeBinding typeBinding) {
 		return Arrays.stream(typeBinding.getDeclaredMethods())
 			.filter(methodBinding -> methodBinding.getName()
 				.equals(CLOSE))
@@ -69,7 +69,7 @@ public class ExceptionHandlingAnalyzer {
 			.findFirst();
 	}
 
-	public static boolean checkThrowStatement(ASTNode excludedAncestor, ThrowStatement throwStatement) {
+	static boolean checkThrowStatement(ASTNode excludedAncestor, ThrowStatement throwStatement) {
 		ITypeBinding exceptionTypeBinding = throwStatement.getExpression()
 			.resolveTypeBinding();
 		if (exceptionTypeBinding == null) {
@@ -81,7 +81,7 @@ public class ExceptionHandlingAnalyzer {
 		return analyzeExceptionHandlingRecursively(excludedAncestor, throwStatement, exceptionTypeBinding);
 	}
 
-	public static boolean checkMethodInvocation(ASTNode excludedAncestor, MethodInvocation methodInvocation) {
+	static boolean checkMethodInvocation(ASTNode excludedAncestor, MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		if (methodBinding == null) {
 			return false;
@@ -89,7 +89,7 @@ public class ExceptionHandlingAnalyzer {
 		return analyzeExceptionHandling(excludedAncestor, methodInvocation, methodBinding);
 	}
 
-	public static boolean checkClassInstanceCreation(ASTNode excludedAncestor,
+	static boolean checkClassInstanceCreation(ASTNode excludedAncestor,
 			ClassInstanceCreation classInstanceCreation) {
 		IMethodBinding methodBinding = classInstanceCreation.resolveConstructorBinding();
 		if (methodBinding == null) {
@@ -127,7 +127,7 @@ public class ExceptionHandlingAnalyzer {
 
 	private static boolean analyzeExceptionHandlingRecursively(ASTNode excludedAncestor, ASTNode node,
 			ITypeBinding exceptionTypeBinding) {
-		TryStatement tryStatement = findNextTryStatrementCatchingExceptions(excludedAncestor, node).orElse(null);
+		TryStatement tryStatement = findNextTryStatementCatchingExceptions(excludedAncestor, node).orElse(null);
 		if (tryStatement == null) {
 			return false;
 		}
@@ -140,7 +140,7 @@ public class ExceptionHandlingAnalyzer {
 		return analyzeExceptionHandlingRecursively(excludedAncestor, tryStatement, exceptionTypeBinding);
 	}
 
-	private static Optional<TryStatement> findNextTryStatrementCatchingExceptions(ASTNode excludedAncestor,
+	private static Optional<TryStatement> findNextTryStatementCatchingExceptions(ASTNode excludedAncestor,
 			ASTNode node) {
 		ASTNode parent = node;
 		while (parent != null && parent != excludedAncestor) {
