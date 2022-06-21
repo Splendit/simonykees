@@ -107,7 +107,7 @@ MVN_VERSION=$(mvn -q -Dexec.executable="echo" -Dexec.args='${project.version}' -
 cat <<EOF
 <plugin>
     <groupId>eu.jsparrow</groupId>
-    <artifactId>jsparrow-maven-plugin</artifactId>
+    <artifactId>jsparrow-4jdk8-maven-plugin</artifactId>
     <version>${MVN_VERSION}</version>
 </plugin>
 EOF

@@ -91,6 +91,14 @@ timestamps {
 
                     tagCommit(env.BRANCH_NAME, "main")
                     break
+                case "develop-4jdk8":
+                    runStandardSteps()
+                    // deploy test noProguard
+                    Profile profile = Profile.DEVELOP_TEST_noPROGUARD
+                    deployMavenPlugin(profile, timestamp)
+                    tagCommit(env.BRANCH_NAME, "main")
+                    break
+
                 case "master":
 
                     runStandardSteps()
@@ -115,6 +123,8 @@ timestamps {
 
                     tagCommit(env.BRANCH_NAME, "main")
                     break
+                
+                case "master-jmp-4jdk8":
                 case "master-jmp":
 
                     runStandardSteps()
@@ -143,6 +153,13 @@ timestamps {
                     uploadMappingFile(profile)
                     deployMavenPlugin(profile, timestamp)
 
+                    break
+                
+                case "release-4jdk8":
+                    runStandardSteps()
+                    // deploy test proguard
+                    Profile profile = Profile.RELEASE_TEST_PROGUARD
+                    deployMavenPlugin(profile, timestamp)
                     break
                 default:
 
