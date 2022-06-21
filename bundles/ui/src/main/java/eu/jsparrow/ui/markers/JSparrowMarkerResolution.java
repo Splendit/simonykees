@@ -92,7 +92,7 @@ public class JSparrowMarkerResolution implements IMarkerResolution2, IJavaComple
 
 	@Override
 	public Image getImage() {
-		return JSparrowImages.JSPARROW_ACTIVE_16;
+		return JSparrowImages.JSPARROW_RETURN_16;
 	}
 
 	private void chargeCredit() {

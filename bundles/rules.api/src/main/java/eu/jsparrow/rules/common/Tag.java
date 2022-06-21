@@ -46,7 +46,8 @@ public enum Tag {
 	IO_OPERATIONS("io operations"), 
 	TESTING("testing"),
 	JUNIT("junit"),
-	ASSERTJ("assertj");
+	ASSERTJ("assertj"),
+	SPRING("spring");
 
 	private List<String> tagName;
 
