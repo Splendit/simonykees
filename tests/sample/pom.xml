@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>tests</artifactId>
-		<version>4.11.0-SNAPSHOT</version>
+		<version>4.12.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>eu.jsparrow.sample</artifactId>
@@ -83,6 +83,16 @@
 			<artifactId>assertj-core</artifactId>
 			<version>3.21.0</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>4.3.4.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>5.3.19</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -390,7 +400,7 @@
 						<configuration>
 							<artifact>org.assertj:assertj-core:3.20.1</artifact>
 						</configuration>
-					</execution>					
+					</execution>
 					<execution>
 						<id>assertj-3.21.0</id>
 						<phase>package</phase>
@@ -409,6 +419,26 @@
 						</goals>
 						<configuration>
 							<artifact>org.assertj:assertj-core:3.22.0</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>springframework-4.3.4.RELEASE</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.springframework:spring-web:4.3.4.RELEASE</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>springframework-5.3.19</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.springframework:spring-web:5.3.19</artifact>
 						</configuration>
 					</execution>
 				</executions>

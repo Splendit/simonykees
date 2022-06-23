@@ -14,7 +14,7 @@ import org.osgi.framework.Version;
 import eu.jsparrow.rules.common.exception.InvalidLibraryVersionException;
 import eu.jsparrow.rules.common.util.LibrariesVersionUtil;
 
-public class LibraryVersionUtilTest {
+class LibraryVersionUtilTest {
 
 	private Predicate<Version> versionComparator;
 
@@ -24,7 +24,7 @@ public class LibraryVersionUtilTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { "5.7.0-M2", "5", "5.0", "5.0.0", "5.0.0.0" })
+	@ValueSource(strings = { "5.7.0-M2", "5", "5.0", "5.0.0", "5.0.0.0", "5.0.1.RELEASE", "5.0.1.RELEASE-M2" })
 	void validVersions_shouldBeSatisfied(String version) throws InvalidLibraryVersionException {
 		boolean satisfied = LibrariesVersionUtil.satisfies(version, versionComparator);
 		assertTrue(satisfied);
@@ -38,7 +38,7 @@ public class LibraryVersionUtilTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { "INVALID_VERSION", "5.0.0.0.0", "", "-", "5.3.r" })
+	@ValueSource(strings = { "INVALID_VERSION", "5.0.0.0.0", "5.0.0.0.0.0", "", "-", "5.R", "5.3.r", "5.0.0.1.RELEASE", "R" })
 	void invalidVersion_shouldThrowException(String version) {
 		assertThrows(InvalidLibraryVersionException.class,
 				() -> LibrariesVersionUtil.satisfies(version, versionComparator));
