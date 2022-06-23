@@ -52,7 +52,7 @@ public class LibrariesVersionUtil {
 			throw new InvalidLibraryVersionException(message);
 		}
 
-		boolean isVersionPattern = version.matches("^\\d+(\\.\\d+){0,3}$"); //$NON-NLS-1$
+		boolean isVersionPattern = version.matches("^\\d+((\\.\\d+){0,3}|(\\.\\d+){2}(\\.[a-zA-Z]+){0,1})$"); //$NON-NLS-1$
 		if (!isVersionPattern) {
 			String message = String.format("Invalid library version %s.", version); //$NON-NLS-1$
 			throw new InvalidLibraryVersionException(message);
