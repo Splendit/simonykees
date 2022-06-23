@@ -54,6 +54,7 @@ import eu.jsparrow.core.markers.visitor.RemoveToStringOnStringResolver;
 import eu.jsparrow.core.markers.visitor.RemoveUnnecessaryThrownExceptionsResolver;
 import eu.jsparrow.core.markers.visitor.RemoveUnusedParameterResolver;
 import eu.jsparrow.core.markers.visitor.ReorderModifiersResolver;
+import eu.jsparrow.core.markers.visitor.ReplaceRequestMappingAnnotationResolver;
 import eu.jsparrow.core.markers.visitor.ReplaceStringFormatByFormattedResolver;
 import eu.jsparrow.core.markers.visitor.StatementLambdaToExpressionResolver;
 import eu.jsparrow.core.markers.visitor.StringBufferToBuilderResolver;
@@ -214,6 +215,7 @@ public class ResolverVisitorsFactory {
 		map.put(ReplaceJUnitTimeoutAnnotationPropertyResolver.ID, ReplaceJUnitTimeoutAnnotationPropertyResolver::new);
 		map.put(UseDedicatedAssertionsResolver.ID, UseDedicatedAssertionsResolver::new);
 		map.put(RemoveRedundantCloseResolver.ID, RemoveRedundantCloseResolver::new);
+		map.put(ReplaceRequestMappingAnnotationResolver.ID, ReplaceRequestMappingAnnotationResolver::new);
 
 		List<MarkerService> markerServices = getExternalRuleServices();
 		markerServices.stream()
