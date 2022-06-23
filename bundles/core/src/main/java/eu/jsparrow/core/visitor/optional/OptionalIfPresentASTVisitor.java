@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.markers.common.OptionalIfPresentEvent;
+import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 
 /**
@@ -81,7 +82,7 @@ public class OptionalIfPresentASTVisitor extends AbstractOptionalASTVisitor impl
 		/*
 		 * Check for unhandled exceptions
 		 */
-		boolean hasUnhandledException = containsUnhandledException(thenStatement);
+		boolean hasUnhandledException =  !UnhandledExceptionVisitor.analyzeExceptionHandling(thenStatement, ifStatement);
 		if (hasUnhandledException) {
 			return true;
 		}

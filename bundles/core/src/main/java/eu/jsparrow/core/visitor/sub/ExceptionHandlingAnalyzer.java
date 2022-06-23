@@ -141,14 +141,18 @@ public class ExceptionHandlingAnalyzer {
 	}
 
 	private static Optional<TryStatement> findNextTryStatementCatchingExceptions(ASTNode excludedAncestor,
-			ASTNode node) {
-		ASTNode parent = node;
-		while (parent != null && parent != excludedAncestor) {
-			if (parent.getLocationInParent() == TryStatement.BODY_PROPERTY
-					|| parent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
-				return Optional.of((TryStatement) parent.getParent());
+			final ASTNode nodeInsideExcludedAncestor) {
+		ASTNode childNode = nodeInsideExcludedAncestor;
+		while (childNode != null) {
+			ASTNode parent = childNode.getParent();
+			if(parent  == excludedAncestor) {
+				return Optional.empty();
+			}			
+			if (childNode.getLocationInParent() == TryStatement.BODY_PROPERTY
+					|| childNode.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
+				return Optional.of((TryStatement) parent);
 			}
-			parent = parent.getParent();
+			childNode = parent;
 		}
 		return Optional.empty();
 	}

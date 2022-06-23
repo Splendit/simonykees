@@ -165,4 +165,39 @@ class OptionalIfPresentOrElseExceptionASTVisitorTest extends UsesJDTUnitFixture 
 
 		assertNoChange(original);
 	}
+	
+	
+	@Test
+	void visit_ifPresentThenTryStatementWithHandledException_shouldTransform() throws Exception {
+		String original = "" +
+				"	public void ifPresentThenTryWithHandledEException(Optional<String> optional) {\n"
+				+ "		if (optional.isPresent())\n"
+				+ "			try {\n"
+				+ "				final String value = optional.get();\n"
+				+ "				if (value.isEmpty())\n"
+				+ "					throw new Exception();\n"
+				+ "				System.out.println(value);\n"
+				+ "			} catch (Exception exc) {\n"
+				+ "\n"
+				+ "			}\n"
+				+ "		else {\n"
+				+ "			System.out.println(\"default\");\n"
+				+ "		}\n"
+				+ "	}";
+		String expected = "" +
+				"	public void ifPresentThenTryWithHandledEException(Optional<String> optional) {\n"
+				+ "		optional.ifPresentOrElse(value -> {\n"
+				+ "			try {\n"
+				+ "				if (value.isEmpty())\n"
+				+ "					throw new Exception();\n"
+				+ "				System.out.println(value);\n"
+				+ "			} catch (Exception exc) {\n"
+				+ "\n"
+				+ "			}\n"
+				+ "		}, () -> System.out.println(\"default\"));\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	
+	}
 }
