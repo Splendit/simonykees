@@ -15,12 +15,19 @@ Simply run `mvn clean verify` in the parent project.
 For the whole language server to get up and running it requires two parts: 
 
 A) The Client Side (see [vscode-java](https://github.com/redhat-developer/vscode-java) as an example).
-See also [VS Code Contributing](https://github.com/redhat-developer/vscode-java/blob/master/CONTRIBUTING.md).
 
 B) The Server Side (this project). This POC is set up based on [Eclipse JDT Language Server](https://github.com/eclipse/eclipse.jdt.ls). 
 
+See also [VS Code Contributing](https://github.com/redhat-developer/vscode-java/blob/master/CONTRIBUTING.md).
 
-See 
+Follow these steps to run/debug this POC
+1) Start the VS Code Java Client. Make sure there is a Java project imported. 
+1.1) Make sure there is some Java code that is refactorable with 'Use Functional Interface' rule
+1.2) In case you are debugging, place a few  breakpoints in relevant lines.
+ 
+
+2) Run `jsparrow-ls.remote.server.launch` launch configuration. 
+
 
 ## Resources 
  
