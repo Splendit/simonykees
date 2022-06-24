@@ -143,7 +143,7 @@ public class WelcomePage extends FormPage {
 		licenseButton.setLayoutData(buttonGridData);
 		licenseButton.setText(Messages.WelcomePage_buy_license_button);
 		createButtonListenerToOpenWebpage(licenseButton,
-				"https://jsparrow.io/pricing/"); //$NON-NLS-1$
+				"https://jsparrow.onfastspring.com/eclipse"); //$NON-NLS-1$
 
 		Button marketplaceButton = new Button(gettingStartedGroup, SWT.PUSH);
 		marketplaceButton.setLayoutData(buttonGridData);
