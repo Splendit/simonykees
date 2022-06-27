@@ -6,13 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.BreakStatement;
-import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -44,24 +41,6 @@ public class StreamForEachCheckValidStatementASTVisitor extends UnhandledExcepti
 	public StreamForEachCheckValidStatementASTVisitor(ASTNode excludedAncestor, SimpleName parameter) {
 		super(excludedAncestor);
 		this.parameters.put(parameter, 0);
-	}
-
-	@Override
-	public boolean visit(BreakStatement breakStatementNode) {
-		containsBreakStatement = true;
-		return false;
-	}
-
-	@Override
-	public boolean visit(ContinueStatement continueStatementNode) {
-		containsContinueStatement = true;
-		return false;
-	}
-
-	@Override
-	public boolean visit(ReturnStatement returnStatementNode) {
-		containsReturnStatement = true;
-		return false;
 	}
 
 	@Override
