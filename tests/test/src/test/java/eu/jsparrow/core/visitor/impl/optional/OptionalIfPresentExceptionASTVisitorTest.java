@@ -62,7 +62,7 @@ class OptionalIfPresentExceptionASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	void visit_ifPresentAndBlankHandledThrowStatement_shouldTransform() throws Exception {
+	void visit_ifPresentThenTryWithHandledExceptionWithinBraces_shouldTransform() throws Exception {
 
 		String original = "" +
 				"	public void ifPresentAndBlankHandledThrowStatement(Optional<String> optional) {\n"
@@ -75,6 +75,35 @@ class OptionalIfPresentExceptionASTVisitorTest extends UsesJDTUnitFixture {
 				+ "			} catch (Exception exc) {\n"
 				+ "			}\n"
 				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	public void ifPresentAndBlankHandledThrowStatement(Optional<String> optional) {\n"
+				+ "		optional.ifPresent(value -> {\n"
+				+ "			try {\n"
+				+ "				if (value.isBlank()) {\n"
+				+ "					throw new Exception();\n"
+				+ "				}\n"
+				+ "			} catch (Exception exc) {\n"
+				+ "			}\n"
+				+ "		});"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_ifPresentThenTryWithHandledExceptionWithoutBraces_shouldTransform() throws Exception {
+
+		String original = "" +
+				"	public void ifPresentAndBlankHandledThrowStatement(Optional<String> optional) {\n"
+				+ "		if (optional.isPresent()) \n"
+				+ "			try {\n"
+				+ "				if (optional.get().isBlank()) {\n"
+				+ "					throw new Exception();\n"
+				+ "				}\n"
+				+ "			} catch (Exception exc) {\n"
+				+ "			}\n"
 				+ "	}";
 
 		String expected = "" +

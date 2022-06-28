@@ -165,10 +165,9 @@ class OptionalIfPresentOrElseExceptionASTVisitorTest extends UsesJDTUnitFixture 
 
 		assertNoChange(original);
 	}
-	
-	
+
 	@Test
-	void visit_ifPresentThenTryStatementWithHandledException_shouldTransform() throws Exception {
+	void visit_ifPresentThenTryWithHandledExceptionWithoutBraces_shouldTransform() throws Exception {
 		String original = "" +
 				"	public void ifPresentThenTryWithHandledEException(Optional<String> optional) {\n"
 				+ "		if (optional.isPresent())\n"
@@ -198,6 +197,30 @@ class OptionalIfPresentOrElseExceptionASTVisitorTest extends UsesJDTUnitFixture 
 				+ "	}";
 
 		assertChange(original, expected);
-	
+
 	}
+
+	/**
+	 * This test may fail in the future if braces for the else clause may not be
+	 * necessary for transformation any more.
+	 */
+	@Test
+	void visit_ifNotPresentThenTryWithHandledExceptionWithoutBraces_shouldNotTransform() throws Exception {
+
+		String original = "" +
+				"	public void ifPresentThenTryWithHandledEException(Optional<String> optional) {\n"
+				+ "		if (optional.isPresent()) {\n"
+				+ "			final String value = optional.get();\n"
+				+ "			System.out.println(value);\n"
+				+ "		} else \n"
+				+ "			try {\n"
+				+ "				throw new Exception();\n"
+				+ "			} catch (Exception exc) {\n"
+				+ "\n"
+				+ "			}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
 }
