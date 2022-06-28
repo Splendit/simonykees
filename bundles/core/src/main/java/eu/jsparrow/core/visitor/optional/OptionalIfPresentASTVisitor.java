@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.markers.common.OptionalIfPresentEvent;
+import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
 import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 
@@ -74,7 +75,7 @@ public class OptionalIfPresentASTVisitor extends AbstractOptionalASTVisitor impl
 		 * Check thenStatement for 'return', throw, 'break' or 'continue'
 		 * statements.
 		 */
-		boolean hasReturnStatement = containsFlowControlStatement(thenStatement);
+		boolean hasReturnStatement = FlowBreakersVisitor.containsFlowControlStatement(thenStatement);
 		if (hasReturnStatement) {
 			return true;
 		}
@@ -82,7 +83,7 @@ public class OptionalIfPresentASTVisitor extends AbstractOptionalASTVisitor impl
 		/*
 		 * Check for unhandled exceptions
 		 */
-		boolean hasUnhandledException =  !UnhandledExceptionVisitor.analyzeExceptionHandling(thenStatement, ifStatement);
+		boolean hasUnhandledException = !UnhandledExceptionVisitor.analyzeExceptionHandling(thenStatement, ifStatement);
 		if (hasUnhandledException) {
 			return true;
 		}
@@ -149,7 +150,7 @@ public class OptionalIfPresentASTVisitor extends AbstractOptionalASTVisitor impl
 
 		return ast.newExpressionStatement(ifPresent);
 	}
-	
+
 	protected boolean isIsPresentMethod(MethodInvocation methodInvocation) {
 		if (!methodInvocation.arguments()
 			.isEmpty() || methodInvocation.getExpression() == null) {

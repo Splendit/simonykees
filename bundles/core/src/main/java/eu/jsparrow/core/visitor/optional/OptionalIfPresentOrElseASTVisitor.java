@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.markers.common.OptionalIfPresentEvent;
+import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
 import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -98,10 +99,11 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 	}
 
 	private boolean isConvertibleToLambdaBody(IfStatement ifStatement, Statement statement) {
-		boolean hasReturnStatement = containsFlowControlStatement(statement);
+		boolean hasReturnStatement = FlowBreakersVisitor.containsFlowControlStatement(statement);
 		if (hasReturnStatement) {
 			return false;
 		}
+
 		boolean hasUnhandledException = !UnhandledExceptionVisitor.analyzeExceptionHandling(statement, ifStatement);
 		if (hasUnhandledException) {
 			return false;

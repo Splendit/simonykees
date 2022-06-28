@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
 /**
@@ -20,6 +21,12 @@ public class FlowBreakersVisitor extends ASTVisitor {
 	private boolean hasReturn = false;
 	private boolean hasBreak = false;
 	private boolean hasContinue = false;
+
+	public static boolean containsFlowControlStatement(Statement thenStatement) {
+		FlowBreakersVisitor visitor = new FlowBreakersVisitor();
+		thenStatement.accept(visitor);
+		return visitor.hasFlowBreakerStatement();
+	}
 
 	@Override
 	public boolean preVisit2(ASTNode node) {

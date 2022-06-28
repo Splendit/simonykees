@@ -126,13 +126,11 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 			return;
 		}
 
-		FlowBreakersVisitor flowBreakersVisitor = new FlowBreakersVisitor();
-		body.accept(flowBreakersVisitor);
-		if (flowBreakersVisitor.hasFlowBreakerStatement()) {
+		if (FlowBreakersVisitor.containsFlowControlStatement(body)) {
 			return;
 		}
 
-		if(!UnhandledExceptionVisitor.analyzeExceptionHandling(body, loop)) {
+		if (!UnhandledExceptionVisitor.analyzeExceptionHandling(body, loop)) {
 			return;
 		}
 

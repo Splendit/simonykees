@@ -157,9 +157,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 
 	private boolean containsFlowBreakerStatements(List<Statement> statements) {
 		for (Statement statement : statements) {
-			FlowBreakersVisitor visitor = new FlowBreakersVisitor();
-			statement.accept(visitor);
-			if (visitor.hasFlowBreakerStatement()) {
+			if (FlowBreakersVisitor.containsFlowControlStatement(statement)) {
 				return true;
 			}
 		}

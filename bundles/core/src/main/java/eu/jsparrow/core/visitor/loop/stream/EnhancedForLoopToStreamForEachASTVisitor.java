@@ -298,9 +298,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 
 	private boolean isStatementValid(Statement statement, SimpleName parameter) {
 
-		FlowBreakersVisitor flowBreakersVisitor = new FlowBreakersVisitor();
-		statement.accept(flowBreakersVisitor);
-		if (flowBreakersVisitor.hasFlowBreakerStatement()) {
+		if (FlowBreakersVisitor.containsFlowControlStatement(statement)) {
 			return false;
 		}
 
