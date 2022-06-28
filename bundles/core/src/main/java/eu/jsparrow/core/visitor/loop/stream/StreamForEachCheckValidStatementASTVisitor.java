@@ -30,12 +30,6 @@ public class StreamForEachCheckValidStatementASTVisitor extends UnhandledExcepti
 	private List<SimpleName> variableNames = new LinkedList<>();
 	private Map<SimpleName, Integer> parameters = new HashMap<>();
 
-	/*
-	 * variables for checking validity
-	 */
-	private boolean containsBreakStatement = false;
-	private boolean containsContinueStatement = false;
-	private boolean containsReturnStatement = false;
 	private List<IVariableBinding> invalidVariables = new LinkedList<>();
 
 	public StreamForEachCheckValidStatementASTVisitor(ASTNode excludedAncestor, SimpleName parameter) {
@@ -123,8 +117,6 @@ public class StreamForEachCheckValidStatementASTVisitor extends UnhandledExcepti
 	}
 
 	public boolean isStatementsValid() {
-		return !containsUnhandledException() &&
-				!containsBreakStatement && !containsContinueStatement && !containsReturnStatement &&
-				invalidVariables.isEmpty();
+		return !containsUnhandledException() && invalidVariables.isEmpty();
 	}
 }
