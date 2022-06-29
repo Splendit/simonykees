@@ -20,19 +20,20 @@ public class UnhandledExceptionVisitor extends ASTVisitor {
 
 	/**
 	 * 
-	 * @param node
-	 *            visited by UnhandledExceptionVisitor to find out whether it
-	 *            contains any Exception which are not handled properly.
+	 * @param nodeToBeVisited
+	 *            {@link ASTNode} visited by UnhandledExceptionVisitor to find
+	 *            out whether it contains any Exception which are not handled
+	 *            properly.
 	 * @param excludedAncestor
-	 *            excludedAncestor is the ASTNode inside which it is analyzed
-	 *            whether a certain exception can be handled or not.
+	 *            excludedAncestor is the {@link ASTNode} inside which it is
+	 *            analyzed whether a certain exception can be handled or not.
 	 * 
 	 * @return true if all possible exceptions can be handled inside the node
 	 *         specified by the argument for excludedAncestor, otherwise false.
 	 */
-	public static boolean analyzeExceptionHandling(ASTNode node, ASTNode excludedAncestor) {
+	public static boolean analyzeExceptionHandling(ASTNode nodeToBeVisited, ASTNode excludedAncestor) {
 		UnhandledExceptionVisitor unhandledExceptionVisitor = new UnhandledExceptionVisitor(excludedAncestor);
-		node.accept(unhandledExceptionVisitor);
+		nodeToBeVisited.accept(unhandledExceptionVisitor);
 		return !unhandledExceptionVisitor.containsUnhandledException();
 	}
 

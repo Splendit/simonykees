@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
+import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -302,9 +303,15 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 			return false;
 		}
 
+		if (!UnhandledExceptionVisitor.analyzeExceptionHandling(statement,
+				statement.getParent())) {
+			return false;
+		}
+
 		StreamForEachCheckValidStatementASTVisitor statementVisitor = new StreamForEachCheckValidStatementASTVisitor(
-				statement.getParent(), parameter);
+				parameter);
 		statement.accept(statementVisitor);
-		return statementVisitor.isStatementsValid();
+
+		return !statementVisitor.containsInvalidVariable();
 	}
 }

@@ -5,15 +5,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-
-import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 
 /**
  * visits blocks and checks their validity
@@ -22,7 +20,7 @@ import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
  * @author Matthias Webhofer
  * @since 1.2
  */
-public class StreamForEachCheckValidStatementASTVisitor extends UnhandledExceptionVisitor {
+public class StreamForEachCheckValidStatementASTVisitor extends ASTVisitor {
 
 	/*
 	 * helper fields
@@ -32,8 +30,7 @@ public class StreamForEachCheckValidStatementASTVisitor extends UnhandledExcepti
 
 	private List<IVariableBinding> invalidVariables = new LinkedList<>();
 
-	public StreamForEachCheckValidStatementASTVisitor(ASTNode excludedAncestor, SimpleName parameter) {
-		super(excludedAncestor);
+	public StreamForEachCheckValidStatementASTVisitor(SimpleName parameter) {
 		this.parameters.put(parameter, 0);
 	}
 
@@ -116,7 +113,7 @@ public class StreamForEachCheckValidStatementASTVisitor extends UnhandledExcepti
 		return false;
 	}
 
-	public boolean isStatementsValid() {
-		return !containsUnhandledException() && invalidVariables.isEmpty();
+	public boolean containsInvalidVariable() {
+		return !invalidVariables.isEmpty();
 	}
 }
