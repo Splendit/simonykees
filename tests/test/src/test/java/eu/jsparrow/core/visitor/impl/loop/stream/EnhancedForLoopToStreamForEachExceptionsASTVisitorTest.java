@@ -495,10 +495,6 @@ class EnhancedForLoopToStreamForEachExceptionsASTVisitorTest extends UsesJDTUnit
 		assertChange(original, expected);
 	}
 
-	/**
-	 * This test is expected to fail as soon as the corresponding bug has been
-	 * fixed
-	 */
 	@Test
 	public void visit_throwThrowableInLoopBody_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -513,17 +509,6 @@ class EnhancedForLoopToStreamForEachExceptionsASTVisitorTest extends UsesJDTUnit
 				+ "		}\n"
 				+ "	}";
 
-		String expected = "" +
-				"	Throwable throwable;\n"
-				+ "\n"
-				+ "	void loopWithThrowError(List<String> strings) throws Throwable {\n"
-				+ "		strings.forEach(s -> {\n"
-				+ "			if (throwable != null) {\n"
-				+ "				throw throwable;\n"
-				+ "			}\n"
-				+ "		});\n"
-				+ "	}";
-
-		assertChange(original, expected);
+		assertNoChange(original);
 	}
 }

@@ -27,12 +27,8 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 public class ExceptionHandlingAnalyzer {
 
 	private static final String CLOSE = "close"; //$NON-NLS-1$
-	private static final String CHECKED_EXCEPTION_SUPERTYPE = java.lang.Exception.class.getName();
-	private static final List<String> CHECKED_EXCEPTION_SUPERTYPE_LIST = Collections
-		.singletonList(CHECKED_EXCEPTION_SUPERTYPE);
-
-	private static final String RUNTIME_EXCEPTION = java.lang.RuntimeException.class.getName();
-	private static final List<String> RUNTIME_EXCEPTION_LIST = Collections.singletonList(RUNTIME_EXCEPTION);
+	private static final List<String> TOLERATED_EXCEPTIONS = Collections.unmodifiableList(Arrays.asList(
+			java.lang.RuntimeException.class.getName(), java.lang.Error.class.getName()));
 
 	static boolean checkResourcesForAutoCloseException(ASTNode excludedAncestor, TryStatement tryStatementNode) {
 		List<Expression> resources = ASTNodeUtil.convertToTypedList(tryStatementNode.resources(), Expression.class);
@@ -75,7 +71,7 @@ public class ExceptionHandlingAnalyzer {
 		if (exceptionTypeBinding == null) {
 			return false;
 		}
-		if (!isCheckedExceptionToBeHandled(exceptionTypeBinding)) {
+		if (isToleratedException(exceptionTypeBinding)) {
 			return true;
 		}
 		return analyzeExceptionHandlingRecursively(excludedAncestor, throwStatement, exceptionTypeBinding);
@@ -105,7 +101,7 @@ public class ExceptionHandlingAnalyzer {
 			if (exception == null) {
 				return false;
 			}
-			if (isCheckedExceptionToBeHandled(exception)
+			if (!isToleratedException(exception)
 					&& !analyzeExceptionHandlingRecursively(excludedAncestor, node, exception)) {
 				return false;
 			}
@@ -113,15 +109,9 @@ public class ExceptionHandlingAnalyzer {
 		return true;
 	}
 
-	private static boolean isCheckedExceptionToBeHandled(ITypeBinding exceptionTypeBinding) {
-
-		if (ClassRelationUtil.isContentOfType(exceptionTypeBinding, RUNTIME_EXCEPTION) ||
-				ClassRelationUtil.isInheritingContentOfTypes(exceptionTypeBinding, RUNTIME_EXCEPTION_LIST)) {
-			return false;
-		}
-
-		return ClassRelationUtil.isContentOfType(exceptionTypeBinding, CHECKED_EXCEPTION_SUPERTYPE) ||
-				ClassRelationUtil.isInheritingContentOfTypes(exceptionTypeBinding, CHECKED_EXCEPTION_SUPERTYPE_LIST);
+	private static boolean isToleratedException(ITypeBinding exceptionTypeBinding) {
+		return ClassRelationUtil.isContentOfTypes(exceptionTypeBinding, TOLERATED_EXCEPTIONS) ||
+				ClassRelationUtil.isInheritingContentOfTypes(exceptionTypeBinding, TOLERATED_EXCEPTIONS);
 
 	}
 
@@ -145,9 +135,9 @@ public class ExceptionHandlingAnalyzer {
 		ASTNode childNode = nodeInsideExcludedAncestor;
 		while (childNode != null) {
 			ASTNode parent = childNode.getParent();
-			if(parent  == excludedAncestor) {
+			if (parent == excludedAncestor) {
 				return Optional.empty();
-			}			
+			}
 			if (childNode.getLocationInParent() == TryStatement.BODY_PROPERTY
 					|| childNode.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
 				return Optional.of((TryStatement) parent);

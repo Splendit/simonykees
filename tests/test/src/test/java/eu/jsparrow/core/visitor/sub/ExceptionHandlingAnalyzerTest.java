@@ -36,20 +36,12 @@ class ExceptionHandlingAnalyzerTest extends UsesJDTUnitFixture {
 		fixtureProject.clear();
 	}
 
-	/**
-	 * Throwable should not be tolerated but at the moment it is tolerated and
-	 * the result of this is a transformation to invalid code. Therefore this
-	 * test is expected to fail for the @ValueSource entry "Throwable" as soon
-	 * as the corresponding bug has been fixed.
-	 */
 	@ParameterizedTest
 	@ValueSource(strings = {
 			"RuntimeException",
 			"IllegalArgumentException",
 			"Error",
 			"AssertionError",
-			"Throwable", // for this entry this test will fail as soon as the
-							// corresponding bug has been fixed
 	})
 	void analyze_throwStatement_shouldReturnTrue(String errorName) throws Exception {
 		String methodWithThrowStatement = String.format("" +
@@ -72,9 +64,7 @@ class ExceptionHandlingAnalyzerTest extends UsesJDTUnitFixture {
 			"Exception",
 			"java.io.IOException",
 			"UndefinedExcetion",
-	// "Throwable",
-	// at the moment this test would fail for "Throwable" but it will pass as
-	// soon as as the corresponding bug has been fixed.
+			"Throwable",
 	})
 	void analyze_throwStatement_shouldReturnFalse(String errorName) throws Exception {
 		String methodWithThrowStatement = String.format("" +
