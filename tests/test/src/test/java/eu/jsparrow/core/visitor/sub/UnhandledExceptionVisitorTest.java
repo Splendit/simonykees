@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl.loop.stream;
+package eu.jsparrow.core.visitor.sub;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -17,7 +17,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
-import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 class UnhandledExceptionVisitorTest extends UsesJDTUnitFixture {
