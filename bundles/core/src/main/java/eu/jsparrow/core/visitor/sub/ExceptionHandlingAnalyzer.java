@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CatchClause;
@@ -121,10 +119,19 @@ public class ExceptionHandlingAnalyzer {
 		if (tryStatement == null) {
 			return false;
 		}
-		List<String> currentHandledExceptionsTypes = collectHandledExceptionTypes(tryStatement);
+		List<Type> handledExceptionTypes = collectHandledExceptionTypes(tryStatement);
 
-		if (ClassRelationUtil.isContentOfTypes(exceptionTypeBinding, currentHandledExceptionsTypes) ||
-				ClassRelationUtil.isInheritingContentOfTypes(exceptionTypeBinding, currentHandledExceptionsTypes)) {
+		List<String> handledExceptionTypeNames = new ArrayList<>();
+		for (Type handledExceptionType : handledExceptionTypes) {
+			ITypeBinding handledExceptionTypeBinding = handledExceptionType.resolveBinding();
+			if (handledExceptionTypeBinding == null) {
+				return false;
+			}
+			handledExceptionTypeNames.add(handledExceptionTypeBinding.getQualifiedName());
+		}
+
+		if (ClassRelationUtil.isContentOfTypes(exceptionTypeBinding, handledExceptionTypeNames) ||
+				ClassRelationUtil.isInheritingContentOfTypes(exceptionTypeBinding, handledExceptionTypeNames)) {
 			return true;
 		}
 		return analyzeExceptionHandlingRecursively(excludedAncestor, tryStatement, exceptionTypeBinding);
@@ -147,7 +154,7 @@ public class ExceptionHandlingAnalyzer {
 		return Optional.empty();
 	}
 
-	private static List<String> collectHandledExceptionTypes(TryStatement tryStatementNode) {
+	private static List<Type> collectHandledExceptionTypes(TryStatement tryStatementNode) {
 		List<Type> exceptionTypes = new ArrayList<>();
 		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class)
 			.stream()
@@ -162,11 +169,7 @@ public class ExceptionHandlingAnalyzer {
 				}
 			});
 
-		return exceptionTypes.stream()
-			.map(Type::resolveBinding)
-			.filter(Objects::nonNull)
-			.map(ITypeBinding::getQualifiedName)
-			.collect(Collectors.toList());
+		return exceptionTypes;
 	}
 
 	private ExceptionHandlingAnalyzer() {

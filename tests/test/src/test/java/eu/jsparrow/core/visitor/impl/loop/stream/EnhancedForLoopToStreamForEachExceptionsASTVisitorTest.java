@@ -511,4 +511,94 @@ class EnhancedForLoopToStreamForEachExceptionsASTVisitorTest extends UsesJDTUnit
 
 		assertNoChange(original);
 	}
+
+	@Test
+	public void visit_ResourceInstanceCreationWithHandledException_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.io.File.class.getName());
+		defaultFixture.addImport(java.io.FileNotFoundException.class.getName());
+		defaultFixture.addImport(java.io.FileReader.class.getName());
+		defaultFixture.addImport(java.io.IOException.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+
+		String subclassDeclaration = ""
+				+ "	class FileReaderWithCloseNotThrowingException extends FileReader {\n"
+				+ "\n"
+				+ "		public FileReaderWithCloseNotThrowingException(File file) throws FileNotFoundException {\n"
+				+ "			super(file);\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		@Override\n"
+				+ "		public void close() {\n"
+				+ "			try {\n"
+				+ "				super.close();\n"
+				+ "			} catch (IOException e) {\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+		String original = "" +
+				"	void resourceCreationThrowingException(List<File> fileList) throws FileNotFoundException  {\n"
+				+ "\n"
+				+ "		for (File file : fileList) {\n"
+				+ "			try (FileReaderWithCloseNotThrowingException reader = new FileReaderWithCloseNotThrowingException(file)) {\n"
+				+ "			} catch (FileNotFoundException exc) {\n"
+				+ "\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ subclassDeclaration;
+
+		String expected = "" +
+				"	void resourceCreationThrowingException(List<File> fileList) throws FileNotFoundException  {\n"
+				+ "\n"
+				+ "		fileList.forEach(file -> {\n"
+				+ "			try (FileReaderWithCloseNotThrowingException reader = new FileReaderWithCloseNotThrowingException(file)) {\n"
+				+ "			} catch (FileNotFoundException exc) {\n"
+				+ "\n"
+				+ "			}\n"
+				+ "		});\n"
+				+ "	}\n"
+				+ "\n"
+				+ subclassDeclaration;
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_ResourceInstanceCreationWithUnHandledException_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.io.File.class.getName());
+		defaultFixture.addImport(java.io.FileNotFoundException.class.getName());
+		defaultFixture.addImport(java.io.FileReader.class.getName());
+		defaultFixture.addImport(java.io.IOException.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+
+		String subclassDeclaration = ""
+				+ "	class FileReaderWithCloseNotThrowingException extends FileReader {\n"
+				+ "\n"
+				+ "		public FileReaderWithCloseNotThrowingException(File file) throws FileNotFoundException {\n"
+				+ "			super(file);\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		@Override\n"
+				+ "		public void close() {\n"
+				+ "			try {\n"
+				+ "				super.close();\n"
+				+ "			} catch (IOException e) {\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+		String original = "" +
+				"	void resourceCreationThrowingException (List<File> fileList) throws FileNotFoundException  {\n"
+				+ "\n"
+				+ "		for (File file : fileList) {\n"
+				+ "			try (FileReaderWithCloseNotThrowingException reader = new FileReaderWithCloseNotThrowingException(file)) {\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ subclassDeclaration;
+
+		assertNoChange(original);
+	}
+
 }
