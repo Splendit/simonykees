@@ -355,19 +355,32 @@ public class OptionalIfPresentRule {
 		}
 	}
 
-	public void throwStatementInBody_shouldNotTransform(List<String> users) {
+	public void throwExceptionInBody_shouldNotTransform(List<String> users) throws Exception {
 		for (String user : users) {
 			final Optional<String> name = findUserName(user);
 			if (name.isPresent()) {
 				final String value = name.get();
 				logger.info(value);
 				if (StringUtils.isEmpty(value)) {
-					throw new NoSuchElementException();
+					throw new Exception();
 				} else {
 					logger.info(value);
 				}
 			}
 		}
+	}
+
+	public void throwNoSuchElementExceptionInBody_shouldTransform(List<String> users) {
+		users.stream()
+			.map(this::findUserName)
+			.forEach(name -> name.ifPresent(value -> {
+				logger.info(value);
+				if (StringUtils.isEmpty(value)) {
+					throw new NoSuchElementException();
+				} else {
+					logger.info(value);
+				}
+			}));
 	}
 
 	public void clashingWithPropertyOnQualifiedName_shouldTransform(Optional<String> input) {

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamTakeWhileASTVisitor;
 
-@SuppressWarnings("nls")
 public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
@@ -69,17 +68,19 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 	@Test
 	public void visit_multipleRemainingStatements_shouldTransform() throws Exception {
 		String original = "" +
-				"	List<String> strings = new ArrayList<>();\n" +
-				"	for(String string : strings) {\n" +
-				"		if(!string.isEmpty()) { \n" +
-				"			break;\n" +
-				"		}\n" +
-				"		string.length();\n" +
-				"		value.length();\n" +
-				"		value.chars();" +
-				"	}";
+				"		List<String> strings = new ArrayList<>();\n"
+				+ "		String value = \"Hello World!\";\n"
+				+ "		for (String string : strings) {\n"
+				+ "			if (!string.isEmpty()) {\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "			string.length();\n"
+				+ "			value.length();\n"
+				+ "			value.chars();\n"
+				+ "		}";
 		String expected = "" +
 				"	List<String> strings=new ArrayList<>();\n" +
+				"		String value = \"Hello World!\";\n"+
 				"	strings.stream().takeWhile(string -> string.isEmpty()).forEach(string -> {string.length();value.length();value.chars();});";
 
 		assertChange(original, expected);
@@ -215,7 +216,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 	}
 
 	@Test
-	public void visit_havingThrowStatement_shouldNotTransform() throws Exception {
+	public void visit_havingThrowExceptionStatement_shouldNotTransform() throws Exception {
 		assertNoChange("" +
 				"		List<String> values = new ArrayList<>();" +
 				"		for(String value : values) {\n" +
@@ -223,7 +224,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 				"				break;\n" +
 				"			}\n" +
 				"			System.out.println(value);\n" +
-				"			throw new RuntimeException();\n" + // <--
+				"			throw new Exception();\n" + // <--
 				"		}");
 	}
 
