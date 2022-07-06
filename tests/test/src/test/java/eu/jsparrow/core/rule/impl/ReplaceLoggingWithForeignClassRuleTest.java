@@ -1,0 +1,76 @@
+package eu.jsparrow.core.rule.impl;
+
+import static eu.jsparrow.common.util.RulesTestUtil.createJavaProject;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+
+import org.eclipse.jdt.core.JavaCore;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import eu.jsparrow.common.SingleRuleTest;
+import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
+
+class ReplaceLoggingWithForeignClassRuleTest extends SingleRuleTest {
+
+	private static final String STANDARD_FILE = "TestReplaceLoggingWithForeignClassRule.java";
+	private static final String POSTRULE_SUBDIRECTORY = "loggingWithForeignClass";
+	private ReplaceLoggingWithForeignClassRule rule;
+
+	@BeforeEach
+	public void setUp() throws Exception {
+		rule = new ReplaceLoggingWithForeignClassRule();
+		testProject = createJavaProject("javaVersionTestProject", "bin");
+	}
+
+	@Test
+	void test_ruleId() {
+		String ruleId = rule.getId();
+		assertThat(ruleId, equalTo("ReplaceLoggingWithForeignClass"));
+	}
+
+	@Test
+	void test_ruleDescription() {
+		RuleDescription description = rule.getRuleDescription();
+		assertThat(description.getName(), equalTo("Replace Logging with Foreign Class"));
+		assertThat(description.getTags(),
+				contains(Tag.JAVA_1_1, Tag.READABILITY));
+		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
+		assertThat(description.getDescription(),
+				equalTo("If a given logger is initialized with a class which is different from the class where it is declared, then this rule will replace the wrong initialization argument by the correct one. For example, if a logger for the class 'Employee' is initialized with 'User.class', then the argument of the initialization will be replaced by 'Employee.class'."));
+	}
+
+	@Test
+	void test_requiredJavaVersion() throws Exception {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertThat(rule.getRequiredJavaVersion(), equalTo("1.1"));
+	}
+
+	/**
+	 * This test is expected to fail as soon as
+	 * ReplaceLoggingWithForeignClassASTVisitor has been implemented.
+	 */
+	@Test
+	void testTransformationWithDefaultFile() throws Exception {
+		loadUtilities();
+
+		rule.calculateEnabledForProject(testProject);
+
+		Path preRule = getPreRuleFile(STANDARD_FILE);
+		Path postRule = getPostRuleFile(STANDARD_FILE, POSTRULE_SUBDIRECTORY);
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+}
