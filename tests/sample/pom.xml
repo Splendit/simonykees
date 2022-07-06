@@ -63,6 +63,11 @@
 			<version>1.7.25</version>
 		</dependency>
 		<dependency>
+		    <groupId>log4j</groupId>
+		    <artifactId>log4j</artifactId>
+		    <version>1.2.17</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
 			<version>2.7</version>
@@ -291,6 +296,16 @@
 							<artifact>org.apache.logging.log4j:log4j-api:2.7</artifact>
 						</configuration>
 					</execution>
+					<execution>
+						<id>log4j-1-2-17</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>log4j:log4j:1.2.17</artifact>
+						</configuration>
+					</execution>					
 					<execution>
 						<id>slf4j-api-1-7-25</id>
 						<phase>package</phase>

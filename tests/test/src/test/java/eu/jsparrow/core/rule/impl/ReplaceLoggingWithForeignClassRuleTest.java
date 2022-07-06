@@ -14,6 +14,8 @@ import java.time.Duration;
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.SingleRuleTest;
 import eu.jsparrow.rules.common.RuleDescription;
@@ -21,7 +23,10 @@ import eu.jsparrow.rules.common.Tag;
 
 class ReplaceLoggingWithForeignClassRuleTest extends SingleRuleTest {
 
-	private static final String STANDARD_FILE = "TestReplaceLoggingWithForeignClassRule.java";
+	private static final String SAMPLE_FILE_JAVA_LOGGING = "TestReplaceLoggingWithForeignClassJavaLoggingRule.java";
+	private static final String SAMPLE_FILE_SLF4J_LOGGER = "TestReplaceLoggingWithForeignClassSlf4jRule.java";
+	private static final String SAMPLE_FILE_APACHE_LOG4J = "TestReplaceLoggingWithForeignClassApacheLog4jRule.java";
+	private static final String SAMPLE_FILE_APACHE_LOGGING_LOG4J = "TestReplaceLoggingWithForeignClassApacheLoggingLog4jRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "loggingWithForeignClass";
 	private ReplaceLoggingWithForeignClassRule rule;
 
@@ -57,18 +62,20 @@ class ReplaceLoggingWithForeignClassRuleTest extends SingleRuleTest {
 		assertThat(rule.getRequiredJavaVersion(), equalTo("1.1"));
 	}
 
-	/**
-	 * This test is expected to fail as soon as
-	 * ReplaceLoggingWithForeignClassASTVisitor has been implemented.
-	 */
-	@Test
-	void testTransformationWithDefaultFile() throws Exception {
+	@ParameterizedTest
+	@ValueSource(strings = {			
+			SAMPLE_FILE_JAVA_LOGGING,
+			SAMPLE_FILE_SLF4J_LOGGER,
+			SAMPLE_FILE_APACHE_LOG4J,
+			SAMPLE_FILE_APACHE_LOGGING_LOG4J
+	})
+	void testTransformationWithDefaultFile(String fileName) throws Exception {
 		loadUtilities();
 
 		rule.calculateEnabledForProject(testProject);
 
-		Path preRule = getPreRuleFile(STANDARD_FILE);
-		Path postRule = getPostRuleFile(STANDARD_FILE, POSTRULE_SUBDIRECTORY);
+		Path preRule = getPreRuleFile(fileName);
+		Path postRule = getPostRuleFile(fileName, POSTRULE_SUBDIRECTORY);
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);

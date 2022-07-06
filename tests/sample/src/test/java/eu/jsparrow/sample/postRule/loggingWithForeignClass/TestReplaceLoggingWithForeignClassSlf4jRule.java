@@ -5,6 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.sample.utilities.HelloWorld;
 
-public class TestReplaceLoggingWithForeignClassRule {
-	static final Logger logger = LoggerFactory.getLogger(HelloWorld.class);
+public class TestReplaceLoggingWithForeignClassSlf4jRule {
+	static final Logger LOGGER = LoggerFactory.getLogger(TestReplaceLoggingWithForeignClassSlf4jRule.class);
 }
