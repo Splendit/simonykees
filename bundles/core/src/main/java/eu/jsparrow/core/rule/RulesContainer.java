@@ -93,7 +93,7 @@ public class RulesContainer {
 				new UseFilesWriteStringRule(),
 				new RemoveRedundantCloseRule(),
 				new ReplaceRequestMappingAnnotationRule(),
-				new ReplaceLoggingWithForeignClassRule(),
+				new ReplaceWrongClassForLoggerRule(),
 
 				/*
 				 * Security

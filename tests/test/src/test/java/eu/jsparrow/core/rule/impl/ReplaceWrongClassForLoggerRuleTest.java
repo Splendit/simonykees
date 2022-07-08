@@ -21,31 +21,31 @@ import eu.jsparrow.common.SingleRuleTest;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-class ReplaceLoggingWithForeignClassRuleTest extends SingleRuleTest {
+class ReplaceWrongClassForLoggerRuleTest extends SingleRuleTest {
 
-	private static final String SAMPLE_FILE_JAVA_LOGGING = "TestReplaceLoggingWithForeignClassJavaLoggingRule.java";
-	private static final String SAMPLE_FILE_SLF4J_LOGGER = "TestReplaceLoggingWithForeignClassSlf4jRule.java";
-	private static final String SAMPLE_FILE_APACHE_LOG4J = "TestReplaceLoggingWithForeignClassApacheLog4jRule.java";
-	private static final String SAMPLE_FILE_APACHE_LOGGING_LOG4J = "TestReplaceLoggingWithForeignClassApacheLoggingLog4jRule.java";
+	private static final String SAMPLE_FILE_JAVA_LOGGING = "TestReplaceWrongClassForLoggerJavaLoggingRule.java";
+	private static final String SAMPLE_FILE_SLF4J_LOGGER = "TestReplaceWrongClassForLoggerSlf4jRule.java";
+	private static final String SAMPLE_FILE_APACHE_LOG4J = "TestReplaceWrongClassForLoggerApacheLog4jRule.java";
+	private static final String SAMPLE_FILE_APACHE_LOGGING_LOG4J = "TestReplaceWrongClassForLoggerApacheLoggingLog4jRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "loggingWithForeignClass";
-	private ReplaceLoggingWithForeignClassRule rule;
+	private ReplaceWrongClassForLoggerRule rule;
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		rule = new ReplaceLoggingWithForeignClassRule();
+		rule = new ReplaceWrongClassForLoggerRule();
 		testProject = createJavaProject("javaVersionTestProject", "bin");
 	}
 
 	@Test
 	void test_ruleId() {
 		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceLoggingWithForeignClass"));
+		assertThat(ruleId, equalTo("ReplaceWrongClassForLogger"));
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace Logging with Foreign Class"));
+		assertThat(description.getName(), equalTo("Replace Wrong Class for Logger"));
 		assertThat(description.getTags(),
 				contains(Tag.JAVA_1_1, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));

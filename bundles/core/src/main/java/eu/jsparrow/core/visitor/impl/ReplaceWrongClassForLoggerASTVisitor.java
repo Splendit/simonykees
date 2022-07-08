@@ -22,7 +22,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 4.13.0
  *
  */
-public class ReplaceLoggingWithForeignClassASTVisitor extends AbstractASTRewriteASTVisitor {
+public class ReplaceWrongClassForLoggerASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final String GET_LOGGER = "getLogger"; //$NON-NLS-1$
 	private static final String GET_NAME = "getName"; //$NON-NLS-1$

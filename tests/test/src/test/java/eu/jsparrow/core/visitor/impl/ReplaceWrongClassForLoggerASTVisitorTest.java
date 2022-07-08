@@ -11,11 +11,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
-class ReplaceLoggingWithForeignClassASTVisitorTest extends UsesJDTUnitFixture {
+class ReplaceWrongClassForLoggerASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setupTest() {
-		setDefaultVisitor(new ReplaceLoggingWithForeignClassASTVisitor());
+		setDefaultVisitor(new ReplaceWrongClassForLoggerASTVisitor());
 	}
 
 	@AfterEach
