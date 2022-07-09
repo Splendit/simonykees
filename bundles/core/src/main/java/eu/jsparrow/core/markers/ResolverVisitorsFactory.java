@@ -56,6 +56,7 @@ import eu.jsparrow.core.markers.visitor.RemoveUnusedParameterResolver;
 import eu.jsparrow.core.markers.visitor.ReorderModifiersResolver;
 import eu.jsparrow.core.markers.visitor.ReplaceRequestMappingAnnotationResolver;
 import eu.jsparrow.core.markers.visitor.ReplaceStringFormatByFormattedResolver;
+import eu.jsparrow.core.markers.visitor.ReplaceWrongClassForLoggerResolver;
 import eu.jsparrow.core.markers.visitor.StatementLambdaToExpressionResolver;
 import eu.jsparrow.core.markers.visitor.StringBufferToBuilderResolver;
 import eu.jsparrow.core.markers.visitor.StringFormatLineSeparatorResolver;
@@ -191,6 +192,7 @@ public class ResolverVisitorsFactory {
 		map.put(RemoveModifiersInInterfacePropertiesResolver.ID, RemoveModifiersInInterfacePropertiesResolver::new);
 		map.put(RemoveToStringOnStringResolver.ID, RemoveToStringOnStringResolver::new);
 		map.put(ReplaceStringFormatByFormattedResolver.ID, ReplaceStringFormatByFormattedResolver::new);
+		map.put(ReplaceWrongClassForLoggerResolver.ID, ReplaceWrongClassForLoggerResolver::new);
 		map.put(UseListSortResolver.ID, UseListSortResolver::new);
 		map.put(MakeFieldsAndVariablesFinalResolver.ID, MakeFieldsAndVariablesFinalResolver::new);
 		map.put(OverrideAnnotationResolver.ID, OverrideAnnotationResolver::new);

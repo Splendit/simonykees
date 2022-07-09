@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
+import eu.jsparrow.core.markers.common.ReplaceWrongClassForLoggerEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -22,7 +23,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 4.13.0
  *
  */
-public class ReplaceWrongClassForLoggerASTVisitor extends AbstractASTRewriteASTVisitor {
+public class ReplaceWrongClassForLoggerASTVisitor extends AbstractASTRewriteASTVisitor implements ReplaceWrongClassForLoggerEvent {
 
 	private static final String GET_LOGGER = "getLogger"; //$NON-NLS-1$
 	private static final String GET_NAME = "getName"; //$NON-NLS-1$
@@ -48,6 +49,7 @@ public class ReplaceWrongClassForLoggerASTVisitor extends AbstractASTRewriteASTV
 				TypeLiteral typeLiteralReplacement = createTypeLiteralReplacement(surroundingTypeDeclarationBinding);
 				astRewrite.replace(node, typeLiteralReplacement, null);
 				onRewrite();
+				addMarkerEvent(node);
 			}
 		}
 		return false;
@@ -103,4 +105,5 @@ public class ReplaceWrongClassForLoggerASTVisitor extends AbstractASTRewriteASTV
 		newTypeLiteral.setType(newSimpleType);
 		return newTypeLiteral;
 	}
+
 }
