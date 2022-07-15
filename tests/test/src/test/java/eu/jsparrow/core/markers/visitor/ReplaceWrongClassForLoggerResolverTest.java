@@ -76,7 +76,7 @@ class ReplaceWrongClassForLoggerResolverTest extends UsesJDTUnitFixture {
 				() -> assertEquals(157, event.getOffset()),
 				() -> assertEquals(12, event.getLength()),
 				() -> assertEquals(8, event.getLineNumber()),
-				() -> assertEquals(2, event.getWeightValue()));
+				() -> assertEquals(5, event.getWeightValue()));
 	}
 
 	@Test

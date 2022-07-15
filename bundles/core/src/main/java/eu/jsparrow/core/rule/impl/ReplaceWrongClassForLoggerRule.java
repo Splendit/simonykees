@@ -26,8 +26,8 @@ public class ReplaceWrongClassForLoggerRule extends RefactoringRuleImpl<ReplaceW
 		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.ReplaceWrongClassForLoggerRule_name,
 				Messages.ReplaceWrongClassForLoggerRule_description,
-				Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY));
+				Duration.ofMinutes(5),
+				Arrays.asList(Tag.JAVA_1_1, Tag.CODE_SMELL, Tag.LOGGING));
 	}
 
 	@Override

@@ -1,11 +1,15 @@
 package eu.jsparrow.core;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.common.SingleRuleTest;
 import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.core.rule.impl.AvoidConcatenationInLoggingStatementsRule;
+import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
 
 public class AvoidConcatenationInLoggingStatementsRuleTest extends SingleRuleTest {
 
@@ -32,6 +38,24 @@ public class AvoidConcatenationInLoggingStatementsRuleTest extends SingleRuleTes
 		rule = new AvoidConcatenationInLoggingStatementsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 
+	}
+
+	@Test
+	void test_ruleId() {
+		String ruleId = rule.getId();
+		assertThat(ruleId, equalTo("AvoidConcatenationInLoggingStatements"));
+	}
+
+	@Test
+	void test_ruleDescription() {
+		RuleDescription description = rule.getRuleDescription();
+		assertThat(description.getName(), equalTo("Avoid Concatenation in Logging Statements"));
+		assertThat(description.getTags(),
+				contains(Tag.JAVA_1_1, Tag.CODE_SMELL, Tag.PERFORMANCE, Tag.CODING_CONVENTIONS, Tag.READABILITY,
+						Tag.LOGGING));
+		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
+		assertThat(description.getDescription(),
+				equalTo("Avoid always evaluating concatenated logging messages by introducing parameters, which only evaluate when the logging level is active."));
 	}
 
 	@Test

@@ -20,7 +20,6 @@ class ReplaceWrongClassForLoggerASTVisitorTest extends UsesJDTUnitFixture {
 
 	@AfterEach
 	void tearDown() throws Exception {
-		System.out.println("tearDown");
 		fixtureProject.clear();
 	}
 
