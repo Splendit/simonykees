@@ -27,9 +27,9 @@ class ReplaceWrongClassForLoggerASTVisitorTest extends UsesJDTUnitFixture {
 		return Stream.of(
 				Arguments.of("java.util.logging.Logger", "getLog", false),
 				Arguments.of("java.util.logging.Logger", "getLogger", false),
-				Arguments.of("java.util.logging.Logger", "java.util.logging.Logger.getLogger", true),
+				Arguments.of("java.util.logging.Logger", "java.util.logging.Logger.getLogger", false),
 				Arguments.of("org.slf4j.Logger", "org.slf4j.LoggerFactory.getLogger", true),
-				Arguments.of("org.apache.log4j.Logger", "org.apache.log4j.LogManager.getLogger", true),
+				Arguments.of("org.apache.log4j.Logger", "org.apache.log4j.LogManager.getLogger", false),
 				Arguments.of("org.apache.logging.log4j.Logger", "org.apache.logging.log4j.LogManager.getLogger", true));
 	}
 
@@ -37,6 +37,7 @@ class ReplaceWrongClassForLoggerASTVisitorTest extends UsesJDTUnitFixture {
 	@MethodSource(value = "visit_GetNameOfNotCorrectClass_arguments")
 	void visit_GetNameOfNotCorrectClassLiteral(String logger, String logggerFactory, boolean shouldTransform)
 			throws Exception {
+
 		addDependency("org.slf4j", "slf4j-api", "1.7.25");
 		addDependency("log4j", "log4j", "1.2.17");
 		addDependency("org.apache.logging.log4j", "log4j-api", "2.7");
@@ -46,17 +47,15 @@ class ReplaceWrongClassForLoggerASTVisitorTest extends UsesJDTUnitFixture {
 				+ "		static final %s logger = %s(Object.class.getName());\n"
 				+ "	}", logger, logggerFactory);
 
-		String expected = String.format(""
-				+ "	static class Employee {\n"
-				+ "		static final %s logger = %s(Employee.class.getName());\n"
-				+ "	}", logger, logggerFactory);
-
 		if (shouldTransform) {
+			String expected = String.format(""
+					+ "	static class Employee {\n"
+					+ "		static final %s logger = %s(Employee.class.getName());\n"
+					+ "	}", logger, logggerFactory);
 			assertChange(original, expected);
 		} else {
 			assertNoChange(original);
 		}
-
 	}
 
 	public static Stream<Arguments> visit_NotCorrectClassLiteral_arguments() throws Exception {
@@ -65,7 +64,7 @@ class ReplaceWrongClassForLoggerASTVisitorTest extends UsesJDTUnitFixture {
 				Arguments.of("java.util.logging.Logger", "getLogger", false),
 				Arguments.of("java.util.logging.Logger", "java.util.logging.Logger.getLogger", false),
 				Arguments.of("org.slf4j.Logger", "org.slf4j.LoggerFactory.getLogger", true),
-				Arguments.of("org.apache.log4j.Logger", "org.apache.log4j.LogManager.getLogger", true),
+				Arguments.of("org.apache.log4j.Logger", "org.apache.log4j.LogManager.getLogger", false),
 				Arguments.of("org.apache.logging.log4j.Logger", "org.apache.logging.log4j.LogManager.getLogger", true));
 	}
 
@@ -93,11 +92,10 @@ class ReplaceWrongClassForLoggerASTVisitorTest extends UsesJDTUnitFixture {
 			assertNoChange(original);
 		}
 	}
-	
-	
+
 	@ParameterizedTest
 	@ValueSource(strings = {
-			"Employee.class", 
+			"Employee.class",
 			"Employee.class.getName()"
 	})
 	void visit_CorrectLoggerInitialization_shouldNotTransform(String initializationArgument) throws Exception {
@@ -107,7 +105,7 @@ class ReplaceWrongClassForLoggerASTVisitorTest extends UsesJDTUnitFixture {
 				+ "	static class Employee {\n"
 				+ "		static final Logger logger = LoggerFactory.getLogger(%s);\n"
 				+ "	}", initializationArgument);
-		
+
 		assertNoChange(original);
 	}
 }

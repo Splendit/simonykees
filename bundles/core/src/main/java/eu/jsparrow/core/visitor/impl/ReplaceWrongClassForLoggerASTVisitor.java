@@ -23,17 +23,44 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 4.13.0
  *
  */
-public class ReplaceWrongClassForLoggerASTVisitor extends AbstractASTRewriteASTVisitor implements ReplaceWrongClassForLoggerEvent {
+public class ReplaceWrongClassForLoggerASTVisitor extends AbstractASTRewriteASTVisitor
+		implements ReplaceWrongClassForLoggerEvent {
+
+	private static final String ORG_SLF4J_LOGGER_FACTORY = "org.slf4j.LoggerFactory"; //$NON-NLS-1$
+	private static final String ORG_APACHE_LOGGING_LOG4J_LOG_MANAGER = "org.apache.logging.log4j.LogManager"; //$NON-NLS-1$
+	private static final String ORG_APACHE_LOG4J_LOG_MANAGER = "org.apache.log4j.LogManager"; //$NON-NLS-1$
+	private static final String JAVA_UTIL_LOGGING_LOGGER = "java.util.logging.Logger"; //$NON-NLS-1$
 
 	private static final String GET_LOGGER = "getLogger"; //$NON-NLS-1$
 	private static final String GET_NAME = "getName"; //$NON-NLS-1$
 
 	@SuppressWarnings("nls")
-	private static final List<String> SUPPORTED_LOGGER_FACTORIES = Collections.unmodifiableList(
-			Arrays.asList("java.util.logging.Logger",
-					"org.slf4j.LoggerFactory",
-					"org.apache.log4j.LogManager",
-					"org.apache.logging.log4j.LogManager"));
+	private static final List<String> LOG4J_1_LOG_METHODS = Collections.unmodifiableList(
+			Arrays.asList(
+					"debug",
+					"error",
+					"fatal",
+					"info",
+					"log",
+					"trace",
+					"warn"));
+
+	@SuppressWarnings("nls")
+	private static final List<String> JAVA_UTIL_LOG_METHODS = Collections.unmodifiableList(
+			Arrays.asList(
+					"config",
+					"entering",
+					"exiting",
+					"fine",
+					"finer",
+					"finest",
+					"info",
+					"log",
+					"logp",
+					"logrb",
+					"severe",
+					"throwing",
+					"warning"));
 
 	@Override
 	public boolean visit(TypeLiteral node) {
@@ -58,7 +85,7 @@ public class ReplaceWrongClassForLoggerASTVisitor extends AbstractASTRewriteASTV
 	private boolean isUsedToInitializeLogger(TypeLiteral typeLiteral) {
 
 		if (typeLiteral.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
-			return isGetLoggerMethod((MethodInvocation) typeLiteral.getParent());
+			return isSupportedGetLoggerMethod((MethodInvocation) typeLiteral.getParent());
 		}
 
 		if (typeLiteral.getLocationInParent() != MethodInvocation.EXPRESSION_PROPERTY) {
@@ -75,25 +102,48 @@ public class ReplaceWrongClassForLoggerASTVisitor extends AbstractASTRewriteASTV
 		if (methodInvocation.getLocationInParent() != MethodInvocation.ARGUMENTS_PROPERTY) {
 			return false;
 		}
-		return isGetLoggerMethod((MethodInvocation) methodInvocation.getParent());
+		return isSupportedGetLoggerMethod((MethodInvocation) methodInvocation.getParent());
 
 	}
 
-	boolean isGetLoggerMethod(MethodInvocation methodInvocation) {
+	boolean isSupportedGetLoggerMethod(MethodInvocation methodInvocation) {
 		if (!methodInvocation.getName()
 			.getIdentifier()
 			.equals(GET_LOGGER)) {
 			return false;
 		}
+		IMethodBinding getLoggerMethodBinding = methodInvocation.resolveMethodBinding();
+		if (getLoggerMethodBinding == null) {
+			return false;
+		}
+
 		if (methodInvocation.resolveTypeBinding() == null) {
 			return false;
 		}
-		IMethodBinding loggerMethodBinding = methodInvocation.resolveMethodBinding();
-		if (loggerMethodBinding == null) {
+
+		ITypeBinding loggerFactoryClass = getLoggerMethodBinding.getDeclaringClass();
+		if (ClassRelationUtil.isContentOfType(loggerFactoryClass, ORG_SLF4J_LOGGER_FACTORY) ||
+				ClassRelationUtil.isContentOfType(loggerFactoryClass, ORG_APACHE_LOGGING_LOG4J_LOG_MANAGER)) {
+			return true;
+		}
+
+		if (methodInvocation.getLocationInParent() != MethodInvocation.EXPRESSION_PROPERTY) {
 			return false;
 		}
-		ITypeBinding declaringClass = loggerMethodBinding.getDeclaringClass();
-		return ClassRelationUtil.isContentOfTypes(declaringClass, SUPPORTED_LOGGER_FACTORIES);
+
+		MethodInvocation ecpectedLogInvocation = (MethodInvocation) methodInvocation.getParent();
+		String loggingMethodIdentifier = ecpectedLogInvocation.getName()
+			.getIdentifier();
+
+		if (ClassRelationUtil.isContentOfType(loggerFactoryClass, ORG_APACHE_LOG4J_LOG_MANAGER)) {
+			return LOG4J_1_LOG_METHODS.contains(loggingMethodIdentifier);
+		}
+
+		if (ClassRelationUtil.isContentOfType(loggerFactoryClass, JAVA_UTIL_LOGGING_LOGGER)) {
+			return JAVA_UTIL_LOG_METHODS.contains(loggingMethodIdentifier);
+		}
+
+		return false;
 	}
 
 	private TypeLiteral createTypeLiteralReplacement(ITypeBinding surroundingTypeDeclarationBinding) {
@@ -105,5 +155,4 @@ public class ReplaceWrongClassForLoggerASTVisitor extends AbstractASTRewriteASTV
 		newTypeLiteral.setType(newSimpleType);
 		return newTypeLiteral;
 	}
-
 }

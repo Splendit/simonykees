@@ -19,7 +19,9 @@ class ReplaceWrongClassForLoggerResolverTest extends UsesJDTUnitFixture {
 	@BeforeEach
 	void setUp() throws Exception {
 		RefactoringMarkers.clear();
-		defaultFixture.addImport(java.util.logging.Logger.class.getName());
+		addDependency("org.slf4j", "slf4j-api", "1.7.25");
+		defaultFixture.addImport("org.slf4j.Logger");
+		defaultFixture.addImport("org.slf4j.LoggerFactory");
 
 	}
 
@@ -33,9 +35,10 @@ class ReplaceWrongClassForLoggerResolverTest extends UsesJDTUnitFixture {
 		ReplaceWrongClassForLoggerResolver visitor = new ReplaceWrongClassForLoggerResolver(node -> false);
 		visitor.addMarkerListener(RefactoringMarkers.getFor("ReplaceWrongClassForLoggerResolver"));
 		setDefaultVisitor(visitor);
+
 		String original = ""
 				+ "	static class Employee {\n"
-				+ "		static final Logger LOGGER = Logger.getLogger(Object.class.getName());\n"
+				+ "		static final Logger logger = LoggerFactory.getLogger(Object.class);\n"
 				+ "	}";
 
 		assertNoChange(original);
@@ -50,12 +53,12 @@ class ReplaceWrongClassForLoggerResolverTest extends UsesJDTUnitFixture {
 		setDefaultVisitor(visitor);
 		String original = ""
 				+ "	static class Employee {\n"
-				+ "		static final Logger LOGGER = Logger.getLogger(Object.class.getName());\n"
+				+ "		static final Logger logger = LoggerFactory.getLogger(Object.class);\n"
 				+ "	}";
 
 		String expected = ""
 				+ "	static class Employee {\n"
-				+ "		static final Logger LOGGER = Logger.getLogger(Employee.class.getName());\n"
+				+ "		static final Logger logger = LoggerFactory.getLogger(Employee.class);\n"
 				+ "	}";
 
 		assertChange(original, expected);
@@ -73,27 +76,27 @@ class ReplaceWrongClassForLoggerResolverTest extends UsesJDTUnitFixture {
 				() -> assertEquals("ReplaceWrongClassForLoggerResolver", event.getResolver()),
 				() -> assertEquals(description, event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
-				() -> assertEquals(157, event.getOffset()),
+				() -> assertEquals(188, event.getOffset()),
 				() -> assertEquals(12, event.getLength()),
-				() -> assertEquals(8, event.getLineNumber()),
+				() -> assertEquals(9, event.getLineNumber()),
 				() -> assertEquals(5, event.getWeightValue()));
 	}
 
 	@Test
 	void test_PredicateOnStartPosition_shouldResolveOne() throws Exception {
 		ReplaceWrongClassForLoggerResolver visitor = new ReplaceWrongClassForLoggerResolver(
-				node -> node.getStartPosition() == 157);
+				node -> node.getStartPosition() == 188);
 		visitor.addMarkerListener(RefactoringMarkers.getFor("ReplaceWrongClassForLoggerResolver"));
 		setDefaultVisitor(visitor);
 
 		String original = ""
 				+ "	static class Employee {\n"
-				+ "		static final Logger logger = Logger.getLogger(Object.class.getName());\n"
+				+ "		static final Logger logger = LoggerFactory.getLogger(Object.class);\n"
 				+ "	}";
 
 		String expected = ""
 				+ "	static class Employee {\n"
-				+ "		static final Logger logger = Logger.getLogger(Employee.class.getName());\n"
+				+ "		static final Logger logger = LoggerFactory.getLogger(Employee.class);\n"
 				+ "	}";
 
 		assertChange(original, expected);
@@ -104,62 +107,61 @@ class ReplaceWrongClassForLoggerResolverTest extends UsesJDTUnitFixture {
 	@Test
 	void test_TwoClassNameArgumentsToReplace_shouldResolveFirst() throws Exception {
 		ReplaceWrongClassForLoggerResolver visitor = new ReplaceWrongClassForLoggerResolver(
-				node -> node.getStartPosition() == 159);
-
+				node -> node.getStartPosition() == 190);
 		visitor.addMarkerListener(RefactoringMarkers.getFor("ReplaceWrongClassForLoggerResolver"));
 		setDefaultVisitor(visitor);
 		String original = ""
 				+ "	static class FirstClass {\n"
-				+ "		static final Logger LOGGER = Logger.getLogger(Object.class.getName());\n"
+				+ "		static final Logger LOGGER = LoggerFactory.getLogger(Object.class);\n"
 				+ "	}\n"
 				+ "\n"
 				+ "	static class SecondClass {\n"
-				+ "		static final Logger LOGGER = Logger.getLogger(Object.class.getName());\n"
+				+ "		static final Logger LOGGER = LoggerFactory.getLogger(Object.class);\n"
 				+ "	}";
 		String expected = ""
 				+ "	static class FirstClass {\n"
-				+ "		static final Logger LOGGER = Logger.getLogger(FirstClass.class.getName());\n"
+				+ "		static final Logger LOGGER = LoggerFactory.getLogger(FirstClass.class);\n"
 				+ "	}\n"
 				+ "\n"
 				+ "	static class SecondClass {\n"
-				+ "		static final Logger LOGGER = Logger.getLogger(Object.class.getName());\n"
+				+ "		static final Logger LOGGER = LoggerFactory.getLogger(Object.class);\n"
 				+ "	}";
 
 		assertChange(original, expected);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertEquals(1, events.size());
-		assertEquals(159, events.get(0)
+		assertEquals(190, events.get(0)
 			.getOffset());
 	}
 
 	@Test
 	void test_TwoClassNameArgumentsToReplace_shouldResolveSecond() throws Exception {
 		ReplaceWrongClassForLoggerResolver visitor = new ReplaceWrongClassForLoggerResolver(
-				node -> node.getStartPosition() == 275);
-
+				node -> node.getStartPosition() == 303);
 		visitor.addMarkerListener(RefactoringMarkers.getFor("ReplaceWrongClassForLoggerResolver"));
 		setDefaultVisitor(visitor);
 		String original = ""
 				+ "	static class FirstClass {\n"
-				+ "		static final Logger LOGGER = Logger.getLogger(Object.class.getName());\n"
+				+ "		static final Logger LOGGER = LoggerFactory.getLogger(Object.class);\n"
 				+ "	}\n"
 				+ "\n"
 				+ "	static class SecondClass {\n"
-				+ "		static final Logger LOGGER = Logger.getLogger(Object.class.getName());\n"
+				+ "		static final Logger LOGGER = LoggerFactory.getLogger(Object.class);\n"
 				+ "	}";
 		String expected = ""
 				+ "	static class FirstClass {\n"
-				+ "		static final Logger LOGGER = Logger.getLogger(Object.class.getName());\n"
+				+ "		static final Logger LOGGER = LoggerFactory.getLogger(Object.class);\n"
 				+ "	}\n"
 				+ "\n"
 				+ "	static class SecondClass {\n"
-				+ "		static final Logger LOGGER = Logger.getLogger(SecondClass.class.getName());\n"
+				+ "		static final Logger LOGGER = LoggerFactory.getLogger(SecondClass.class);\n"
 				+ "	}";
 
 		assertChange(original, expected);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertEquals(1, events.size());
-		assertEquals(275, events.get(0)
+		assertEquals(303, events.get(0)
 			.getOffset());
+
 	}
 }
