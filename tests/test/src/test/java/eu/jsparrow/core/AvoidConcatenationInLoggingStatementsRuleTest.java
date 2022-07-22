@@ -51,7 +51,7 @@ public class AvoidConcatenationInLoggingStatementsRuleTest extends SingleRuleTes
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Avoid Concatenation in Logging Statements"));
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_1, Tag.CODE_SMELL, Tag.PERFORMANCE, Tag.CODING_CONVENTIONS, Tag.READABILITY,
+				contains(Tag.JAVA_1_1, Tag.PERFORMANCE, Tag.CODING_CONVENTIONS, Tag.READABILITY,
 						Tag.LOGGING));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),

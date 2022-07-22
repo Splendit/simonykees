@@ -36,7 +36,6 @@ public enum Tag {
 	STRING_MANIPULATION("string manipulation"),
 	FORMATTING("formatting", "organize"),
 	CODING_CONVENTIONS("coding conventions"),
-	CODE_SMELL("code  smell"),
 	PERFORMANCE("performance"),
 	READABILITY("readability"),
 	OLD_LANGUAGE_CONSTRUCTS("old language constructs"),
