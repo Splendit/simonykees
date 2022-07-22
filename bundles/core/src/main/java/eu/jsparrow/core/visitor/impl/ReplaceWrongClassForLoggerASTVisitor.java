@@ -64,25 +64,23 @@ public class ReplaceWrongClassForLoggerASTVisitor extends AbstractASTRewriteASTV
 
 	@Override
 	public boolean visit(TypeLiteral node) {
+		AbstractTypeDeclaration surroundingTypeDeclaration = ASTNodeUtil.getSpecificAncestor(node,
+				AbstractTypeDeclaration.class);
+		ITypeBinding typeLiteralBinding = node.getType()
+			.resolveBinding();
+		ITypeBinding surroundingTypeDeclarationBinding = surroundingTypeDeclaration.resolveBinding();
 
-		if (isUsedToInitializeLogger(node)) {
-			AbstractTypeDeclaration surroundingTypeDeclaration = ASTNodeUtil.getSpecificAncestor(node,
-					AbstractTypeDeclaration.class);
-			ITypeBinding typeLiteralBinding = node.getType()
-				.resolveBinding();
-			ITypeBinding surroundingTypeDeclarationBinding = surroundingTypeDeclaration.resolveBinding();
-
-			if (!ClassRelationUtil.compareITypeBinding(typeLiteralBinding, surroundingTypeDeclarationBinding)) {
-				TypeLiteral typeLiteralReplacement = createTypeLiteralReplacement(surroundingTypeDeclarationBinding);
-				astRewrite.replace(node, typeLiteralReplacement, null);
-				onRewrite();
-				addMarkerEvent(node);
-			}
+		if (!ClassRelationUtil.compareITypeBinding(typeLiteralBinding, surroundingTypeDeclarationBinding)
+				&& isUsedForSupportedGetLoggerInvocation(node)) {
+			TypeLiteral typeLiteralReplacement = createTypeLiteralReplacement(surroundingTypeDeclarationBinding);
+			astRewrite.replace(node, typeLiteralReplacement, null);
+			onRewrite();
+			addMarkerEvent(node);
 		}
 		return false;
 	}
 
-	private boolean isUsedToInitializeLogger(TypeLiteral typeLiteral) {
+	private boolean isUsedForSupportedGetLoggerInvocation(TypeLiteral typeLiteral) {
 
 		if (typeLiteral.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
 			return isSupportedGetLoggerMethod((MethodInvocation) typeLiteral.getParent());
@@ -92,17 +90,17 @@ public class ReplaceWrongClassForLoggerASTVisitor extends AbstractASTRewriteASTV
 			return false;
 		}
 
-		MethodInvocation methodInvocation = (MethodInvocation) typeLiteral.getParent();
-		if (!methodInvocation.getName()
+		MethodInvocation methodInvocationOnTypeLiteral = (MethodInvocation) typeLiteral.getParent();
+		if (!methodInvocationOnTypeLiteral.getName()
 			.getIdentifier()
 			.equals(GET_NAME)) {
 			return false;
 		}
 
-		if (methodInvocation.getLocationInParent() != MethodInvocation.ARGUMENTS_PROPERTY) {
+		if (methodInvocationOnTypeLiteral.getLocationInParent() != MethodInvocation.ARGUMENTS_PROPERTY) {
 			return false;
 		}
-		return isSupportedGetLoggerMethod((MethodInvocation) methodInvocation.getParent());
+		return isSupportedGetLoggerMethod((MethodInvocation) methodInvocationOnTypeLiteral.getParent());
 
 	}
 
