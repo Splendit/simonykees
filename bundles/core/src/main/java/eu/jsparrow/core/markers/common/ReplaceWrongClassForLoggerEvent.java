@@ -2,7 +2,7 @@ package eu.jsparrow.core.markers.common;
 
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
-import eu.jsparrow.core.visitor.impl.ReplaceWrongClassForLoggerASTVisitor;
+import eu.jsparrow.core.visitor.logger.ReplaceWrongClassForLoggerASTVisitor;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
 /**

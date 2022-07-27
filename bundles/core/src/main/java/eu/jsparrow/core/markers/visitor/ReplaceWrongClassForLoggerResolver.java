@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.ReplaceWrongClassForLoggerRule;
 import eu.jsparrow.core.visitor.impl.ReplaceStringFormatByFormattedASTVisitor;
-import eu.jsparrow.core.visitor.impl.ReplaceWrongClassForLoggerASTVisitor;
+import eu.jsparrow.core.visitor.logger.ReplaceWrongClassForLoggerASTVisitor;
 import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;

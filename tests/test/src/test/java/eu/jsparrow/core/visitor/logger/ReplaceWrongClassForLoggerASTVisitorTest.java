@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl;
+package eu.jsparrow.core.visitor.logger;
 
 import java.util.stream.Stream;
 
