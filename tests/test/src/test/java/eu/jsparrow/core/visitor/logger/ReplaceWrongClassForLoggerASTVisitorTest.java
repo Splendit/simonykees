@@ -48,4 +48,13 @@ class ReplaceWrongClassForLoggerASTVisitorTest extends UsesJDTUnitFixture {
 				"	}";
 		assertChange(original, expected);
 	}
+
+	@Test
+	void visit_InitializeSLFJLoggerWithInvalidArgument_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	static class Employee {\n" +
+				"		private static final Logger logger = LoggerFactory.getLogger(Object.class, 1);" +
+				"	}";
+		assertNoChange(original);
+	}
 }

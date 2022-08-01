@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
+import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class ReplaceWrongClassForLoggerAnalyzer {
@@ -53,14 +55,14 @@ public class ReplaceWrongClassForLoggerAnalyzer {
 					"warning"));
 
 	static boolean isClassLiteralToReplace(TypeLiteral typeLiteral,
-			AbstractTypeDeclaration surroundingTypeDeclaration) {
+			AbstractTypeDeclaration surroundingTypeDeclaration, CompilationUnit compilationUnit) throws UnresolvedTypeBindingException {
 
 		MethodInvocation getLoggerInvocation = findGetLoggerInvocationForTypeLiteral(typeLiteral)
 			.orElse(null);
 		if (getLoggerInvocation == null) {
 			return false;
 		}
-		if (ForeignTypeLiteral.isForeignTypeLiteral(typeLiteral, surroundingTypeDeclaration)) {
+		if (ForeignTypeLiteral.isForeignTypeLiteral(typeLiteral, surroundingTypeDeclaration, compilationUnit)) {
 			return analyzeGetLoggerInvocation(getLoggerInvocation);
 		}
 		return false;
@@ -93,14 +95,14 @@ public class ReplaceWrongClassForLoggerAnalyzer {
 		return Optional.empty();
 	}
 
-	private static boolean analyzeGetLoggerInvocation(MethodInvocation getLoggerInvocation) {
+	private static boolean analyzeGetLoggerInvocation(MethodInvocation getLoggerInvocation) throws UnresolvedTypeBindingException {
 		IMethodBinding getLoggerMethodBinding = getLoggerInvocation.resolveMethodBinding();
 		if (getLoggerMethodBinding == null) {
-			return false;
+			throw new UnresolvedTypeBindingException(String.format("Cannot resolve method binding for getLogger invocation {%s}.", getLoggerInvocation.toString())); //$NON-NLS-1$
 		}
 
 		if (getLoggerInvocation.resolveTypeBinding() == null) {
-			return false;
+			throw new UnresolvedTypeBindingException(String.format("Cannot resolve type binding for getLogger invocation {%s}.", getLoggerInvocation.toString())); //$NON-NLS-1$
 		}
 
 		ITypeBinding loggerFactoryClass = getLoggerMethodBinding.getDeclaringClass();

@@ -1,15 +1,13 @@
 package eu.jsparrow.core.visitor.logger;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
-import org.eclipse.jface.text.BadLocationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
-import eu.jsparrow.jdtunit.JdtUnitException;
+import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 class ReplaceWrongClassForLoggerAnalyzerTest extends UsesJDTUnitFixture {
@@ -54,7 +52,6 @@ class ReplaceWrongClassForLoggerAnalyzerTest extends UsesJDTUnitFixture {
 			"Class<?> clazz = Object.class;",
 			"int i = Object.class.hashCode();",
 			"String className = Object.class.getName();",
-			"static final Logger logger = Logger.getLogger(Object.class);",
 			"" +
 					"	void callUseClass() {\n" +
 					"		useClass(Object.class);\n" +
@@ -74,13 +71,28 @@ class ReplaceWrongClassForLoggerAnalyzerTest extends UsesJDTUnitFixture {
 					NESTED_LOGGER
 	})
 	void analyze_ForeignTypeLiteralNotUsedForGetLogger_shouldReturnFalse(String fieldDeclaration)
-			throws JavaModelException, JdtUnitException, BadLocationException {
+			throws Exception {
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, fieldDeclaration);
 		TypeDeclaration typeDeclaration = defaultFixture.getTypeDeclaration();
 		TypeLiteral typeLiteral = VisitorTestUtil.findUniqueNode(typeDeclaration, TypeLiteral.class);
 		assertSame(typeDeclaration, ASTNodeUtil.getSpecificAncestor(typeLiteral, AbstractTypeDeclaration.class));
-		assertTrue(ForeignTypeLiteral.isForeignTypeLiteral(typeLiteral, typeDeclaration));
-		assertFalse(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, typeDeclaration));
+		assertTrue(ForeignTypeLiteral.isForeignTypeLiteral(typeLiteral, typeDeclaration, defaultFixture.getRootNode()));
+		assertFalse(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, typeDeclaration,
+				defaultFixture.getRootNode()));
+	}
+
+	@Test
+	void analyze_UnresolvedGetLoggerWithForeignLiteral_shouldThrowException()
+			throws Exception {
+		String fieldDeclaration = "static final Logger logger = getLogger(Object.class);";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, fieldDeclaration);
+		TypeDeclaration typeDeclaration = defaultFixture.getTypeDeclaration();
+		TypeLiteral typeLiteral = VisitorTestUtil.findUniqueNode(typeDeclaration, TypeLiteral.class);
+		assertSame(typeDeclaration, ASTNodeUtil.getSpecificAncestor(typeLiteral, AbstractTypeDeclaration.class));
+		assertTrue(ForeignTypeLiteral.isForeignTypeLiteral(typeLiteral, typeDeclaration, defaultFixture.getRootNode()));
+		assertThrows(UnresolvedTypeBindingException.class,
+				() -> ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, typeDeclaration,
+						defaultFixture.getRootNode()));
 	}
 
 	private TypeDeclaration createDefaultTypeDeclarationUsingSLF4JLogger(String argumentForLoggerFactory)
@@ -103,11 +115,8 @@ class ReplaceWrongClassForLoggerAnalyzerTest extends UsesJDTUnitFixture {
 	void analyze_UsingOrgSLFJLogger_shouldReturnTrue(String argumentForLoggerFactory) throws Exception {
 		TypeDeclaration typeDeclaration = createDefaultTypeDeclarationUsingSLF4JLogger(argumentForLoggerFactory);
 		TypeLiteral typeLiteral = VisitorTestUtil.findUniqueNode(typeDeclaration, TypeLiteral.class);
-		assertNotNull(typeLiteral.getType()
-			.resolveBinding());
-		AbstractTypeDeclaration enclosingTypeDeclaration = ASTNodeUtil.getSpecificAncestor(typeLiteral,
-				AbstractTypeDeclaration.class);
-		assertTrue(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, enclosingTypeDeclaration));
+		assertTrue(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, typeDeclaration,
+				defaultFixture.getRootNode()));
 	}
 
 	@ParameterizedTest
@@ -118,13 +127,10 @@ class ReplaceWrongClassForLoggerAnalyzerTest extends UsesJDTUnitFixture {
 	void analyze_UsingOrgSLFJLogger_shouldReturnFalse(String argumentForLoggerFactory) throws Exception {
 		TypeDeclaration typeDeclaration = createDefaultTypeDeclarationUsingSLF4JLogger(argumentForLoggerFactory);
 		TypeLiteral typeLiteral = VisitorTestUtil.findUniqueNode(typeDeclaration, TypeLiteral.class);
-		assertNotNull(typeLiteral.getType()
-			.resolveBinding());
-		AbstractTypeDeclaration enclosingTypeDeclaration = ASTNodeUtil.getSpecificAncestor(typeLiteral,
-				AbstractTypeDeclaration.class);
-		assertFalse(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, enclosingTypeDeclaration));
+		assertFalse(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, typeDeclaration,
+				defaultFixture.getRootNode()));
 	}
-	
+
 	private TypeDeclaration createDefaultTypeUsingApacheLoggingLog4J2Logger(String argumentForLoggerFactory)
 			throws Exception {
 		addDependency("org.apache.logging.log4j", "log4j-api", "2.7");
@@ -142,44 +148,40 @@ class ReplaceWrongClassForLoggerAnalyzerTest extends UsesJDTUnitFixture {
 			"Object.class",
 			"Object.class.getName()"
 	})
-	void analyze_ApacheLoggingLog4jGetLoggerWithForeignClass_shouldReturnTrue(String argumentForLoggerFactory) throws Exception {		
+	void analyze_ApacheLoggingLog4jGetLoggerWithForeignClass_shouldReturnTrue(String argumentForLoggerFactory)
+			throws Exception {
 		TypeDeclaration typeDeclaration = createDefaultTypeUsingApacheLoggingLog4J2Logger("Object.class");
 		TypeLiteral typeLiteral = VisitorTestUtil.findUniqueNode(typeDeclaration, TypeLiteral.class);
-		assertNotNull(typeLiteral.getType()
-			.resolveBinding());
-		assertTrue(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, typeDeclaration));
+		assertTrue(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, typeDeclaration,
+				defaultFixture.getRootNode()));
 	}
-	
+
 	@ParameterizedTest
 	@ValueSource(strings = {
 			DEFAULT_TYPE_DECLARATION_NAME + ".class",
 			DEFAULT_TYPE_DECLARATION_NAME + ".class.getName()"
 	})
-	void analyze_ApacheLoggingLog4jGetLoggerWithForeignClass_shouldReturnFalse(String argumentForLoggerFactory) throws Exception {		
+	void analyze_ApacheLoggingLog4jGetLoggerWithForeignClass_shouldReturnFalse(String argumentForLoggerFactory)
+			throws Exception {
 		TypeDeclaration typeDeclaration = createDefaultTypeUsingApacheLoggingLog4J2Logger(argumentForLoggerFactory);
 		TypeLiteral typeLiteral = VisitorTestUtil.findUniqueNode(typeDeclaration, TypeLiteral.class);
-		assertNotNull(typeLiteral.getType()
-			.resolveBinding());
-		assertFalse(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, typeDeclaration));
+		assertFalse(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, typeDeclaration,
+				defaultFixture.getRootNode()));
 	}
 
 	@Test
-	void analyze_CallInfoOnJavaUtilLoggerGetLoggerWithTypeLiteral_shouldReturnFale() throws Exception {
+	void analyze_CallInfoOnJavaUtilLoggerGetLoggerWithTypeLiteral_shouldThrowException() throws Exception {
 		defaultFixture.addImport(java.util.logging.Logger.class.getName());
-		String nestedClass = "" +
-				"	static class NestedClass {\n"
-				+ "		void callInfoOnGetLogger(String message) {\n"
-				+ "			Logger.getLogger(Object.class).info(message);\n"
-				+ "		}\n"
-				+ "	}";
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, nestedClass);
+		String callInfoOnGetLogger = "" +
+				"	void callInfoOnGetLogger(String message) {\n" +
+				"		Logger.getLogger(Object.class).info(message);\n" +
+				"	}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, callInfoOnGetLogger);
 		TypeDeclaration typeDeclaration = defaultFixture.getTypeDeclaration();
 		TypeLiteral typeLiteral = VisitorTestUtil.findUniqueNode(typeDeclaration, TypeLiteral.class);
-		assertNotNull(typeLiteral.getType()
-			.resolveBinding());
-		AbstractTypeDeclaration enclosingTypeDeclaration = ASTNodeUtil.getSpecificAncestor(typeLiteral,
-				AbstractTypeDeclaration.class);
-		assertFalse(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, enclosingTypeDeclaration));
+		assertThrows(UnresolvedTypeBindingException.class,
+				() -> ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, typeDeclaration,
+						defaultFixture.getRootNode()));
 	}
 
 	@Test
@@ -194,11 +196,10 @@ class ReplaceWrongClassForLoggerAnalyzerTest extends UsesJDTUnitFixture {
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, nestedClass);
 		TypeDeclaration typeDeclaration = defaultFixture.getTypeDeclaration();
 		TypeLiteral typeLiteral = VisitorTestUtil.findUniqueNode(typeDeclaration, TypeLiteral.class);
-		assertNotNull(typeLiteral.getType()
-			.resolveBinding());
 		AbstractTypeDeclaration enclosingTypeDeclaration = ASTNodeUtil.getSpecificAncestor(typeLiteral,
 				AbstractTypeDeclaration.class);
-		assertFalse(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, enclosingTypeDeclaration));
+		assertFalse(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, enclosingTypeDeclaration,
+				defaultFixture.getRootNode()));
 	}
 
 	@Test
@@ -213,11 +214,10 @@ class ReplaceWrongClassForLoggerAnalyzerTest extends UsesJDTUnitFixture {
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, nestedClass);
 		TypeDeclaration typeDeclaration = defaultFixture.getTypeDeclaration();
 		TypeLiteral typeLiteral = VisitorTestUtil.findUniqueNode(typeDeclaration, TypeLiteral.class);
-		assertNotNull(typeLiteral.getType()
-			.resolveBinding());
 		AbstractTypeDeclaration enclosingTypeDeclaration = ASTNodeUtil.getSpecificAncestor(typeLiteral,
 				AbstractTypeDeclaration.class);
-		assertTrue(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, enclosingTypeDeclaration));
+		assertTrue(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, enclosingTypeDeclaration,
+				defaultFixture.getRootNode()));
 	}
 
 	@Test
@@ -236,11 +236,10 @@ class ReplaceWrongClassForLoggerAnalyzerTest extends UsesJDTUnitFixture {
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, nestedClass);
 		TypeDeclaration typeDeclaration = defaultFixture.getTypeDeclaration();
 		TypeLiteral typeLiteral = VisitorTestUtil.findUniqueNode(typeDeclaration, TypeLiteral.class);
-		assertNotNull(typeLiteral.getType()
-			.resolveBinding());
 		AbstractTypeDeclaration enclosingTypeDeclaration = ASTNodeUtil.getSpecificAncestor(typeLiteral,
 				AbstractTypeDeclaration.class);
-		assertFalse(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, enclosingTypeDeclaration));
+		assertFalse(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, enclosingTypeDeclaration,
+				defaultFixture.getRootNode()));
 	}
 
 	@Test
@@ -258,11 +257,10 @@ class ReplaceWrongClassForLoggerAnalyzerTest extends UsesJDTUnitFixture {
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, nestedClass);
 		TypeDeclaration typeDeclaration = defaultFixture.getTypeDeclaration();
 		TypeLiteral typeLiteral = VisitorTestUtil.findUniqueNode(typeDeclaration, TypeLiteral.class);
-		assertNotNull(typeLiteral.getType()
-			.resolveBinding());
 		AbstractTypeDeclaration enclosingTypeDeclaration = ASTNodeUtil.getSpecificAncestor(typeLiteral,
 				AbstractTypeDeclaration.class);
-		assertTrue(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, enclosingTypeDeclaration));
+		assertTrue(ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, enclosingTypeDeclaration,
+				defaultFixture.getRootNode()));
 	}
 
 }

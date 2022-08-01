@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
+import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
 import eu.jsparrow.core.markers.common.ReplaceWrongClassForLoggerEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -22,7 +23,15 @@ public class ReplaceWrongClassForLoggerASTVisitor extends AbstractASTRewriteASTV
 	public boolean visit(TypeLiteral node) {
 		AbstractTypeDeclaration surroundingTypeDeclaration = ASTNodeUtil.getSpecificAncestor(node,
 				AbstractTypeDeclaration.class);
-		if (ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(node, surroundingTypeDeclaration)) {
+		boolean doReplacement;
+		try {
+			doReplacement = ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(node,
+					surroundingTypeDeclaration, getCompilationUnit());
+		} catch (UnresolvedTypeBindingException exc) {
+			doReplacement = false;
+		}
+
+		if (doReplacement) {
 			TypeLiteral typeLiteralReplacement = createTypeLiteralReplacement(surroundingTypeDeclaration);
 			astRewrite.replace(node, typeLiteralReplacement, null);
 			onRewrite();
