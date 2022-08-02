@@ -84,15 +84,20 @@ public class ReplaceWrongClassForLoggerAnalyzer {
 
 	private static Optional<MethodInvocation> findGetLoggerInvocation(Expression expression) {
 
-		if (expression.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
-			MethodInvocation invocationToAnalyze = (MethodInvocation) expression.getParent();
-			if (invocationToAnalyze.getName()
-				.getIdentifier()
-				.equals(GET_LOGGER)) {
-				return Optional.of(invocationToAnalyze);
-			}
+		if (expression.getLocationInParent() != MethodInvocation.ARGUMENTS_PROPERTY) {
+			return Optional.empty();
 		}
-		return Optional.empty();
+		MethodInvocation invocationToAnalyze = (MethodInvocation) expression.getParent();
+		if (!invocationToAnalyze.getName()
+			.getIdentifier()
+			.equals(GET_LOGGER)) {
+			return Optional.empty();
+		}
+		if(invocationToAnalyze.arguments().indexOf(expression) != 0) {
+			return Optional.empty(); 
+		}
+		return Optional.of(invocationToAnalyze);
+		
 	}
 
 	private static boolean analyzeGetLoggerInvocation(MethodInvocation getLoggerInvocation) throws UnresolvedTypeBindingException {
