@@ -3,7 +3,9 @@ package eu.jsparrow.core.visitor.impl;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -21,6 +23,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 public class ReplaceSetRemoveAllWithForEachASTVisitor extends AbstractASTRewriteASTVisitor
 		implements ReplaceSetRemoveAllWithForEachEvent {
 
+
 	private static final List<String> LIST_WITH_JAVA_LANG_ITERABLE_CLASS_NAME = Collections
 		.singletonList(java.lang.Iterable.class.getName());
 
@@ -28,6 +31,8 @@ public class ReplaceSetRemoveAllWithForEachASTVisitor extends AbstractASTRewrite
 		.singletonList(java.util.Set.class.getName());
 
 	private static final String REMOVE_ALL = "removeAll"; //$NON-NLS-1$
+	private static final String REMOVE = "remove"; //$NON-NLS-1$
+	private static final String FOR_EACH = "forEach"; //$NON-NLS-1$
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
@@ -49,7 +54,7 @@ public class ReplaceSetRemoveAllWithForEachASTVisitor extends AbstractASTRewrite
 		}
 		Expression removeAllArgument = arguments.get(0);
 		try {
-			if(methodInvocation.resolveMethodBinding() == null) {
+			if (methodInvocation.resolveMethodBinding() == null) {
 				String message = "Could not resolve type binding of method invocation" //$NON-NLS-1$
 						+ methodInvocation.toString();
 				throw new UnresolvedTypeBindingException(message);
@@ -95,11 +100,33 @@ public class ReplaceSetRemoveAllWithForEachASTVisitor extends AbstractASTRewrite
 						LIST_WITH_JAVA_LANG_ITERABLE_CLASS_NAME);
 	}
 
-	private void transform(MethodInvocation methodInvocationToReplace, Expression setExpression,
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void transform(MethodInvocation methodInvocationToReplace, Expression removeAllInvocationExpression,
 			Expression removeAllArgument) {
+
+		AST ast = astRewrite.getAST();
+
+		ExpressionMethodReference newExpressionMethodReference = ast.newExpressionMethodReference();
+		Expression newSetExpression = (Expression) astRewrite.createCopyTarget(removeAllInvocationExpression);
+		newExpressionMethodReference.setExpression(newSetExpression);
+		newExpressionMethodReference.setName(ast.newSimpleName(REMOVE));
+		
+		MethodInvocation removeAllInvocationReplacement = ast.newMethodInvocation();
+		Expression newIterableExpression = (Expression) astRewrite.createCopyTarget(removeAllArgument);
+		removeAllInvocationReplacement.setExpression(newIterableExpression);
+		removeAllInvocationReplacement.setName(ast.newSimpleName(FOR_EACH));
+		
+		List newArguments = removeAllInvocationReplacement.arguments();
+		newArguments.add(newExpressionMethodReference);
+		
+		astRewrite.replace(methodInvocationToReplace, removeAllInvocationReplacement, null);
+		onRewrite();
+		addMarkerEvent(methodInvocationToReplace);
+
 		// This method is not implemented yet !!!
 		methodInvocationToReplace.toString();
-		setExpression.toString();
+		removeAllInvocationExpression.toString();
 		removeAllArgument.toString();
 	}
 }

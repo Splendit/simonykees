@@ -30,13 +30,13 @@ class ReplaceSetRemoveAllWithForEachASTVisitorTest extends UsesJDTUnitFixture {
 	@Test
 	void visit_SetRemoveAll_shouldTransform() throws Exception {
 		String original = "" +
-				"	void exampleWithStringVarargs(Set<String> mySet, String... strings) {\n" +
-				"		mySet.removeAll(List.of(strings));\n" +
+				"	void exampleWithParametersForSetAndList(Set<String> stringSet, List<String> stringsToRemove) {\n" +
+				"		stringSet.removeAll(stringsToRemove);\n" +
 				"	}";
 
 		String expected = "" +
-				"	void exampleWithStringVarargs(Set<String> mySet, String... strings) {\n" +
-				"		mySet.removeAll(List.of(strings));\n" +
+				"	void exampleWithParametersForSetAndList(Set<String> stringSet, List<String> stringsToRemove) {\n" +
+				"		stringsToRemove.forEach(stringSet::remove);\n" +
 				"	}";
 
 		assertChange(original, expected);
