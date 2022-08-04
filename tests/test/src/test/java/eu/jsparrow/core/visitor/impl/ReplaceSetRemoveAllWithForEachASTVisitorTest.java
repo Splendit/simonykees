@@ -22,10 +22,10 @@ class ReplaceSetRemoveAllWithForEachASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	/*
-	 * This test will fail as soon as
-	 * {@ReplaceSetRemoveAllWithForEachASTVisitor} will have been implemented.
+	 * This test will fail as soon as {@link
+	 * ReplaceSetRemoveAllWithForEachASTVisitor} will have been fully
+	 * implemented.
 	 * 
-	 * @throws Exception
 	 */
 	@Test
 	void visit_SetRemoveAll_shouldTransform() throws Exception {
