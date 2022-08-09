@@ -11,9 +11,6 @@ class ReplaceSetRemoveAllWithForEachASTVisitorTest extends UsesJDTUnitFixture {
 	@BeforeEach
 	public void setUp() throws Exception {
 		setDefaultVisitor(new ReplaceSetRemoveAllWithForEachASTVisitor());
-		defaultFixture.addImport(java.util.HashSet.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.Set.class.getName());
 	}
 
 	@AfterEach
@@ -29,6 +26,8 @@ class ReplaceSetRemoveAllWithForEachASTVisitorTest extends UsesJDTUnitFixture {
 	 */
 	@Test
 	void visit_SetRemoveAll_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.Set.class.getName());
 		String original = "" +
 				"	void exampleWithParametersForSetAndList(Set<String> stringSet, List<String> stringsToRemove) {\n" +
 				"		stringSet.removeAll(stringsToRemove);\n" +

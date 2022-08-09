@@ -55,6 +55,7 @@ import eu.jsparrow.core.markers.visitor.RemoveUnnecessaryThrownExceptionsResolve
 import eu.jsparrow.core.markers.visitor.RemoveUnusedParameterResolver;
 import eu.jsparrow.core.markers.visitor.ReorderModifiersResolver;
 import eu.jsparrow.core.markers.visitor.ReplaceRequestMappingAnnotationResolver;
+import eu.jsparrow.core.markers.visitor.ReplaceSetRemoveAllWithForEachResolver;
 import eu.jsparrow.core.markers.visitor.ReplaceStringFormatByFormattedResolver;
 import eu.jsparrow.core.markers.visitor.ReplaceWrongClassForLoggerResolver;
 import eu.jsparrow.core.markers.visitor.StatementLambdaToExpressionResolver;
@@ -105,6 +106,7 @@ import eu.jsparrow.core.markers.visitor.security.random.UseSecureRandomResolver;
 import eu.jsparrow.core.markers.visitor.stream.tolist.ReplaceStreamCollectByToListResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.MultiCatchResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.TryWithResourceResolver;
+import eu.jsparrow.core.rule.impl.ReplaceSetRemoveAllWithForEachRule;
 import eu.jsparrow.rules.api.MarkerService;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
@@ -143,6 +145,7 @@ public class ResolverVisitorsFactory {
 		map.put(EnumsWithoutEqualsResolver.ID, EnumsWithoutEqualsResolver::new);
 		map.put(AvoidConcatenationInLoggingStatementsResolver.ID, AvoidConcatenationInLoggingStatementsResolver::new);
 		map.put(CollectionRemoveAllResolver.ID, CollectionRemoveAllResolver::new);
+		map.put(ReplaceSetRemoveAllWithForEachResolver.ID, ReplaceSetRemoveAllWithForEachResolver::new);
 		map.put(DiamondOperatorResolver.ID, DiamondOperatorResolver::new);
 		map.put(IndexOfToContainsResolver.ID, IndexOfToContainsResolver::new);
 		map.put(InsertBreakStatementInLoopsResolver.ID, InsertBreakStatementInLoopsResolver::new);
