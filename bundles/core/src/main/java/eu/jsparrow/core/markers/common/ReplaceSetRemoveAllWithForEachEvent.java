@@ -2,12 +2,12 @@ package eu.jsparrow.core.markers.common;
 
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-import eu.jsparrow.core.visitor.impl.ReplaceStringFormatByFormattedASTVisitor;
+import eu.jsparrow.core.visitor.impl.ReplaceSetRemoveAllWithForEachASTVisitor;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
 /**
  * An interface to add {@link RefactoringMarkerEvent}s events for
- * {@link ReplaceStringFormatByFormattedASTVisitor}.
+ * {@link ReplaceSetRemoveAllWithForEachASTVisitor}.
  * 
  * @since 4.13.0
  *
