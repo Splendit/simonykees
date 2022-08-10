@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
+import java.util.function.Predicate;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,17 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 
 class ReplaceSetRemoveAllWithForEachResolverTest extends UsesJDTUnitFixture {
+
+	private static final String REMOVE_ALL_ONE_OCCURRANCE = "" +
+			"	void testWithOneOccurrence(Set<String> stringSet, List<String> stringsToRemove) {\n" +
+			"		" + "stringSet.removeAll(stringsToRemove);\n" +
+			"	}";
+
+	private void prepareResolver(Predicate<ASTNode> positionChecker) {
+		ReplaceSetRemoveAllWithForEachResolver visitor = new ReplaceSetRemoveAllWithForEachResolver(positionChecker);
+		visitor.addMarkerListener(RefactoringMarkers.getFor("ReplaceSetRemoveAllWithForEachResolver"));
+		setDefaultVisitor(visitor);
+	}
 
 	@BeforeEach
 	void setUpVisitor() throws Exception {
@@ -35,15 +48,9 @@ class ReplaceSetRemoveAllWithForEachResolverTest extends UsesJDTUnitFixture {
 
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
-		ReplaceSetRemoveAllWithForEachResolver visitor = new ReplaceSetRemoveAllWithForEachResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("ReplaceSetRemoveAllWithForEachResolver"));
-		setDefaultVisitor(visitor);
-		String original = "" +
-				"	void exampleWithParametersForSetAndList(Set<String> stringSet, List<String> stringsToRemove) {\n" +
-				"		stringSet.removeAll(stringsToRemove);\n" +
-				"	}";
+		prepareResolver(node -> false);
 
-		assertNoChange(original);
+		assertNoChange(REMOVE_ALL_ONE_OCCURRANCE);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertTrue(events.isEmpty());
 
@@ -51,20 +58,13 @@ class ReplaceSetRemoveAllWithForEachResolverTest extends UsesJDTUnitFixture {
 
 	@Test
 	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
-		ReplaceSetRemoveAllWithForEachResolver visitor = new ReplaceSetRemoveAllWithForEachResolver(node -> true);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("ReplaceSetRemoveAllWithForEachResolver"));
-		setDefaultVisitor(visitor);
-		String original = "" +
-				"	void exampleWithParametersForSetAndList(Set<String> stringSet, List<String> stringsToRemove) {\n" +
-				"		stringSet.removeAll(stringsToRemove);\n" +
-				"	}";
-
+		prepareResolver(node -> true);
 		String expected = "" +
-				"	void exampleWithParametersForSetAndList(Set<String> stringSet, List<String> stringsToRemove) {\n" +
+				"	void testWithOneOccurrence(Set<String> stringSet, List<String> stringsToRemove) {\n" +
 				"		stringsToRemove.forEach(stringSet::remove);\n" +
 				"	}";
 
-		assertChange(original, expected);
+		assertChange(REMOVE_ALL_ONE_OCCURRANCE, expected);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertEquals(1, events.size());
 		RefactoringMarkerEvent event = events.get(0);
@@ -77,7 +77,7 @@ class ReplaceSetRemoveAllWithForEachResolverTest extends UsesJDTUnitFixture {
 				() -> assertEquals("ReplaceSetRemoveAllWithForEachResolver", event.getResolver()),
 				() -> assertEquals(description, event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
-				() -> assertEquals(194, event.getOffset()),
+				() -> assertEquals(181, event.getOffset()),
 				() -> assertEquals(36, event.getLength()),
 				() -> assertEquals(9, event.getLineNumber()),
 				() -> assertEquals(5, event.getWeightValue()));
@@ -85,23 +85,88 @@ class ReplaceSetRemoveAllWithForEachResolverTest extends UsesJDTUnitFixture {
 
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
-		ReplaceSetRemoveAllWithForEachResolver visitor = new ReplaceSetRemoveAllWithForEachResolver(
-				node -> node.getStartPosition() == 194);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("ReplaceSetRemoveAllWithForEachResolver"));
-		setDefaultVisitor(visitor);
-		String original = "" +
-				"	void exampleWithParametersForSetAndList(Set<String> stringSet, List<String> stringsToRemove) {\n" +
-				"		stringSet.removeAll(stringsToRemove);\n" +
-				"	}";
+		final int startPosition = 181;
+		prepareResolver(node -> node.getStartPosition() == startPosition);
 
 		String expected = "" +
-				"	void exampleWithParametersForSetAndList(Set<String> stringSet, List<String> stringsToRemove) {\n" +
+				"	void testWithOneOccurrence(Set<String> stringSet, List<String> stringsToRemove) {\n" +
 				"		stringsToRemove.forEach(stringSet::remove);\n" +
 				"	}";
+
+		assertChange(REMOVE_ALL_ONE_OCCURRANCE, expected);
+		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
+		assertEquals(1, events.size());
+		assertEquals(startPosition, events.get(0)
+			.getOffset());
+	}
+
+	@Test
+	void test_markerGeneration_shouldGenerateTwoMarkerEvents() throws Exception {
+		prepareResolver(node -> true);
+		String original = ""
+				+ "	void testWithTwoOccurrences(Set<String> stringSet1, Set<String> stringSet2, List<String> stringsToRemove) {\n"
+				+ "		stringSet1.removeAll(stringsToRemove);\n"
+				+ "		stringSet2.removeAll(stringsToRemove);\n"
+				+ "	}";
+
+		String expected = ""
+				+ "	void testWithTwoOccurrences(Set<String> stringSet1,  Set<String> stringSet2,  List<String> stringsToRemove){\n"
+				+ "		stringsToRemove.forEach(stringSet1::remove);\n"
+				+ "		stringsToRemove.forEach(stringSet2::remove);\n"
+				+ "	}\n";
+
+		assertChange(original, expected);
+		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
+		assertEquals(2, events.size());
+		assertEquals(207, events.get(0)
+			.getOffset());
+		assertEquals(254, events.get(1)
+			.getOffset());
+	}
+
+	@Test
+	void test_markerGeneration_shouldGenerateForFirst() throws Exception {
+		int startPosition = 207;
+		prepareResolver(node -> node.getStartPosition() == startPosition);
+		String original = ""
+				+ "	void testWithTwoOccurrences(Set<String> stringSet1, Set<String> stringSet2, List<String> stringsToRemove) {\n"
+				+ "		stringSet1.removeAll(stringsToRemove);\n"
+				+ "		stringSet2.removeAll(stringsToRemove);\n"
+				+ "	}";
+
+		String expected = ""
+				+ "	void testWithTwoOccurrences(Set<String> stringSet1,  Set<String> stringSet2,  List<String> stringsToRemove){\n"
+				+ "		stringsToRemove.forEach(stringSet1::remove);\n"
+				+ "		stringSet2.removeAll(stringsToRemove);\n"
+				+ "	}\n";
 
 		assertChange(original, expected);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertEquals(1, events.size());
+		assertEquals(startPosition, events.get(0)
+			.getOffset());
 	}
+	
+	@Test
+	void test_markerGeneration_shouldGenerateForSecond() throws Exception {
+		int startPosition = 254;
+		prepareResolver(node -> node.getStartPosition() == startPosition);
+		String original = ""
+				+ "	void testWithTwoOccurrences(Set<String> stringSet1, Set<String> stringSet2, List<String> stringsToRemove) {\n"
+				+ "		stringSet1.removeAll(stringsToRemove);\n"
+				+ "		stringSet2.removeAll(stringsToRemove);\n"
+				+ "	}";
 
+		String expected = ""
+				+ "	void testWithTwoOccurrences(Set<String> stringSet1,  Set<String> stringSet2,  List<String> stringsToRemove){\n"
+				+ "		stringSet1.removeAll(stringsToRemove);\n"
+				+ "		stringsToRemove.forEach(stringSet2::remove);\n"
+				+ "	}\n";
+
+		assertChange(original, expected);
+		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
+		assertEquals(1, events.size());
+		assertEquals(startPosition, events.get(0)
+			.getOffset());
+	}
 }
