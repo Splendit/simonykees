@@ -3,13 +3,20 @@ package eu.jsparrow.core.rule.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.SingleRuleTest;
 import eu.jsparrow.common.util.RulesTestUtil;
@@ -17,6 +24,10 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 class ReplaceSetRemoveAllWithForEachRuleTest extends SingleRuleTest {
+
+	private static final String SAMPLE_FILE = "TestReplaceSetRemoveAllWithForEachRule.java";
+	private static final String SAMPLE_FILE_NOT_TRANSFORMING = "TestReplaceSetRemoveAllWithForEachNotTransformingRule.java";
+	private static final String POSTRULE_SUBDIRECTORY = "replaceSetRemoveAll";
 
 	private ReplaceSetRemoveAllWithForEachRule rule;
 
@@ -29,7 +40,7 @@ class ReplaceSetRemoveAllWithForEachRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleId() {
 		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo( "ReplaceSetRemoveAllWithForEach"));
+		assertThat(ruleId, equalTo("ReplaceSetRemoveAllWithForEach"));
 	}
 
 	@Test
@@ -62,5 +73,21 @@ class ReplaceSetRemoveAllWithForEachRuleTest extends SingleRuleTest {
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			SAMPLE_FILE,
+			SAMPLE_FILE_NOT_TRANSFORMING })
+	void testTransformation(String preRuleFileName) throws Exception {
+
+		rule.calculateEnabledForProject(testProject);
+		Path preRule = getPreRuleFile(preRuleFileName);
+		Path postRule = getPostRuleFile(preRuleFileName, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
 	}
 }
