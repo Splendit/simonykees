@@ -5,11 +5,11 @@ import java.util.function.Predicate;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
-import eu.jsparrow.core.rule.impl.ReplaceWrongClassForLoggerRule;
-import eu.jsparrow.core.visitor.logger.ReplaceWrongClassForLoggerASTVisitor;
+import eu.jsparrow.core.rule.impl.ReplaceSetRemoveAllWithForEachRule;
+import eu.jsparrow.core.visitor.impl.ReplaceSetRemoveAllWithForEachASTVisitor;
 import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
@@ -17,23 +17,23 @@ import eu.jsparrow.rules.common.markers.Resolver;
 
 /**
  * A visitor for resolving one issue of type
- * {@link ReplaceWrongClassForLoggerASTVisitor}.
+ * {@link ReplaceSetRemoveAllWithForEachASTVisitor}.
  * 
  * @since 4.13.0
  *
  */
-public class ReplaceWrongClassForLoggerResolver extends ReplaceWrongClassForLoggerASTVisitor
+public class ReplaceSetRemoveAllWithForEachResolver extends ReplaceSetRemoveAllWithForEachASTVisitor
 		implements Resolver {
 
-	public static final String ID = "ReplaceWrongClassForLoggerResolver"; //$NON-NLS-1$
+	public static final String ID = "ReplaceSetRemoveAllWithForEachResolver"; //$NON-NLS-1$
 
 	private Predicate<ASTNode> positionChecker;
 	private RuleDescription description;
 
-	public ReplaceWrongClassForLoggerResolver(Predicate<ASTNode> positionChecker) {
+	public ReplaceSetRemoveAllWithForEachResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
-			.findByRuleId(ReplaceWrongClassForLoggerRule.RULE_ID);
+			.findByRuleId(ReplaceSetRemoveAllWithForEachRule.RULE_ID);
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class ReplaceWrongClassForLoggerResolver extends ReplaceWrongClassForLogg
 	}
 
 	@Override
-	public boolean visit(TypeLiteral methodInvocation) {
+	public boolean visit(MethodInvocation methodInvocation) {
 		if (positionChecker.test(methodInvocation)) {
 			super.visit(methodInvocation);
 		}
@@ -50,7 +50,7 @@ public class ReplaceWrongClassForLoggerResolver extends ReplaceWrongClassForLogg
 	}
 
 	@Override
-	public void addMarkerEvent(TypeLiteral node) {
+	public void addMarkerEvent(MethodInvocation node) {
 		int credit = description.getCredit();
 		int highlightLength = 0;
 		int offset = node.getStartPosition();

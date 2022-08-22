@@ -502,6 +502,8 @@ public class Messages extends NLS {
 	public static String ReplaceWrongClassForLoggerRule_name;
 	public static String ReplaceRequestMappingAnnotationRule_description;
 	public static String ReplaceRequestMappingAnnotationRule_name;
+	public static String ReplaceSetRemoveAllWithForEachRule_description;
+	public static String ReplaceSetRemoveAllWithForEachRule_name;
 	public static String ReplaceStringFormatByFormattedRule_description;
 	public static String ReplaceStringFormatByFormattedRule_name;
 	public static String ReplaceStreamCollectByToListRule_description;
