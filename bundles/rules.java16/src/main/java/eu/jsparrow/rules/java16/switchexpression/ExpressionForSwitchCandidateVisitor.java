@@ -1,6 +1,7 @@
 package eu.jsparrow.rules.java16.switchexpression;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -77,31 +78,23 @@ public class ExpressionForSwitchCandidateVisitor extends ASTVisitor {
 
 	private Optional<VariableForSwitchAnalysisData> findVariableDataForSwitch(SimpleName node) {
 		ASTNode parent = node.getParent();
-		if (analyzeSimpleNameParent(parent)) {
-			IVariableBinding variableBinding = IfExpressionAnalyzer.findSupportedVariableBinding(node)
-				.orElse(null);
-			if (variableBinding != null) {
-				ITypeBinding typeBinding = variableBinding.getType();
-				if (parent.getNodeType() == ASTNode.METHOD_INVOCATION && IfExpressionAnalyzer.isString(typeBinding)) {
-					return Optional.of(new VariableForSwitchAnalysisData(node, typeBinding));
-				}
-				if (IfExpressionAnalyzer.isTypeSupportedForInfixOperations(typeBinding)) {
-					return Optional.of(new VariableForSwitchAnalysisData(node, typeBinding));
-				}
-			}
-		}
-		return Optional.empty();
-	}
-
-	/**
-	 * @return true if the parent of the simple name is either an equals infix
-	 *         expression or an equals method invocation, otherwise false
-	 */
-	private boolean analyzeSimpleNameParent(ASTNode parent) {
+		Predicate<ITypeBinding> typeBindingPredicate;
 		if (parent.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			return true;
+			typeBindingPredicate = IfExpressionAnalyzer::isString;
+		} else if (isInfixExpression(parent, Operator.EQUALS)) {
+			typeBindingPredicate = IfExpressionAnalyzer::isTypeSupportedForInfixOperations;
+		} else {
+			return Optional.empty();
 		}
-		return isInfixExpression(parent, Operator.EQUALS);
+		IVariableBinding variableBinding = IfExpressionAnalyzer.findSupportedVariableBinding(node)
+			.orElse(null);
+		if (variableBinding == null) {
+			return Optional.empty();
+		}
+		return Optional.of(variableBinding)
+			.map(IVariableBinding::getType)
+			.filter(typeBindingPredicate)
+			.map(typeBinding -> new VariableForSwitchAnalysisData(node, typeBinding));
 	}
 
 	private boolean analyzeExpressionParent(Expression expression) {

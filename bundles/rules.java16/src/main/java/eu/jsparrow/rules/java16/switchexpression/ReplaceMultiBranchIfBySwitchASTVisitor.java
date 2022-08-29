@@ -46,11 +46,11 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends AbstractASTRewriteAS
 
 	@Override
 	public boolean visit(IfStatement ifStatement) {
-
-		ExpressionForSwitchCandidateVisitor variableDataVisitor = new ExpressionForSwitchCandidateVisitor(ifStatement);
+		VariableForSwitchVisitor variableDataVisitor = new VariableForSwitchVisitor();
+		// ExpressionForSwitchCandidateVisitor variableDataVisitor = new ExpressionForSwitchCandidateVisitor(ifStatement);
 		ifStatement.getExpression()
 			.accept(variableDataVisitor);
-		VariableForSwitchAnalysisData variableDataForSwitch = variableDataVisitor.getVariableData()
+		VariableForSwitchAnalysisData variableDataForSwitch = variableDataVisitor.getVariableForSwitchAnalysisResult()
 			.orElse(null);
 
 		// VariableForSwitchAnalysisData variableDataForSwitch =

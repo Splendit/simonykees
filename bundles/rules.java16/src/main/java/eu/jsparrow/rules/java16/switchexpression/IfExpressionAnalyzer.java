@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -32,56 +33,63 @@ public class IfExpressionAnalyzer {
 		// private default constructor in order to hide implicit public one.
 	}
 
-//	static Optional<VariableForSwitchAnalysisData> findVariableData(IfStatement ifStatement) {
-//		FirstOperandVisitor visitor = new FirstOperandVisitor();
-//		ifStatement.getExpression()
-//			.accept(visitor);
-//		InfixExpression firstInfixExpression = visitor.getFirstInfixExpression()
-//			.orElse(null);
-//		if (firstInfixExpression != null) {
-//			return findVariableData(firstInfixExpression);
-//		}
-//		MethodInvocation firstMethodInvocation = visitor.getFirstMethodInvocation()
-//			.orElse(null);
-//		if (firstMethodInvocation != null) {
-//			return findVariableData(firstMethodInvocation);
-//		}
-//
-//		return Optional.empty();
-//	}
+	// static Optional<VariableForSwitchAnalysisData>
+	// findVariableData(IfStatement ifStatement) {
+	// FirstOperandVisitor visitor = new FirstOperandVisitor();
+	// ifStatement.getExpression()
+	// .accept(visitor);
+	// InfixExpression firstInfixExpression = visitor.getFirstInfixExpression()
+	// .orElse(null);
+	// if (firstInfixExpression != null) {
+	// return findVariableData(firstInfixExpression);
+	// }
+	// MethodInvocation firstMethodInvocation =
+	// visitor.getFirstMethodInvocation()
+	// .orElse(null);
+	// if (firstMethodInvocation != null) {
+	// return findVariableData(firstMethodInvocation);
+	// }
+	//
+	// return Optional.empty();
+	// }
 
-//	static Optional<VariableForSwitchAnalysisData> findVariableData(InfixExpression infixExpression) {
-//		if (!isEqualsInfixOperation(infixExpression)) {
-//			return Optional.empty();
-//		}
-//		return findVariableDataForEqualsInfixExpression(
-//				infixExpression.getLeftOperand(),
-//				infixExpression.getRightOperand());
-//
-//	}
+	// static Optional<VariableForSwitchAnalysisData>
+	// findVariableData(InfixExpression infixExpression) {
+	// if (!isEqualsInfixOperation(infixExpression)) {
+	// return Optional.empty();
+	// }
+	// return findVariableDataForEqualsInfixExpression(
+	// infixExpression.getLeftOperand(),
+	// infixExpression.getRightOperand());
+	//
+	// }
 
-//	static Optional<VariableForSwitchAnalysisData> findVariableDataForEqualsInfixExpression(
-//			Expression leftOperand, Expression rightOperand) {
-//
-//		ITypeBinding operandType = leftOperand.resolveTypeBinding();
-//		if (!isTypeSupportedForInfixOperations(operandType)) {
-//			return Optional.empty();
-//		}
-//
-//		if (!ClassRelationUtil.compareITypeBinding(operandType, rightOperand.resolveTypeBinding())) {
-//			return Optional.empty();
-//		}
-//
-//		SimpleName variableName = findNameOfVariableForSwitch(leftOperand)
-//			.orElse(findNameOfVariableForSwitch(rightOperand).orElse(null));
-//
-//		if (variableName == null) {
-//			return Optional.empty();
-//		}
-//
-//		return Optional.of(new VariableForSwitchAnalysisData(ASTNode.INFIX_EXPRESSION, variableName, operandType));
-//
-//	}
+	// static Optional<VariableForSwitchAnalysisData>
+	// findVariableDataForEqualsInfixExpression(
+	// Expression leftOperand, Expression rightOperand) {
+	//
+	// ITypeBinding operandType = leftOperand.resolveTypeBinding();
+	// if (!isTypeSupportedForInfixOperations(operandType)) {
+	// return Optional.empty();
+	// }
+	//
+	// if (!ClassRelationUtil.compareITypeBinding(operandType,
+	// rightOperand.resolveTypeBinding())) {
+	// return Optional.empty();
+	// }
+	//
+	// SimpleName variableName = findNameOfVariableForSwitch(leftOperand)
+	// .orElse(findNameOfVariableForSwitch(rightOperand).orElse(null));
+	//
+	// if (variableName == null) {
+	// return Optional.empty();
+	// }
+	//
+	// return Optional.of(new
+	// VariableForSwitchAnalysisData(ASTNode.INFIX_EXPRESSION, variableName,
+	// operandType));
+	//
+	// }
 
 	static Optional<SimpleName> findNameOfVariableForSwitch(Expression operand) {
 		if (operand.getNodeType() != ASTNode.SIMPLE_NAME) {
@@ -102,38 +110,44 @@ public class IfExpressionAnalyzer {
 		return Optional.of(simpleName);
 	}
 
-//	static Optional<VariableForSwitchAnalysisData> findVariableData(MethodInvocation methodInvocation) {
-//
-//		List<Expression> equalsMethodInvocationOperands = findEqualsMethodInvocationOperands(methodInvocation);
-//		if (equalsMethodInvocationOperands.size() != 2) {
-//			return Optional.empty();
-//		}
-//		return findVariableDataForMethodInvocation(
-//				equalsMethodInvocationOperands.get(0),
-//				equalsMethodInvocationOperands.get(1));
-//	}
+	// static Optional<VariableForSwitchAnalysisData>
+	// findVariableData(MethodInvocation methodInvocation) {
+	//
+	// List<Expression> equalsMethodInvocationOperands =
+	// findEqualsMethodInvocationOperands(methodInvocation);
+	// if (equalsMethodInvocationOperands.size() != 2) {
+	// return Optional.empty();
+	// }
+	// return findVariableDataForMethodInvocation(
+	// equalsMethodInvocationOperands.get(0),
+	// equalsMethodInvocationOperands.get(1));
+	// }
 
-//	static Optional<VariableForSwitchAnalysisData> findVariableDataForMethodInvocation(
-//			Expression leftOperand, Expression rightOperand) {
-//
-//		ITypeBinding operandType = leftOperand.resolveTypeBinding();
-//		if (!isString(operandType)) {
-//			return Optional.empty();
-//		}
-//
-//		if (!ClassRelationUtil.compareITypeBinding(operandType, rightOperand.resolveTypeBinding())) {
-//			return Optional.empty();
-//		}
-//
-//		SimpleName variableName = findNameOfVariableForSwitch(leftOperand)
-//			.orElse(findNameOfVariableForSwitch(rightOperand).orElse(null));
-//
-//		if (variableName == null) {
-//			return Optional.empty();
-//		}
-//
-//		return Optional.of(new VariableForSwitchAnalysisData(ASTNode.METHOD_INVOCATION, variableName, operandType));
-//	}
+	// static Optional<VariableForSwitchAnalysisData>
+	// findVariableDataForMethodInvocation(
+	// Expression leftOperand, Expression rightOperand) {
+	//
+	// ITypeBinding operandType = leftOperand.resolveTypeBinding();
+	// if (!isString(operandType)) {
+	// return Optional.empty();
+	// }
+	//
+	// if (!ClassRelationUtil.compareITypeBinding(operandType,
+	// rightOperand.resolveTypeBinding())) {
+	// return Optional.empty();
+	// }
+	//
+	// SimpleName variableName = findNameOfVariableForSwitch(leftOperand)
+	// .orElse(findNameOfVariableForSwitch(rightOperand).orElse(null));
+	//
+	// if (variableName == null) {
+	// return Optional.empty();
+	// }
+	//
+	// return Optional.of(new
+	// VariableForSwitchAnalysisData(ASTNode.METHOD_INVOCATION, variableName,
+	// operandType));
+	// }
 
 	static boolean isString(ITypeBinding typeBinding) {
 		return ClassRelationUtil.isContentOfType(typeBinding, java.lang.String.class.getName());
@@ -143,49 +157,60 @@ public class IfExpressionAnalyzer {
 		return ClassRelationUtil.isContentOfTypes(typeBinding, SUPPORTED_PRIMITIVE_TYPES);
 	}
 
-//	static List<Expression> findCaseExpressions(VariableForSwitchAnalysisData variableData, IfStatement ifStatement) {
-//		if (variableData.getOperationNodeType() == ASTNode.METHOD_INVOCATION) {
-//			return findCaseExpressionsForEqualsMethod(variableData, ifStatement);
-//		}
-//		return findCaseExpressionsForEqualsInfix(variableData, ifStatement);
-//	}
+	// static List<Expression> findCaseExpressions(VariableForSwitchAnalysisData
+	// variableData, IfStatement ifStatement) {
+	// if (variableData.getOperationNodeType() == ASTNode.METHOD_INVOCATION) {
+	// return findCaseExpressionsForEqualsMethod(variableData, ifStatement);
+	// }
+	// return findCaseExpressionsForEqualsInfix(variableData, ifStatement);
+	// }
 
-//	static List<Expression> findCaseExpressionsForEqualsInfix(VariableForSwitchAnalysisData variableData,
-//			IfStatement ifStatement) {
-//
-//		InfixExpressionsCollectorVisitor collectorVisitor = new InfixExpressionsCollectorVisitor();
-//		ifStatement.getExpression()
-//			.accept(collectorVisitor);
-//		List<InfixExpression> infixExpressions = collectorVisitor.getInfixExpressions();
-//		List<Expression> caseExpressions = new ArrayList<>();
-//		for (InfixExpression infixExpression : infixExpressions) {
-//			Expression caseExpression = findCaseExpression(variableData, infixExpression).orElse(null);
-//			if (caseExpression == null) {
-//				return Collections.emptyList();
-//			}
-//			caseExpressions.add(caseExpression);
-//		}
-//		return caseExpressions;
-//	}
+	// static List<Expression>
+	// findCaseExpressionsForEqualsInfix(VariableForSwitchAnalysisData
+	// variableData,
+	// IfStatement ifStatement) {
+	//
+	// InfixExpressionsCollectorVisitor collectorVisitor = new
+	// InfixExpressionsCollectorVisitor();
+	// ifStatement.getExpression()
+	// .accept(collectorVisitor);
+	// List<InfixExpression> infixExpressions =
+	// collectorVisitor.getInfixExpressions();
+	// List<Expression> caseExpressions = new ArrayList<>();
+	// for (InfixExpression infixExpression : infixExpressions) {
+	// Expression caseExpression = findCaseExpression(variableData,
+	// infixExpression).orElse(null);
+	// if (caseExpression == null) {
+	// return Collections.emptyList();
+	// }
+	// caseExpressions.add(caseExpression);
+	// }
+	// return caseExpressions;
+	// }
 
-//	static List<Expression> findCaseExpressionsForEqualsMethod(VariableForSwitchAnalysisData variableData,
-//			IfStatement ifStatement) {
-//
-//		MethodInvocationsCollectorVisitor collectorVisitor = new MethodInvocationsCollectorVisitor();
-//		ifStatement.getExpression()
-//			.accept(collectorVisitor);
-//		List<MethodInvocation> methodInvocations = collectorVisitor.getMethodInvocations();
-//		List<Expression> caseExpressions = new ArrayList<>();
-//		for (MethodInvocation methodInvocation : methodInvocations) {
-//			Expression caseExpression = findCaseExpression(variableData, methodInvocation).orElse(null);
-//			if (caseExpression == null) {
-//				return Collections.emptyList();
-//			}
-//			caseExpressions.add(caseExpression);
-//		}
-//		return caseExpressions;
-//
-//	}
+	// static List<Expression>
+	// findCaseExpressionsForEqualsMethod(VariableForSwitchAnalysisData
+	// variableData,
+	// IfStatement ifStatement) {
+	//
+	// MethodInvocationsCollectorVisitor collectorVisitor = new
+	// MethodInvocationsCollectorVisitor();
+	// ifStatement.getExpression()
+	// .accept(collectorVisitor);
+	// List<MethodInvocation> methodInvocations =
+	// collectorVisitor.getMethodInvocations();
+	// List<Expression> caseExpressions = new ArrayList<>();
+	// for (MethodInvocation methodInvocation : methodInvocations) {
+	// Expression caseExpression = findCaseExpression(variableData,
+	// methodInvocation).orElse(null);
+	// if (caseExpression == null) {
+	// return Collections.emptyList();
+	// }
+	// caseExpressions.add(caseExpression);
+	// }
+	// return caseExpressions;
+	//
+	// }
 
 	static Optional<Expression> findCaseExpression(VariableForSwitchAnalysisData variableData,
 			InfixExpression infixExpression) {
@@ -309,4 +334,46 @@ public class IfExpressionAnalyzer {
 		return operands;
 	}
 
+	static Optional<VariableForSwitchAnalysisData> findVariableAnalysisResult(InfixExpression infixExpression) {
+		if (!isEqualsInfixOperation(infixExpression)) {
+			return Optional.empty();
+		}
+		Expression leftOperand = infixExpression.getLeftOperand();
+		Expression rightOperand = infixExpression.getRightOperand();
+		Predicate<ITypeBinding> operandTypePredicate = IfExpressionAnalyzer::isTypeSupportedForInfixOperations;
+		return findVariableForSwitchAnalysisResult(leftOperand, rightOperand, operandTypePredicate);
+	}
+
+	static Optional<VariableForSwitchAnalysisData> findVariableAnalysisResult(MethodInvocation methodInvocation) {
+		List<Expression> operands = findEqualsMethodInvocationOperands(methodInvocation);
+		if (operands.size() != 2) {
+			return Optional.empty();
+		}
+		Expression leftOperand = operands.get(0);
+		Expression rightOperand = operands.get(1);
+		Predicate<ITypeBinding> operandTypePredicate = IfExpressionAnalyzer::isString;
+		return findVariableForSwitchAnalysisResult(leftOperand, rightOperand, operandTypePredicate);
+	}
+
+	static Optional<VariableForSwitchAnalysisData> findVariableForSwitchAnalysisResult(Expression leftOperand,
+			Expression rightOperand, Predicate<ITypeBinding> operandTypePredicate) {
+
+		SimpleName simpleName;
+		if (leftOperand.getNodeType() == ASTNode.SIMPLE_NAME) {
+			simpleName = (SimpleName) leftOperand;
+		} else if (rightOperand.getNodeType() == ASTNode.SIMPLE_NAME) {
+			simpleName = (SimpleName) rightOperand;
+		} else {
+			return Optional.empty();
+		}
+		IVariableBinding variableBinding = IfExpressionAnalyzer.findSupportedVariableBinding(simpleName)
+			.orElse(null);
+		if (variableBinding == null) {
+			return Optional.empty();
+		}
+		return Optional.of(variableBinding)
+			.map(IVariableBinding::getType)
+			.filter(operandTypePredicate)
+			.map(typeBinding -> new VariableForSwitchAnalysisData(simpleName, typeBinding));
+	}
 }
