@@ -18,19 +18,13 @@ import org.eclipse.jdt.core.dom.SimpleName;
  * 
  */
 public class VariableForSwitchAnalysisData {
-	private final int operationNodeType;
 	private final SimpleName variableForSwitch;
 	private final ITypeBinding operandType;
 
-	public VariableForSwitchAnalysisData(int operationNodeType, SimpleName variableForSwitch,
+	public VariableForSwitchAnalysisData(SimpleName variableForSwitch,
 			ITypeBinding operandType) {
-		this.operationNodeType = operationNodeType;
 		this.variableForSwitch = variableForSwitch;
 		this.operandType = operandType;
-	}
-
-	public int getOperationNodeType() {
-		return operationNodeType;
 	}
 
 	public SimpleName getVariableForSwitch() {

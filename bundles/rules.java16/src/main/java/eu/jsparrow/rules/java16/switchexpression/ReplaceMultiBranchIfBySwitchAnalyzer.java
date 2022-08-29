@@ -52,7 +52,10 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 
 	private static Optional<IfBranch> ifStatementToIfBranchForSwitch(IfStatement ifStatement,
 			VariableForSwitchAnalysisData variableData) {
-		List<Expression> expressionsForSwitchCase = IfExpressionAnalyzer.findCaseExpressions(variableData, ifStatement);
+		CaseExpressionsVisitor caseExpressionsVisitor = new CaseExpressionsVisitor(variableData);
+		ifStatement.getExpression()
+			.accept(caseExpressionsVisitor);
+		List<Expression>  expressionsForSwitchCase = caseExpressionsVisitor.getCaseExpressions();
 		if (expressionsForSwitchCase.isEmpty()) {
 			return Optional.empty();
 		}
