@@ -1,14 +1,19 @@
 package eu.jsparrow.rules.java16.switchexpression;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Statement;
+
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * 
@@ -16,6 +21,12 @@ import org.eclipse.jdt.core.dom.Statement;
  *
  */
 public class ReplaceMultiBranchIfBySwitchAnalyzer {
+
+	private static final ASTMatcher AST_MATCHER = new ASTMatcher();
+
+	private static final List<String> TYPES_FOR_NUMBER_LITERAL = Collections.unmodifiableList(Arrays.asList(
+			int.class.getName(),
+			long.class.getName()));
 
 	static List<IfBranch> collectIfBranchesForSwitch(IfStatement ifStatement,
 			VariableForSwitchAnalysisData variableAnalysisData) {
@@ -52,14 +63,71 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 
 	private static Optional<IfBranch> ifStatementToIfBranchForSwitch(IfStatement ifStatement,
 			VariableForSwitchAnalysisData variableData) {
-		CaseExpressionsVisitor caseExpressionsVisitor = new CaseExpressionsVisitor(variableData);
+
+		EqualityOperationForSwitchVisitor equalsOperationsVisitor = new EqualityOperationForSwitchVisitor();
 		ifStatement.getExpression()
-			.accept(caseExpressionsVisitor);
-		List<Expression>  expressionsForSwitchCase = caseExpressionsVisitor.getCaseExpressions();
-		if (expressionsForSwitchCase.isEmpty()) {
+			.accept(equalsOperationsVisitor);
+		List<EqualityOperationForSwitch> equalsOperations = equalsOperationsVisitor.getEqualsOperations();
+		if (equalsOperations.isEmpty()) {
 			return Optional.empty();
 		}
-		return Optional.of(new IfBranch(expressionsForSwitchCase, ifStatement.getThenStatement()));
+
+		List<Expression> caseExpressions = findCaseExpressions(equalsOperations, variableData);
+		if (caseExpressions.isEmpty()) {
+			return Optional.empty();
+		}
+
+		return Optional.of(new IfBranch(caseExpressions, ifStatement.getThenStatement()));
+	}
+
+	private static Optional<Expression> findCaseExpression(EqualityOperationForSwitch equalsOperation,
+			VariableForSwitchAnalysisData variableData) {
+
+		if (!AST_MATCHER.match(variableData.getVariableForSwitch(), equalsOperation.getVariableForSwitch())) {
+			return Optional.empty();
+		}
+
+		Expression caseExpression = equalsOperation.getCaseExpression();
+
+		if (equalsOperation.getOperationNodeType() == ASTNode.INFIX_EXPRESSION) {
+			ITypeBinding expectedOperandType = variableData.getOperandType();
+			if (ClassRelationUtil.isContentOfType(expectedOperandType, char.class.getName())
+					&& caseExpression.getNodeType() == ASTNode.CHARACTER_LITERAL) {
+				return Optional.of(caseExpression);
+			}
+			if (caseExpression.getNodeType() == ASTNode.NUMBER_LITERAL) {
+				if (!ClassRelationUtil.isContentOfTypes(expectedOperandType, TYPES_FOR_NUMBER_LITERAL)) {
+					return Optional.empty();
+				}
+				ITypeBinding caseExpressionType = equalsOperation.getCaseExpression()
+					.resolveTypeBinding();
+				if (!ClassRelationUtil.compareITypeBinding(expectedOperandType, caseExpressionType)) {
+					return Optional.empty();
+				}
+				return Optional.of(caseExpression);
+			}
+		}
+
+		if (equalsOperation.getOperationNodeType() == ASTNode.METHOD_INVOCATION
+				&& caseExpression.getNodeType() == ASTNode.STRING_LITERAL) {
+			return Optional.of(caseExpression);
+		}
+
+		return Optional.empty();
+	}
+
+	static List<Expression> findCaseExpressions(List<EqualityOperationForSwitch> equalsOperations,
+			VariableForSwitchAnalysisData variableData) {
+		List<Expression> caseExpressions = new ArrayList<>();
+		for (EqualityOperationForSwitch equalsOperation : equalsOperations) {
+
+			Expression caseExpression = findCaseExpression(equalsOperation, variableData).orElse(null);
+			if (caseExpression == null) {
+				return Collections.emptyList();
+			}
+			caseExpressions.add(caseExpression);
+		}
+		return caseExpressions;
 	}
 
 	private ReplaceMultiBranchIfBySwitchAnalyzer() {

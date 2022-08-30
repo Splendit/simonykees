@@ -1,7 +1,5 @@
 package org.eu.jsparrow.rules.java16.switchexpression;
 
-import static org.junit.Assert.assertEquals;
-
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -103,56 +101,4 @@ class ReplaceMultiBranchIfBySwitchASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
-
-	String getResultBySubsequentIfReturnStatements(String value) {
-		if ("A".equals(value) || "B".equals(value) || "C".equals(value)) {
-			return "A | B | C";
-		}
-		if ("D".equals(value)) {
-			return "D";
-		}
-		if ("E".equals(value) || "F".equals(value)) {
-			return "E | F";
-		}
-		return "";
-	}
-
-	String getResultBySwitch(String value) {
-		switch (value) {
-		case "A":
-		case "B":
-		case "C":
-			return "A | B | C";
-		case "D":
-			return "D";
-		case "E":
-		case "F":
-			return "E | F";
-		}
-
-		return "";
-
-	}
-
-	@Test
-	void testEquivalence() throws Exception {
-		assertEquals("A | B | C", getResultBySubsequentIfReturnStatements("A"));
-		assertEquals("A | B | C", getResultBySwitch("A"));
-		
-		assertEquals("A | B | C", getResultBySubsequentIfReturnStatements("B"));
-		assertEquals("A | B | C", getResultBySwitch("B"));
-
-		assertEquals("A | B | C", getResultBySubsequentIfReturnStatements("C"));
-		assertEquals("A | B | C", getResultBySwitch("C"));
-
-		assertEquals("D", getResultBySubsequentIfReturnStatements("D"));
-		assertEquals("D", getResultBySwitch("D"));
-
-		assertEquals("E | F", getResultBySubsequentIfReturnStatements("E"));
-		assertEquals("E | F", getResultBySwitch("E"));
-		
-		assertEquals("E | F", getResultBySubsequentIfReturnStatements("F"));
-		assertEquals("E | F", getResultBySwitch("F"));
-	}
-
 }
