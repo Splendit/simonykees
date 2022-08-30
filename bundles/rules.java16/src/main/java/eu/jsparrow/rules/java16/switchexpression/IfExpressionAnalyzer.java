@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -23,22 +23,43 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class IfExpressionAnalyzer {
 
-	static final List<String> SUPPORTED_PRIMITIVE_TYPES = Arrays.asList(
+	static final List<String> TYPES_FOR_EQUALS_INFIX_EXPRESSION = Arrays.asList(
 			char.class, int.class, long.class)
 		.stream()
 		.map(Class::getName)
 		.collect(Collectors.toUnmodifiableList());
 
+	static final List<String> TYPES_FOR_EQUALS_METHOD_INVOCATION = Collections
+		.singletonList(java.lang.String.class.getName());
+
 	private IfExpressionAnalyzer() {
 		// private default constructor in order to hide implicit public one.
 	}
+	
+	static Function<InfixExpression, Optional<Expression>> getLambdaForInfixExpressionToCaseExpression(
+			VariableForSwitchAnalysisData variableData) {
+		if (ClassRelationUtil.isContentOfTypes(variableData.getOperandType(),
+				IfExpressionAnalyzer.TYPES_FOR_EQUALS_INFIX_EXPRESSION)) {
+			return infixExpression -> IfExpressionAnalyzer.findCaseExpression(variableData, infixExpression);
+		}
+		return infixExpression -> Optional.empty();
+	}
 
-	static boolean isString(ITypeBinding typeBinding) {
+	static Function<MethodInvocation, Optional<Expression>> getLambdaForMethodInvocationToCaseExpression(
+			VariableForSwitchAnalysisData variableData) {
+		if (ClassRelationUtil.isContentOfTypes(variableData.getOperandType(),
+				IfExpressionAnalyzer.TYPES_FOR_EQUALS_METHOD_INVOCATION)) {
+			return methodInvocation -> IfExpressionAnalyzer.findCaseExpression(variableData, methodInvocation);
+		}
+		return methodInvocation -> Optional.empty();
+	}
+
+	static boolean isTypeSupportingEqualsMethodInvocation(ITypeBinding typeBinding) {
 		return ClassRelationUtil.isContentOfType(typeBinding, java.lang.String.class.getName());
 	}
 
-	static boolean isTypeSupportedForInfixOperations(ITypeBinding typeBinding) {
-		return ClassRelationUtil.isContentOfTypes(typeBinding, SUPPORTED_PRIMITIVE_TYPES);
+	static boolean isTypeSupportingEqualsInfixExpression(ITypeBinding typeBinding) {
+		return ClassRelationUtil.isContentOfTypes(typeBinding, TYPES_FOR_EQUALS_INFIX_EXPRESSION);
 	}
 
 	static Optional<Expression> findCaseExpression(VariableForSwitchAnalysisData variableData,
@@ -169,8 +190,7 @@ public class IfExpressionAnalyzer {
 		}
 		Expression leftOperand = infixExpression.getLeftOperand();
 		Expression rightOperand = infixExpression.getRightOperand();
-		Predicate<ITypeBinding> operandTypePredicate = IfExpressionAnalyzer::isTypeSupportedForInfixOperations;
-		return findVariableForSwitchAnalysisResult(leftOperand, rightOperand, operandTypePredicate);
+		return findVariableForSwitchAnalysisResult(leftOperand, rightOperand, TYPES_FOR_EQUALS_INFIX_EXPRESSION);
 	}
 
 	static Optional<VariableForSwitchAnalysisData> findVariableAnalysisResult(MethodInvocation methodInvocation) {
@@ -180,12 +200,11 @@ public class IfExpressionAnalyzer {
 		}
 		Expression leftOperand = operands.get(0);
 		Expression rightOperand = operands.get(1);
-		Predicate<ITypeBinding> operandTypePredicate = IfExpressionAnalyzer::isString;
-		return findVariableForSwitchAnalysisResult(leftOperand, rightOperand, operandTypePredicate);
+		return findVariableForSwitchAnalysisResult(leftOperand, rightOperand, TYPES_FOR_EQUALS_METHOD_INVOCATION);
 	}
 
 	static Optional<VariableForSwitchAnalysisData> findVariableForSwitchAnalysisResult(Expression leftOperand,
-			Expression rightOperand, Predicate<ITypeBinding> operandTypePredicate) {
+			Expression rightOperand, List<String> supportedOperandTypes) {
 
 		SimpleName simpleName;
 		if (leftOperand.getNodeType() == ASTNode.SIMPLE_NAME) {
@@ -202,7 +221,7 @@ public class IfExpressionAnalyzer {
 		}
 		return Optional.of(variableBinding)
 			.map(IVariableBinding::getType)
-			.filter(operandTypePredicate)
+			.filter(typeBinding -> ClassRelationUtil.isContentOfTypes(typeBinding, supportedOperandTypes))
 			.map(typeBinding -> new VariableForSwitchAnalysisData(simpleName, typeBinding));
 	}
 }

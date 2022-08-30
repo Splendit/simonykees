@@ -1,9 +1,12 @@
 package eu.jsparrow.rules.java16.switchexpression;
 
+import static eu.jsparrow.rules.java16.switchexpression.IfExpressionAnalyzer.getLambdaForInfixExpressionToCaseExpression;
+import static eu.jsparrow.rules.java16.switchexpression.IfExpressionAnalyzer.getLambdaForMethodInvocationToCaseExpression;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.*;
+import java.util.function.Function;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -31,16 +34,8 @@ class CaseExpressionsVisitor extends ASTVisitor {
 	protected boolean unexpectedNode;
 
 	CaseExpressionsVisitor(VariableForSwitchAnalysisData variableData) {
-		boolean isStringOperandExprected = IfExpressionAnalyzer.isString(variableData.getOperandType());
-		if (isStringOperandExprected) {
-			infixExpressionToCaseExpression = operation -> Optional.empty();
-			methodInvocationToCaseExpression = operation -> IfExpressionAnalyzer.findCaseExpression(variableData,
-					operation);
-		} else {
-			infixExpressionToCaseExpression = operation -> IfExpressionAnalyzer.findCaseExpression(variableData,
-					operation);
-			methodInvocationToCaseExpression = operation -> Optional.empty();
-		}
+		infixExpressionToCaseExpression = getLambdaForInfixExpressionToCaseExpression(variableData);
+		methodInvocationToCaseExpression = getLambdaForMethodInvocationToCaseExpression(variableData);
 	}
 
 	@Override
