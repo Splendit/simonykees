@@ -2,7 +2,6 @@ package eu.jsparrow.rules.java16.switchexpression.ifstatement;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
