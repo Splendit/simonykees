@@ -1,4 +1,4 @@
-package org.eu.jsparrow.rules.java16.switchexpression;
+package org.eu.jsparrow.rules.java16.switchexpression.ifstatement;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.AfterEach;
@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
-import eu.jsparrow.rules.java16.switchexpression.ReplaceMultiBranchIfBySwitchASTVisitor;
+import eu.jsparrow.rules.java16.switchexpression.ifstatement.ReplaceMultiBranchIfBySwitchASTVisitor;
 
 class ReplaceMultiBranchIfBySwitchASTVisitorTest extends UsesJDTUnitFixture {
 

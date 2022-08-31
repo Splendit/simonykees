@@ -1,4 +1,4 @@
-package eu.jsparrow.rules.java16.switchexpression;
+package eu.jsparrow.rules.java16.switchexpression.ifstatement;
 
 import org.eclipse.jdt.core.dom.IfStatement;
 

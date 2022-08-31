@@ -1,4 +1,4 @@
-package eu.jsparrow.rules.java16.switchexpression;
+package eu.jsparrow.rules.java16.switchexpression.ifstatement;
 
 import java.util.List;
 import java.util.Optional;
