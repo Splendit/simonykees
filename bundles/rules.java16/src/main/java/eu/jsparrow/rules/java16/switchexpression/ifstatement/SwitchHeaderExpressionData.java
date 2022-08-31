@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -29,7 +28,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * @since 4.13.0
  * 
  */
-public class VariableForSwitchAnalysisData {
+public class SwitchHeaderExpressionData {
 
 	private static final List<String> TYPES_FOR_EQUALS_INFIX_EXPRESSION = Collections.unmodifiableList(Arrays.asList(
 			char.class.getName(),
@@ -39,11 +38,11 @@ public class VariableForSwitchAnalysisData {
 	private static final List<String> TYPES_FOR_EQUALS_METHOD_INVOCATION = Collections
 		.singletonList(java.lang.String.class.getName());
 
-	private final SimpleName variableForSwitch;
+	private final SimpleName switchHeaderExpression;
 	private final ITypeBinding operandType;
 
-	static Optional<VariableForSwitchAnalysisData> findVariableForSwitchAnalysisResult(
-			EqualityOperationForSwitch equalsOperation) {
+	static Optional<SwitchHeaderExpressionData> findSwitchHeaderExpressionData(
+			EqualsOperationForSwitch equalsOperation) {
 
 		List<String> supportedOperandTypes;
 		if (equalsOperation.getOperationNodeType() == ASTNode.INFIX_EXPRESSION) {
@@ -53,12 +52,12 @@ public class VariableForSwitchAnalysisData {
 		}
 		Predicate<ITypeBinding> typeBindingPredicate = typeBinding -> ClassRelationUtil.isContentOfTypes(typeBinding,
 				supportedOperandTypes);
-		SimpleName simpleName = equalsOperation.getVariableForSwitch();
+		SimpleName simpleName = equalsOperation.getSwitchHeaderExpression();
 
 		return findSupportedVariableBinding(simpleName)
 			.map(IVariableBinding::getType)
 			.filter(typeBindingPredicate)
-			.map(typeBinding -> new VariableForSwitchAnalysisData(simpleName, typeBinding));
+			.map(typeBinding -> new SwitchHeaderExpressionData(simpleName, typeBinding));
 	}
 
 	private static Optional<IVariableBinding> findSupportedVariableBinding(SimpleName simpleName) {
@@ -73,17 +72,17 @@ public class VariableForSwitchAnalysisData {
 			.filter(variableBinding -> !variableBinding.isField());
 	}
 
-	private VariableForSwitchAnalysisData(SimpleName variableForSwitch,
+	private SwitchHeaderExpressionData(SimpleName switchHeaderExpression,
 			ITypeBinding operandType) {
-		this.variableForSwitch = variableForSwitch;
+		this.switchHeaderExpression = switchHeaderExpression;
 		this.operandType = operandType;
 	}
 
-	SimpleName getVariableForSwitch() {
-		return variableForSwitch;
+	SimpleName getSwitchHeaderExpression() {
+		return switchHeaderExpression;
 	}
 
-	ITypeBinding getOperandType() {
+	ITypeBinding getSwitchHeaderExpressionType() {
 		return operandType;
 	}
 }

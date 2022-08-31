@@ -12,8 +12,8 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 /**
  *
  */
-class EqualityOperationForSwitchVisitor extends ASTVisitor {
-	private final List<EqualityOperationForSwitch> equalsOperations = new ArrayList<>();
+class EqualsOperationForSwitchVisitor extends ASTVisitor {
+	private final List<EqualsOperationForSwitch> equalsOperations = new ArrayList<>();
 	protected boolean unexpectedNode;
 
 	@Override
@@ -35,7 +35,7 @@ class EqualityOperationForSwitchVisitor extends ASTVisitor {
 		if (node.getOperator() == Operator.CONDITIONAL_OR) {
 			return true;
 		}
-		EqualityOperationForSwitch equalsOperation = EqualityOperationForSwitch.findEqualityOperationForSwitch(node)
+		EqualsOperationForSwitch equalsOperation = EqualsOperationForSwitch.findEqualityOperationForSwitch(node)
 			.orElse(null);
 		if (equalsOperation != null) {
 			equalsOperations.add(equalsOperation);
@@ -47,7 +47,7 @@ class EqualityOperationForSwitchVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-		EqualityOperationForSwitch equalsOperation = EqualityOperationForSwitch.findEqualityOperationForSwitch(node)
+		EqualsOperationForSwitch equalsOperation = EqualsOperationForSwitch.findEqualityOperationForSwitch(node)
 			.orElse(null);
 		if (equalsOperation != null) {
 			equalsOperations.add(equalsOperation);
@@ -57,7 +57,7 @@ class EqualityOperationForSwitchVisitor extends ASTVisitor {
 		return false;
 	}
 
-	public List<EqualityOperationForSwitch> getEqualsOperations() {
+	public List<EqualsOperationForSwitch> getEqualsOperations() {
 		return equalsOperations;
 	}
 }

@@ -12,13 +12,13 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
-public class EqualityOperationForSwitch {
+public class EqualsOperationForSwitch {
 
-	private final SimpleName variableForSwitch;
+	private final SimpleName switchHeaderExpression;
 	private final Expression caseExpression;
 	private final int operationNodeType;
 
-	static Optional<EqualityOperationForSwitch> findEqualityOperationForSwitch(InfixExpression infixExpression) {
+	static Optional<EqualsOperationForSwitch> findEqualityOperationForSwitch(InfixExpression infixExpression) {
 		if (infixExpression.hasExtendedOperands()) {
 			return Optional.empty();
 		}
@@ -31,7 +31,7 @@ public class EqualityOperationForSwitch {
 		return findEqualityOperationForSwitch(leftOperand, rightOperand, ASTNode.INFIX_EXPRESSION);
 	}
 
-	static Optional<EqualityOperationForSwitch> findEqualityOperationForSwitch(MethodInvocation methodInvocation) {
+	static Optional<EqualsOperationForSwitch> findEqualityOperationForSwitch(MethodInvocation methodInvocation) {
 		Expression invocationExpression = methodInvocation.getExpression();
 		if (invocationExpression == null) {
 			return Optional.empty();
@@ -57,32 +57,32 @@ public class EqualityOperationForSwitch {
 		return Optional.of(invocationArgumentList.get(0));
 	}
 
-	private static Optional<EqualityOperationForSwitch> findEqualityOperationForSwitch(Expression leftOperand,
+	private static Optional<EqualsOperationForSwitch> findEqualityOperationForSwitch(Expression leftOperand,
 			Expression rightOperand, int operationNodeType) {
 
 		if (leftOperand.getNodeType() == ASTNode.SIMPLE_NAME) {
 			return Optional
-				.of(new EqualityOperationForSwitch((SimpleName) leftOperand, rightOperand, operationNodeType));
+				.of(new EqualsOperationForSwitch((SimpleName) leftOperand, rightOperand, operationNodeType));
 		}
 
 		if (rightOperand.getNodeType() == ASTNode.SIMPLE_NAME) {
 			return Optional
-				.of(new EqualityOperationForSwitch((SimpleName) rightOperand, leftOperand, operationNodeType));
+				.of(new EqualsOperationForSwitch((SimpleName) rightOperand, leftOperand, operationNodeType));
 		}
 
 		return Optional.empty();
 	}
 
-	private EqualityOperationForSwitch(SimpleName variableForSwitch, Expression literalExpression,
+	private EqualsOperationForSwitch(SimpleName switchHeaderExpression, Expression literalExpression,
 			int operationNodeType) {
 
-		this.variableForSwitch = variableForSwitch;
+		this.switchHeaderExpression = switchHeaderExpression;
 		this.caseExpression = literalExpression;
 		this.operationNodeType = operationNodeType;
 	}
 
-	SimpleName getVariableForSwitch() {
-		return variableForSwitch;
+	SimpleName getSwitchHeaderExpression() {
+		return switchHeaderExpression;
 	}
 
 	Expression getCaseExpression() {

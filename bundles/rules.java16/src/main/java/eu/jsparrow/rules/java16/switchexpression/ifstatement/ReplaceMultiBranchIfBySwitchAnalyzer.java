@@ -29,7 +29,7 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 			long.class.getName()));
 
 	static List<IfBranch> collectIfBranchesForSwitch(IfStatement ifStatement,
-			VariableForSwitchAnalysisData variableAnalysisData) {
+			SwitchHeaderExpressionData variableAnalysisData) {
 
 		List<IfBranch> ifBranches = new ArrayList<>();
 		IfBranch ifBranch = ifStatementToIfBranchForSwitch(ifStatement, variableAnalysisData).orElse(null);
@@ -62,12 +62,12 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 	}
 
 	private static Optional<IfBranch> ifStatementToIfBranchForSwitch(IfStatement ifStatement,
-			VariableForSwitchAnalysisData variableData) {
+			SwitchHeaderExpressionData variableData) {
 
-		EqualityOperationForSwitchVisitor equalsOperationsVisitor = new EqualityOperationForSwitchVisitor();
+		EqualsOperationForSwitchVisitor equalsOperationsVisitor = new EqualsOperationForSwitchVisitor();
 		ifStatement.getExpression()
 			.accept(equalsOperationsVisitor);
-		List<EqualityOperationForSwitch> equalsOperations = equalsOperationsVisitor.getEqualsOperations();
+		List<EqualsOperationForSwitch> equalsOperations = equalsOperationsVisitor.getEqualsOperations();
 		if (equalsOperations.isEmpty()) {
 			return Optional.empty();
 		}
@@ -80,17 +80,17 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 		return Optional.of(new IfBranch(caseExpressions, ifStatement.getThenStatement()));
 	}
 
-	private static Optional<Expression> findCaseExpression(EqualityOperationForSwitch equalsOperation,
-			VariableForSwitchAnalysisData variableData) {
+	private static Optional<Expression> findCaseExpression(EqualsOperationForSwitch equalsOperation,
+			SwitchHeaderExpressionData switchHeaderExpressionData) {
 
-		if (!AST_MATCHER.match(variableData.getVariableForSwitch(), equalsOperation.getVariableForSwitch())) {
+		if (!AST_MATCHER.match(switchHeaderExpressionData.getSwitchHeaderExpression(), equalsOperation.getSwitchHeaderExpression())) {
 			return Optional.empty();
 		}
 
 		Expression caseExpression = equalsOperation.getCaseExpression();
 
 		if (equalsOperation.getOperationNodeType() == ASTNode.INFIX_EXPRESSION) {
-			ITypeBinding expectedOperandType = variableData.getOperandType();
+			ITypeBinding expectedOperandType = switchHeaderExpressionData.getSwitchHeaderExpressionType();
 			if (ClassRelationUtil.isContentOfType(expectedOperandType, char.class.getName())
 					&& caseExpression.getNodeType() == ASTNode.CHARACTER_LITERAL) {
 				return Optional.of(caseExpression);
@@ -116,10 +116,10 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 		return Optional.empty();
 	}
 
-	static List<Expression> findCaseExpressions(List<EqualityOperationForSwitch> equalsOperations,
-			VariableForSwitchAnalysisData variableData) {
+	static List<Expression> findCaseExpressions(List<EqualsOperationForSwitch> equalsOperations,
+			SwitchHeaderExpressionData variableData) {
 		List<Expression> caseExpressions = new ArrayList<>();
-		for (EqualityOperationForSwitch equalsOperation : equalsOperations) {
+		for (EqualsOperationForSwitch equalsOperation : equalsOperations) {
 
 			Expression caseExpression = findCaseExpression(equalsOperation, variableData).orElse(null);
 			if (caseExpression == null) {
