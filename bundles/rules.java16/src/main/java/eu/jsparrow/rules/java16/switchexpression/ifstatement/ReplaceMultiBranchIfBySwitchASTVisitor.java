@@ -2,11 +2,12 @@ package eu.jsparrow.rules.java16.switchexpression.ifstatement;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionASTVisitor;
 
 /**
  * A visitor for replacing {@link IfStatement}s by {@link SwitchExpression}s or
@@ -41,7 +42,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 4.13.0
  *
  */
-public class ReplaceMultiBranchIfBySwitchASTVisitor extends AbstractASTRewriteASTVisitor
+public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionASTVisitor
 		implements ReplaceMultiBranchIfBySwitchEvent {
 
 	@Override
@@ -62,7 +63,7 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends AbstractASTRewriteAS
 			List<IfBranch> ifBranches = ReplaceMultiBranchIfBySwitchAnalyzer.collectIfBranchesForSwitch(ifStatement,
 					variableDataForSwitch);
 			if (!ifBranches.isEmpty()) {
-				transform(ifStatement, variableDataForSwitch, ifBranches);
+				transform(ifStatement, variableDataForSwitch.getSwitchHeaderExpression(), ifBranches);
 				return false;
 				// ??? would it also be possible to return true ???
 				// --> test it !!!
@@ -71,10 +72,10 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends AbstractASTRewriteAS
 		return true;
 	}
 
-	private void transform(IfStatement ifStatement, SwitchHeaderExpressionData variableDataForSwitch,
+	private void transform(IfStatement ifStatement, Expression switchHeaderExpression,
 			List<IfBranch> ifBranches) {
-		ifStatement.getExpression();
-		variableDataForSwitch.toString();
-		ifBranches.toString();
+		replaceBySwitchStatement( ifStatement.getAST(), ifStatement, switchHeaderExpression, ifBranches);
+		addMarkerEvent(ifStatement);
+		onRewrite();
 	}
 }

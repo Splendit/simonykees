@@ -87,8 +87,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		AST ast = switchStatement.getAST();
 		boolean hasDefaultClause = hasDefaultClause(switchStatement);
 		if (!hasDefaultClause) {
-			SwitchStatement newSwitchStatement = createSwitchStatement(ast, switchHeaderExpression, clauses);
-			astRewrite.replace(switchStatement, newSwitchStatement, null);
+			replaceBySwitchStatement(ast, switchStatement, switchHeaderExpression, clauses);
 			addMarkerEvent(switchStatement);
 			onRewrite();
 			return true;
@@ -106,15 +105,20 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			addMarkerEvent(switchStatement);
 			onRewrite();
 		} else {
-			SwitchStatement newSwitchStatement = createSwitchStatement(ast, switchHeaderExpression, clauses);
-			astRewrite.replace(switchStatement, newSwitchStatement, null);
+			replaceBySwitchStatement(ast, switchStatement, switchHeaderExpression, clauses);
 			addMarkerEvent(switchStatement);
-			
+
 			onRewrite();
 		}
 		CommentRewriter commentRewriter = getCommentRewriter();
 		commentRewriter.saveLeadingComment(switchStatement);
 		return true;
+	}
+
+	protected void replaceBySwitchStatement(AST ast, Statement statementToReplace, Expression switchHeaderExpression,
+			List<? extends SwitchCaseClause> clauses) {
+		SwitchStatement newSwitchStatement = createSwitchStatement(ast, switchHeaderExpression, clauses);
+		astRewrite.replace(statementToReplace, newSwitchStatement, null);
 	}
 
 	private boolean hasLabeledSwitchCase(SwitchStatement switchStatement) {
@@ -247,7 +251,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	@SuppressWarnings("unchecked")
 	private SwitchStatement createSwitchStatement(AST ast, Expression switchHeaderExpression,
-			List<SwitchCaseClause> clauses) {
+			List<? extends SwitchCaseClause> clauses) {
 		SwitchStatement newSwitchStatement = ast.newSwitchStatement();
 		Expression newHeaderExpression = (Expression) astRewrite.createCopyTarget(switchHeaderExpression);
 		newSwitchStatement.setExpression(newHeaderExpression);
