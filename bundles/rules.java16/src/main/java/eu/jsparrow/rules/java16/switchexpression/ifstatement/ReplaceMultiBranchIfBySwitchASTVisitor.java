@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 
@@ -53,29 +54,55 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 			.accept(equalsOperationsVisitor);
 		List<EqualsOperationForSwitch> equalsOperations = equalsOperationsVisitor.getEqualsOperations();
 		SwitchHeaderExpressionData variableDataForSwitch = null;
-		if (!equalsOperations.isEmpty()) {
-			variableDataForSwitch = SwitchHeaderExpressionData.findSwitchHeaderExpressionData(equalsOperations.get(0))
+		if (equalsOperations.isEmpty()) {
+			return true;
+		}
+
+		variableDataForSwitch = SwitchHeaderExpressionData.findSwitchHeaderExpressionData(equalsOperations.get(0))
+			.orElse(null);
+
+		if (variableDataForSwitch == null) {
+			return true;
+		}
+
+		List<IfBranch> ifBranches = ReplaceMultiBranchIfBySwitchAnalyzer.collectIfBranchesForSwitch(ifStatement,
+				variableDataForSwitch);
+
+		if (ifBranches.isEmpty()) {
+			return true;
+		}
+
+		SimpleName switchHeaderExpression = variableDataForSwitch.getSwitchHeaderExpression();
+
+		if (isMultiBranchIfEndingWithElse(ifBranches)) {
+			
+			Expression variableAssignedByFirstBranch = ifBranches.get(0)
+				.findAssignedVariable()
 				.orElse(null);
-		}
-
-		if (variableDataForSwitch != null) {
-
-			List<IfBranch> ifBranches = ReplaceMultiBranchIfBySwitchAnalyzer.collectIfBranchesForSwitch(ifStatement,
-					variableDataForSwitch);
-			if (!ifBranches.isEmpty()) {
-				transform(ifStatement, variableDataForSwitch.getSwitchHeaderExpression(), ifBranches);
+			if (variableAssignedByFirstBranch != null && areAllAssigningToSameVariable(ifBranches)) {
+				replaceBySwitchAssignedToVariable(variableAssignedByFirstBranch, ifStatement, switchHeaderExpression,
+						ifBranches);
+				addMarkerEvent(ifStatement);
+				onRewrite();
 				return false;
-				// ??? would it also be possible to return true ???
-				// --> test it !!!
 			}
-		}
-		return true;
-	}
 
-	private void transform(IfStatement ifStatement, Expression switchHeaderExpression,
-			List<IfBranch> ifBranches) {
-		replaceBySwitchStatement( ifStatement.getAST(), ifStatement, switchHeaderExpression, ifBranches);
+		}
+
+		replaceBySwitchStatement(ifStatement.getAST(), ifStatement,
+				switchHeaderExpression,
+				ifBranches);
 		addMarkerEvent(ifStatement);
 		onRewrite();
+
+		return false;
 	}
+
+	private boolean isMultiBranchIfEndingWithElse(List<IfBranch> ifBranches) {
+		int lastBranchIndex = ifBranches.size() - 1;
+		IfBranch lastBranch = ifBranches.get(lastBranchIndex);
+		return lastBranch.getExpressions()
+			.isEmpty();
+	}
+
 }

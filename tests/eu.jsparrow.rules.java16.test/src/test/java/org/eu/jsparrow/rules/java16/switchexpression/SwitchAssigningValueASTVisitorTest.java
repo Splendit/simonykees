@@ -42,8 +42,6 @@ class SwitchAssigningValueASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				+ "			  case 2 -> System.out.println(\"TWO\");\n"
 				+ "			  case 3 -> System.out.println(\"THREE\");	\n"
 				+ "			}";
-		// Problem with yield
-		expected = original;
 		assertChange(original, expected);
 	}
 
