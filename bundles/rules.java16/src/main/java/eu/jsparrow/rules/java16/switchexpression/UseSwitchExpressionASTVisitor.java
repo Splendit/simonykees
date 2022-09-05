@@ -102,21 +102,26 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 					addMarkerEvent(switchStatement);
 				});
 		} else if (areReturningValue(clauses)) {
-			SwitchExpression newSwitchExpression = createSwitchWithYieldValue(ast, switchHeaderExpression, clauses);
-			ReturnStatement newReturnStatement = ast.newReturnStatement();
-			newReturnStatement.setExpression(newSwitchExpression);
-			astRewrite.replace(switchStatement, newReturnStatement, null);
+			replaceByReturnWithSwitch(switchStatement, clauses, switchHeaderExpression);
 			addMarkerEvent(switchStatement);
 			onRewrite();
 		} else {
 			replaceBySwitchStatement(ast, switchStatement, switchHeaderExpression, clauses);
 			addMarkerEvent(switchStatement);
-
 			onRewrite();
 		}
 		CommentRewriter commentRewriter = getCommentRewriter();
 		commentRewriter.saveLeadingComment(switchStatement);
 		return true;
+	}
+
+	protected void replaceByReturnWithSwitch(Statement switchStatement, List<? extends SwitchCaseClause> clauses,
+			Expression switchHeaderExpression) {
+		AST ast = switchStatement.getAST();
+		SwitchExpression newSwitchExpression = createSwitchWithYieldValue(ast, switchHeaderExpression, clauses);
+		ReturnStatement newReturnStatement = ast.newReturnStatement();
+		newReturnStatement.setExpression(newSwitchExpression);
+		astRewrite.replace(switchStatement, newReturnStatement, null);
 	}
 
 	protected void replaceBySwitchStatement(AST ast, Statement statementToReplace, Expression switchHeaderExpression,
@@ -212,7 +217,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		return Optional.of(fragment);
 	}
 
-	private boolean areReturningValue(List<SwitchCaseClause> clauses) {
+	protected boolean areReturningValue(List<? extends SwitchCaseClause> clauses) {
 
 		boolean isReturningValue = clauses.stream()
 			.allMatch(SwitchCaseClause::isReturningValue);

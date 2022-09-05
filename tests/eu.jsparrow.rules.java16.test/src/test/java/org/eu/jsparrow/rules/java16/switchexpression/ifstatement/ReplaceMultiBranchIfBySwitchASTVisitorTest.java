@@ -94,7 +94,7 @@ class ReplaceMultiBranchIfBySwitchASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	void visit_SpecialCaseWithVariableInitialization_shouldTransform() throws Exception {
 		String original = ""
@@ -139,7 +139,7 @@ class ReplaceMultiBranchIfBySwitchASTVisitorTest extends UsesJDTUnitFixture {
 				+ "			result = \"< ZERO or > TWO\";\n"
 				+ "		}\n"
 				+ "	}";
-		
+
 		String expected = ""
 				+ "	void specialCaseWithReAssignmentAfterUse(int value) {\n"
 				+ "		String result = \"\";\n"
@@ -154,7 +154,7 @@ class ReplaceMultiBranchIfBySwitchASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	void visit_SpecialCaseWithAssignmentsWithoutElse_shouldTransform() throws Exception {
 		String original = ""
@@ -181,8 +181,6 @@ class ReplaceMultiBranchIfBySwitchASTVisitorTest extends UsesJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
-
-
 	@Test
 	void visit_SpecialCaseWithReturnStatements_shouldTransform() throws Exception {
 		String original = ""
@@ -199,20 +197,12 @@ class ReplaceMultiBranchIfBySwitchASTVisitorTest extends UsesJDTUnitFixture {
 				+ "	}";
 		String expected = ""
 				+ "	String specialCaseWithReturn(int value) {\n"
-				+ "		switch (value) {\n"
-				+ "		case 0 -> {\n"
-				+ "			return \"ZERO\";\n"
-				+ "		}\n"
-				+ "		case 1 -> {\n"
-				+ "			return \"ONE\";\n"
-				+ "		}\n"
-				+ "		case 2 -> {\n"
-				+ "			return \"TWO\";\n"
-				+ "		}\n"
-				+ "		default -> {\n"
-				+ "			return \"< ZERO or > TWO\";\n"
-				+ "		}\n"
-				+ "		}\n"
+				+ "		return switch (value) {\n"
+				+ "		case 0 -> \"ZERO\";\n"
+				+ "		case 1 -> \"ONE\";\n"
+				+ "		case 2 -> \"TWO\";\n"
+				+ "		default -> \"< ZERO or > TWO\";\n"
+				+ "		};\n"
 				+ "	}";
 
 		assertChange(original, expected);

@@ -75,7 +75,7 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 		SimpleName switchHeaderExpression = variableDataForSwitch.getSwitchHeaderExpression();
 
 		if (isMultiBranchIfEndingWithElse(ifBranches)) {
-			
+
 			Expression variableAssignedByFirstBranch = ifBranches.get(0)
 				.findAssignedVariable()
 				.orElse(null);
@@ -87,8 +87,14 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 				return false;
 			}
 
+			if (areReturningValue(ifBranches)) {
+				replaceByReturnWithSwitch(ifStatement, ifBranches, switchHeaderExpression);
+				addMarkerEvent(ifStatement);
+				onRewrite();
+				return false;
+			}
 		}
-
+		
 		replaceBySwitchStatement(ifStatement.getAST(), ifStatement,
 				switchHeaderExpression,
 				ifBranches);
