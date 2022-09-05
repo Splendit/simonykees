@@ -84,10 +84,9 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		List<SwitchCaseClause> clauses = createClauses(switchCaseBucks);
 		Expression switchHeaderExpression = switchStatement.getExpression();
-		AST ast = switchStatement.getAST();
 		boolean hasDefaultClause = hasDefaultClause(switchStatement);
 		if (!hasDefaultClause) {
-			replaceBySwitchStatement(ast, switchStatement, switchHeaderExpression, clauses);
+			replaceBySwitchStatement(switchStatement, switchHeaderExpression, clauses);
 			addMarkerEvent(switchStatement);
 			onRewrite();
 			return true;
@@ -97,16 +96,16 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			clauses.get(0)
 				.findAssignedVariable()
 				.ifPresent(assigned -> {
-					replaceBySwitchAssignedToVariable(assigned, switchStatement, switchHeaderExpression, clauses);
+					replaceByAssignmentOrInitializationWithSwitch(assigned, switchStatement, switchHeaderExpression, clauses);
 					onRewrite();
 					addMarkerEvent(switchStatement);
 				});
 		} else if (areReturningValue(clauses)) {
-			replaceByReturnWithSwitch(switchStatement, clauses, switchHeaderExpression);
+			replaceByReturnWithSwitch(switchStatement, switchHeaderExpression, clauses);
 			addMarkerEvent(switchStatement);
 			onRewrite();
 		} else {
-			replaceBySwitchStatement(ast, switchStatement, switchHeaderExpression, clauses);
+			replaceBySwitchStatement(switchStatement, switchHeaderExpression, clauses);
 			addMarkerEvent(switchStatement);
 			onRewrite();
 		}
@@ -115,8 +114,8 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		return true;
 	}
 
-	protected void replaceByReturnWithSwitch(Statement switchStatement, List<? extends SwitchCaseClause> clauses,
-			Expression switchHeaderExpression) {
+	protected void replaceByReturnWithSwitch(Statement switchStatement,
+			Expression switchHeaderExpression, List<? extends SwitchCaseClause> clauses) {
 		AST ast = switchStatement.getAST();
 		SwitchExpression newSwitchExpression = createSwitchWithYieldValue(ast, switchHeaderExpression, clauses);
 		ReturnStatement newReturnStatement = ast.newReturnStatement();
@@ -124,8 +123,9 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		astRewrite.replace(switchStatement, newReturnStatement, null);
 	}
 
-	protected void replaceBySwitchStatement(AST ast, Statement statementToReplace, Expression switchHeaderExpression,
+	protected void replaceBySwitchStatement(Statement statementToReplace, Expression switchHeaderExpression,
 			List<? extends SwitchCaseClause> clauses) {
+		AST ast = statementToReplace.getAST();
 		SwitchStatement newSwitchStatement = createSwitchStatement(ast, switchHeaderExpression, clauses);
 		astRewrite.replace(statementToReplace, newSwitchStatement, null);
 	}
@@ -136,24 +136,36 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			.anyMatch(SwitchCase::isSwitchLabeledRule);
 	}
 
-	protected void replaceBySwitchAssignedToVariable(Expression assigned, Statement switchStatement,
+	private void replaceByAssignmentOrInitializationWithSwitch(Expression assigned, Statement switchStatement,
 			Expression switchHeaderExpression,
 			List<? extends SwitchCaseClause> clauses) {
-		AST ast = switchStatement.getAST();
+		
 
 		VariableDeclarationFragment fragment = findDeclaringFragment(assigned, switchStatement).orElse(null);
 		if (fragment != null) {
-			SwitchExpression newSwitchExpression = createSwitchWithYieldValue(ast, switchHeaderExpression, clauses);
-			astRewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, newSwitchExpression, null);
-			astRewrite.remove(switchStatement, null);
+			replaceByInitializationWithSwitch(switchStatement, switchHeaderExpression, clauses, fragment);
 		} else {
-			Assignment assignment = ast.newAssignment();
-			assignment.setLeftHandSide((Expression) astRewrite.createCopyTarget(assigned));
-			SwitchExpression newSwitchExpression = createSwitchWithYieldValue(ast, switchHeaderExpression, clauses);
-			assignment.setRightHandSide(newSwitchExpression);
-			ExpressionStatement newAssignmentStatement = ast.newExpressionStatement(assignment);
-			astRewrite.replace(switchStatement, newAssignmentStatement, null);
+			replaceByAssignmentWithSwitch(assigned, switchStatement, switchHeaderExpression, clauses);
 		}
+	}
+
+	protected void replaceByAssignmentWithSwitch(Expression assigned, Statement switchStatement,
+			Expression switchHeaderExpression, List<? extends SwitchCaseClause> clauses) {
+		AST ast = switchStatement.getAST();
+		Assignment assignment = ast.newAssignment();
+		assignment.setLeftHandSide((Expression) astRewrite.createCopyTarget(assigned));
+		SwitchExpression newSwitchExpression = createSwitchWithYieldValue(ast, switchHeaderExpression, clauses);
+		assignment.setRightHandSide(newSwitchExpression);
+		ExpressionStatement newAssignmentStatement = ast.newExpressionStatement(assignment);
+		astRewrite.replace(switchStatement, newAssignmentStatement, null);
+	}
+
+	protected void replaceByInitializationWithSwitch(Statement switchStatement, Expression switchHeaderExpression,
+			List<? extends SwitchCaseClause> clauses, VariableDeclarationFragment fragment) {
+		AST ast = switchStatement.getAST();
+		SwitchExpression newSwitchExpression = createSwitchWithYieldValue(ast, switchHeaderExpression, clauses);
+		astRewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, newSwitchExpression, null);
+		astRewrite.remove(switchStatement, null);
 	}
 
 	private boolean hasDefaultClause(SwitchStatement switchStatement) {
@@ -163,7 +175,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			.anyMatch(SwitchCase::isDefault);
 	}
 
-	private Optional<VariableDeclarationFragment> findDeclaringFragment(Expression assigned,
+	protected Optional<VariableDeclarationFragment> findDeclaringFragment(Expression assigned,
 			Statement switchStatement) {
 		CompilationUnit compilationUnit = getCompilationUnit();
 		if (assigned.getNodeType() != ASTNode.SIMPLE_NAME) {
