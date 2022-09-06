@@ -83,36 +83,40 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 
 		List<SwitchCaseClause> clauses = createClauses(switchCaseBucks);
-		Expression switchHeaderExpression = switchStatement.getExpression();
-		boolean hasDefaultClause = hasDefaultClause(switchStatement);
-		if (!hasDefaultClause) {
-			replaceBySwitchStatement(switchStatement, switchHeaderExpression, clauses);
-			addMarkerEvent(switchStatement);
-			onRewrite();
-			return true;
-		}
-
-		if (areAllAssigningToSameVariable(clauses)) {
-			clauses.get(0)
-				.findAssignedVariable()
-				.ifPresent(assigned -> {
-					replaceByAssignmentOrInitializationWithSwitch(assigned, switchStatement, switchHeaderExpression,
-							clauses);
-					onRewrite();
-					addMarkerEvent(switchStatement);
-				});
-		} else if (areReturningValue(clauses)) {
-			replaceByReturnWithSwitch(switchStatement, switchHeaderExpression, clauses);
-			addMarkerEvent(switchStatement);
-			onRewrite();
-		} else {
-			replaceBySwitchStatement(switchStatement, switchHeaderExpression, clauses);
-			addMarkerEvent(switchStatement);
-			onRewrite();
-		}
+		Runnable lambdaForRefactoring = createLambdaForRefactoring(switchStatement, clauses);
+		lambdaForRefactoring.run();
+		addMarkerEvent(switchStatement);
+		onRewrite();
 		CommentRewriter commentRewriter = getCommentRewriter();
 		commentRewriter.saveLeadingComment(switchStatement);
 		return true;
+	}
+
+	private Runnable createLambdaForRefactoring(SwitchStatement switchStatement, List<SwitchCaseClause> clauses) {
+		Expression switchHeaderExpression = switchStatement.getExpression();
+		boolean hasDefaultClause = hasDefaultClause(switchStatement);
+		if (hasDefaultClause) {
+			Expression variableAssignedInFirstBranch = clauses.get(0)
+				.findAssignedVariable()
+				.orElse(null);
+
+			if (variableAssignedInFirstBranch != null && areAllAssigningToSameVariable(clauses)) {
+				VariableDeclarationFragment fragment = findDeclaringFragment(variableAssignedInFirstBranch,
+						switchStatement)
+							.orElse(null);
+
+				if (fragment != null) {
+					return () -> replaceByInitializationWithSwitch(switchStatement, switchHeaderExpression, clauses,
+							fragment);
+				}
+				return () -> replaceByAssignmentWithSwitch(variableAssignedInFirstBranch, switchStatement,
+						switchHeaderExpression, clauses);
+			}
+			if (areReturningValue(clauses)) {
+				return () -> replaceByReturnWithSwitch(switchStatement, switchHeaderExpression, clauses);
+			}
+		}
+		return () -> replaceBySwitchStatement(switchStatement, switchHeaderExpression, clauses);
 	}
 
 	protected void replaceByReturnWithSwitch(Statement statementToReplace,
@@ -135,18 +139,6 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		return ASTNodeUtil.convertToTypedList(switchStatement.statements(), SwitchCase.class)
 			.stream()
 			.anyMatch(SwitchCase::isSwitchLabeledRule);
-	}
-
-	private void replaceByAssignmentOrInitializationWithSwitch(Expression assigned, Statement statementToReplace,
-			Expression switchHeaderExpression,
-			List<? extends SwitchCaseClause> clauses) {
-
-		VariableDeclarationFragment fragment = findDeclaringFragment(assigned, statementToReplace).orElse(null);
-		if (fragment != null) {
-			replaceByInitializationWithSwitch(statementToReplace, switchHeaderExpression, clauses, fragment);
-		} else {
-			replaceByAssignmentWithSwitch(assigned, statementToReplace, switchHeaderExpression, clauses);
-		}
 	}
 
 	protected void replaceByAssignmentWithSwitch(Expression assigned, Statement statementToReplace,
