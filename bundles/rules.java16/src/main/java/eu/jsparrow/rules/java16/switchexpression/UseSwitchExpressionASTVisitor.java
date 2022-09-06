@@ -96,7 +96,8 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			clauses.get(0)
 				.findAssignedVariable()
 				.ifPresent(assigned -> {
-					replaceByAssignmentOrInitializationWithSwitch(assigned, switchStatement, switchHeaderExpression, clauses);
+					replaceByAssignmentOrInitializationWithSwitch(assigned, switchStatement, switchHeaderExpression,
+							clauses);
 					onRewrite();
 					addMarkerEvent(switchStatement);
 				});
@@ -114,13 +115,13 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		return true;
 	}
 
-	protected void replaceByReturnWithSwitch(Statement switchStatement,
+	protected void replaceByReturnWithSwitch(Statement statementToReplace,
 			Expression switchHeaderExpression, List<? extends SwitchCaseClause> clauses) {
-		AST ast = switchStatement.getAST();
+		AST ast = statementToReplace.getAST();
 		SwitchExpression newSwitchExpression = createSwitchWithYieldValue(ast, switchHeaderExpression, clauses);
 		ReturnStatement newReturnStatement = ast.newReturnStatement();
 		newReturnStatement.setExpression(newSwitchExpression);
-		astRewrite.replace(switchStatement, newReturnStatement, null);
+		astRewrite.replace(statementToReplace, newReturnStatement, null);
 	}
 
 	protected void replaceBySwitchStatement(Statement statementToReplace, Expression switchHeaderExpression,
@@ -136,36 +137,35 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			.anyMatch(SwitchCase::isSwitchLabeledRule);
 	}
 
-	private void replaceByAssignmentOrInitializationWithSwitch(Expression assigned, Statement switchStatement,
+	private void replaceByAssignmentOrInitializationWithSwitch(Expression assigned, Statement statementToReplace,
 			Expression switchHeaderExpression,
 			List<? extends SwitchCaseClause> clauses) {
-		
 
-		VariableDeclarationFragment fragment = findDeclaringFragment(assigned, switchStatement).orElse(null);
+		VariableDeclarationFragment fragment = findDeclaringFragment(assigned, statementToReplace).orElse(null);
 		if (fragment != null) {
-			replaceByInitializationWithSwitch(switchStatement, switchHeaderExpression, clauses, fragment);
+			replaceByInitializationWithSwitch(statementToReplace, switchHeaderExpression, clauses, fragment);
 		} else {
-			replaceByAssignmentWithSwitch(assigned, switchStatement, switchHeaderExpression, clauses);
+			replaceByAssignmentWithSwitch(assigned, statementToReplace, switchHeaderExpression, clauses);
 		}
 	}
 
-	protected void replaceByAssignmentWithSwitch(Expression assigned, Statement switchStatement,
+	protected void replaceByAssignmentWithSwitch(Expression assigned, Statement statementToReplace,
 			Expression switchHeaderExpression, List<? extends SwitchCaseClause> clauses) {
-		AST ast = switchStatement.getAST();
+		AST ast = statementToReplace.getAST();
 		Assignment assignment = ast.newAssignment();
 		assignment.setLeftHandSide((Expression) astRewrite.createCopyTarget(assigned));
 		SwitchExpression newSwitchExpression = createSwitchWithYieldValue(ast, switchHeaderExpression, clauses);
 		assignment.setRightHandSide(newSwitchExpression);
 		ExpressionStatement newAssignmentStatement = ast.newExpressionStatement(assignment);
-		astRewrite.replace(switchStatement, newAssignmentStatement, null);
+		astRewrite.replace(statementToReplace, newAssignmentStatement, null);
 	}
 
-	protected void replaceByInitializationWithSwitch(Statement switchStatement, Expression switchHeaderExpression,
+	protected void replaceByInitializationWithSwitch(Statement statementToReplace, Expression switchHeaderExpression,
 			List<? extends SwitchCaseClause> clauses, VariableDeclarationFragment fragment) {
-		AST ast = switchStatement.getAST();
+		AST ast = statementToReplace.getAST();
 		SwitchExpression newSwitchExpression = createSwitchWithYieldValue(ast, switchHeaderExpression, clauses);
 		astRewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, newSwitchExpression, null);
-		astRewrite.remove(switchStatement, null);
+		astRewrite.remove(statementToReplace, null);
 	}
 
 	private boolean hasDefaultClause(SwitchStatement switchStatement) {
@@ -175,8 +175,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			.anyMatch(SwitchCase::isDefault);
 	}
 
-	protected Optional<VariableDeclarationFragment> findDeclaringFragment(Expression assigned,
-			Statement switchStatement) {
+	protected Optional<VariableDeclarationFragment> findDeclaringFragment(Expression assigned, Statement statement) {
 		CompilationUnit compilationUnit = getCompilationUnit();
 		if (assigned.getNodeType() != ASTNode.SIMPLE_NAME) {
 			return Optional.empty();
@@ -202,21 +201,21 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			return Optional.empty();
 		}
 		boolean areStatementsInBlock = declaraingStatement.getLocationInParent() == Block.STATEMENTS_PROPERTY
-				&& switchStatement.getLocationInParent() == Block.STATEMENTS_PROPERTY;
+				&& statement.getLocationInParent() == Block.STATEMENTS_PROPERTY;
 		if (!areStatementsInBlock) {
 			return Optional.empty();
 		}
 		Block declarationParent = (Block) declaraingStatement.getParent();
-		Block switchParent = (Block) switchStatement.getParent();
-		if (switchParent != declarationParent) {
+		Block statementParent = (Block) statement.getParent();
+		if (statementParent != declarationParent) {
 			return Optional.empty();
 		}
 		List<Statement> blockStatements = ASTNodeUtil.convertToTypedList(declarationParent.statements(),
 				Statement.class);
 		int declarationIndex = blockStatements.indexOf(declaraingStatement);
-		int switchIndex = blockStatements.indexOf(switchStatement);
+		int statementIndex = blockStatements.indexOf(statement);
 
-		if (switchIndex != declarationIndex + 1) {
+		if (statementIndex != declarationIndex + 1) {
 			return Optional.empty();
 		}
 
@@ -225,7 +224,6 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 				&& !ASTNodeUtil.isLiteral(initializer)) {
 			return Optional.empty();
 		}
-
 		return Optional.of(fragment);
 	}
 
