@@ -46,7 +46,7 @@ public class EqualsOperationForSwitch {
 	static Optional<Expression> findEqualsMethodArgument(MethodInvocation methodInvocation) {
 		if (!methodInvocation.getName()
 			.getIdentifier()
-			.equals("equals")) {
+			.equals("equals")) { //$NON-NLS-1$
 			return Optional.empty();
 		}
 		List<Expression> invocationArgumentList = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),

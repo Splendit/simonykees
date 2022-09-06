@@ -29,7 +29,6 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * 
  */
 public class SwitchHeaderExpressionData {
-
 	private static final List<String> TYPES_FOR_EQUALS_INFIX_EXPRESSION = Collections.unmodifiableList(Arrays.asList(
 			char.class.getName(),
 			int.class.getName(),

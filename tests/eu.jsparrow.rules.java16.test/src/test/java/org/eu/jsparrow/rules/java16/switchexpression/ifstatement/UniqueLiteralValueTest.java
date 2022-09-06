@@ -1,0 +1,61 @@
+package org.eu.jsparrow.rules.java16.switchexpression.ifstatement;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+
+import eu.jsparrow.rules.java16.switchexpression.ifstatement.UniqueLiteralValues;
+
+public class UniqueLiteralValueTest {
+
+	@Test
+	void testIsUniqueStringLiteral() {
+		UniqueLiteralValues uniqueLiteralValues = new UniqueLiteralValues();
+		assertTrue(uniqueLiteralValues.isUnique("5"));
+		assertFalse(uniqueLiteralValues.isUnique("\65"));
+		assertFalse(uniqueLiteralValues.isUnique("\u0035"));
+	}
+
+	@Test
+	void testIsUniqueCharLiteral() {
+		UniqueLiteralValues uniqueLiteralValues = new UniqueLiteralValues();
+
+		assertTrue(uniqueLiteralValues.isUnique(Character.valueOf('5')));
+		assertEquals('5', Character.valueOf('\65'));
+		assertEquals('5', Character.valueOf('\u0035'));
+
+		assertFalse(uniqueLiteralValues.isUnique(Character.valueOf('\65')));
+		assertFalse(uniqueLiteralValues.isUnique(Character.valueOf('\u0035')));
+
+		assertFalse(uniqueLiteralValues.isUnique("5"));
+		assertFalse(uniqueLiteralValues.isUnique("\65"));
+		assertFalse(uniqueLiteralValues.isUnique("\u0035"));
+	}
+
+	@Test
+	void testIsUniqueIntLiteral() {
+		UniqueLiteralValues uniqueLiteralValues = new UniqueLiteralValues();
+
+		assertTrue(uniqueLiteralValues.isUnique(Integer.decode("16")));
+		assertEquals(16, Integer.decode("0x10"));
+		assertEquals(16, Integer.decode("020"));
+
+		assertFalse(uniqueLiteralValues.isUnique(Integer.decode("0x10")));
+		assertFalse(uniqueLiteralValues.isUnique(Integer.decode("020")));
+		assertFalse(uniqueLiteralValues.isUnique(Long.decode("16")));
+		assertFalse(uniqueLiteralValues.isUnique("16"));
+
+		assertTrue(uniqueLiteralValues.isUnique(Integer.decode("-16")));
+		assertFalse(uniqueLiteralValues.isUnique("-16"));
+	}
+
+	@Test
+	void testIsUniqueLongLiteral() {
+		UniqueLiteralValues uniqueLiteralValues = new UniqueLiteralValues();
+		assertTrue(uniqueLiteralValues.isUnique(Long.decode("0x10")));
+		assertFalse(uniqueLiteralValues.isUnique(Long.decode("16")));
+		assertFalse(uniqueLiteralValues.isUnique(Integer.decode("16")));
+	}
+}

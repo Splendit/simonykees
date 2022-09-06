@@ -130,5 +130,4 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 		return lastBranch.getExpressions()
 			.isEmpty();
 	}
-
 }
