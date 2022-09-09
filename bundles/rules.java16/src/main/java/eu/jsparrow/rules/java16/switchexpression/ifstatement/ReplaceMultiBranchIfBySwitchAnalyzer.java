@@ -34,6 +34,10 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 			return Collections.emptyList();
 		}
 
+		if (containsContinueStatements(ifStatement)) {
+			return Collections.emptyList();
+		}
+
 		List<IfStatement> ifStatements = new ArrayList<>();
 		ifStatements.add(ifStatement);
 		Statement elseStatement = ifStatement.getElseStatement();
@@ -184,6 +188,12 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 		statement.accept(visitor);
 		return !visitor.getBreakStatements()
 			.isEmpty();
+	}
+
+	private static boolean containsContinueStatements(Statement statement) {
+		ContinueStatementWithinIfVisitor visitor = new ContinueStatementWithinIfVisitor();
+		statement.accept(visitor);
+		return visitor.isContainingContinueStatement();
 	}
 
 	private ReplaceMultiBranchIfBySwitchAnalyzer() {

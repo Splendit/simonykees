@@ -118,4 +118,23 @@ class ReplaceMultiBranchIfBySwitchNegativesASTVisitorTest extends UsesJDTUnitFix
 		assertNoChange(original);
 	}
 
+	@Test
+	void visit_ContinueStatementWithinIfStatement_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "	void continueStatementWithinIfStatement(String[] strings) {\n"
+				+ "		for(String value : strings) {\n"
+				+ "			if (value.equals(\"a\") || value.equals(\"b\") || value.equals(\"c\")) {\n"
+				+ "				System.out.println(1);\n"
+				+ "				continue;\n"
+				+ "			} else if (value.equals(\"d\")) {\n"
+				+ "				System.out.println(2);\n"
+				+ "			} else {\n"
+				+ "				System.out.println(3);\n"
+				+ "			}			\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
 }
