@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.java16.switchexpression.SwitchCaseBreakStatementsVisitor;
 
 /**
  * 
@@ -28,6 +29,10 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 
 	static List<IfBranch> collectIfBranchesForSwitch(IfStatement ifStatement,
 			SwitchHeaderExpressionData variableAnalysisData) {
+
+		if (containsBreakStatements(ifStatement)) {
+			return Collections.emptyList();
+		}
 
 		List<IfStatement> ifStatements = new ArrayList<>();
 		ifStatements.add(ifStatement);
@@ -57,7 +62,7 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 		if (elseStatement != null) {
 			ifBranches.add(new IfBranch(Collections.emptyList(), elseStatement));
 		}
-	
+
 		return ifBranches;
 	}
 
@@ -172,6 +177,13 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 			caseExpressions.add(caseExpression);
 		}
 		return caseExpressions;
+	}
+
+	private static boolean containsBreakStatements(Statement statement) {
+		SwitchCaseBreakStatementsVisitor visitor = new SwitchCaseBreakStatementsVisitor();
+		statement.accept(visitor);
+		return !visitor.getBreakStatements()
+			.isEmpty();
 	}
 
 	private ReplaceMultiBranchIfBySwitchAnalyzer() {

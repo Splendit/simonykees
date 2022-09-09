@@ -60,9 +60,7 @@ class ReplaceMultiBranchIfBySwitchNegativesASTVisitorTest extends UsesJDTUnitFix
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { "'a'",
-	// TODO: include again
-	// "'\\u0061'", "'\\141'"
+	@ValueSource(strings = { "'a'", "'\\u0061'", "'\\141'"
 	// breaks the test:
 	// , "'\\143'"
 	})
@@ -97,6 +95,25 @@ class ReplaceMultiBranchIfBySwitchNegativesASTVisitorTest extends UsesJDTUnitFix
 				+ "			System.out.println(3);\n"
 				+ "		}\n"
 				+ "	}", redundantLiteral);
+
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_BreakStatementWithinIfStatement_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "	void breakLoopWithinIfStatement(String[] strings) {\n"
+				+ "		for(String value : strings) {\n"
+				+ "			if (value.equals(\"a\") || value.equals(\"b\") || value.equals(\"c\")) {\n"
+				+ "				System.out.println(1);\n"
+				+ "				break;\n"
+				+ "			} else if (value.equals(\"d\")) {\n"
+				+ "				System.out.println(2);\n"
+				+ "			} else {\n"
+				+ "				System.out.println(3);\n"
+				+ "			}			\n"
+				+ "		}\n"
+				+ "	}";
 
 		assertNoChange(original);
 	}
