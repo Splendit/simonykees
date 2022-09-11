@@ -4,15 +4,10 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.BreakStatement;
-import org.eclipse.jdt.core.dom.ContinueStatement;
-import org.eclipse.jdt.core.dom.DoStatement;
-import org.eclipse.jdt.core.dom.EnhancedForStatement;
-import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
-import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.YieldStatement;
 
 /**
  * A visitor to collect {@link BreakStatement}s of a {@link SwitchStatement}.
@@ -22,33 +17,13 @@ import org.eclipse.jdt.core.dom.WhileStatement;
  * @since 4.3.0
  *
  */
-public class ContinueStatementWithinIfVisitor extends ASTVisitor {
+public class YieldStatementWithinIfVisitor extends ASTVisitor {
 
-	private boolean containingContinueStatement;
+	private boolean containingYieldStatement;
 
 	@Override
 	public boolean preVisit2(ASTNode node) {
-		return !containingContinueStatement;
-	}
-
-	@Override
-	public boolean visit(WhileStatement whileStatement) {
-		return false;
-	}
-
-	@Override
-	public boolean visit(ForStatement forStatement) {
-		return false;
-	}
-
-	@Override
-	public boolean visit(EnhancedForStatement forStatement) {
-		return false;
-	}
-
-	@Override
-	public boolean visit(DoStatement doStatement) {
-		return false;
+		return !containingYieldStatement;
 	}
 
 	@Override
@@ -67,12 +42,12 @@ public class ContinueStatementWithinIfVisitor extends ASTVisitor {
 	}
 
 	@Override
-	public boolean visit(ContinueStatement node) {
-		containingContinueStatement = true;
+	public boolean visit(YieldStatement node) {
+		containingYieldStatement = true;
 		return false;
 	}
 
-	public boolean isContainingContinueStatement() {
-		return containingContinueStatement;
+	public boolean isContainingYieldStatement() {
+		return containingYieldStatement;
 	}
 }

@@ -136,5 +136,34 @@ class ReplaceMultiBranchIfBySwitchNegativesASTVisitorTest extends UsesJDTUnitFix
 
 		assertNoChange(original);
 	}
+	
+	@Test
+	void visit_YieldStatementWithinIfStatement_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "	String yieldWithinIfStatement(int value, int value2) {\n"
+				+ "		return switch (value) {\n"
+				+ "		case 0 -> \"value == ZERO\";\n"
+				+ "		case 1 -> \"value == ONE\";\n"
+				+ "		case 2 -> \"value == TWO\";\n"
+				+ "		// break out of switch expression not allowed\n"
+				+ "		// break;\n"
+				+ "		default -> {\n"
+				+ "			if (value2 == 0) {\n"
+				+ "				yield \"value2 == ZERO\";\n"
+				+ "			} else if (value2 == 1) {\n"
+				+ "				yield \"value2 == ONE\";\n"
+				+ "			} else if (value2 == 2) {\n"
+				+ "				yield \"value2 == TWO\";\n"
+				+ "			} else {\n"
+				+ "				yield \"value == OTHER,  value2 == OTHER\";\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "		};\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+		
 
 }
