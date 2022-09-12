@@ -210,12 +210,14 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 		statement.accept(visitor);
 		return visitor.isContainingYieldStatement();
 	}
-	
+
 	private static boolean containsUnsupportedLabels(Statement statement) {
 		LabeledBreakStatementsVisitor visitor = new LabeledBreakStatementsVisitor();
 		statement.accept(visitor);
 		return visitor.containsLabeledStatements();
 	}
+
+
 
 	private ReplaceMultiBranchIfBySwitchAnalyzer() {
 		// private default constructor hiding implicit public one
