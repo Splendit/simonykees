@@ -31,22 +31,6 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 	static List<IfBranch> collectIfBranchesForSwitch(IfStatement ifStatement,
 			SwitchHeaderExpressionData variableAnalysisData) {
 
-		if (containsBreakStatements(ifStatement)) {
-			return Collections.emptyList();
-		}
-
-		if (containsContinueStatements(ifStatement)) {
-			return Collections.emptyList();
-		}
-
-		if (containsYieldStatements(ifStatement)) {
-			return Collections.emptyList();
-		}
-
-		if (containsUnsupportedLabels(ifStatement)) {
-			return Collections.emptyList();
-		}
-
 		List<IfStatement> ifStatements = new ArrayList<>();
 		ifStatements.add(ifStatement);
 		Statement elseStatement = ifStatement.getElseStatement();
@@ -62,6 +46,18 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 			minimalIfStatementsCount = 3;
 		}
 		if (ifStatements.size() < minimalIfStatementsCount) {
+			return Collections.emptyList();
+		}
+
+		List<Statement> statementsToValidate = new ArrayList<>();
+		ifStatements.stream()
+			.map(IfStatement::getThenStatement)
+			.forEach(statementsToValidate::add);
+		if (elseStatement != null) {
+			statementsToValidate.add(elseStatement);
+		}
+
+		if (containsUnsupportedStatementOrLabel(statementsToValidate)) {
 			return Collections.emptyList();
 		}
 
@@ -192,32 +188,36 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 		return caseExpressions;
 	}
 
-	private static boolean containsBreakStatements(Statement statement) {
-		SwitchCaseBreakStatementsVisitor visitor = new SwitchCaseBreakStatementsVisitor();
-		statement.accept(visitor);
-		return !visitor.getBreakStatements()
-			.isEmpty();
+	private static boolean containsUnsupportedStatementOrLabel(List<Statement> statementsToValidate) {
+		SwitchCaseBreakStatementsVisitor breakStatementVisitor = new SwitchCaseBreakStatementsVisitor();
+		ContinueStatementWithinIfVisitor continueStatementVisitor = new ContinueStatementWithinIfVisitor();
+		YieldStatementWithinIfVisitor yieldStatementVisitor = new YieldStatementWithinIfVisitor();
+		LabeledBreakStatementsVisitor unsupportedLabelsVisitor = new LabeledBreakStatementsVisitor();
+
+		for (Statement statementToValidate : statementsToValidate) {
+			statementToValidate.accept(breakStatementVisitor);
+			boolean containsBreakStatement = !breakStatementVisitor.getBreakStatements()
+				.isEmpty();
+			if (containsBreakStatement) {
+				return true;
+			}
+			statementToValidate.accept(continueStatementVisitor);
+			if (continueStatementVisitor.isContainingContinueStatement()) {
+				return true;
+			}
+
+			statementToValidate.accept(yieldStatementVisitor);
+			if (yieldStatementVisitor.isContainingYieldStatement()) {
+				return true;
+			}
+
+			statementToValidate.accept(unsupportedLabelsVisitor);
+			if (unsupportedLabelsVisitor.containsLabeledStatements()) {
+				return true;
+			}
+		}
+		return false;
 	}
-
-	private static boolean containsContinueStatements(Statement statement) {
-		ContinueStatementWithinIfVisitor visitor = new ContinueStatementWithinIfVisitor();
-		statement.accept(visitor);
-		return visitor.isContainingContinueStatement();
-	}
-
-	private static boolean containsYieldStatements(Statement statement) {
-		YieldStatementWithinIfVisitor visitor = new YieldStatementWithinIfVisitor();
-		statement.accept(visitor);
-		return visitor.isContainingYieldStatement();
-	}
-
-	private static boolean containsUnsupportedLabels(Statement statement) {
-		LabeledBreakStatementsVisitor visitor = new LabeledBreakStatementsVisitor();
-		statement.accept(visitor);
-		return visitor.containsLabeledStatements();
-	}
-
-
 
 	private ReplaceMultiBranchIfBySwitchAnalyzer() {
 		// private default constructor hiding implicit public one

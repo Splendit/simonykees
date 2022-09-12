@@ -1,21 +1,15 @@
 package eu.jsparrow.rules.java16.switchexpression.ifstatement;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import eu.jsparrow.rules.java16.switchexpression.LabeledBreakStatementsVisitor;
-import eu.jsparrow.rules.java16.switchexpression.SwitchCaseBreakStatementsVisitor;
 import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionASTVisitor;
 
 /**
@@ -71,18 +65,18 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 
 	private Optional<Runnable> findTransformingLambda(IfStatement ifStatement) {
 
-		MultiBranchIfStatement multiBranchIfStatement = MultiBranchIfStatement.toMultiBranchIfStatement(ifStatement)
-			.orElse(null);
-		if (multiBranchIfStatement == null) {
+		EqualsOperationForSwitchVisitor equalsOperationsVisitor = new EqualsOperationForSwitchVisitor();
+		ifStatement.getExpression()
+			.accept(equalsOperationsVisitor);
+		List<EqualsOperationForSwitch> equalsOperations = equalsOperationsVisitor.getEqualsOperations();
+		SwitchHeaderExpressionData variableDataForSwitch = null;
+		if (equalsOperations.isEmpty()) {
 			return Optional.empty();
 		}
 
-		if (containsUnsupportedStatementOrLabel(multiBranchIfStatement)) {
-			return Optional.empty();
-		}
-
-		SwitchHeaderExpressionData variableDataForSwitch = findSwitchHeaderExpressionData(multiBranchIfStatement)
+		variableDataForSwitch = SwitchHeaderExpressionData.findSwitchHeaderExpressionData(equalsOperations.get(0))
 			.orElse(null);
+
 		if (variableDataForSwitch == null) {
 			return Optional.empty();
 		}
@@ -98,60 +92,6 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 
 		Runnable transformingLambda = createTransformingLambda(ifStatement, switchHeaderExpression, ifBranches);
 		return Optional.of(transformingLambda);
-	}
-
-	private static boolean containsUnsupportedStatementOrLabel(
-			MultiBranchIfStatement multiBranchIfStatement) {
-		List<Statement> statementsToAnalyze = new ArrayList<>();
-		statementsToAnalyze.add(multiBranchIfStatement.getIfStatement()
-			.getThenStatement());
-		multiBranchIfStatement.getElseIfStatements()
-			.forEach(statementsToAnalyze::add);
-		multiBranchIfStatement.getLastElseStatement()
-			.ifPresent(statementsToAnalyze::add);
-
-		SwitchCaseBreakStatementsVisitor breakStatementVisitor = new SwitchCaseBreakStatementsVisitor();
-		ContinueStatementWithinIfVisitor continueStatementVisitor = new ContinueStatementWithinIfVisitor();
-		YieldStatementWithinIfVisitor yieldStatementVisitor = new YieldStatementWithinIfVisitor();
-		LabeledBreakStatementsVisitor unsupportedLabelsVisitor = new LabeledBreakStatementsVisitor();
-
-		for (Statement statement : statementsToAnalyze) {
-			statement.accept(breakStatementVisitor);
-			boolean containsBreakStatement = !breakStatementVisitor.getBreakStatements()
-				.isEmpty();
-			if (containsBreakStatement) {
-				return true;
-			}
-
-			statement.accept(continueStatementVisitor);
-			if (continueStatementVisitor.isContainingContinueStatement()) {
-				return true;
-			}
-
-			statement.accept(yieldStatementVisitor);
-			if (yieldStatementVisitor.isContainingYieldStatement()) {
-				return true;
-			}
-
-			statement.accept(unsupportedLabelsVisitor);
-			if (unsupportedLabelsVisitor.containsLabeledStatements()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private Optional<SwitchHeaderExpressionData> findSwitchHeaderExpressionData(
-			MultiBranchIfStatement multiBranchIfStatement) {
-		Expression ifExpression = multiBranchIfStatement.getIfStatement()
-			.getExpression();
-
-		EqualsOperationForSwitchVisitor equalsOperationsVisitor = new EqualsOperationForSwitchVisitor();
-		ifExpression.accept(equalsOperationsVisitor);
-		return equalsOperationsVisitor.getEqualsOperations()
-			.stream()
-			.findFirst()
-			.flatMap(SwitchHeaderExpressionData::findSwitchHeaderExpressionData);
 	}
 
 	private Runnable createTransformingLambda(IfStatement ifStatement, SimpleName switchHeaderExpression,
