@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.java16.switchexpression.LabeledBreakStatementsVisitor;
 import eu.jsparrow.rules.java16.switchexpression.SwitchCaseBreakStatementsVisitor;
 
 /**
@@ -39,6 +40,10 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 		}
 
 		if (containsYieldStatements(ifStatement)) {
+			return Collections.emptyList();
+		}
+
+		if (containsUnsupportedLabels(ifStatement)) {
 			return Collections.emptyList();
 		}
 
@@ -204,6 +209,12 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 		YieldStatementWithinIfVisitor visitor = new YieldStatementWithinIfVisitor();
 		statement.accept(visitor);
 		return visitor.isContainingYieldStatement();
+	}
+	
+	private static boolean containsUnsupportedLabels(Statement statement) {
+		LabeledBreakStatementsVisitor visitor = new LabeledBreakStatementsVisitor();
+		statement.accept(visitor);
+		return visitor.containsLabeledStatements();
 	}
 
 	private ReplaceMultiBranchIfBySwitchAnalyzer() {

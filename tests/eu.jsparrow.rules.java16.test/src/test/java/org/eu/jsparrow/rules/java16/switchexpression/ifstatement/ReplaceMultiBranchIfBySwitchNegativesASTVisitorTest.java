@@ -136,7 +136,7 @@ class ReplaceMultiBranchIfBySwitchNegativesASTVisitorTest extends UsesJDTUnitFix
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_YieldStatementWithinIfStatement_shouldNotTransform() throws Exception {
 		String original = ""
@@ -164,6 +164,32 @@ class ReplaceMultiBranchIfBySwitchNegativesASTVisitorTest extends UsesJDTUnitFix
 		assertNoChange(original);
 	}
 
-		
+	/**
+	 * this test may fail in case of relaxations in connection with labels and
+	 * labeled statements.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	void visit_LoopWithLabelWithinIfStatement_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "	void loopWithLabelWithinIfStatement(String value, String... otherValues) {\n"
+				+ "		if (value.equals(\"a\")) {\n"
+				+ "			loop: for (String otherValue : otherValues) {\n"
+				+ "				if (otherValue.equals(value)) {\n"
+				+ "					System.out.println(\"otherValue.equals(value)\");\n"
+				+ "					break loop;\n"
+				+ "				}\n"
+				+ "			}\n"
+				+ "			System.out.println(1);\n"
+				+ "		} else if (value.equals(\"b\")) {\n"
+				+ "			System.out.println(2);\n"
+				+ "		} else {\n"
+				+ "			System.out.println(3);\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
 
 }
