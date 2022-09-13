@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SwitchExpression;
@@ -65,32 +66,27 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 
 	private Optional<Runnable> findTransformingLambda(IfStatement ifStatement) {
 
-		EqualsOperationForSwitchVisitor equalsOperationsVisitor = new EqualsOperationForSwitchVisitor();
+		SwitchHeaderExpressionVisitor switchHeaderExpressionVisitor = new SwitchHeaderExpressionVisitor();
 		ifStatement.getExpression()
-			.accept(equalsOperationsVisitor);
-		List<EqualsOperationForSwitch> equalsOperations = equalsOperationsVisitor.getEqualsOperations();
-		SwitchHeaderExpressionData variableDataForSwitch = null;
-		if (equalsOperations.isEmpty()) {
-			return Optional.empty();
-		}
+			.accept(switchHeaderExpressionVisitor);
 
-		variableDataForSwitch = SwitchHeaderExpressionData.findSwitchHeaderExpressionData(equalsOperations.get(0))
+		SimpleName expectedSwitchHeaderExpression = switchHeaderExpressionVisitor.getSwitchHeaderExpression()
+			.orElse(null);
+		ITypeBinding expectedOperandType = switchHeaderExpressionVisitor.getSwitchHeaderExpressionType()
 			.orElse(null);
 
-		if (variableDataForSwitch == null) {
+		if (expectedSwitchHeaderExpression == null || expectedOperandType == null) {
 			return Optional.empty();
 		}
 
 		List<IfBranch> ifBranches = ReplaceMultiBranchIfBySwitchAnalyzer.collectIfBranchesForSwitch(ifStatement,
-				variableDataForSwitch);
+				expectedSwitchHeaderExpression, expectedOperandType);
 
 		if (ifBranches.isEmpty()) {
 			return Optional.empty();
 		}
 
-		SimpleName switchHeaderExpression = variableDataForSwitch.getSwitchHeaderExpression();
-
-		Runnable transformingLambda = createTransformingLambda(ifStatement, switchHeaderExpression, ifBranches);
+		Runnable transformingLambda = createTransformingLambda(ifStatement, expectedSwitchHeaderExpression, ifBranches);
 		return Optional.of(transformingLambda);
 	}
 

@@ -29,7 +29,8 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 	private static final ASTMatcher AST_MATCHER = new ASTMatcher();
 
 	static List<IfBranch> collectIfBranchesForSwitch(IfStatement ifStatement,
-			SwitchHeaderExpressionData variableAnalysisData) {
+			SimpleName expectedSwitchHeaderExpression,
+			ITypeBinding expectedOperandType) {
 
 		List<IfStatement> ifStatements = new ArrayList<>();
 		ifStatements.add(ifStatement);
@@ -63,8 +64,8 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 
 		UniqueLiteralValues uniqueLiteralValuesStore = new UniqueLiteralValues();
 
-		List<IfBranch> ifBranches = ifStatementsToIfBranches(ifStatements, variableAnalysisData,
-				uniqueLiteralValuesStore);
+		List<IfBranch> ifBranches = ifStatementsToIfBranches(ifStatements, expectedSwitchHeaderExpression,
+				expectedOperandType, uniqueLiteralValuesStore);
 		if (ifBranches.isEmpty()) {
 			return Collections.emptyList();
 		}
@@ -76,11 +77,14 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 	}
 
 	private static List<IfBranch> ifStatementsToIfBranches(List<IfStatement> ifStatements,
-			SwitchHeaderExpressionData variableAnalysisData, UniqueLiteralValues uniqueLiteralValuesStore) {
+			SimpleName expectedSwitchHeaderExpression,
+			ITypeBinding expectedOperandType,
+			UniqueLiteralValues uniqueLiteralValuesStore) {
 		List<IfBranch> ifBranches = new ArrayList<>();
+
 		for (IfStatement ifStatement : ifStatements) {
-			IfBranch ifBranch = ifStatementToIfBranchForSwitch(ifStatement, variableAnalysisData,
-					uniqueLiteralValuesStore)
+			IfBranch ifBranch = ifStatementToIfBranchForSwitch(ifStatement, expectedSwitchHeaderExpression,
+					expectedOperandType, uniqueLiteralValuesStore)
 						.orElse(null);
 			if (ifBranch == null) {
 				return Collections.emptyList();
@@ -91,7 +95,8 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 	}
 
 	private static Optional<IfBranch> ifStatementToIfBranchForSwitch(IfStatement ifStatement,
-			SwitchHeaderExpressionData variableData, UniqueLiteralValues uniqueLiteralValues) {
+			SimpleName expectedSwitchHeaderExpression, ITypeBinding expectedOperandType,
+			UniqueLiteralValues uniqueLiteralValues) {
 
 		EqualsOperationForSwitchVisitor equalsOperationsVisitor = new EqualsOperationForSwitchVisitor();
 		ifStatement.getExpression()
@@ -101,7 +106,9 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 			return Optional.empty();
 		}
 
-		List<Expression> caseExpressions = findCaseExpressions(variableData, equalsOperations, uniqueLiteralValues);
+		List<Expression> caseExpressions = findCaseExpressions(expectedSwitchHeaderExpression, expectedOperandType,
+				equalsOperations,
+				uniqueLiteralValues);
 		if (caseExpressions.isEmpty()) {
 			return Optional.empty();
 		}
@@ -140,11 +147,9 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 		return uniqueLiteralValues.isUnique(stringLiteral.getLiteralValue());
 	}
 
-	private static Optional<Expression> findCaseExpression(
-			SwitchHeaderExpressionData switchHeaderExpressionData, EqualsOperationForSwitch equalsOperation,
-			UniqueLiteralValues uniqueLiteralValues) {
+	private static Optional<Expression> findCaseExpression(ITypeBinding expectedOperandType,
+			EqualsOperationForSwitch equalsOperation, UniqueLiteralValues uniqueLiteralValues) {
 
-		ITypeBinding expectedOperandType = switchHeaderExpressionData.getSwitchHeaderExpressionType();
 		Optional<Expression> optionalReturnValue = Optional.of(equalsOperation.getCaseExpression());
 		if (equalsOperation.getOperationNodeType() == ASTNode.INFIX_EXPRESSION) {
 
@@ -162,11 +167,12 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 		return Optional.empty();
 	}
 
-	static List<Expression> findCaseExpressions(SwitchHeaderExpressionData variableData,
+	static List<Expression> findCaseExpressions(SimpleName expectedSwitchHeaderExpression,
+			ITypeBinding expectedOperandType,
 			List<EqualsOperationForSwitch> equalsOperations,
 			UniqueLiteralValues uniqueLiteralValues) {
 
-		SimpleName expectedSwitchHeaderExpression = variableData.getSwitchHeaderExpression();
+		//
 		boolean allVariableNamesMatching = equalsOperations.stream()
 			.map(EqualsOperationForSwitch::getSwitchHeaderExpression)
 			.allMatch(simpleName -> AST_MATCHER.match(expectedSwitchHeaderExpression, simpleName));
@@ -177,8 +183,7 @@ public class ReplaceMultiBranchIfBySwitchAnalyzer {
 
 		List<Expression> caseExpressions = new ArrayList<>();
 		for (EqualsOperationForSwitch equalsOperation : equalsOperations) {
-
-			Expression caseExpression = findCaseExpression(variableData, equalsOperation, uniqueLiteralValues)
+			Expression caseExpression = findCaseExpression(expectedOperandType, equalsOperation, uniqueLiteralValues)
 				.orElse(null);
 			if (caseExpression == null) {
 				return Collections.emptyList();
