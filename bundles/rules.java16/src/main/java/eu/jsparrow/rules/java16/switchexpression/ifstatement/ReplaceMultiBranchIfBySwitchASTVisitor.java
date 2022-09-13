@@ -1,16 +1,22 @@
 package eu.jsparrow.rules.java16.switchexpression.ifstatement;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.rules.java16.switchexpression.LabeledBreakStatementsVisitor;
+import eu.jsparrow.rules.java16.switchexpression.SwitchCaseBreakStatementsVisitor;
 import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionASTVisitor;
 
 /**
@@ -22,7 +28,7 @@ import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionASTVisitor;
  * <code>
  *	if (value.equals("a")) {
  *		System.out.println(1);
- *	} else if (value.equals("b")) {
+ *	} else if (value.equalsList<Expression> caseExpressions = equalsOperationsVisitor.getCaseExpressions();("b")) {
  *		System.out.println(2);
  *	} else {
  *		System.out.println(3);
@@ -79,7 +85,7 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 			return Optional.empty();
 		}
 
-		List<IfBranch> ifBranches = ReplaceMultiBranchIfBySwitchAnalyzer.collectIfBranchesForSwitch(ifStatement,
+		List<IfBranch> ifBranches = collectIfBranchesForSwitch(ifStatement,
 				expectedSwitchHeaderExpression, expectedOperandType);
 
 		if (ifBranches.isEmpty()) {
@@ -88,6 +94,116 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 
 		Runnable transformingLambda = createTransformingLambda(ifStatement, expectedSwitchHeaderExpression, ifBranches);
 		return Optional.of(transformingLambda);
+	}
+
+	static List<IfBranch> collectIfBranchesForSwitch(IfStatement ifStatement,
+			SimpleName expectedSwitchHeaderExpression,
+			ITypeBinding expectedOperandType) {
+
+		List<IfStatement> ifStatements = new ArrayList<>();
+		ifStatements.add(ifStatement);
+		Statement elseStatement = ifStatement.getElseStatement();
+		while (elseStatement != null && elseStatement.getNodeType() == ASTNode.IF_STATEMENT) {
+			IfStatement eliseIfStatement = (IfStatement) elseStatement;
+			ifStatements.add(eliseIfStatement);
+			elseStatement = eliseIfStatement.getElseStatement();
+		}
+		int minimalIfStatementsCount;
+		if (elseStatement != null) {
+			minimalIfStatementsCount = 2;
+		} else {
+			minimalIfStatementsCount = 3;
+		}
+		if (ifStatements.size() < minimalIfStatementsCount) {
+			return Collections.emptyList();
+		}
+
+		List<Statement> statementsToValidate = new ArrayList<>();
+		ifStatements.stream()
+			.map(IfStatement::getThenStatement)
+			.forEach(statementsToValidate::add);
+		if (elseStatement != null) {
+			statementsToValidate.add(elseStatement);
+		}
+
+		if (containsUnsupportedStatementOrLabel(statementsToValidate)) {
+			return Collections.emptyList();
+		}
+
+		List<IfBranch> ifBranches = ifStatementsToIfBranches(ifStatements, expectedSwitchHeaderExpression,
+				expectedOperandType);
+		if (ifBranches.isEmpty()) {
+			return Collections.emptyList();
+		}
+		if (elseStatement != null) {
+			ifBranches.add(new IfBranch(Collections.emptyList(), elseStatement));
+		}
+
+		return ifBranches;
+	}
+
+	private static List<IfBranch> ifStatementsToIfBranches(List<IfStatement> ifStatements,
+			SimpleName expectedSwitchHeaderExpression,
+			ITypeBinding expectedOperandType) {
+		List<IfBranch> ifBranches = new ArrayList<>();
+
+		for (IfStatement ifStatement : ifStatements) {
+			IfBranch ifBranch = ifStatementToIfBranchForSwitch(ifStatement, expectedSwitchHeaderExpression,
+					expectedOperandType)
+						.orElse(null);
+			if (ifBranch == null) {
+				return Collections.emptyList();
+			}
+			ifBranches.add(ifBranch);
+		}
+		return ifBranches;
+	}
+
+	private static Optional<IfBranch> ifStatementToIfBranchForSwitch(IfStatement ifStatement,
+			SimpleName expectedSwitchHeaderExpression, ITypeBinding expectedOperandType) {
+
+		EqualsOperationForSwitchVisitor equalsOperationsVisitor = new EqualsOperationForSwitchVisitor(
+				expectedSwitchHeaderExpression, expectedOperandType);
+		ifStatement.getExpression()
+			.accept(equalsOperationsVisitor);
+
+		List<Expression> caseExpressions = equalsOperationsVisitor.getCaseExpressions();
+		if (caseExpressions.isEmpty()) {
+			return Optional.empty();
+		}
+
+		return Optional.of(new IfBranch(caseExpressions, ifStatement.getThenStatement()));
+	}
+
+	private static boolean containsUnsupportedStatementOrLabel(List<Statement> statementsToValidate) {
+		SwitchCaseBreakStatementsVisitor breakStatementVisitor = new SwitchCaseBreakStatementsVisitor();
+		ContinueStatementWithinIfVisitor continueStatementVisitor = new ContinueStatementWithinIfVisitor();
+		YieldStatementWithinIfVisitor yieldStatementVisitor = new YieldStatementWithinIfVisitor();
+		LabeledBreakStatementsVisitor unsupportedLabelsVisitor = new LabeledBreakStatementsVisitor();
+
+		for (Statement statementToValidate : statementsToValidate) {
+			statementToValidate.accept(breakStatementVisitor);
+			boolean containsBreakStatement = !breakStatementVisitor.getBreakStatements()
+				.isEmpty();
+			if (containsBreakStatement) {
+				return true;
+			}
+			statementToValidate.accept(continueStatementVisitor);
+			if (continueStatementVisitor.isContainingContinueStatement()) {
+				return true;
+			}
+
+			statementToValidate.accept(yieldStatementVisitor);
+			if (yieldStatementVisitor.isContainingYieldStatement()) {
+				return true;
+			}
+
+			statementToValidate.accept(unsupportedLabelsVisitor);
+			if (unsupportedLabelsVisitor.containsLabeledStatements()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private Runnable createTransformingLambda(IfStatement ifStatement, SimpleName switchHeaderExpression,

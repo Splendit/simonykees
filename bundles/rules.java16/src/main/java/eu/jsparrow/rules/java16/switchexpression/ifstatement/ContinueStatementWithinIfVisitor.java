@@ -10,7 +10,6 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 

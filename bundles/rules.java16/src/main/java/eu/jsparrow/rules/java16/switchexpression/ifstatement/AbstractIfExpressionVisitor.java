@@ -47,4 +47,8 @@ abstract class AbstractIfExpressionVisitor extends ASTVisitor {
 
 	protected abstract boolean analyzeEqualsOperationForSwitch(EqualsOperationForSwitch equalsOperation);
 
+	public boolean isUnexpectedNode() {
+		return unexpectedNode;
+	}
+
 }
