@@ -3,7 +3,7 @@ package eu.jsparrow.rules.java16.switchexpression.ifstatement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UniqueLiteralValues {
+public class UniqueLiteralValueStore {
 
 	private final List<String> uniqueLiterals = new ArrayList<>();
 

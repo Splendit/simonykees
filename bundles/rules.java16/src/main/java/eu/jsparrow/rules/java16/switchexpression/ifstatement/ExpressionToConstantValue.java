@@ -10,23 +10,9 @@ import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
-public class ExpressionToNumericToken {
+public class ExpressionToConstantValue {
 
-//	private static final String L_LOWERCASE = "l"; //$NON-NLS-1$
-//	private static final String L_UPPERCASE = "L"; //$NON-NLS-1$
-//
-	/**
-	 * TODO: make this method private, only test {@link #expressionToInteger}
-	 * and {@link #expressionToLong}
-	 * 
-	 * @param expression
-	 * @return
-	 */
-//	public static Optional<String> findNumericToken(Expression expression) {
-//		return findNumericToken(expression, Operator.PLUS);
-//	}
-
-	public static Optional<Integer> expressionToInteger(Expression expression) {
+	public static Optional<Integer> extractIntegerConstant(Expression expression) {
 		return findNumericToken(expression, Operator.PLUS).map(Integer::decode);
 	}
 
@@ -73,16 +59,7 @@ public class ExpressionToNumericToken {
 		return Optional.empty();
 	}
 
-//	public static Long decodeLong(String token) {
-//		if (token.endsWith(L_UPPERCASE) || token.endsWith(L_LOWERCASE)) {
-//			int excludedLastIndex = token.length() - 1;
-//			String substring = token.substring(0, excludedLastIndex);
-//			return Long.decode(substring);
-//		}
-//		return (Long.decode(token));
-//	}
-
-	private ExpressionToNumericToken() {
+	private ExpressionToConstantValue() {
 		/*
 		 * private default constructor hiding implicit public one
 		 */

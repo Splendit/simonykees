@@ -96,7 +96,7 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 		return Optional.of(transformingLambda);
 	}
 
-	static List<IfBranch> collectIfBranchesForSwitch(IfStatement ifStatement,
+	private static List<IfBranch> collectIfBranchesForSwitch(IfStatement ifStatement,
 			SimpleName expectedSwitchHeaderExpression,
 			ITypeBinding expectedOperandType) {
 
@@ -162,7 +162,7 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 	private static Optional<IfBranch> ifStatementToIfBranchForSwitch(IfStatement ifStatement,
 			SimpleName expectedSwitchHeaderExpression, ITypeBinding expectedOperandType) {
 
-		EqualsOperationForSwitchVisitor equalsOperationsVisitor = new EqualsOperationForSwitchVisitor(
+		SwitchCaseExpressionsVisitor equalsOperationsVisitor = new SwitchCaseExpressionsVisitor(
 				expectedSwitchHeaderExpression, expectedOperandType);
 		ifStatement.getExpression()
 			.accept(equalsOperationsVisitor);

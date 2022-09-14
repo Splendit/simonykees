@@ -17,14 +17,14 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 /**
  *
  */
-class EqualsOperationForSwitchVisitor extends AbstractIfExpressionVisitor {
+class SwitchCaseExpressionsVisitor extends AbstractIfExpressionVisitor {
 	private static final ASTMatcher AST_MATCHER = new ASTMatcher();
 	final SimpleName expectedSwitchHeaderExpression;
 	final ITypeBinding expectedOperandType;
 	private final List<Expression> caseExpressions = new ArrayList<>();
-	private final UniqueLiteralValues uniqueLiteralValues = new UniqueLiteralValues();
+	private final UniqueLiteralValueStore uniqueLiteralValues = new UniqueLiteralValueStore();
 
-	boolean isSupportedCharacter(Expression caseExpression) {
+	private boolean isSupportedCharacter(Expression caseExpression) {
 		if (caseExpression.getNodeType() != ASTNode.CHARACTER_LITERAL) {
 			return false;
 		}
@@ -33,10 +33,10 @@ class EqualsOperationForSwitchVisitor extends AbstractIfExpressionVisitor {
 		return uniqueLiteralValues.isUnique(characterValue);
 	}
 
-	boolean isSupportedInteger(Expression caseExpression) {
+	private boolean isSupportedInteger(Expression caseExpression) {
 		Integer integerValue;
 		try {
-			integerValue = ExpressionToNumericToken.expressionToInteger(caseExpression)
+			integerValue = ExpressionToConstantValue.extractIntegerConstant(caseExpression)
 				.orElse(null);
 		} catch (NumberFormatException exc) {
 			integerValue = null;
@@ -47,7 +47,7 @@ class EqualsOperationForSwitchVisitor extends AbstractIfExpressionVisitor {
 		return false;
 	}
 
-	boolean isSupportedString(Expression caseExpression) {
+	private boolean isSupportedString(Expression caseExpression) {
 		if (caseExpression.getNodeType() != ASTNode.STRING_LITERAL) {
 			return false;
 		}
@@ -55,36 +55,7 @@ class EqualsOperationForSwitchVisitor extends AbstractIfExpressionVisitor {
 		return uniqueLiteralValues.isUnique(stringLiteral.getLiteralValue());
 	}
 
-	// Optional<Expression> findCaseExpression(Expression assumedCaseExpression)
-	// {
-	//
-	// Optional<Expression> optionalReturnValue =
-	// Optional.of(assumedCaseExpression);
-	// int parentNodeType = assumedCaseExpression.getParent()
-	// .getNodeType();
-	// if (parentNodeType == ASTNode.INFIX_EXPRESSION) {
-	//
-	// if (ClassRelationUtil.isContentOfType(expectedOperandType,
-	// char.class.getName())) {
-	// return optionalReturnValue.filter(expression ->
-	// isSupportedCharacter(expression));
-	// }
-	// if (ClassRelationUtil.isContentOfType(expectedOperandType,
-	// int.class.getName())) {
-	// return optionalReturnValue.filter(expression ->
-	// isSupportedInteger(expression));
-	// }
-	// }
-	// if (parentNodeType == ASTNode.METHOD_INVOCATION &&
-	// ClassRelationUtil.isContentOfType(expectedOperandType,
-	// java.lang.String.class.getName())) {
-	// return optionalReturnValue.filter(expression ->
-	// isSupportedString(expression));
-	// }
-	// return Optional.empty();
-	// }
-
-	boolean isValidEqualsMethodCaseExpression(Expression assumedCaseExpression) {
+	private boolean isValidEqualsMethodCaseExpression(Expression assumedCaseExpression) {
 		if (ClassRelationUtil.isContentOfType(expectedOperandType, java.lang.String.class.getName())) {
 			return isSupportedString(assumedCaseExpression);
 		}
@@ -101,30 +72,11 @@ class EqualsOperationForSwitchVisitor extends AbstractIfExpressionVisitor {
 		return false;
 	}
 
-	public EqualsOperationForSwitchVisitor(SimpleName expectedSwitchHeaderExpression,
+	public SwitchCaseExpressionsVisitor(SimpleName expectedSwitchHeaderExpression,
 			ITypeBinding expectedOperandType) {
 		this.expectedSwitchHeaderExpression = expectedSwitchHeaderExpression;
 		this.expectedOperandType = expectedOperandType;
 	}
-
-	// @Override
-	// protected boolean
-	// analyzeEqualsOperationForSwitch(EqualsOperationForSwitch equalsOperation)
-	// {
-	// SimpleName simpleNameFound = equalsOperation.getSwitchHeaderExpression();
-	// if (!AST_MATCHER.match(expectedSwitchHeaderExpression, simpleNameFound))
-	// {
-	// return false;
-	// }
-	// Expression assumedCaseExpression = equalsOperation.getCaseExpression();
-	// Expression caseExpression = findCaseExpression(assumedCaseExpression)
-	// .orElse(null);
-	// if (caseExpression == null) {
-	// return false;
-	// }
-	// caseExpressions.add(caseExpression);
-	// return true;
-	// }
 
 	public List<Expression> getCaseExpressions() {
 		if (isUnexpectedNode()) {
@@ -134,7 +86,7 @@ class EqualsOperationForSwitchVisitor extends AbstractIfExpressionVisitor {
 	}
 
 	@Override
-	protected boolean analyzeEqualsInfixOperationForSwitch(Expression leftOperand, Expression rightOperand) {
+	protected boolean analyzeEqualsInfixOperands(Expression leftOperand, Expression rightOperand) {
 		Expression assumedCaseExpression;
 		if (AST_MATCHER.match(expectedSwitchHeaderExpression, leftOperand)) {
 			assumedCaseExpression = rightOperand;
@@ -152,7 +104,7 @@ class EqualsOperationForSwitchVisitor extends AbstractIfExpressionVisitor {
 	}
 
 	@Override
-	protected boolean analyzeEqualsMethodInvocation(Expression equalsInvocationExpression,
+	protected boolean analyzeEqualsMethodOperands(Expression equalsInvocationExpression,
 			Expression equalsInvocationArgument) {
 		Expression assumedCaseExpression;
 		if (AST_MATCHER.match(expectedSwitchHeaderExpression, equalsInvocationExpression)) {
@@ -169,5 +121,4 @@ class EqualsOperationForSwitchVisitor extends AbstractIfExpressionVisitor {
 		}
 		return false;
 	}
-
 }

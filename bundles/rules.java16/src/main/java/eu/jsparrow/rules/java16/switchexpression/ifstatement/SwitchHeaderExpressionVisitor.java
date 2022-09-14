@@ -39,14 +39,6 @@ class SwitchHeaderExpressionVisitor extends AbstractIfExpressionVisitor {
 		return super.preVisit2(node);
 	}
 
-//	@Override
-//	protected boolean analyzeEqualsOperationForSwitch(EqualsOperationForSwitch equalsOperation) {
-//		stopVisit = true;
-//		expectedSwitchHeaderExpression = equalsOperation.getSwitchHeaderExpression();
-//		expectedOperandType = findVariableTypeBinding(expectedSwitchHeaderExpression).orElse(null);
-//		return expectedOperandType != null;
-//	}
-
 	public Optional<SimpleName> getSwitchHeaderExpression() {
 		return Optional.ofNullable(expectedSwitchHeaderExpression);
 	}
@@ -55,7 +47,7 @@ class SwitchHeaderExpressionVisitor extends AbstractIfExpressionVisitor {
 		return Optional.ofNullable(expectedOperandType);
 	}
 
-	protected boolean analyzeEqualsOperands(Expression leftOperand, Expression rightOperand) {
+	private boolean analyzeEqualsOperands(Expression leftOperand, Expression rightOperand) {
 		stopVisit = true;
 		if (leftOperand.getNodeType() == ASTNode.SIMPLE_NAME) {
 			expectedSwitchHeaderExpression = (SimpleName) leftOperand;
@@ -69,12 +61,12 @@ class SwitchHeaderExpressionVisitor extends AbstractIfExpressionVisitor {
 	}
 
 	@Override
-	protected boolean analyzeEqualsInfixOperationForSwitch(Expression leftOperand, Expression rightOperand) {
+	protected boolean analyzeEqualsInfixOperands(Expression leftOperand, Expression rightOperand) {
 		return analyzeEqualsOperands(leftOperand, rightOperand);
 	}
 
 	@Override
-	protected boolean analyzeEqualsMethodInvocation(Expression equalsInvocationExpression,
+	protected boolean analyzeEqualsMethodOperands(Expression equalsInvocationExpression,
 			Expression equalsInvocationArgument) {
 		return analyzeEqualsOperands(equalsInvocationExpression, equalsInvocationArgument);
 	}

@@ -26,7 +26,7 @@ abstract class AbstractIfExpressionVisitor extends ASTVisitor {
 		Operator operator = infixExpression.getOperator();
 		return operator == Operator.EQUALS;
 	}
-	
+
 	static Optional<Expression> findEqualsMethodArgument(MethodInvocation methodInvocation) {
 		if (!methodInvocation.getName()
 			.getIdentifier()
@@ -40,7 +40,6 @@ abstract class AbstractIfExpressionVisitor extends ASTVisitor {
 		}
 		return Optional.of(invocationArgumentList.get(0));
 	}
-
 
 	@Override
 	public boolean preVisit2(ASTNode node) {
@@ -62,7 +61,7 @@ abstract class AbstractIfExpressionVisitor extends ASTVisitor {
 			return true;
 		}
 		if (!isValidEqualsInfixExpression(node)
-				|| !analyzeEqualsInfixOperationForSwitch(node.getLeftOperand(), node.getRightOperand())) {
+				|| !analyzeEqualsInfixOperands(node.getLeftOperand(), node.getRightOperand())) {
 			unexpectedNode = true;
 		}
 		return false;
@@ -71,20 +70,21 @@ abstract class AbstractIfExpressionVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation node) {
 		Expression invocationExpression = node.getExpression();
-		Expression equalsMethodArgument = findEqualsMethodArgument(node).orElse(null);
-		unexpectedNode = invocationExpression == null || equalsMethodArgument == null  || !analyzeEqualsMethodInvocation(invocationExpression, equalsMethodArgument);
+		Expression equalsMethodArgument = null;
+		if (invocationExpression != null) {
+			equalsMethodArgument = findEqualsMethodArgument(node).orElse(null);
+		}
+		unexpectedNode = invocationExpression == null || equalsMethodArgument == null
+				|| !analyzeEqualsMethodOperands(invocationExpression, equalsMethodArgument);
 		return false;
 	}
 
-	protected abstract boolean analyzeEqualsInfixOperationForSwitch(Expression leftOperand, Expression rightOperand);
+	protected abstract boolean analyzeEqualsInfixOperands(Expression leftOperand, Expression rightOperand);
 
-	protected abstract boolean analyzeEqualsMethodInvocation(Expression equalsInvocationExpression,
+	protected abstract boolean analyzeEqualsMethodOperands(Expression equalsInvocationExpression,
 			Expression equalsInvocationArgument);
-
-//	protected abstract boolean analyzeEqualsOperationForSwitch(EqualsOperationForSwitch equalsOperation);
 
 	public boolean isUnexpectedNode() {
 		return unexpectedNode;
 	}
-
 }

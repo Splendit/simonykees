@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
-import eu.jsparrow.rules.java16.switchexpression.ifstatement.ExpressionToNumericToken;
+import eu.jsparrow.rules.java16.switchexpression.ifstatement.ExpressionToConstantValue;
 import eu.jsparrow.rules.java16.switchexpression.ifstatement.ReplaceMultiBranchIfBySwitchASTVisitor;
 
 class ExpressionToNumericTokenTest extends UsesJDTUnitFixture {
@@ -86,7 +86,7 @@ class ExpressionToNumericTokenTest extends UsesJDTUnitFixture {
 		TypeDeclaration typeDeclaration = defaultFixture.getTypeDeclaration();
 
 		List<Integer> numericTokens = collectExpressions(typeDeclaration).stream()
-			.map(ExpressionToNumericToken::expressionToInteger)
+			.map(ExpressionToConstantValue::extractIntegerConstant)
 			.filter(Optional<Integer>::isPresent)
 			.map(Optional::get)
 			.collect(Collectors.toList());
@@ -103,7 +103,7 @@ class ExpressionToNumericTokenTest extends UsesJDTUnitFixture {
 		TypeDeclaration typeDeclaration = defaultFixture.getTypeDeclaration();
 		List<Expression> expressions = collectExpressions(typeDeclaration);
 		assertEquals(1, expressions.size());
-		Integer minusOne = ExpressionToNumericToken.expressionToInteger(expressions.get(0))
+		Integer minusOne = ExpressionToConstantValue.extractIntegerConstant(expressions.get(0))
 			.orElse(null);
 		assertNotNull(minusOne);
 		assertEquals(-1, minusOne.intValue());
@@ -117,7 +117,7 @@ class ExpressionToNumericTokenTest extends UsesJDTUnitFixture {
 		TypeDeclaration typeDeclaration = defaultFixture.getTypeDeclaration();
 		List<Expression> expressions = collectExpressions(typeDeclaration);
 		assertEquals(1, expressions.size());
-		Integer oneUnsigned = ExpressionToNumericToken.expressionToInteger(expressions.get(0))
+		Integer oneUnsigned = ExpressionToConstantValue.extractIntegerConstant(expressions.get(0))
 			.orElse(null);
 		assertNotNull(oneUnsigned);
 		assertEquals(1, oneUnsigned.intValue());
@@ -132,7 +132,7 @@ class ExpressionToNumericTokenTest extends UsesJDTUnitFixture {
 		TypeDeclaration typeDeclaration = defaultFixture.getTypeDeclaration();
 		List<Expression> expressions = collectExpressions(typeDeclaration);
 		assertEquals(1, expressions.size());
-		Optional<Integer> optionalInteger = ExpressionToNumericToken.expressionToInteger(expressions.get(0));
+		Optional<Integer> optionalInteger = ExpressionToConstantValue.extractIntegerConstant(expressions.get(0));
 		assertFalse(optionalInteger.isPresent());
 	}
 
@@ -146,7 +146,7 @@ class ExpressionToNumericTokenTest extends UsesJDTUnitFixture {
 		assertEquals(1, expressions.size());
 		Expression firstExpression = expressions.get(0);
 		assertThrows(NumberFormatException.class, () -> {
-			ExpressionToNumericToken.expressionToInteger(firstExpression);
+			ExpressionToConstantValue.extractIntegerConstant(firstExpression);
 		});
 	}
 

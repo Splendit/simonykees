@@ -6,13 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.rules.java16.switchexpression.ifstatement.UniqueLiteralValues;
+import eu.jsparrow.rules.java16.switchexpression.ifstatement.UniqueLiteralValueStore;
 
 public class UniqueLiteralValueTest {
 
 	@Test
 	void testIsUniqueStringLiteral() {
-		UniqueLiteralValues uniqueLiteralValues = new UniqueLiteralValues();
+		UniqueLiteralValueStore uniqueLiteralValues = new UniqueLiteralValueStore();
 		assertTrue(uniqueLiteralValues.isUnique("5"));
 		assertFalse(uniqueLiteralValues.isUnique("\65"));
 		assertFalse(uniqueLiteralValues.isUnique("\u0035"));
@@ -20,7 +20,7 @@ public class UniqueLiteralValueTest {
 
 	@Test
 	void testIsUniqueCharLiteral() {
-		UniqueLiteralValues uniqueLiteralValues = new UniqueLiteralValues();
+		UniqueLiteralValueStore uniqueLiteralValues = new UniqueLiteralValueStore();
 
 		assertTrue(uniqueLiteralValues.isUnique(Character.valueOf('5')));
 		assertEquals('5', Character.valueOf('\65'));
@@ -36,7 +36,7 @@ public class UniqueLiteralValueTest {
 
 	@Test
 	void testIsUniqueIntLiteral() {
-		UniqueLiteralValues uniqueLiteralValues = new UniqueLiteralValues();
+		UniqueLiteralValueStore uniqueLiteralValues = new UniqueLiteralValueStore();
 
 		assertTrue(uniqueLiteralValues.isUnique(Integer.decode("16")));
 		assertEquals(16, Integer.decode("0x10"));
@@ -53,7 +53,7 @@ public class UniqueLiteralValueTest {
 
 	@Test
 	void testIsUniqueLongLiteral() {
-		UniqueLiteralValues uniqueLiteralValues = new UniqueLiteralValues();
+		UniqueLiteralValueStore uniqueLiteralValues = new UniqueLiteralValueStore();
 		assertTrue(uniqueLiteralValues.isUnique(Long.decode("0x10")));
 		assertFalse(uniqueLiteralValues.isUnique(Long.decode("16")));
 		assertFalse(uniqueLiteralValues.isUnique(Integer.decode("16")));
