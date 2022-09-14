@@ -3,7 +3,6 @@ package eu.jsparrow.rules.java16.switchexpression.ifstatement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -22,7 +21,6 @@ class EqualsOperationForSwitchVisitor extends AbstractIfExpressionVisitor {
 	private static final ASTMatcher AST_MATCHER = new ASTMatcher();
 	final SimpleName expectedSwitchHeaderExpression;
 	final ITypeBinding expectedOperandType;
-	private final List<EqualsOperationForSwitch> equalsOperations = new ArrayList<>();
 	private final List<Expression> caseExpressions = new ArrayList<>();
 	private final UniqueLiteralValues uniqueLiteralValues = new UniqueLiteralValues();
 
@@ -57,24 +55,50 @@ class EqualsOperationForSwitchVisitor extends AbstractIfExpressionVisitor {
 		return uniqueLiteralValues.isUnique(stringLiteral.getLiteralValue());
 	}
 
-	Optional<Expression> findCaseExpression(ITypeBinding expectedOperandType,
-			EqualsOperationForSwitch equalsOperation) {
+	// Optional<Expression> findCaseExpression(Expression assumedCaseExpression)
+	// {
+	//
+	// Optional<Expression> optionalReturnValue =
+	// Optional.of(assumedCaseExpression);
+	// int parentNodeType = assumedCaseExpression.getParent()
+	// .getNodeType();
+	// if (parentNodeType == ASTNode.INFIX_EXPRESSION) {
+	//
+	// if (ClassRelationUtil.isContentOfType(expectedOperandType,
+	// char.class.getName())) {
+	// return optionalReturnValue.filter(expression ->
+	// isSupportedCharacter(expression));
+	// }
+	// if (ClassRelationUtil.isContentOfType(expectedOperandType,
+	// int.class.getName())) {
+	// return optionalReturnValue.filter(expression ->
+	// isSupportedInteger(expression));
+	// }
+	// }
+	// if (parentNodeType == ASTNode.METHOD_INVOCATION &&
+	// ClassRelationUtil.isContentOfType(expectedOperandType,
+	// java.lang.String.class.getName())) {
+	// return optionalReturnValue.filter(expression ->
+	// isSupportedString(expression));
+	// }
+	// return Optional.empty();
+	// }
 
-		Optional<Expression> optionalReturnValue = Optional.of(equalsOperation.getCaseExpression());
-		if (equalsOperation.getOperationNodeType() == ASTNode.INFIX_EXPRESSION) {
+	boolean isValidEqualsMethodCaseExpression(Expression assumedCaseExpression) {
+		if (ClassRelationUtil.isContentOfType(expectedOperandType, java.lang.String.class.getName())) {
+			return isSupportedString(assumedCaseExpression);
+		}
+		return false;
+	}
 
-			if (ClassRelationUtil.isContentOfType(expectedOperandType, char.class.getName())) {
-				return optionalReturnValue.filter(expression -> isSupportedCharacter(expression));
-			}
-			if (ClassRelationUtil.isContentOfType(expectedOperandType, int.class.getName())) {
-				return optionalReturnValue.filter(expression -> isSupportedInteger(expression));
-			}
+	private boolean isValidEqualsInfixCaseExpression(Expression assumedCaseExpression) {
+		if (ClassRelationUtil.isContentOfType(expectedOperandType, char.class.getName())) {
+			return isSupportedCharacter(assumedCaseExpression);
 		}
-		if (equalsOperation.getOperationNodeType() == ASTNode.METHOD_INVOCATION &&
-				ClassRelationUtil.isContentOfType(expectedOperandType, java.lang.String.class.getName())) {
-			return optionalReturnValue.filter(expression -> isSupportedString(expression));
+		if (ClassRelationUtil.isContentOfType(expectedOperandType, int.class.getName())) {
+			return isSupportedInteger(assumedCaseExpression);
 		}
-		return Optional.empty();
+		return false;
 	}
 
 	public EqualsOperationForSwitchVisitor(SimpleName expectedSwitchHeaderExpression,
@@ -83,31 +107,67 @@ class EqualsOperationForSwitchVisitor extends AbstractIfExpressionVisitor {
 		this.expectedOperandType = expectedOperandType;
 	}
 
-	@Override
-	protected boolean analyzeEqualsOperationForSwitch(EqualsOperationForSwitch equalsOperation) {
-		equalsOperations.add(equalsOperation);
-		SimpleName simpleNameFound = equalsOperation.getSwitchHeaderExpression();
-		if (!AST_MATCHER.match(expectedSwitchHeaderExpression, simpleNameFound)) {
-			return false;
-		}
-		Expression caseExpression = findCaseExpression(expectedOperandType, equalsOperation)
-			.orElse(null);
-		if (caseExpression == null) {
-			return false;
-		}
-		caseExpressions.add(caseExpression);
-		return true;
-	}
-
-	public List<EqualsOperationForSwitch> getEqualsOperations() {
-		return equalsOperations;
-	}
+	// @Override
+	// protected boolean
+	// analyzeEqualsOperationForSwitch(EqualsOperationForSwitch equalsOperation)
+	// {
+	// SimpleName simpleNameFound = equalsOperation.getSwitchHeaderExpression();
+	// if (!AST_MATCHER.match(expectedSwitchHeaderExpression, simpleNameFound))
+	// {
+	// return false;
+	// }
+	// Expression assumedCaseExpression = equalsOperation.getCaseExpression();
+	// Expression caseExpression = findCaseExpression(assumedCaseExpression)
+	// .orElse(null);
+	// if (caseExpression == null) {
+	// return false;
+	// }
+	// caseExpressions.add(caseExpression);
+	// return true;
+	// }
 
 	public List<Expression> getCaseExpressions() {
-		if(isUnexpectedNode()) {
+		if (isUnexpectedNode()) {
 			return Collections.emptyList();
 		}
 		return caseExpressions;
+	}
+
+	@Override
+	protected boolean analyzeEqualsInfixOperationForSwitch(Expression leftOperand, Expression rightOperand) {
+		Expression assumedCaseExpression;
+		if (AST_MATCHER.match(expectedSwitchHeaderExpression, leftOperand)) {
+			assumedCaseExpression = rightOperand;
+		} else if (AST_MATCHER.match(expectedSwitchHeaderExpression, rightOperand)) {
+			assumedCaseExpression = leftOperand;
+		} else {
+			return false;
+		}
+
+		if (isValidEqualsInfixCaseExpression(assumedCaseExpression)) {
+			caseExpressions.add(assumedCaseExpression);
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	protected boolean analyzeEqualsMethodInvocation(Expression equalsInvocationExpression,
+			Expression equalsInvocationArgument) {
+		Expression assumedCaseExpression;
+		if (AST_MATCHER.match(expectedSwitchHeaderExpression, equalsInvocationExpression)) {
+			assumedCaseExpression = equalsInvocationArgument;
+		} else if (AST_MATCHER.match(expectedSwitchHeaderExpression, equalsInvocationArgument)) {
+			assumedCaseExpression = equalsInvocationExpression;
+		} else {
+			return false;
+		}
+
+		if (isValidEqualsMethodCaseExpression(assumedCaseExpression)) {
+			caseExpressions.add(assumedCaseExpression);
+			return true;
+		}
+		return false;
 	}
 
 }

@@ -3,6 +3,7 @@ package eu.jsparrow.rules.java16.switchexpression.ifstatement;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -38,13 +39,13 @@ class SwitchHeaderExpressionVisitor extends AbstractIfExpressionVisitor {
 		return super.preVisit2(node);
 	}
 
-	@Override
-	protected boolean analyzeEqualsOperationForSwitch(EqualsOperationForSwitch equalsOperation) {
-		stopVisit = true;
-		expectedSwitchHeaderExpression = equalsOperation.getSwitchHeaderExpression();
-		expectedOperandType = findVariableTypeBinding(expectedSwitchHeaderExpression).orElse(null);
-		return expectedOperandType != null;
-	}
+//	@Override
+//	protected boolean analyzeEqualsOperationForSwitch(EqualsOperationForSwitch equalsOperation) {
+//		stopVisit = true;
+//		expectedSwitchHeaderExpression = equalsOperation.getSwitchHeaderExpression();
+//		expectedOperandType = findVariableTypeBinding(expectedSwitchHeaderExpression).orElse(null);
+//		return expectedOperandType != null;
+//	}
 
 	public Optional<SimpleName> getSwitchHeaderExpression() {
 		return Optional.ofNullable(expectedSwitchHeaderExpression);
@@ -52,6 +53,30 @@ class SwitchHeaderExpressionVisitor extends AbstractIfExpressionVisitor {
 
 	public Optional<ITypeBinding> getSwitchHeaderExpressionType() {
 		return Optional.ofNullable(expectedOperandType);
+	}
+
+	protected boolean analyzeEqualsOperands(Expression leftOperand, Expression rightOperand) {
+		stopVisit = true;
+		if (leftOperand.getNodeType() == ASTNode.SIMPLE_NAME) {
+			expectedSwitchHeaderExpression = (SimpleName) leftOperand;
+		} else if (rightOperand.getNodeType() == ASTNode.SIMPLE_NAME) {
+			expectedSwitchHeaderExpression = (SimpleName) rightOperand;
+		} else {
+			return false;
+		}
+		expectedOperandType = findVariableTypeBinding(expectedSwitchHeaderExpression).orElse(null);
+		return expectedOperandType != null;
+	}
+
+	@Override
+	protected boolean analyzeEqualsInfixOperationForSwitch(Expression leftOperand, Expression rightOperand) {
+		return analyzeEqualsOperands(leftOperand, rightOperand);
+	}
+
+	@Override
+	protected boolean analyzeEqualsMethodInvocation(Expression equalsInvocationExpression,
+			Expression equalsInvocationArgument) {
+		return analyzeEqualsOperands(equalsInvocationExpression, equalsInvocationArgument);
 	}
 
 }

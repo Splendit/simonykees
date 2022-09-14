@@ -80,8 +80,7 @@ class ReplaceMultiBranchIfBySwitchNegativesASTVisitorTest extends UsesJDTUnitFix
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { // "16",
-			"0x10", "020"
+	@ValueSource(strings = { "16", "0x10", "020"
 	// breaks the test:
 	// , "0"
 	})
