@@ -32,13 +32,4 @@ public class UniqueLiteralValueStore {
 		uniqueLiterals.add(stringRepresentation);
 		return true;
 	}
-
-	public boolean isUnique(Long literalValue) {
-		String stringRepresentation = literalValue.toString();
-		if (uniqueLiterals.contains(stringRepresentation)) {
-			return false;
-		}
-		uniqueLiterals.add(stringRepresentation);
-		return true;
-	}
 }

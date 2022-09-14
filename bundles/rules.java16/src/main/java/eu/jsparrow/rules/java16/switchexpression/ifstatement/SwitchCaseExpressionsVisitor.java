@@ -17,12 +17,12 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 /**
  *
  */
-class SwitchCaseExpressionsVisitor extends AbstractIfExpressionVisitor {
+public class SwitchCaseExpressionsVisitor extends AbstractIfExpressionVisitor {
 	private static final ASTMatcher AST_MATCHER = new ASTMatcher();
 	final SimpleName expectedSwitchHeaderExpression;
 	final ITypeBinding expectedOperandType;
 	private final List<Expression> caseExpressions = new ArrayList<>();
-	private final UniqueLiteralValueStore uniqueLiteralValues = new UniqueLiteralValueStore();
+	private final UniqueLiteralValueStore uniqueLiteralValueStore;
 
 	private boolean isSupportedCharacter(Expression caseExpression) {
 		if (caseExpression.getNodeType() != ASTNode.CHARACTER_LITERAL) {
@@ -30,21 +30,17 @@ class SwitchCaseExpressionsVisitor extends AbstractIfExpressionVisitor {
 		}
 		CharacterLiteral characterLiteral = (CharacterLiteral) caseExpression;
 		Character characterValue = Character.valueOf(characterLiteral.charValue());
-		return uniqueLiteralValues.isUnique(characterValue);
+		return uniqueLiteralValueStore.isUnique(characterValue);
 	}
 
 	private boolean isSupportedInteger(Expression caseExpression) {
-		Integer integerValue;
 		try {
-			integerValue = ExpressionToConstantValue.extractIntegerConstant(caseExpression)
+			Integer integerValue = ExpressionToConstantValue.extractIntegerConstant(caseExpression)
 				.orElse(null);
+			return integerValue != null && uniqueLiteralValueStore.isUnique(integerValue);
 		} catch (NumberFormatException exc) {
-			integerValue = null;
+			return false;
 		}
-		if (integerValue != null && uniqueLiteralValues.isUnique(integerValue)) {
-			return true;
-		}
-		return false;
 	}
 
 	private boolean isSupportedString(Expression caseExpression) {
@@ -52,7 +48,7 @@ class SwitchCaseExpressionsVisitor extends AbstractIfExpressionVisitor {
 			return false;
 		}
 		StringLiteral stringLiteral = (StringLiteral) caseExpression;
-		return uniqueLiteralValues.isUnique(stringLiteral.getLiteralValue());
+		return uniqueLiteralValueStore.isUnique(stringLiteral.getLiteralValue());
 	}
 
 	private boolean isValidEqualsMethodCaseExpression(Expression assumedCaseExpression) {
@@ -73,9 +69,10 @@ class SwitchCaseExpressionsVisitor extends AbstractIfExpressionVisitor {
 	}
 
 	public SwitchCaseExpressionsVisitor(SimpleName expectedSwitchHeaderExpression,
-			ITypeBinding expectedOperandType) {
+			ITypeBinding expectedOperandType, UniqueLiteralValueStore uniqueLiteralValueStore) {
 		this.expectedSwitchHeaderExpression = expectedSwitchHeaderExpression;
 		this.expectedOperandType = expectedOperandType;
+		this.uniqueLiteralValueStore = uniqueLiteralValueStore;
 	}
 
 	public List<Expression> getCaseExpressions() {

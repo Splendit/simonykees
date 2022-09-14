@@ -224,6 +224,16 @@ class SwitchHeaderExpressionVisitorTest extends UsesJDTUnitFixture {
 					"		if (1 == getValue()) {\n" +
 					"		}\n" +
 					"	}",
+			"" +
+					"	static class StaticNestedClass {\n"
+					+ "		static boolean equals(String value) {\n"
+					+ "			return false;\n"
+					+ "		}\n"
+					+ "		void useStaticEqualsMethod(String value) {\n"
+					+ "			if(StaticNestedClass.equals(value)) {				\n"
+					+ "			}\n"
+					+ "		}\n"
+					+ "	}"
 	})
 	void visit_NoLocalVariableName_shouldNotFindSwitchHeaderExpression(String codeExample)
 			throws Exception {

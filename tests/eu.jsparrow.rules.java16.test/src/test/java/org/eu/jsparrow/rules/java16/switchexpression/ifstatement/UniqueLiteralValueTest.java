@@ -44,18 +44,10 @@ public class UniqueLiteralValueTest {
 
 		assertFalse(uniqueLiteralValues.isUnique(Integer.decode("0x10")));
 		assertFalse(uniqueLiteralValues.isUnique(Integer.decode("020")));
-		assertFalse(uniqueLiteralValues.isUnique(Long.decode("16")));
 		assertFalse(uniqueLiteralValues.isUnique("16"));
 
 		assertTrue(uniqueLiteralValues.isUnique(Integer.decode("-16")));
 		assertFalse(uniqueLiteralValues.isUnique("-16"));
 	}
 
-	@Test
-	void testIsUniqueLongLiteral() {
-		UniqueLiteralValueStore uniqueLiteralValues = new UniqueLiteralValueStore();
-		assertTrue(uniqueLiteralValues.isUnique(Long.decode("0x10")));
-		assertFalse(uniqueLiteralValues.isUnique(Long.decode("16")));
-		assertFalse(uniqueLiteralValues.isUnique(Integer.decode("16")));
-	}
 }

@@ -146,10 +146,10 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 			SimpleName expectedSwitchHeaderExpression,
 			ITypeBinding expectedOperandType) {
 		List<IfBranch> ifBranches = new ArrayList<>();
-
+		final UniqueLiteralValueStore uniqueLiteralValueStore = new UniqueLiteralValueStore();
 		for (IfStatement ifStatement : ifStatements) {
 			IfBranch ifBranch = ifStatementToIfBranchForSwitch(ifStatement, expectedSwitchHeaderExpression,
-					expectedOperandType)
+					expectedOperandType, uniqueLiteralValueStore)
 						.orElse(null);
 			if (ifBranch == null) {
 				return Collections.emptyList();
@@ -160,10 +160,11 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 	}
 
 	private static Optional<IfBranch> ifStatementToIfBranchForSwitch(IfStatement ifStatement,
-			SimpleName expectedSwitchHeaderExpression, ITypeBinding expectedOperandType) {
+			SimpleName expectedSwitchHeaderExpression, ITypeBinding expectedOperandType,
+			UniqueLiteralValueStore uniqueLiteralValueStore) {
 
 		SwitchCaseExpressionsVisitor equalsOperationsVisitor = new SwitchCaseExpressionsVisitor(
-				expectedSwitchHeaderExpression, expectedOperandType);
+				expectedSwitchHeaderExpression, expectedOperandType, uniqueLiteralValueStore);
 		ifStatement.getExpression()
 			.accept(equalsOperationsVisitor);
 
