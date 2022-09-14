@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 /**
  *
  */
-class SwitchHeaderExpressionVisitor extends AbstractIfExpressionVisitor {
+public class SwitchHeaderExpressionVisitor extends AbstractIfExpressionVisitor {
 
 	private SimpleName expectedSwitchHeaderExpression;
 	private ITypeBinding expectedOperandType;
@@ -40,10 +40,16 @@ class SwitchHeaderExpressionVisitor extends AbstractIfExpressionVisitor {
 	}
 
 	public Optional<SimpleName> getSwitchHeaderExpression() {
+		if(isUnexpectedNode()) {
+			return Optional.empty();
+		}
 		return Optional.ofNullable(expectedSwitchHeaderExpression);
 	}
 
 	public Optional<ITypeBinding> getSwitchHeaderExpressionType() {
+		if(isUnexpectedNode()) {
+			return Optional.empty();
+		}
 		return Optional.ofNullable(expectedOperandType);
 	}
 
