@@ -22,25 +22,6 @@ class ReplaceMultiBranchIfBySwitchNegativesASTVisitorTest extends UsesJDTUnitFix
 	}
 
 	@Test
-	void visit_BreakStatementWithinIfStatement_shouldNotTransform() throws Exception {
-		String original = ""
-				+ "	void breakLoopWithinIfStatement(String[] strings) {\n"
-				+ "		for(String value : strings) {\n"
-				+ "			if (value.equals(\"a\") || value.equals(\"b\") || value.equals(\"c\")) {\n"
-				+ "				System.out.println(1);\n"
-				+ "				break;\n"
-				+ "			} else if (value.equals(\"d\")) {\n"
-				+ "				System.out.println(2);\n"
-				+ "			} else {\n"
-				+ "				System.out.println(3);\n"
-				+ "			}			\n"
-				+ "		}\n"
-				+ "	}";
-
-		assertNoChange(original);
-	}
-
-	@Test
 	void visit_ContinueStatementWithinIfStatement_shouldNotTransform() throws Exception {
 		String original = ""
 				+ "	void continueStatementWithinIfStatement(String[] strings) {\n"
@@ -85,33 +66,4 @@ class ReplaceMultiBranchIfBySwitchNegativesASTVisitorTest extends UsesJDTUnitFix
 
 		assertNoChange(original);
 	}
-
-	/**
-	 * this test may fail in case of relaxations in connection with labels and
-	 * labeled statements.
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	void visit_LoopWithLabelWithinIfStatement_shouldNotTransform() throws Exception {
-		String original = ""
-				+ "	void loopWithLabelWithinIfStatement(String value, String... otherValues) {\n"
-				+ "		if (value.equals(\"a\")) {\n"
-				+ "			loop: for (String otherValue : otherValues) {\n"
-				+ "				if (otherValue.equals(value)) {\n"
-				+ "					System.out.println(\"otherValue.equals(value)\");\n"
-				+ "					break loop;\n"
-				+ "				}\n"
-				+ "			}\n"
-				+ "			System.out.println(1);\n"
-				+ "		} else if (value.equals(\"b\")) {\n"
-				+ "			System.out.println(2);\n"
-				+ "		} else {\n"
-				+ "			System.out.println(3);\n"
-				+ "		}\n"
-				+ "	}";
-
-		assertNoChange(original);
-	}
-
 }

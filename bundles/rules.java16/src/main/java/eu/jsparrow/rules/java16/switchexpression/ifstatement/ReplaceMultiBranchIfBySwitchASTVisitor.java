@@ -190,7 +190,7 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 				return true;
 			}
 			statementToValidate.accept(continueStatementVisitor);
-			if (continueStatementVisitor.isContainingContinueStatement()) {
+			if (continueStatementVisitor.isContainingUnsupportedContinueStatement()) {
 				return true;
 			}
 

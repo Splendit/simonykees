@@ -71,7 +71,7 @@ public class ContinueStatementWithinIfVisitor extends ASTVisitor {
 		return false;
 	}
 
-	public boolean isContainingContinueStatement() {
+	public boolean isContainingUnsupportedContinueStatement() {
 		return containingContinueStatement;
 	}
 }
