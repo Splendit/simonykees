@@ -16,7 +16,7 @@ class SwitchAssigningValueASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	void visit_SystemOutPrintLine_shouldTransform() throws Exception {	
+	void visit_SystemOutPrintLine_shouldTransform() throws Exception {
 		String original = ""
 				+ "	int digit = 10;\n"
 				+ "		switch (digit) {\n"

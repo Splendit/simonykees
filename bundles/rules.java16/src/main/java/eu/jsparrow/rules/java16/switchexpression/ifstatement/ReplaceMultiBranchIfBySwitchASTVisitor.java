@@ -211,14 +211,13 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 			List<IfBranch> ifBranches) {
 
 		if (isMultiBranchIfEndingWithElse(ifBranches)) {
-
-			Expression variableAssignedByFirstBranch = ifBranches.get(0)
-				.findAssignedVariable()
+			Expression variableAssignedByFirstBranch = findVariableAssignedInFirstBranch(ifBranches)
 				.orElse(null);
 
 			if (variableAssignedByFirstBranch != null && areAllAssigningToSameVariable(ifBranches)) {
-				VariableDeclarationFragment fragment = findDeclaringFragment(variableAssignedByFirstBranch, ifStatement)
-					.orElse(null);
+				VariableDeclarationFragment fragment = findDeclaringFragment(variableAssignedByFirstBranch,
+						ifStatement)
+							.orElse(null);
 
 				if (fragment != null) {
 					return () -> replaceByInitializationWithSwitch(ifStatement, switchHeaderExpression, ifBranches,
@@ -233,7 +232,6 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 				return () -> replaceByReturnWithSwitch(ifStatement, switchHeaderExpression, ifBranches);
 			}
 		}
-
 		return () -> replaceBySwitchStatement(ifStatement, switchHeaderExpression, ifBranches);
 	}
 

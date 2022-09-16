@@ -96,8 +96,8 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		Expression switchHeaderExpression = switchStatement.getExpression();
 		boolean hasDefaultClause = hasDefaultClause(switchStatement);
 		if (hasDefaultClause) {
-			Expression variableAssignedInFirstBranch = clauses.get(0)
-				.findAssignedVariable()
+
+			Expression variableAssignedInFirstBranch = findVariableAssignedInFirstBranch(clauses)
 				.orElse(null);
 
 			if (variableAssignedInFirstBranch != null && areAllAssigningToSameVariable(clauses)) {
@@ -112,11 +112,33 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 				return () -> replaceByAssignmentWithSwitch(variableAssignedInFirstBranch, switchStatement,
 						switchHeaderExpression, clauses);
 			}
+
 			if (areReturningValue(clauses)) {
 				return () -> replaceByReturnWithSwitch(switchStatement, switchHeaderExpression, clauses);
 			}
 		}
 		return () -> replaceBySwitchStatement(switchStatement, switchHeaderExpression, clauses);
+	}
+
+	protected Optional<Expression> findVariableAssignedInFirstBranch(List<? extends SwitchCaseClause> clauses) {
+		Optional<Expression> optionalAssignedVariable = clauses.stream()
+			.findFirst()
+			.flatMap(SwitchCaseClause::findAssignedVariable);
+
+		if (optionalAssignedVariable.isPresent()) {
+			SwitchCaseReturnStatementsVisitor returnVisitor = new SwitchCaseReturnStatementsVisitor();
+			boolean hasAnyReturnStatement = clauses.stream()
+				.flatMap(clause -> clause.getStatements()
+					.stream())
+				.anyMatch(statement -> {
+					statement.accept(returnVisitor);
+					return returnVisitor.hasAnyReturnStatement();
+				});
+			if (hasAnyReturnStatement) {
+				return Optional.empty();
+			}
+		}
+		return optionalAssignedVariable;
 	}
 
 	protected void replaceByReturnWithSwitch(Statement statementToReplace,

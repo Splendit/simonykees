@@ -81,47 +81,43 @@ class ReplaceMultiBranchIfBySwitchASTVisitorTest extends UsesJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
-	/**
-	 * At the moment the if statement in this test is transformed to the
-	 * assignment of a switch expression, but this produces invalid code. This
-	 * test is expected to fail as soon as the corner case has been fixed.
-	 */
 	@Test
 	void visit_ConditionalReturnBeforeLastAssignment_shouldTransformToSwitchStatement() throws Exception {
 		String original = ""
-				+ "		String result;\n"
-				+ "		String assignToFieldByIf(int value) {\n"
-				+ "			if (value == 0) {\n"
-				+ "				result = \"ZERO\";\n"
-				+ "			} else if (value == 1) {\n"
-				+ "				result = \"ONE\";\n"
-				+ "			} else if (value == 2) {\n"
-				+ "				result = \"TWO\";\n"
-				+ "			} else {\n"
-				+ "				if (value < 0) {\n"
-				+ "					return \"NEGATIVE\";\n"
-				+ "				}\n"
-				+ "				result = \"GREATER THAN TWO\";\n"
+				+ "	String result;\n"
+				+ "	String assignToFieldByIf(int value) {\n"
+				+ "		if (value == 0) {\n"
+				+ "			result = \"ZERO\";\n"
+				+ "		} else if (value == 1) {\n"
+				+ "			result = \"ONE\";\n"
+				+ "		} else if (value == 2) {\n"
+				+ "			result = \"TWO\";\n"
+				+ "		} else {\n"
+				+ "			if (value < 0) {\n"
+				+ "				return \"NEGATIVE\";\n"
 				+ "			}\n"
-				+ "			return result;\n"
-				+ "		}";
+				+ "			result = \"GREATER THAN TWO\";\n"
+				+ "		}\n"
+				+ "		return result;\n"
+				+ "	}";
 
 		String expected = ""
-				+ "		String result;\n"
-				+ "		String assignToFieldByIf(int value) {\n"
-				+ "			result = switch (value) {\n"
-				+ "			case 0 -> \"ZERO\";\n"
-				+ "			case 1 -> \"ONE\";\n"
-				+ "			case 2 -> \"TWO\";\n"
-				+ "			default -> {\n"
-				+ "				if (value < 0) {\n"
-				+ "					return \"NEGATIVE\";\n"
-				+ "				}\n"
-				+ "				yield \"GREATER THAN TWO\";\n"
+				+ "	String result;\n"
+				+ "	String assignToFieldByIf(int value) {\n"
+				+ "		switch (value) {\n"
+				+ "		case 0 -> result = \"ZERO\";\n"
+				+ "		case 1 -> result = \"ONE\";\n"
+				+ "		case 2 -> result = \"TWO\";\n"
+				+ "		default -> {\n"
+				+ "			if (value < 0) {\n"
+				+ "				return \"NEGATIVE\";\n"
 				+ "			}\n"
-				+ "			};\n"
-				+ "			return result;\n"
-				+ "		}";
+				+ "			result = \"GREATER THAN TWO\";\n"
+				+ "			break;\n"
+				+ "		}\n"
+				+ "		}\n"
+				+ "		return result;\n"
+				+ "	};";
 
 		assertChange(original, expected);
 	}
