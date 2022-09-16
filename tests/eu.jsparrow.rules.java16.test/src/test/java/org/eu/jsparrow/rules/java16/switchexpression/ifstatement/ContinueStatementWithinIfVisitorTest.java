@@ -91,6 +91,34 @@ class ContinueStatementWithinIfVisitorTest extends UsesJDTUnitFixture {
 		firstThenStatement.accept(continueStatementVisitor);
 		assertTrue(continueStatementVisitor.isContainingUnsupportedContinueStatement());
 	}
+	
+	
+	@Test
+	void visit_continueStatementEscapedByForStatement_shouldTransform() throws Exception {
+		String original = ""
+				+ "	void continueStatementEscapedByForStatement(int value) {\n"
+				+ "		if (value == 1) {\n"
+				+ "			for (;;) {\n"
+				+ "				continue;\n"
+				+ "			}\n"
+				+ "		} else if (value == 2) {\n"
+				+ "		} else {\n"
+				+ "		}\n"
+				+ "	}";
+		String expected = ""
+				+ "	void continueStatementEscapedByForStatement(int value) {\n"
+				+ "		switch (value) {\n"
+				+ "		case 1 -> {\n"
+				+ "			for (;;) {\n"
+				+ "				continue;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "		case 2 -> {break;}\n"
+				+ "		default -> {break;}\n"
+				+ "		}\n"
+				+ "	}";
+		assertChange(original, expected);
+	}
 
 	@ParameterizedTest
 	@ValueSource(strings = {
