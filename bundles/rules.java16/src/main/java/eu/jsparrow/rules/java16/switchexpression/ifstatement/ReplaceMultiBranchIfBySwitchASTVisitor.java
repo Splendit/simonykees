@@ -195,7 +195,7 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 			}
 
 			statementToValidate.accept(yieldStatementVisitor);
-			if (yieldStatementVisitor.isContainingYieldStatement()) {
+			if (yieldStatementVisitor.isContainingUnsupportedYieldStatement()) {
 				return true;
 			}
 

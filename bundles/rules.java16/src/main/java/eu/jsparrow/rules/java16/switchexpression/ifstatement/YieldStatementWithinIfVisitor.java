@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.YieldStatement;
@@ -24,6 +25,11 @@ public class YieldStatementWithinIfVisitor extends ASTVisitor {
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		return !containingYieldStatement;
+	}
+	
+	@Override
+	public boolean visit(SwitchExpression switchExpression) {
+		return false;
 	}
 
 	@Override
@@ -47,7 +53,7 @@ public class YieldStatementWithinIfVisitor extends ASTVisitor {
 		return false;
 	}
 
-	public boolean isContainingYieldStatement() {
+	public boolean isContainingUnsupportedYieldStatement() {
 		return containingYieldStatement;
 	}
 }
