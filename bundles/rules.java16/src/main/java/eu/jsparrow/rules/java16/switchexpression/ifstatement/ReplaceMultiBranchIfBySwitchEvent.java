@@ -8,7 +8,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
  * An interface to add {@link RefactoringMarkerEvent}s for
  * {@link ReplaceMultiBranchIfBySwitchASTVisitor}.
  * 
- * @since 4.7.0
+ * @since 4.13.0
  *
  */
 public interface ReplaceMultiBranchIfBySwitchEvent {

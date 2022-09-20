@@ -15,7 +15,19 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
- *
+ * Helper visitor which tries to extract expressions from a node representing
+ * the condition of an if statement as case expressions in connection with the
+ * transformation of a multi-branch if statement to a switch expression or to a
+ * switch statement.
+ * <p>
+ * For example, <br>
+ * {@code if (value == 3 || value == 4 || value == 5)} <br>
+ * is an if condition where it is possible to extract the values 3, 4, and 5
+ * which can be transformed to the combined rule-labeled <br>
+ * {@code case 3,4,5 ->} <br>
+ * in the switch replacing the given if statement.
+ * 
+ * @since 4.13.0
  */
 public class SwitchCaseExpressionsVisitor extends AbstractIfExpressionVisitor {
 	private static final ASTMatcher AST_MATCHER = new ASTMatcher();

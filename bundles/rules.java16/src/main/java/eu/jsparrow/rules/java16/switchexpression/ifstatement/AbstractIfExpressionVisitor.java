@@ -14,7 +14,19 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 /**
- *
+ * Child classes of this visitor are expected to visit the condition of an if
+ * statement in connection with a potential transformation of the given if
+ * statement to a switch expression or a switch statement.
+ * <p>
+ * This visitor class only tolerated the following kinds of nodes:
+ * <ul>
+ * <li>conditional OR infix expressions</li>
+ * <li>equals infix expressions</li>
+ * <li>method invocations with the name "equals", for example
+ * {@code s.equals("ABC")}</li>
+ * </ul>
+ * 
+ * @since 4.3.0
  */
 abstract class AbstractIfExpressionVisitor extends ASTVisitor {
 	protected boolean unexpectedNode;

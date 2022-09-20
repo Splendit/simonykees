@@ -40,10 +40,10 @@ class ReplaceMultiBranchIfBySwitchRuleTest extends SingleRuleTest {
 		assertThat(description.getName(), equalTo("Replace Multi-Branch If By Switch"));
 		assertThat(description.getTags(),
 				contains(Tag.JAVA_14, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
+		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(15)));
 		assertThat(description.getDescription(),
 				equalTo("In Java 14, the switch expressions turned to a standard feature."
-						+ " This rule replaces multi-branch if statements by corresponding switch-case expressions."
+						+ " This rule replaces multi-branch if statements by corresponding switch expressions or switch statements with switch labeled rules."
 						+ " Because this rule removes a lot of redundant parts of code, readability is improved."));
 	}
 

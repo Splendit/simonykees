@@ -11,9 +11,9 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 /**
- * @see UseSwitchExpressionASTVisitor
+ * @see ReplaceMultiBranchIfBySwitchASTVisitor
  * 
- * @since 4.3.0
+ * @since 4.13.0
  *
  */
 public class ReplaceMultiBranchIfBySwitchRule extends RefactoringRuleImpl<ReplaceMultiBranchIfBySwitchASTVisitor> {
@@ -23,7 +23,7 @@ public class ReplaceMultiBranchIfBySwitchRule extends RefactoringRuleImpl<Replac
 		this.id = "ReplaceMultiBranchIfBySwitch"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.ReplaceMultiBranchIfBySwitchRule_name,
 				Messages.ReplaceMultiBranchIfBySwitchRule_description,
-				Duration.ofMinutes(5),
+				Duration.ofMinutes(15),
 				Arrays.asList(Tag.JAVA_14, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
 	}
 

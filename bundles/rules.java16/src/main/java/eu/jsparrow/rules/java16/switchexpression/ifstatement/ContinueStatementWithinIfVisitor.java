@@ -3,20 +3,18 @@ package eu.jsparrow.rules.java16.switchexpression.ifstatement;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
-import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 /**
- * A visitor to collect {@link BreakStatement}s of a {@link SwitchStatement}.
- * The {@link BreakStatement}s belonging to embedded loops or other switch
- * statements are not collected.
+ * A visitor to find out whether there is a {@link ContinueStatement} within an
+ * {@link ASTNode} which belongs to a loop construct that encloses the visited
+ * node. {@link ContinueStatement}s belonging to embedded loops are not counted.
  * 
  * @since 4.3.0
  *

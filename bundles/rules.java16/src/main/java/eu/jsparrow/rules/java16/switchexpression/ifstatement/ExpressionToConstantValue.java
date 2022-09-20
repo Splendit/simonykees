@@ -10,8 +10,26 @@ import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * Helper class which tries to extract an Integer value from an
+ * {@link Expression}.
+ * <p>
+ * For example, it is possible to extract the Integer with the value 1 from an
+ * infix expression node like {code +1 }.
+ * 
+ * 
+ * @since 4.3.0
+ */
 public class ExpressionToConstantValue {
 
+	/**
+	 * 
+	 * @param expression
+	 *            expected to be a numeric int expression.
+	 * @return an {@link Optional} storing an Integer which corresponds to the
+	 *         numeric expression, or an empty {@link Optional} if no valid
+	 *         integer value could be extracted.
+	 */
 	public static Optional<Integer> extractIntegerConstant(Expression expression) {
 		return findNumericToken(expression, Operator.PLUS).map(Integer::decode);
 	}

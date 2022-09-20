@@ -10,7 +10,17 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 /**
- *
+ * Helper visitor which tries to extract an expression from a node representing
+ * the condition of an if statement as a switch header expression in connection
+ * with the transformation of a multi-branch if statement to a switch expression
+ * or to a switch statement.
+ * <p>
+ * For example, <b> {@code if (value == 3 || value == 4 || value == 5)} </b> is
+ * an if condition where it is possible to extract the variable {@value} which
+ * can be used as switch header expression for the<b> {@code switch(value)}</b>
+ * part of the switch replacing the given if statement.
+ * 
+ * @since 4.13.0
  */
 public class SwitchHeaderExpressionVisitor extends AbstractIfExpressionVisitor {
 
@@ -40,14 +50,14 @@ public class SwitchHeaderExpressionVisitor extends AbstractIfExpressionVisitor {
 	}
 
 	public Optional<SimpleName> getSwitchHeaderExpression() {
-		if(isUnexpectedNode()) {
+		if (isUnexpectedNode()) {
 			return Optional.empty();
 		}
 		return Optional.ofNullable(expectedSwitchHeaderExpression);
 	}
 
 	public Optional<ITypeBinding> getSwitchHeaderExpressionType() {
-		if(isUnexpectedNode()) {
+		if (isUnexpectedNode()) {
 			return Optional.empty();
 		}
 		return Optional.ofNullable(expectedOperandType);
