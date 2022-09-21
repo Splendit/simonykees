@@ -56,6 +56,11 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 		implements ReplaceMultiBranchIfBySwitchEvent {
 
 	@Override
+	public boolean visit(SwitchStatement switchStatement) {
+		return true;
+	}
+
+	@Override
 	public boolean visit(IfStatement ifStatement) {
 
 		Runnable transformingLambda = findTransformingLambda(ifStatement).orElse(null);
