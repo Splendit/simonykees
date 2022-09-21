@@ -289,6 +289,79 @@ class ReplaceMultiBranchIfBySwitchASTVisitorTest extends UsesJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
+	/**
+	 * The transformation result in this test is valid Java code although the
+	 * resulting assignment with the switch expression is not wrapped into a
+	 * block. However, it is desirable to wrap such a transformation result into
+	 * a block.
+	 * <p>
+	 * This test is expected to fail as soon as the corresponding improvement
+	 * has been implemented.
+	 */
+	@Test
+	void visit_expectAssignmentWithSwitchExpressionInBlock_shouldTransform() throws Exception {
+		String original = STRING_CONSTANTS + "\n"
+				+ "		void expectAssignmentWithSwitchExpression(int value) {\n"
+				+ "			String result;\n"
+				+ "			if (value < 0) {\n"
+				+ "				result = NEGATIVE;\n"
+				+ "			} else if (value == 0) {\n"
+				+ "				result = ZERO;\n"
+				+ "			} else if (value == 1) {\n"
+				+ "				result = ONE;\n"
+				+ "			} else if (value == 2) {\n"
+				+ "				result = TWO;\n"
+				+ "			} else {\n"
+				+ "				result = GREATER_THAN_TWO;\n"
+				+ "			}\n"
+				+ "		}";
+
+		String expected = STRING_CONSTANTS + "\n"
+				+ "		void expectAssignmentWithSwitchExpression(int value) {\n"
+				+ "			String result;\n"
+				+ "			if (value < 0) {\n"
+				+ "				result = NEGATIVE;\n"
+				+ "			} else\n"
+				+ "				result = switch (value) {\n"
+				+ "				case 0 -> ZERO;\n"
+				+ "				case 1 -> ONE;\n"
+				+ "				case 2 -> TWO;\n"
+				+ "				default -> GREATER_THAN_TWO;\n"
+				+ "				};\n"
+				+ "		}";
+
+		assertChange(original, expected);
+	}
+
+	// TODO:
+	@Test
+	void visit_expectAssignmentWithSwitchExpressionToFormalParameter_shouldTransform() throws Exception {
+		String original = STRING_CONSTANTS + "\n"
+				+ "	void expectSwitchExpressionAssignedToFieldAccess(int value, String result) {\n"
+				+ "		if (value == 0) {\n"
+				+ "			result = ZERO;\n"
+				+ "		} else if (value == 1) {\n"
+				+ "			result = ONE;\n"
+				+ "		} else if (value == 2) {\n"
+				+ "			result = TWO;\n"
+				+ "		} else {\n"
+				+ "			result = OTHER;\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = STRING_CONSTANTS + "\n"
+				+ "	void expectSwitchExpressionAssignedToFieldAccess(int value, String result) {\n"
+				+ "		result = switch (value) {\n"
+				+ "		case 0 -> ZERO;\n"
+				+ "		case 1 -> ONE;\n"
+				+ "		case 2 -> TWO;\n"
+				+ "		default -> OTHER;\n"
+				+ "		};\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
 	@Test
 	void visit_expectSwitchExpressionAssignedToFieldAccess_shouldTransform()
 			throws Exception {
