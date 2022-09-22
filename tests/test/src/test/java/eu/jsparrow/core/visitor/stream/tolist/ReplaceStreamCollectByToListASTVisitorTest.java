@@ -2,12 +2,14 @@ package eu.jsparrow.core.visitor.stream.tolist;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
+@Disabled("Code examples in tests may not be compiled in JDK 8 environment")
 class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixture {
 
 	private static final String TEST_METHOD_PARAMETERS = ""
