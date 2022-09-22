@@ -1,22 +1,11 @@
 package eu.jsparrow.core.visitor.sub;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
-
-import eu.jsparrow.core.visitor.loop.stream.StreamForEachCheckValidStatementASTVisitor;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * This visitor checks whether an unhandled checked exception is thrown.
@@ -26,85 +15,70 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  *
  */
 public class UnhandledExceptionVisitor extends ASTVisitor {
+	private final ASTNode excludedAncestor;
+	private boolean containsCheckedException = false;
 
-	private static final String CHECKED_EXCEPTION_SUPERTYPE = java.lang.Exception.class.getName();
-	private static final List<String> CHECKED_EXCEPTION_TYPE_LIST = Collections
-		.singletonList(CHECKED_EXCEPTION_SUPERTYPE);
+	/**
+	 * 
+	 * @param nodeToBeVisited
+	 *            {@link ASTNode} visited by UnhandledExceptionVisitor to find
+	 *            out whether it contains any Exception which are not handled
+	 *            properly.
+	 * @param excludedAncestor
+	 *            excludedAncestor is the {@link ASTNode} inside which it is
+	 *            analyzed whether a certain exception can be handled or not.
+	 * 
+	 * @return true if all possible exceptions can be handled inside the node
+	 *         specified by the argument for excludedAncestor, otherwise false.
+	 */
+	public static boolean analyzeExceptionHandling(ASTNode nodeToBeVisited, ASTNode excludedAncestor) {
+		UnhandledExceptionVisitor unhandledExceptionVisitor = new UnhandledExceptionVisitor(excludedAncestor);
+		nodeToBeVisited.accept(unhandledExceptionVisitor);
+		return !unhandledExceptionVisitor.containsUnhandledException();
+	}
 
-	protected boolean containsCheckedException = false;
-	protected boolean containsThrowStatement = false;
-	protected List<String> currentHandledExceptionsTypes = new LinkedList<>();
+	public UnhandledExceptionVisitor(ASTNode excludedAncestor) {
+		this.excludedAncestor = excludedAncestor;
+	}
 
 	@Override
 	public boolean visit(TryStatement tryStatementNode) {
-		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class)
-			.stream()
-			.map(catchClause -> catchClause.getException()
-				.resolveBinding())
-			.filter(Objects::nonNull)
-			.forEach(exceptionVariableBinding -> currentHandledExceptionsTypes.add(exceptionVariableBinding.getType()
-				.getQualifiedName()));
+		if (!ExceptionHandlingAnalyzer.checkResourcesForAutoCloseException(excludedAncestor, tryStatementNode)) {
+			containsCheckedException = true;
+			return false;
+		}
 		return true;
 	}
 
 	@Override
-	public void endVisit(TryStatement tryStatementNode) {
-		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class)
-			.stream()
-			.map(catchClause -> catchClause.getException()
-				.resolveBinding())
-			.filter(Objects::nonNull)
-			.forEach(exceptionVariableBinding -> currentHandledExceptionsTypes.remove(exceptionVariableBinding.getType()
-				.getQualifiedName()));
-	}
-
-	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
-		IMethodBinding methodBinding = methodInvocationNode.resolveMethodBinding();
-		return checkForExceptions(methodBinding);
+		if (!ExceptionHandlingAnalyzer.checkMethodInvocation(excludedAncestor, methodInvocationNode)) {
+			containsCheckedException = true;
+			return false;
+		}
+		return true;
 
 	}
 
 	@Override
 	public boolean visit(ClassInstanceCreation classInstanceCreationNode) {
-		IMethodBinding methodBinding = classInstanceCreationNode.resolveConstructorBinding();
-		return checkForExceptions(methodBinding);
-	}
-
-	/**
-	 * checks the given method binding for declared exceptions and looks if
-	 * those exceptions are handled. if there is an unhandled exception the
-	 * {@link StreamForEachCheckValidStatementASTVisitor#containsCheckedException}
-	 * property is set, which prevents the enhanced for loop from transforming.
-	 * 
-	 * @param methodBinding
-	 *            the methodBinding for the method invocation to check
-	 * @return true, if the visitor should continue with this statement, false
-	 *         otherwise.
-	 */
-	protected boolean checkForExceptions(IMethodBinding methodBinding) {
-		if (methodBinding != null) {
-			ITypeBinding[] exceptions = methodBinding.getExceptionTypes();
-			for (ITypeBinding exception : exceptions) {
-				if ((ClassRelationUtil.isInheritingContentOfTypes(exception, CHECKED_EXCEPTION_TYPE_LIST)
-						|| ClassRelationUtil.isContentOfTypes(exception, CHECKED_EXCEPTION_TYPE_LIST))
-						&& !currentHandledExceptionsTypes.contains(exception.getQualifiedName())) {
-					containsCheckedException = true;
-					return false;
-				}
-			}
+		if (!ExceptionHandlingAnalyzer.checkClassInstanceCreation(excludedAncestor, classInstanceCreationNode)) {
+			containsCheckedException = true;
+			return false;
 		}
-
 		return true;
 	}
 
 	@Override
 	public boolean visit(ThrowStatement throwStatementNode) {
-		containsThrowStatement = true;
-		return false;
+		if (!ExceptionHandlingAnalyzer.checkThrowStatement(excludedAncestor, throwStatementNode)) {
+			containsCheckedException = true;
+			return false;
+		}
+		return true;
 	}
 
-	public boolean throwsException() {
+	public boolean containsUnhandledException() {
 		return containsCheckedException;
 	}
 }

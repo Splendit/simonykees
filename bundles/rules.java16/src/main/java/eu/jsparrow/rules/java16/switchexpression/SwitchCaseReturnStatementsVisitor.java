@@ -52,4 +52,8 @@ public class SwitchCaseReturnStatementsVisitor extends ASTVisitor {
 	public boolean hasMultipleReturnStatements() {
 		return returnStatements.size() > 1;
 	}
+
+	public boolean hasAnyReturnStatement() {
+		return !returnStatements.isEmpty();
+	}
 }

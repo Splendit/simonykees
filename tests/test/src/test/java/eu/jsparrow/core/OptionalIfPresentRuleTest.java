@@ -16,7 +16,6 @@ import eu.jsparrow.common.SingleRuleTest;
 import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.core.rule.impl.OptionalIfPresentRule;
 
-@SuppressWarnings("nls")
 public class OptionalIfPresentRuleTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE = "OptionalIfPresentRule.java";

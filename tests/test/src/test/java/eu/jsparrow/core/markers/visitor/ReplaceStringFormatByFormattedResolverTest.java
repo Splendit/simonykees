@@ -13,7 +13,7 @@ import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 
-class ReplaceStringFormatByFormatterResolverTest extends UsesSimpleJDTUnitFixture {
+class ReplaceStringFormatByFormattedResolverTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -23,7 +23,7 @@ class ReplaceStringFormatByFormatterResolverTest extends UsesSimpleJDTUnitFixtur
 	@Test
 	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		ReplaceStringFormatByFormattedResolver visitor = new ReplaceStringFormatByFormattedResolver(node -> false);
-		visitor.addMarkerListener(RefactoringMarkers.getFor("UseStringJoinResolver"));
+		visitor.addMarkerListener(RefactoringMarkers.getFor("ReplaceStringFormatByFormattedResolver"));
 		setVisitor(visitor);
 		String original = ""
 				+ "String output = String.format(\n"
