@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.Statement;
  * @since 4.3.0
  *
  */
-class LabeledBreakStatementsVisitor extends ASTVisitor {
+public class LabeledBreakStatementsVisitor extends ASTVisitor {
 
 	private List<Statement> statements = new ArrayList<>();
 
