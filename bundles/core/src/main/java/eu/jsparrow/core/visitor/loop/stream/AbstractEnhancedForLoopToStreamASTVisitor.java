@@ -41,7 +41,8 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * @since 2.1.1
  *
  */
-public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends AbstractLambdaForEachASTVisitor implements EnhancedForLoopToStreamEvent {
+public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends AbstractLambdaForEachASTVisitor
+		implements EnhancedForLoopToStreamEvent {
 
 	/**
 	 * Checks whether the type binding is a raw type, capture, wildcard or a
@@ -99,23 +100,6 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 			return parenthesizedExpression;
 		}
 		return expressionCopy;
-	}
-
-	/**
-	 * Checks whether the given expression contains a method invocation which
-	 * throws an unchecked exception. Makes use of
-	 * {@link UnhandledExceptionVisitor}.
-	 * 
-	 * @param expression
-	 *            the expression to be checked
-	 * 
-	 * @return {@code true} if an invocation which throws an exception is found,
-	 *         or {@code false} otherwise.
-	 */
-	protected boolean throwsException(ASTNode expression) {
-		UnhandledExceptionVisitor visitor = new UnhandledExceptionVisitor();
-		expression.accept(visitor);
-		return visitor.throwsException();
 	}
 
 	/**
@@ -318,7 +302,8 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		 * the if statement should not contain non effectively final variables
 		 * and should not throw any exception
 		 */
-		if (containsNonEffectivelyFinalVariable(ifStatement.getExpression()) || throwsException(ifStatement)) {
+		if (containsNonEffectivelyFinalVariable(ifStatement.getExpression()) ||
+				!UnhandledExceptionVisitor.analyzeExceptionHandling(ifStatement, ifStatement)) {
 			return null;
 		}
 

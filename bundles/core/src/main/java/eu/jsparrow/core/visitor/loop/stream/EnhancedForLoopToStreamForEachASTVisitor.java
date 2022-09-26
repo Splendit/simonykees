@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
+import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -60,8 +62,8 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 		Statement statement = enhancedForStatementNode.getBody();
 		SimpleName parameterName = parameter.getName();
 		ITypeBinding parameterTypeBinding = parameterName.resolveTypeBinding();
-		
-		if(isGeneratedNode(parameterType)) {
+
+		if (isGeneratedNode(parameterType)) {
 			return;
 		}
 
@@ -171,15 +173,23 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 	}
 
 	/**
-	 * this method starts an instance of
-	 * {@link StreamForEachCheckValidStatementASTVisitor} on the loop block and
-	 * checks its validity.
-	 * 
 	 * @param statement
 	 *            the body of the enhanced for loop
 	 * @param parameter
 	 *            the parameter of the enhanced for loop
-	 * @return an {@link ASTNode} if the block is valid, null otherwise
+	 * @return
+	 *         <ul>
+	 *         <li>If the statement specified by the first parameter is a
+	 *         {@link Block} and <br>
+	 *         {@link #isStatementValid(Statement, SimpleName)} <br>
+	 *         returns true for it, the first parameter is returned.</li>
+	 *         <li>If the statement specified by the first parameter is an
+	 *         {@link ExpressionStatement} and <br>
+	 *         {@link #isStatementValid(Statement, SimpleName)} <br>
+	 *         returns true for it, then the {@link Expression} extracted from
+	 *         the first parameter is returned.</li>
+	 *         <li>In each other case {@code null} is returned.</li>
+	 *         </ul>
 	 */
 	private ASTNode getApprovedStatement(Statement statement, SimpleName parameter) {
 		if (ASTNode.BLOCK == statement.getNodeType()) {
@@ -287,17 +297,21 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 		super.addAlreadyVerifiedImports(Arrays.asList(addedImpots));
 	}
 
-	/**
-	 * @see {@link EnhancedForLoopToStreamForEachASTVisitor#getApprovedStatement(Statement, SimpleName)}
-	 * 
-	 * @param statement
-	 * @param parameter
-	 * @return
-	 */
 	private boolean isStatementValid(Statement statement, SimpleName parameter) {
+
+		if (FlowBreakersVisitor.containsFlowControlStatement(statement)) {
+			return false;
+		}
+
+		if (!UnhandledExceptionVisitor.analyzeExceptionHandling(statement,
+				statement.getParent())) {
+			return false;
+		}
+
 		StreamForEachCheckValidStatementASTVisitor statementVisitor = new StreamForEachCheckValidStatementASTVisitor(
 				parameter);
 		statement.accept(statementVisitor);
-		return statementVisitor.isStatementsValid();
+
+		return !statementVisitor.containsInvalidVariable();
 	}
 }
