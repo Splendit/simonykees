@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.dom.YieldStatement;
  * @since 4.3.0
  *
  */
-class SwitchCaseClause {
+public class SwitchCaseClause {
 
 	private List<Expression> expressions;
 	private List<Statement> statements;

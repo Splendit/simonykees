@@ -87,8 +87,10 @@ import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedAnnotationPropertyRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedExceptionRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitTimeoutAnnotationPropertyRule;
 import eu.jsparrow.core.rule.impl.ReplaceRequestMappingAnnotationRule;
+import eu.jsparrow.core.rule.impl.ReplaceSetRemoveAllWithForEachRule;
 import eu.jsparrow.core.rule.impl.ReplaceStreamCollectByToListRule;
 import eu.jsparrow.core.rule.impl.ReplaceStringFormatByFormattedRule;
+import eu.jsparrow.core.rule.impl.ReplaceWrongClassForLoggerRule;
 import eu.jsparrow.core.rule.impl.ReuseRandomObjectsRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.ShiftAssertJDescriptionBeforeAssertionRule;
@@ -177,7 +179,7 @@ public class RulesContainer {
 				 */
 				new RemoveUnusedLocalVariablesRule(),
 				new TryWithResourceRule(), new MultiCatchRule(), new FunctionalInterfaceRule(),
-				new CollectionRemoveAllRule(), new ImmutableStaticFinalCollectionsRule(), new DiamondOperatorRule(),
+				new CollectionRemoveAllRule(), new ReplaceSetRemoveAllWithForEachRule(), new ImmutableStaticFinalCollectionsRule(), new DiamondOperatorRule(),
 				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),
 				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
 				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new MapGetOrDefaultRule(),
@@ -195,6 +197,7 @@ public class RulesContainer {
 				new UseFilesWriteStringRule(),
 				new RemoveRedundantCloseRule(),
 				new ReplaceRequestMappingAnnotationRule(),
+				new ReplaceWrongClassForLoggerRule(),
 
 				/*
 				 * Security

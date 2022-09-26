@@ -498,8 +498,14 @@ public class Messages extends NLS {
 	public static String ReplaceExpectedExceptionRule_name;
 	public static String ReplaceJUnitTimeoutAnnotationPropertyRule_description;
 	public static String ReplaceJUnitTimeoutAnnotationPropertyRule_name;
+	public static String ReplaceMultiBranchIfBySwitchRule_description;
+	public static String ReplaceMultiBranchIfBySwitchRule_name;
+	public static String ReplaceWrongClassForLoggerRule_description;
+	public static String ReplaceWrongClassForLoggerRule_name;
 	public static String ReplaceRequestMappingAnnotationRule_description;
 	public static String ReplaceRequestMappingAnnotationRule_name;
+	public static String ReplaceSetRemoveAllWithForEachRule_description;
+	public static String ReplaceSetRemoveAllWithForEachRule_name;
 	public static String ReplaceStringFormatByFormattedRule_description;
 	public static String ReplaceStringFormatByFormattedRule_name;
 	public static String ReplaceStreamCollectByToListRule_description;

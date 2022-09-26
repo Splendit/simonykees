@@ -15,6 +15,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.markers.common.OptionalIfPresentEvent;
+import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
+import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
@@ -56,7 +58,7 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 
 		// analyze thenStatement
 		Statement thenStatement = ifStatement.getThenStatement();
-		if (!isConvertibleToLambdaBody(thenStatement)) {
+		if (!isConvertibleToLambdaBody(ifStatement, thenStatement)) {
 			return true;
 		}
 
@@ -77,7 +79,7 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 			return true;
 		}
 
-		if (!isConvertibleToLambdaBody(elseStatement)) {
+		if (!isConvertibleToLambdaBody(ifStatement, elseStatement)) {
 			return true;
 		}
 
@@ -96,18 +98,18 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 		return true;
 	}
 
-	private boolean isConvertibleToLambdaBody(Statement thenStatement) {
-		boolean hasReturnStatement = containsFlowControlStatement(thenStatement);
+	private boolean isConvertibleToLambdaBody(IfStatement ifStatement, Statement statement) {
+		boolean hasReturnStatement = FlowBreakersVisitor.containsFlowControlStatement(statement);
 		if (hasReturnStatement) {
 			return false;
 		}
 
-		boolean hasUnhandledException = containsUnhandledException(thenStatement);
+		boolean hasUnhandledException = !UnhandledExceptionVisitor.analyzeExceptionHandling(statement, ifStatement);
 		if (hasUnhandledException) {
 			return false;
 		}
 
-		return !containsNonEffectivelyFinal(thenStatement);
+		return !containsNonEffectivelyFinal(statement);
 	}
 
 	@SuppressWarnings("unchecked")

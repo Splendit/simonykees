@@ -329,19 +329,33 @@ public class OptionalIfPresentRule {
 			}
 		}
 	}
-
-	public void throwStatementInBody_shouldNotTransform(List<String> users) {
+	
+	public void throwExceptionInBody_shouldNotTransform(List<String> users) throws Exception {
 		for (String user : users) {
 			Optional<String> name = findUserName(user);
 			if (name.isPresent()) {
 				String value = name.get();
 				System.out.println(value);
 				if (value.isEmpty()) {
-					throw new NoSuchElementException();
+					throw new Exception();
 				} else {
 					System.out.println(value);
 				}
 			}
+		}
+	}
+
+	public void throwNoSuchElementExceptionInBody_shouldTransform(List<String> users) {
+		for (String user : users) {
+			Optional<String> name = findUserName(user);
+			name.ifPresent(value -> {
+				System.out.println(value);
+				if (value.isEmpty()) {
+					throw new NoSuchElementException();
+				} else {
+					System.out.println(value);
+				}
+			});
 		}
 	}
 
