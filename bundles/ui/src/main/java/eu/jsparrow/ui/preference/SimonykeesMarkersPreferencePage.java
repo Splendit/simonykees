@@ -1,5 +1,7 @@
 package eu.jsparrow.ui.preference;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -9,15 +11,20 @@ import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.i18n.Messages;
@@ -27,6 +34,7 @@ import eu.jsparrow.ui.preference.marker.MarkerContentProvider;
 import eu.jsparrow.ui.preference.marker.MarkerItemWrapper;
 import eu.jsparrow.ui.preference.marker.MarkerLabelProvider;
 import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * A preference page for activating and deactivating jSparrow Markers.
@@ -38,6 +46,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 
 	private CheckboxTreeViewerWrapper treeViewerWrapper;
 	private Text searchField;
+
 	@Override
 	public void init(IWorkbench workbench) {
 		// required by the parent
@@ -68,13 +77,34 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		searchFieldGridData.widthHint = 180;
 		searchField.setLayoutData(searchFieldGridData);
 
+		LicenseUtil licenseUtil = LicenseUtil.get();
+		if (licenseUtil.isFreeLicense()) {
+			Link jSparrowLink = new Link(group, SWT.NONE);
+			jSparrowLink.setFont(parent.getFont());
+			jSparrowLink.setText(Messages.SimonykeesMarkersPreferencePage_to_be_able_to_use_jsparrow_markers);
+			jSparrowLink.setEnabled(true);
+			jSparrowLink.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					try {
+						PlatformUI.getWorkbench()
+							.getBrowserSupport()
+							.getExternalBrowser()
+							.openURL(new URL(arg0.text));
+					} catch (PartInitException | MalformedURLException e) {
+						// nothing...
+					}
+				}
+			});
+		}
+
 		CheckboxTreeViewer checkboxTreeViewer = new CheckboxTreeViewer(group);
 		checkboxTreeViewer.getTree()
 			.setLayoutData(new GridData(GridData.FILL_BOTH));
 		checkboxTreeViewer.setContentProvider(new MarkerContentProvider());
 		checkboxTreeViewer.setLabelProvider(new MarkerLabelProvider());
 		checkboxTreeViewer.setInput("root"); //$NON-NLS-1$
-		
+
 		treeViewerWrapper = new CheckboxTreeViewerWrapper(checkboxTreeViewer);
 
 		Map<String, RuleDescription> allMarkerDescriptions = ResolverVisitorsFactory.getAllMarkerDescriptions();
@@ -127,12 +157,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 
 	public void setSearchField(String string) {
 		searchField.setText(string);
-		
+
 	}
 
-
-
-	
-
-	
 }
