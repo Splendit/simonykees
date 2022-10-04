@@ -219,7 +219,7 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 			Expression variableAssignedByFirstBranch = findVariableAssignedInFirstBranch(ifBranches)
 				.orElse(null);
 
-			if (variableAssignedByFirstBranch != null && areAllAssigningToSameVariable(ifBranches)) {
+			if (variableAssignedByFirstBranch != null) {
 				VariableDeclarationFragment fragment = findDeclaringFragment(variableAssignedByFirstBranch,
 						ifStatement)
 							.orElse(null);

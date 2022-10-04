@@ -100,7 +100,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			Expression variableAssignedInFirstBranch = findVariableAssignedInFirstBranch(clauses)
 				.orElse(null);
 
-			if (variableAssignedInFirstBranch != null && areAllAssigningToSameVariable(clauses)) {
+			if (variableAssignedInFirstBranch != null) {
 				VariableDeclarationFragment fragment = findDeclaringFragment(variableAssignedInFirstBranch,
 						switchStatement)
 							.orElse(null);
@@ -121,24 +121,45 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	protected Optional<Expression> findVariableAssignedInFirstBranch(List<? extends SwitchCaseClause> clauses) {
-		Optional<Expression> optionalAssignedVariable = clauses.stream()
-			.findFirst()
-			.flatMap(SwitchCaseClause::findAssignedVariable);
 
-		if (optionalAssignedVariable.isPresent()) {
-			SwitchCaseReturnStatementsVisitor returnVisitor = new SwitchCaseReturnStatementsVisitor();
-			boolean hasAnyReturnStatement = clauses.stream()
-				.flatMap(clause -> clause.getStatements()
-					.stream())
+		SwitchCaseReturnStatementsVisitor returnStatementVisitor = new SwitchCaseReturnStatementsVisitor();
+		for (SwitchCaseClause clause : clauses) {
+			if (clause.hasInternalBreakStatements()) {
+				return Optional.empty();
+			}
+			boolean hasAnyReturnStatement = clause.getStatements()
+				.stream()
 				.anyMatch(statement -> {
-					statement.accept(returnVisitor);
-					return returnVisitor.hasAnyReturnStatement();
+					statement.accept(returnStatementVisitor);
+					return returnStatementVisitor.hasAnyReturnStatement();
 				});
 			if (hasAnyReturnStatement) {
 				return Optional.empty();
 			}
 		}
-		return optionalAssignedVariable;
+
+		Expression firstAssignedVariable = clauses.stream()
+			.findFirst()
+			.flatMap(SwitchCaseClause::findAssignedVariable)
+			.orElse(null);
+		if (firstAssignedVariable == null) {
+			return Optional.empty();
+		}
+
+		ASTMatcher matcher = new ASTMatcher();
+		for (SwitchCaseClause clause : clauses) {
+			Expression assignedVariable = clause.findAssignedVariable()
+				.orElse(null);
+			if (assignedVariable == null) {
+				return Optional.empty();
+			}
+			if (assignedVariable != firstAssignedVariable
+					&& !firstAssignedVariable.subtreeMatch(matcher, assignedVariable)) {
+				return Optional.empty();
+			}
+		}
+
+		return Optional.of(firstAssignedVariable);
 	}
 
 	protected void replaceByReturnWithSwitch(Statement statementToReplace,
@@ -251,34 +272,6 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		return clauses.stream()
 			.map(SwitchCaseClause::getStatements)
 			.noneMatch(this::containsMultipleReturnStatements);
-	}
-
-	protected boolean areAllAssigningToSameVariable(List<? extends SwitchCaseClause> clauses) {
-		List<Expression> assignedExpressions = clauses.stream()
-			.map(SwitchCaseClause::findAssignedVariable)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.collect(Collectors.toList());
-
-		if (assignedExpressions.size() != clauses.size()) {
-			return false;
-		}
-
-		boolean hasInternalBreakStatements = clauses.stream()
-			.anyMatch(SwitchCaseClause::hasInternalBreakStatements);
-		if (hasInternalBreakStatements) {
-			return false;
-		}
-
-		Expression firstAssigned = assignedExpressions.get(0);
-		ASTMatcher matcher = new ASTMatcher();
-		for (int i = 1; i < assignedExpressions.size(); i++) {
-			Expression assigned = assignedExpressions.get(i);
-			if (!firstAssigned.subtreeMatch(matcher, assigned)) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	@SuppressWarnings("unchecked")
