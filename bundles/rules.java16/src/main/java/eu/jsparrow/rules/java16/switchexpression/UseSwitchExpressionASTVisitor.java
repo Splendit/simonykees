@@ -97,7 +97,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		boolean hasDefaultClause = hasDefaultClause(switchStatement);
 		if (hasDefaultClause) {
 
-			Expression variableAssignedInFirstBranch = findVariableAssignedInFirstBranch(clauses)
+			Expression variableAssignedInFirstBranch = findVariableAssignedInFirstBranch(clauses, switchStatement)
 				.orElse(null);
 
 			if (variableAssignedInFirstBranch != null) {
@@ -120,7 +120,8 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		return () -> replaceBySwitchStatement(switchStatement, switchHeaderExpression, clauses);
 	}
 
-	protected Optional<Expression> findVariableAssignedInFirstBranch(List<? extends SwitchCaseClause> clauses) {
+	protected Optional<Expression> findVariableAssignedInFirstBranch(List<? extends SwitchCaseClause> clauses,
+			Statement enclosingStatement) {
 
 		SwitchCaseReturnStatementsVisitor returnStatementVisitor = new SwitchCaseReturnStatementsVisitor();
 		for (SwitchCaseClause clause : clauses) {
@@ -155,6 +156,13 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			}
 			if (assignedVariable != firstAssignedVariable
 					&& !firstAssignedVariable.subtreeMatch(matcher, assignedVariable)) {
+				return Optional.empty();
+			}
+
+			boolean supportedAssignmentLeftHandSide = SwitchExpressionAssignmentAnalyzer
+				.isSupportedAssignmentLeftHandSide(assignedVariable, enclosingStatement,
+						getCompilationUnit());
+			if (!supportedAssignmentLeftHandSide) {
 				return Optional.empty();
 			}
 		}

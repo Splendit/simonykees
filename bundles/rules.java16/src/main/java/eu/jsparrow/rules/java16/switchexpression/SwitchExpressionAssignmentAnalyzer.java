@@ -11,33 +11,21 @@ import org.eclipse.jdt.core.dom.Statement;
 
 public class SwitchExpressionAssignmentAnalyzer {
 
-	boolean analyzeAssignmentLeftHandSideRootQualifier(Expression expression, Statement enclosingStatement,
+	public static boolean isSupportedAssignmentLeftHandSide(final Expression expression, Statement enclosingStatement,
 			CompilationUnit compilationUnit) {
-		if (expression.getNodeType() == ASTNode.THIS_EXPRESSION
-				|| expression.getNodeType() == ASTNode.SUPER_FIELD_ACCESS) {
+
+		Expression qualifierToAnalyze = getQualifierToAnalyze(expression);
+		if (qualifierToAnalyze.getNodeType() == ASTNode.THIS_EXPRESSION
+				|| qualifierToAnalyze.getNodeType() == ASTNode.SUPER_FIELD_ACCESS) {
 			return true;
 		}
-		if (expression.getNodeType() == ASTNode.SIMPLE_NAME) {
-			return !isLocalVariableDeclaredWithinEnclosingStatement((SimpleName) expression, enclosingStatement,
-					compilationUnit);
-		}
-		if (expression.getNodeType() == ASTNode.QUALIFIED_NAME) {
-			QualifiedName qualifiedName = (QualifiedName) expression;
-			return !analyzeAssignmentLeftHandSideRootQualifier(qualifiedName.getQualifier(), enclosingStatement,
-					compilationUnit);
-		}
-		if (expression.getNodeType() == ASTNode.FIELD_ACCESS) {
-			FieldAccess fieldAccess = (FieldAccess) expression;
-			return !analyzeAssignmentLeftHandSideRootQualifier(fieldAccess.getExpression(), enclosingStatement,
-					compilationUnit);
-		}
-		return false;
-	}
 
-	private boolean isLocalVariableDeclaredWithinEnclosingStatement(SimpleName rootQualifier,
-			Statement enclosingStatement,
-			CompilationUnit compilationUnit) {
-		IBinding binding = rootQualifier.resolveBinding();
+		if (qualifierToAnalyze.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return false;
+		}
+
+		SimpleName simpleName = (SimpleName) qualifierToAnalyze;
+		IBinding binding = simpleName.resolveBinding();
 		if (binding == null) {
 			return false;
 		}
@@ -55,4 +43,16 @@ public class SwitchExpressionAssignmentAnalyzer {
 		return true;
 	}
 
+	private static Expression getQualifierToAnalyze(Expression expression) {
+		if (expression.getNodeType() == ASTNode.QUALIFIED_NAME) {
+			QualifiedName qualifiedName = (QualifiedName) expression;
+			return getQualifierToAnalyze(qualifiedName.getQualifier());
+		}
+
+		if (expression.getNodeType() == ASTNode.FIELD_ACCESS) {
+			FieldAccess fieldAccess = (FieldAccess) expression;
+			return getQualifierToAnalyze(fieldAccess.getExpression());
+		}
+		return expression;
+	}
 }

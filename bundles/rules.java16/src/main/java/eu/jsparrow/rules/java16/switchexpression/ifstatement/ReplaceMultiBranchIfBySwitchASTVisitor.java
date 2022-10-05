@@ -216,7 +216,7 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 			List<IfBranch> ifBranches) {
 
 		if (isMultiBranchIfEndingWithElse(ifBranches)) {
-			Expression variableAssignedByFirstBranch = findVariableAssignedInFirstBranch(ifBranches)
+			Expression variableAssignedByFirstBranch = findVariableAssignedInFirstBranch(ifBranches, ifStatement)
 				.orElse(null);
 
 			if (variableAssignedByFirstBranch != null) {
