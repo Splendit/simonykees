@@ -67,16 +67,6 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		GridData groupLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		groupLayoutData.heightHint = 400;
 
-		Composite searchComposite = new Composite(group, SWT.NONE);
-		searchComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		searchComposite.setLayout(new GridLayout(1, true));
-
-		searchField = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
-		searchField.setMessage(Messages.SimonykeesMarkersPreferencePage_searchLabelMessage);
-		GridData searchFieldGridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
-		searchFieldGridData.widthHint = 180;
-		searchField.setLayoutData(searchFieldGridData);
-
 		LicenseUtil licenseUtil = LicenseUtil.get();
 		if (licenseUtil.isFreeLicense()) {
 			Link jSparrowLink = new Link(group, SWT.NONE);
@@ -97,6 +87,16 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 				}
 			});
 		}
+
+		Composite searchComposite = new Composite(group, SWT.NONE);
+		searchComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		searchComposite.setLayout(new GridLayout(1, true));
+
+		searchField = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
+		searchField.setMessage(Messages.SimonykeesMarkersPreferencePage_searchLabelMessage);
+		GridData searchFieldGridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
+		searchFieldGridData.widthHint = 180;
+		searchField.setLayoutData(searchFieldGridData);
 
 		CheckboxTreeViewer checkboxTreeViewer = new CheckboxTreeViewer(group);
 		checkboxTreeViewer.getTree()
