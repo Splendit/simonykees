@@ -160,7 +160,6 @@ public class ActivationControl extends Composite {
 			}
 		});
 		activateButton.setLayoutData(buttonData);
-
 	}
 
 	private boolean validateActivationKey(ActivationEntity activationEntity) {

@@ -38,6 +38,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -66,6 +67,8 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 	private Image jSparrowImageInactive;
 
 	private Label logoLabel;
+
+	private Button registerForFreeButton;
 
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 
@@ -111,6 +114,11 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		licenseLabel.setLayoutData(licenseRowData);
 		licenseLabel.setFont(parent.getFont());
 
+		registerForFreeButton = new Button(composite, SWT.PUSH);
+		registerForFreeButton.setText(Messages.SimonykeesPreferencePageLicense_register_for_free_jsparrow_trial);
+		registerForFreeButton.setFont(parent.getFont());
+		registerForFreeButton.setVisible(false);
+
 		Link jSparrowLink = new Link(composite, SWT.NONE);
 		jSparrowLink.setFont(parent.getFont());
 		jSparrowLink.setText(Messages.SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow);
@@ -154,7 +162,8 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		composite.addDisposeListener((DisposeEvent e) -> {
 			jSparrowImageActive.dispose();
 			jSparrowImageInactive.dispose();
-			expirationLabel.getFont().dispose();
+			expirationLabel.getFont()
+				.dispose();
 		});
 
 		composite.pack();
@@ -174,11 +183,34 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			expirationLabel.setText(""); //$NON-NLS-1$
 			logoLabel.setImage(jSparrowImageActive);
 		}
+		
+		if (addButtonToRegisterForFree()) {
+			registerForFreeButton.setVisible(true);
+			registerForFreeButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					RegistrationDialog dialog = new RegistrationDialog(getShell());
+					dialog.create();
+					dialog.open();
+					updateDisplayedInformation();
+				}
+			});
+		}
+
 
 		licenseLabel.getParent()
 			.pack();
 		licenseLabel.getParent()
 			.layout(true);
+	}
+
+	private boolean addButtonToRegisterForFree() {
+		LicenseValidationResult result = licenseUtil.getValidationResult();
+		boolean isFullLicense = licenseUtil.isProLicense();
+		boolean activeRegistration = licenseUtil.isActiveRegistration();
+		boolean isValid = result.isValid();
+		boolean fullValid = isFullLicense && isValid;
+		return !fullValid && !activeRegistration;
 	}
 
 	private String computeLicenseLabel(LicenseValidationResult result) {
@@ -188,8 +220,8 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		boolean fullValid = isFullLicense && isValid;
 
 		if (!fullValid) {
-			return activeRegistration ? Messages.SimonykeesPreferencePageLicense_jsparrow_starter
-					: Messages.SimonykeesPreferencePageLicense_jsparrow_free;
+			return activeRegistration ? Messages.SimonykeesPreferencePageLicense_jsparrow_free
+					: Messages.SimonykeesPreferencePageLicense_currently_not_registered;
 		}
 
 		LicenseType licenseType = result.getLicenseType();
