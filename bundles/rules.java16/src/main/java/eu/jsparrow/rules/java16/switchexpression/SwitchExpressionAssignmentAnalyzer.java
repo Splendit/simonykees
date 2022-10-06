@@ -1,6 +1,7 @@
 package eu.jsparrow.rules.java16.switchexpression;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -53,6 +54,20 @@ public class SwitchExpressionAssignmentAnalyzer {
 			FieldAccess fieldAccess = (FieldAccess) expression;
 			return getQualifierToAnalyze(fieldAccess.getExpression());
 		}
+
+		if (expression.getNodeType() == ASTNode.ARRAY_ACCESS) {
+			ArrayAccess arrayAccess = (ArrayAccess) expression;
+			Expression index = arrayAccess.getIndex();
+			if (index.getNodeType() == ASTNode.NUMBER_LITERAL) {
+				Expression array = arrayAccess.getArray();
+				return getQualifierToAnalyze(array);
+			}
+		}
 		return expression;
+	}
+
+	private SwitchExpressionAssignmentAnalyzer() {
+		// private default constructor of utility class in order to hide
+		// implicit public one
 	}
 }
