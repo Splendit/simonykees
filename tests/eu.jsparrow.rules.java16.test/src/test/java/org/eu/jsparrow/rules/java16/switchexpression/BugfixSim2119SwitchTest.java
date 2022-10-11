@@ -77,9 +77,8 @@ public class BugfixSim2119SwitchTest extends UsesJDTUnitFixture {
 	void visit_NoAssignmentOfSwitchExpressionToQualifiedName_shouldTransform() throws Exception {
 
 		String original = STRING_CONSTANTS + "\n"
-				+ "		StringWrapper resultWrapper;\n"
-				+ "\n"
 				+ "		void assignmentsWithinSwitch(int value) {\n"
+				+ "			StringWrapper resultWrapper = new StringWrapper();\n"
 				+ "			switch (value) {\n"
 				+ "			case 0:\n"
 				+ "				resultWrapper.content = ZERO;\n"
@@ -87,41 +86,82 @@ public class BugfixSim2119SwitchTest extends UsesJDTUnitFixture {
 				+ "			case 1:\n"
 				+ "				resultWrapper.content = ONE;\n"
 				+ "				break;\n"
-				+ "\n"
 				+ "			case 2:\n"
+				+ "				resultWrapper = new StringWrapper();\n"
 				+ "				resultWrapper.content = TWO;\n"
 				+ "				break;\n"
-				+ "\n"
 				+ "			default:\n"
-				+ "				StringWrapper resultWrapper = new StringWrapper();\n"
 				+ "				resultWrapper.content = OTHER;\n"
 				+ "				break;\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "\n"
-				+ "		static class StringWrapper {\n"
-				+ "			String content;\n"
-				+ "		}";
-
-		String expected = STRING_CONSTANTS + "\n"
-				+ "		StringWrapper resultWrapper;\n"
-				+ "\n"
-				+ "		void assignmentsWithinSwitch(int value) {\n"
-				+ "			switch (value) {\n"
-				+ "			case 0 -> resultWrapper.content = ZERO;\n"
-				+ "			case 1 -> resultWrapper.content = ONE;\n"
-				+ "			case 2 -> resultWrapper.content = TWO;\n"
-				+ "			default -> {\n"
-				+ "				StringWrapper resultWrapper = new StringWrapper();\n"
-				+ "				resultWrapper.content = OTHER;\n"
-				+ "				break;\n"
-				+ "			}\n"
 				+ "			}\n"
 				+ "		}\n"
 				+ "		\n"
 				+ "		static class StringWrapper {\n"
 				+ "			String content;\n"
 				+ "		}";
+
+		String expected = STRING_CONSTANTS + "\n"
+				+ "		void assignmentsWithinSwitch(int value) {\n"
+				+ "			StringWrapper resultWrapper = new StringWrapper();\n"
+				+ "			switch (value) {\n"
+				+ "			case 0 -> resultWrapper.content = ZERO;\n"
+				+ "			case 1 -> resultWrapper.content = ONE;\n"
+				+ "			case 2 -> {\n"
+				+ "				resultWrapper = new StringWrapper();\n"
+				+ "				resultWrapper.content = TWO;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "			default -> resultWrapper.content = OTHER;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "		\n"
+				+ "		static class StringWrapper {\n"
+				+ "			String content;\n"
+				+ "		}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_ExpectAssignmentOfSwitchExpressionToQualifiedName_shouldTransform() throws Exception {
+
+		String original = STRING_CONSTANTS + "\n"
+				+ "	void assignmentsWithinSwitch(int value) {\n"
+				+ "		StringWrapper resultWrapper = new StringWrapper();\n"
+				+ "		switch (value) {\n"
+				+ "		case 0:\n"
+				+ "			resultWrapper.content = ZERO;\n"
+				+ "			break;\n"
+				+ "		case 1:\n"
+				+ "			resultWrapper.content = ONE;\n"
+				+ "			break;\n"
+				+ "		case 2:\n"
+				+ "			resultWrapper.content = TWO;\n"
+				+ "			break;\n"
+				+ "		default:\n"
+				+ "			resultWrapper.content = OTHER;\n"
+				+ "			break;\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "	\n"
+				+ "	static class StringWrapper {\n"
+				+ "		String content;\n"
+				+ "	}";
+
+		String expected = STRING_CONSTANTS + "\n"
+				+ "	void assignmentsWithinSwitch(int value) {\n"
+				+ "		StringWrapper resultWrapper = new StringWrapper();\n"
+				+ "		resultWrapper.content = switch (value) {\n"
+				+ "		case 0 -> ZERO;\n"
+				+ "		case 1 -> ONE;\n"
+				+ "		case 2 -> TWO;\n"
+				+ "		default -> OTHER;\n"
+				+ "		};\n"
+				+ "	}\n"
+				+ "	\n"
+				+ "	static class StringWrapper {\n"
+				+ "		String content;\n"
+				+ "	}";
 
 		assertChange(original, expected);
 	}
@@ -276,4 +316,407 @@ public class BugfixSim2119SwitchTest extends UsesJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
+
+	@Test
+	void visit_NoAssignmentOfSwitchExpressionToArrayAccessByLiteral_shouldTransform() throws Exception {
+		String original = STRING_CONSTANTS + "\n"
+				+ "	void assignmentsWithinSwitch(int value) {\n"
+				+ "		String[] strings = new String[3];\n"
+				+ "		switch (value) {\n"
+				+ "		case 0:\n"
+				+ "			strings[0] = ZERO;\n"
+				+ "			break;\n"
+				+ "		case 1:\n"
+				+ "			strings[0] = ONE;\n"
+				+ "			break;\n"
+				+ "		case 2:\n"
+				+ "			strings = new String[3];\n"
+				+ "			strings[0] = TWO;\n"
+				+ "			break;\n"
+				+ "		default:\n"
+				+ "			strings[0] = OTHER;\n"
+				+ "			break;\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = STRING_CONSTANTS + "\n"
+				+ "void assignmentsWithinSwitch(int value) {\n"
+				+ "		String[] strings = new String[3];\n"
+				+ "		switch (value) {\n"
+				+ "		case 0 -> strings[0] = ZERO;\n"
+				+ "		case 1 -> strings[0] = ONE;\n"
+				+ "		case 2 -> {\n"
+				+ "			strings = new String[3];\n"
+				+ "			strings[0] = TWO;\n"
+				+ "			break;\n"
+				+ "		}\n"
+				+ "		default -> strings[0] = OTHER;\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_NoAssignmentOfSwitchExpressionToArrayAccessByIndexGetter_shouldTransform() throws Exception {
+		String original = STRING_CONSTANTS + "\n"
+				+ "			void assignmentsWithinSwitch(int value) {\n"
+				+ "				String[] strings = new String[3];\n"
+				+ "				switch (value) {\n"
+				+ "				case 0:\n"
+				+ "					strings[getIndex()] = ZERO;\n"
+				+ "					break;\n"
+				+ "				case 1:\n"
+				+ "					strings[getIndex()] = ONE;\n"
+				+ "					break;\n"
+				+ "				case 2:\n"
+				+ "					strings[getIndex()] = TWO;\n"
+				+ "					break;\n"
+				+ "				default:\n"
+				+ "					strings[getIndex()] = OTHER;\n"
+				+ "					break;\n"
+				+ "				}\n"
+				+ "			}\n"
+				+ "\n"
+				+ "			int getIndex() {\n"
+				+ "				return 0;\n"
+				+ "			}";
+
+		String expected = STRING_CONSTANTS + "\n"
+				+ "			void assignmentsWithinSwitch(int value) {\n"
+				+ "				String[] strings = new String[3];\n"
+				+ "				switch (value) {\n"
+				+ "				case 0 -> strings[getIndex()] = ZERO;\n"
+				+ "				case 1 -> strings[getIndex()] = ONE;\n"
+				+ "				case 2 -> strings[getIndex()] = TWO;\n"
+				+ "				default -> strings[getIndex()] = OTHER;\n"
+				+ "				}\n"
+				+ "			}\n"
+				+ "\n"
+				+ "			int getIndex() {\n"
+				+ "				return 0;\n"
+				+ "			}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_NoAssignmentOfSwitchExpressionToElementZeroOfGetArray_shouldTransform() throws Exception {
+		String original = STRING_CONSTANTS + "\n"
+				+ "	void assignmentsWithinSwitch(int value) {\n"
+				+ "		switch (value) {\n"
+				+ "		case 0:\n"
+				+ "			getStringArray()[0] = ZERO;\n"
+				+ "			break;\n"
+				+ "		case 1:\n"
+				+ "			getStringArray()[0] = ONE;\n"
+				+ "			break;\n"
+				+ "		case 2:\n"
+				+ "			getStringArray()[0] = TWO;\n"
+				+ "			break;\n"
+				+ "		default:\n"
+				+ "			getStringArray()[0] = OTHER;\n"
+				+ "			break;\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	private String[] getStringArray() {\n"
+				+ "		return new String[3];\n"
+				+ "	}";
+
+		String expected = STRING_CONSTANTS + "\n"
+				+ "	void assignmentsWithinSwitch(int value) {\n"
+				+ "		switch (value) {\n"
+				+ "		case 0 -> getStringArray()[0] = ZERO;\n"
+				+ "		case 1 -> getStringArray()[0] = ONE;\n"
+				+ "		case 2 -> getStringArray()[0] = TWO;\n"
+				+ "		default -> getStringArray()[0] = OTHER;\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	private String[] getStringArray() {\n"
+				+ "		return new String[3];\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_ExpectAssignmentOfSwitchExpressionToArrayAccessByLiteral_shouldTransform() throws Exception {
+		String original = STRING_CONSTANTS + "\n"
+				+ "		void assignmentsWithinSwitch(int value) {\n"
+				+ "			String[] strings = new String[3];\n"
+				+ "			switch (value) {\n"
+				+ "			case 0:\n"
+				+ "				strings[0] = ZERO;\n"
+				+ "				break;\n"
+				+ "			case 1:\n"
+				+ "				strings[0] = ONE;\n"
+				+ "				break;\n"
+				+ "			case 2:\n"
+				+ "				strings[0] = TWO;\n"
+				+ "				break;\n"
+				+ "			default:\n"
+				+ "				strings[0] = OTHER;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "		}";
+
+		String expected = STRING_CONSTANTS + "\n"
+				+ "	void assignmentsWithinSwitch(int value) {\n"
+				+ "			String[] strings = new String[3];\n"
+				+ "			strings[0] = switch (value) {\n"
+				+ "			case 0 -> ZERO;\n"
+				+ "			case 1 -> ONE;\n"
+				+ "			case 2 -> TWO;\n"
+				+ "			default -> OTHER;\n"
+				+ "			};\n"
+				+ "		}";
+
+		assertChange(original, expected);
+
+	}
+
+	@Test
+	void visit_ExpectAssignmentOfSwitchExpressionToArrayAccessByVariable_shouldTransform() throws Exception {
+		String original = STRING_CONSTANTS + "\n"
+				+ "		void assignmentsWithinSwitch(int value) {\n"
+				+ "			String[] strings = new String[3];\n"
+				+ "			int i = 0;\n"
+				+ "			switch (value) {\n"
+				+ "			case 0:\n"
+				+ "				strings[i] = ZERO;\n"
+				+ "				break;\n"
+				+ "			case 1:\n"
+				+ "				strings[i] = ONE;\n"
+				+ "				break;\n"
+				+ "			case 2:\n"
+				+ "				strings[i] = TWO;\n"
+				+ "				break;\n"
+				+ "			default:\n"
+				+ "				strings[i] = OTHER;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "		}";
+
+		String expected = STRING_CONSTANTS + "\n"
+				+ "void assignmentsWithinSwitch(int value) {\n"
+				+ "			String[] strings = new String[3];\n"
+				+ "			int i = 0;\n"
+				+ "			strings[i] = switch (value) {\n"
+				+ "			case 0 -> ZERO;\n"
+				+ "			case 1 -> ONE;\n"
+				+ "			case 2 -> TWO;\n"
+				+ "			default -> OTHER;\n"
+				+ "			};\n"
+				+ "		}";
+
+		assertChange(original, expected);
+
+	}
+
+	@Test
+	void visit_ExpectAssignmentOfSwitchExpressionToThisArrayAccess_shouldTransform() throws Exception {
+		String original = STRING_CONSTANTS + "\n"
+				+ "		String[] strings = new String[3];\n"
+				+ "		void assignmentsWithinSwitch(int value) {\n"
+				+ "			int i = 0;\n"
+				+ "			switch (value) {\n"
+				+ "			case 0:\n"
+				+ "				this.strings[i] = ZERO;\n"
+				+ "				break;\n"
+				+ "			case 1:\n"
+				+ "				this.strings[i] = ONE;\n"
+				+ "				break;\n"
+				+ "			case 2:\n"
+				+ "				this.strings[i] = TWO;\n"
+				+ "				break;\n"
+				+ "			default:\n"
+				+ "				this.strings[i] = OTHER;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "		}";
+
+		String expected = STRING_CONSTANTS + "\n"
+				+ "		String[] strings = new String[3];\n"
+				+ "		void assignmentsWithinSwitch(int value) {\n"
+				+ "			int i = 0;\n"
+				+ "			this.strings[i] = switch (value) {\n"
+				+ "			case 0 -> ZERO;\n"
+				+ "			case 1 -> ONE;\n"
+				+ "			case 2 -> TWO;\n"
+				+ "			default -> OTHER;\n"
+				+ "			};\n"
+				+ "		}";
+
+		assertChange(original, expected);
+
+	}
+
+	@Test
+	void visit_ExpectAssignmentOfSwitchExpressionToSuperArrayAccess_shouldTransform() throws Exception {
+		String original = STRING_CONSTANTS + "\n"
+				+ "	static class SampleSuperArrayAccessWithinSwitch extends SuperClass{\n"
+				+ "		void assignmentsWithinSwitch(int value) {\n"
+				+ "			int i = 0;\n"
+				+ "			switch (value) {\n"
+				+ "			case 0:\n"
+				+ "				super.strings[i] = ZERO;\n"
+				+ "				break;\n"
+				+ "			case 1:\n"
+				+ "				super.strings[i] = ONE;\n"
+				+ "				break;\n"
+				+ "			case 2:\n"
+				+ "				super.strings[i] = TWO;\n"
+				+ "				break;\n"
+				+ "			default:\n"
+				+ "				super.strings[i] = OTHER;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	static class SuperClass {\n"
+				+ "		String[] strings = new String[3];\n"
+				+ "	}";
+
+		String expected = STRING_CONSTANTS + "\n"
+				+ "	static class SampleSuperArrayAccessWithinSwitch extends SuperClass{\n"
+				+ "		void assignmentsWithinSwitch(int value) {\n"
+				+ "			int i = 0;\n"
+				+ "			super.strings[i] = switch (value) {\n"
+				+ "			case 0 -> ZERO;\n"
+				+ "			case 1 -> ONE;\n"
+				+ "			case 2 -> TWO;\n"
+				+ "			default -> OTHER;\n"
+				+ "			};\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	static class SuperClass {\n"
+				+ "		String[] strings = new String[3];\n"
+				+ "	}";
+
+		assertChange(original, expected);
+
+	}
+
+	@Test
+	void visit_NoAssignmentOfSwitchExpressionToDifferentVariables_shouldTransform() throws Exception {
+		String original = STRING_CONSTANTS + "\n"
+				+ "		void assignmentsWithinSwitch(int value) {\n"
+				+ "			String s1;\n"
+				+ "			String s2;\n"
+				+ "			String s3;\n"
+				+ "			String s4;\n"
+				+ "			switch (value) {\n"
+				+ "			case 0:\n"
+				+ "				System.out.println(\"s1 = ZERO;\");\n"
+				+ "				s1 = ZERO;\n"
+				+ "				break;\n"
+				+ "			case 1:\n"
+				+ "				System.out.println(\"s2 = ONE;\");\n"
+				+ "				s2 = ONE;\n"
+				+ "				break;\n"
+				+ "			case 2:\n"
+				+ "				System.out.println(\"s3 = TWO;\");\n"
+				+ "				s3 = TWO;\n"
+				+ "				break;\n"
+				+ "			default:\n"
+				+ "				System.out.println(\"s4 = OTHER;\");\n"
+				+ "				s4 = OTHER;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "		}";
+		String expected = STRING_CONSTANTS + "\n"
+				+ "		void assignmentsWithinSwitch(int value) {\n"
+				+ "			String s1;\n"
+				+ "			String s2;\n"
+				+ "			String s3;\n"
+				+ "			String s4;\n"
+				+ "			switch (value) {\n"
+				+ "			case 0 -> {\n"
+				+ "				System.out.println(\"s1 = ZERO;\");\n"
+				+ "				s1 = ZERO;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "			case 1 -> {\n"
+				+ "				System.out.println(\"s2 = ONE;\");\n"
+				+ "				s2 = ONE;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "			case 2 -> {\n"
+				+ "				System.out.println(\"s3 = TWO;\");\n"
+				+ "				s3 = TWO;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "			default -> {\n"
+				+ "				System.out.println(\"s4 = OTHER;\");\n"
+				+ "				s4 = OTHER;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "			}\n"
+				+ "		}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_NoAssignmentOfSwitchExpressionToDifferentKindsOfExpression_shouldTransform() throws Exception {
+		String original = STRING_CONSTANTS + "\n"
+				+ "		String result;\n"
+				+ "		void assignmentsWithinSwitch(int value) {\n"
+				+ "			String result;\n"
+				+ "			switch (value) {\n"
+				+ "			case 0:\n"
+				+ "				System.out.println(\"s1 = ZERO;\");\n"
+				+ "				result = ZERO;\n"
+				+ "				break;\n"
+				+ "			case 1:\n"
+				+ "				System.out.println(\"s2 = ONE;\");\n"
+				+ "				this.result= ONE;\n"
+				+ "				break;\n"
+				+ "			case 2:\n"
+				+ "				System.out.println(\"s3 = TWO;\");\n"
+				+ "				result = TWO;\n"
+				+ "				break;\n"
+				+ "			default:\n"
+				+ "				System.out.println(\"s4 = OTHER;\");\n"
+				+ "				result = OTHER;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "		}";
+		
+		String expected = STRING_CONSTANTS + "\n"
+				+ "		String result;\n"
+				+ "		void assignmentsWithinSwitch(int value) {\n"
+				+ "			String result;\n"
+				+ "			switch (value) {\n"
+				+ "			case 0 -> {\n"
+				+ "				System.out.println(\"s1 = ZERO;\");\n"
+				+ "				result = ZERO;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "			case 1 -> {\n"
+				+ "				System.out.println(\"s2 = ONE;\");\n"
+				+ "				this.result= ONE;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "			case 2 -> {\n"
+				+ "				System.out.println(\"s3 = TWO;\");\n"
+				+ "				result = TWO;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "			default -> {\n"
+				+ "				System.out.println(\"s4 = OTHER;\");\n"
+				+ "				result = OTHER;\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "			}\n"
+				+ "		}";
+		
+		assertChange(original, expected);
+
+	}
+
 }

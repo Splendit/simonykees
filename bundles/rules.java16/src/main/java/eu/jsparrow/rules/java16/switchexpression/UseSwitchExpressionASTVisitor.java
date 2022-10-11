@@ -230,7 +230,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			.map(List::size)
 			.allMatch(size -> size == 1);
 		if (allClausesContainingAssignmentAsOnlyStatement) {
-			return SwitchExpressionAssignmentAnalyzer.isVariableWithoutSideEffect(firstAssignedVariable)
+			return VariableWithoutSideEffect.isVariableWithoutSideEffect(firstAssignedVariable)
 					&& areAllSubsequentVariablesMatching(firstAssignedVariable, subsequentAssignedVariables);
 		}
 
