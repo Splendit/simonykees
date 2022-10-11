@@ -15,7 +15,9 @@ import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -72,6 +74,8 @@ import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
  */
 public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor implements UseSwitchExpressionEvent {
 
+	private final ASTMatcher matcher = new ASTMatcher();
+
 	@Override
 	public boolean visit(SwitchStatement switchStatement) {
 		List<Statement> statements = ASTNodeUtil.convertToTypedList(switchStatement.statements(), Statement.class);
@@ -98,7 +102,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		boolean hasDefaultClause = hasDefaultClause(switchStatement);
 		if (hasDefaultClause) {
 
-			Expression variableAssignedInFirstBranch = findVariableAssignedInFirstBranch(clauses, switchStatement)
+			Expression variableAssignedInFirstBranch = findVariableAssignedInFirstBranch(clauses)
 				.orElse(null);
 
 			if (variableAssignedInFirstBranch != null) {
@@ -159,13 +163,86 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	private boolean areAllSubsequentVariablesMatching(Expression firstAssignedVariable,
 			List<Expression> subsequentAssignedVariables) {
-		ASTMatcher matcher = new ASTMatcher();
+
 		return subsequentAssignedVariables.stream()
 			.allMatch(variable -> firstAssignedVariable.subtreeMatch(matcher, variable));
 	}
 
-	protected Optional<Expression> findVariableAssignedInFirstBranch(List<? extends SwitchCaseClause> clauses,
-			Statement enclosingStatement) {
+	private boolean isThisOrSuperFieldAccess(Expression firstAssignedVariable) {
+		if (firstAssignedVariable.getNodeType() == ASTNode.SUPER_FIELD_ACCESS) {
+			return true;
+		}
+
+		if (firstAssignedVariable.getNodeType() == ASTNode.FIELD_ACCESS) {
+			FieldAccess fieldAccess = (FieldAccess) firstAssignedVariable;
+			return fieldAccess.getExpression()
+				.getNodeType() == ASTNode.THIS_EXPRESSION;
+		}
+		return false;
+	}
+
+	Optional<ASTNode> findNodeDeclaringVariable(SimpleName firstAssignedVariable, CompilationUnit compilationUnit) {
+		IBinding binding = firstAssignedVariable.resolveBinding();
+		if (binding == null) {
+			return Optional.empty();
+		}
+		if (binding.getKind() != IBinding.VARIABLE) {
+			return Optional.empty();
+		}
+		IVariableBinding variableBinding = (IVariableBinding) binding;
+		return Optional.ofNullable(compilationUnit.findDeclaringNode(variableBinding));
+	}
+
+	boolean canAssignSwitchExpression(SimpleName firstAssignedVariable,
+			List<Expression> subsequentAssignedVariables) {
+
+		ASTNode expectedDeclaringNode = findNodeDeclaringVariable(firstAssignedVariable, getCompilationUnit())
+			.orElse(null);
+		if (expectedDeclaringNode == null) {
+			return false;
+		}
+
+		for (Expression subsequentAssignedVariable : subsequentAssignedVariables) {
+			if (subsequentAssignedVariable.getNodeType() != ASTNode.SIMPLE_NAME) {
+				return false;
+			}
+			SimpleName simpleName = (SimpleName) subsequentAssignedVariable;
+			if (!matcher.match(firstAssignedVariable, simpleName)) {
+				return false;
+			}
+
+			if (expectedDeclaringNode != findNodeDeclaringVariable(simpleName, getCompilationUnit()).orElse(null)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	boolean canAssignSwitchExpression(Expression firstAssignedVariable,
+			List<Expression> subsequentAssignedVariables, List<? extends SwitchCaseClause> clauses) {
+
+		if (isThisOrSuperFieldAccess(firstAssignedVariable)) {
+			return areAllSubsequentVariablesMatching(firstAssignedVariable, subsequentAssignedVariables);
+		}
+
+		boolean allClausesContainingAssignmentAsOnlyStatement = clauses.stream()
+			.map(SwitchCaseClause::getStatements)
+			.map(List::size)
+			.allMatch(size -> size == 1);
+		if (allClausesContainingAssignmentAsOnlyStatement) {
+			return SwitchExpressionAssignmentAnalyzer.isVariableWithoutSideEffect(firstAssignedVariable)
+					&& areAllSubsequentVariablesMatching(firstAssignedVariable, subsequentAssignedVariables);
+		}
+
+		if (firstAssignedVariable.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return false;
+		}
+		SimpleName simpleName = (SimpleName) firstAssignedVariable;
+		return canAssignSwitchExpression(simpleName, subsequentAssignedVariables);
+
+	}
+
+	protected Optional<Expression> findVariableAssignedInFirstBranch(List<? extends SwitchCaseClause> clauses) {
 
 		if (hasReturnOrInternalBreak(clauses)) {
 			return Optional.empty();
@@ -176,44 +253,12 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			return Optional.empty();
 		}
 
-		Expression firstAssignedVariable = allAssignedVariables.get(0);
-
 		List<Expression> subsequentAssignedVariables = allAssignedVariables.subList(1,
 				allAssignedVariables.size());
 
-		boolean allClausesContainingExactlyOneStatement = clauses.stream()
-			.map(SwitchCaseClause::getStatements)
-			.map(List::size)
-			.allMatch(size -> size == 1);
-		if (allClausesContainingExactlyOneStatement) {
-			return Optional.of(firstAssignedVariable)
-				.filter(variable -> SwitchExpressionAssignmentAnalyzer
-					.isVariableWithoutSideEffect(firstAssignedVariable))
-				.filter(variable -> areAllSubsequentVariablesMatching(firstAssignedVariable,
-						subsequentAssignedVariables));
-		}
-		
-		if(!areAllSubsequentVariablesMatching(firstAssignedVariable, subsequentAssignedVariables)) {
-			return Optional.empty();
-		}
+		return Optional.of(allAssignedVariables.get(0))
+			.filter(variable -> canAssignSwitchExpression(variable, subsequentAssignedVariables, clauses));
 
-		ASTMatcher matcher = new ASTMatcher();
-		boolean areAllSubsequentNamesMatching = subsequentAssignedVariables.stream()
-			.allMatch(variable -> firstAssignedVariable.subtreeMatch(matcher, variable));
-		if (!areAllSubsequentNamesMatching) {
-			return Optional.empty();
-		}
-
-		for (Expression assignedVariable : allAssignedVariables) {
-			boolean supportedFieldOrVariable = SwitchExpressionAssignmentAnalyzer
-				.isSupportedFieldOrVariable(assignedVariable, enclosingStatement,
-						getCompilationUnit());
-			if (!supportedFieldOrVariable) {
-				return Optional.empty();
-			}
-		}
-
-		return Optional.of(firstAssignedVariable);
 	}
 
 	protected void replaceByReturnWithSwitch(Statement statementToReplace,
