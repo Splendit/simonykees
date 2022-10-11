@@ -157,6 +157,13 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		return assignedVariableNames;
 	}
 
+	private boolean areAllSubsequentVariablesMatching(Expression firstAssignedVariable,
+			List<Expression> subsequentAssignedVariables) {
+		ASTMatcher matcher = new ASTMatcher();
+		return subsequentAssignedVariables.stream()
+			.allMatch(variable -> firstAssignedVariable.subtreeMatch(matcher, variable));
+	}
+
 	protected Optional<Expression> findVariableAssignedInFirstBranch(List<? extends SwitchCaseClause> clauses,
 			Statement enclosingStatement) {
 
@@ -170,8 +177,26 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 
 		Expression firstAssignedVariable = allAssignedVariables.get(0);
+
 		List<Expression> subsequentAssignedVariables = allAssignedVariables.subList(1,
 				allAssignedVariables.size());
+
+		boolean allClausesContainingExactlyOneStatement = clauses.stream()
+			.map(SwitchCaseClause::getStatements)
+			.map(List::size)
+			.allMatch(size -> size == 1);
+		if (allClausesContainingExactlyOneStatement) {
+			return Optional.of(firstAssignedVariable)
+				.filter(variable -> SwitchExpressionAssignmentAnalyzer
+					.isVariableWithoutSideEffect(firstAssignedVariable))
+				.filter(variable -> areAllSubsequentVariablesMatching(firstAssignedVariable,
+						subsequentAssignedVariables));
+		}
+		
+		if(!areAllSubsequentVariablesMatching(firstAssignedVariable, subsequentAssignedVariables)) {
+			return Optional.empty();
+		}
+
 		ASTMatcher matcher = new ASTMatcher();
 		boolean areAllSubsequentNamesMatching = subsequentAssignedVariables.stream()
 			.allMatch(variable -> firstAssignedVariable.subtreeMatch(matcher, variable));
@@ -180,10 +205,10 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 
 		for (Expression assignedVariable : allAssignedVariables) {
-			boolean supportedAssignmentLeftHandSide = SwitchExpressionAssignmentAnalyzer
-				.isSupportedAssignmentLeftHandSide(assignedVariable, enclosingStatement,
+			boolean supportedFieldOrVariable = SwitchExpressionAssignmentAnalyzer
+				.isSupportedFieldOrVariable(assignedVariable, enclosingStatement,
 						getCompilationUnit());
-			if (!supportedAssignmentLeftHandSide) {
+			if (!supportedFieldOrVariable) {
 				return Optional.empty();
 			}
 		}
