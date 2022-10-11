@@ -1,6 +1,7 @@
 package eu.jsparrow.rules.java16.switchexpression;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -120,14 +121,15 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		return () -> replaceBySwitchStatement(switchStatement, switchHeaderExpression, clauses);
 	}
 
-	protected Optional<Expression> findVariableAssignedInFirstBranch(List<? extends SwitchCaseClause> clauses,
-			Statement enclosingStatement) {
+	private boolean hasReturnOrInternalBreak(List<? extends SwitchCaseClause> clauses) {
+		boolean hasInternalBreakStatement = clauses.stream()
+			.anyMatch(SwitchCaseClause::hasInternalBreakStatements);
+		if (hasInternalBreakStatement) {
+			return true;
+		}
 
 		SwitchCaseReturnStatementsVisitor returnStatementVisitor = new SwitchCaseReturnStatementsVisitor();
 		for (SwitchCaseClause clause : clauses) {
-			if (clause.hasInternalBreakStatements()) {
-				return Optional.empty();
-			}
 			boolean hasAnyReturnStatement = clause.getStatements()
 				.stream()
 				.anyMatch(statement -> {
@@ -135,30 +137,49 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 					return returnStatementVisitor.hasAnyReturnStatement();
 				});
 			if (hasAnyReturnStatement) {
-				return Optional.empty();
+				return true;
 			}
 		}
+		return false;
+	}
 
-		Expression firstAssignedVariable = clauses.stream()
-			.findFirst()
-			.flatMap(SwitchCaseClause::findAssignedVariable)
-			.orElse(null);
-		if (firstAssignedVariable == null) {
+	private List<Expression> findAssignmentLeftHandSideExpressions(List<? extends SwitchCaseClause> clauses) {
+		List<Expression> assignedVariableNames = clauses.stream()
+			.map(SwitchCaseClause::findAssignedVariable)
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.collect(Collectors.toList());
+
+		if (assignedVariableNames.size() != clauses.size()) {
+			return Collections.emptyList();
+		}
+
+		return assignedVariableNames;
+	}
+
+	protected Optional<Expression> findVariableAssignedInFirstBranch(List<? extends SwitchCaseClause> clauses,
+			Statement enclosingStatement) {
+
+		if (hasReturnOrInternalBreak(clauses)) {
 			return Optional.empty();
 		}
 
-		ASTMatcher matcher = new ASTMatcher();
-		for (SwitchCaseClause clause : clauses) {
-			Expression assignedVariable = clause.findAssignedVariable()
-				.orElse(null);
-			if (assignedVariable == null) {
-				return Optional.empty();
-			}
-			if (assignedVariable != firstAssignedVariable
-					&& !firstAssignedVariable.subtreeMatch(matcher, assignedVariable)) {
-				return Optional.empty();
-			}
+		List<Expression> allAssignedVariables = findAssignmentLeftHandSideExpressions(clauses);
+		if (allAssignedVariables.isEmpty()) {
+			return Optional.empty();
+		}
 
+		Expression firstAssignedVariable = allAssignedVariables.get(0);
+		List<Expression> subsequentAssignedVariables = allAssignedVariables.subList(1,
+				allAssignedVariables.size());
+		ASTMatcher matcher = new ASTMatcher();
+		boolean areAllSubsequentNamesMatching = subsequentAssignedVariables.stream()
+			.allMatch(variable -> firstAssignedVariable.subtreeMatch(matcher, variable));
+		if (!areAllSubsequentNamesMatching) {
+			return Optional.empty();
+		}
+
+		for (Expression assignedVariable : allAssignedVariables) {
 			boolean supportedAssignmentLeftHandSide = SwitchExpressionAssignmentAnalyzer
 				.isSupportedAssignmentLeftHandSide(assignedVariable, enclosingStatement,
 						getCompilationUnit());
