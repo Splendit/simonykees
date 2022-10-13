@@ -103,11 +103,11 @@ public class UseSwitchExpressionASTVisitor extends AbstractReplaceBySwitchASTVis
 
 		boolean hasDefaultClause = containsDefaultClause(clauses);
 		if (hasDefaultClause) {
-			Expression variableToAssignedInSwitchExpression = findVariableAssignedInFirstBranch(clauses)
+			Expression variableToAssignSwitchExpression = findVariableToAssignSwitchExpression(clauses)
 				.orElse(null);
 
-			if (variableToAssignedInSwitchExpression != null) {
-				VariableDeclarationFragment fragment = findDeclaringFragment(variableToAssignedInSwitchExpression,
+			if (variableToAssignSwitchExpression != null) {
+				VariableDeclarationFragment fragment = findDeclaringFragment(variableToAssignSwitchExpression,
 						statementToReplace)
 							.orElse(null);
 
@@ -116,7 +116,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractReplaceBySwitchASTVis
 							fragment);
 				}
 
-				return () -> replaceByAssignmentWithSwitch(variableToAssignedInSwitchExpression, statementToReplace,
+				return () -> replaceByAssignmentWithSwitch(variableToAssignSwitchExpression, statementToReplace,
 						switchHeaderExpression, clauses);
 			}
 
@@ -244,7 +244,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractReplaceBySwitchASTVis
 
 	}
 
-	protected Optional<Expression> findVariableAssignedInFirstBranch(List<? extends SwitchCaseClause> clauses) {
+	protected Optional<Expression> findVariableToAssignSwitchExpression(List<? extends SwitchCaseClause> clauses) {
 
 		if (hasReturnOrInternalBreak(clauses)) {
 			return Optional.empty();

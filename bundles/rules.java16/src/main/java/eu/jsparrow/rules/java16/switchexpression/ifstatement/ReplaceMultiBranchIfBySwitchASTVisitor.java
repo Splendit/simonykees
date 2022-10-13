@@ -218,11 +218,11 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 
 		boolean hasDefaultClause = containsDefaultClause(clauses);
 		if (hasDefaultClause) {
-			Expression variableToAssignedInSwitchExpression = findVariableAssignedInFirstBranch(clauses)
+			Expression variableToAssignSwitchExpression = findVariableToAssignSwitchExpression(clauses)
 				.orElse(null);
 
-			if (variableToAssignedInSwitchExpression != null) {
-				VariableDeclarationFragment fragment = findDeclaringFragment(variableToAssignedInSwitchExpression,
+			if (variableToAssignSwitchExpression != null) {
+				VariableDeclarationFragment fragment = findDeclaringFragment(variableToAssignSwitchExpression,
 						statementToReplace)
 							.orElse(null);
 
@@ -231,7 +231,7 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 							fragment);
 				}
 
-				return () -> replaceByAssignmentWithSwitch(variableToAssignedInSwitchExpression, statementToReplace,
+				return () -> replaceByAssignmentWithSwitch(variableToAssignSwitchExpression, statementToReplace,
 						switchHeaderExpression, clauses);
 			}
 
