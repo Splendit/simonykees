@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.YieldStatement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
@@ -72,7 +71,8 @@ import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
  * @since 4.3.0
  *
  */
-public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor implements UseSwitchExpressionEvent {
+public class UseSwitchExpressionASTVisitor extends AbstractReplaceBySwitchASTVisitor
+		implements UseSwitchExpressionEvent {
 
 	private final ASTMatcher matcher = new ASTMatcher();
 
@@ -88,7 +88,8 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 
 		List<SwitchCaseClause> clauses = createClauses(switchCaseBucks);
-		Runnable lambdaForRefactoring = createLambdaForRefactoring(switchStatement, clauses);
+		Expression switchHeaderExpression = switchStatement.getExpression();
+		Runnable lambdaForRefactoring = createLambdaForRefactoring(switchStatement, switchHeaderExpression, clauses);
 		lambdaForRefactoring.run();
 		addMarkerEvent(switchStatement);
 		onRewrite();
@@ -97,32 +98,33 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		return true;
 	}
 
-	private Runnable createLambdaForRefactoring(SwitchStatement switchStatement, List<SwitchCaseClause> clauses) {
-		Expression switchHeaderExpression = switchStatement.getExpression();
-		boolean hasDefaultClause = hasDefaultClause(switchStatement);
-		if (hasDefaultClause) {
+	private Runnable createLambdaForRefactoring(Statement statementToReplace, Expression switchHeaderExpression,
+			List<? extends SwitchCaseClause> clauses) {
 
-			Expression variableAssignedInFirstBranch = findVariableAssignedInFirstBranch(clauses)
+		boolean hasDefaultClause = containsDefaultClause(clauses);
+		if (hasDefaultClause) {
+			Expression variableToAssignedInSwitchExpression = findVariableAssignedInFirstBranch(clauses)
 				.orElse(null);
 
-			if (variableAssignedInFirstBranch != null) {
-				VariableDeclarationFragment fragment = findDeclaringFragment(variableAssignedInFirstBranch,
-						switchStatement)
+			if (variableToAssignedInSwitchExpression != null) {
+				VariableDeclarationFragment fragment = findDeclaringFragment(variableToAssignedInSwitchExpression,
+						statementToReplace)
 							.orElse(null);
 
 				if (fragment != null) {
-					return () -> replaceByInitializationWithSwitch(switchStatement, switchHeaderExpression, clauses,
+					return () -> replaceByInitializationWithSwitch(statementToReplace, switchHeaderExpression, clauses,
 							fragment);
 				}
-				return () -> replaceByAssignmentWithSwitch(variableAssignedInFirstBranch, switchStatement,
+
+				return () -> replaceByAssignmentWithSwitch(variableToAssignedInSwitchExpression, statementToReplace,
 						switchHeaderExpression, clauses);
 			}
 
 			if (areReturningValue(clauses)) {
-				return () -> replaceByReturnWithSwitch(switchStatement, switchHeaderExpression, clauses);
+				return () -> replaceByReturnWithSwitch(statementToReplace, switchHeaderExpression, clauses);
 			}
 		}
-		return () -> replaceBySwitchStatement(switchStatement, switchHeaderExpression, clauses);
+		return () -> replaceBySwitchStatement(statementToReplace, switchHeaderExpression, clauses);
 	}
 
 	private boolean hasReturnOrInternalBreak(List<? extends SwitchCaseClause> clauses) {
@@ -300,13 +302,6 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		SwitchExpression newSwitchExpression = createSwitchWithYieldValue(ast, switchHeaderExpression, clauses);
 		astRewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, newSwitchExpression, null);
 		astRewrite.remove(statementToReplace, null);
-	}
-
-	private boolean hasDefaultClause(SwitchStatement switchStatement) {
-		List<Statement> statements = ASTNodeUtil.convertToTypedList(switchStatement.statements(), Statement.class);
-		List<SwitchCase> switchCaseStatements = filterSwitchCaseStatements(statements);
-		return switchCaseStatements.stream()
-			.anyMatch(SwitchCase::isDefault);
 	}
 
 	protected Optional<VariableDeclarationFragment> findDeclaringFragment(Expression assigned, Statement statement) {

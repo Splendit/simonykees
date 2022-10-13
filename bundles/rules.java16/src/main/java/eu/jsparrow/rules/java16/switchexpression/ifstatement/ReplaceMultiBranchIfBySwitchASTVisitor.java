@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.java16.switchexpression.LabeledBreakStatementsVisitor;
 import eu.jsparrow.rules.java16.switchexpression.SwitchCaseBreakStatementsVisitor;
+import eu.jsparrow.rules.java16.switchexpression.SwitchCaseClause;
 import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionASTVisitor;
 
 /**
@@ -212,38 +213,32 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 		return false;
 	}
 
-	private Runnable createTransformingLambda(IfStatement ifStatement, SimpleName switchHeaderExpression,
-			List<IfBranch> ifBranches) {
+	private Runnable createTransformingLambda(Statement statementToReplace, SimpleName switchHeaderExpression,
+			List<? extends SwitchCaseClause> clauses) {
 
-		if (isMultiBranchIfEndingWithElse(ifBranches)) {
-			Expression variableAssignedByFirstBranch = findVariableAssignedInFirstBranch(ifBranches)
+		boolean hasDefaultClause = containsDefaultClause(clauses);
+		if (hasDefaultClause) {
+			Expression variableToAssignedInSwitchExpression = findVariableAssignedInFirstBranch(clauses)
 				.orElse(null);
 
-			if (variableAssignedByFirstBranch != null) {
-				VariableDeclarationFragment fragment = findDeclaringFragment(variableAssignedByFirstBranch,
-						ifStatement)
+			if (variableToAssignedInSwitchExpression != null) {
+				VariableDeclarationFragment fragment = findDeclaringFragment(variableToAssignedInSwitchExpression,
+						statementToReplace)
 							.orElse(null);
 
 				if (fragment != null) {
-					return () -> replaceByInitializationWithSwitch(ifStatement, switchHeaderExpression, ifBranches,
+					return () -> replaceByInitializationWithSwitch(statementToReplace, switchHeaderExpression, clauses,
 							fragment);
 				}
 
-				return () -> replaceByAssignmentWithSwitch(variableAssignedByFirstBranch, ifStatement,
-						switchHeaderExpression, ifBranches);
+				return () -> replaceByAssignmentWithSwitch(variableToAssignedInSwitchExpression, statementToReplace,
+						switchHeaderExpression, clauses);
 			}
 
-			if (areReturningValue(ifBranches)) {
-				return () -> replaceByReturnWithSwitch(ifStatement, switchHeaderExpression, ifBranches);
+			if (areReturningValue(clauses)) {
+				return () -> replaceByReturnWithSwitch(statementToReplace, switchHeaderExpression, clauses);
 			}
 		}
-		return () -> replaceBySwitchStatement(ifStatement, switchHeaderExpression, ifBranches);
-	}
-
-	private boolean isMultiBranchIfEndingWithElse(List<IfBranch> ifBranches) {
-		int lastBranchIndex = ifBranches.size() - 1;
-		IfBranch lastBranch = ifBranches.get(lastBranchIndex);
-		return lastBranch.getExpressions()
-			.isEmpty();
+		return () -> replaceBySwitchStatement(statementToReplace, switchHeaderExpression, clauses);
 	}
 }
