@@ -13,12 +13,10 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.rules.java16.switchexpression.AbstractReplaceBySwitchASTVisitor;
 import eu.jsparrow.rules.java16.switchexpression.LabeledBreakStatementsVisitor;
 import eu.jsparrow.rules.java16.switchexpression.SwitchCaseBreakStatementsVisitor;
-import eu.jsparrow.rules.java16.switchexpression.SwitchCaseClause;
-import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionASTVisitor;
 
 /**
  * A visitor for replacing {@link IfStatement}s by {@link SwitchExpression}s or
@@ -53,7 +51,7 @@ import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionASTVisitor;
  * @since 4.13.0
  *
  */
-public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionASTVisitor
+public class ReplaceMultiBranchIfBySwitchASTVisitor extends AbstractReplaceBySwitchASTVisitor
 		implements ReplaceMultiBranchIfBySwitchEvent {
 
 	@Override
@@ -98,7 +96,8 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 			return Optional.empty();
 		}
 
-		Runnable transformingLambda = createTransformingLambda(ifStatement, expectedSwitchHeaderExpression, ifBranches);
+		Runnable transformingLambda = createLambdaForRefactoring(ifStatement, expectedSwitchHeaderExpression,
+				ifBranches);
 		return Optional.of(transformingLambda);
 	}
 
@@ -211,34 +210,5 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 			}
 		}
 		return false;
-	}
-
-	private Runnable createTransformingLambda(Statement statementToReplace, SimpleName switchHeaderExpression,
-			List<? extends SwitchCaseClause> clauses) {
-
-		boolean hasDefaultClause = containsDefaultClause(clauses);
-		if (hasDefaultClause) {
-			Expression variableToAssignSwitchExpression = findVariableToAssignSwitchExpression(clauses)
-				.orElse(null);
-
-			if (variableToAssignSwitchExpression != null) {
-				VariableDeclarationFragment fragment = findDeclaringFragment(variableToAssignSwitchExpression,
-						statementToReplace)
-							.orElse(null);
-
-				if (fragment != null) {
-					return () -> replaceByInitializationWithSwitch(statementToReplace, switchHeaderExpression, clauses,
-							fragment);
-				}
-
-				return () -> replaceByAssignmentWithSwitch(variableToAssignSwitchExpression, statementToReplace,
-						switchHeaderExpression, clauses);
-			}
-
-			if (areReturningValue(clauses)) {
-				return () -> replaceByReturnWithSwitch(statementToReplace, switchHeaderExpression, clauses);
-			}
-		}
-		return () -> replaceBySwitchStatement(statementToReplace, switchHeaderExpression, clauses);
 	}
 }
