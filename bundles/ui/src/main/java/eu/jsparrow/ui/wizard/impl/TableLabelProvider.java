@@ -27,27 +27,41 @@ import eu.jsparrow.ui.util.LicenseUtil;
  *
  */
 public class TableLabelProvider extends BaseLabelProvider implements ITableLabelProvider {
-
-	private Image greenFreeRuleImage;
 	private Image tickmarkGreenIconImage;
-	private static final String F_GREEN_ICON_PATH = "icons/f-icon-green-14px.png"; //$NON-NLS-1$
+	private Image greenFreeRuleImage;
+	private Image tickmarkLockedRuleImage;
+	private Image lockedRuleImage;
+	private static final String ICON_CHECK = "icons/icon-check.png"; //$NON-NLS-1$
+	private static final String ICON_LOCK = "icons/icon-lock.png"; //$NON-NLS-1$
 
 	public TableLabelProvider() {
 		Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
 
-		IPath iPathTickMarkGreen = new Path(F_GREEN_ICON_PATH);
+		IPath iPathTickMarkGreen = new Path(ICON_CHECK);
 		URL urlTickMarkGreen = FileLocator.find(bundle, iPathTickMarkGreen, new HashMap<>());
 		ImageDescriptor imageDescTickMarkGreen = ImageDescriptor.createFromURL(urlTickMarkGreen);
 		tickmarkGreenIconImage = imageDescTickMarkGreen.createImage();
 		ImageData imageDataTickmarkGreen = tickmarkGreenIconImage.getImageData();
 		greenFreeRuleImage = new Image(Display.getCurrent(), imageDataTickmarkGreen);
+
+		IPath iPathIconLock = new Path(ICON_LOCK);
+		URL urlIconLock = FileLocator.find(bundle, iPathIconLock, new HashMap<>());
+		ImageDescriptor imageDescLockIcon = ImageDescriptor.createFromURL(urlIconLock);
+		tickmarkLockedRuleImage = imageDescLockIcon.createImage();
+		ImageData imageDataIconLock = tickmarkLockedRuleImage.getImageData();
+		lockedRuleImage = new Image(Display.getCurrent(), imageDataIconLock);
 	}
 
 	@Override
 	public Image getColumnImage(Object element, int columnIndex) {
 		RefactoringRule rule = (RefactoringRule) element;
-		if (rule.isFree() && LicenseUtil.get().isFreeLicense()) {
-			return greenFreeRuleImage;
+		boolean freeLicense = LicenseUtil.get()
+			.isFreeLicense();
+		if (freeLicense) {
+			if (rule.isFree()) {
+				return greenFreeRuleImage;
+			}
+			return lockedRuleImage;
 		} else {
 			return null;
 		}
@@ -68,11 +82,12 @@ public class TableLabelProvider extends BaseLabelProvider implements ITableLabel
 		}
 
 	}
-	
+
 	@Override
 	public void dispose() {
 		greenFreeRuleImage.dispose();
 		tickmarkGreenIconImage.dispose();
+		lockedRuleImage.dispose();
+		tickmarkLockedRuleImage.dispose();
 	}
-
 }
