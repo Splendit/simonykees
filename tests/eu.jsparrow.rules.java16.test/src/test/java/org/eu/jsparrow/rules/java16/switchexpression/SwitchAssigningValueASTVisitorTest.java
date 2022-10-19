@@ -163,6 +163,33 @@ class SwitchAssigningValueASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
+	void visit_initializerIsSimpleName_shouldTransform() throws Exception {
+		String original = ""
+				+ "String s = \"\";\n"
+				+ "int digit = 0;\n"
+				+ "String value = s;\n"
+				+ "switch (digit) {\n"
+				+ "case 1:\n"
+				+ "	value = \"one\";\n"
+				+ "	break;\n"
+				+ "case 2:\n"
+				+ "	value = \"two\";\n"
+				+ "	break;\n"
+				+ "default:\n"
+				+ "	value = \"other\";\n"
+				+ "}";
+		String expected = ""
+				+ "String s = \"\";\n"
+				+ "int digit = 0;\n"
+				+ "String value = switch (digit) {\n"
+				+ "case 1 -> \"one\";\n"
+				+ "case 2 -> \"two\";\n"
+				+ "default -> \"other\";\n"
+				+ "};";
+		assertChange(original, expected);
+	}
+
+	@Test
 	void visit_noInitializer_shouldTransform() throws Exception {
 		String original = ""
 				+ "int digit = 0;\n"
@@ -431,4 +458,82 @@ class SwitchAssigningValueASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
+
+	@Test
+	void visit_expectSwitchExpressionAssignedToFieldAccess_shouldTransform()
+			throws Exception {
+
+		String original = ""
+				+ "	class SampleReassignment6Switch {\n"
+				+ "		String result;\n"
+				+ "		void expectSwitchExpressionAssignedToFieldAccess(int value) {\n"
+				+ "			switch (value) {\n"
+				+ "			case (0):\n"
+				+ "				this.result = \"ZERO\";\n"
+				+ "				break;\n"
+				+ "			case (1):\n"
+				+ "				this.result = \"ONE\";\n"
+				+ "				break;\n"
+				+ "			case (2):\n"
+				+ "				this.result = \"TWO\";\n"
+				+ "				break;\n"
+				+ "			default:\n"
+				+ "				this.result = \"OTHER\";\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = ""
+				+ "	class SampleReassignment6Switch {\n"
+				+ "		String result;\n"
+				+ "		void expectSwitchExpressionAssignedToFieldAccess(int value) {\n"
+				+ "			this.result = switch (value) {\n"
+				+ "			case 0 -> \"ZERO\";\n"
+				+ "			case 1 -> \"ONE\";\n"
+				+ "			case 2 -> \"TWO\";\n"
+				+ "			default -> \"OTHER\";\n"
+				+ "			};\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_expectAssignmentWithSwitchExpressionToFormalParameter_shouldTransform() throws Exception {
+		String original = ""
+				+ "	class SampleReassignment8Switch {\n"
+				+ "		void expectSwitchExpressionAssignedToFormalParameter(int value, String result) {\n"
+				+ "			switch (value) {\n"
+				+ "			case (0):\n"
+				+ "				result = \"ZERO\";\n"
+				+ "				break;\n"
+				+ "			case (1):\n"
+				+ "				result = \"ONE\";\n"
+				+ "				break;\n"
+				+ "			case (2):\n"
+				+ "				result = \"TWO\";\n"
+				+ "				break;\n"
+				+ "			default:\n"
+				+ "				result = \"ZERO\";\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = ""
+				+ "	class SampleReassignment8Switch {\n"
+				+ "		void expectSwitchExpressionAssignedToFormalParameter(int value, String result) {\n"
+				+ "			result = switch (value) {\n"
+				+ "			case 0 -> \"ZERO\";\n"
+				+ "			case 1 -> \"ONE\";\n"
+				+ "			case 2 -> \"TWO\";\n"
+				+ "			default -> \"ZERO\";\n"
+				+ "			};\n"
+				+ "		}\n"
+				+ "	}";
+		assertChange(original, expected);
+	}
+
 }
