@@ -85,14 +85,14 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 		if (element instanceof RefactoringRule) {
 
 			RefactoringRule rule = (RefactoringRule) element;
-			if (freeLicense && (!activeRegistration || !rule.isFree())) {
-				return lockedRuleImage;
-			}
-
 			if (!rule.isEnabled()) {
 				// info icon that rule is disabled, explanation appears in
 				// description text when rule is clicked
 				return JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_INFO);
+			}
+
+			if (freeLicense && (!activeRegistration || !rule.isFree())) {
+				return lockedRuleImage;
 			}
 
 			return greenFreeRuleImage;

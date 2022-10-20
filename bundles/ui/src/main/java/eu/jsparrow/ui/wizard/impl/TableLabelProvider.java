@@ -31,6 +31,10 @@ public class TableLabelProvider extends BaseLabelProvider implements ITableLabel
 	private Image greenFreeRuleImage;
 	private Image tickmarkLockedRuleImage;
 	private Image lockedRuleImage;
+
+	private boolean freeLicense;
+	private boolean activeRegistration;
+
 	private static final String ICON_CHECK = "icons/icon-check.png"; //$NON-NLS-1$
 	private static final String ICON_LOCK = "icons/icon-lock.png"; //$NON-NLS-1$
 
@@ -50,21 +54,24 @@ public class TableLabelProvider extends BaseLabelProvider implements ITableLabel
 		tickmarkLockedRuleImage = imageDescLockIcon.createImage();
 		ImageData imageDataIconLock = tickmarkLockedRuleImage.getImageData();
 		lockedRuleImage = new Image(Display.getCurrent(), imageDataIconLock);
+
+		LicenseUtil licenseUtil = LicenseUtil.get();
+		freeLicense = licenseUtil.isFreeLicense();
+		activeRegistration = licenseUtil.isActiveRegistration();
 	}
 
 	@Override
 	public Image getColumnImage(Object element, int columnIndex) {
-		RefactoringRule rule = (RefactoringRule) element;
-		boolean freeLicense = LicenseUtil.get()
-			.isFreeLicense();
-		if (freeLicense) {
-			if (rule.isFree()) {
-				return greenFreeRuleImage;
+		if (element instanceof RefactoringRule) {
+			RefactoringRule rule = (RefactoringRule) element;
+
+			if (freeLicense && (!activeRegistration || !rule.isFree())) {
+				return lockedRuleImage;
 			}
-			return lockedRuleImage;
-		} else {
-			return null;
+
+			return greenFreeRuleImage;
 		}
+		return null;
 	}
 
 	@Override

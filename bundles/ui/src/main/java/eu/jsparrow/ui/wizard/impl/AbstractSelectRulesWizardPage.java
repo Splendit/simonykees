@@ -48,6 +48,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.dialog.LockedRuleSelectionDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -219,15 +220,18 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			}
 		});
 
+		boolean freeLicense = licenseUtil.isFreeLicense();
+		boolean activeRegistration = licenseUtil.isActiveRegistration();
 		addButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection());
+				addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection(), freeLicense, activeRegistration);
 			}
 		});
 
-		leftTreeViewer.addDoubleClickListener((DoubleClickEvent event) -> controler
-			.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection()));
+		leftTreeViewer.addDoubleClickListener(
+				(DoubleClickEvent event) -> addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection(),
+						freeLicense, activeRegistration));
 
 		rightTableViewer.addSelectionChangedListener((SelectionChangedEvent event) -> {
 			latestSelectionSide = SelectionSide.RIGHT;
@@ -690,6 +694,28 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	protected Button getRemoveAllButton() {
 		return removeAllButton;
+	}
+
+	private void addButtonClicked(IStructuredSelection structuredSecection, boolean freeLicense,
+			boolean activeRegistration) {
+
+		controler.addButtonClicked(structuredSecection);
+		if (freeLicense) {
+			@SuppressWarnings("unchecked")
+			List<RefactoringRule> list = structuredSecection.toList();
+
+			boolean showLockedRuleSelectionDialog = list
+				.stream()
+				.filter(RefactoringRule::isEnabled)
+				.anyMatch(rule -> !activeRegistration || !rule.isFree());
+
+			if (showLockedRuleSelectionDialog) {
+				LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), activeRegistration);
+				dialog.open();
+				// updateData();
+				
+			}
+		}
 	}
 
 	private enum SelectionSide {
