@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.ui
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow UI
 Bundle-SymbolicName: eu.jsparrow.ui;singleton:=true
-Bundle-Version: 4.13.0.qualifier
+Bundle-Version: 4.13.1.qualifier
 Bundle-Activator: eu.jsparrow.ui.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
