@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.rules.api.test
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow :: test rules api
 Bundle-SymbolicName: eu.jsparrow.rules.api.test
-Bundle-Version: 4.13.0.qualifier
+Bundle-Version: 4.13.1.qualifier
 Fragment-Host: eu.jsparrow.rules.api
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: eu.jsparrow.logging,
