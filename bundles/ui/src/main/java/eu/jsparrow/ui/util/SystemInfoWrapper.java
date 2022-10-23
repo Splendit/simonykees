@@ -5,12 +5,14 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
+import oshi.hardware.CentralProcessor.ProcessorIdentifier;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.UsbDevice;
@@ -80,7 +82,7 @@ public class SystemInfoWrapper {
 	 */
 	private List<String> findAllUsbSerialNumbers() {
 
-		UsbDevice[] usbDevices = hardwareAbstractionLayer.getUsbDevices(false);
+		List<UsbDevice> usbDevices = hardwareAbstractionLayer.getUsbDevices(false);
 		List<String> usbSerialNumbers = new ArrayList<>();
 		for (UsbDevice usbDevice : usbDevices) {
 			String deviceSerialNumber = usbDevice.getSerialNumber();
@@ -99,7 +101,7 @@ public class SystemInfoWrapper {
 	 */
 	private List<String> findAllDiskSerialNumbers() {
 
-		HWDiskStore[] diskStores = hardwareAbstractionLayer.getDiskStores();
+		List<HWDiskStore> diskStores = hardwareAbstractionLayer.getDiskStores();
 
 		List<String> diskSerialNumbers = new ArrayList<>();
 
@@ -121,7 +123,9 @@ public class SystemInfoWrapper {
 	 */
 	private String findProcessorId() {
 		CentralProcessor processor = hardwareAbstractionLayer.getProcessor();
-		return processor.getProcessorID();
+		return Optional.ofNullable(processor.getProcessorIdentifier())
+				.map(ProcessorIdentifier::getProcessorID)
+				.orElse(""); //$NON-NLS-1$
 	}
 
 	/**
