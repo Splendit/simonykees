@@ -63,6 +63,10 @@ import eu.jsparrow.ui.util.LicenseUtil;
 @SuppressWarnings("restriction") // StatusInfo is internal
 public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
+	private static final String BENEFIT_FROM_ALL_ADVANTAGES = " now and benefit from all advantages of jSparrow.";
+	private static final String UPGRADE_YOUR_LICENSE = "upgrade your license";
+	private static final String TO_UNLOCK_RULES = "To unlock this and many other rules, ";
+
 	private static class SelectedRule {
 		private SelectedRule() {
 
@@ -71,6 +75,16 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		static int start = 0;
 		static int end = 0;
 		static String link = ""; //$NON-NLS-1$
+	}
+
+	private static class UpgradeLicense {
+		private UpgradeLicense() {
+
+		}
+
+		static int start = 0;
+		static int end = 0;
+		static final String LINK = "https://jsparrow.io/pricing/"; //$NON-NLS-1$
 	}
 
 	protected AbstractSelectRulesWizardModel model;
@@ -388,6 +402,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			}
 			if (offset != -1 && SelectedRule.start < offset && offset < SelectedRule.end) {
 				Program.launch(SelectedRule.link);
+			} else if (offset != -1 && UpgradeLicense.start < offset && offset < UpgradeLicense.end) {
+				Program.launch(UpgradeLicense.LINK);
 			}
 		});
 	}
@@ -532,9 +548,35 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			style.data = SelectedRule.link;
 		};
 
+		Consumer<StyleRange> updateLicenseConfig = style -> {
+			style.underline = true;
+			style.underlineStyle = SWT.UNDERLINE_LINK;
+			style.data = UpgradeLicense.LINK;
+		};
+
+		boolean freeLicense = licenseUtil.isFreeLicense();
+		boolean unlockRulesSuggestion;
+		if (freeLicense) {
+			unlockRulesSuggestion = !rule.isFree() || !licenseUtil.isActiveRegistration();
+		} else {
+			unlockRulesSuggestion = false;
+		}
+
 		List<StyleContainer> descriptionList = new ArrayList<>();
 		descriptionList.add(new StyleContainer(name, h1));
 		descriptionList.add(new StyleContainer(lineDelimiter));
+
+		if (unlockRulesSuggestion) {
+
+			descriptionList.add(new StyleContainer(lineDelimiter));
+			descriptionList.add(new StyleContainer(TO_UNLOCK_RULES));
+			descriptionList.add(new StyleContainer(UPGRADE_YOUR_LICENSE, blue.andThen(updateLicenseConfig)));
+			descriptionList.add(new StyleContainer(BENEFIT_FROM_ALL_ADVANTAGES));
+			descriptionList.add(new StyleContainer(lineDelimiter));
+			descriptionList.add(new StyleContainer(lineDelimiter));
+
+		}
+
 		descriptionList.add(new StyleContainer(documentationLabel, blue.andThen(documentationConfig)));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(lineDelimiter));
@@ -543,6 +585,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(requirementsLabel, bold));
 		descriptionList.add(new StyleContainer(lineDelimiter));
+		
 		descriptionList.add(new StyleContainer(minJavaVersionLabel, h2));
 		descriptionList.add(new StyleContainer(minJavaVersionValue, bold.andThen(red), !rule.isSatisfiedJavaVersion()));
 		descriptionList.add(new StyleContainer(lineDelimiter));
@@ -563,6 +606,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		descriptionStyledText.setText(descriptionText);
 
 		int offset = 0;
+		UpgradeLicense.start = -1;
+		UpgradeLicense.end = -1;
 		for (StyleContainer iterator : descriptionList) {
 			if (!lineDelimiter.equals(iterator.getValue()) && iterator.isEnabled()) {
 				descriptionStyledText.setStyleRange(iterator.generateStyle(offset));
@@ -571,15 +616,37 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 					SelectedRule.end = offset + iterator.getValue()
 						.length();
 				}
+				if (unlockRulesSuggestion && UPGRADE_YOUR_LICENSE.equals(iterator.getValue())) {
+					UpgradeLicense.start = offset;
+					UpgradeLicense.end = offset + iterator.getValue()
+						.length();
+				}
 			}
 			offset += iterator.getValue()
 				.length();
 		}
+		
+		
 
 		int requirementsBulletingStartLine = descriptionStyledText
-			.getLineAtOffset(name.length() + lineDelimiter.length() + documentationLabel.length()
-					+ 2 * lineDelimiter.length() + description.length() + 2 * lineDelimiter.length()
-					+ requirementsLabel.length() + lineDelimiter.length());
+			.getLineAtOffset(
+					name.length() +
+							lineDelimiter.length() +
+							(unlockRulesSuggestion
+									? lineDelimiter.length() +
+											TO_UNLOCK_RULES.length() +
+											UPGRADE_YOUR_LICENSE.length() +
+											BENEFIT_FROM_ALL_ADVANTAGES.length() +
+											lineDelimiter.length() +
+											lineDelimiter.length()
+									: 0)
+							+
+							documentationLabel.length() +
+							2 * lineDelimiter.length() +
+							description.length() +
+							2 * lineDelimiter.length() +
+							requirementsLabel.length() +
+							lineDelimiter.length());
 
 		StyleRange bulletPointStyle = new StyleRange();
 		bulletPointStyle.metrics = new GlyphMetrics(0, 0, 40);
@@ -713,7 +780,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), activeRegistration);
 				dialog.open();
 				// updateData();
-				
+
 			}
 		}
 	}
