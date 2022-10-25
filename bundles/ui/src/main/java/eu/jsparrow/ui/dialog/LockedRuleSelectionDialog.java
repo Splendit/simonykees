@@ -2,6 +2,7 @@ package eu.jsparrow.ui.dialog;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -20,6 +21,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
@@ -35,7 +37,8 @@ public class LockedRuleSelectionDialog extends Dialog {
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private final boolean activeRegistration;
 
-	public LockedRuleSelectionDialog(Shell parentShell, boolean activeRegistration) {
+	public LockedRuleSelectionDialog(Shell parentShell, boolean activeRegistration,
+			List<RefactoringRule> selectedRules) {
 		super(parentShell);
 		this.activeRegistration = activeRegistration;
 	}
@@ -51,11 +54,11 @@ public class LockedRuleSelectionDialog extends Dialog {
 
 		if (!activeRegistration) {
 			Label titleLabel = new Label(area, SWT.NONE);
-			titleLabel.setText(Messages.SuggestRegistrationDialog_noFreemiumLiceseWarning);
+			titleLabel.setText("Unlock some of the selected rules by registration for a free trial.");
 
 			Label descriptionLabel = new Label(area, SWT.NONE);
-			descriptionLabel.setText("Registration for a free trial will unlock 20 of our most liked rules!"); 
-			
+			descriptionLabel.setText("Registration for a free trial will unlock 20 of our most liked rules!");
+
 			Button registerForFreeButton = new Button(area, SWT.PUSH);
 			registerForFreeButton.setText(Messages.SimonykeesPreferencePageLicense_register_for_free_jsparrow_trial);
 			registerForFreeButton.setFont(composite.getFont());
@@ -63,16 +66,14 @@ public class LockedRuleSelectionDialog extends Dialog {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
 					registerButtonPressed();
-//					RegistrationDialog dialog = new RegistrationDialog(getShell());
-//					dialog.create();
-//					dialog.open();
 				}
 			});
 		}
 
 		Link jSparrowLink = new Link(area, SWT.NONE);
 		jSparrowLink.setFont(composite.getFont());
-		jSparrowLink.setText("To unlock all the rules <a href=\"https://jsparrow.io/pricing/\">visit us</a> and upgrade your license.");
+		jSparrowLink.setText(
+				"To unlock all the rules <a href=\"https://jsparrow.io/pricing/\">visit us</a> and upgrade your license.");
 		jSparrowLink.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -93,25 +94,13 @@ public class LockedRuleSelectionDialog extends Dialog {
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText("Unlock selected rules"); 
+		shell.setText("Unlock selected rules");
 	}
 
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-//		if (!activeRegistration) {
-//			createButton(parent, 7, Messages.SuggestRegistrationDialog_registerButtonText, true);
-//		}
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
-
-//	@Override
-//	protected void buttonPressed(int buttonId) {
-//		if (buttonId == 7) {
-//			registerButtonPressed();
-//		} else {
-//			super.buttonPressed(buttonId);
-//		}
-//	}
 
 	private void registerButtonPressed() {
 		licenseUtil.setShouldContinueWithSelectRules(false);

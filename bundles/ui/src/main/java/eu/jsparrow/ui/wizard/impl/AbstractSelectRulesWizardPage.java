@@ -3,6 +3,7 @@ package eu.jsparrow.ui.wizard.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IStatus;
@@ -196,18 +197,17 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			}
 		});
 
-		boolean freeLicense = licenseUtil.isFreeLicense();
-		boolean activeRegistration = licenseUtil.isActiveRegistration();
+		// boolean freeLicense = licenseUtil.isFreeLicense();
+		// boolean activeRegistration = licenseUtil.isActiveRegistration();
 		addButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection(), freeLicense, activeRegistration);
+				addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection());
 			}
 		});
 
 		leftTreeViewer.addDoubleClickListener(
-				(DoubleClickEvent event) -> addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection(),
-						freeLicense, activeRegistration));
+				(DoubleClickEvent event) -> addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection()));
 
 		rightTableViewer.addSelectionChangedListener((SelectionChangedEvent event) -> {
 			latestSelectionSide = SelectionSide.RIGHT;
@@ -241,6 +241,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				controler.addAllButtonClicked();
+				afterAddClicked();
 			}
 		});
 
@@ -518,21 +519,38 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		return removeAllButton;
 	}
 
-	private void addButtonClicked(IStructuredSelection structuredSecection, boolean freeLicense,
-			boolean activeRegistration) {
+	private void addButtonClicked(IStructuredSelection structuredSecection) {
 
 		controler.addButtonClicked(structuredSecection);
-		if (freeLicense) {
-			@SuppressWarnings("unchecked")
-			List<RefactoringRule> list = structuredSecection.toList();
+		@SuppressWarnings("unchecked")
+		List<RefactoringRule> selectedRules = structuredSecection.toList();
+		boolean anyEnabledRule = selectedRules
+			.stream()
+			.anyMatch(RefactoringRule::isEnabled);
+		if (anyEnabledRule) {
+			afterAddClicked();
+		}
+	}
 
-			boolean showLockedRuleSelectionDialog = list
+	private void afterAddClicked() {
+
+		boolean freeLicense = licenseUtil.isFreeLicense();
+		Set<Object> selection = model.getSelection();
+
+		if (freeLicense && !selection.isEmpty()) {
+			boolean activeRegistration = licenseUtil.isActiveRegistration();
+
+			List<RefactoringRule> allEnabledRules = selection.stream()
+				.map(RefactoringRule.class::cast)
+				.collect(Collectors.toList());
+
+			boolean showLockedRuleSelectionDialog = !activeRegistration || allEnabledRules
 				.stream()
-				.filter(RefactoringRule::isEnabled)
-				.anyMatch(rule -> !activeRegistration || !rule.isFree());
+				.anyMatch(rule -> !rule.isFree());
 
 			if (showLockedRuleSelectionDialog) {
-				LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), activeRegistration);
+				LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), activeRegistration,
+						allEnabledRules);
 				dialog.open();
 				// updateData();
 

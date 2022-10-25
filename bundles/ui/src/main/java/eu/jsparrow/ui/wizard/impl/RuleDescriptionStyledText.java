@@ -28,10 +28,15 @@ import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 class RuleDescriptionStyledText extends StyledText {
-
-	private static final String BENEFIT_FROM_ALL_ADVANTAGES = " now and benefit from all advantages of jSparrow.";
-	private static final String UPGRADE_YOUR_LICENSE = "upgrade your license";
+	private static final String UPGRADE_LICENSE_LINK = "https://jsparrow.io/pricing/";
 	private static final String TO_UNLOCK_RULES = "To unlock this and many other rules, ";
+	private static final String UPGRADE_YOUR_LICENSE = "upgrade your license";
+	private static final String BENEFIT_FROM_ALL_ADVANTAGES = " now and benefit from all advantages of jSparrow.";
+
+	private String selectedRuleLink = ""; //$NON-NLS-1$
+
+	private OffsetRange selectedRuleOffsetRange = new OffsetRange();
+	private OffsetRange upgradeLicenseOffsetRange = new OffsetRange();
 
 	RuleDescriptionStyledText(Composite parent) {
 		super(parent, SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
@@ -64,10 +69,11 @@ class RuleDescriptionStyledText extends StyledText {
 			} catch (SWTException | IllegalArgumentException e) {
 				offset = -1;
 			}
-			if (offset != -1 && SelectedRule.start < offset && offset < SelectedRule.end) {
-				Program.launch(SelectedRule.link);
-			} else if (offset != -1 && UpgradeLicense.start < offset && offset < UpgradeLicense.end) {
-				Program.launch(UpgradeLicense.LINK);
+			if (offset != -1 && selectedRuleOffsetRange.start < offset && offset < selectedRuleOffsetRange.end) {
+				Program.launch(selectedRuleLink);
+			} else if (offset != -1 && upgradeLicenseOffsetRange.start < offset
+					&& offset < upgradeLicenseOffsetRange.end) {
+				Program.launch(UPGRADE_LICENSE_LINK);
 			}
 		});
 	}
@@ -128,17 +134,17 @@ class RuleDescriptionStyledText extends StyledText {
 		Consumer<StyleRange> green = style -> style.foreground = getShell().getDisplay()
 			.getSystemColor(SWT.COLOR_GREEN);
 
-		SelectedRule.link = RuleDocumentationURLGeneratorUtil.generateLinkToDocumentation(rule.getId());
+		selectedRuleLink = RuleDocumentationURLGeneratorUtil.generateLinkToDocumentation(rule.getId());
 		Consumer<StyleRange> documentationConfig = style -> {
 			style.underline = true;
 			style.underlineStyle = SWT.UNDERLINE_LINK;
-			style.data = SelectedRule.link;
+			style.data = selectedRuleLink;
 		};
 
 		Consumer<StyleRange> updateLicenseConfig = style -> {
 			style.underline = true;
 			style.underlineStyle = SWT.UNDERLINE_LINK;
-			style.data = UpgradeLicense.LINK;
+			style.data = UPGRADE_LICENSE_LINK;
 		};
 
 		boolean freeLicense = licenseUtil.isFreeLicense();
@@ -153,18 +159,20 @@ class RuleDescriptionStyledText extends StyledText {
 		descriptionList.add(new StyleContainer(name, h1));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 
+		StyleContainer upgradeLicenseStyleContainer = null;
 		if (unlockRulesSuggestion) {
-
+			upgradeLicenseStyleContainer = new StyleContainer(UPGRADE_YOUR_LICENSE, blue.andThen(updateLicenseConfig));
 			descriptionList.add(new StyleContainer(lineDelimiter));
 			descriptionList.add(new StyleContainer(TO_UNLOCK_RULES));
-			descriptionList.add(new StyleContainer(UPGRADE_YOUR_LICENSE, blue.andThen(updateLicenseConfig)));
+			descriptionList.add(upgradeLicenseStyleContainer);
 			descriptionList.add(new StyleContainer(BENEFIT_FROM_ALL_ADVANTAGES));
 			descriptionList.add(new StyleContainer(lineDelimiter));
 			descriptionList.add(new StyleContainer(lineDelimiter));
-
 		}
 
-		descriptionList.add(new StyleContainer(documentationLabel, blue.andThen(documentationConfig)));
+		StyleContainer documentationStyleContainer = new StyleContainer(documentationLabel,
+				blue.andThen(documentationConfig));
+		descriptionList.add(documentationStyleContainer);
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(description));
@@ -173,7 +181,8 @@ class RuleDescriptionStyledText extends StyledText {
 		descriptionList.add(new StyleContainer(requirementsLabel, bold));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 
-		descriptionList.add(new StyleContainer(minJavaVersionLabel, h2));
+		StyleContainer minJavaVarsionStyleContainer = new StyleContainer(minJavaVersionLabel, h2);
+		descriptionList.add(minJavaVarsionStyleContainer);
 		descriptionList.add(new StyleContainer(minJavaVersionValue, bold.andThen(red), !rule.isSatisfiedJavaVersion()));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(requiredLibrariesLabel, h2));
@@ -193,44 +202,22 @@ class RuleDescriptionStyledText extends StyledText {
 		setText(descriptionText);
 
 		int offset = 0;
-		UpgradeLicense.start = -1;
-		UpgradeLicense.end = -1;
 		for (StyleContainer iterator : descriptionList) {
 			if (!lineDelimiter.equals(iterator.getValue()) && iterator.isEnabled()) {
 				setStyleRange(iterator.generateStyle(offset));
-				if (documentationLabel.equals(iterator.getValue())) {
-					SelectedRule.start = offset;
-					SelectedRule.end = offset + iterator.getValue()
-						.length();
-				}
-				if (unlockRulesSuggestion && UPGRADE_YOUR_LICENSE.equals(iterator.getValue())) {
-					UpgradeLicense.start = offset;
-					UpgradeLicense.end = offset + iterator.getValue()
-						.length();
-				}
 			}
 			offset += iterator.getValue()
 				.length();
 		}
 
+		selectedRuleOffsetRange = findOffsetRange(descriptionList, documentationStyleContainer);
+		upgradeLicenseOffsetRange = OffsetRange.NONE;
+		if (upgradeLicenseStyleContainer != null) {
+			upgradeLicenseOffsetRange = findOffsetRange(descriptionList, upgradeLicenseStyleContainer);
+		}
+
 		int requirementsBulletingStartLine = getLineAtOffset(
-				name.length() +
-						lineDelimiter.length() +
-						(unlockRulesSuggestion
-								? lineDelimiter.length() +
-										TO_UNLOCK_RULES.length() +
-										UPGRADE_YOUR_LICENSE.length() +
-										BENEFIT_FROM_ALL_ADVANTAGES.length() +
-										lineDelimiter.length() +
-										lineDelimiter.length()
-								: 0)
-						+
-						documentationLabel.length() +
-						2 * lineDelimiter.length() +
-						description.length() +
-						2 * lineDelimiter.length() +
-						requirementsLabel.length() +
-						lineDelimiter.length());
+				findOffsetBefore(descriptionList, minJavaVarsionStyleContainer));
 
 		StyleRange bulletPointStyle = new StyleRange();
 		bulletPointStyle.metrics = new GlyphMetrics(0, 0, 40);
@@ -242,23 +229,45 @@ class RuleDescriptionStyledText extends StyledText {
 				bulletPoint);
 	}
 
-	private static class SelectedRule {
-		private SelectedRule() {
-
+	private OffsetRange findOffsetRange(List<StyleContainer> styleContainerList,
+			StyleContainer expectedStyleContainer) {
+		int offset = findOffsetBefore(styleContainerList, expectedStyleContainer);
+		if (offset == -1) {
+			return OffsetRange.NONE;
 		}
-
-		static int start = 0;
-		static int end = 0;
-		static String link = ""; //$NON-NLS-1$
+		int end = offset + expectedStyleContainer.getValue()
+			.length();
+		return new OffsetRange(offset, end);
 	}
 
-	private static class UpgradeLicense {
-		private UpgradeLicense() {
+	private int findOffsetBefore(List<StyleContainer> styleContainerList,
+			StyleContainer expectedStyleContainer) {
+		int offset = 0;
+		for (StyleContainer styleContainer : styleContainerList) {
+			if (styleContainer == expectedStyleContainer) {
+				return offset;
+			}
+			offset += styleContainer.getValue()
+				.length();
+		}
+		return -1;
+	}
 
+	static class OffsetRange {
+
+		static final OffsetRange NONE = new OffsetRange();
+
+		OffsetRange() {
+			this(-1, -1);
 		}
 
-		static int start = 0;
-		static int end = 0;
-		static final String LINK = "https://jsparrow.io/pricing/"; //$NON-NLS-1$
+		OffsetRange(int start, int end) {
+			this.start = start;
+			this.end = end;
+		}
+
+		private int start;
+		private int end;
+
 	}
 }
