@@ -198,7 +198,7 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 				}
 			});
 	}
-	
+
 	private IStatus startSelectRulesWizard(Map<IJavaProject, List<IJavaElement>> selectedJavaElements,
 			IProgressMonitor monitor, RefactoringPipeline refactoringPipeline) {
 		try {

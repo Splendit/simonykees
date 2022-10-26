@@ -28,8 +28,10 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.dialog.LockedRuleSelectionDialog;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
+import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 
@@ -106,6 +108,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		logger.info(message);
 
 		final List<RefactoringRule> selectedRules = model.getSelectionAsList();
+		dialogWhenLockedRulesFound(selectedRules);
 
 		refactoringPipeline.setRules(selectedRules);
 		refactoringPipeline.updateInitialSourceMap();
@@ -118,6 +121,25 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		job.schedule();
 
 		return true;
+	}
+
+	private void dialogWhenLockedRulesFound(List<RefactoringRule> selectedRules) {
+		LicenseUtil licenseUtil = LicenseUtil.get();
+		boolean freeLicense = licenseUtil.isFreeLicense();
+		if (freeLicense && !selectedRules.isEmpty()) {
+			boolean activeRegistration = licenseUtil.isActiveRegistration();
+
+			boolean showLockedRuleSelectionDialog = !activeRegistration || selectedRules
+				.stream()
+				.anyMatch(rule -> !rule.isFree());
+
+			if (showLockedRuleSelectionDialog) {
+				LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), activeRegistration,
+						selectedRules);
+				dialog.open();
+
+			}
+		}
 	}
 
 	/**
