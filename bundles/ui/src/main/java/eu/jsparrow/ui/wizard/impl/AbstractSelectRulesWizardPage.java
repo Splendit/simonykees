@@ -197,8 +197,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			}
 		});
 
-		// boolean freeLicense = licenseUtil.isFreeLicense();
-		// boolean activeRegistration = licenseUtil.isActiveRegistration();
 		addButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -240,8 +238,11 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			 */
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				List<RefactoringRule> selectionBefore = model.getSelectionAsList();
 				controler.addAllButtonClicked();
-				afterAddClicked();
+				List<RefactoringRule> recentlySelected = new ArrayList<>(model.getSelectionAsList());
+				selectionBefore.forEach(recentlySelected::remove);
+				dialogWhenLockedRulesSelected(recentlySelected);
 			}
 		});
 
@@ -519,38 +520,32 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		return removeAllButton;
 	}
 
-	private void addButtonClicked(IStructuredSelection structuredSecection) {
+	private void addButtonClicked(IStructuredSelection structuredSelection) {
 
-		controler.addButtonClicked(structuredSecection);
+		controler.addButtonClicked(structuredSelection);
 		@SuppressWarnings("unchecked")
-		List<RefactoringRule> selectedRules = structuredSecection.toList();
-		boolean anyEnabledRule = selectedRules
-			.stream()
-			.anyMatch(RefactoringRule::isEnabled);
-		if (anyEnabledRule) {
-			afterAddClicked();
+		List<RefactoringRule> selectedRules = structuredSelection.toList();
+		List<RefactoringRule> selectedEnabledRules = selectedRules.stream()
+			.filter(RefactoringRule::isEnabled)
+			.collect(Collectors.toList());
+		if (!selectedEnabledRules.isEmpty()) {
+			dialogWhenLockedRulesSelected(selectedEnabledRules);
 		}
 	}
 
-	private void afterAddClicked() {
+	private void dialogWhenLockedRulesSelected(List<RefactoringRule> selectedEnabledRules) {
 
 		boolean freeLicense = licenseUtil.isFreeLicense();
-		Set<Object> selection = model.getSelection();
-
-		if (freeLicense && !selection.isEmpty()) {
+		if (freeLicense) {
 			boolean activeRegistration = licenseUtil.isActiveRegistration();
 
-			List<RefactoringRule> allEnabledRules = selection.stream()
-				.map(RefactoringRule.class::cast)
-				.collect(Collectors.toList());
-
-			boolean showLockedRuleSelectionDialog = !activeRegistration || allEnabledRules
+			boolean showLockedRuleSelectionDialog = !activeRegistration || selectedEnabledRules
 				.stream()
 				.anyMatch(rule -> !rule.isFree());
 
 			if (showLockedRuleSelectionDialog) {
 				LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), activeRegistration,
-						allEnabledRules);
+						selectedEnabledRules);
 				dialog.open();
 				// updateData();
 
