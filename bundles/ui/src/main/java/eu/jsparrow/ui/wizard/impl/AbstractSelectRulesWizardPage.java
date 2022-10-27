@@ -1,8 +1,10 @@
 package eu.jsparrow.ui.wizard.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -238,11 +240,13 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			 */
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				List<RefactoringRule> selectionBefore = model.getSelectionAsList();
-				controler.addAllButtonClicked();
-				List<RefactoringRule> recentlySelected = new ArrayList<>(model.getSelectionAsList());
-				selectionBefore.forEach(recentlySelected::remove);
-				dialogWhenLockedRulesSelected(recentlySelected);
+				if (licenseUtil.isFreeLicense()) {
+					List<RefactoringRule> selectionBefore = new ArrayList<>(model.getSelectionAsList());
+					controler.addAllButtonClicked();
+					showLockedRuleSelectionDialog(collectRecentlySelected(selectionBefore));
+				} else {
+					controler.addAllButtonClicked();
+				}
 			}
 		});
 
@@ -522,35 +526,71 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	private void addButtonClicked(IStructuredSelection structuredSelection) {
 
-		controler.addButtonClicked(structuredSelection);
-		@SuppressWarnings("unchecked")
-		List<RefactoringRule> selectedRules = structuredSelection.toList();
-		List<RefactoringRule> selectedEnabledRules = selectedRules.stream()
-			.filter(RefactoringRule::isEnabled)
-			.collect(Collectors.toList());
-		if (!selectedEnabledRules.isEmpty()) {
-			dialogWhenLockedRulesSelected(selectedEnabledRules);
+		if (licenseUtil.isFreeLicense()) {
+			List<RefactoringRule> selectionBefore = new ArrayList<>(model.getSelectionAsList());
+			controler.addButtonClicked(structuredSelection);
+			showLockedRuleSelectionDialog(collectRecentlySelected(selectionBefore));
+		} else {
+			controler.addButtonClicked(structuredSelection);
 		}
 	}
 
-	private void dialogWhenLockedRulesSelected(List<RefactoringRule> selectedEnabledRules) {
+	private List<RefactoringRule> collectRecentlySelected(List<RefactoringRule> selectedRulesBefore) {
+		return model.getSelectionAsList()
+			.stream()
+			.filter(rule -> !selectedRulesBefore.contains(rule))
+			.collect(Collectors.toList());
+	}
 
-		boolean freeLicense = licenseUtil.isFreeLicense();
-		if (freeLicense) {
-			boolean activeRegistration = licenseUtil.isActiveRegistration();
+	private void showLockedRuleSelectionDialog(List<RefactoringRule> selectedEnabledRules) {
 
-			boolean showLockedRuleSelectionDialog = !activeRegistration || selectedEnabledRules
+		List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas = null;
+		if (licenseUtil.isActiveRegistration()) {
+			boolean allRulesFree = selectedEnabledRules
 				.stream()
-				.anyMatch(rule -> !rule.isFree());
+				.allMatch(RefactoringRule::isFree);
+			if (!allRulesFree) {
+				addComponentLambdas = Arrays.asList(//
+						dialog -> dialog.addLabel("You selection is including premium rules."),
+						dialog -> dialog.addLinkToUnlockAllRules(
+								"To unlock premium rules <a href=\"https://jsparrow.io/pricing/\">visit us</a> and upgrade your license.")//
+				);
+			}
+		} else {
+			boolean containsFreeRule = selectedEnabledRules
+				.stream()
+				.anyMatch(RefactoringRule::isFree);
 
-			if (showLockedRuleSelectionDialog) {
-				LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), activeRegistration,
-						selectedEnabledRules);
-				dialog.open();
-				// updateData();
+			if (containsFreeRule) {
+				addComponentLambdas = Arrays.asList(//
+						dialog -> dialog.addLabel("You selection is including free rules."),
+						dialog -> dialog.addLabel(
+								"To unlock them, register for a free trial version."),
+						dialog -> dialog.addLabel(
+								"Registration for a free trial will unlock 20 of our most liked rules!"),
+						LockedRuleSelectionDialog::addRegisterForFreeButton,
+						dialog -> dialog.addLinkToUnlockAllRules(
+								"To unlock all our rules <a href=\"https://jsparrow.io/pricing/\">register for a premium license</a>.") //
+				);
 
+			} else {
+				addComponentLambdas = Arrays.asList(//
+						dialog -> dialog.addLabel("You selection is including only premium rules."),
+						dialog -> dialog.addLinkToUnlockAllRules(
+								"To unlock them, <a href=\"https://jsparrow.io/pricing/\">register for a premium license</a>."),
+						dialog -> dialog
+							.addLabel(
+									"Registration for a free trial will unlock 20 of our most liked rules!"),
+						LockedRuleSelectionDialog::addRegisterForFreeButton //
+				);
 			}
 		}
+
+		if (addComponentLambdas != null) {
+			LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), addComponentLambdas);
+			dialog.open();
+		}
+
 	}
 
 	private enum SelectionSide {

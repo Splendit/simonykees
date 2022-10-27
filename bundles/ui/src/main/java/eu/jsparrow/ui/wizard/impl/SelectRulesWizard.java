@@ -3,6 +3,8 @@ package eu.jsparrow.ui.wizard.impl;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +22,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +111,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		logger.info(message);
 
 		final List<RefactoringRule> selectedRules = model.getSelectionAsList();
-		dialogWhenLockedRulesFound(selectedRules);
+		showOptionalLockedRuleSelectionDialog(selectedRules);
 
 		refactoringPipeline.setRules(selectedRules);
 		refactoringPipeline.updateInitialSourceMap();
@@ -123,23 +126,61 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		return true;
 	}
 
-	private void dialogWhenLockedRulesFound(List<RefactoringRule> selectedRules) {
+	public void showOptionalLockedRuleSelectionDialog(List<RefactoringRule> selectedRules) {
 		LicenseUtil licenseUtil = LicenseUtil.get();
-		boolean freeLicense = licenseUtil.isFreeLicense();
-		if (freeLicense && !selectedRules.isEmpty()) {
-			boolean activeRegistration = licenseUtil.isActiveRegistration();
-
-			boolean showLockedRuleSelectionDialog = !activeRegistration || selectedRules
-				.stream()
-				.anyMatch(rule -> !rule.isFree());
-
-			if (showLockedRuleSelectionDialog) {
-				LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), activeRegistration,
-						selectedRules);
-				dialog.open();
-
-			}
+		if (!licenseUtil.isFreeLicense() || selectedRules.isEmpty()) {
+			return;
 		}
+
+		List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas = null;
+		if (licenseUtil.isActiveRegistration()) {
+			boolean allRulesFree = selectedRules
+				.stream()
+				.allMatch(RefactoringRule::isFree);
+
+			if (!allRulesFree) {
+				addComponentLambdas = Arrays.asList(//
+						dialog -> dialog.addLabel("You selection is including premium rules."),
+						dialog -> dialog.addLinkToUnlockAllRules(
+								"To unlock premium rules <a href=\"https://jsparrow.io/pricing/\">visit us</a> and upgrade your license.")//
+				);
+			}
+		} else {
+			boolean allRulesFree = selectedRules
+				.stream()
+				.allMatch(RefactoringRule::isFree);
+
+			if (allRulesFree) {
+				addComponentLambdas = Arrays.asList(//
+						dialog -> dialog.addLabel("All rules in your selection are free."),
+						dialog -> dialog.addLabel("Unlock them by registering for a free trial."),
+						dialog -> dialog
+							.addLabel("Registration for a free trial will unlock 20 of our most liked rules!"),
+						LockedRuleSelectionDialog::addRegisterForFreeButton,
+						dialog -> dialog.addLinkToUnlockAllRules(
+								"To unlock all our rules <a href=\"https://jsparrow.io/pricing/\">register for a premium license</a>.") //
+
+				);
+			} else {
+				addComponentLambdas = Arrays.asList(//
+						dialog -> dialog.addLabel(//
+								"You selection is including premium rules."),
+						dialog -> dialog.addLinkToUnlockAllRules(
+								"To unlock them, <a href=\"https://jsparrow.io/pricing/\">register for a premium license</a>."),
+						dialog -> dialog
+							.addLabel(
+									"Registration for a free trial will unlock 20 of our most liked rules!"),
+						LockedRuleSelectionDialog::addRegisterForFreeButton //
+				);
+			}
+
+		}
+
+		if (addComponentLambdas != null) {
+			LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), addComponentLambdas);
+			dialog.open();
+		}
+
 	}
 
 	/**
