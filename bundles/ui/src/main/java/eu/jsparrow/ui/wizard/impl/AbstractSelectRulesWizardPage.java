@@ -1,5 +1,17 @@
 package eu.jsparrow.ui.wizard.impl;
 
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.AND_UPGRADE_YOUR_LICENSE;
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.REGISTER_FOR_A_FREE_TRIAL_VERSION;
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.REGISTER_FOR_A_PREMIUM_LICENSE;
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES;
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.TO_UNLOCK_ALL_OUR_RULES;
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.TO_UNLOCK_PREMIUM_RULES;
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.TO_UNLOCK_THEM;
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.VISIT_US;
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.YOUR_SELECTION_IS_INCLUDING_FREE_RULES;
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.YOUR_SELECTION_IS_INCLUDING_ONLY_PREMIUM_RULES;
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,6 +62,7 @@ import eu.jsparrow.ui.util.LicenseUtil;
  */
 @SuppressWarnings("restriction") // StatusInfo is internal
 public abstract class AbstractSelectRulesWizardPage extends WizardPage {
+
 
 	protected AbstractSelectRulesWizardModel model;
 	protected AbstractSelectRulesWizardControler controler;
@@ -551,9 +564,9 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				.allMatch(RefactoringRule::isFree);
 			if (!allRulesFree) {
 				addComponentLambdas = Arrays.asList(//
-						dialog -> dialog.addLabel("You selection is including premium rules."),
+						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
 						dialog -> dialog.addLinkToUnlockAllRules(
-								"To unlock premium rules <a href=\"https://jsparrow.io/pricing/\">visit us</a> and upgrade your license.")//
+								TO_UNLOCK_PREMIUM_RULES, VISIT_US, AND_UPGRADE_YOUR_LICENSE)//
 				);
 			}
 		} else {
@@ -563,24 +576,24 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 			if (containsFreeRule) {
 				addComponentLambdas = Arrays.asList(//
-						dialog -> dialog.addLabel("You selection is including free rules."),
+						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_FREE_RULES),
 						dialog -> dialog.addLabel(
-								"To unlock them, register for a free trial version."),
+								TO_UNLOCK_THEM + REGISTER_FOR_A_FREE_TRIAL_VERSION),
 						dialog -> dialog.addLabel(
-								"Registration for a free trial will unlock 20 of our most liked rules!"),
+								REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES),
 						LockedRuleSelectionDialog::addRegisterForFreeButton,
 						dialog -> dialog.addLinkToUnlockAllRules(
-								"To unlock all our rules <a href=\"https://jsparrow.io/pricing/\">register for a premium license</a>.") //
+								TO_UNLOCK_ALL_OUR_RULES, REGISTER_FOR_A_PREMIUM_LICENSE) //
 				);
 
 			} else {
 				addComponentLambdas = Arrays.asList(//
-						dialog -> dialog.addLabel("You selection is including only premium rules."),
+						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_ONLY_PREMIUM_RULES),
 						dialog -> dialog.addLinkToUnlockAllRules(
-								"To unlock them, <a href=\"https://jsparrow.io/pricing/\">register for a premium license</a>."),
+								TO_UNLOCK_THEM, REGISTER_FOR_A_PREMIUM_LICENSE),
 						dialog -> dialog
 							.addLabel(
-									"Registration for a free trial will unlock 20 of our most liked rules!"),
+									REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES),
 						LockedRuleSelectionDialog::addRegisterForFreeButton //
 				);
 			}
