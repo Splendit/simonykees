@@ -38,8 +38,11 @@ public class ActivationControl extends Composite {
 	private Label statusLabel;
 	private Button activateButton;
 
-	public ActivationControl(Composite parent, int style) {
+	private Runnable lambdaAfterActivation;
+
+	public ActivationControl(Composite parent, int style, Runnable lambdaAfterActivation) {
 		super(parent, style);
+		this.lambdaAfterActivation = lambdaAfterActivation;
 
 		GridLayout overallLayout = new GridLayout();
 		overallLayout.marginHeight = 0;
@@ -147,6 +150,9 @@ public class ActivationControl extends Composite {
 							showLicenseValidDialog(display);
 							parentComposite.getShell()
 								.close();
+							if (lambdaAfterActivation != null) {
+								lambdaAfterActivation.run();
+							}
 							return;
 						} else {
 							showInvalidLicenseDialog(display);

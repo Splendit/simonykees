@@ -23,6 +23,12 @@ public class RegistrationDialog extends Dialog {
 
 	RegistrationControl registrationTabControl;
 	ActivationControl activationTabControl;
+	private Runnable lambdaAfterActivation;
+
+	public RegistrationDialog(Shell parent, Runnable lambdaAfterActivation) {
+		super(parent);
+		this.lambdaAfterActivation = lambdaAfterActivation;
+	}
 
 	public RegistrationDialog(Shell parent) {
 		super(parent);
@@ -45,7 +51,7 @@ public class RegistrationDialog extends Dialog {
 		TabItem activateTab = new TabItem(tabFolder, SWT.NONE);
 		activateTab.setText(Messages.RegistrationDialog_activateTabTitle);
 		activateTab.setToolTipText(Messages.RegistrationDialog_activateTabTooltip);
-		activationTabControl = new ActivationControl(tabFolder, SWT.NONE);
+		activationTabControl = new ActivationControl(tabFolder, SWT.NONE, lambdaAfterActivation);
 		activateTab.setControl(activationTabControl);
 
 		// Select the first tab (index is zero-based)
