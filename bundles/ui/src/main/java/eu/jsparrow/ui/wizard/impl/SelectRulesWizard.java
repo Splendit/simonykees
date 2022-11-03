@@ -151,8 +151,8 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 				addComponentLambdas = Arrays.asList(//
 						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
 						dialog -> dialog.addLinkToUnlockAllRules(TO_UNLOCK_PREMIUM_RULES, VISIT_US,
-								AND_UPGRADE_YOUR_LICENSE)//
-				);
+								AND_UPGRADE_YOUR_LICENSE),
+						LockedRuleSelectionDialog::addRegisterForPremiumButton);
 			}
 		} else {
 			boolean allRulesFree = selectedRules
@@ -167,19 +167,18 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 							.addLabel(REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES),
 						LockedRuleSelectionDialog::addRegisterForFreeButton,
 						dialog -> dialog.addLinkToUnlockAllRules(
-								TO_UNLOCK_ALL_OUR_RULES, REGISTER_FOR_A_PREMIUM_LICENSE) //
-
-				);
+								TO_UNLOCK_ALL_OUR_RULES, REGISTER_FOR_A_PREMIUM_LICENSE),
+						LockedRuleSelectionDialog::addRegisterForPremiumButton);
 			} else {
 				addComponentLambdas = Arrays.asList(//
 						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
 						dialog -> dialog.addLinkToUnlockAllRules(
 								TO_UNLOCK_THEM, REGISTER_FOR_A_PREMIUM_LICENSE),
+						LockedRuleSelectionDialog::addRegisterForPremiumButton,
 						dialog -> dialog
 							.addLabel(
 									REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES),
-						LockedRuleSelectionDialog::addRegisterForFreeButton //
-				);
+						LockedRuleSelectionDialog::addRegisterForFreeButton);
 			}
 
 		}

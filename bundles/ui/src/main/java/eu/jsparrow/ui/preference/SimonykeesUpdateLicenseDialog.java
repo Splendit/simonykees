@@ -66,7 +66,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
-	protected SimonykeesUpdateLicenseDialog(Shell parentShell) {
+	public SimonykeesUpdateLicenseDialog(Shell parentShell) {
 		super(parentShell);
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 	}

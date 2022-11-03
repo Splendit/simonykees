@@ -22,6 +22,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 
 /**
@@ -35,7 +36,7 @@ public class LockedRuleSelectionDialog extends Dialog {
 
 	private static final String UNLOCK_SELECTED_RULES = "Unlock selected rules";
 
-	private static final String FORMAT_LINK_TO_JSPARROW_PRICING = "%<a href=\"https://jsparrow.io/pricing/\">%</a>%";
+	private static final String FORMAT_LINK_TO_JSPARROW_PRICING = "%s<a href=\"https://jsparrow.io/pricing/\">%s</a>%s";
 
 	public static final String FULLSTOP = ".";
 
@@ -58,8 +59,6 @@ public class LockedRuleSelectionDialog extends Dialog {
 
 	private final List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas;
 	private Composite area;
-	private Button registerForFreeButton;
-	private Link linkToUnlockRules;
 
 	public LockedRuleSelectionDialog(Shell parentShell, List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas) {
 		super(parentShell);
@@ -78,33 +77,10 @@ public class LockedRuleSelectionDialog extends Dialog {
 
 		addComponentLambdas.forEach(lambda -> lambda.accept(this));
 
-		if (registerForFreeButton != null) {
-			registerForFreeButton.setFont(composite.getFont());
-			registerForFreeButton.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					registerButtonPressed();
-				}
-			});
+		Control[] children = area.getChildren();
+		for (Control child : children) {
+			child.setFont(composite.getFont());
 		}
-
-		if (linkToUnlockRules != null) {
-			linkToUnlockRules.setFont(composite.getFont());
-			linkToUnlockRules.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					try {
-						PlatformUI.getWorkbench()
-							.getBrowserSupport()
-							.getExternalBrowser()
-							.openURL(new URL(arg0.text));
-					} catch (PartInitException | MalformedURLException e) {
-						// nothing...
-					}
-				}
-			});
-		}
-
 		return composite;
 	}
 
@@ -112,20 +88,50 @@ public class LockedRuleSelectionDialog extends Dialog {
 		Label titleLabel = new Label(area, SWT.NONE);
 		titleLabel.setText(lableText);
 	}
-	
+
 	public void addLinkToUnlockAllRules(String textBeforeLink, String linkedText) {
 		addLinkToUnlockAllRules(textBeforeLink, linkedText, ""); //$NON-NLS-1$
 	}
 
 	public void addLinkToUnlockAllRules(String textBeforeLink, String linkedText, String textAfterLink) {
-		linkToUnlockRules = new Link(area, SWT.NONE);
+		Link linkToUnlockRules = new Link(area, SWT.NONE);
 		linkToUnlockRules
 			.setText(String.format(FORMAT_LINK_TO_JSPARROW_PRICING, textBeforeLink, linkedText, textAfterLink));
+		linkToUnlockRules.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				try {
+					PlatformUI.getWorkbench()
+						.getBrowserSupport()
+						.getExternalBrowser()
+						.openURL(new URL(arg0.text));
+				} catch (PartInitException | MalformedURLException e) {
+					// nothing...
+				}
+			}
+		});
 	}
 
 	public void addRegisterForFreeButton() {
-		registerForFreeButton = new Button(area, SWT.PUSH);
+		Button registerForFreeButton = new Button(area, SWT.PUSH);
 		registerForFreeButton.setText(Messages.SimonykeesPreferencePageLicense_register_for_free_jsparrow_trial);
+		registerForFreeButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				registerForFreeButtonPressed();
+			}
+		});
+	}
+
+	public void addRegisterForPremiumButton() {
+		Button registerForPremiumButton = new Button(area, SWT.PUSH);
+		registerForPremiumButton.setText(Messages.SimonykeesPreferencePageLicense_update_license_key_button);
+		registerForPremiumButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				registerForPremiumButtonPressed();
+			}
+		});
 	}
 
 	@Override
@@ -139,17 +145,15 @@ public class LockedRuleSelectionDialog extends Dialog {
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
 
-	private void registerButtonPressed() {
-		// PlatformUI.getWorkbench()
-		// .getDisplay()
-		// .asyncExec(() -> {
-		// Shell activeShell = PlatformUI.getWorkbench()
-		// .getActiveWorkbenchWindow()
-		// .getShell();
-		// new RegistrationDialog(activeShell).open();
-		// });
+	private void registerForFreeButtonPressed() {
 		new RegistrationDialog(getShell()).open();
 		this.close();
 	}
 
+	private void registerForPremiumButtonPressed() {
+		SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell());
+		dialog.create();
+		dialog.open();
+		this.close();
+	}
 }
