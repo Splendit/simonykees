@@ -600,10 +600,18 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		}
 
 		if (addComponentLambdas != null) {
-			LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), addComponentLambdas);
+			LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), addComponentLambdas,
+					this::afterLicenseUpdate);
 			dialog.open();
 		}
 
+	}
+
+	private void afterLicenseUpdate() {
+		licenseUtil.updateValidationResult();
+		doStatusUpdate();
+		configureTree(leftTreeViewer);
+		configureTable(rightTableViewer);
 	}
 
 	private enum SelectionSide {

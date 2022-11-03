@@ -58,7 +58,15 @@ public class LockedRuleSelectionDialog extends Dialog {
 	public static final String VISIT_US = "visit us";
 
 	private final List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas;
+	private Runnable lambdaAfterLicenseUpdate;
 	private Composite area;
+	
+	
+	public LockedRuleSelectionDialog(Shell parentShell, List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas, Runnable lambdaAfterLicenseUpdate) {
+		this(parentShell, addComponentLambdas);
+		this.lambdaAfterLicenseUpdate = lambdaAfterLicenseUpdate;
+
+	}
 
 	public LockedRuleSelectionDialog(Shell parentShell, List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas) {
 		super(parentShell);
@@ -146,12 +154,12 @@ public class LockedRuleSelectionDialog extends Dialog {
 	}
 
 	private void registerForFreeButtonPressed() {
-		new RegistrationDialog(getShell()).open();
+		new RegistrationDialog(getShell(), lambdaAfterLicenseUpdate).open();
 		this.close();
 	}
 
 	private void registerForPremiumButtonPressed() {
-		SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell());
+		SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell(), lambdaAfterLicenseUpdate);
 		dialog.create();
 		dialog.open();
 		this.close();

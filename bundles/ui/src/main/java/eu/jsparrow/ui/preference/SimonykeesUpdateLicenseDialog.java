@@ -63,8 +63,14 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	private Image scaledJSparrowImageInactive;
 	private Image scaledTickmarkGreenIconImage;
 	private Image scaledCloseRedIconImage;
+	private Runnable lambdaAfterLicenseUpdate;
 
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
+
+	public SimonykeesUpdateLicenseDialog(Shell parentShell, Runnable lambdaAfterLicenseUpdate) {
+		this(parentShell);
+		this.lambdaAfterLicenseUpdate = lambdaAfterLicenseUpdate;
+	}
 
 	public SimonykeesUpdateLicenseDialog(Shell parentShell) {
 		super(parentShell);
@@ -142,6 +148,9 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 					} else {
 						updatedLabel.setImage(scaledTickmarkGreenIconImage);
 						updatedIconLabel.setImage(scaledJSparrowImageActive);
+						if (lambdaAfterLicenseUpdate != null) {
+							lambdaAfterLicenseUpdate.run();
+						}
 
 					}
 					updatedLabel.setText(result.getDetailMessage());
