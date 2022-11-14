@@ -54,7 +54,7 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizardHandler.class);
 
-	private LicenseUtilService licenseUtil = LicenseUtil.get();
+	private LicenseUtil licenseUtil = LicenseUtil.get();
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -114,9 +114,10 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				final WizardDialog dialog = new WizardDialog(shell, new SelectRulesWizard(selectedJavaElements.keySet(),
+				SelectRulesWizard selectRulesWizard = new SelectRulesWizard(selectedJavaElements.keySet(),
 						refactoringPipeline,
-						RulesContainer.getRulesForProjects(selectedJavaElements.keySet(), false))) {
+						RulesContainer.getRulesForProjects(selectedJavaElements.keySet(), false));
+				final WizardDialog dialog = new WizardDialog(shell, selectRulesWizard) {
 					/*
 					 * Removed unnecessary empty space on the bottom of the
 					 * wizard intended for ProgressMonitor that is not used
@@ -155,11 +156,37 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 
 					@Override
 					protected void createButtonsForButtonBar(Composite parent) {
+						createButton(parent, 11001, "Register for free jSparrow trial", false);
+						createButton(parent, 11002, "Enter premium license key", false);
 						super.createButtonsForButtonBar(parent);
 
 						Button finish = getButton(IDialogConstants.FINISH_ID);
 						finish.setText(Messages.SelectRulesWizardHandler_finishButtonText);
 						setButtonLayoutData(finish);
+					}
+
+					private void updateShowRegistrationDialogButton() {
+						licenseUtil.updateValidationResult();
+						boolean activeRegistration = licenseUtil
+							.isActiveRegistration();
+						boolean isProLicense = licenseUtil.isProLicense();
+						if (activeRegistration || isProLicense) {
+							getButton(11001).setVisible(false);
+						}
+					}
+
+					@Override
+					protected void buttonPressed(int buttonId) {
+						if (buttonId == 11001) {
+							selectRulesWizard.showRegistrationDialog();
+							updateShowRegistrationDialogButton();
+						} else if (buttonId == 11002) {
+							selectRulesWizard.showSimonykeesUpdateLicenseDialog();
+							
+							updateShowRegistrationDialogButton();
+						} else {
+							super.buttonPressed(buttonId);
+						}
 					}
 				};
 				/*

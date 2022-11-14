@@ -44,11 +44,14 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.dialog.LockedRuleSelectionDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -114,7 +117,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		createSelectionViewer(composite);
 
-		descriptionStyledText = new RuleDescriptionStyledText(composite);
+		descriptionStyledText = new RuleDescriptionStyledText(composite, this);
 		descriptionStyledText.createDescriptionViewer();
 
 		model.addListener(this::updateData);
@@ -607,7 +610,18 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	}
 
-	private void afterLicenseUpdate() {
+	public void showRegistrationDialog() {
+		Shell activeShell = PlatformUI.getWorkbench()
+			.getActiveWorkbenchWindow()
+			.getShell();
+		RegistrationDialog registrationDialog = new RegistrationDialog(activeShell,
+				this::afterLicenseUpdate);
+
+		registrationDialog.open();
+
+	}
+
+	void afterLicenseUpdate() {
 		licenseUtil.updateValidationResult();
 		doStatusUpdate();
 		configureTree(leftTreeViewer);

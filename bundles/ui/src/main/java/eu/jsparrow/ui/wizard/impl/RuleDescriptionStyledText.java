@@ -19,15 +19,19 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 
 import eu.jsparrow.core.statistic.RuleDocumentationURLGeneratorUtil;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 class RuleDescriptionStyledText extends StyledText {
+	private final AbstractSelectRulesWizardPage selectRulesWizardPage;
 	private static final String UPGRADE_LICENSE_LINK = "https://jsparrow.io/pricing/";
 	private static final String TO_UNLOCK_RULES = "To unlock this and many other rules, ";
 	private static final String UPGRADE_YOUR_LICENSE = "upgrade your license";
@@ -35,11 +39,13 @@ class RuleDescriptionStyledText extends StyledText {
 
 	private String selectedRuleLink = ""; //$NON-NLS-1$
 
-	private OffsetRange selectedRuleOffsetRange = new OffsetRange();
-	private OffsetRange upgradeLicenseOffsetRange = new OffsetRange();
+	private OffsetRange selectedRuleOffsetRange = OffsetRange.NONE;
+	private OffsetRange registerForFreeOffsetRange = OffsetRange.NONE;
+	private OffsetRange upgradeLicenseOffsetRange = OffsetRange.NONE;
 
-	RuleDescriptionStyledText(Composite parent) {
+	RuleDescriptionStyledText(Composite parent, AbstractSelectRulesWizardPage selectRulesWizardPage) {
 		super(parent, SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
+		this.selectRulesWizardPage = selectRulesWizardPage;
 	}
 
 	/**
@@ -62,7 +68,9 @@ class RuleDescriptionStyledText extends StyledText {
 		gridData.minimumHeight = 110;
 		this.setLayoutData(gridData);
 		this.setMargins(2, 2, 2, 2);
+
 		this.addListener(SWT.MouseDown, event -> {
+
 			int offset;
 			try {
 				offset = getOffsetAtPoint(new Point(event.x, event.y));
@@ -71,6 +79,20 @@ class RuleDescriptionStyledText extends StyledText {
 			}
 			if (offset != -1 && selectedRuleOffsetRange.start < offset && offset < selectedRuleOffsetRange.end) {
 				Program.launch(selectedRuleLink);
+
+			} else if (offset != -1 && registerForFreeOffsetRange.start < offset
+					&& offset < registerForFreeOffsetRange.end) {
+				// setCapture(false);
+
+				Shell activeShell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				RegistrationDialog registrationDialog = new RegistrationDialog(activeShell,
+						selectRulesWizardPage::afterLicenseUpdate);
+
+				registrationDialog.open();
+				// this.getShell().getChildren() [0].setFocus();
+
 			} else if (offset != -1 && upgradeLicenseOffsetRange.start < offset
 					&& offset < upgradeLicenseOffsetRange.end) {
 				Program.launch(UPGRADE_LICENSE_LINK);
@@ -141,6 +163,12 @@ class RuleDescriptionStyledText extends StyledText {
 			style.data = selectedRuleLink;
 		};
 
+		Consumer<StyleRange> registerForFreeConfig = style -> {
+			style.underline = true;
+			style.underlineStyle = SWT.UNDERLINE_LINK;
+			style.data = ""; //$NON-NLS-1$
+		};
+
 		Consumer<StyleRange> updateLicenseConfig = style -> {
 			style.underline = true;
 			style.underlineStyle = SWT.UNDERLINE_LINK;
@@ -159,8 +187,18 @@ class RuleDescriptionStyledText extends StyledText {
 		descriptionList.add(new StyleContainer(name, h1));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 
+		StyleContainer registerForFreeStyleContainer = null;
 		StyleContainer upgradeLicenseStyleContainer = null;
 		if (unlockRulesSuggestion) {
+			if (rule.isFree() && !licenseUtil.isActiveRegistration()) {
+				descriptionList.add(new StyleContainer(lineDelimiter));
+				descriptionList.add(new StyleContainer("This Rule is free. To unlock it, "));
+				registerForFreeStyleContainer = new StyleContainer("register for a free jSparrow trial ",
+						blue.andThen(registerForFreeConfig));
+				descriptionList.add(registerForFreeStyleContainer);
+				descriptionList.add(new StyleContainer(" and you will be able to apply 20 of our most liked rules."));
+				descriptionList.add(new StyleContainer(lineDelimiter));
+			}
 			upgradeLicenseStyleContainer = new StyleContainer(UPGRADE_YOUR_LICENSE, blue.andThen(updateLicenseConfig));
 			descriptionList.add(new StyleContainer(lineDelimiter));
 			descriptionList.add(new StyleContainer(TO_UNLOCK_RULES));
@@ -212,8 +250,12 @@ class RuleDescriptionStyledText extends StyledText {
 
 		selectedRuleOffsetRange = findOffsetRange(descriptionList, documentationStyleContainer);
 		upgradeLicenseOffsetRange = OffsetRange.NONE;
+		registerForFreeOffsetRange = OffsetRange.NONE;
 		if (upgradeLicenseStyleContainer != null) {
 			upgradeLicenseOffsetRange = findOffsetRange(descriptionList, upgradeLicenseStyleContainer);
+		}
+		if (registerForFreeStyleContainer != null) {
+			registerForFreeOffsetRange = findOffsetRange(descriptionList, registerForFreeStyleContainer);
 		}
 
 		int requirementsBulletingStartLine = getLineAtOffset(

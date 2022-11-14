@@ -42,7 +42,9 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.LockedRuleSelectionDialog;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
+import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
+import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
@@ -66,6 +68,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	private static final String WINDOW_ICON = "icons/jsparrow-icon-16-003.png"; //$NON-NLS-1$
 
 	private SelectRulesWizardPageModel model;
+	private SelectRulesWizardPage page;
 
 	private final Collection<IJavaProject> javaProjects;
 	private final List<RefactoringRule> rules;
@@ -92,11 +95,23 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	@Override
 	public void addPages() {
 		model = new SelectRulesWizardPageModel(rules);
-		AbstractSelectRulesWizardPage page = new SelectRulesWizardPage(model,
+		page = new SelectRulesWizardPage(model,
 				new SelectRulesWizardPageControler(model));
 		addPage(page);
 	}
 
+	public void showRegistrationDialog() {
+		RegistrationDialog registrationDialog = new RegistrationDialog(getShell(),
+				page::afterLicenseUpdate);
+		registrationDialog.open();
+	}
+	
+	public void showSimonykeesUpdateLicenseDialog() {
+		SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell(), page::afterLicenseUpdate);
+		dialog.create();
+		dialog.open();
+	}
+	
 	@Override
 	public boolean performCancel() {
 		Activator.setRunning(false);
