@@ -80,6 +80,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	private Button removeAllButton;
 
 	private RuleDescriptionStyledText descriptionStyledText;
+	private RefactoringRule selectedRuleToDescribe;
 
 	protected IStatus fSelectionStatus;
 
@@ -117,7 +118,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		createSelectionViewer(composite);
 
-		descriptionStyledText = new RuleDescriptionStyledText(composite, this);
+		descriptionStyledText = new RuleDescriptionStyledText(composite);
 		descriptionStyledText.createDescriptionViewer();
 
 		model.addListener(this::updateData);
@@ -426,9 +427,18 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		List<Object> rightSelection = ((IStructuredSelection) rightTableViewer.getSelection()).toList();
 
 		if (latestSelectionSide == SelectionSide.LEFT && leftSelection.size() == 1) {
-			descriptionStyledText.createTextForDescription((RefactoringRule) leftSelection.get(0));
+			selectedRuleToDescribe = (RefactoringRule) leftSelection.get(0);
 		} else if (latestSelectionSide == SelectionSide.RIGHT && rightSelection.size() == 1) {
-			descriptionStyledText.createTextForDescription((RefactoringRule) rightSelection.get(0));
+			selectedRuleToDescribe = (RefactoringRule) rightSelection.get(0);
+		} else {
+			selectedRuleToDescribe = null;
+		}
+		updateDescriptionTextViewer();
+	}
+
+	private void updateDescriptionTextViewer() {
+		if (selectedRuleToDescribe != null) {
+			descriptionStyledText.createTextForDescription(selectedRuleToDescribe);
 		} else {
 			descriptionStyledText.setText(Messages.SelectRulesWizardPage_defaultDescriptionText);
 		}
@@ -626,6 +636,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		doStatusUpdate();
 		configureTree(leftTreeViewer);
 		configureTable(rightTableViewer);
+		updateDescriptionTextViewer();
 	}
 
 	private enum SelectionSide {

@@ -37,7 +37,6 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -156,7 +155,7 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 
 					@Override
 					protected void createButtonsForButtonBar(Composite parent) {
-						createButton(parent, 11001, "Register for free jSparrow trial", false);
+						createButton(parent, 11001, "Register for free trial", false);
 						createButton(parent, 11002, "Enter premium license key", false);
 						super.createButtonsForButtonBar(parent);
 
@@ -166,13 +165,9 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 					}
 
 					private void updateShowRegistrationDialogButton() {
-						licenseUtil.updateValidationResult();
-						boolean activeRegistration = licenseUtil
-							.isActiveRegistration();
-						boolean isProLicense = licenseUtil.isProLicense();
-						if (activeRegistration || isProLicense) {
-							getButton(11001).setVisible(false);
-						}
+						boolean showButtonForFreeRegistration = licenseUtil.isFreeLicense()
+								&& !licenseUtil.isActiveRegistration();
+						getButton(11001).setVisible(showButtonForFreeRegistration);
 					}
 
 					@Override
@@ -182,7 +177,6 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 							updateShowRegistrationDialogButton();
 						} else if (buttonId == 11002) {
 							selectRulesWizard.showSimonykeesUpdateLicenseDialog();
-							
 							updateShowRegistrationDialogButton();
 						} else {
 							super.buttonPressed(buttonId);
