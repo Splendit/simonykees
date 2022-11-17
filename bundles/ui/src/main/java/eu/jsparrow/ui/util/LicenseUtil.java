@@ -30,7 +30,6 @@ import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
-import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
 import eu.jsparrow.ui.startup.registration.entity.RegistrationEntity;
 
@@ -171,10 +170,11 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		}
 		// When starting with an demo license we offer to register for free
 		// rules if not registered yet
-		if (isFreeLicense() && !isActiveRegistration() && !SimonykeesPreferenceManager.getDisableRegisterSuggestion()) {
+		if (isFreeLicense() && !isActiveRegistration()) {
 			setShouldContinueWithSelectRules(true);
 			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(shell);
-			return (dialog.open() == 0) && shouldContinueWithSelectRules;
+			dialog.open();
+			// return (dialog.open() == 0) && shouldContinueWithSelectRules;
 		}
 		return true;
 	}
@@ -191,7 +191,8 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	 * Does NOT check license validity.
 	 * 
 	 * @return whether the type of the validation result is either
-	 *         {@link LicenseType#FLOATING}, {@link LicenseType#NODE_LOCKED}, or {@link LicenseType#PAY_PER_USE}.
+	 *         {@link LicenseType#FLOATING}, {@link LicenseType#NODE_LOCKED}, or
+	 *         {@link LicenseType#PAY_PER_USE}.
 	 */
 	public boolean isProLicense() {
 		if (result == null) {
@@ -252,7 +253,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 		}
 
-		if(validationResult.getLicenseType() == LicenseType.PAY_PER_USE) {
+		if (validationResult.getLicenseType() == LicenseType.PAY_PER_USE) {
 			moduleNr = properties.getProperty("license.payPerUseModuleNr"); //$NON-NLS-1$
 		}
 		LicenseModel persitModel = factoryService.createNewModel(validationResult.getKey(), secret, productNr, moduleNr,
@@ -469,7 +470,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	public void setShouldContinueWithSelectRules(boolean shouldContinue) {
 		shouldContinueWithSelectRules = shouldContinue;
 	}
-	
+
 	public void reserveQuantity(int credit) {
 		LicenseModel model = tryLoadModelFromPersistence();
 

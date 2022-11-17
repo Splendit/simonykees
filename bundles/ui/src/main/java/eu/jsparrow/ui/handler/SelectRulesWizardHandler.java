@@ -155,13 +155,14 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 
 					@Override
 					protected void createButtonsForButtonBar(Composite parent) {
-						createButton(parent, 11001, "Register for free trial", false);
+						createButton(parent, 11001, "Register for a free trial", false);
 						createButton(parent, 11002, "Enter premium license key", false);
 						super.createButtonsForButtonBar(parent);
 
 						Button finish = getButton(IDialogConstants.FINISH_ID);
 						finish.setText(Messages.SelectRulesWizardHandler_finishButtonText);
 						setButtonLayoutData(finish);
+						updateShowRegistrationDialogButton();
 					}
 
 					private void updateShowRegistrationDialogButton() {

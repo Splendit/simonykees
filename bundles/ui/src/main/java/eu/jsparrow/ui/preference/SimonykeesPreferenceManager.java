@@ -130,24 +130,6 @@ public class SimonykeesPreferenceManager {
 	}
 
 	/**
-	 * Returns the current selection for disabling register suggestion when
-	 * starting select rules wizard.
-	 * 
-	 * @return the boolean value if register suggestion should be disabled
-	 */
-	public static boolean getDisableRegisterSuggestion() {
-		return store.getBoolean(SimonykeesPreferenceConstants.DISABLE_REGISTER_SUGGESTION);
-	}
-
-	/**
-	 * Sets the current selection for disabling register suggestion when
-	 * starting select rules wizard.
-	 */
-	public static void setDisableRegisterSuggestion(boolean disabled) {
-		store.setValue(SimonykeesPreferenceConstants.DISABLE_REGISTER_SUGGESTION, disabled);
-	}
-
-	/**
 	 * Returns the current selection for enabling recursive package resolving
 	 * 
 	 * @return true for recursive package resolving, false otherwise

@@ -1,5 +1,8 @@
 package eu.jsparrow.ui.dialog;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -11,11 +14,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
+import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
@@ -29,6 +34,7 @@ import eu.jsparrow.ui.util.LicenseUtil;
 public class SuggestRegistrationDialog extends Dialog {
 
 	private LicenseUtil licenseUtil = LicenseUtil.get();
+	private Composite area;
 
 	public SuggestRegistrationDialog(Shell parentShell) {
 		super(parentShell);
@@ -36,36 +42,61 @@ public class SuggestRegistrationDialog extends Dialog {
 
 	@Override
 	protected Control createDialogArea(Composite composite) {
-		Composite area = (Composite) super.createDialogArea(composite);
+		area = (Composite) super.createDialogArea(composite);
 		GridLayout gridLayout = new GridLayout(1, false);
 		gridLayout.marginWidth = 10;
 		area.setLayout(gridLayout);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		area.setLayoutData(gridData);
 
-		Label titleLabel = new Label(area, SWT.NONE);
-		titleLabel.setText(Messages.SuggestRegistrationDialog_noFreemiumLiceseWarning);
-
 		Label descriptionLabel = new Label(area, SWT.NONE);
 		descriptionLabel.setText(Messages.SuggestRegistrationDialog_descriptionOfFreemiumLicense);
+		addRegisterForFreeButton();
+		addLinkToUnlockAllRules("", "Upgrade your license", " to be able to apply all our rules!");
+		addRegisterForPremiumButton();
+		return composite;
+	}
 
-		Label offerLabel = new Label(area, SWT.NONE);
-		offerLabel.setText(Messages.SuggestRegistrationDialog_suggestToRegister);
-
-		GridData checkBoxTextGridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
-		checkBoxTextGridData.widthHint = 300;
-		Button dontShowAgainCheckBox = new Button(area, SWT.CHECK | SWT.WRAP);
-		dontShowAgainCheckBox.setText(Messages.SuggestRegistrationDialog_dontShowAgainCheckbox);
-		dontShowAgainCheckBox.setLayoutData(checkBoxTextGridData);
-		dontShowAgainCheckBox.addSelectionListener(new SelectionAdapter() {
+	public void addRegisterForFreeButton() {
+		Button registerForFreeButton = new Button(area, SWT.PUSH);
+		registerForFreeButton.setText("Register for a free trial");
+		registerForFreeButton.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Button source = (Button) e.getSource();
-				SimonykeesPreferenceManager.setDisableRegisterSuggestion(source.getSelection());
+			public void widgetSelected(SelectionEvent arg0) {
+				registerForFreeButtonPressed();
 			}
 		});
+	}
 
-		return composite;
+	public void addLinkToUnlockAllRules(String textBeforeLink, String linkedText, String textAfterLink) {
+		Link linkToUnlockRules = new Link(area, SWT.NONE);
+		linkToUnlockRules
+			.setText(String.format(LockedRuleSelectionDialog.FORMAT_LINK_TO_JSPARROW_PRICING, textBeforeLink,
+					linkedText, textAfterLink));
+		linkToUnlockRules.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				try {
+					PlatformUI.getWorkbench()
+						.getBrowserSupport()
+						.getExternalBrowser()
+						.openURL(new URL(arg0.text));
+				} catch (PartInitException | MalformedURLException e) {
+					// nothing...
+				}
+			}
+		});
+	}
+
+	public void addRegisterForPremiumButton() {
+		Button registerForPremiumButton = new Button(area, SWT.PUSH);
+		registerForPremiumButton.setText("Enter your license key");
+		registerForPremiumButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				registerForPremiumButtonPressed();
+			}
+		});
 	}
 
 	@Override
@@ -76,29 +107,19 @@ public class SuggestRegistrationDialog extends Dialog {
 
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, 7, Messages.SuggestRegistrationDialog_registerButtonText, true);
 		createButton(parent, IDialogConstants.OK_ID, Messages.SuggestRegistrationDialog_skipButtonText, false);
 	}
 
-	@Override
-	protected void buttonPressed(int buttonId) {
-		if (buttonId == 7) {
-			registerButtonPressed();
-		} else {
-			super.buttonPressed(buttonId);
-		}
+	private void registerForFreeButtonPressed() {
+		new RegistrationDialog(getShell(), licenseUtil::updateValidationResult).open();
+		this.close();
 	}
 
-	private void registerButtonPressed() {
-		licenseUtil.setShouldContinueWithSelectRules(false);
-		PlatformUI.getWorkbench()
-			.getDisplay()
-			.asyncExec(() -> {
-				Shell activeShell = PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow()
-					.getShell();
-				new RegistrationDialog(activeShell).open();
-			});
+	private void registerForPremiumButtonPressed() {
+		SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell(),
+				licenseUtil::updateValidationResult);
+		dialog.create();
+		dialog.open();
 		this.close();
 	}
 }

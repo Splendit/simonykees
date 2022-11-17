@@ -36,7 +36,7 @@ public class LockedRuleSelectionDialog extends Dialog {
 
 	private static final String UNLOCK_SELECTED_RULES = "Unlock selected rules";
 
-	private static final String FORMAT_LINK_TO_JSPARROW_PRICING = "%s<a href=\"https://jsparrow.io/pricing/\">%s</a>%s";
+	static final String FORMAT_LINK_TO_JSPARROW_PRICING = "%s<a href=\"https://jsparrow.io/pricing/\">%s</a>%s";
 
 	public static final String FULLSTOP = ".";
 
