@@ -1,6 +1,5 @@
 package eu.jsparrow.ui.handler;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +119,9 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 
 				class SelectRulesWizardDialog extends WizardDialog {
 
+					private static final int BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL = 11001;
+					private static final int BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY = 11002;
+
 					public SelectRulesWizardDialog(Shell parentShell, SelectRulesWizard newWizard) {
 						super(parentShell, newWizard);
 					}
@@ -162,30 +164,37 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 
 					@Override
 					protected void createButtonsForButtonBar(Composite parent) {
-						createButton(parent, 11001, "Register for a free trial", false);
-						createButton(parent, 11002, "Enter premium license key", false);
+						createButton(parent, BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL, "Register for a free trial", false);
+						createButton(parent, BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY, "Enter premium license key", false);
 						super.createButtonsForButtonBar(parent);
 
 						Button finish = getButton(IDialogConstants.FINISH_ID);
 						finish.setText(Messages.SelectRulesWizardHandler_finishButtonText);
 						setButtonLayoutData(finish);
-						updateShowRegistrationDialogButton();
+						updateButtonsForButtonBar();
 					}
 
-					private void updateShowRegistrationDialogButton() {
-						boolean showButtonForFreeRegistration = licenseUtil.isFreeLicense()
-								&& !licenseUtil.isActiveRegistration();
-						getButton(11001).setVisible(showButtonForFreeRegistration);
+					private void updateButtonsForButtonBar() {
+						boolean showRegisterForAFreeTrial = false;
+						boolean showEnterPremiumLicenseKey = false;
+						if (licenseUtil.isFreeLicense()) {
+							if (!licenseUtil.isActiveRegistration()) {
+								showRegisterForAFreeTrial = true;
+							}
+							showEnterPremiumLicenseKey = true;
+						}
+						getButton(BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL).setVisible(showRegisterForAFreeTrial);
+						getButton(BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY).setVisible(showEnterPremiumLicenseKey);
 					}
 
 					@Override
 					protected void buttonPressed(int buttonId) {
-						if (buttonId == 11001) {
+						if (buttonId == BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
 							selectRulesWizard.showRegistrationDialog();
-							updateShowRegistrationDialogButton();
-						} else if (buttonId == 11002) {
+							updateButtonsForButtonBar();
+						} else if (buttonId == BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
 							selectRulesWizard.showSimonykeesUpdateLicenseDialog();
-							updateShowRegistrationDialogButton();
+							updateButtonsForButtonBar();
 						} else {
 							super.buttonPressed(buttonId);
 						}
