@@ -124,6 +124,7 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 
 					public SelectRulesWizardDialog(Shell parentShell, SelectRulesWizard newWizard) {
 						super(parentShell, newWizard);
+						newWizard.addLicenseUpdateListener(this::updateButtonsForButtonBar);
 					}
 
 					/*
@@ -191,10 +192,8 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 					protected void buttonPressed(int buttonId) {
 						if (buttonId == BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
 							selectRulesWizard.showRegistrationDialog();
-							updateButtonsForButtonBar();
 						} else if (buttonId == BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
 							selectRulesWizard.showSimonykeesUpdateLicenseDialog();
-							updateButtonsForButtonBar();
 						} else {
 							super.buttonPressed(buttonId);
 						}

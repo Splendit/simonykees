@@ -1,7 +1,9 @@
 package eu.jsparrow.ui.preference;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
@@ -62,11 +64,11 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	private Image scaledJSparrowImageInactive;
 	private Image scaledTickmarkGreenIconImage;
 	private Image scaledCloseRedIconImage;
-	private Runnable lambdaAfterLicenseUpdate;
+	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
 
-	public SimonykeesUpdateLicenseDialog(Shell parentShell, Runnable lambdaAfterLicenseUpdate) {
+	public SimonykeesUpdateLicenseDialog(Shell parentShell, List<Runnable> afterLicenseUpdateListeners) {
 		this(parentShell);
-		this.lambdaAfterLicenseUpdate = lambdaAfterLicenseUpdate;
+		this.afterLicenseUpdateListeners.addAll(afterLicenseUpdateListeners);
 	}
 
 	public SimonykeesUpdateLicenseDialog(Shell parentShell) {
@@ -147,10 +149,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 						updatedLabel.setImage(scaledTickmarkGreenIconImage);
 						updatedIconLabel.setImage(scaledJSparrowImageActive);
 						licenseUtil.updateValidationResult();
-						if (lambdaAfterLicenseUpdate != null) {
-							lambdaAfterLicenseUpdate.run();
-						}
-
+						afterLicenseUpdateListeners.forEach(Runnable::run);
 					}
 					updatedLabel.setText(result.getDetailMessage());
 					updatedLabel.setVisible(true);

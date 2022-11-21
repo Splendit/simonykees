@@ -22,8 +22,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
-import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 
 /**
  * Dialog that shows when user has free license and is not registered for free
@@ -33,6 +31,9 @@ import eu.jsparrow.ui.startup.registration.RegistrationDialog;
  *
  */
 public class LockedRuleSelectionDialog extends Dialog {
+
+	public static final int BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL = 11001;
+	public static final int BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY = 11002;
 
 	private static final String UNLOCK_SELECTED_RULES = "Unlock selected rules";
 
@@ -58,20 +59,12 @@ public class LockedRuleSelectionDialog extends Dialog {
 	public static final String VISIT_US = "visit us";
 
 	private final List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas;
-	private Runnable lambdaAfterLicenseUpdate;
-	private Composite area;
-	
-	
-	public LockedRuleSelectionDialog(Shell parentShell, List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas, Runnable lambdaAfterLicenseUpdate) {
-		this(parentShell, addComponentLambdas);
-		this.lambdaAfterLicenseUpdate = lambdaAfterLicenseUpdate;
 
-	}
+	private Composite area;
 
 	public LockedRuleSelectionDialog(Shell parentShell, List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas) {
 		super(parentShell);
 		this.addComponentLambdas = addComponentLambdas;
-
 	}
 
 	@Override
@@ -154,14 +147,14 @@ public class LockedRuleSelectionDialog extends Dialog {
 	}
 
 	private void registerForFreeButtonPressed() {
-		new RegistrationDialog(getShell(), lambdaAfterLicenseUpdate).open();
+		this.setReturnCode(BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL);
+		this.close();
 		this.close();
 	}
 
 	private void registerForPremiumButtonPressed() {
-		SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell(), lambdaAfterLicenseUpdate);
-		dialog.create();
-		dialog.open();
+		this.setReturnCode(BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY);
+		this.close();
 		this.close();
 	}
 }

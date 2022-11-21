@@ -44,13 +44,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.dialog.LockedRuleSelectionDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
@@ -89,6 +88,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	private SelectionSide latestSelectionSide = SelectionSide.NONE;
 
 	private LicenseUtil licenseUtil = LicenseUtil.get();
+	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
 
 	protected AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
 			AbstractSelectRulesWizardControler controler) {
@@ -100,6 +100,11 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		this.model = model;
 		this.controler = controler;
+		afterLicenseUpdateListeners.add(this::afterLicenseUpdate);
+	}
+
+	public void addLicenseUpdateListener(Runnable afterLicenseUpdate) {
+		afterLicenseUpdateListeners.add(afterLicenseUpdate);
 	}
 
 	/**
@@ -613,25 +618,30 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		}
 
 		if (addComponentLambdas != null) {
-			LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), addComponentLambdas,
-					this::afterLicenseUpdate);
-			dialog.open();
+			LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), addComponentLambdas);
+			int returnCode = dialog.open();
+			if (returnCode == LockedRuleSelectionDialog.BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
+				showRegistrationDialog();
+			} else if (returnCode == LockedRuleSelectionDialog.BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
+				showSimonykeesUpdateLicenseDialog();
+			}
 		}
 
 	}
 
 	public void showRegistrationDialog() {
-		Shell activeShell = PlatformUI.getWorkbench()
-			.getActiveWorkbenchWindow()
-			.getShell();
-		RegistrationDialog registrationDialog = new RegistrationDialog(activeShell,
-				this::afterLicenseUpdate);
-
+		RegistrationDialog registrationDialog = new RegistrationDialog(getShell(), afterLicenseUpdateListeners);
 		registrationDialog.open();
-
 	}
 
-	void afterLicenseUpdate() {
+	public void showSimonykeesUpdateLicenseDialog() {
+		SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell(),
+				afterLicenseUpdateListeners);
+		dialog.create();
+		dialog.open();
+	}
+
+	private void afterLicenseUpdate() {
 		doStatusUpdate();
 		configureTree(leftTreeViewer);
 		configureTable(rightTableViewer);

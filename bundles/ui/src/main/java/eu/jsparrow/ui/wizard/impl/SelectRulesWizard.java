@@ -11,6 +11,7 @@ import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.TO_UNLOCK_THEM;
 import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.VISIT_US;
 import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -42,9 +43,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.LockedRuleSelectionDialog;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
-import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
-import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
@@ -75,6 +74,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 	private RefactoringPipeline refactoringPipeline;
 	private Image windowIcon;
+	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
 
 	public SelectRulesWizard(Collection<IJavaProject> javaProjects, RefactoringPipeline refactoringPipeline,
 			List<RefactoringRule> rules) {
@@ -87,6 +87,10 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		Window.setDefaultImage(windowIcon);
 	}
 
+	public void addLicenseUpdateListener(Runnable afterLicenseUpdate) {
+		afterLicenseUpdateListeners.add(afterLicenseUpdate);
+	}
+
 	@Override
 	public String getWindowTitle() {
 		return Messages.SelectRulesWizard_title;
@@ -97,21 +101,18 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		model = new SelectRulesWizardPageModel(rules);
 		page = new SelectRulesWizardPage(model,
 				new SelectRulesWizardPageControler(model));
+		afterLicenseUpdateListeners.forEach(page::addLicenseUpdateListener);
 		addPage(page);
 	}
 
 	public void showRegistrationDialog() {
-		RegistrationDialog registrationDialog = new RegistrationDialog(getShell(),
-				page::afterLicenseUpdate);
-		registrationDialog.open();
+		page.showRegistrationDialog();
 	}
-	
+
 	public void showSimonykeesUpdateLicenseDialog() {
-		SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell(), page::afterLicenseUpdate);
-		dialog.create();
-		dialog.open();
+		page.showSimonykeesUpdateLicenseDialog();
 	}
-	
+
 	@Override
 	public boolean performCancel() {
 		Activator.setRunning(false);
@@ -200,9 +201,13 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 		if (addComponentLambdas != null) {
 			LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), addComponentLambdas);
-			dialog.open();
+			int returnCode = dialog.open();
+			if (returnCode == LockedRuleSelectionDialog.BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
+				showRegistrationDialog();
+			} else if (returnCode == LockedRuleSelectionDialog.BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
+				showSimonykeesUpdateLicenseDialog();
+			}
 		}
-
 	}
 
 	/**

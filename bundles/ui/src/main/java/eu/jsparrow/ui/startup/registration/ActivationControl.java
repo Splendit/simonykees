@@ -1,5 +1,7 @@
 package eu.jsparrow.ui.startup.registration;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,11 +40,11 @@ public class ActivationControl extends Composite {
 	private Label statusLabel;
 	private Button activateButton;
 
-	private Runnable lambdaAfterActivation;
+	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
 
-	public ActivationControl(Composite parent, int style, Runnable lambdaAfterActivation) {
+	public ActivationControl(Composite parent, int style, List<Runnable> afterLicenseUpdateListeners) {
 		super(parent, style);
-		this.lambdaAfterActivation = lambdaAfterActivation;
+		this.afterLicenseUpdateListeners.addAll(afterLicenseUpdateListeners);
 
 		GridLayout overallLayout = new GridLayout();
 		overallLayout.marginHeight = 0;
@@ -152,9 +154,7 @@ public class ActivationControl extends Composite {
 								.close();
 							LicenseUtil licenseUtil = LicenseUtil.get();
 							licenseUtil.updateValidationResult();
-							if (lambdaAfterActivation != null) {
-								lambdaAfterActivation.run();
-							}
+							afterLicenseUpdateListeners.forEach(Runnable::run);
 							return;
 						} else {
 							showInvalidLicenseDialog(display);
