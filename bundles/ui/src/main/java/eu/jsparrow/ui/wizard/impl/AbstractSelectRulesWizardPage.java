@@ -632,7 +632,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	}
 
 	void afterLicenseUpdate() {
-		licenseUtil.updateValidationResult();
 		doStatusUpdate();
 		configureTree(leftTreeViewer);
 		configureTable(rightTableViewer);

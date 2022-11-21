@@ -150,6 +150,8 @@ public class ActivationControl extends Composite {
 							showLicenseValidDialog(display);
 							parentComposite.getShell()
 								.close();
+							LicenseUtil licenseUtil = LicenseUtil.get();
+							licenseUtil.updateValidationResult();
 							if (lambdaAfterActivation != null) {
 								lambdaAfterActivation.run();
 							}

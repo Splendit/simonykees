@@ -22,7 +22,6 @@ import org.eclipse.ui.PlatformUI;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
-import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * Dialog that shows when user has free license and is not registered for free
@@ -33,7 +32,6 @@ import eu.jsparrow.ui.util.LicenseUtil;
  */
 public class SuggestRegistrationDialog extends Dialog {
 
-	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private Composite area;
 
 	public SuggestRegistrationDialog(Shell parentShell) {
@@ -111,13 +109,12 @@ public class SuggestRegistrationDialog extends Dialog {
 	}
 
 	private void registerForFreeButtonPressed() {
-		new RegistrationDialog(getShell(), licenseUtil::updateValidationResult).open();
+		new RegistrationDialog(getShell()).open();
 		this.close();
 	}
 
 	private void registerForPremiumButtonPressed() {
-		SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell(),
-				licenseUtil::updateValidationResult);
+		SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell());
 		dialog.create();
 		dialog.open();
 		this.close();
