@@ -1,5 +1,6 @@
 package eu.jsparrow.ui.handler;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -116,7 +117,13 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 				SelectRulesWizard selectRulesWizard = new SelectRulesWizard(selectedJavaElements.keySet(),
 						refactoringPipeline,
 						RulesContainer.getRulesForProjects(selectedJavaElements.keySet(), false));
-				final WizardDialog dialog = new WizardDialog(shell, selectRulesWizard) {
+
+				class SelectRulesWizardDialog extends WizardDialog {
+
+					public SelectRulesWizardDialog(Shell parentShell, SelectRulesWizard newWizard) {
+						super(parentShell, newWizard);
+					}
+
 					/*
 					 * Removed unnecessary empty space on the bottom of the
 					 * wizard intended for ProgressMonitor that is not used
@@ -183,7 +190,9 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 							super.buttonPressed(buttonId);
 						}
 					}
-				};
+				}
+
+				SelectRulesWizardDialog dialog = new SelectRulesWizardDialog(shell, selectRulesWizard);
 				/*
 				 * Creates new shell and wizard.
 				 */
