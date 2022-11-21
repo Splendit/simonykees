@@ -8,6 +8,7 @@ import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.REGISTRATION_FOR_A
 import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.TO_UNLOCK_ALL_OUR_RULES;
 import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.TO_UNLOCK_PREMIUM_RULES;
 import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.TO_UNLOCK_THEM;
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.UNLOCK_SELECTED_RULES;
 import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.VISIT_US;
 import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES;
 
@@ -201,6 +202,8 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 		if (addComponentLambdas != null) {
 			LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), addComponentLambdas);
+			dialog.useSkipAsLastButton();
+			dialog.setTextForShell(UNLOCK_SELECTED_RULES);
 			int returnCode = dialog.open();
 			if (returnCode == LockedRuleSelectionDialog.BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
 				showRegistrationDialog();

@@ -1,11 +1,19 @@
 package eu.jsparrow.ui.util;
 
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.REGISTER_FOR_A_FREE_J_SPARROW_TRIAL;
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.UPGRADE_YOUR_LICENSE;
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog._TO_BE_ABLE_TO_APPLY_20_OF_OUR_MOST_LIKED_RULES;
+import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog._TO_BE_ABLE_TO_APPLY_ALL_OUR_RULES;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Consumer;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
@@ -28,8 +36,10 @@ import eu.jsparrow.license.api.RegistrationService;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
+import eu.jsparrow.ui.dialog.LockedRuleSelectionDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
+import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
+import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
 import eu.jsparrow.ui.startup.registration.entity.RegistrationEntity;
 
@@ -61,7 +71,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	private Scheduler scheduler;
 	private SystemInfoWrapper systemInfoWrapper;
 
-	private boolean shouldContinueWithSelectRules = true;
 	private EndpointEncryption endpointEncryption;
 
 	private LicenseUtil() {
@@ -171,10 +180,27 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		// When starting with an demo license we offer to register for free
 		// rules if not registered yet
 		if (isFreeLicense() && !isActiveRegistration()) {
-			setShouldContinueWithSelectRules(true);
-			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(shell);
-			dialog.open();
-			// return (dialog.open() == 0) && shouldContinueWithSelectRules;
+			List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas = Arrays.asList(
+					dialog -> dialog
+						.addLabel(
+								REGISTER_FOR_A_FREE_J_SPARROW_TRIAL + _TO_BE_ABLE_TO_APPLY_20_OF_OUR_MOST_LIKED_RULES),
+					LockedRuleSelectionDialog::addRegisterForFreeButton,
+					dialog -> dialog.addLinkToUnlockAllRules("", //$NON-NLS-1$
+							UPGRADE_YOUR_LICENSE, _TO_BE_ABLE_TO_APPLY_ALL_OUR_RULES),
+					LockedRuleSelectionDialog::addRegisterForPremiumButton);
+			LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(shell, addComponentLambdas);
+			dialog.useSkipAsLastButton();
+			dialog.setTextForShell(Messages.SuggestRegistrationDialog_getFreeRulesTitle);
+			int returnCode = dialog.open();
+			if (returnCode == LockedRuleSelectionDialog.BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
+				RegistrationDialog registrationDialog = new RegistrationDialog(shell);
+				registrationDialog.open();
+
+			} else if (returnCode == LockedRuleSelectionDialog.BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
+				SimonykeesUpdateLicenseDialog simonykeesUpdateLicenseDialog = new SimonykeesUpdateLicenseDialog(shell);
+				simonykeesUpdateLicenseDialog.create();
+				simonykeesUpdateLicenseDialog.open();
+			}
 		}
 		return true;
 	}
@@ -465,10 +491,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			return wasSuccessful;
 		}
 
-	}
-
-	public void setShouldContinueWithSelectRules(boolean shouldContinue) {
-		shouldContinueWithSelectRules = shouldContinue;
 	}
 
 	public void reserveQuantity(int credit) {

@@ -35,9 +35,14 @@ public class LockedRuleSelectionDialog extends Dialog {
 	public static final int BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL = 11001;
 	public static final int BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY = 11002;
 
-	private static final String UNLOCK_SELECTED_RULES = "Unlock selected rules";
-
 	static final String FORMAT_LINK_TO_JSPARROW_PRICING = "%s<a href=\"https://jsparrow.io/pricing/\">%s</a>%s";
+
+	public static final String UPGRADE_YOUR_LICENSE = "Upgrade your license";
+	public static final String _TO_BE_ABLE_TO_APPLY_ALL_OUR_RULES = " to be able to apply all our rules!";
+	public static final String REGISTER_FOR_A_FREE_J_SPARROW_TRIAL = "Register for a free jSparrow trial";
+	public static final String _TO_BE_ABLE_TO_APPLY_20_OF_OUR_MOST_LIKED_RULES = " to be able to apply 20 of our most liked rules!";
+
+	public static final String UNLOCK_SELECTED_RULES = "Unlock selected rules";
 
 	public static final String FULLSTOP = ".";
 
@@ -54,6 +59,9 @@ public class LockedRuleSelectionDialog extends Dialog {
 	public static final String REGISTER_FOR_A_PREMIUM_LICENSE = "register for a premium license.";
 	public static final String REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES = "Registration for a free trial will unlock 20 of our most liked rules!";
 
+	private static final String REGISTER_FOR_A_FREE_TRIAL = "Register for a free trial";
+	private static final String ENTER_YOUR_LICENSE_KEY = "Enter your license key";
+
 	public static final String AND_UPGRADE_YOUR_LICENSE = " and upgrade your license.";
 
 	public static final String VISIT_US = "visit us";
@@ -61,6 +69,9 @@ public class LockedRuleSelectionDialog extends Dialog {
 	private final List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas;
 
 	private Composite area;
+	private boolean cancelAsLastButton;
+	private boolean skipAsLastButton;
+	private String textForShell;
 
 	public LockedRuleSelectionDialog(Shell parentShell, List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas) {
 		super(parentShell);
@@ -85,9 +96,23 @@ public class LockedRuleSelectionDialog extends Dialog {
 		return composite;
 	}
 
+	public void useCancelAsLastButton() {
+		cancelAsLastButton = true;
+		skipAsLastButton = false;
+	}
+
+	public void useSkipAsLastButton() {
+		skipAsLastButton = true;
+		cancelAsLastButton = false;
+	}
+
+	public void setTextForShell(String text) {
+		textForShell = text;
+	}
+
 	public void addLabel(String lableText) {
-		Label titleLabel = new Label(area, SWT.NONE);
-		titleLabel.setText(lableText);
+		Label label = new Label(area, SWT.NONE);
+		label.setText(lableText);
 	}
 
 	public void addLinkToUnlockAllRules(String textBeforeLink, String linkedText) {
@@ -115,7 +140,7 @@ public class LockedRuleSelectionDialog extends Dialog {
 
 	public void addRegisterForFreeButton() {
 		Button registerForFreeButton = new Button(area, SWT.PUSH);
-		registerForFreeButton.setText(Messages.SimonykeesPreferencePageLicense_register_for_free_jsparrow_trial);
+		registerForFreeButton.setText(REGISTER_FOR_A_FREE_TRIAL);
 		registerForFreeButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -126,7 +151,7 @@ public class LockedRuleSelectionDialog extends Dialog {
 
 	public void addRegisterForPremiumButton() {
 		Button registerForPremiumButton = new Button(area, SWT.PUSH);
-		registerForPremiumButton.setText(Messages.SimonykeesPreferencePageLicense_update_license_key_button);
+		registerForPremiumButton.setText(ENTER_YOUR_LICENSE_KEY);
 		registerForPremiumButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -138,23 +163,28 @@ public class LockedRuleSelectionDialog extends Dialog {
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText(UNLOCK_SELECTED_RULES);
+		if (textForShell != null) {
+			shell.setText(textForShell);
+		}
+
 	}
 
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		if (skipAsLastButton) {
+			createButton(parent, IDialogConstants.OK_ID, Messages.SuggestRegistrationDialog_skipButtonText, false);
+		} else if (cancelAsLastButton) {
+			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		}
 	}
 
 	private void registerForFreeButtonPressed() {
 		this.setReturnCode(BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL);
 		this.close();
-		this.close();
 	}
 
 	private void registerForPremiumButtonPressed() {
 		this.setReturnCode(BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY);
-		this.close();
 		this.close();
 	}
 }
