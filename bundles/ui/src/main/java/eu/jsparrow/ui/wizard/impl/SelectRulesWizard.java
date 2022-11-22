@@ -1,7 +1,6 @@
 package eu.jsparrow.ui.wizard.impl;
 
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.ALL_RULES_IN_YOUR_SELECTION_ARE_FREE;
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.AND_UPGRADE_YOUR_LICENSE;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_FREE_TRIAL_VERSION;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_PREMIUM_LICENSE;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES;
@@ -9,8 +8,8 @@ import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_ALL_OUR_
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_PREMIUM_RULES;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_THEM;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.UNLOCK_SELECTED_RULES;
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.VISIT_US;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog._UPGRADE_YOUR_LICENSE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +61,7 @@ import eu.jsparrow.ui.wizard.AbstractRuleWizard;
  * @since 0.9
  */
 public class SelectRulesWizard extends AbstractRuleWizard {
+
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
 
@@ -167,8 +167,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 			if (!allRulesFree) {
 				addComponentLambdas = Arrays.asList(//
 						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
-						dialog -> dialog.addLinkToUnlockAllRules(TO_UNLOCK_PREMIUM_RULES, VISIT_US,
-								AND_UPGRADE_YOUR_LICENSE),
+						dialog -> dialog.addLinkToUnlockAllRules(TO_UNLOCK_PREMIUM_RULES, _UPGRADE_YOUR_LICENSE),
 						SuggestRegistrationDialog::addRegisterForPremiumButton);
 			}
 		} else {

@@ -1,6 +1,5 @@
 package eu.jsparrow.ui.wizard.impl;
 
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.AND_UPGRADE_YOUR_LICENSE;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_FREE_TRIAL_VERSION;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_PREMIUM_LICENSE;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES;
@@ -8,10 +7,10 @@ import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_ALL_OUR_
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_PREMIUM_RULES;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_THEM;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.UNLOCK_SELECTED_RULES;
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.VISIT_US;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.YOUR_SELECTION_IS_INCLUDING_FREE_RULES;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.YOUR_SELECTION_IS_INCLUDING_ONLY_PREMIUM_RULES;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog._UPGRADE_YOUR_LICENSE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,8 +47,8 @@ import org.eclipse.swt.widgets.Label;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
 import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -584,13 +583,14 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			boolean allRulesFree = selectedEnabledRules
 				.stream()
 				.allMatch(RefactoringRule::isFree);
+
 			if (!allRulesFree) {
 				addComponentLambdas = Arrays.asList(//
 						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
-						dialog -> dialog.addLinkToUnlockAllRules(TO_UNLOCK_PREMIUM_RULES, VISIT_US,
-								AND_UPGRADE_YOUR_LICENSE),
+						dialog -> dialog.addLinkToUnlockAllRules(TO_UNLOCK_PREMIUM_RULES, _UPGRADE_YOUR_LICENSE),
 						SuggestRegistrationDialog::addRegisterForPremiumButton);
 			}
+			
 		} else {
 			boolean containsFreeRule = selectedEnabledRules
 				.stream()

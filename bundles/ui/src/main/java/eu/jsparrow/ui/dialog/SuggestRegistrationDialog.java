@@ -47,7 +47,7 @@ public class SuggestRegistrationDialog extends Dialog {
 	public static final String FULLSTOP = ".";
 
 	public static final String TO_UNLOCK_ALL_OUR_RULES = "To unlock all our rules, ";
-	public static final String TO_UNLOCK_PREMIUM_RULES = "To unlock premium rules ";
+	public static final String TO_UNLOCK_PREMIUM_RULES = "To unlock premium rules, ";
 	public static final String TO_UNLOCK_THEM = "To unlock them, ";
 
 	public static final String ALL_RULES_IN_YOUR_SELECTION_ARE_FREE = "All rules in your selection are free.";
@@ -58,13 +58,10 @@ public class SuggestRegistrationDialog extends Dialog {
 	public static final String REGISTER_FOR_A_FREE_TRIAL_VERSION = "register for a free trial version.";
 	public static final String REGISTER_FOR_A_PREMIUM_LICENSE = "register for a premium license.";
 	public static final String REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES = "Registration for a free trial will unlock 20 of our most liked rules!";
+	public static final String _UPGRADE_YOUR_LICENSE = " upgrade your license";
 
 	private static final String REGISTER_FOR_A_FREE_TRIAL = "Register for a free trial";
 	private static final String ENTER_YOUR_LICENSE_KEY = "Enter your license key";
-
-	public static final String AND_UPGRADE_YOUR_LICENSE = " and upgrade your license.";
-
-	public static final String VISIT_US = "visit us";
 
 	private final List<Consumer<SuggestRegistrationDialog>> addComponentLambdas;
 
