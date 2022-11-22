@@ -30,7 +30,7 @@ import eu.jsparrow.i18n.Messages;
  * @since 3.0.0
  *
  */
-public class LockedRuleSelectionDialog extends Dialog {
+public class SuggestRegistrationDialog extends Dialog {
 
 	public static final int BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL = 11001;
 	public static final int BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY = 11002;
@@ -66,14 +66,14 @@ public class LockedRuleSelectionDialog extends Dialog {
 
 	public static final String VISIT_US = "visit us";
 
-	private final List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas;
+	private final List<Consumer<SuggestRegistrationDialog>> addComponentLambdas;
 
 	private Composite area;
 	private boolean cancelAsLastButton;
 	private boolean skipAsLastButton;
 	private String textForShell;
 
-	public LockedRuleSelectionDialog(Shell parentShell, List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas) {
+	public SuggestRegistrationDialog(Shell parentShell, List<Consumer<SuggestRegistrationDialog>> addComponentLambdas) {
 		super(parentShell);
 		this.addComponentLambdas = addComponentLambdas;
 	}

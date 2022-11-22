@@ -1,17 +1,17 @@
 package eu.jsparrow.ui.wizard.impl;
 
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.AND_UPGRADE_YOUR_LICENSE;
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.REGISTER_FOR_A_FREE_TRIAL_VERSION;
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.REGISTER_FOR_A_PREMIUM_LICENSE;
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES;
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.TO_UNLOCK_ALL_OUR_RULES;
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.TO_UNLOCK_PREMIUM_RULES;
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.TO_UNLOCK_THEM;
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.UNLOCK_SELECTED_RULES;
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.VISIT_US;
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.YOUR_SELECTION_IS_INCLUDING_FREE_RULES;
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.YOUR_SELECTION_IS_INCLUDING_ONLY_PREMIUM_RULES;
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.AND_UPGRADE_YOUR_LICENSE;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_FREE_TRIAL_VERSION;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_PREMIUM_LICENSE;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_ALL_OUR_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_PREMIUM_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_THEM;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.UNLOCK_SELECTED_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.VISIT_US;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.YOUR_SELECTION_IS_INCLUDING_FREE_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.YOUR_SELECTION_IS_INCLUDING_ONLY_PREMIUM_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,7 +48,7 @@ import org.eclipse.swt.widgets.Label;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.ui.dialog.LockedRuleSelectionDialog;
+import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
@@ -579,7 +579,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			return;
 		}
 
-		List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas = null;
+		List<Consumer<SuggestRegistrationDialog>> addComponentLambdas = null;
 		if (licenseUtil.isActiveRegistration()) {
 			boolean allRulesFree = selectedEnabledRules
 				.stream()
@@ -589,7 +589,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
 						dialog -> dialog.addLinkToUnlockAllRules(TO_UNLOCK_PREMIUM_RULES, VISIT_US,
 								AND_UPGRADE_YOUR_LICENSE),
-						LockedRuleSelectionDialog::addRegisterForPremiumButton);
+						SuggestRegistrationDialog::addRegisterForPremiumButton);
 			}
 		} else {
 			boolean containsFreeRule = selectedEnabledRules
@@ -602,30 +602,30 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 						dialog -> dialog.addLabel(TO_UNLOCK_THEM + REGISTER_FOR_A_FREE_TRIAL_VERSION),
 						dialog -> dialog.addLabel(
 								REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES),
-						LockedRuleSelectionDialog::addRegisterForFreeButton,
+						SuggestRegistrationDialog::addRegisterForFreeButton,
 						dialog -> dialog.addLinkToUnlockAllRules(TO_UNLOCK_ALL_OUR_RULES,
 								REGISTER_FOR_A_PREMIUM_LICENSE),
-						LockedRuleSelectionDialog::addRegisterForPremiumButton);
+						SuggestRegistrationDialog::addRegisterForPremiumButton);
 
 			} else {
 				addComponentLambdas = Arrays.asList(//
 						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_ONLY_PREMIUM_RULES),
 						dialog -> dialog.addLinkToUnlockAllRules(TO_UNLOCK_THEM, REGISTER_FOR_A_PREMIUM_LICENSE),
-						LockedRuleSelectionDialog::addRegisterForPremiumButton,
+						SuggestRegistrationDialog::addRegisterForPremiumButton,
 						dialog -> dialog
 							.addLabel(REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES),
-						LockedRuleSelectionDialog::addRegisterForFreeButton);
+						SuggestRegistrationDialog::addRegisterForFreeButton);
 			}
 		}
 
 		if (addComponentLambdas != null) {
-			LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(getShell(), addComponentLambdas);
+			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(getShell(), addComponentLambdas);
 			dialog.useCancelAsLastButton();
 			dialog.setTextForShell(UNLOCK_SELECTED_RULES);
 			int returnCode = dialog.open();
-			if (returnCode == LockedRuleSelectionDialog.BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
+			if (returnCode == SuggestRegistrationDialog.BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
 				showRegistrationDialog();
-			} else if (returnCode == LockedRuleSelectionDialog.BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
+			} else if (returnCode == SuggestRegistrationDialog.BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
 				showSimonykeesUpdateLicenseDialog();
 			}
 		}

@@ -1,9 +1,9 @@
 package eu.jsparrow.ui.util;
 
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.REGISTER_FOR_A_FREE_J_SPARROW_TRIAL;
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog.UPGRADE_YOUR_LICENSE;
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog._TO_BE_ABLE_TO_APPLY_20_OF_OUR_MOST_LIKED_RULES;
-import static eu.jsparrow.ui.dialog.LockedRuleSelectionDialog._TO_BE_ABLE_TO_APPLY_ALL_OUR_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_FREE_J_SPARROW_TRIAL;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.UPGRADE_YOUR_LICENSE;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog._TO_BE_ABLE_TO_APPLY_20_OF_OUR_MOST_LIKED_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog._TO_BE_ABLE_TO_APPLY_ALL_OUR_RULES;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +36,7 @@ import eu.jsparrow.license.api.RegistrationService;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
-import eu.jsparrow.ui.dialog.LockedRuleSelectionDialog;
+import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
@@ -180,23 +180,23 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		// When starting with an demo license we offer to register for free
 		// rules if not registered yet
 		if (isFreeLicense() && !isActiveRegistration()) {
-			List<Consumer<LockedRuleSelectionDialog>> addComponentLambdas = Arrays.asList(
+			List<Consumer<SuggestRegistrationDialog>> addComponentLambdas = Arrays.asList(
 					dialog -> dialog
 						.addLabel(
 								REGISTER_FOR_A_FREE_J_SPARROW_TRIAL + _TO_BE_ABLE_TO_APPLY_20_OF_OUR_MOST_LIKED_RULES),
-					LockedRuleSelectionDialog::addRegisterForFreeButton,
+					SuggestRegistrationDialog::addRegisterForFreeButton,
 					dialog -> dialog.addLinkToUnlockAllRules("", //$NON-NLS-1$
 							UPGRADE_YOUR_LICENSE, _TO_BE_ABLE_TO_APPLY_ALL_OUR_RULES),
-					LockedRuleSelectionDialog::addRegisterForPremiumButton);
-			LockedRuleSelectionDialog dialog = new LockedRuleSelectionDialog(shell, addComponentLambdas);
+					SuggestRegistrationDialog::addRegisterForPremiumButton);
+			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(shell, addComponentLambdas);
 			dialog.useSkipAsLastButton();
 			dialog.setTextForShell(Messages.SuggestRegistrationDialog_getFreeRulesTitle);
 			int returnCode = dialog.open();
-			if (returnCode == LockedRuleSelectionDialog.BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
+			if (returnCode == SuggestRegistrationDialog.BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
 				RegistrationDialog registrationDialog = new RegistrationDialog(shell);
 				registrationDialog.open();
 
-			} else if (returnCode == LockedRuleSelectionDialog.BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
+			} else if (returnCode == SuggestRegistrationDialog.BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
 				SimonykeesUpdateLicenseDialog simonykeesUpdateLicenseDialog = new SimonykeesUpdateLicenseDialog(shell);
 				simonykeesUpdateLicenseDialog.create();
 				simonykeesUpdateLicenseDialog.open();
