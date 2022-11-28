@@ -37,7 +37,14 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 
 	private Image tickmarkGreenIconImage;
 	private Image greenFreeRuleImage;
-	private static final String F_GREEN_ICON_PATH = "icons/f-icon-green-14px.png"; //$NON-NLS-1$
+	private Image tickmarkLockedRuleImage;
+	private Image lockedRuleImage;
+
+	private boolean freeLicense;
+	private boolean activeRegistration;
+
+	private static final String F_GREEN_ICON_PATH = "icons/icon-check.png"; //$NON-NLS-1$
+	private static final String ICON_LOCK = "icons/icon-lock.png"; //$NON-NLS-1$
 
 	public TreeLabelProvider() {
 		Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
@@ -48,6 +55,17 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 		tickmarkGreenIconImage = imageDescTickMarkGreen.createImage();
 		ImageData imageDataTickmarkGreen = tickmarkGreenIconImage.getImageData();
 		greenFreeRuleImage = new Image(Display.getCurrent(), imageDataTickmarkGreen);
+
+		IPath iPathIconLock = new Path(ICON_LOCK);
+		URL urlIconLock = FileLocator.find(bundle, iPathIconLock, new HashMap<>());
+		ImageDescriptor imageDescLockIcon = ImageDescriptor.createFromURL(urlIconLock);
+		tickmarkLockedRuleImage = imageDescLockIcon.createImage();
+		ImageData imageDataIconLock = tickmarkLockedRuleImage.getImageData();
+		lockedRuleImage = new Image(Display.getCurrent(), imageDataIconLock);
+
+		LicenseUtil licenseUtil = LicenseUtil.get();
+		freeLicense = licenseUtil.isFreeLicense();
+		activeRegistration = licenseUtil.isActiveRegistration();
 	}
 
 	@Override
@@ -65,17 +83,19 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 	@Override
 	public Image getImage(Object element) {
 		if (element instanceof RefactoringRule) {
+
 			RefactoringRule rule = (RefactoringRule) element;
 			if (!rule.isEnabled()) {
 				// info icon that rule is disabled, explanation appears in
 				// description text when rule is clicked
 				return JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_INFO);
-			} else if (rule.isFree() && LicenseUtil.get()
-				.isFreeLicense()) {
-				return greenFreeRuleImage;
-			} else {
-				// without icon
 			}
+
+			if (freeLicense && (!activeRegistration || !rule.isFree())) {
+				return lockedRuleImage;
+			}
+
+			return greenFreeRuleImage;
 		}
 		return super.getImage(element);
 	}
@@ -108,6 +128,8 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 		}
 		greenFreeRuleImage.dispose();
 		tickmarkGreenIconImage.dispose();
+		lockedRuleImage.dispose();
+		tickmarkLockedRuleImage.dispose();
 	}
 
 	protected ResourceManager getResourceManager() {

@@ -2,7 +2,7 @@
 <feature
       id="eu.jsparrow.202106.feature"
       label="jsparrow for Eclipse 4.20 and above"
-      version="4.13.0.qualifier"
+      version="4.14.0.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
 
    <description url="https://jsparrow.github.io/">
@@ -22,7 +22,7 @@
    </url>
 
    <requires>
-      <import plugin="com.github.oshi.core" version="3.4.2" match="compatible"/>
+      <import plugin="com.github.oshi.core" version="6.3.1" match="compatible"/>
       <import plugin="org.apache.commons.lang3" version="3.0.0" match="compatible"/>
       <import plugin="org.apache.felix.scr"/>
       <import plugin="org.eclipse.osgi.util"/>

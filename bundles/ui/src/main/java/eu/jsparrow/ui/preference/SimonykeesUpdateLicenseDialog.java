@@ -1,7 +1,9 @@
 package eu.jsparrow.ui.preference;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
@@ -40,7 +42,6 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtil.LicenseUpdateResult;
-import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
  * Dialog for updating license key.
@@ -51,8 +52,8 @@ import eu.jsparrow.ui.util.LicenseUtilService;
  */
 public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
-	private static final String LOGO_ACTIVE_LICENSE_PATH = "icons/jsparrow-logo-003.png"; //$NON-NLS-1$
-	private static final String LOGO_INACTIVE_LICENSE_PATH = "icons/jsparrow-logo-inactive-003.png"; //$NON-NLS-1$
+	private static final String LOGO_ACTIVE_LICENSE_PATH = SimonykeesPreferencePageLicense.LOGO_ACTIVE_LICENSE_PATH;
+	private static final String LOGO_INACTIVE_LICENSE_PATH = SimonykeesPreferencePageLicense.LOGO_INACTIVE_LICENSE_PATH;
 	private static final String TICKMARK_GREEN_ICON_PATH = "icons/if_Tick_Mark_20px.png"; //$NON-NLS-1$
 	private static final String CLOSE_RED_ICON_PATH = "icons/if_Close_Icon_20px.png"; //$NON-NLS-1$
 	private Text licenseKeyText;
@@ -63,10 +64,14 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	private Image scaledJSparrowImageInactive;
 	private Image scaledTickmarkGreenIconImage;
 	private Image scaledCloseRedIconImage;
+	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
 
-	private LicenseUtilService licenseUtil = LicenseUtil.get();
+	public SimonykeesUpdateLicenseDialog(Shell parentShell, List<Runnable> afterLicenseUpdateListeners) {
+		this(parentShell);
+		this.afterLicenseUpdateListeners.addAll(afterLicenseUpdateListeners);
+	}
 
-	protected SimonykeesUpdateLicenseDialog(Shell parentShell) {
+	public SimonykeesUpdateLicenseDialog(Shell parentShell) {
 		super(parentShell);
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 	}
@@ -134,6 +139,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 			public void widgetSelected(SelectionEvent arg0) {
 				BusyIndicator.showWhile(Display.getDefault(), () -> {
 
+					LicenseUtil licenseUtil = LicenseUtil.get();
 					LicenseUpdateResult result = licenseUtil.update(licenseKey);
 					if (!result.wasSuccessful()) {
 						updatedLabel.setImage(scaledCloseRedIconImage);
@@ -142,7 +148,8 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 					} else {
 						updatedLabel.setImage(scaledTickmarkGreenIconImage);
 						updatedIconLabel.setImage(scaledJSparrowImageActive);
-
+						licenseUtil.updateValidationResult();
+						afterLicenseUpdateListeners.forEach(Runnable::run);
 					}
 					updatedLabel.setText(result.getDetailMessage());
 					updatedLabel.setVisible(true);

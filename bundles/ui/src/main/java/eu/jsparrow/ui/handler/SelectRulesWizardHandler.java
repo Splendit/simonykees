@@ -37,7 +37,6 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -54,7 +53,7 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizardHandler.class);
 
-	private LicenseUtilService licenseUtil = LicenseUtil.get();
+	private LicenseUtil licenseUtil = LicenseUtil.get();
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -114,9 +113,20 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				final WizardDialog dialog = new WizardDialog(shell, new SelectRulesWizard(selectedJavaElements.keySet(),
+				SelectRulesWizard selectRulesWizard = new SelectRulesWizard(selectedJavaElements.keySet(),
 						refactoringPipeline,
-						RulesContainer.getRulesForProjects(selectedJavaElements.keySet(), false))) {
+						RulesContainer.getRulesForProjects(selectedJavaElements.keySet(), false));
+
+				class SelectRulesWizardDialog extends WizardDialog {
+
+					private static final int BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL = 11001;
+					private static final int BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY = 11002;
+
+					public SelectRulesWizardDialog(Shell parentShell, SelectRulesWizard newWizard) {
+						super(parentShell, newWizard);
+						newWizard.addLicenseUpdateListener(this::updateButtonsForButtonBar);
+					}
+
 					/*
 					 * Removed unnecessary empty space on the bottom of the
 					 * wizard intended for ProgressMonitor that is not used
@@ -155,13 +165,42 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 
 					@Override
 					protected void createButtonsForButtonBar(Composite parent) {
+						createButton(parent, BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL, "Register for a free trial", false);
+						createButton(parent, BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY, "Enter premium license key", false);
 						super.createButtonsForButtonBar(parent);
 
 						Button finish = getButton(IDialogConstants.FINISH_ID);
 						finish.setText(Messages.SelectRulesWizardHandler_finishButtonText);
 						setButtonLayoutData(finish);
+						updateButtonsForButtonBar();
 					}
-				};
+
+					private void updateButtonsForButtonBar() {
+						boolean showRegisterForAFreeTrial = false;
+						boolean showEnterPremiumLicenseKey = false;
+						if (licenseUtil.isFreeLicense()) {
+							if (!licenseUtil.isActiveRegistration()) {
+								showRegisterForAFreeTrial = true;
+							}
+							showEnterPremiumLicenseKey = true;
+						}
+						getButton(BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL).setVisible(showRegisterForAFreeTrial);
+						getButton(BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY).setVisible(showEnterPremiumLicenseKey);
+					}
+
+					@Override
+					protected void buttonPressed(int buttonId) {
+						if (buttonId == BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
+							selectRulesWizard.showRegistrationDialog();
+						} else if (buttonId == BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
+							selectRulesWizard.showSimonykeesUpdateLicenseDialog();
+						} else {
+							super.buttonPressed(buttonId);
+						}
+					}
+				}
+
+				SelectRulesWizardDialog dialog = new SelectRulesWizardDialog(shell, selectRulesWizard);
 				/*
 				 * Creates new shell and wizard.
 				 */
@@ -198,7 +237,7 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 				}
 			});
 	}
-	
+
 	private IStatus startSelectRulesWizard(Map<IJavaProject, List<IJavaElement>> selectedJavaElements,
 			IProgressMonitor monitor, RefactoringPipeline refactoringPipeline) {
 		try {

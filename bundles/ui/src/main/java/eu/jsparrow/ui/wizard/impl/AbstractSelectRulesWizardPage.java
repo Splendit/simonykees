@@ -1,6 +1,19 @@
 package eu.jsparrow.ui.wizard.impl;
 
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_FREE_TRIAL_VERSION;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_PREMIUM_LICENSE;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_ALL_OUR_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_PREMIUM_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_THEM;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.UNLOCK_SELECTED_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.YOUR_SELECTION_IS_INCLUDING_FREE_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.YOUR_SELECTION_IS_INCLUDING_ONLY_PREMIUM_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog._UPGRADE_YOUR_LICENSE;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -24,30 +37,20 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTException;
-import org.eclipse.swt.custom.Bullet;
-import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.GlyphMetrics;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 
-import eu.jsparrow.core.statistic.RuleDocumentationURLGeneratorUtil;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
+import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
+import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -62,16 +65,6 @@ import eu.jsparrow.ui.util.LicenseUtil;
 @SuppressWarnings("restriction") // StatusInfo is internal
 public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
-	private static class SelectedRule {
-		private SelectedRule() {
-
-		}
-
-		static int start = 0;
-		static int end = 0;
-		static String link = ""; //$NON-NLS-1$
-	}
-
 	protected AbstractSelectRulesWizardModel model;
 	protected AbstractSelectRulesWizardControler controler;
 
@@ -85,7 +78,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	private Button removeButton;
 	private Button removeAllButton;
 
-	private StyledText descriptionStyledText;
+	private RuleDescriptionStyledText descriptionStyledText;
+	private RefactoringRule selectedRuleToDescribe;
 
 	protected IStatus fSelectionStatus;
 
@@ -94,6 +88,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	private SelectionSide latestSelectionSide = SelectionSide.NONE;
 
 	private LicenseUtil licenseUtil = LicenseUtil.get();
+	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
 
 	protected AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
 			AbstractSelectRulesWizardControler controler) {
@@ -105,6 +100,11 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		this.model = model;
 		this.controler = controler;
+		afterLicenseUpdateListeners.add(this::afterLicenseUpdate);
+	}
+
+	public void addLicenseUpdateListener(Runnable afterLicenseUpdate) {
+		afterLicenseUpdateListeners.add(afterLicenseUpdate);
 	}
 
 	/**
@@ -123,7 +123,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		createSelectionViewer(composite);
 
-		createDescriptionViewer(composite);
+		descriptionStyledText = new RuleDescriptionStyledText(composite);
+		descriptionStyledText.createDescriptionViewer();
 
 		model.addListener(this::updateData);
 
@@ -222,12 +223,12 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		addButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection());
+				addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection());
 			}
 		});
 
-		leftTreeViewer.addDoubleClickListener((DoubleClickEvent event) -> controler
-			.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection()));
+		leftTreeViewer.addDoubleClickListener(
+				(DoubleClickEvent event) -> addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection()));
 
 		rightTableViewer.addSelectionChangedListener((SelectionChangedEvent event) -> {
 			latestSelectionSide = SelectionSide.RIGHT;
@@ -260,7 +261,13 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			 */
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.addAllButtonClicked();
+				if (licenseUtil.isFreeLicense()) {
+					List<RefactoringRule> selectionBefore = new ArrayList<>(model.getSelectionAsList());
+					controler.addAllButtonClicked();
+					showLockedRuleSelectionDialog(collectRecentlySelected(selectionBefore));
+				} else {
+					controler.addAllButtonClicked();
+				}
 			}
 		});
 
@@ -355,40 +362,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Creates bottom part of select wizard containing Text field with
-	 * description of selected rule if only one rule is selected, default
-	 * description otherwise.
-	 * 
-	 * @param parent
-	 */
-	private void createDescriptionViewer(Composite parent) {
-		/*
-		 * There is a known issue with automatically showing and hiding
-		 * scrollbars and SWT.WRAP. Using StyledText and
-		 * setAlwaysShowScrollBars(false) makes the vertical scroll work
-		 * correctly at least.
-		 */
-		descriptionStyledText = new StyledText(parent, SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
-		descriptionStyledText.setAlwaysShowScrollBars(false);
-		descriptionStyledText.setEditable(false);
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.minimumHeight = 110;
-		descriptionStyledText.setLayoutData(gridData);
-		descriptionStyledText.setMargins(2, 2, 2, 2);
-		descriptionStyledText.addListener(SWT.MouseDown, event -> {
-			int offset;
-			try {
-				offset = descriptionStyledText.getOffsetAtPoint(new Point(event.x, event.y));
-			} catch (SWTException | IllegalArgumentException e) {
-				offset = -1;
-			}
-			if (offset != -1 && SelectedRule.start < offset && offset < SelectedRule.end) {
-				Program.launch(SelectedRule.link);
-			}
-		});
-	}
-
-	/**
 	 * Updates entire view with data every time something is changed in model.
 	 */
 	protected void updateData() {
@@ -459,132 +432,21 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		List<Object> rightSelection = ((IStructuredSelection) rightTableViewer.getSelection()).toList();
 
 		if (latestSelectionSide == SelectionSide.LEFT && leftSelection.size() == 1) {
-			createTextForDescription((RefactoringRule) leftSelection.get(0));
+			selectedRuleToDescribe = (RefactoringRule) leftSelection.get(0);
 		} else if (latestSelectionSide == SelectionSide.RIGHT && rightSelection.size() == 1) {
-			createTextForDescription((RefactoringRule) rightSelection.get(0));
+			selectedRuleToDescribe = (RefactoringRule) rightSelection.get(0);
+		} else {
+			selectedRuleToDescribe = null;
+		}
+		updateDescriptionTextViewer();
+	}
+
+	private void updateDescriptionTextViewer() {
+		if (selectedRuleToDescribe != null) {
+			descriptionStyledText.createTextForDescription(selectedRuleToDescribe);
 		} else {
 			descriptionStyledText.setText(Messages.SelectRulesWizardPage_defaultDescriptionText);
 		}
-	}
-
-	/**
-	 * Creating description for rule to be displayed using StyledText
-	 * 
-	 * @param rule
-	 */
-	private void createTextForDescription(RefactoringRule rule) {
-
-		final String lineDelimiter = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_lineDelimiter;
-		final String requirementsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
-		final String minJavaVersionLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_minJavaVersionLabel;
-		final String requiredLibrariesLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesLabel;
-		final String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
-		final String documentationLabel = Messages.AbstractSelectRulesWizardPage_seeDocumentation;
-
-		String name = rule.getRuleDescription()
-			.getName();
-		String description = rule.getRuleDescription()
-			.getDescription();
-		String minJavaVersionValue = rule.getRequiredJavaVersion();
-		String requiredLibrariesValue = (null != rule.requiredLibraries()) ? rule.requiredLibraries()
-				: Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
-		String jSparrowStarterValue = (rule.isFree() && licenseUtil.isFreeLicense())
-				? Messages.AbstractSelectRulesWizardPage_freemiumRegirementsMessage + lineDelimiter
-				: ""; //$NON-NLS-1$
-		String tagsValue = StringUtils.join(rule.getRuleDescription()
-			.getTags()
-			.stream()
-			.map(Tag::getTagNames)
-			.collect(Collectors.toList()), "  "); //$NON-NLS-1$
-
-		FontData data = descriptionStyledText.getFont()
-			.getFontData()[0];
-		Shell shell = getShell();
-		Display display = shell.getDisplay();
-		Consumer<StyleRange> h1 = style -> {
-			style.font = new Font(display, data.getName(), data.getHeight() * 3 / 2, data.getStyle());
-			shell.addDisposeListener(e -> style.font.dispose());
-		};
-		Consumer<StyleRange> h2 = style -> {
-			style.font = new Font(display, data.getName(), data.getHeight(), data.getStyle());
-			shell.addDisposeListener(e -> style.font.dispose());
-		};
-		Consumer<StyleRange> bold = style -> {
-			style.font = new Font(display, data.getName(), data.getHeight(), SWT.BOLD);
-			shell.addDisposeListener(e -> style.font.dispose());
-		};
-
-		Consumer<StyleRange> blue = style -> style.foreground = getShell().getDisplay()
-			.getSystemColor(SWT.COLOR_BLUE);
-		Consumer<StyleRange> red = style -> style.foreground = getShell().getDisplay()
-			.getSystemColor(SWT.COLOR_RED);
-		Consumer<StyleRange> green = style -> style.foreground = getShell().getDisplay()
-			.getSystemColor(SWT.COLOR_GREEN);
-
-		SelectedRule.link = RuleDocumentationURLGeneratorUtil.generateLinkToDocumentation(rule.getId());
-		Consumer<StyleRange> documentationConfig = style -> {
-			style.underline = true;
-			style.underlineStyle = SWT.UNDERLINE_LINK;
-			style.data = SelectedRule.link;
-		};
-
-		List<StyleContainer> descriptionList = new ArrayList<>();
-		descriptionList.add(new StyleContainer(name, h1));
-		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(documentationLabel, blue.andThen(documentationConfig)));
-		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(description));
-		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(requirementsLabel, bold));
-		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(minJavaVersionLabel, h2));
-		descriptionList.add(new StyleContainer(minJavaVersionValue, bold.andThen(red), !rule.isSatisfiedJavaVersion()));
-		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(requiredLibrariesLabel, h2));
-		descriptionList
-			.add(new StyleContainer(requiredLibrariesValue, bold.andThen(red), !rule.isSatisfiedLibraries()));
-		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(jSparrowStarterValue, bold.andThen(green)));
-		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(tagsLabel, bold));
-		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(tagsValue));
-
-		String descriptionText = descriptionList.stream()
-			.map(StyleContainer::getValue)
-			.collect(Collectors.joining());
-
-		descriptionStyledText.setText(descriptionText);
-
-		int offset = 0;
-		for (StyleContainer iterator : descriptionList) {
-			if (!lineDelimiter.equals(iterator.getValue()) && iterator.isEnabled()) {
-				descriptionStyledText.setStyleRange(iterator.generateStyle(offset));
-				if (documentationLabel.equals(iterator.getValue())) {
-					SelectedRule.start = offset;
-					SelectedRule.end = offset + iterator.getValue()
-						.length();
-				}
-			}
-			offset += iterator.getValue()
-				.length();
-		}
-
-		int requirementsBulletingStartLine = descriptionStyledText
-			.getLineAtOffset(name.length() + lineDelimiter.length() + documentationLabel.length()
-					+ 2 * lineDelimiter.length() + description.length() + 2 * lineDelimiter.length()
-					+ requirementsLabel.length() + lineDelimiter.length());
-
-		StyleRange bulletPointStyle = new StyleRange();
-		bulletPointStyle.metrics = new GlyphMetrics(0, 0, 40);
-		bulletPointStyle.foreground = getShell().getDisplay()
-			.getSystemColor(SWT.COLOR_BLACK);
-		Bullet bulletPoint = new Bullet(bulletPointStyle);
-
-		descriptionStyledText.setLineBullet(requirementsBulletingStartLine, jSparrowStarterValue.isEmpty() ? 2 : 3,
-				bulletPoint);
 	}
 
 	private boolean selectionContainsEnabledEntry(List<Object> selection) {
@@ -690,6 +552,103 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	protected Button getRemoveAllButton() {
 		return removeAllButton;
+	}
+
+	private void addButtonClicked(IStructuredSelection structuredSelection) {
+
+		if (licenseUtil.isFreeLicense()) {
+			List<RefactoringRule> selectionBefore = new ArrayList<>(model.getSelectionAsList());
+			controler.addButtonClicked(structuredSelection);
+			showLockedRuleSelectionDialog(collectRecentlySelected(selectionBefore));
+		} else {
+			controler.addButtonClicked(structuredSelection);
+		}
+	}
+
+	private List<RefactoringRule> collectRecentlySelected(List<RefactoringRule> selectedRulesBefore) {
+		return model.getSelectionAsList()
+			.stream()
+			.filter(rule -> !selectedRulesBefore.contains(rule))
+			.collect(Collectors.toList());
+	}
+
+	private void showLockedRuleSelectionDialog(List<RefactoringRule> selectedEnabledRules) {
+
+		if (selectedEnabledRules.isEmpty()) {
+			return;
+		}
+
+		List<Consumer<SuggestRegistrationDialog>> addComponentLambdas = null;
+		if (licenseUtil.isActiveRegistration()) {
+			boolean allRulesFree = selectedEnabledRules
+				.stream()
+				.allMatch(RefactoringRule::isFree);
+
+			if (!allRulesFree) {
+				addComponentLambdas = Arrays.asList(//
+						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
+						dialog -> dialog.addLinkToUnlockAllRules(TO_UNLOCK_PREMIUM_RULES, _UPGRADE_YOUR_LICENSE),
+						SuggestRegistrationDialog::addRegisterForPremiumButton);
+			}
+			
+		} else {
+			boolean containsFreeRule = selectedEnabledRules
+				.stream()
+				.anyMatch(RefactoringRule::isFree);
+
+			if (containsFreeRule) {
+				addComponentLambdas = Arrays.asList(//
+						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_FREE_RULES),
+						dialog -> dialog.addLabel(TO_UNLOCK_THEM + REGISTER_FOR_A_FREE_TRIAL_VERSION),
+						dialog -> dialog.addLabel(
+								REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES),
+						SuggestRegistrationDialog::addRegisterForFreeButton,
+						dialog -> dialog.addLinkToUnlockAllRules(TO_UNLOCK_ALL_OUR_RULES,
+								REGISTER_FOR_A_PREMIUM_LICENSE),
+						SuggestRegistrationDialog::addRegisterForPremiumButton);
+
+			} else {
+				addComponentLambdas = Arrays.asList(//
+						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_ONLY_PREMIUM_RULES),
+						dialog -> dialog.addLinkToUnlockAllRules(TO_UNLOCK_THEM, REGISTER_FOR_A_PREMIUM_LICENSE),
+						SuggestRegistrationDialog::addRegisterForPremiumButton,
+						dialog -> dialog
+							.addLabel(REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES),
+						SuggestRegistrationDialog::addRegisterForFreeButton);
+			}
+		}
+
+		if (addComponentLambdas != null) {
+			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(getShell(), addComponentLambdas);
+			dialog.useCancelAsLastButton();
+			dialog.setTextForShell(UNLOCK_SELECTED_RULES);
+			int returnCode = dialog.open();
+			if (returnCode == SuggestRegistrationDialog.BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
+				showRegistrationDialog();
+			} else if (returnCode == SuggestRegistrationDialog.BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
+				showSimonykeesUpdateLicenseDialog();
+			}
+		}
+
+	}
+
+	public void showRegistrationDialog() {
+		RegistrationDialog registrationDialog = new RegistrationDialog(getShell(), afterLicenseUpdateListeners);
+		registrationDialog.open();
+	}
+
+	public void showSimonykeesUpdateLicenseDialog() {
+		SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell(),
+				afterLicenseUpdateListeners);
+		dialog.create();
+		dialog.open();
+	}
+
+	private void afterLicenseUpdate() {
+		doStatusUpdate();
+		configureTree(leftTreeViewer);
+		configureTable(rightTableViewer);
+		updateDescriptionTextViewer();
 	}
 
 	private enum SelectionSide {
