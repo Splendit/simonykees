@@ -49,12 +49,15 @@ import eu.jsparrow.ui.util.LicenseUtil;
  *
  */
 public class SimonykeesPreferencePageLicense extends PreferencePage implements IWorkbenchPreferencePage {
+	private static final String FORMAT_ICONS_PATH = "icons/%s"; //$NON-NLS-1$
+
+	private static final String JSPARROW_LOGO_PIRATE_HAT = "jsparrow-logo-alternative-blue-small.png"; //$NON-NLS-1$
 
 	private static final int LICENSE_LABEL_MAX_WIDTH = 370;
 
-	private static final String LOGO_PATH_ACTIVE = "icons/jsparrow-logo-003.png"; //$NON-NLS-1$
+	static final String LOGO_ACTIVE_LICENSE_PATH = String.format(FORMAT_ICONS_PATH, JSPARROW_LOGO_PIRATE_HAT);
 
-	private static final String LOGO_PATH_INACTIVE = "icons/jsparrow-logo-inactive-003.png"; //$NON-NLS-1$
+	static final String LOGO_INACTIVE_LICENSE_PATH = String.format(FORMAT_ICONS_PATH, JSPARROW_LOGO_PIRATE_HAT);
 
 	private static final String DATE_FORMAT_PATTERN = "MMMM dd, yyyy"; //$NON-NLS-1$
 
@@ -96,12 +99,12 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		composite.setLayout(new RowLayout(SWT.VERTICAL));
 
 		Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
-		IPath iPathActive = new Path(LOGO_PATH_ACTIVE);
+		IPath iPathActive = new Path(LOGO_ACTIVE_LICENSE_PATH);
 		URL urlActive = FileLocator.find(bundle, iPathActive, new HashMap<>());
 		ImageDescriptor imageDescActive = ImageDescriptor.createFromURL(urlActive);
 		jSparrowImageActive = imageDescActive.createImage();
 
-		IPath iPathInactive = new Path(LOGO_PATH_INACTIVE);
+		IPath iPathInactive = new Path(LOGO_INACTIVE_LICENSE_PATH);
 		URL urlInactive = FileLocator.find(bundle, iPathInactive, new HashMap<>());
 		ImageDescriptor imageDescInactive = ImageDescriptor.createFromURL(urlInactive);
 		jSparrowImageInactive = imageDescInactive.createImage();

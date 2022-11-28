@@ -72,7 +72,7 @@ public class BuyLicenseDialog extends Dialog {
 
 	private static final Logger logger = LoggerFactory.getLogger(BuyLicenseDialog.class);
 
-	private static final String LOGO_PATH_INACTIVE = "icons/jsparrow-logo-inactive-003.png"; //$NON-NLS-1$
+	private static final String LOGO_PATH_INACTIVE = "icons/jsparrow-logo-alternative-blue-small.png"; //$NON-NLS-1$
 
 	private static final String IMG_SAD_ICON = "icons/sad.png"; //$NON-NLS-1$
 	private static final String IMG_EVEN_ICON = "icons/even.png"; //$NON-NLS-1$

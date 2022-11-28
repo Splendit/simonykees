@@ -142,8 +142,7 @@ public class WelcomePage extends FormPage {
 		Button licenseButton = new Button(gettingStartedGroup, SWT.PUSH);
 		licenseButton.setLayoutData(buttonGridData);
 		licenseButton.setText(Messages.WelcomePage_buy_license_button);
-		createButtonListenerToOpenWebpage(licenseButton,
-				"https://jsparrow.onfastspring.com/eclipse"); //$NON-NLS-1$
+		createButtonListenerToOpenWebpage(licenseButton, "https://jsparrow.io/pricing/"); //$NON-NLS-1$
 
 		Button marketplaceButton = new Button(gettingStartedGroup, SWT.PUSH);
 		marketplaceButton.setLayoutData(buttonGridData);
@@ -186,7 +185,7 @@ public class WelcomePage extends FormPage {
 			freemiumGroup.setLayout(new GridLayout(1, false));
 			Button freemiumRegistrationButton = new Button(freemiumGroup, SWT.PUSH);
 			freemiumRegistrationButton.setLayoutData(buttonGridData);
-			freemiumRegistrationButton.setText(Messages.WelcomePage_getFreeRulesNow);
+			freemiumRegistrationButton.setText("Register for a free trial"); //$NON-NLS-1$
 			freemiumRegistrationButton.addSelectionListener(new SelectionAdapter() {
 
 				@Override
