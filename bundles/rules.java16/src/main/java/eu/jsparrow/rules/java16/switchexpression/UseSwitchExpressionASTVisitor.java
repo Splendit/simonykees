@@ -2,32 +2,19 @@ package eu.jsparrow.rules.java16.switchexpression;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
-import org.eclipse.jdt.core.dom.ThrowStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.YieldStatement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
@@ -69,7 +56,8 @@ import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
  * @since 4.3.0
  *
  */
-public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor implements UseSwitchExpressionEvent {
+public class UseSwitchExpressionASTVisitor extends AbstractReplaceBySwitchASTVisitor
+		implements UseSwitchExpressionEvent {
 
 	@Override
 	public boolean visit(SwitchStatement switchStatement) {
@@ -83,7 +71,8 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 
 		List<SwitchCaseClause> clauses = createClauses(switchCaseBucks);
-		Runnable lambdaForRefactoring = createLambdaForRefactoring(switchStatement, clauses);
+		Expression switchHeaderExpression = switchStatement.getExpression();
+		Runnable lambdaForRefactoring = createLambdaForRefactoring(switchStatement, switchHeaderExpression, clauses);
 		lambdaForRefactoring.run();
 		addMarkerEvent(switchStatement);
 		onRewrite();
@@ -92,287 +81,10 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		return true;
 	}
 
-	private Runnable createLambdaForRefactoring(SwitchStatement switchStatement, List<SwitchCaseClause> clauses) {
-		Expression switchHeaderExpression = switchStatement.getExpression();
-		boolean hasDefaultClause = hasDefaultClause(switchStatement);
-		if (hasDefaultClause) {
-
-			Expression variableAssignedInFirstBranch = findVariableAssignedInFirstBranch(clauses)
-				.orElse(null);
-
-			if (variableAssignedInFirstBranch != null && areAllAssigningToSameVariable(clauses)) {
-				VariableDeclarationFragment fragment = findDeclaringFragment(variableAssignedInFirstBranch,
-						switchStatement)
-							.orElse(null);
-
-				if (fragment != null) {
-					return () -> replaceByInitializationWithSwitch(switchStatement, switchHeaderExpression, clauses,
-							fragment);
-				}
-				return () -> replaceByAssignmentWithSwitch(variableAssignedInFirstBranch, switchStatement,
-						switchHeaderExpression, clauses);
-			}
-
-			if (areReturningValue(clauses)) {
-				return () -> replaceByReturnWithSwitch(switchStatement, switchHeaderExpression, clauses);
-			}
-		}
-		return () -> replaceBySwitchStatement(switchStatement, switchHeaderExpression, clauses);
-	}
-
-	protected Optional<Expression> findVariableAssignedInFirstBranch(List<? extends SwitchCaseClause> clauses) {
-		Optional<Expression> optionalAssignedVariable = clauses.stream()
-			.findFirst()
-			.flatMap(SwitchCaseClause::findAssignedVariable);
-
-		if (optionalAssignedVariable.isPresent()) {
-			SwitchCaseReturnStatementsVisitor returnVisitor = new SwitchCaseReturnStatementsVisitor();
-			boolean hasAnyReturnStatement = clauses.stream()
-				.flatMap(clause -> clause.getStatements()
-					.stream())
-				.anyMatch(statement -> {
-					statement.accept(returnVisitor);
-					return returnVisitor.hasAnyReturnStatement();
-				});
-			if (hasAnyReturnStatement) {
-				return Optional.empty();
-			}
-		}
-		return optionalAssignedVariable;
-	}
-
-	protected void replaceByReturnWithSwitch(Statement statementToReplace,
-			Expression switchHeaderExpression, List<? extends SwitchCaseClause> clauses) {
-		AST ast = statementToReplace.getAST();
-		SwitchExpression newSwitchExpression = createSwitchWithYieldValue(ast, switchHeaderExpression, clauses);
-		ReturnStatement newReturnStatement = ast.newReturnStatement();
-		newReturnStatement.setExpression(newSwitchExpression);
-		astRewrite.replace(statementToReplace, newReturnStatement, null);
-	}
-
-	protected void replaceBySwitchStatement(Statement statementToReplace, Expression switchHeaderExpression,
-			List<? extends SwitchCaseClause> clauses) {
-		AST ast = statementToReplace.getAST();
-		SwitchStatement newSwitchStatement = createSwitchStatement(ast, switchHeaderExpression, clauses);
-		astRewrite.replace(statementToReplace, newSwitchStatement, null);
-	}
-
 	private boolean hasLabeledSwitchCase(SwitchStatement switchStatement) {
 		return ASTNodeUtil.convertToTypedList(switchStatement.statements(), SwitchCase.class)
 			.stream()
 			.anyMatch(SwitchCase::isSwitchLabeledRule);
-	}
-
-	protected void replaceByAssignmentWithSwitch(Expression assigned, Statement statementToReplace,
-			Expression switchHeaderExpression, List<? extends SwitchCaseClause> clauses) {
-		AST ast = statementToReplace.getAST();
-		Assignment assignment = ast.newAssignment();
-		assignment.setLeftHandSide((Expression) astRewrite.createCopyTarget(assigned));
-		SwitchExpression newSwitchExpression = createSwitchWithYieldValue(ast, switchHeaderExpression, clauses);
-		assignment.setRightHandSide(newSwitchExpression);
-		ExpressionStatement newAssignmentStatement = ast.newExpressionStatement(assignment);
-		astRewrite.replace(statementToReplace, newAssignmentStatement, null);
-	}
-
-	protected void replaceByInitializationWithSwitch(Statement statementToReplace, Expression switchHeaderExpression,
-			List<? extends SwitchCaseClause> clauses, VariableDeclarationFragment fragment) {
-		AST ast = statementToReplace.getAST();
-		SwitchExpression newSwitchExpression = createSwitchWithYieldValue(ast, switchHeaderExpression, clauses);
-		astRewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, newSwitchExpression, null);
-		astRewrite.remove(statementToReplace, null);
-	}
-
-	private boolean hasDefaultClause(SwitchStatement switchStatement) {
-		List<Statement> statements = ASTNodeUtil.convertToTypedList(switchStatement.statements(), Statement.class);
-		List<SwitchCase> switchCaseStatements = filterSwitchCaseStatements(statements);
-		return switchCaseStatements.stream()
-			.anyMatch(SwitchCase::isDefault);
-	}
-
-	protected Optional<VariableDeclarationFragment> findDeclaringFragment(Expression assigned, Statement statement) {
-		CompilationUnit compilationUnit = getCompilationUnit();
-		if (assigned.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return Optional.empty();
-		}
-		SimpleName simpleName = (SimpleName) assigned;
-
-		IBinding binding = simpleName.resolveBinding();
-		ASTNode declaringNode = compilationUnit.findDeclaringNode(binding);
-		if (declaringNode == null) {
-			return Optional.empty();
-		}
-		int declaringNodeType = declaringNode.getNodeType();
-		if (declaringNodeType != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return Optional.empty();
-		}
-		VariableDeclarationFragment fragment = (VariableDeclarationFragment) declaringNode;
-		if (fragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-			return Optional.empty();
-		}
-		VariableDeclarationStatement declaraingStatement = (VariableDeclarationStatement) fragment.getParent();
-		if (declaraingStatement.fragments()
-			.size() != 1) {
-			return Optional.empty();
-		}
-		boolean areStatementsInBlock = declaraingStatement.getLocationInParent() == Block.STATEMENTS_PROPERTY
-				&& statement.getLocationInParent() == Block.STATEMENTS_PROPERTY;
-		if (!areStatementsInBlock) {
-			return Optional.empty();
-		}
-		Block declarationParent = (Block) declaraingStatement.getParent();
-		Block statementParent = (Block) statement.getParent();
-		if (statementParent != declarationParent) {
-			return Optional.empty();
-		}
-		List<Statement> blockStatements = ASTNodeUtil.convertToTypedList(declarationParent.statements(),
-				Statement.class);
-		int declarationIndex = blockStatements.indexOf(declaraingStatement);
-		int statementIndex = blockStatements.indexOf(statement);
-
-		if (statementIndex != declarationIndex + 1) {
-			return Optional.empty();
-		}
-
-		Expression initializer = fragment.getInitializer();
-		if (initializer != null && initializer.getNodeType() != ASTNode.SIMPLE_NAME
-				&& !ASTNodeUtil.isLiteral(initializer)) {
-			return Optional.empty();
-		}
-		return Optional.of(fragment);
-	}
-
-	protected boolean areReturningValue(List<? extends SwitchCaseClause> clauses) {
-
-		boolean isReturningValue = clauses.stream()
-			.allMatch(SwitchCaseClause::isReturningValue);
-		if (!isReturningValue) {
-			return false;
-		}
-		return clauses.stream()
-			.map(SwitchCaseClause::getStatements)
-			.noneMatch(this::containsMultipleReturnStatements);
-	}
-
-	protected boolean areAllAssigningToSameVariable(List<? extends SwitchCaseClause> clauses) {
-		List<Expression> assignedExpressions = clauses.stream()
-			.map(SwitchCaseClause::findAssignedVariable)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.collect(Collectors.toList());
-
-		if (assignedExpressions.size() != clauses.size()) {
-			return false;
-		}
-
-		boolean hasInternalBreakStatements = clauses.stream()
-			.anyMatch(SwitchCaseClause::hasInternalBreakStatements);
-		if (hasInternalBreakStatements) {
-			return false;
-		}
-
-		Expression firstAssigned = assignedExpressions.get(0);
-		ASTMatcher matcher = new ASTMatcher();
-		for (int i = 1; i < assignedExpressions.size(); i++) {
-			Expression assigned = assignedExpressions.get(i);
-			if (!firstAssigned.subtreeMatch(matcher, assigned)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	@SuppressWarnings("unchecked")
-	private SwitchStatement createSwitchStatement(AST ast, Expression switchHeaderExpression,
-			List<? extends SwitchCaseClause> clauses) {
-		SwitchStatement newSwitchStatement = ast.newSwitchStatement();
-		Expression newHeaderExpression = (Expression) astRewrite.createCopyTarget(switchHeaderExpression);
-		newSwitchStatement.setExpression(newHeaderExpression);
-		List<Statement> statements = newSwitchStatement.statements();
-		for (SwitchCaseClause clause : clauses) {
-			SwitchCase switchCase = replaceWithLabeledRuleSwitchCase(ast, clause);
-			statements.add(switchCase);
-
-			List<Statement> clauseStatements = clause.getStatements();
-			if (clauseStatements.size() == 1) {
-				Statement clauseStatement = clauseStatements.get(0);
-				if (clauseStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT
-						|| clauseStatement.getNodeType() == ASTNode.THROW_STATEMENT) {
-					Statement newExpStatement = (Statement) astRewrite
-						.createCopyTarget(clauseStatement);
-					statements.add(newExpStatement);
-				} else {
-					Block block = ast.newBlock();
-					Statement newStatement = (Statement) astRewrite.createCopyTarget(clauseStatement);
-					block.statements()
-						.add(newStatement);
-					statements.add(block);
-				}
-			} else {
-				Block block = ast.newBlock();
-				for (Statement clauseStatement : clauseStatements) {
-					Statement newStatement = (Statement) astRewrite.createCopyTarget(clauseStatement);
-					block.statements()
-						.add(newStatement);
-				}
-				statements.add(block);
-			}
-		}
-		return newSwitchStatement;
-	}
-
-	@SuppressWarnings("unchecked")
-	private SwitchCase replaceWithLabeledRuleSwitchCase(AST ast, SwitchCaseClause clause) {
-		List<Expression> clauseExpressions = clause.getExpressions();
-		SwitchCase switchCase = ast.newSwitchCase();
-		switchCase.setSwitchLabeledRule(true);
-		for (Expression expression : clauseExpressions) {
-			Expression unwrappedExpression = ASTNodeUtil.unwrapParenthesizedExpression(expression);
-			switchCase.expressions()
-				.add((Expression) astRewrite.createCopyTarget(unwrappedExpression));
-		}
-		return switchCase;
-	}
-
-	@SuppressWarnings("unchecked")
-	private SwitchExpression createSwitchWithYieldValue(AST ast, Expression switchHeaderExpression,
-			List<? extends SwitchCaseClause> clauses) {
-		SwitchExpression newSwitchStatement = ast.newSwitchExpression();
-		Expression newHeaderExpression = (Expression) astRewrite.createCopyTarget(switchHeaderExpression);
-		newSwitchStatement.setExpression(newHeaderExpression);
-		List<Statement> statements = newSwitchStatement.statements();
-		for (SwitchCaseClause clause : clauses) {
-			SwitchCase switchCase = replaceWithLabeledRuleSwitchCase(ast, clause);
-			statements.add(switchCase);
-			List<Statement> clauseStatements = clause.getStatements();
-			Expression yieldExpression = clause.findYieldExpression();
-			ThrowStatement throwStatement = clause.findThrowsStatement()
-				.orElse(null);
-
-			if (clauseStatements.size() == 1) {
-				Statement yieldStatement;
-				if (throwStatement != null) {
-					yieldStatement = (Statement) astRewrite.createCopyTarget(throwStatement);
-				} else {
-					yieldStatement = ast
-						.newExpressionStatement((Expression) astRewrite.createCopyTarget(yieldExpression));
-				}
-				statements.add(yieldStatement);
-			} else {
-				Block block = ast.newBlock();
-				for (int i = 0; i < clauseStatements.size() - 1; i++) {
-					Statement clauseStatement = clauseStatements.get(i);
-					Statement newStatement = (Statement) astRewrite.createCopyTarget(clauseStatement);
-					block.statements()
-						.add(newStatement);
-				}
-				YieldStatement yieldStatement = ast.newYieldStatement();
-				yieldStatement.setExpression((Expression) astRewrite.createCopyTarget(yieldExpression));
-				block.statements()
-					.add(yieldStatement);
-				statements.add(block);
-			}
-		}
-		return newSwitchStatement;
 	}
 
 	private boolean areTransformableBucks(List<List<Statement>> switchCaseBucks) {
@@ -462,17 +174,6 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		return visitor.getBreakStatements();
 	}
 
-	private boolean containsMultipleReturnStatements(List<Statement> buck) {
-		SwitchCaseReturnStatementsVisitor visitor = new SwitchCaseReturnStatementsVisitor();
-		for (Statement statement : buck) {
-			statement.accept(visitor);
-			if (visitor.hasMultipleReturnStatements()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	private boolean containsNonConsecutiveSwitchCases(List<Statement> buck) {
 		List<Integer> caseIndexes = new ArrayList<>();
 		for (int i = 0; i < buck.size(); i++) {
@@ -550,5 +251,4 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		List<BreakStatement> breakStatements = findAllBreakStatements(buck);
 		return new SwitchCaseClause(caseExpressions, blockStatements, breakStatements);
 	}
-
 }

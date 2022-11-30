@@ -1,5 +1,8 @@
 package eu.jsparrow.ui.startup.registration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -23,6 +26,12 @@ public class RegistrationDialog extends Dialog {
 
 	RegistrationControl registrationTabControl;
 	ActivationControl activationTabControl;
+	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
+
+	public RegistrationDialog(Shell parent, List<Runnable> afterLicenseUpdateListeners) {
+		super(parent);
+		this.afterLicenseUpdateListeners.addAll(afterLicenseUpdateListeners);
+	}
 
 	public RegistrationDialog(Shell parent) {
 		super(parent);
@@ -45,7 +54,7 @@ public class RegistrationDialog extends Dialog {
 		TabItem activateTab = new TabItem(tabFolder, SWT.NONE);
 		activateTab.setText(Messages.RegistrationDialog_activateTabTitle);
 		activateTab.setToolTipText(Messages.RegistrationDialog_activateTabTooltip);
-		activationTabControl = new ActivationControl(tabFolder, SWT.NONE);
+		activationTabControl = new ActivationControl(tabFolder, SWT.NONE, afterLicenseUpdateListeners);
 		activateTab.setControl(activationTabControl);
 
 		// Select the first tab (index is zero-based)

@@ -1,11 +1,19 @@
 package eu.jsparrow.ui.util;
 
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_FREE_J_SPARROW_TRIAL;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.UPGRADE_YOUR_LICENSE;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog._TO_BE_ABLE_TO_APPLY_20_OF_OUR_MOST_LIKED_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog._TO_BE_ABLE_TO_APPLY_ALL_OUR_RULES;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Consumer;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
@@ -28,9 +36,10 @@ import eu.jsparrow.license.api.RegistrationService;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
-import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
-import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
+import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
+import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
 import eu.jsparrow.ui.startup.registration.entity.RegistrationEntity;
 
@@ -62,7 +71,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	private Scheduler scheduler;
 	private SystemInfoWrapper systemInfoWrapper;
 
-	private boolean shouldContinueWithSelectRules = true;
 	private EndpointEncryption endpointEncryption;
 
 	private LicenseUtil() {
@@ -171,10 +179,28 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		}
 		// When starting with an demo license we offer to register for free
 		// rules if not registered yet
-		if (isFreeLicense() && !isActiveRegistration() && !SimonykeesPreferenceManager.getDisableRegisterSuggestion()) {
-			setShouldContinueWithSelectRules(true);
-			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(shell);
-			return (dialog.open() == 0) && shouldContinueWithSelectRules;
+		if (isFreeLicense() && !isActiveRegistration()) {
+			List<Consumer<SuggestRegistrationDialog>> addComponentLambdas = Arrays.asList(
+					dialog -> dialog
+						.addLabel(
+								REGISTER_FOR_A_FREE_J_SPARROW_TRIAL + _TO_BE_ABLE_TO_APPLY_20_OF_OUR_MOST_LIKED_RULES),
+					SuggestRegistrationDialog::addRegisterForFreeButton,
+					dialog -> dialog.addLinkToUnlockAllRules("", //$NON-NLS-1$
+							UPGRADE_YOUR_LICENSE, _TO_BE_ABLE_TO_APPLY_ALL_OUR_RULES),
+					SuggestRegistrationDialog::addRegisterForPremiumButton);
+			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(shell, addComponentLambdas);
+			dialog.useSkipAsLastButton();
+			dialog.setTextForShell(Messages.SuggestRegistrationDialog_getFreeRulesTitle);
+			int returnCode = dialog.open();
+			if (returnCode == SuggestRegistrationDialog.BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
+				RegistrationDialog registrationDialog = new RegistrationDialog(shell);
+				registrationDialog.open();
+
+			} else if (returnCode == SuggestRegistrationDialog.BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
+				SimonykeesUpdateLicenseDialog simonykeesUpdateLicenseDialog = new SimonykeesUpdateLicenseDialog(shell);
+				simonykeesUpdateLicenseDialog.create();
+				simonykeesUpdateLicenseDialog.open();
+			}
 		}
 		return true;
 	}
@@ -191,7 +217,8 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	 * Does NOT check license validity.
 	 * 
 	 * @return whether the type of the validation result is either
-	 *         {@link LicenseType#FLOATING}, {@link LicenseType#NODE_LOCKED}, or {@link LicenseType#PAY_PER_USE}.
+	 *         {@link LicenseType#FLOATING}, {@link LicenseType#NODE_LOCKED}, or
+	 *         {@link LicenseType#PAY_PER_USE}.
 	 */
 	public boolean isProLicense() {
 		if (result == null) {
@@ -252,7 +279,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 		}
 
-		if(validationResult.getLicenseType() == LicenseType.PAY_PER_USE) {
+		if (validationResult.getLicenseType() == LicenseType.PAY_PER_USE) {
 			moduleNr = properties.getProperty("license.payPerUseModuleNr"); //$NON-NLS-1$
 		}
 		LicenseModel persitModel = factoryService.createNewModel(validationResult.getKey(), secret, productNr, moduleNr,
@@ -466,10 +493,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	}
 
-	public void setShouldContinueWithSelectRules(boolean shouldContinue) {
-		shouldContinueWithSelectRules = shouldContinue;
-	}
-	
 	public void reserveQuantity(int credit) {
 		LicenseModel model = tryLoadModelFromPersistence();
 

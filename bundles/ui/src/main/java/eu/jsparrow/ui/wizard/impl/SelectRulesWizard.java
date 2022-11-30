@@ -1,8 +1,21 @@
 package eu.jsparrow.ui.wizard.impl;
 
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.ALL_RULES_IN_YOUR_SELECTION_ARE_FREE;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_FREE_TRIAL_VERSION;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_PREMIUM_LICENSE;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_ALL_OUR_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_PREMIUM_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_THEM;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.UNLOCK_SELECTED_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES;
+import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog._UPGRADE_YOUR_LICENSE;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,8 +41,10 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
+import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 
@@ -47,17 +62,20 @@ import eu.jsparrow.ui.wizard.AbstractRuleWizard;
  */
 public class SelectRulesWizard extends AbstractRuleWizard {
 
+
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
 
 	private static final String WINDOW_ICON = "icons/jsparrow-icon-16-003.png"; //$NON-NLS-1$
 
 	private SelectRulesWizardPageModel model;
+	private SelectRulesWizardPage page;
 
 	private final Collection<IJavaProject> javaProjects;
 	private final List<RefactoringRule> rules;
 
 	private RefactoringPipeline refactoringPipeline;
 	private Image windowIcon;
+	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
 
 	public SelectRulesWizard(Collection<IJavaProject> javaProjects, RefactoringPipeline refactoringPipeline,
 			List<RefactoringRule> rules) {
@@ -70,6 +88,10 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		Window.setDefaultImage(windowIcon);
 	}
 
+	public void addLicenseUpdateListener(Runnable afterLicenseUpdate) {
+		afterLicenseUpdateListeners.add(afterLicenseUpdate);
+	}
+
 	@Override
 	public String getWindowTitle() {
 		return Messages.SelectRulesWizard_title;
@@ -78,9 +100,18 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	@Override
 	public void addPages() {
 		model = new SelectRulesWizardPageModel(rules);
-		AbstractSelectRulesWizardPage page = new SelectRulesWizardPage(model,
+		page = new SelectRulesWizardPage(model,
 				new SelectRulesWizardPageControler(model));
+		afterLicenseUpdateListeners.forEach(page::addLicenseUpdateListener);
 		addPage(page);
+	}
+
+	public void showRegistrationDialog() {
+		page.showRegistrationDialog();
+	}
+
+	public void showSimonykeesUpdateLicenseDialog() {
+		page.showSimonykeesUpdateLicenseDialog();
 	}
 
 	@Override
@@ -106,6 +137,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		logger.info(message);
 
 		final List<RefactoringRule> selectedRules = model.getSelectionAsList();
+		showOptionalLockedRuleSelectionDialog(selectedRules);
 
 		refactoringPipeline.setRules(selectedRules);
 		refactoringPipeline.updateInitialSourceMap();
@@ -118,6 +150,66 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		job.schedule();
 
 		return true;
+	}
+
+	public void showOptionalLockedRuleSelectionDialog(List<RefactoringRule> selectedRules) {
+		LicenseUtil licenseUtil = LicenseUtil.get();
+		if (!licenseUtil.isFreeLicense() || selectedRules.isEmpty()) {
+			return;
+		}
+
+		List<Consumer<SuggestRegistrationDialog>> addComponentLambdas = null;
+		if (licenseUtil.isActiveRegistration()) {
+			boolean allRulesFree = selectedRules
+				.stream()
+				.allMatch(RefactoringRule::isFree);
+
+			if (!allRulesFree) {
+				addComponentLambdas = Arrays.asList(//
+						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
+						dialog -> dialog.addLinkToUnlockAllRules(TO_UNLOCK_PREMIUM_RULES, _UPGRADE_YOUR_LICENSE),
+						SuggestRegistrationDialog::addRegisterForPremiumButton);
+			}
+		} else {
+			boolean allRulesFree = selectedRules
+				.stream()
+				.allMatch(RefactoringRule::isFree);
+
+			if (allRulesFree) {
+				addComponentLambdas = Arrays.asList(//
+						dialog -> dialog.addLabel(ALL_RULES_IN_YOUR_SELECTION_ARE_FREE),
+						dialog -> dialog.addLabel(TO_UNLOCK_THEM + REGISTER_FOR_A_FREE_TRIAL_VERSION),
+						dialog -> dialog
+							.addLabel(REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES),
+						SuggestRegistrationDialog::addRegisterForFreeButton,
+						dialog -> dialog.addLinkToUnlockAllRules(
+								TO_UNLOCK_ALL_OUR_RULES, REGISTER_FOR_A_PREMIUM_LICENSE),
+						SuggestRegistrationDialog::addRegisterForPremiumButton);
+			} else {
+				addComponentLambdas = Arrays.asList(//
+						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
+						dialog -> dialog.addLinkToUnlockAllRules(
+								TO_UNLOCK_THEM, REGISTER_FOR_A_PREMIUM_LICENSE),
+						SuggestRegistrationDialog::addRegisterForPremiumButton,
+						dialog -> dialog
+							.addLabel(
+									REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES),
+						SuggestRegistrationDialog::addRegisterForFreeButton);
+			}
+
+		}
+
+		if (addComponentLambdas != null) {
+			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(getShell(), addComponentLambdas);
+			dialog.useSkipAsLastButton();
+			dialog.setTextForShell(UNLOCK_SELECTED_RULES);
+			int returnCode = dialog.open();
+			if (returnCode == SuggestRegistrationDialog.BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
+				showRegistrationDialog();
+			} else if (returnCode == SuggestRegistrationDialog.BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
+				showSimonykeesUpdateLicenseDialog();
+			}
+		}
 	}
 
 	/**

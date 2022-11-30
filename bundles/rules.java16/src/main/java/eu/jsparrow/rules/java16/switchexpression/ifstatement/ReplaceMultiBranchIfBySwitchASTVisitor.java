@@ -13,11 +13,10 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.rules.java16.switchexpression.AbstractReplaceBySwitchASTVisitor;
 import eu.jsparrow.rules.java16.switchexpression.LabeledBreakStatementsVisitor;
 import eu.jsparrow.rules.java16.switchexpression.SwitchCaseBreakStatementsVisitor;
-import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionASTVisitor;
 
 /**
  * A visitor for replacing {@link IfStatement}s by {@link SwitchExpression}s or
@@ -52,7 +51,7 @@ import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionASTVisitor;
  * @since 4.13.0
  *
  */
-public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionASTVisitor
+public class ReplaceMultiBranchIfBySwitchASTVisitor extends AbstractReplaceBySwitchASTVisitor
 		implements ReplaceMultiBranchIfBySwitchEvent {
 
 	@Override
@@ -97,7 +96,8 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 			return Optional.empty();
 		}
 
-		Runnable transformingLambda = createTransformingLambda(ifStatement, expectedSwitchHeaderExpression, ifBranches);
+		Runnable transformingLambda = createLambdaForRefactoring(ifStatement, expectedSwitchHeaderExpression,
+				ifBranches);
 		return Optional.of(transformingLambda);
 	}
 
@@ -210,40 +210,5 @@ public class ReplaceMultiBranchIfBySwitchASTVisitor extends UseSwitchExpressionA
 			}
 		}
 		return false;
-	}
-
-	private Runnable createTransformingLambda(IfStatement ifStatement, SimpleName switchHeaderExpression,
-			List<IfBranch> ifBranches) {
-
-		if (isMultiBranchIfEndingWithElse(ifBranches)) {
-			Expression variableAssignedByFirstBranch = findVariableAssignedInFirstBranch(ifBranches)
-				.orElse(null);
-
-			if (variableAssignedByFirstBranch != null && areAllAssigningToSameVariable(ifBranches)) {
-				VariableDeclarationFragment fragment = findDeclaringFragment(variableAssignedByFirstBranch,
-						ifStatement)
-							.orElse(null);
-
-				if (fragment != null) {
-					return () -> replaceByInitializationWithSwitch(ifStatement, switchHeaderExpression, ifBranches,
-							fragment);
-				}
-
-				return () -> replaceByAssignmentWithSwitch(variableAssignedByFirstBranch, ifStatement,
-						switchHeaderExpression, ifBranches);
-			}
-
-			if (areReturningValue(ifBranches)) {
-				return () -> replaceByReturnWithSwitch(ifStatement, switchHeaderExpression, ifBranches);
-			}
-		}
-		return () -> replaceBySwitchStatement(ifStatement, switchHeaderExpression, ifBranches);
-	}
-
-	private boolean isMultiBranchIfEndingWithElse(List<IfBranch> ifBranches) {
-		int lastBranchIndex = ifBranches.size() - 1;
-		IfBranch lastBranch = ifBranches.get(lastBranchIndex);
-		return lastBranch.getExpressions()
-			.isEmpty();
 	}
 }
