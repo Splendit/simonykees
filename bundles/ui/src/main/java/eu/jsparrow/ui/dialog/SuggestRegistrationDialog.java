@@ -35,10 +35,6 @@ public class SuggestRegistrationDialog extends Dialog {
 	public static final int BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL = 11001;
 	public static final int BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY = 11002;
 
-	static final String FORMAT_LINK_TO_JSPARROW_PRICING = "%s<a href=\"https://jsparrow.io/pricing/\">%s</a>%s";
-
-	public static final String UPGRADE_YOUR_LICENSE = "Upgrade your license";
-	public static final String _TO_BE_ABLE_TO_APPLY_ALL_OUR_RULES = " to be able to apply all our rules!";
 	public static final String REGISTER_FOR_A_FREE_J_SPARROW_TRIAL = "Register for a free jSparrow trial";
 	public static final String _TO_BE_ABLE_TO_APPLY_20_OF_OUR_MOST_LIKED_RULES = " to be able to apply 20 of our most liked rules!";
 
@@ -46,8 +42,6 @@ public class SuggestRegistrationDialog extends Dialog {
 
 	public static final String FULLSTOP = ".";
 
-	public static final String TO_UNLOCK_ALL_OUR_RULES = "To unlock all our rules, ";
-	public static final String TO_UNLOCK_PREMIUM_RULES = "To unlock premium rules, ";
 	public static final String TO_UNLOCK_THEM = "To unlock them, ";
 
 	public static final String ALL_RULES_IN_YOUR_SELECTION_ARE_FREE = "All rules in your selection are free.";
@@ -56,10 +50,7 @@ public class SuggestRegistrationDialog extends Dialog {
 	public static final String YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES = "Your selection is including premium rules.";
 
 	public static final String REGISTER_FOR_A_FREE_TRIAL_VERSION = "register for a free trial version.";
-	public static final String REGISTER_FOR_A_PREMIUM_LICENSE = "register for a premium license.";
 	public static final String REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES = "Registration for a free trial will unlock 20 of our most liked rules!";
-	public static final String _UPGRADE_YOUR_LICENSE = " upgrade your license";
-
 	private static final String REGISTER_FOR_A_FREE_TRIAL = "Register for a free trial";
 	private static final String ENTER_YOUR_LICENSE_KEY = "Enter your license key";
 
@@ -112,14 +103,10 @@ public class SuggestRegistrationDialog extends Dialog {
 		label.setText(lableText);
 	}
 
-	public void addLinkToUnlockAllRules(String textBeforeLink, String linkedText) {
-		addLinkToUnlockAllRules(textBeforeLink, linkedText, ""); //$NON-NLS-1$
-	}
-
-	public void addLinkToUnlockAllRules(String textBeforeLink, String linkedText, String textAfterLink) {
+	public void addLinkToJSparrowPricingPage(JSparrowPricingLink jSparrowPricingLink) {
 		Link linkToUnlockRules = new Link(area, SWT.NONE);
 		linkToUnlockRules
-			.setText(String.format(FORMAT_LINK_TO_JSPARROW_PRICING, textBeforeLink, linkedText, textAfterLink));
+			.setText(jSparrowPricingLink.getText());
 		linkToUnlockRules.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
