@@ -17,6 +17,22 @@ public enum JSparrowPricingLink {
 	TO_UNLOCK_PREMIUM_RULES_UPGRADE_YOUR_LICENSE(
 			"To unlock premium rules, ",
 			"upgrade your license",
+			"."),
+	OBTAIN_NEW_LICENSE(
+			"",
+			"Obtain a new license",
+			"."),
+	TO_GET_FULL_ACCESS_AND_UNLOCK_ALL_RULES_UPGRADE_YOUR_LICENSE(
+			"To get full access and unlock all the rules, ",
+			"upgrade your license",
+			"."),
+	TO_BE_ABLE_TO_USE_JSPARROW_MARKERS_UPGRADE_HERE(
+			"If you want to be able to use the jSparrow markers, ",
+			"upgrade here",
+			"."),
+	UPGRADE_YOUR_LICENSE_HERE(
+			"Upgrade your license ",
+			"here",
 			".");
 
 	private static final String HTTPS_JSPARROW_IO_PRICING = "https://jsparrow.io/pricing/";

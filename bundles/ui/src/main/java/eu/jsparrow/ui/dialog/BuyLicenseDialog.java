@@ -104,6 +104,7 @@ public class BuyLicenseDialog extends Dialog {
 		bundle = Platform.getBundle(Activator.PLUGIN_ID);
 	}
 
+	@SuppressWarnings("nls")
 	@Override
 	protected Control createDialogArea(Composite composite) {
 		Composite area = (Composite) super.createDialogArea(composite);
@@ -146,7 +147,8 @@ public class BuyLicenseDialog extends Dialog {
 		gridData.verticalIndent = 12;
 		gridData.widthHint = 450;
 		link.setLayoutData(gridData);
-		link.setText(Messages.BuyLicenseDialog_purchaseLinkLabel);
+		link.setText("Using the free version of jSparrow, you can view a summary of all changes but not apply them. "
+				+ JSparrowPricingLink.UPGRADE_YOUR_LICENSE_HERE.getText());
 		link.addSelectionListener(new SelectionAdapter() {
 
 			@Override

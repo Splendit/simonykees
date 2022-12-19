@@ -38,6 +38,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
@@ -196,7 +197,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		}
 
 		registerForFreeButton.setVisible(isButtonToRegisterForFreeVisible(result));
-		jSparrowLink.setText(computeJSparrowLinkText(result));
+		jSparrowLink.setText(computeJSparrowLinkText(result).getText());
 
 		licenseLabel.getParent()
 			.pack();
@@ -204,13 +205,13 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			.layout(true);
 	}
 
-	private String computeJSparrowLinkText(LicenseValidationResult result) {
+	private JSparrowPricingLink computeJSparrowLinkText(LicenseValidationResult result) {
 		boolean isFullLicense = licenseUtil.isProLicense();
 		boolean isValid = result.isValid();
 		if (isFullLicense && isValid) {
-			return Messages.SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow;
+			return JSparrowPricingLink.OBTAIN_NEW_LICENSE;
 		}
-		return Messages.SimonykeesPreferencePageLicense_to_get_full_access_and_unlock_all_rules;
+		return JSparrowPricingLink.TO_GET_FULL_ACCESS_AND_UNLOCK_ALL_RULES_UPGRADE_YOUR_LICENSE;
 	}
 
 	private boolean isButtonToRegisterForFreeVisible(LicenseValidationResult result) {

@@ -25,6 +25,7 @@ import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
@@ -142,7 +143,7 @@ public class WelcomePage extends FormPage {
 		Button licenseButton = new Button(gettingStartedGroup, SWT.PUSH);
 		licenseButton.setLayoutData(buttonGridData);
 		licenseButton.setText(Messages.WelcomePage_buy_license_button);
-		createButtonListenerToOpenWebpage(licenseButton, "https://jsparrow.io/pricing/"); //$NON-NLS-1$
+		createButtonListenerToOpenWebpage(licenseButton, JSparrowPricingLink.getJSparrowPricingPageAddress()); 
 
 		Button marketplaceButton = new Button(gettingStartedGroup, SWT.PUSH);
 		marketplaceButton.setLayoutData(buttonGridData);
@@ -165,21 +166,18 @@ public class WelcomePage extends FormPage {
 		createButtonListenerToOpenPreferences(generalPreferencesButton,
 				"eu.jsparrow.ui.preference.ProfilePreferencePage"); //$NON-NLS-1$
 
-		
 		Button licensePreferencesButton = new Button(customizationGroup, SWT.PUSH);
 		licensePreferencesButton.setLayoutData(buttonGridData);
 		licensePreferencesButton.setText(Messages.WelcomePage_license_preferences_button);
 		createButtonListenerToOpenPreferences(licensePreferencesButton,
 				"eu.jsparrow.ui.preference.ProfilePreferencePageLicense"); //$NON-NLS-1$
-				
-		
+
 		Button markerPreferencesButton = new Button(customizationGroup, SWT.PUSH);
 		markerPreferencesButton.setLayoutData(buttonGridData);
 		markerPreferencesButton.setText("Open marker Preferences"); //$NON-NLS-1$
 		createButtonListenerToOpenPreferences(markerPreferencesButton,
 				"eu.jsparrow.ui.preference.MarkersPreferencePage"); //$NON-NLS-1$
 		markerPreferencesButton.setVisible(true);
-		
 
 		if (!LicenseUtil.get()
 			.isValidProLicensePresentInSecureStore()

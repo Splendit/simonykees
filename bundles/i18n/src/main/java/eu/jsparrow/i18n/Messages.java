@@ -68,7 +68,6 @@ public class Messages extends NLS {
 	public static String BufferedReaderLinesRule_name;
 	public static String BuyLicenseDialog_feedbackLabel;
 	public static String BuyLicenseDialog_opinionLabel;
-	public static String BuyLicenseDialog_purchaseLinkLabel;
 	public static String BuyLicenseDialog_rateUsLabel;
 	public static String BuyLicenseDialog_reason1;
 	public static String BuyLicenseDialog_reason2;
@@ -552,7 +551,6 @@ public class Messages extends NLS {
 	public static String SimonykeesMarkersPreferencePage_enableAll;
 	public static String SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText;
 	public static String SimonykeesMarkersPreferencePage_searchLabelMessage;
-	public static String SimonykeesMarkersPreferencePage_to_be_able_to_use_jsparrow_markers;
 	public static String SimonykeesMessageDialog_bugreport_email;
 	public static String SimonykeesMessageDialog_default_error_message;
 	public static String SimonykeesMessageDialog_open_browser_error_message;
@@ -594,8 +592,6 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePageLicense_jsparrow_pro_valid_until;
 	public static String SimonykeesPreferencePageLicense_jsparrow_starter;
 	public static String SimonykeesPreferencePageLicense_register_for_free_jsparrow_trial;
-	public static String SimonykeesPreferencePageLicense_to_get_full_access_and_unlock_all_rules;
-	public static String SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow;
 	public static String SimonykeesPreferencePageLicense_update_license_key_button;
 	public static String SimonykeesUpdateLicenseDialog_invalid_license_key;
 	public static String SimonykeesUpdateLicenseDialog_license_updated_successfully;
