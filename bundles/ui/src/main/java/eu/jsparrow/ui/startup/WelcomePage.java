@@ -124,7 +124,7 @@ public class WelcomePage extends FormPage {
 		Group gettingStartedGroup = new Group(rightComposite, SWT.NONE);
 		gettingStartedGroup.setText(Messages.WelcomePage_getting_started_group);
 		GridData groupGridData = new GridData(GridData.FILL_HORIZONTAL);
-		groupGridData.heightHint = 132;
+		groupGridData.heightHint = 142;
 		groupGridData.horizontalIndent = 5;
 		groupGridData.verticalIndent = 15;
 		gettingStartedGroup.setLayoutData(groupGridData);
@@ -153,7 +153,7 @@ public class WelcomePage extends FormPage {
 		Group customizationGroup = new Group(rightComposite, SWT.NONE);
 		customizationGroup.setText(Messages.WelcomePage_customization_group);
 		groupGridData = new GridData(GridData.FILL_HORIZONTAL);
-		groupGridData.heightHint = 92;
+		groupGridData.heightHint = 142;
 		groupGridData.horizontalIndent = 5;
 		groupGridData.verticalIndent = 65;
 		customizationGroup.setLayoutData(groupGridData);
@@ -165,11 +165,21 @@ public class WelcomePage extends FormPage {
 		createButtonListenerToOpenPreferences(generalPreferencesButton,
 				"eu.jsparrow.ui.preference.ProfilePreferencePage"); //$NON-NLS-1$
 
+		
 		Button licensePreferencesButton = new Button(customizationGroup, SWT.PUSH);
 		licensePreferencesButton.setLayoutData(buttonGridData);
 		licensePreferencesButton.setText(Messages.WelcomePage_license_preferences_button);
 		createButtonListenerToOpenPreferences(licensePreferencesButton,
 				"eu.jsparrow.ui.preference.ProfilePreferencePageLicense"); //$NON-NLS-1$
+				
+		
+		Button markerPreferencesButton = new Button(customizationGroup, SWT.PUSH);
+		markerPreferencesButton.setLayoutData(buttonGridData);
+		markerPreferencesButton.setText("Open marker Preferences"); //$NON-NLS-1$
+		createButtonListenerToOpenPreferences(markerPreferencesButton,
+				"eu.jsparrow.ui.preference.MarkersPreferencePage"); //$NON-NLS-1$
+		markerPreferencesButton.setVisible(true);
+		
 
 		if (!LicenseUtil.get()
 			.isValidProLicensePresentInSecureStore()
