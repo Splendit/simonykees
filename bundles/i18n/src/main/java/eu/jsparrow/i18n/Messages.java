@@ -302,6 +302,17 @@ public class Messages extends NLS {
 	public static String Java5Profile_profileName;
 	public static String Java7Profile_profileName;
 	public static String JSparrowMarkerResolution_reserving_payPerUseCredit;
+	public static String JSparrowPricingLink_jSparrowPricingPage_url;
+	public static String JSparrowPricingLink_link_startTag;
+	public static String JSparrowPricingLink_link_startTag_formatstring;
+	public static String JSparrowPricingLink_obtainNewLicense;
+	public static String JSparrowPricingLink_toGetFullAccessUpgradeLicense;
+	public static String JSparrowPricingLink_toUnlockAllRulesRegisterForPremiumLicense;
+	public static String JSparrowPricingLink_toUnlockPremiumRulesUpgradeLicense;
+	public static String JSparrowPricingLink_toUnlockThemRegisterForPremiumLicense;
+	public static String JSparrowPricingLink_toUseJSparrowMarkersUpgradeHere;
+	public static String JSparrowPricingLink_upgradeLicenceToApplyAllRules;
+	public static String JSparrowPricingLink_upgradeLicenseHere;
 	public static String Netlicensing_persistenceError_failedtoLoad;
 	public static String Netlicensing_persistenceError_failedToSave;
 	public static String Netlicensing_validationResult_freeLicenseExpired0;

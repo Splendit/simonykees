@@ -72,7 +72,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		if (licenseUtil.isFreeLicense()) {
 			Link jSparrowLink = new Link(group, SWT.NONE);
 			jSparrowLink.setFont(parent.getFont());
-			jSparrowLink.setText(JSparrowPricingLink.TO_BE_ABLE_TO_USE_JSPARROW_MARKERS_UPGRADE_HERE.getText());
+			jSparrowLink.setText(JSparrowPricingLink.TO_USE_JSPARROW_MARKERS_UPGRADE_HERE.getText());
 			jSparrowLink.setEnabled(true);
 			jSparrowLink.addSelectionListener(new SelectionAdapter() {
 				@Override

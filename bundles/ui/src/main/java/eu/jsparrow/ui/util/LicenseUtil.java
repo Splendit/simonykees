@@ -185,7 +185,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 								REGISTER_FOR_A_FREE_J_SPARROW_TRIAL + _TO_BE_ABLE_TO_APPLY_20_OF_OUR_MOST_LIKED_RULES),
 					SuggestRegistrationDialog::addRegisterForFreeButton,
 					dialog -> dialog.addLinkToJSparrowPricingPage(
-							JSparrowPricingLink.UPGRADE_YOUR_LICENSE_TO_BE_ABLE_TO_APPLY_ALL_OUR_RULES),
+							JSparrowPricingLink.UPGRADE_LICENSE_TO_APPLY_ALL_RULES),
 					SuggestRegistrationDialog::addRegisterForPremiumButton);
 			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(shell, addComponentLambdas);
 			dialog.useSkipAsLastButton();

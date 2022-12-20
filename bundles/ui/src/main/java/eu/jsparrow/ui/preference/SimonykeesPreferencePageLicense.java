@@ -211,7 +211,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		if (isFullLicense && isValid) {
 			return JSparrowPricingLink.OBTAIN_NEW_LICENSE;
 		}
-		return JSparrowPricingLink.TO_GET_FULL_ACCESS_AND_UNLOCK_ALL_RULES_UPGRADE_YOUR_LICENSE;
+		return JSparrowPricingLink.TO_GET_FULL_ACCESS_UPGRADE_LICENSE;
 	}
 
 	private boolean isButtonToRegisterForFreeVisible(LicenseValidationResult result) {

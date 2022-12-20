@@ -163,7 +163,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 			if (!allRulesFree) {
 				addComponentLambdas = Arrays.asList(//
 						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
-						dialog -> dialog.addLinkToJSparrowPricingPage(JSparrowPricingLink.TO_UNLOCK_PREMIUM_RULES_UPGRADE_YOUR_LICENSE),
+						dialog -> dialog.addLinkToJSparrowPricingPage(JSparrowPricingLink.TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE),
 						SuggestRegistrationDialog::addRegisterForPremiumButton);
 			}
 		} else {
@@ -179,13 +179,13 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 							.addLabel(REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES),
 						SuggestRegistrationDialog::addRegisterForFreeButton,
 						dialog -> dialog.addLinkToJSparrowPricingPage(
-								JSparrowPricingLink.TO_UNLOCK_ALL_OUR_RULES_REGISTER_FOR_A_PREMIUM_LICENSE),
+								JSparrowPricingLink.TO_UNLOCK_ALL_RULES_REGISTER_FOR_PREMIUM_LICENSE),
 						SuggestRegistrationDialog::addRegisterForPremiumButton);
 			} else {
 				addComponentLambdas = Arrays.asList(//
 						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
 						dialog -> dialog.addLinkToJSparrowPricingPage(
-								JSparrowPricingLink.TO_UNLOCK_THEM_REGISTER_FOR_A_PREMIUM_LICENSE),
+								JSparrowPricingLink.TO_UNLOCK_THEM_REGISTER_FOR_PREMIUM_LICENSE),
 						SuggestRegistrationDialog::addRegisterForPremiumButton,
 						dialog -> dialog
 							.addLabel(
