@@ -114,12 +114,6 @@ public class BuyLicenseDialog extends Dialog {
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		area.setLayoutData(gridData);
 
-		Composite titleContainer = new Composite(area, SWT.NONE);
-		GridLayout titleLayout = new GridLayout(2, false);
-		titleContainer.setLayout(titleLayout);
-		gridData = new GridData(SWT.CENTER, SWT.CENTER, true, true);
-		titleContainer.setLayoutData(gridData);
-
 		Dialog.applyDialogFont(composite);
 		Font font = composite.getDisplay()
 			.getSystemFont();
@@ -135,20 +129,18 @@ public class BuyLicenseDialog extends Dialog {
 		Image jSparrowImageInactive = imageDescInactive.createImage();
 		composite.addDisposeListener(e -> jSparrowImageInactive.dispose());
 
-		Label logoLabel = new Label(titleContainer, SWT.NONE);
+		Label logoLabel = new Label(area, SWT.NONE);
 		logoLabel.setImage(jSparrowImageInactive);
 
-		Label titleLabel = new Label(titleContainer, SWT.NONE);
+		Label titleLabel = new Label(area, SWT.NONE);
 		titleLabel.setFont(boldFont);
 		titleLabel.setText(message);
 
+		Label titleLabel2 = new Label(area, SWT.NONE);
+		titleLabel2.setText("You can preview all changes but not apply them.");
+
 		Link link = new Link(area, SWT.NONE);
-		gridData = new GridData();
-		gridData.verticalIndent = 12;
-		gridData.widthHint = 450;
-		link.setLayoutData(gridData);
-		link.setText("Using the free version of jSparrow, you can view a summary of all changes but not apply them. "
-				+ JSparrowPricingLink.UPGRADE_YOUR_LICENSE_HERE.getText());
+		link.setText(JSparrowPricingLink.UPGRADE_YOUR_LICENSE_HERE.getText());
 		link.addSelectionListener(new SelectionAdapter() {
 
 			@Override
@@ -163,8 +155,6 @@ public class BuyLicenseDialog extends Dialog {
 				}
 			}
 		});
-		link.setFont(boldFont);
-
 		createRatingForm(area);
 		return composite;
 	}
