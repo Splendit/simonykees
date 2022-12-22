@@ -56,7 +56,7 @@ class JSparrowPricingLinkTest {
 						".",
 						OBTAIN_NEW_LICENSE),
 				Arguments.of(
-						"To get full access and unlock all the rules, ",
+						"To get full access and unlock all our rules, ",
 						"upgrade your license",
 						".",
 						TO_GET_FULL_ACCESS_UPGRADE_LICENSE),

@@ -53,7 +53,7 @@ import eu.jsparrow.ui.util.LicenseUtil.LicenseUpdateResult;
 public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
 	private static final String LOGO_ACTIVE_LICENSE_PATH = SimonykeesPreferencePageLicense.LOGO_ACTIVE_LICENSE_PATH;
-	private static final String LOGO_INACTIVE_LICENSE_PATH = SimonykeesPreferencePageLicense.LOGO_INACTIVE_LICENSE_PATH;
+	private static final String LOGO_INACTIVE_LICENSE_PATH = SimonykeesPreferencePageLicense.LOGO_ACTIVE_LICENSE_PATH;
 	private static final String TICKMARK_GREEN_ICON_PATH = "icons/if_Tick_Mark_20px.png"; //$NON-NLS-1$
 	private static final String CLOSE_RED_ICON_PATH = "icons/if_Close_Icon_20px.png"; //$NON-NLS-1$
 	private Text licenseKeyText;

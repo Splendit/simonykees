@@ -66,12 +66,6 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private Label expirationLabel;
 
-	private Image jSparrowImageActive;
-
-	private Image jSparrowImageInactive;
-
-	private Label logoLabel;
-
 	private Button registerForFreeButton;
 
 	Link jSparrowLink;
@@ -103,15 +97,17 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		IPath iPathActive = new Path(LOGO_ACTIVE_LICENSE_PATH);
 		URL urlActive = FileLocator.find(bundle, iPathActive, new HashMap<>());
 		ImageDescriptor imageDescActive = ImageDescriptor.createFromURL(urlActive);
-		jSparrowImageActive = imageDescActive.createImage();
+		Image jSparrowImageActive = imageDescActive.createImage();
 
-		IPath iPathInactive = new Path(LOGO_INACTIVE_LICENSE_PATH);
-		URL urlInactive = FileLocator.find(bundle, iPathInactive, new HashMap<>());
-		ImageDescriptor imageDescInactive = ImageDescriptor.createFromURL(urlInactive);
-		jSparrowImageInactive = imageDescInactive.createImage();
-
-		logoLabel = new Label(composite, SWT.NONE);
+		Label logoLabel = new Label(composite, SWT.NONE);
 		logoLabel.setImage(jSparrowImageActive);
+
+		expirationLabel = new Label(composite, SWT.NONE);
+		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont())
+			.setStyle(SWT.BOLD);
+		expirationLabel.setFont(boldDescriptor.createFont(composite.getDisplay()));
+		expirationLabel.setForeground(display.getSystemColor(SWT.COLOR_RED));
+		expirationLabel.setVisible(true);
 
 		licenseLabel = new Label(composite, SWT.LEFT | SWT.WRAP);
 		licenseLabel.setVisible(true);
@@ -149,13 +145,6 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			}
 		});
 
-		expirationLabel = new Label(composite, SWT.NONE);
-		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont())
-			.setStyle(SWT.BOLD);
-		expirationLabel.setFont(boldDescriptor.createFont(composite.getDisplay()));
-		expirationLabel.setForeground(display.getSystemColor(SWT.COLOR_RED));
-		expirationLabel.setVisible(true);
-
 		Button updateButton = new Button(composite, SWT.PUSH);
 		updateButton.setText(Messages.SimonykeesPreferencePageLicense_update_license_key_button);
 		updateButton.setFont(parent.getFont());
@@ -173,7 +162,6 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		updateButton.setVisible(true);
 		composite.addDisposeListener((DisposeEvent e) -> {
 			jSparrowImageActive.dispose();
-			jSparrowImageInactive.dispose();
 			expirationLabel.getFont()
 				.dispose();
 		});
@@ -190,10 +178,8 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		boolean freeWithStarter = !licenseUtil.isProLicense() && licenseUtil.isActiveRegistration();
 		if (!result.isValid() && !freeWithStarter) {
 			expirationLabel.setText(result.getDetail());
-			logoLabel.setImage(jSparrowImageInactive);
 		} else {
 			expirationLabel.setText(""); //$NON-NLS-1$
-			logoLabel.setImage(jSparrowImageActive);
 		}
 
 		registerForFreeButton.setVisible(isButtonToRegisterForFreeVisible(result));
