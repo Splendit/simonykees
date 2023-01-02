@@ -1,9 +1,9 @@
 package eu.jsparrow.ui.preview;
 
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
-import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -73,7 +73,7 @@ public class RefactoringSummaryWizardPage extends AbstractSummaryWizardPage<Refa
 		RefactoringSummaryWizardPageModel summaryWizardPageModel = getSummaryPageModel();
 		ViewerSupport.bind(fileTableViewer, summaryWizardPageModel.getChangedFiles(), BeanProperties.values("name")); //$NON-NLS-1$
 
-		IViewerObservableValue selectedFile = ViewerProperties.singleSelection()
+		IViewerObservableValue<Object>  selectedFile = ViewerProperties.singleSelection()
 			.observe(fileTableViewer);
 		ViewerSupport.bind(rulesPerFileTableViewer, summaryWizardPageModel.getRulesPerFile(),
 				BeanProperties.values("name")); //$NON-NLS-1$
