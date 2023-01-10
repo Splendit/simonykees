@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.test.common
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow :: test common
 Bundle-SymbolicName: eu.jsparrow.test.common
-Bundle-Version: 4.14.1.qualifier
+Bundle-Version: 4.15.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Splendit IT-Consulting GmbH
