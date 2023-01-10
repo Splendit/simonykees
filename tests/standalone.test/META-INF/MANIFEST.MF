@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.standalone.test
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow :: test standalone
 Bundle-SymbolicName: eu.jsparrow.standalone.test
-Bundle-Version: 4.14.1.qualifier
+Bundle-Version: 4.15.0.qualifier
 Fragment-Host: eu.jsparrow.standalone
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH

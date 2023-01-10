@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.test
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Test Fragment
 Bundle-SymbolicName: eu.jsparrow.test
-Bundle-Version: 4.14.1.qualifier
+Bundle-Version: 4.15.0.qualifier
 Fragment-Host: eu.jsparrow.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: eu.jsparrow.logging,
