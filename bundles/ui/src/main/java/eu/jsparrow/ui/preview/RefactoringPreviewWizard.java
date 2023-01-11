@@ -62,22 +62,20 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	protected StatisticsSection summaryPageStatisticsSection;
 	protected StatisticsSectionUpdater updater;
 	private Image windowIcon;
-
+	
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private StandaloneStatisticsMetadata statisticsMetadata;
 	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
 
-	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
-			StandaloneStatisticsMetadata standaloneStatisticsMetadata) {
+	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline, StandaloneStatisticsMetadata standaloneStatisticsMetadata) {
 		this(refactoringPipeline);
 		this.statisticsMetadata = standaloneStatisticsMetadata;
 	}
-
+	
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
 		this.statisticsSection = StatisticsSectionFactory.createStatisticsSection(refactoringPipeline);
-		this.summaryPageStatisticsSection = StatisticsSectionFactory
-			.createStatisticsSectionForSummaryPage(refactoringPipeline);
+		this.summaryPageStatisticsSection = StatisticsSectionFactory.createStatisticsSectionForSummaryPage(refactoringPipeline);
 		this.updater = new StatisticsSectionUpdater(statisticsSection, summaryPageStatisticsSection);
 		this.refactoringPipeline = refactoringPipeline;
 		this.shell = PlatformUI.getWorkbench()
@@ -104,15 +102,14 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		 * First summary page is created to collect all initial source from
 		 * working copies
 		 */
-
+		
 		model = new RefactoringPreviewWizardModel();
 		refactoringPipeline.getRules()
 			.forEach(rule -> {
 				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
 				if (!changes.isEmpty()) {
 					RuleStatisticsSection ruleStats = StatisticsSectionFactory.createRuleStatisticsSection(rule);
-					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model,
-							canFinish(), ruleStats, updater);
+					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish(), ruleStats, updater);
 					previewPage.setTotalStatisticsSection(statisticsSection);
 					addPage(previewPage);
 				}
@@ -121,12 +118,11 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.size() == 1
 				&& refactoringPipeline.getRules()
 					.get(0) instanceof StandardLoggerRule)) {
-			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(),
-					statisticsMetadata, summaryPageStatisticsSection);
+			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsMetadata, summaryPageStatisticsSection);
 			addPage(summaryPage);
 		}
 	}
-
+	
 	@Override
 	public void updateViewsOnNavigation(IWizardPage page) {
 		if (page instanceof RefactoringPreviewWizardPage) {
@@ -213,21 +209,19 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public boolean canFinish() {
 		if (licenseUtil.isFreeLicense()) {
-			return licenseUtil.isActiveRegistration() && containsOnlyFreeRules();
+			return licenseUtil.isActiveRegistration()  && containsOnlyFreeRules();
 		}
-
+		
 		LicenseValidationResult result = licenseUtil.getValidationResult();
 		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
 			return super.canFinish();
 		}
-		boolean enoughCredit = payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
+		boolean enoughCredit =  payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
 		return enoughCredit && super.canFinish();
 	}
 
 	private boolean containsOnlyFreeRules() {
-		return refactoringPipeline.getRules()
-			.stream()
-			.allMatch(RefactoringRule::isFree);
+		return refactoringPipeline.getRules().stream().allMatch(RefactoringRule::isFree);
 	}
 
 	/*
@@ -301,7 +295,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public boolean performCancel() {
 		refactoringPipeline.clearStates();
-		return true;
+		return super.performCancel();
 	}
 
 	@Override
