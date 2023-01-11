@@ -135,6 +135,11 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		final List<RefactoringRule> selectedRules = model.getSelectionAsList();
 		showOptionalLockedRuleSelectionDialog(selectedRules);
 
+		if (refactoringPipeline.getRefactoringStates()
+			.isEmpty()) {
+			refactoringPipeline.restoreRefactoringStatesFromOriginals();
+		}
+
 		refactoringPipeline.setRules(selectedRules);
 		refactoringPipeline.updateInitialSourceMap();
 
@@ -145,7 +150,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		job.setUser(true);
 		job.schedule();
 
-		return true;
+		return false;
 	}
 
 	public void showOptionalLockedRuleSelectionDialog(List<RefactoringRule> selectedRules) {
@@ -163,7 +168,8 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 			if (!allRulesFree) {
 				addComponentLambdas = Arrays.asList(//
 						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
-						dialog -> dialog.addLinkToJSparrowPricingPage(JSparrowPricingLink.TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE),
+						dialog -> dialog
+							.addLinkToJSparrowPricingPage(JSparrowPricingLink.TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE),
 						SuggestRegistrationDialog::addRegisterForPremiumButton);
 			}
 		} else {

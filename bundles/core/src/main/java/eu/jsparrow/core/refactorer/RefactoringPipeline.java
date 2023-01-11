@@ -51,6 +51,7 @@ public class RefactoringPipeline {
 	 * {@link RefactoringState}s
 	 */
 	private List<RefactoringState> refactoringStates;
+	private List<ICompilationUnit> compilationUnits;
 
 	/**
 	 * List of selected rules.
@@ -74,6 +75,7 @@ public class RefactoringPipeline {
 	 */
 	public RefactoringPipeline() {
 		this.refactoringStates = new ArrayList<>();
+		this.compilationUnits = new ArrayList<>();
 		this.workingCopyOwner = new WorkingCopyOwnerDecorator();
 	}
 
@@ -298,12 +300,26 @@ public class RefactoringPipeline {
 		List<IProblem> problems = ((ProblemRequestor) problemRequestor).getProblems();
 		if (problems.isEmpty()) {
 			refactoringStates.add(new RefactoringState(compilationUnit, workingCopy, workingCopyOwner));
+			compilationUnits.add(compilationUnit);
 		} else {
 			String loggerInfo = NLS.bind(Messages.RefactoringPipeline_CompilationUnitWithCompilationErrors,
 					compilationUnit.getElementName(), problems.get(0));
 			logger.warn(loggerInfo);
 			containingErrorList.add(compilationUnit);
 		}
+	}
+
+	public void restoreRefactoringStatesFromOriginals() {
+		clearStates();
+		compilationUnits.forEach(compilationUnit -> {
+			ICompilationUnit workingCopy;
+			try {
+				workingCopy = compilationUnit.getWorkingCopy(workingCopyOwner, null);
+				refactoringStates.add(new RefactoringState(compilationUnit, workingCopy, workingCopyOwner));
+			} catch (JavaModelException e) {
+				e.printStackTrace();
+			}
+		});
 	}
 
 	public boolean isMultipleProjects() {
@@ -585,7 +601,8 @@ public class RefactoringPipeline {
 			if (hasChanges) {
 				Version jdtVersion = JdtCoreVersionBindingUtil.findCurrentJDTCoreVersion();
 				ICompilationUnit workingCopy = refactoringState.getWorkingCopy();
-				newAstRoot = workingCopy.reconcile(JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion), true, null, null);
+				newAstRoot = workingCopy.reconcile(JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion), true, null,
+						null);
 			}
 		} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 			logger.error(e.getMessage(), e);
