@@ -122,7 +122,6 @@ public abstract class AbstractRuleWizard extends Wizard {
 			.getShell();
 		RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline,
 				statisticsMetadata);
-		previewWizard.setKeepJSparrowRunningAfterCancel(isSelectRulesDialogOpen());
 		final WizardDialog dialog = new WizardDialog(shell, previewWizard) {
 
 			@Override
@@ -197,9 +196,5 @@ public abstract class AbstractRuleWizard extends Wizard {
 				}
 			}
 		};
-	}
-
-	protected boolean isSelectRulesDialogOpen() {
-		return false;
 	}
 }

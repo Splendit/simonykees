@@ -366,9 +366,4 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		windowIcon.dispose();
 		super.dispose();
 	}
-
-	@Override
-	protected boolean isSelectRulesDialogOpen() {
-		return true;
-	}
 }
