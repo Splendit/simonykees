@@ -16,12 +16,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.wizard.ProgressMonitorPart;
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -39,6 +33,7 @@ import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
+import eu.jsparrow.ui.wizard.impl.SelectRulesWizardDialog;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -117,88 +112,7 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 						refactoringPipeline,
 						RulesContainer.getRulesForProjects(selectedJavaElements.keySet(), false));
 
-				class SelectRulesWizardDialog extends WizardDialog {
 
-					private static final int BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL = 11001;
-					private static final int BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY = 11002;
-
-					public SelectRulesWizardDialog(Shell parentShell, SelectRulesWizard newWizard) {
-						super(parentShell, newWizard);
-						newWizard.addLicenseUpdateListener(this::updateButtonsForButtonBar);
-					}
-
-					/*
-					 * Removed unnecessary empty space on the bottom of the
-					 * wizard intended for ProgressMonitor that is not used
-					 */
-					@Override
-					protected Control createDialogArea(Composite parent) {
-						Control ctrl = super.createDialogArea(parent);
-						getProgressMonitor();
-						return ctrl;
-					}
-
-					@Override
-					protected IProgressMonitor getProgressMonitor() {
-						ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
-						GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-						gridData.heightHint = 0;
-						monitor.setLayoutData(gridData);
-						monitor.setVisible(false);
-						return monitor;
-					}
-
-					/**
-					 * Creates new shell defined for this wizard. The dialog is
-					 * made as big enough to show rule description vertically
-					 * and horizontally to avoid two scrollers. Minimum size is
-					 * set to avoid loosing components from view.
-					 * 
-					 * @param newShell
-					 */
-					@Override
-					protected void configureShell(Shell newShell) {
-						super.configureShell(newShell);
-						newShell.setSize(1000, 1000);
-						newShell.setMinimumSize(680, 600);
-					}
-
-					@Override
-					protected void createButtonsForButtonBar(Composite parent) {
-						createButton(parent, BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL, "Register for a free trial", false);
-						createButton(parent, BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY, "Enter premium license key", false);
-						super.createButtonsForButtonBar(parent);
-
-						Button finish = getButton(IDialogConstants.FINISH_ID);
-						finish.setText(Messages.SelectRulesWizardHandler_finishButtonText);
-						setButtonLayoutData(finish);
-						updateButtonsForButtonBar();
-					}
-
-					private void updateButtonsForButtonBar() {
-						boolean showRegisterForAFreeTrial = false;
-						boolean showEnterPremiumLicenseKey = false;
-						if (licenseUtil.isFreeLicense()) {
-							if (!licenseUtil.isActiveRegistration()) {
-								showRegisterForAFreeTrial = true;
-							}
-							showEnterPremiumLicenseKey = true;
-						}
-						getButton(BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL).setVisible(showRegisterForAFreeTrial);
-						getButton(BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY).setVisible(showEnterPremiumLicenseKey);
-					}
-
-					@Override
-					protected void buttonPressed(int buttonId) {
-						if (buttonId == BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
-							selectRulesWizard.showRegistrationDialog();
-						} else if (buttonId == BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
-							selectRulesWizard.showSimonykeesUpdateLicenseDialog();
-						} else {
-							super.buttonPressed(buttonId);
-						}
-					}
-				}
 
 				SelectRulesWizardDialog dialog = new SelectRulesWizardDialog(shell, selectRulesWizard);
 				/*
