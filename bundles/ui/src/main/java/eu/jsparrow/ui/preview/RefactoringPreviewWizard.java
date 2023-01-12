@@ -66,6 +66,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private StandaloneStatisticsMetadata statisticsMetadata;
 	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
+	private boolean keepJSparrowRunningAfterCancel;
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
 			StandaloneStatisticsMetadata standaloneStatisticsMetadata) {
@@ -301,7 +302,11 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public boolean performCancel() {
 		refactoringPipeline.clearStates();
-		return true;
+		if(keepJSparrowRunningAfterCancel) {
+			return true;
+		}
+		return super.performCancel();
+		
 	}
 
 	@Override
@@ -380,5 +385,9 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	public RefactoringSummaryWizardPage getSummaryPage() {
 		return this.summaryPage;
+	}
+
+	public void setKeepJSparrowRunningAfterCancel(boolean keepJSparrowRunningAfterCancel) {
+		this.keepJSparrowRunningAfterCancel = keepJSparrowRunningAfterCancel;
 	}
 }
