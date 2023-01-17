@@ -25,6 +25,7 @@ import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
@@ -124,7 +125,7 @@ public class WelcomePage extends FormPage {
 		Group gettingStartedGroup = new Group(rightComposite, SWT.NONE);
 		gettingStartedGroup.setText(Messages.WelcomePage_getting_started_group);
 		GridData groupGridData = new GridData(GridData.FILL_HORIZONTAL);
-		groupGridData.heightHint = 132;
+		groupGridData.heightHint = 142;
 		groupGridData.horizontalIndent = 5;
 		groupGridData.verticalIndent = 15;
 		gettingStartedGroup.setLayoutData(groupGridData);
@@ -142,7 +143,7 @@ public class WelcomePage extends FormPage {
 		Button licenseButton = new Button(gettingStartedGroup, SWT.PUSH);
 		licenseButton.setLayoutData(buttonGridData);
 		licenseButton.setText(Messages.WelcomePage_buy_license_button);
-		createButtonListenerToOpenWebpage(licenseButton, "https://jsparrow.io/pricing/"); //$NON-NLS-1$
+		createButtonListenerToOpenWebpage(licenseButton, JSparrowPricingLink.getJSparrowPricingPageAddress()); 
 
 		Button marketplaceButton = new Button(gettingStartedGroup, SWT.PUSH);
 		marketplaceButton.setLayoutData(buttonGridData);
@@ -153,7 +154,7 @@ public class WelcomePage extends FormPage {
 		Group customizationGroup = new Group(rightComposite, SWT.NONE);
 		customizationGroup.setText(Messages.WelcomePage_customization_group);
 		groupGridData = new GridData(GridData.FILL_HORIZONTAL);
-		groupGridData.heightHint = 92;
+		groupGridData.heightHint = 142;
 		groupGridData.horizontalIndent = 5;
 		groupGridData.verticalIndent = 65;
 		customizationGroup.setLayoutData(groupGridData);
@@ -170,6 +171,13 @@ public class WelcomePage extends FormPage {
 		licensePreferencesButton.setText(Messages.WelcomePage_license_preferences_button);
 		createButtonListenerToOpenPreferences(licensePreferencesButton,
 				"eu.jsparrow.ui.preference.ProfilePreferencePageLicense"); //$NON-NLS-1$
+
+		Button markerPreferencesButton = new Button(customizationGroup, SWT.PUSH);
+		markerPreferencesButton.setLayoutData(buttonGridData);
+		markerPreferencesButton.setText("Open marker Preferences"); //$NON-NLS-1$
+		createButtonListenerToOpenPreferences(markerPreferencesButton,
+				"eu.jsparrow.ui.preference.MarkersPreferencePage"); //$NON-NLS-1$
+		markerPreferencesButton.setVisible(true);
 
 		if (!LicenseUtil.get()
 			.isValidProLicensePresentInSecureStore()

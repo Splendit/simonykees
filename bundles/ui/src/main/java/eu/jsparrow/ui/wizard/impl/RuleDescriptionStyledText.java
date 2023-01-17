@@ -26,6 +26,7 @@ import eu.jsparrow.core.statistic.RuleDocumentationURLGeneratorUtil;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 class RuleDescriptionStyledText extends StyledText {
@@ -33,7 +34,6 @@ class RuleDescriptionStyledText extends StyledText {
 	private static final String DBL_QUOT = "\""; //$NON-NLS-1$
 	private static final String FULLSTOP = "."; //$NON-NLS-1$
 	private static final String REGISTER_FOR_A_FREE_TRIAL = "Register for a free trial";
-	private static final String UPGRADE_LICENSE_LINK = "https://jsparrow.io/pricing/";
 	private static final String UPGRADE_YOUR_LICENSE = "upgrade your license";
 
 	private String selectedRuleLink = ""; //$NON-NLS-1$
@@ -80,7 +80,7 @@ class RuleDescriptionStyledText extends StyledText {
 
 			} else if (offset != -1 && upgradeLicenseOffsetRange.start < offset
 					&& offset < upgradeLicenseOffsetRange.end) {
-				Program.launch(UPGRADE_LICENSE_LINK);
+				Program.launch(JSparrowPricingLink.getJSparrowPricingPageAddress());
 			}
 		});
 	}
