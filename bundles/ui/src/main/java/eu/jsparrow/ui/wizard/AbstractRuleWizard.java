@@ -151,12 +151,6 @@ public abstract class AbstractRuleWizard extends Wizard {
 				}
 			}
 
-			@Override
-			protected void cancelPressed() {
-				previewWizard.performCancel();
-				super.cancelPressed();
-			}
-
 			private void summaryButtonPressed() {
 				if (getCurrentPage() instanceof RefactoringPreviewWizardPage) {
 					previewWizard.updateViewsOnNavigation(getCurrentPage());
