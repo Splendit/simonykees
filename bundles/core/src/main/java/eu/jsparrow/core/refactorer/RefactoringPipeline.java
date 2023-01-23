@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.exception.model.NotWorkingRuleModel;
+import eu.jsparrow.core.rule.RulesForProjectsData;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -68,6 +69,7 @@ public class RefactoringPipeline {
 
 	private int fileCount;
 
+	private RulesForProjectsData dataForSelectRulesWizard;
 	/**
 	 * Constructor without parameters, used to create RefactoringPipeline before
 	 * SelectRulesWizard is opened
@@ -640,5 +642,10 @@ public class RefactoringPipeline {
 	public int getFileCount() {
 		return fileCount;
 	}
+
+	public void setDataForSelectRulesWizard(RulesForProjectsData dataForSelectRulesWizard) {
+		this.dataForSelectRulesWizard = dataForSelectRulesWizard;
+	}
+
 
 }
