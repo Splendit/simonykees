@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RulesContainer;
+import eu.jsparrow.core.rule.RulesForProjectsData;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -155,6 +156,9 @@ public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 			.filter(rule -> profileRuleIds.contains(rule.getId()))
 			.filter(RefactoringRule::isEnabled)
 			.collect(Collectors.toList());
+		RulesForProjectsData rulesForProjectsData = RulesContainer
+			.getRulesForProjectsData(selectedJavaElements.keySet(), false);
+		refactoringPipeline.setDataForSelectRulesWizard(rulesForProjectsData);
 		implicitWizard.computeRefactoring(refactoringPipeline, javaProjects, rules);
 
 	}

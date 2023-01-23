@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
@@ -29,6 +30,8 @@ import eu.jsparrow.core.statistic.StopWatchUtil;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.handler.SelectRulesWizardHandler;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -182,7 +185,20 @@ public abstract class AbstractRuleWizard extends Wizard {
 						Display.getDefault()
 							.asyncExec(() -> showRefactoringPreviewWizard(refactoringPipeline, javaProjects));
 					} else {
-						WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
+						Display.getDefault()
+							.asyncExec(() -> {
+								Shell shell = PlatformUI.getWorkbench()
+									.getActiveWorkbenchWindow()
+									.getShell();
+								SimonykeesMessageDialog.openMessageDialog(shell,
+										Messages.SelectRulesWizard_warning_no_refactorings,
+										MessageDialog.INFORMATION);
+
+								if (!RefactoringPipeline.showSelectRulesWithNewPipeline(refactoringPipeline,
+										SelectRulesWizardHandler::synchronizeWithUIShowSelectRulesWizard)) {
+									Activator.setRunning(false);
+								}
+							});
 					}
 				} else {
 					// do nothing if status is canceled, close

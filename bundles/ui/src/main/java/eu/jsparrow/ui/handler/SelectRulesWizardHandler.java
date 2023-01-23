@@ -3,6 +3,7 @@ package eu.jsparrow.ui.handler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RulesContainer;
+import eu.jsparrow.core.rule.RulesForProjectsData;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
@@ -107,15 +109,22 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 	 */
 	private void synchronizeWithUIShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,
 			Map<IJavaProject, List<IJavaElement>> selectedJavaElements) {
+		Set<IJavaProject> javaProjects = selectedJavaElements.keySet();
 
+		RulesForProjectsData rulesForProjectsData = RulesContainer.getRulesForProjectsData(javaProjects, false);
+		refactoringPipeline.setDataForSelectRulesWizard(rulesForProjectsData);
+		synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, rulesForProjectsData);
+
+	}
+	
+	public static void synchronizeWithUIShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,
+			RulesForProjectsData rulesForProjectsData) {
 		Display.getDefault()
 			.asyncExec(() -> {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				SelectRulesWizard selectRulesWizard = new SelectRulesWizard(selectedJavaElements.keySet(),
-						refactoringPipeline,
-						RulesContainer.getRulesForProjects(selectedJavaElements.keySet(), false));
+				SelectRulesWizard selectRulesWizard = new SelectRulesWizard(refactoringPipeline, rulesForProjectsData);
 
 				class SelectRulesWizardDialog extends WizardDialog {
 
@@ -178,6 +187,7 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 					private void updateButtonsForButtonBar() {
 						boolean showRegisterForAFreeTrial = false;
 						boolean showEnterPremiumLicenseKey = false;
+						LicenseUtil licenseUtil = LicenseUtil.get();
 						if (licenseUtil.isFreeLicense()) {
 							if (!licenseUtil.isActiveRegistration()) {
 								showRegisterForAFreeTrial = true;

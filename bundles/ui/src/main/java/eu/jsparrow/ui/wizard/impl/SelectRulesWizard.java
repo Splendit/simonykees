@@ -29,10 +29,12 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.rule.RulesForProjectsData;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -73,12 +75,11 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	private Image windowIcon;
 	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
 
-	public SelectRulesWizard(Collection<IJavaProject> javaProjects, RefactoringPipeline refactoringPipeline,
-			List<RefactoringRule> rules) {
+	public SelectRulesWizard(RefactoringPipeline refactoringPipeline, RulesForProjectsData rulesForProjectsData) {
 		super();
-		this.javaProjects = javaProjects;
+		this.javaProjects = rulesForProjectsData.getJavaProjects();
 		this.refactoringPipeline = refactoringPipeline;
-		this.rules = rules;
+		this.rules = rulesForProjectsData.getRulesChoice();
 		setNeedsProgressMonitor(true);
 		windowIcon = ResourceHelper.createImage(WINDOW_ICON);
 		Window.setDefaultImage(windowIcon);
@@ -125,25 +126,30 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 	@Override
 	public boolean performFinish() {
-		String message = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
-			.getSimpleName(),
-				this.javaProjects.stream()
-					.map(IJavaProject::getElementName)
-					.collect(Collectors.joining(";"))); //$NON-NLS-1$
-		logger.info(message);
 
-		final List<RefactoringRule> selectedRules = model.getSelectionAsList();
-		showOptionalLockedRuleSelectionDialog(selectedRules);
+		Display.getCurrent()
+			.asyncExec(() -> {
 
-		refactoringPipeline.setRules(selectedRules);
-		refactoringPipeline.updateInitialSourceMap();
+				String message = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
+					.getSimpleName(),
+						this.javaProjects.stream()
+							.map(IJavaProject::getElementName)
+							.collect(Collectors.joining(";"))); //$NON-NLS-1$
+				logger.info(message);
 
-		Job job = createRefactoringJob(refactoringPipeline, javaProjects);
+				final List<RefactoringRule> selectedRules = model.getSelectionAsList();
+				showOptionalLockedRuleSelectionDialog(selectedRules);
 
-		job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects));
+				refactoringPipeline.setRules(selectedRules);
+				refactoringPipeline.updateInitialSourceMap();
 
-		job.setUser(true);
-		job.schedule();
+				Job job = createRefactoringJob(refactoringPipeline, javaProjects);
+
+				job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects));
+
+				job.setUser(true);
+				job.schedule();
+			});
 
 		return true;
 	}

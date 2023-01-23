@@ -30,11 +30,12 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.exception.SimonykeesException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.handler.SelectRulesWizardHandler;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.statistics.RuleStatisticsSection;
+import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionUpdater;
-import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
@@ -62,7 +63,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	protected StatisticsSection summaryPageStatisticsSection;
 	protected StatisticsSectionUpdater updater;
 	private Image windowIcon;
-	
+
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private StandaloneStatisticsMetadata statisticsMetadata;
 	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
@@ -71,7 +72,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		this(refactoringPipeline);
 		this.statisticsMetadata = standaloneStatisticsMetadata;
 	}
-	
+
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
 		this.statisticsSection = StatisticsSectionFactory.createStatisticsSection(refactoringPipeline);
@@ -102,7 +103,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		 * First summary page is created to collect all initial source from
 		 * working copies
 		 */
-		
+
 		model = new RefactoringPreviewWizardModel();
 		refactoringPipeline.getRules()
 			.forEach(rule -> {
@@ -122,7 +123,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			addPage(summaryPage);
 		}
 	}
-	
+
 	@Override
 	public void updateViewsOnNavigation(IWizardPage page) {
 		if (page instanceof RefactoringPreviewWizardPage) {
@@ -294,9 +295,14 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 */
 	@Override
 	public boolean performCancel() {
-		refactoringPipeline.clearStates();
-		return super.performCancel();
+		if(!RefactoringPipeline.showSelectRulesWithNewPipeline(refactoringPipeline,
+				SelectRulesWizardHandler::synchronizeWithUIShowSelectRulesWizard)) {
+			Activator.setRunning(false);
+		}
+		return true;
 	}
+
+
 
 	@Override
 	public void dispose() {
