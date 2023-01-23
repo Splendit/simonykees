@@ -302,29 +302,36 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		currentProfileId = profileId;
 		moveAllToLeft();
 		unapplicableRules.clear();
+		
 		if (!currentProfileId.equals(Messages.SelectRulesWizardPage_EmptyProfileLabel)
 				&& !StringUtils.isEmpty(currentProfileId)) {
-			Set<Object> currentPosibilities = new HashSet<>();
-			currentPosibilities.addAll(posibilities);
-			Optional<SimonykeesProfile> optionalProfile = SimonykeesPreferenceManager
-				.getProfileFromName(currentProfileId);
-
-			optionalProfile.ifPresent(profile -> currentPosibilities.stream()
-				.filter(posibility -> profile.containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
-						// SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
-						((RefactoringRule) posibility).getId()))
-				.forEach(posibility -> {
-					if (((RefactoringRule) posibility).isEnabled()) {
-						selection.add(posibility);
-						posibilities.remove(posibility);
-					} else {
-						unapplicableRules.add(posibility);
-					}
-				}));
+			findProfileByName().ifPresent(this::selectFromProfile);
 		}
 
 		setChanged(true);
 		notifyListeners();
+	}
+
+	private void selectFromProfile(SimonykeesProfile profile) {
+		Set<Object> currentPosibilities = new HashSet<>();
+		currentPosibilities.addAll(posibilities);
+		currentPosibilities.stream()
+			.filter(posibility -> profile.containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
+					// SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
+					((RefactoringRule) posibility).getId()))
+			.forEach(posibility -> {
+				if (((RefactoringRule) posibility).isEnabled()) {
+					selection.add(posibility);
+					posibilities.remove(posibility);
+				} else {
+					unapplicableRules.add(posibility);
+				}
+			});
+	}
+
+	protected Optional<SimonykeesProfile> findProfileByName() {
+		return SimonykeesPreferenceManager
+			.getProfileFromName(currentProfileId);
 	}
 
 	public void removeAlreadySelected() {

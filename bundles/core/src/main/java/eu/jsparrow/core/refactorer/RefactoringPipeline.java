@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -71,7 +72,7 @@ public class RefactoringPipeline {
 	private int fileCount;
 
 	private RulesForProjectsData dataForSelectRulesWizard;
-	
+
 	/**
 	 * If possible, then a new instance of {@link RefactoringPipeline} is
 	 * created and a wizard to select rules for refactoring is opened. In all
@@ -623,7 +624,8 @@ public class RefactoringPipeline {
 			if (hasChanges) {
 				Version jdtVersion = JdtCoreVersionBindingUtil.findCurrentJDTCoreVersion();
 				ICompilationUnit workingCopy = refactoringState.getWorkingCopy();
-				newAstRoot = workingCopy.reconcile(JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion), true, null, null);
+				newAstRoot = workingCopy.reconcile(JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion), true, null,
+						null);
 			}
 		} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 			logger.error(e.getMessage(), e);
@@ -683,5 +685,7 @@ public class RefactoringPipeline {
 		this.dataForSelectRulesWizard = dataForSelectRulesWizard;
 	}
 
-
+	public Optional<RulesForProjectsData> getDataForSelectRulesWizard() {
+		return Optional.ofNullable(dataForSelectRulesWizard);
+	}
 }

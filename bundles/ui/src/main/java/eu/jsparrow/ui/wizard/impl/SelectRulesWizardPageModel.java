@@ -2,13 +2,17 @@ package eu.jsparrow.ui.wizard.impl;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.ui.preference.profile.CustomProfile;
+import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 
 /**
  * Model for Wizard page for selecting rules when applying rules to selected
@@ -25,6 +29,8 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	private String[] tags;
 
 	private final Set<String> appliedTags = new HashSet<>();
+
+	private CustomProfile customProfile;
 
 	public SelectRulesWizardPageModel(List<RefactoringRule> rules) {
 		super(rules);
@@ -56,7 +62,8 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	public Set<Object> filterPosibilitiesByName() {
 		return super.getPosibilities().stream()
 			.filter(object -> StringUtils.contains(StringUtils
-				.lowerCase(((RefactoringRule) object).getRuleDescription().getName()), nameFilter))
+				.lowerCase(((RefactoringRule) object).getRuleDescription()
+					.getName()), nameFilter))
 			.collect(Collectors.toSet());
 	}
 
@@ -81,7 +88,8 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 					return true;
 				}
 			} else if (StringUtils.contains(StringUtils
-				.lowerCase(object.getRuleDescription().getName()), tag)) {
+				.lowerCase(object.getRuleDescription()
+					.getName()), tag)) {
 				return true;
 			}
 		}
@@ -128,4 +136,25 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 		notifyListeners();
 	}
 
+	public void setCustomProfile(CustomProfile customProfile) {
+		this.customProfile = customProfile;
+	}
+
+	@Override
+	protected Optional<SimonykeesProfile> findProfileByName() {
+		if (Messages.SelectRulesWizardPage_CustomProfileLabel.equals(getCurrentProfileId())) {
+			return Optional.ofNullable(customProfile);
+		}
+		return super.findProfileByName();
+	}
+
+	@Override
+	public void selectFromProfile(String profileId) {
+
+		super.selectFromProfile(profileId);
+		
+		if (!Messages.SelectRulesWizardPage_CustomProfileLabel.equals(getCurrentProfileId())) {
+			customProfile = null;
+		}
+	}
 }

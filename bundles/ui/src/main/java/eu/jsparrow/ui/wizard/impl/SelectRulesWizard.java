@@ -74,12 +74,14 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	private RefactoringPipeline refactoringPipeline;
 	private Image windowIcon;
 	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
+	private final RulesForProjectsData rulesForProjectsData;
 
 	public SelectRulesWizard(RefactoringPipeline refactoringPipeline, RulesForProjectsData rulesForProjectsData) {
 		super();
 		this.javaProjects = rulesForProjectsData.getJavaProjects();
 		this.refactoringPipeline = refactoringPipeline;
 		this.rules = rulesForProjectsData.getRulesChoice();
+		this.rulesForProjectsData = rulesForProjectsData;
 		setNeedsProgressMonitor(true);
 		windowIcon = ResourceHelper.createImage(WINDOW_ICON);
 		Window.setDefaultImage(windowIcon);
@@ -98,7 +100,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	public void addPages() {
 		model = new SelectRulesWizardPageModel(rules);
 		page = new SelectRulesWizardPage(model,
-				new SelectRulesWizardPageControler(model));
+				new SelectRulesWizardPageControler(model), rulesForProjectsData);
 		afterLicenseUpdateListeners.forEach(page::addLicenseUpdateListener);
 		addPage(page);
 	}
@@ -127,21 +129,34 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	@Override
 	public boolean performFinish() {
 
+		String message = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
+			.getSimpleName(),
+				this.javaProjects.stream()
+					.map(IJavaProject::getElementName)
+					.collect(Collectors.joining(";"))); //$NON-NLS-1$
+		logger.info(message);
+
+		final List<RefactoringRule> selectedRules = model.getSelectionAsList();
+		showOptionalLockedRuleSelectionDialog(selectedRules);
+
+		refactoringPipeline.setRules(selectedRules);
+		refactoringPipeline.updateInitialSourceMap();
+
+		refactoringPipeline.getDataForSelectRulesWizard()
+			.ifPresent(data -> {
+
+				String selectedProfileId = page.getSelectedProfileId()
+					.orElse(null);
+				if (selectedProfileId != null) {
+					data.setSelectedProfileId(selectedProfileId);
+				} else {
+					data.setCustomRulesSelection(selectedRules);
+				}
+
+			});
+
 		Display.getCurrent()
 			.asyncExec(() -> {
-
-				String message = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
-					.getSimpleName(),
-						this.javaProjects.stream()
-							.map(IJavaProject::getElementName)
-							.collect(Collectors.joining(";"))); //$NON-NLS-1$
-				logger.info(message);
-
-				final List<RefactoringRule> selectedRules = model.getSelectionAsList();
-				showOptionalLockedRuleSelectionDialog(selectedRules);
-
-				refactoringPipeline.setRules(selectedRules);
-				refactoringPipeline.updateInitialSourceMap();
 
 				Job job = createRefactoringJob(refactoringPipeline, javaProjects);
 
@@ -169,7 +184,8 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 			if (!allRulesFree) {
 				addComponentLambdas = Arrays.asList(//
 						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
-						dialog -> dialog.addLinkToJSparrowPricingPage(JSparrowPricingLink.TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE),
+						dialog -> dialog
+							.addLinkToJSparrowPricingPage(JSparrowPricingLink.TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE),
 						SuggestRegistrationDialog::addRegisterForPremiumButton);
 			}
 		} else {
