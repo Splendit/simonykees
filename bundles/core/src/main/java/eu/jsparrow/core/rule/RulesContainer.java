@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -312,4 +313,11 @@ public class RulesContainer {
 
 		return result;
 	}
+	
+	public static RulesForProjectsData getRulesForProjectsData(Set<IJavaProject> javaProjects, boolean isStandalone) {
+		List<RefactoringRule> rulesForProjects = getRulesForProjects(javaProjects, isStandalone);
+		return new RulesForProjectsData(rulesForProjects, javaProjects);
+	}
+
+
 }
