@@ -230,4 +230,15 @@ public class RefactoringState {
 				.toString(), e.getMessage()), e);
 		}
 	}
+	
+	
+	/**
+	 * When working copy gets unselected in preview view its state has to be
+	 * returned to original
+	 */
+	public void resetAll() {
+		resetWorkingCopy();
+		initialChanges.clear();
+		ignoredRules.clear();
+	}
 }
