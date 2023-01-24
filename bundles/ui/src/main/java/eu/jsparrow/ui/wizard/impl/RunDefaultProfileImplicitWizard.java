@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.rule.RulesForProjectsData;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
@@ -25,8 +26,17 @@ import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 public class RunDefaultProfileImplicitWizard extends AbstractRuleWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunDefaultProfileImplicitWizard.class);
+	
+	private RefactoringPipeline refactoringPipeline;
+	private RulesForProjectsData dataForSelectRulesWizard;
 
-	public boolean computeRefactoring(RefactoringPipeline refactoringPipeline, Collection<IJavaProject> javaProjects,
+	public RunDefaultProfileImplicitWizard(RefactoringPipeline refactoringPipeline,
+			RulesForProjectsData dataForSelectRulesWizard) {
+		this.refactoringPipeline = refactoringPipeline;
+		this.dataForSelectRulesWizard = dataForSelectRulesWizard;
+	}
+
+	public boolean computeRefactoring(Collection<IJavaProject> javaProjects,
 			final List<RefactoringRule> selectedRules) {
 		String message = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
 			.getSimpleName(),
@@ -39,7 +49,7 @@ public class RunDefaultProfileImplicitWizard extends AbstractRuleWizard {
 		refactoringPipeline.updateInitialSourceMap();
 
 		Job job = createRefactoringJob(refactoringPipeline, javaProjects);
-		job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects));
+		job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects, dataForSelectRulesWizard));
 
 		job.setUser(true);
 		job.schedule();

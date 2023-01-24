@@ -74,14 +74,14 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	private RefactoringPipeline refactoringPipeline;
 	private Image windowIcon;
 	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
-	private final RulesForProjectsData rulesForProjectsData;
+	private final RulesForProjectsData dataForSelectRulesWizard;
 
 	public SelectRulesWizard(RefactoringPipeline refactoringPipeline, RulesForProjectsData rulesForProjectsData) {
 		super();
 		this.javaProjects = rulesForProjectsData.getJavaProjects();
 		this.refactoringPipeline = refactoringPipeline;
 		this.rules = rulesForProjectsData.getRulesChoice();
-		this.rulesForProjectsData = rulesForProjectsData;
+		this.dataForSelectRulesWizard = rulesForProjectsData;
 		setNeedsProgressMonitor(true);
 		windowIcon = ResourceHelper.createImage(WINDOW_ICON);
 		Window.setDefaultImage(windowIcon);
@@ -100,7 +100,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	public void addPages() {
 		model = new SelectRulesWizardPageModel(rules);
 		page = new SelectRulesWizardPage(model,
-				new SelectRulesWizardPageControler(model), rulesForProjectsData);
+				new SelectRulesWizardPageControler(model), dataForSelectRulesWizard);
 		afterLicenseUpdateListeners.forEach(page::addLicenseUpdateListener);
 		addPage(page);
 	}
@@ -142,25 +142,21 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		refactoringPipeline.setRules(selectedRules);
 		refactoringPipeline.updateInitialSourceMap();
 
-		refactoringPipeline.getDataForSelectRulesWizard()
-			.ifPresent(data -> {
-
-				String selectedProfileId = page.getSelectedProfileId()
-					.orElse(null);
-				if (selectedProfileId != null) {
-					data.setSelectedProfileId(selectedProfileId);
-				} else {
-					data.setCustomRulesSelection(selectedRules);
-				}
-
-			});
+		String selectedProfileId = page.getSelectedProfileId()
+			.orElse(null);
+		if (selectedProfileId != null) {
+			dataForSelectRulesWizard.setSelectedProfileId(selectedProfileId);
+		} else {
+			dataForSelectRulesWizard.setCustomRulesSelection(selectedRules);
+		}
 
 		Display.getCurrent()
 			.asyncExec(() -> {
 
 				Job job = createRefactoringJob(refactoringPipeline, javaProjects);
 
-				job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects));
+				job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects,
+						dataForSelectRulesWizard));
 
 				job.setUser(true);
 				job.schedule();

@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
+import eu.jsparrow.core.rule.RulesForProjectsData;
 import eu.jsparrow.core.statistic.StopWatchUtil;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
@@ -105,7 +106,7 @@ public abstract class AbstractRuleWizard extends Wizard {
 	}
 
 	private void showRefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
-			Collection<IJavaProject> javaProjects) {
+			Collection<IJavaProject> javaProjects, RulesForProjectsData dataForSelectRulesWizard) {
 		String endRefactoringInProject = NLS.bind(Messages.SelectRulesWizard_end_refactoring,
 				this.getClass()
 					.getSimpleName(),
@@ -124,7 +125,8 @@ public abstract class AbstractRuleWizard extends Wizard {
 			.getActiveWorkbenchWindow()
 			.getShell();
 		RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline,
-				statisticsMetadata);
+				statisticsMetadata, dataForSelectRulesWizard);
+		
 		final WizardDialog dialog = new WizardDialog(shell, previewWizard) {
 
 			@Override
@@ -173,7 +175,7 @@ public abstract class AbstractRuleWizard extends Wizard {
 	}
 
 	protected JobChangeAdapter createPreviewWizardJobChangeAdapter(RefactoringPipeline refactoringPipeline,
-			Collection<IJavaProject> javaProjects) {
+			Collection<IJavaProject> javaProjects, RulesForProjectsData dataForSelectRulesWizard) {
 		return new JobChangeAdapter() {
 
 			@Override
@@ -183,7 +185,7 @@ public abstract class AbstractRuleWizard extends Wizard {
 					.isOK()) {
 					if (refactoringPipeline.hasChanges()) {
 						Display.getDefault()
-							.asyncExec(() -> showRefactoringPreviewWizard(refactoringPipeline, javaProjects));
+							.asyncExec(() -> showRefactoringPreviewWizard(refactoringPipeline, javaProjects, dataForSelectRulesWizard));
 					} else {
 						Display.getDefault()
 							.asyncExec(() -> {
@@ -194,10 +196,10 @@ public abstract class AbstractRuleWizard extends Wizard {
 										Messages.SelectRulesWizard_warning_no_refactorings,
 										MessageDialog.INFORMATION);
 
-								if (!RefactoringPipeline.showSelectRulesWithNewPipeline(refactoringPipeline,
-										SelectRulesWizardHandler::synchronizeWithUIShowSelectRulesWizard)) {
-									Activator.setRunning(false);
-								}
+								RefactoringPipeline.showSelectRulesWithNewPipeline(refactoringPipeline,
+										dataForSelectRulesWizard,
+										SelectRulesWizardHandler::synchronizeWithUIShowSelectRulesWizard);
+
 							});
 					}
 				} else {

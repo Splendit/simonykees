@@ -54,7 +54,7 @@ public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunDefaultProfileHandler.class);
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
-	private RunDefaultProfileImplicitWizard implicitWizard = new RunDefaultProfileImplicitWizard();
+	
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -156,10 +156,11 @@ public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 			.filter(rule -> profileRuleIds.contains(rule.getId()))
 			.filter(RefactoringRule::isEnabled)
 			.collect(Collectors.toList());
-		RulesForProjectsData rulesForProjectsData = RulesContainer
+		RulesForProjectsData dataForSelectRulesWizard = RulesContainer
 			.getRulesForProjectsData(selectedJavaElements.keySet(), false);
-		refactoringPipeline.setDataForSelectRulesWizard(rulesForProjectsData);
-		implicitWizard.computeRefactoring(refactoringPipeline, javaProjects, rules);
+
+		RunDefaultProfileImplicitWizard implicitWizard = new RunDefaultProfileImplicitWizard(refactoringPipeline, dataForSelectRulesWizard);
+		implicitWizard.computeRefactoring(javaProjects, rules);
 
 	}
 

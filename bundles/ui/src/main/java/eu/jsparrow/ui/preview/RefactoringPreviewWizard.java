@@ -21,6 +21,7 @@ import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
+import eu.jsparrow.core.rule.RulesForProjectsData;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseType;
@@ -67,16 +68,20 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private StandaloneStatisticsMetadata statisticsMetadata;
 	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
+	private RulesForProjectsData dataForSelectRulesWizard;
 
-	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline, StandaloneStatisticsMetadata standaloneStatisticsMetadata) {
+	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
+			StandaloneStatisticsMetadata standaloneStatisticsMetadata, RulesForProjectsData dataForSelectRulesWizard) {
 		this(refactoringPipeline);
 		this.statisticsMetadata = standaloneStatisticsMetadata;
+		this.dataForSelectRulesWizard = dataForSelectRulesWizard;
 	}
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
 		this.statisticsSection = StatisticsSectionFactory.createStatisticsSection(refactoringPipeline);
-		this.summaryPageStatisticsSection = StatisticsSectionFactory.createStatisticsSectionForSummaryPage(refactoringPipeline);
+		this.summaryPageStatisticsSection = StatisticsSectionFactory
+			.createStatisticsSectionForSummaryPage(refactoringPipeline);
 		this.updater = new StatisticsSectionUpdater(statisticsSection, summaryPageStatisticsSection);
 		this.refactoringPipeline = refactoringPipeline;
 		this.shell = PlatformUI.getWorkbench()
@@ -110,7 +115,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
 				if (!changes.isEmpty()) {
 					RuleStatisticsSection ruleStats = StatisticsSectionFactory.createRuleStatisticsSection(rule);
-					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish(), ruleStats, updater);
+					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model,
+							canFinish(), ruleStats, updater);
 					previewPage.setTotalStatisticsSection(statisticsSection);
 					addPage(previewPage);
 				}
@@ -119,7 +125,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.size() == 1
 				&& refactoringPipeline.getRules()
 					.get(0) instanceof StandardLoggerRule)) {
-			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsMetadata, summaryPageStatisticsSection);
+			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(),
+					statisticsMetadata, summaryPageStatisticsSection);
 			addPage(summaryPage);
 		}
 	}
@@ -210,19 +217,21 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public boolean canFinish() {
 		if (licenseUtil.isFreeLicense()) {
-			return licenseUtil.isActiveRegistration()  && containsOnlyFreeRules();
+			return licenseUtil.isActiveRegistration() && containsOnlyFreeRules();
 		}
-		
+
 		LicenseValidationResult result = licenseUtil.getValidationResult();
 		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
 			return super.canFinish();
 		}
-		boolean enoughCredit =  payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
+		boolean enoughCredit = payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
 		return enoughCredit && super.canFinish();
 	}
 
 	private boolean containsOnlyFreeRules() {
-		return refactoringPipeline.getRules().stream().allMatch(RefactoringRule::isFree);
+		return refactoringPipeline.getRules()
+			.stream()
+			.allMatch(RefactoringRule::isFree);
 	}
 
 	/*
@@ -295,14 +304,14 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 */
 	@Override
 	public boolean performCancel() {
-		if(!RefactoringPipeline.showSelectRulesWithNewPipeline(refactoringPipeline,
-				SelectRulesWizardHandler::synchronizeWithUIShowSelectRulesWizard)) {
+		if (dataForSelectRulesWizard != null) {
+			RefactoringPipeline.showSelectRulesWithNewPipeline(refactoringPipeline, dataForSelectRulesWizard,
+					SelectRulesWizardHandler::synchronizeWithUIShowSelectRulesWizard);
+		} else {
 			Activator.setRunning(false);
 		}
 		return true;
 	}
-
-
 
 	@Override
 	public void dispose() {

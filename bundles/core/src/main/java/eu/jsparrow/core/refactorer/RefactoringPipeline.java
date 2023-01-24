@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -71,8 +70,6 @@ public class RefactoringPipeline {
 
 	private int fileCount;
 
-	private RulesForProjectsData dataForSelectRulesWizard;
-
 	/**
 	 * If possible, then a new instance of {@link RefactoringPipeline} is
 	 * created and a wizard to select rules for refactoring is opened. In all
@@ -89,17 +86,12 @@ public class RefactoringPipeline {
 	 *         otherwise false.
 	 */
 	public static boolean showSelectRulesWithNewPipeline(RefactoringPipeline refactoringPipeline,
+			RulesForProjectsData dataForSelectRulesWizard,
 			BiConsumer<RefactoringPipeline, RulesForProjectsData> showSelectRulesWizardLambda) {
-		RulesForProjectsData dataForSelectRulesWizard = refactoringPipeline.dataForSelectRulesWizard;
-		if (dataForSelectRulesWizard == null) {
-			refactoringPipeline.clearStates();
-			return false;
-		}
 		refactoringPipeline.refactoringStates.forEach(RefactoringState::resetAll);
 		refactoringPipeline.initialSource.clear();
 		RefactoringPipeline newRefactoringPipeline = new RefactoringPipeline();
 		newRefactoringPipeline.refactoringStates.addAll(refactoringPipeline.refactoringStates);
-		newRefactoringPipeline.dataForSelectRulesWizard = dataForSelectRulesWizard;
 		newRefactoringPipeline.fileCount = refactoringPipeline.fileCount;
 		refactoringPipeline.refactoringStates.clear();
 		refactoringPipeline.clearStates();
@@ -679,13 +671,5 @@ public class RefactoringPipeline {
 
 	public int getFileCount() {
 		return fileCount;
-	}
-
-	public void setDataForSelectRulesWizard(RulesForProjectsData dataForSelectRulesWizard) {
-		this.dataForSelectRulesWizard = dataForSelectRulesWizard;
-	}
-
-	public Optional<RulesForProjectsData> getDataForSelectRulesWizard() {
-		return Optional.ofNullable(dataForSelectRulesWizard);
 	}
 }

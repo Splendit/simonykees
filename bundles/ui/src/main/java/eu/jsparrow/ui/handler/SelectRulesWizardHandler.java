@@ -111,12 +111,11 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 			Map<IJavaProject, List<IJavaElement>> selectedJavaElements) {
 		Set<IJavaProject> javaProjects = selectedJavaElements.keySet();
 
-		RulesForProjectsData rulesForProjectsData = RulesContainer.getRulesForProjectsData(javaProjects, false);
-		refactoringPipeline.setDataForSelectRulesWizard(rulesForProjectsData);
-		synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, rulesForProjectsData);
+		RulesForProjectsData dataForSelectRulesWizard = RulesContainer.getRulesForProjectsData(javaProjects, false);
+		synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, dataForSelectRulesWizard);
 
 	}
-	
+
 	public static void synchronizeWithUIShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,
 			RulesForProjectsData rulesForProjectsData) {
 		Display.getDefault()
