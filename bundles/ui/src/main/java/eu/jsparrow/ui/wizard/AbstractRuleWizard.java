@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
-import eu.jsparrow.core.rule.RulesForProjectsData;
 import eu.jsparrow.core.statistic.StopWatchUtil;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
@@ -35,6 +34,7 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.handler.SelectRulesWizardHandler;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
+import eu.jsparrow.ui.wizard.impl.RulesForProjectsData;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**

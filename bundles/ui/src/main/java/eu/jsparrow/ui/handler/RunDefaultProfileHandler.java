@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RulesContainer;
-import eu.jsparrow.core.rule.RulesForProjectsData;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -39,6 +38,7 @@ import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
+import eu.jsparrow.ui.wizard.impl.RulesForProjectsData;
 import eu.jsparrow.ui.wizard.impl.RunDefaultProfileImplicitWizard;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -54,7 +54,6 @@ public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunDefaultProfileHandler.class);
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
-	
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -156,10 +155,11 @@ public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 			.filter(rule -> profileRuleIds.contains(rule.getId()))
 			.filter(RefactoringRule::isEnabled)
 			.collect(Collectors.toList());
-		RulesForProjectsData dataForSelectRulesWizard = RulesContainer
+		RulesForProjectsData dataForSelectRulesWizard = SelectRulesWizard
 			.getRulesForProjectsData(selectedJavaElements.keySet(), false);
 
-		RunDefaultProfileImplicitWizard implicitWizard = new RunDefaultProfileImplicitWizard(refactoringPipeline, dataForSelectRulesWizard);
+		RunDefaultProfileImplicitWizard implicitWizard = new RunDefaultProfileImplicitWizard(refactoringPipeline,
+				dataForSelectRulesWizard);
 		implicitWizard.computeRefactoring(javaProjects, rules);
 
 	}

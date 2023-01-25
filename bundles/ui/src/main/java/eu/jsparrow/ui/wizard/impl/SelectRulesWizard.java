@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.RulesForProjectsData;
+import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -75,6 +76,11 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	private Image windowIcon;
 	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
 	private final RulesForProjectsData dataForSelectRulesWizard;
+
+	public static RulesForProjectsData getRulesForProjectsData(Set<IJavaProject> javaProjects, boolean isStandalone) {
+		List<RefactoringRule> rulesForProjects = RulesContainer.getRulesForProjects(javaProjects, isStandalone);
+		return new RulesForProjectsData(rulesForProjects, javaProjects);
+	}
 
 	public SelectRulesWizard(RefactoringPipeline refactoringPipeline, RulesForProjectsData rulesForProjectsData) {
 		super();

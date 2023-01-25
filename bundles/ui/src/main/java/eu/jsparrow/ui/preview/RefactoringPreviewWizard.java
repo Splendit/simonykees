@@ -21,7 +21,6 @@ import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
-import eu.jsparrow.core.rule.RulesForProjectsData;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseType;
@@ -40,6 +39,7 @@ import eu.jsparrow.ui.preview.statistics.StatisticsSectionUpdater;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
+import eu.jsparrow.ui.wizard.impl.RulesForProjectsData;
 
 /**
  * This {@link Wizard} holds a {@link RefactoringPreviewWizardPage} for every

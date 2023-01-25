@@ -32,14 +32,15 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RulesContainer;
-import eu.jsparrow.core.rule.RulesForProjectsData;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
+import eu.jsparrow.ui.wizard.impl.RulesForProjectsData;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
@@ -56,7 +57,8 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizardHandler.class);
 
 	private LicenseUtil licenseUtil = LicenseUtil.get();
-
+	
+	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
@@ -109,10 +111,9 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 	 */
 	private void synchronizeWithUIShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,
 			Map<IJavaProject, List<IJavaElement>> selectedJavaElements) {
+		
 		Set<IJavaProject> javaProjects = selectedJavaElements.keySet();
-
-		RulesForProjectsData dataForSelectRulesWizard = RulesContainer.getRulesForProjectsData(javaProjects, false);
-		synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, dataForSelectRulesWizard);
+		synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, SelectRulesWizard.getRulesForProjectsData(javaProjects, false));
 
 	}
 

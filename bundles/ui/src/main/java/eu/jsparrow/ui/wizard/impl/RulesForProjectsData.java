@@ -1,4 +1,4 @@
-package eu.jsparrow.core.rule;
+package eu.jsparrow.ui.wizard.impl;
 
 import java.util.Collections;
 import java.util.List;
