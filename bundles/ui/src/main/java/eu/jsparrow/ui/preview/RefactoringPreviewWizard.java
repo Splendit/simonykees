@@ -69,6 +69,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	private StandaloneStatisticsMetadata statisticsMetadata;
 	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
 	private RulesForProjectsData dataForSelectRulesWizard;
+	private boolean reuseRefactoringPipeline;
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
 			StandaloneStatisticsMetadata standaloneStatisticsMetadata, RulesForProjectsData dataForSelectRulesWizard) {
@@ -305,8 +306,10 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public boolean performCancel() {
 		if (dataForSelectRulesWizard != null) {
-			RefactoringPipeline.showSelectRulesWithNewPipeline(refactoringPipeline, dataForSelectRulesWizard,
-					SelectRulesWizardHandler::synchronizeWithUIShowSelectRulesWizard);
+			reuseRefactoringPipeline = true;
+			refactoringPipeline.cancelFileChanges();
+			SelectRulesWizardHandler.synchronizeWithUIShowSelectRulesWizard(refactoringPipeline,
+					dataForSelectRulesWizard);
 		} else {
 			Activator.setRunning(false);
 		}
@@ -315,7 +318,9 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	@Override
 	public void dispose() {
-		refactoringPipeline.clearStates();
+		if (!reuseRefactoringPipeline) {
+			refactoringPipeline.clearStates();
+		}
 		windowIcon.dispose();
 		super.dispose();
 	}

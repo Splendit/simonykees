@@ -651,6 +651,16 @@ public class RefactoringPipeline {
 	}
 
 	/**
+	 * This method is intended to be called before re-using the same
+	 * {@link RefactoringPipeline} instance to open a wizard for selecting rules
+	 * after having cancelled the refactoring preview wizard.
+	 */
+	public void cancelFileChanges() {
+		refactoringStates.forEach(RefactoringState::resetAll);
+		initialSource.clear();
+	}
+
+	/**
 	 * Getter for map with original source code for all refactoring states
 	 * 
 	 * @return

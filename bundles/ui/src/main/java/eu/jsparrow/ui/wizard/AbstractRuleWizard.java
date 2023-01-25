@@ -126,7 +126,7 @@ public abstract class AbstractRuleWizard extends Wizard {
 			.getShell();
 		RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline,
 				statisticsMetadata, dataForSelectRulesWizard);
-		
+
 		final WizardDialog dialog = new WizardDialog(shell, previewWizard) {
 
 			@Override
@@ -185,7 +185,8 @@ public abstract class AbstractRuleWizard extends Wizard {
 					.isOK()) {
 					if (refactoringPipeline.hasChanges()) {
 						Display.getDefault()
-							.asyncExec(() -> showRefactoringPreviewWizard(refactoringPipeline, javaProjects, dataForSelectRulesWizard));
+							.asyncExec(() -> showRefactoringPreviewWizard(refactoringPipeline, javaProjects,
+									dataForSelectRulesWizard));
 					} else {
 						Display.getDefault()
 							.asyncExec(() -> {
@@ -196,14 +197,13 @@ public abstract class AbstractRuleWizard extends Wizard {
 										Messages.SelectRulesWizard_warning_no_refactorings,
 										MessageDialog.INFORMATION);
 
-								RefactoringPipeline.showSelectRulesWithNewPipeline(refactoringPipeline,
-										dataForSelectRulesWizard,
-										SelectRulesWizardHandler::synchronizeWithUIShowSelectRulesWizard);
-
+								refactoringPipeline.cancelFileChanges();
+								SelectRulesWizardHandler.synchronizeWithUIShowSelectRulesWizard(refactoringPipeline,
+										dataForSelectRulesWizard);
 							});
 					}
 				} else {
-					// do nothing if status is canceled, close
+					refactoringPipeline.clearStates();
 					Activator.setRunning(false);
 				}
 			}
