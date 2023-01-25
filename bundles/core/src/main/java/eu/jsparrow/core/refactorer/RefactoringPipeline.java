@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -26,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.exception.model.NotWorkingRuleModel;
-import eu.jsparrow.core.rule.RulesForProjectsData;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -69,35 +67,6 @@ public class RefactoringPipeline {
 	private WorkingCopyOwnerDecorator workingCopyOwner;
 
 	private int fileCount;
-
-	/**
-	 * If possible, then a new instance of {@link RefactoringPipeline} is
-	 * created and a wizard to select rules for refactoring is opened. In all
-	 * cases, the state of the old {@link RefactoringPipeline} is cleared.
-	 * 
-	 * @param refactoringPipeline
-	 *            cannot be reused any more after invocation of this method
-	 *            because its state is cleared and therefore important
-	 *            informations for its usage are removed.
-	 * @param showSelectRulesWizardLambda
-	 *            specifies the method to open a wizard to select rules for
-	 *            refactoring.
-	 * @return true if it is possible to open a wizard for selecting rules,
-	 *         otherwise false.
-	 */
-	public static boolean showSelectRulesWithNewPipeline(RefactoringPipeline refactoringPipeline,
-			RulesForProjectsData dataForSelectRulesWizard,
-			BiConsumer<RefactoringPipeline, RulesForProjectsData> showSelectRulesWizardLambda) {
-		refactoringPipeline.refactoringStates.forEach(RefactoringState::resetAll);
-		refactoringPipeline.initialSource.clear();
-		RefactoringPipeline newRefactoringPipeline = new RefactoringPipeline();
-		newRefactoringPipeline.refactoringStates.addAll(refactoringPipeline.refactoringStates);
-		newRefactoringPipeline.fileCount = refactoringPipeline.fileCount;
-		refactoringPipeline.refactoringStates.clear();
-		refactoringPipeline.clearStates();
-		showSelectRulesWizardLambda.accept(newRefactoringPipeline, dataForSelectRulesWizard);
-		return true;
-	}
 
 	/**
 	 * Constructor without parameters, used to create RefactoringPipeline before
