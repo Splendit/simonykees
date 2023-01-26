@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -307,13 +310,39 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	public boolean performCancel() {
 		if (selectRulesWizardData != null) {
 			reuseRefactoringPipeline = true;
-			refactoringPipeline.cancelFileChanges();
-			SelectRulesWizardHandler.synchronizeWithUIShowSelectRulesWizard(refactoringPipeline,
-					selectRulesWizardData);
+
+			Display.getCurrent()
+				.asyncExec(() -> {
+					Job job = createJobToShowSelectRulesWizard(refactoringPipeline, selectRulesWizardData);
+
+					job.setUser(true);
+					job.schedule();
+				});
+
 		} else {
 			Activator.setRunning(false);
 		}
 		return true;
+	}
+
+	public static Job createJobToShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,
+			SelectRulesWizardData selectRulesWizardData) {
+
+		return new Job("Cancelling file changes.") { //$NON-NLS-1$
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				IStatus status = refactoringPipeline.cancelFileChanges(monitor);
+				if (!status.isOK()) {
+					refactoringPipeline.clearStates();
+					Activator.setRunning(false);
+					return Status.CANCEL_STATUS;
+				}
+				SelectRulesWizardHandler.synchronizeWithUIShowSelectRulesWizard(refactoringPipeline,
+						selectRulesWizardData);
+				return Status.OK_STATUS;
+			}
+		};
 	}
 
 	@Override

@@ -31,7 +31,6 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.handler.SelectRulesWizardHandler;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
@@ -197,9 +196,11 @@ public abstract class AbstractRuleWizard extends Wizard {
 										Messages.SelectRulesWizard_warning_no_refactorings,
 										MessageDialog.INFORMATION);
 
-								refactoringPipeline.cancelFileChanges();
-								SelectRulesWizardHandler.synchronizeWithUIShowSelectRulesWizard(refactoringPipeline,
+								Job job = RefactoringPreviewWizard.createJobToShowSelectRulesWizard(refactoringPipeline,
 										selectRulesWizardData);
+
+								job.setUser(true);
+								job.schedule();
 							});
 					}
 				} else {
