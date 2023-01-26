@@ -197,7 +197,7 @@ public abstract class AbstractRuleWizard extends Wizard {
 										MessageDialog.INFORMATION);
 
 								Job job = RefactoringPreviewWizard.createJobToShowSelectRulesWizard(refactoringPipeline,
-										selectRulesWizardData);
+										selectRulesWizardData, "Opening Select Rules Wizard."); //$NON-NLS-1$
 
 								job.setUser(true);
 								job.schedule();

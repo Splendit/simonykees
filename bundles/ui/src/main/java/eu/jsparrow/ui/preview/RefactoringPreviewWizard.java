@@ -313,7 +313,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 			Display.getCurrent()
 				.asyncExec(() -> {
-					Job job = createJobToShowSelectRulesWizard(refactoringPipeline, selectRulesWizardData);
+					Job job = createJobToShowSelectRulesWizard(refactoringPipeline, selectRulesWizardData,
+							"Cancelling file changes and opening Select Rules Wizard."); //$NON-NLS-1$
 
 					job.setUser(true);
 					job.schedule();
@@ -326,9 +327,9 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	}
 
 	public static Job createJobToShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,
-			SelectRulesWizardData selectRulesWizardData) {
+			SelectRulesWizardData selectRulesWizardData, String jobName) {
 
-		return new Job("Cancelling file changes.") { //$NON-NLS-1$
+		return new Job(jobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
