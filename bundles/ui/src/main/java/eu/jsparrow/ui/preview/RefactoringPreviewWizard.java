@@ -39,7 +39,7 @@ import eu.jsparrow.ui.preview.statistics.StatisticsSectionUpdater;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
-import eu.jsparrow.ui.wizard.impl.RulesForProjectsData;
+import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
 
 /**
  * This {@link Wizard} holds a {@link RefactoringPreviewWizardPage} for every
@@ -68,14 +68,14 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private StandaloneStatisticsMetadata statisticsMetadata;
 	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
-	private RulesForProjectsData dataForSelectRulesWizard;
+	private SelectRulesWizardData selectRulesWizardData;
 	private boolean reuseRefactoringPipeline;
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
-			StandaloneStatisticsMetadata standaloneStatisticsMetadata, RulesForProjectsData dataForSelectRulesWizard) {
+			StandaloneStatisticsMetadata standaloneStatisticsMetadata, SelectRulesWizardData selectRulesWizardData) {
 		this(refactoringPipeline);
 		this.statisticsMetadata = standaloneStatisticsMetadata;
-		this.dataForSelectRulesWizard = dataForSelectRulesWizard;
+		this.selectRulesWizardData = selectRulesWizardData;
 	}
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
@@ -305,11 +305,11 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 */
 	@Override
 	public boolean performCancel() {
-		if (dataForSelectRulesWizard != null) {
+		if (selectRulesWizardData != null) {
 			reuseRefactoringPipeline = true;
 			refactoringPipeline.cancelFileChanges();
 			SelectRulesWizardHandler.synchronizeWithUIShowSelectRulesWizard(refactoringPipeline,
-					dataForSelectRulesWizard);
+					selectRulesWizardData);
 		} else {
 			Activator.setRunning(false);
 		}

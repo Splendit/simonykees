@@ -51,7 +51,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private static final String CUSTOM_PROFILE = Messages.SelectRulesWizardPage_CustomProfileLabel;
 
-	private final RulesForProjectsData rulesForProjectsData;
+	private final SelectRulesWizardData selectRulesWizardData;
 
 	private Composite filterComposite;
 
@@ -66,9 +66,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	private boolean update = true;
 
 	public SelectRulesWizardPage(SelectRulesWizardPageModel model, SelectRulesWizardPageControler controler,
-			RulesForProjectsData rulesForProjectsData) {
+			SelectRulesWizardData selectRulesWizardData) {
 		super(model, controler);
-		this.rulesForProjectsData = rulesForProjectsData;
+		this.selectRulesWizardData = selectRulesWizardData;
 		setTitle(Messages.SelectRulesWizardPage_title);
 		setDescription(Messages.SelectRulesWizardPage_description);
 	}
@@ -208,7 +208,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 */
 	private void initializeGroupFilterCombo() {
 
-		List<RefactoringRule> customRulesSelection = rulesForProjectsData.getCustomRulesSelection();
+		List<RefactoringRule> customRulesSelection = selectRulesWizardData.getCustomRulesSelection();
 		if (!customRulesSelection.isEmpty()) {
 
 			selectCustomProfile();
@@ -220,7 +220,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		}
 
 		String defaultProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
-		String currentProfileId = rulesForProjectsData.getSelectedProfileId()
+		String currentProfileId = selectRulesWizardData.getSelectedProfileId()
 			.orElse(defaultProfileId);
 
 		/*

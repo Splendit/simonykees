@@ -13,13 +13,13 @@ import eu.jsparrow.rules.common.RefactoringRule;
  * Stores a set of {@link IJavaProject} instances and the corresponding list of
  * all available {@link RefactoringRule} instances.
  */
-public class RulesForProjectsData {
+public class SelectRulesWizardData {
 	private final List<RefactoringRule> rulesChoice;
 	private final Set<IJavaProject> javaProjects;
 	private List<RefactoringRule> customRulesSelection;
 	private String selectedProfileId;
 
-	RulesForProjectsData(List<RefactoringRule> rulesChoice, Set<IJavaProject> javaProjects) {
+	SelectRulesWizardData(List<RefactoringRule> rulesChoice, Set<IJavaProject> javaProjects) {
 		this.rulesChoice = rulesChoice;
 		this.javaProjects = javaProjects;
 	}

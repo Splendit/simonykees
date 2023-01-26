@@ -75,19 +75,19 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	private RefactoringPipeline refactoringPipeline;
 	private Image windowIcon;
 	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
-	private final RulesForProjectsData dataForSelectRulesWizard;
+	private final SelectRulesWizardData selectRulesWizardData;
 
-	public static RulesForProjectsData getRulesForProjectsData(Set<IJavaProject> javaProjects, boolean isStandalone) {
-		List<RefactoringRule> rulesForProjects = RulesContainer.getRulesForProjects(javaProjects, isStandalone);
-		return new RulesForProjectsData(rulesForProjects, javaProjects);
+	public static SelectRulesWizardData createSelectRulesWizardData(Set<IJavaProject> javaProjects) {
+		List<RefactoringRule> rulesChoice = RulesContainer.getRulesForProjects(javaProjects, false);
+		return new SelectRulesWizardData(rulesChoice, javaProjects);
 	}
 
-	public SelectRulesWizard(RefactoringPipeline refactoringPipeline, RulesForProjectsData rulesForProjectsData) {
+	public SelectRulesWizard(RefactoringPipeline refactoringPipeline, SelectRulesWizardData selectRulesWizardData) {
 		super();
-		this.javaProjects = rulesForProjectsData.getJavaProjects();
+		this.javaProjects = selectRulesWizardData.getJavaProjects();
 		this.refactoringPipeline = refactoringPipeline;
-		this.rules = rulesForProjectsData.getRulesChoice();
-		this.dataForSelectRulesWizard = rulesForProjectsData;
+		this.rules = selectRulesWizardData.getRulesChoice();
+		this.selectRulesWizardData = selectRulesWizardData;
 		setNeedsProgressMonitor(true);
 		windowIcon = ResourceHelper.createImage(WINDOW_ICON);
 		Window.setDefaultImage(windowIcon);
@@ -106,7 +106,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	public void addPages() {
 		model = new SelectRulesWizardPageModel(rules);
 		page = new SelectRulesWizardPage(model,
-				new SelectRulesWizardPageControler(model), dataForSelectRulesWizard);
+				new SelectRulesWizardPageControler(model), selectRulesWizardData);
 		afterLicenseUpdateListeners.forEach(page::addLicenseUpdateListener);
 		addPage(page);
 	}
@@ -151,9 +151,9 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		String selectedProfileId = page.getSelectedProfileId()
 			.orElse(null);
 		if (selectedProfileId != null) {
-			dataForSelectRulesWizard.setSelectedProfileId(selectedProfileId);
+			selectRulesWizardData.setSelectedProfileId(selectedProfileId);
 		} else {
-			dataForSelectRulesWizard.setCustomRulesSelection(selectedRules);
+			selectRulesWizardData.setCustomRulesSelection(selectedRules);
 		}
 
 		Display.getCurrent()
@@ -162,7 +162,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 				Job job = createRefactoringJob(refactoringPipeline, javaProjects);
 
 				job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects,
-						dataForSelectRulesWizard));
+						selectRulesWizardData));
 
 				job.setUser(true);
 				job.schedule();

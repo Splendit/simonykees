@@ -38,7 +38,7 @@ import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
-import eu.jsparrow.ui.wizard.impl.RulesForProjectsData;
+import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
 import eu.jsparrow.ui.wizard.impl.RunDefaultProfileImplicitWizard;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -155,11 +155,11 @@ public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 			.filter(rule -> profileRuleIds.contains(rule.getId()))
 			.filter(RefactoringRule::isEnabled)
 			.collect(Collectors.toList());
-		RulesForProjectsData dataForSelectRulesWizard = SelectRulesWizard
-			.getRulesForProjectsData(selectedJavaElements.keySet(), false);
+		SelectRulesWizardData selectRulesWizardData = SelectRulesWizard
+			.createSelectRulesWizardData(selectedJavaElements.keySet());
 
 		RunDefaultProfileImplicitWizard implicitWizard = new RunDefaultProfileImplicitWizard(refactoringPipeline,
-				dataForSelectRulesWizard);
+				selectRulesWizardData);
 		implicitWizard.computeRefactoring(javaProjects, rules);
 
 	}

@@ -35,7 +35,7 @@ public class ConfigureProfileSelectRulesWIzardPageModel extends AbstractSelectRu
 
 	@Override
 	public Set<Object> filterPosibilitiesByName() {
-		return super.getAllPosibilities();
+		return super.getAllPossibilities();
 	}
 
 	@Override

@@ -27,12 +27,12 @@ public class RunDefaultProfileImplicitWizard extends AbstractRuleWizard {
 	private static final Logger logger = LoggerFactory.getLogger(RunDefaultProfileImplicitWizard.class);
 	
 	private RefactoringPipeline refactoringPipeline;
-	private RulesForProjectsData dataForSelectRulesWizard;
+	private SelectRulesWizardData selectRulesWizardData;
 
 	public RunDefaultProfileImplicitWizard(RefactoringPipeline refactoringPipeline,
-			RulesForProjectsData dataForSelectRulesWizard) {
+			SelectRulesWizardData selectRulesWizardData) {
 		this.refactoringPipeline = refactoringPipeline;
-		this.dataForSelectRulesWizard = dataForSelectRulesWizard;
+		this.selectRulesWizardData = selectRulesWizardData;
 	}
 
 	public boolean computeRefactoring(Collection<IJavaProject> javaProjects,
@@ -48,7 +48,7 @@ public class RunDefaultProfileImplicitWizard extends AbstractRuleWizard {
 		refactoringPipeline.updateInitialSourceMap();
 
 		Job job = createRefactoringJob(refactoringPipeline, javaProjects);
-		job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects, dataForSelectRulesWizard));
+		job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects, selectRulesWizardData));
 
 		job.setUser(true);
 		job.schedule();

@@ -27,9 +27,9 @@ import eu.jsparrow.ui.wizard.IWizardPageModel;
  */
 public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel {
 
-	private Set<Object> allPosibilities = new HashSet<>();
+	private Set<Object> allPossibilities = new HashSet<>();
 
-	private Set<Object> posibilities = new HashSet<>();
+	private Set<Object> possibilities = new HashSet<>();
 	private Set<Object> selection = new HashSet<>();
 	private Set<Object> unapplicableRules = new HashSet<>();
 
@@ -55,8 +55,8 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 
 	public AbstractSelectRulesWizardModel(List<RefactoringRule> rules) {
 		this.rules = rules;
-		addAllItems(allPosibilities);
-		addAllItems(posibilities);
+		addAllItems(allPossibilities);
+		addAllItems(possibilities);
 		changed = true;
 	}
 
@@ -74,8 +74,8 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 * 
 	 * @return Set containing all values for left view
 	 */
-	public Set<Object> getPosibilities() {
-		return posibilities;
+	public Set<Object> getPossibilities() {
+		return possibilities;
 	}
 
 	/**
@@ -83,8 +83,8 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 * 
 	 * @return Set containing all possible values for rules
 	 */
-	public Set<Object> getAllPosibilities() {
-		return allPosibilities;
+	public Set<Object> getAllPossibilities() {
+		return allPossibilities;
 	}
 
 	/**
@@ -119,7 +119,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 			.filter(posibility -> ((RefactoringRule) posibility).isEnabled())
 			.forEach(posibility -> {
 				selection.add(posibility);
-				posibilities.remove(posibility);
+				possibilities.remove(posibility);
 				recentlyMoved.add(posibility);
 				changed = true;
 			});
@@ -139,7 +139,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 			.filter(posibility -> ((RefactoringRule) posibility).isEnabled())
 			.forEach(posibility -> {
 				selection.add(posibility);
-				posibilities.remove(posibility);
+				possibilities.remove(posibility);
 				changed = true;
 			});
 		notifyListeners();
@@ -157,7 +157,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 
 		selection.removeAll(selectedElements.toList());
 
-		posibilities.addAll(selectedElements.toList());
+		possibilities.addAll(selectedElements.toList());
 		recentlyMoved.addAll(selectedElements.toList());
 
 		changed = true;
@@ -173,7 +173,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	@Override
 	public void moveAllToLeft() {
 
-		posibilities.addAll(selection);
+		possibilities.addAll(selection);
 
 		selection.clear();
 
@@ -200,7 +200,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		applicable.addAll(rules);
 		if (removeDisabled) {
 			Set<Object> currentPosibilities = new HashSet<>();
-			currentPosibilities.addAll(posibilities);
+			currentPosibilities.addAll(possibilities);
 			currentPosibilities.stream()
 				.filter(posibility -> !((RefactoringRule) posibility).isEnabled())
 				.forEach(applicable::remove);
@@ -211,13 +211,13 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		removeDisabled = doit;
 		if (doit) {
 			Set<Object> currentPosibilities = new HashSet<>();
-			currentPosibilities.addAll(posibilities);
+			currentPosibilities.addAll(possibilities);
 			currentPosibilities.stream()
 				.filter(posibility -> !((RefactoringRule) posibility).isEnabled())
-				.forEach(posibilities::remove);
+				.forEach(possibilities::remove);
 		} else {
-			posibilities.clear();
-			posibilities.addAll(rules);
+			possibilities.clear();
+			possibilities.addAll(rules);
 
 		}
 		setChanged(false);
@@ -294,8 +294,8 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	public abstract void filterPosibilitiesByTags();
 
 	public void setPosibilitiesFilteredByTag(Set<Object> filteredPosibilities) {
-		posibilities.clear();
-		posibilities.addAll(filteredPosibilities);
+		possibilities.clear();
+		possibilities.addAll(filteredPosibilities);
 	}
 
 	public void selectFromProfile(final String profileId) {
@@ -314,7 +314,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 
 	private void selectFromProfile(SimonykeesProfile profile) {
 		Set<Object> currentPosibilities = new HashSet<>();
-		currentPosibilities.addAll(posibilities);
+		currentPosibilities.addAll(possibilities);
 		currentPosibilities.stream()
 			.filter(posibility -> profile.containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
 					// SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
@@ -322,7 +322,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 			.forEach(posibility -> {
 				if (((RefactoringRule) posibility).isEnabled()) {
 					selection.add(posibility);
-					posibilities.remove(posibility);
+					possibilities.remove(posibility);
 				} else {
 					unapplicableRules.add(posibility);
 				}
@@ -336,10 +336,10 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 
 	public void removeAlreadySelected() {
 		Set<Object> currentPosibilities = new HashSet<>();
-		currentPosibilities.addAll(posibilities);
+		currentPosibilities.addAll(possibilities);
 		currentPosibilities.stream()
 			.filter(selection::contains)
-			.forEach(posibilities::remove);
+			.forEach(possibilities::remove);
 	}
 
 }

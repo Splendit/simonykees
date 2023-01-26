@@ -31,17 +31,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
-import eu.jsparrow.ui.wizard.impl.RulesForProjectsData;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
+import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -56,9 +54,6 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizardHandler.class);
 
-	private LicenseUtil licenseUtil = LicenseUtil.get();
-	
-	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
@@ -70,6 +65,7 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 		Activator.setRunning(true);
 
 		final Shell shell = HandlerUtil.getActiveShell(event);
+		LicenseUtil licenseUtil = LicenseUtil.get();
 		if (!licenseUtil.checkAtStartUp(shell)) {
 			Activator.setRunning(false);
 			return null;
@@ -106,25 +102,14 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 		return true;
 	}
 
-	/**
-	 * Method used to open SelectRulesWizard from non UI thread
-	 */
-	private void synchronizeWithUIShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,
-			Map<IJavaProject, List<IJavaElement>> selectedJavaElements) {
-		
-		Set<IJavaProject> javaProjects = selectedJavaElements.keySet();
-		synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, SelectRulesWizard.getRulesForProjectsData(javaProjects, false));
-
-	}
-
 	public static void synchronizeWithUIShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,
-			RulesForProjectsData rulesForProjectsData) {
+			SelectRulesWizardData selectRulesWizardData) {
 		Display.getDefault()
 			.asyncExec(() -> {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				SelectRulesWizard selectRulesWizard = new SelectRulesWizard(refactoringPipeline, rulesForProjectsData);
+				SelectRulesWizard selectRulesWizard = new SelectRulesWizard(refactoringPipeline, selectRulesWizardData);
 
 				class SelectRulesWizardDialog extends WizardDialog {
 
@@ -238,7 +223,9 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 				dialog.open();
 				if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
 					if (refactoringPipeline.hasRefactoringStates()) {
-						synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, selectedJavaElements);
+						Set<IJavaProject> javaProjects = selectedJavaElements.keySet();
+						synchronizeWithUIShowSelectRulesWizard(refactoringPipeline,
+								SelectRulesWizard.createSelectRulesWizardData(javaProjects));
 					} else {
 						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitWithoutErrorsDialog();
 					}
@@ -266,7 +253,9 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 				synchronizeWithUIShowCompilationErrorMessage(containingErrorList,
 						refactoringPipeline, selectedJavaElements);
 			} else {
-				synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, selectedJavaElements);
+				Set<IJavaProject> javaProjects = selectedJavaElements.keySet();
+				synchronizeWithUIShowSelectRulesWizard(refactoringPipeline,
+						SelectRulesWizard.createSelectRulesWizardData(javaProjects));
 			}
 
 		} catch (RefactoringException e) {

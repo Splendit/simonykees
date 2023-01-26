@@ -60,7 +60,7 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	 */
 	@Override
 	public Set<Object> filterPosibilitiesByName() {
-		return super.getPosibilities().stream()
+		return super.getPossibilities().stream()
 			.filter(object -> StringUtils.contains(StringUtils
 				.lowerCase(((RefactoringRule) object).getRuleDescription()
 					.getName()), nameFilter))
@@ -70,12 +70,12 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	@Override
 	public void filterPosibilitiesByTags() {
 		if (!appliedTags.isEmpty()) {
-			Set<Object> currentPossibilities = getPosibilities();
+			Set<Object> currentPossibilities = getPossibilities();
 			setPosibilitiesFilteredByTag(currentPossibilities.stream()
 				.filter(object -> containsTag((RefactoringRule) object))
 				.collect(Collectors.toSet()));
 		} else {
-			addAllItems(getPosibilities());
+			addAllItems(getPossibilities());
 		}
 	}
 

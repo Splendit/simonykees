@@ -34,7 +34,7 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.handler.SelectRulesWizardHandler;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
-import eu.jsparrow.ui.wizard.impl.RulesForProjectsData;
+import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -106,7 +106,7 @@ public abstract class AbstractRuleWizard extends Wizard {
 	}
 
 	private void showRefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
-			Collection<IJavaProject> javaProjects, RulesForProjectsData dataForSelectRulesWizard) {
+			Collection<IJavaProject> javaProjects, SelectRulesWizardData selectRulesWizardData) {
 		String endRefactoringInProject = NLS.bind(Messages.SelectRulesWizard_end_refactoring,
 				this.getClass()
 					.getSimpleName(),
@@ -125,7 +125,7 @@ public abstract class AbstractRuleWizard extends Wizard {
 			.getActiveWorkbenchWindow()
 			.getShell();
 		RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline,
-				statisticsMetadata, dataForSelectRulesWizard);
+				statisticsMetadata, selectRulesWizardData);
 
 		final WizardDialog dialog = new WizardDialog(shell, previewWizard) {
 
@@ -175,7 +175,7 @@ public abstract class AbstractRuleWizard extends Wizard {
 	}
 
 	protected JobChangeAdapter createPreviewWizardJobChangeAdapter(RefactoringPipeline refactoringPipeline,
-			Collection<IJavaProject> javaProjects, RulesForProjectsData dataForSelectRulesWizard) {
+			Collection<IJavaProject> javaProjects, SelectRulesWizardData selectRulesWizardData) {
 		return new JobChangeAdapter() {
 
 			@Override
@@ -186,7 +186,7 @@ public abstract class AbstractRuleWizard extends Wizard {
 					if (refactoringPipeline.hasChanges()) {
 						Display.getDefault()
 							.asyncExec(() -> showRefactoringPreviewWizard(refactoringPipeline, javaProjects,
-									dataForSelectRulesWizard));
+									selectRulesWizardData));
 					} else {
 						Display.getDefault()
 							.asyncExec(() -> {
@@ -199,7 +199,7 @@ public abstract class AbstractRuleWizard extends Wizard {
 
 								refactoringPipeline.cancelFileChanges();
 								SelectRulesWizardHandler.synchronizeWithUIShowSelectRulesWizard(refactoringPipeline,
-										dataForSelectRulesWizard);
+										selectRulesWizardData);
 							});
 					}
 				} else {

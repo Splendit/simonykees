@@ -371,7 +371,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				model.filterPosibilitiesByTags();
 				model.removeAlreadySelected();
 				if (StringUtils.isEmpty(model.getNameFilter())) {
-					leftTreeViewer.setInput(model.getPosibilities());
+					leftTreeViewer.setInput(model.getPossibilities());
 				} else {
 					leftTreeViewer.setInput(model.filterPosibilitiesByName());
 				}
@@ -381,7 +381,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				 * view if selection is empty Finish button is disabled
 				 */
 			} else {
-				leftTreeViewer.setInput(model.getPosibilities());
+				leftTreeViewer.setInput(model.getPossibilities());
 				rightTableViewer.setInput(model.getSelection());
 				model.resetForced();
 			}
