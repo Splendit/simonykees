@@ -33,7 +33,6 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.exception.SimonykeesException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.handler.SelectRulesWizardHandler;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.statistics.RuleStatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSection;
@@ -42,6 +41,7 @@ import eu.jsparrow.ui.preview.statistics.StatisticsSectionUpdater;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
+import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
 
 /**
@@ -339,7 +339,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 					Activator.setRunning(false);
 					return Status.CANCEL_STATUS;
 				}
-				SelectRulesWizardHandler.synchronizeWithUIShowSelectRulesWizard(refactoringPipeline,
+				SelectRulesWizard.synchronizeWithUIShowSelectRulesWizard(refactoringPipeline,
 						selectRulesWizardData);
 				return Status.OK_STATUS;
 			}
