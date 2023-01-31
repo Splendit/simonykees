@@ -419,4 +419,82 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 		disposables.clear();
 		super.dispose();
 	}
+
+	@Override
+	String getClassNameString(ICompilationUnit compilationUnit) {
+		// TODO Auto-generated method stub
+		return super.getClassNameString(compilationUnit);
+	}
+
+	@Override
+	String getPathString(ICompilationUnit compilationUnit) {
+		// TODO Auto-generated method stub
+		return super.getPathString(compilationUnit);
+	}
+
+	@Override
+	public List<ICompilationUnit> getUnselectedChange() {
+		// TODO Auto-generated method stub
+		return super.getUnselectedChange();
+	}
+
+	@Override
+	public void applyUnselectedChange() {
+		// TODO Auto-generated method stub
+		super.applyUnselectedChange();
+	}
+
+	@Override
+	public RefactoringRule getRule() {
+		// TODO Auto-generated method stub
+		return super.getRule();
+	}
+
+	@Override
+	public void update(Map<ICompilationUnit, DocumentChange> changesForRule) {
+		// TODO Auto-generated method stub
+		super.update(changesForRule);
+	}
+
+	@Override
+	ICompilationUnit getCurrentCompilationUnit() {
+		// TODO Auto-generated method stub
+		return super.getCurrentCompilationUnit();
+	}
+
+	@Override
+	void setCurrentCompilationUnit(ICompilationUnit currentCompilationUnit) {
+		// TODO Auto-generated method stub
+		super.setCurrentCompilationUnit(currentCompilationUnit);
+	}
+
+	@Override
+	public Map<ICompilationUnit, DocumentChange> getChangesForRule() {
+		// TODO Auto-generated method stub
+		return super.getChangesForRule();
+	}
+
+	@Override
+	public void setChangesForRule(Map<ICompilationUnit, DocumentChange> changesForRule) {
+		// TODO Auto-generated method stub
+		super.setChangesForRule(changesForRule);
+	}
+
+	@Override
+	public void setRule(RefactoringRule rule) {
+		// TODO Auto-generated method stub
+		super.setRule(rule);
+	}
+
+	@Override
+	public Map<String, ICompilationUnit> getUnselected() {
+		// TODO Auto-generated method stub
+		return super.getUnselected();
+	}
+
+	@Override
+	public void setUnselected(Map<String, ICompilationUnit> unselected) {
+		// TODO Auto-generated method stub
+		super.setUnselected(unselected);
+	}
 }
