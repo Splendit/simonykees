@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
@@ -30,5 +31,63 @@ public abstract class RefactoringPreviewWizardPageModel extends WizardPage {
 
 	protected RefactoringPreviewWizardPageModel(String pageName) {
 		super(pageName);
+	}
+
+	/**
+	 * Returns the class name of an {@link ICompilationUnit}, including ".java"
+	 * 
+	 * @param compilationUnit
+	 * @return
+	 */
+	String getClassNameString(ICompilationUnit compilationUnit) {
+		return compilationUnit.getElementName();
+	}
+
+	/**
+	 * Returns the path of an {@link ICompilationUnit} without leading slash
+	 * (the same as in the Externalize Strings refactoring view).
+	 * 
+	 * @param compilationUnit
+	 * @return
+	 */
+	String getPathString(ICompilationUnit compilationUnit) {
+		String temp = compilationUnit.getParent()
+			.getPath()
+			.toString();
+		return StringUtils.startsWith(temp, "/") ? StringUtils.substring(temp, 1) : temp; //$NON-NLS-1$
+	}
+
+	public List<ICompilationUnit> getUnselectedChange() {
+		return unselectedChange;
+	}
+
+	/**
+	 * When page is no more in focus, all changes are already stored and
+	 * calculated, so unselected changes go to unselected map and cleans
+	 * unselectedChanges list.
+	 */
+	public void applyUnselectedChange() {
+		unselectedChange.stream()
+			.forEach(unit -> unselected.put(unit.getElementName(), unit));
+		unselectedChange.clear();
+	}
+
+	public RefactoringRule getRule() {
+		return rule;
+	}
+
+	/**
+	 * Updates changes for this page. IF there were changes in currently
+	 * displayed working copy, it needs to be updated too.
+	 * 
+	 * @param changesForRule
+	 */
+	public void update(Map<ICompilationUnit, DocumentChange> changesForRule) {
+		this.changesForRule = changesForRule;
+		changesForRule.keySet()
+			.stream()
+			.filter(unit -> unit.getElementName()
+				.equals(currentCompilationUnit.getElementName()) && !unit.equals(currentCompilationUnit))
+			.forEach(unit -> currentCompilationUnit = unit);
 	}
 }
