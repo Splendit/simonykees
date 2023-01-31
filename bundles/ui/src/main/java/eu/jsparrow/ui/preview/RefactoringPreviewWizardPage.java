@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
@@ -60,7 +61,7 @@ import eu.jsparrow.ui.util.LicenseUtilService;
  * @since 0.9
  */
 @SuppressWarnings("restriction")
-public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageModel {
+public class RefactoringPreviewWizardPage extends WizardPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringPreviewWizardPage.class);
 
@@ -76,7 +77,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 	protected IStatus fSelectionStatus;
 
 	private RefactoringPreviewWizardModel wizardModel;
-
+	private RefactoringPreviewWizardPageModel model;
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule, RefactoringRule rule,
@@ -84,6 +85,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 			StatisticsSectionUpdater statisticsUpdater) {
 		super(rule.getRuleDescription()
 			.getName());
+		this.model = new RefactoringPreviewWizardPageModel();
 		this.statisticsUpdater = statisticsUpdater;
 		CustomTextEditChangePreviewViewer.setEnableDiffView(enabled);
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
@@ -420,81 +422,55 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 		super.dispose();
 	}
 
-	@Override
 	String getClassNameString(ICompilationUnit compilationUnit) {
-		// TODO Auto-generated method stub
-		return super.getClassNameString(compilationUnit);
+		return model.getClassNameString(compilationUnit);
 	}
 
-	@Override
 	String getPathString(ICompilationUnit compilationUnit) {
-		// TODO Auto-generated method stub
-		return super.getPathString(compilationUnit);
+		return model.getPathString(compilationUnit);
 	}
 
-	@Override
 	public List<ICompilationUnit> getUnselectedChange() {
-		// TODO Auto-generated method stub
-		return super.getUnselectedChange();
+		return model.getUnselectedChange();
 	}
 
-	@Override
 	public void applyUnselectedChange() {
-		// TODO Auto-generated method stub
-		super.applyUnselectedChange();
+		model.applyUnselectedChange();
 	}
 
-	@Override
 	public RefactoringRule getRule() {
-		// TODO Auto-generated method stub
-		return super.getRule();
+		return model.getRule();
 	}
 
-	@Override
 	public void update(Map<ICompilationUnit, DocumentChange> changesForRule) {
-		// TODO Auto-generated method stub
-		super.update(changesForRule);
+		model.update(changesForRule);
 	}
 
-	@Override
 	ICompilationUnit getCurrentCompilationUnit() {
-		// TODO Auto-generated method stub
-		return super.getCurrentCompilationUnit();
+		return model.getCurrentCompilationUnit();
 	}
 
-	@Override
 	void setCurrentCompilationUnit(ICompilationUnit currentCompilationUnit) {
-		// TODO Auto-generated method stub
-		super.setCurrentCompilationUnit(currentCompilationUnit);
+		model.setCurrentCompilationUnit(currentCompilationUnit);
 	}
 
-	@Override
 	public Map<ICompilationUnit, DocumentChange> getChangesForRule() {
-		// TODO Auto-generated method stub
-		return super.getChangesForRule();
+		return model.getChangesForRule();
 	}
 
-	@Override
 	public void setChangesForRule(Map<ICompilationUnit, DocumentChange> changesForRule) {
-		// TODO Auto-generated method stub
-		super.setChangesForRule(changesForRule);
+		model.setChangesForRule(changesForRule);
 	}
 
-	@Override
 	public void setRule(RefactoringRule rule) {
-		// TODO Auto-generated method stub
-		super.setRule(rule);
+		model.setRule(rule);
 	}
 
-	@Override
 	public Map<String, ICompilationUnit> getUnselected() {
-		// TODO Auto-generated method stub
-		return super.getUnselected();
+		return model.getUnselected();
 	}
 
-	@Override
 	public void setUnselected(Map<String, ICompilationUnit> unselected) {
-		// TODO Auto-generated method stub
-		super.setUnselected(unselected);
+		model.setUnselected(unselected);
 	}
 }

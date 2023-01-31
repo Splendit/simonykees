@@ -12,7 +12,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.rules.common.RefactoringRule;
 
-public abstract class RefactoringPreviewWizardPageModel extends WizardPage {
+public class RefactoringPreviewWizardPageModel {
 	private ICompilationUnit currentCompilationUnit;
 	private Map<ICompilationUnit, DocumentChange> changesForRule;
 	private RefactoringRule rule;
@@ -28,10 +28,6 @@ public abstract class RefactoringPreviewWizardPageModel extends WizardPage {
 	 * when this page is active
 	 */
 	private List<ICompilationUnit> unselectedChange = new ArrayList<>();
-
-	protected RefactoringPreviewWizardPageModel(String pageName) {
-		super(pageName);
-	}
 
 	/**
 	 * Returns the class name of an {@link ICompilationUnit}, including ".java"
