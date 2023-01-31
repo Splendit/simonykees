@@ -2,7 +2,6 @@ package eu.jsparrow.ui.preview;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -70,24 +69,11 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 	private StatisticsSection statisticsSection;
 	private StatisticsSectionUpdater statisticsUpdater;
 
-	private ICompilationUnit currentCompilationUnit;
 	private IChangePreviewViewer currentPreviewViewer;
 	private CheckboxTableViewer viewer;
-	private Map<ICompilationUnit, DocumentChange> changesForRule;
-	private RefactoringRule rule;
 	private List<Image> disposables = new ArrayList<>();
 
-	/*
-	 * map that contains all names of working copies and working copies that
-	 * were unselected for this page
-	 */
-	private Map<String, ICompilationUnit> unselected = new HashMap<>();
 	private Composite previewContainer;
-	/*
-	 * map that contains working copies that are unselected in one iteration
-	 * when this page is active
-	 */
-	private List<ICompilationUnit> unselectedChange = new ArrayList<>();
 	protected IStatus fSelectionStatus;
 
 	private RefactoringPreviewWizardModel wizardModel;
