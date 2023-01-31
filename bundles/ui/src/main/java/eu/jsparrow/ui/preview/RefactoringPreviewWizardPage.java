@@ -213,7 +213,8 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 			.forEach(entry -> {
 				viewer.add(entry);
 				viewer.setChecked(entry,
-						!(getUnselected().containsKey(entry.getElementName()) || unselectedChange.contains(entry)));
+						!(getUnselected().containsKey(entry.getElementName())
+								|| getUnselectedChange().contains(entry)));
 			});
 	}
 
@@ -257,8 +258,8 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 				if (getUnselected().containsKey(newSelection.getElementName())) {
 					getUnselected().remove(newSelection.getElementName());
 				}
-				if (unselectedChange.contains(newSelection)) {
-					unselectedChange.remove(newSelection);
+				if (getUnselectedChange().contains(newSelection)) {
+					getUnselectedChange().remove(newSelection);
 				}
 				clearCounterForChangedFile(newSelection);
 				wizardModel.addFileToRule(getRule(), newSelection.getHandleIdentifier());
@@ -266,7 +267,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 			} else {
 				// add in list with unselected classes
 				if (!getUnselected().containsKey(newSelection.getElementName())) {
-					unselectedChange.add(newSelection);
+					getUnselectedChange().add(newSelection);
 				}
 				clearCounterForChangedFile(newSelection);
 				wizardModel.removeFileFromRule(getRule(), newSelection.getHandleIdentifier());

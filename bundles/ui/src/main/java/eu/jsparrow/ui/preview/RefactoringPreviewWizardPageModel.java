@@ -27,7 +27,7 @@ public abstract class RefactoringPreviewWizardPageModel extends WizardPage {
 	 * map that contains working copies that are unselected in one iteration
 	 * when this page is active
 	 */
-	List<ICompilationUnit> unselectedChange = new ArrayList<>();
+	private List<ICompilationUnit> unselectedChange = new ArrayList<>();
 
 	protected RefactoringPreviewWizardPageModel(String pageName) {
 		super(pageName);
