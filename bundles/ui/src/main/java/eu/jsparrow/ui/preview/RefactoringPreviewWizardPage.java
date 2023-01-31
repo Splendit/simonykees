@@ -24,7 +24,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
@@ -63,7 +62,7 @@ import eu.jsparrow.ui.util.LicenseUtilService;
  * @since 0.9
  */
 @SuppressWarnings("restriction")
-public class RefactoringPreviewWizardPage extends WizardPage {
+public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageModel {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringPreviewWizardPage.class);
 
