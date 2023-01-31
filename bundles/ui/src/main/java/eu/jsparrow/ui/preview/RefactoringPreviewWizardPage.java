@@ -76,8 +76,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private CheckboxTableViewer viewer;
 	private Map<ICompilationUnit, DocumentChange> changesForRule;
 	private RefactoringRule rule;
-	private List<Image>disposables = new ArrayList<>();
-
+	private List<Image> disposables = new ArrayList<>();
 
 	/*
 	 * map that contains all names of working copies and working copies that
@@ -130,15 +129,14 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	public void setTotalStatisticsSection(StatisticsSection statisticsSection) {
 		this.statisticsSection = statisticsSection;
 	}
-	
+
 	private Optional<StatisticsSection> getTotalStatisticsSection() {
 		return Optional.ofNullable(this.statisticsSection);
 	}
-	
+
 	private void initializeDataBindings() {
 		this.ruleStatisticsSection.initializeDataBindings();
 		getTotalStatisticsSection().ifPresent(StatisticsSection::initializeDataBindings);
-
 	}
 
 	/*
@@ -183,7 +181,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		 */
 		sashForm.setWeights(1, 3);
 		List<Image> images = getTotalStatisticsSection().map(statistics -> statistics.createView(container))
-				.orElse(Collections.emptyList());
+			.orElse(Collections.emptyList());
 		disposables.addAll(images);
 		initializeDataBindings();
 	}
@@ -216,7 +214,6 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		viewer.addCheckStateListener(createCheckStateListener());
 
 		populateFileView();
-
 	}
 
 	protected void populateFileView() {
@@ -487,7 +484,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				.getApplicationsForFile(newSelection.getHandleIdentifier()))
 			.forEach(FileChangeCount::clear);
 	}
-	
+
 	@Override
 	public void dispose() {
 		ruleStatisticsSection.dispose();
@@ -495,5 +492,4 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		disposables.clear();
 		super.dispose();
 	}
-
 }
