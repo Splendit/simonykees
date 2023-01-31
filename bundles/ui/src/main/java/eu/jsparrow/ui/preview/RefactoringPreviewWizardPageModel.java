@@ -21,7 +21,7 @@ public abstract class RefactoringPreviewWizardPageModel extends WizardPage {
 	 * map that contains all names of working copies and working copies that
 	 * were unselected for this page
 	 */
-	Map<String, ICompilationUnit> unselected = new HashMap<>();
+	private Map<String, ICompilationUnit> unselected = new HashMap<>();
 
 	/*
 	 * map that contains working copies that are unselected in one iteration
@@ -68,7 +68,7 @@ public abstract class RefactoringPreviewWizardPageModel extends WizardPage {
 	 */
 	public void applyUnselectedChange() {
 		unselectedChange.stream()
-			.forEach(unit -> unselected.put(unit.getElementName(), unit));
+			.forEach(unit -> getUnselected().put(unit.getElementName(), unit));
 		unselectedChange.clear();
 	}
 
@@ -109,5 +109,13 @@ public abstract class RefactoringPreviewWizardPageModel extends WizardPage {
 
 	public void setRule(RefactoringRule rule) {
 		this.rule = rule;
+	}
+
+	public Map<String, ICompilationUnit> getUnselected() {
+		return unselected;
+	}
+
+	public void setUnselected(Map<String, ICompilationUnit> unselected) {
+		this.unselected = unselected;
 	}	
 }

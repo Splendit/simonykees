@@ -213,7 +213,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 			.forEach(entry -> {
 				viewer.add(entry);
 				viewer.setChecked(entry,
-						!(unselected.containsKey(entry.getElementName()) || unselectedChange.contains(entry)));
+						!(getUnselected().containsKey(entry.getElementName()) || unselectedChange.contains(entry)));
 			});
 	}
 
@@ -254,8 +254,8 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 				 * remove from unselected and recalculate rules for this
 				 * compilationUnit
 				 */
-				if (unselected.containsKey(newSelection.getElementName())) {
-					unselected.remove(newSelection.getElementName());
+				if (getUnselected().containsKey(newSelection.getElementName())) {
+					getUnselected().remove(newSelection.getElementName());
 				}
 				if (unselectedChange.contains(newSelection)) {
 					unselectedChange.remove(newSelection);
@@ -265,7 +265,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 				immediatelyUpdateForSelected(newSelection);
 			} else {
 				// add in list with unselected classes
-				if (!unselected.containsKey(newSelection.getElementName())) {
+				if (!getUnselected().containsKey(newSelection.getElementName())) {
 					unselectedChange.add(newSelection);
 				}
 				clearCounterForChangedFile(newSelection);
