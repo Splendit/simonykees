@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -585,7 +587,8 @@ public class RefactoringPipeline {
 			if (hasChanges) {
 				Version jdtVersion = JdtCoreVersionBindingUtil.findCurrentJDTCoreVersion();
 				ICompilationUnit workingCopy = refactoringState.getWorkingCopy();
-				newAstRoot = workingCopy.reconcile(JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion), true, null, null);
+				newAstRoot = workingCopy.reconcile(JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion), true, null,
+						null);
 			}
 		} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 			logger.error(e.getMessage(), e);
@@ -619,6 +622,44 @@ public class RefactoringPipeline {
 	}
 
 	/**
+	 * This method is intended to be called before re-using the same
+	 * {@link RefactoringPipeline} instance to open a wizard for selecting rules
+	 * after having cancelled the refactoring preview wizard.
+	 */
+	public IStatus cancelFileChanges(IProgressMonitor monitor) {
+
+		/*
+		 * Converts the monitor to a SubMonitor and sets name of task on
+		 * progress monitor dialog. Size is set to number 100 and then scaled to
+		 * size of the compilationUnits list. Each compilation unit increases
+		 * worked amount for same size.
+		 */
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
+			.setWorkRemaining(refactoringStates.size());
+		subMonitor.setTaskName(""); //$NON-NLS-1$
+
+		for (RefactoringState refactoringState : refactoringStates) {
+
+			subMonitor.subTask(refactoringState.getWorkingCopyName());
+			refactoringState.resetAll();
+
+			/*
+			 * If cancel is pressed on progress monitor, abort all and return,
+			 * else continue
+			 */
+			if (subMonitor.isCanceled()) {
+				return Status.CANCEL_STATUS;
+			} else {
+				subMonitor.worked(1);
+			}
+		}
+
+		initialSource.clear();
+
+		return Status.OK_STATUS;
+	}
+
+	/**
 	 * Getter for map with original source code for all refactoring states
 	 * 
 	 * @return
@@ -640,5 +681,4 @@ public class RefactoringPipeline {
 	public int getFileCount() {
 		return fileCount;
 	}
-
 }

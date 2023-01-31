@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -24,15 +25,26 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.ProgressMonitorPart;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -72,13 +84,122 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	private RefactoringPipeline refactoringPipeline;
 	private Image windowIcon;
 	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
+	private final SelectRulesWizardData selectRulesWizardData;
+	
+	public static void synchronizeWithUIShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,
+			SelectRulesWizardData selectRulesWizardData) {
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				SelectRulesWizard selectRulesWizard = new SelectRulesWizard(refactoringPipeline, selectRulesWizardData);
 
-	public SelectRulesWizard(Collection<IJavaProject> javaProjects, RefactoringPipeline refactoringPipeline,
-			List<RefactoringRule> rules) {
+				class SelectRulesWizardDialog extends WizardDialog {
+
+					private static final int BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL = 11001;
+					private static final int BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY = 11002;
+
+					public SelectRulesWizardDialog(Shell parentShell, SelectRulesWizard newWizard) {
+						super(parentShell, newWizard);
+						newWizard.addLicenseUpdateListener(this::updateButtonsForButtonBar);
+					}
+
+					/*
+					 * Removed unnecessary empty space on the bottom of the
+					 * wizard intended for ProgressMonitor that is not used
+					 */
+					@Override
+					protected Control createDialogArea(Composite parent) {
+						Control ctrl = super.createDialogArea(parent);
+						getProgressMonitor();
+						return ctrl;
+					}
+
+					@Override
+					protected IProgressMonitor getProgressMonitor() {
+						ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
+						GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+						gridData.heightHint = 0;
+						monitor.setLayoutData(gridData);
+						monitor.setVisible(false);
+						return monitor;
+					}
+
+					/**
+					 * Creates new shell defined for this wizard. The dialog is
+					 * made as big enough to show rule description vertically
+					 * and horizontally to avoid two scrollers. Minimum size is
+					 * set to avoid loosing components from view.
+					 * 
+					 * @param newShell
+					 */
+					@Override
+					protected void configureShell(Shell newShell) {
+						super.configureShell(newShell);
+						newShell.setSize(1000, 1000);
+						newShell.setMinimumSize(680, 600);
+					}
+
+					@Override
+					protected void createButtonsForButtonBar(Composite parent) {
+						createButton(parent, BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL, "Register for a free trial", false);
+						createButton(parent, BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY, "Enter premium license key", false);
+						super.createButtonsForButtonBar(parent);
+
+						Button finish = getButton(IDialogConstants.FINISH_ID);
+						finish.setText(Messages.SelectRulesWizardHandler_finishButtonText);
+						setButtonLayoutData(finish);
+						updateButtonsForButtonBar();
+					}
+
+					private void updateButtonsForButtonBar() {
+						boolean showRegisterForAFreeTrial = false;
+						boolean showEnterPremiumLicenseKey = false;
+						LicenseUtil licenseUtil = LicenseUtil.get();
+						if (licenseUtil.isFreeLicense()) {
+							if (!licenseUtil.isActiveRegistration()) {
+								showRegisterForAFreeTrial = true;
+							}
+							showEnterPremiumLicenseKey = true;
+						}
+						getButton(BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL).setVisible(showRegisterForAFreeTrial);
+						getButton(BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY).setVisible(showEnterPremiumLicenseKey);
+					}
+
+					@Override
+					protected void buttonPressed(int buttonId) {
+						if (buttonId == BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
+							selectRulesWizard.showRegistrationDialog();
+						} else if (buttonId == BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
+							selectRulesWizard.showSimonykeesUpdateLicenseDialog();
+						} else {
+							super.buttonPressed(buttonId);
+						}
+					}
+				}
+
+				SelectRulesWizardDialog dialog = new SelectRulesWizardDialog(shell, selectRulesWizard);
+				/*
+				 * Creates new shell and wizard.
+				 */
+				dialog.create();
+				dialog.open();
+			});
+
+	}
+
+	public static SelectRulesWizardData createSelectRulesWizardData(Set<IJavaProject> javaProjects) {
+		List<RefactoringRule> rulesChoice = RulesContainer.getRulesForProjects(javaProjects, false);
+		return new SelectRulesWizardData(rulesChoice, javaProjects);
+	}
+
+	public SelectRulesWizard(RefactoringPipeline refactoringPipeline, SelectRulesWizardData selectRulesWizardData) {
 		super();
-		this.javaProjects = javaProjects;
+		this.javaProjects = selectRulesWizardData.getJavaProjects();
 		this.refactoringPipeline = refactoringPipeline;
-		this.rules = rules;
+		this.rules = selectRulesWizardData.getRulesChoice();
+		this.selectRulesWizardData = selectRulesWizardData;
 		setNeedsProgressMonitor(true);
 		windowIcon = ResourceHelper.createImage(WINDOW_ICON);
 		Window.setDefaultImage(windowIcon);
@@ -97,7 +218,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	public void addPages() {
 		model = new SelectRulesWizardPageModel(rules);
 		page = new SelectRulesWizardPage(model,
-				new SelectRulesWizardPageControler(model));
+				new SelectRulesWizardPageControler(model), selectRulesWizardData);
 		afterLicenseUpdateListeners.forEach(page::addLicenseUpdateListener);
 		addPage(page);
 	}
@@ -125,6 +246,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 	@Override
 	public boolean performFinish() {
+
 		String message = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
 			.getSimpleName(),
 				this.javaProjects.stream()
@@ -138,12 +260,25 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		refactoringPipeline.setRules(selectedRules);
 		refactoringPipeline.updateInitialSourceMap();
 
-		Job job = createRefactoringJob(refactoringPipeline, javaProjects);
+		String selectedProfileId = page.getSelectedProfileId()
+			.orElse(null);
+		if (selectedProfileId != null) {
+			selectRulesWizardData.setSelectedProfileId(selectedProfileId);
+		} else {
+			selectRulesWizardData.setCustomRulesSelection(selectedRules);
+		}
 
-		job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects));
+		Display.getCurrent()
+			.asyncExec(() -> {
 
-		job.setUser(true);
-		job.schedule();
+				Job job = createRefactoringJob(refactoringPipeline, javaProjects);
+
+				job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects,
+						selectRulesWizardData));
+
+				job.setUser(true);
+				job.schedule();
+			});
 
 		return true;
 	}
@@ -163,7 +298,8 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 			if (!allRulesFree) {
 				addComponentLambdas = Arrays.asList(//
 						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
-						dialog -> dialog.addLinkToJSparrowPricingPage(JSparrowPricingLink.TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE),
+						dialog -> dialog
+							.addLinkToJSparrowPricingPage(JSparrowPricingLink.TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE),
 						SuggestRegistrationDialog::addRegisterForPremiumButton);
 			}
 		} else {

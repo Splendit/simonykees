@@ -25,8 +25,17 @@ import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 public class RunDefaultProfileImplicitWizard extends AbstractRuleWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunDefaultProfileImplicitWizard.class);
+	
+	private RefactoringPipeline refactoringPipeline;
+	private SelectRulesWizardData selectRulesWizardData;
 
-	public boolean computeRefactoring(RefactoringPipeline refactoringPipeline, Collection<IJavaProject> javaProjects,
+	public RunDefaultProfileImplicitWizard(RefactoringPipeline refactoringPipeline,
+			SelectRulesWizardData selectRulesWizardData) {
+		this.refactoringPipeline = refactoringPipeline;
+		this.selectRulesWizardData = selectRulesWizardData;
+	}
+
+	public boolean computeRefactoring(Collection<IJavaProject> javaProjects,
 			final List<RefactoringRule> selectedRules) {
 		String message = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
 			.getSimpleName(),
@@ -39,7 +48,7 @@ public class RunDefaultProfileImplicitWizard extends AbstractRuleWizard {
 		refactoringPipeline.updateInitialSourceMap();
 
 		Job job = createRefactoringJob(refactoringPipeline, javaProjects);
-		job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects));
+		job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects, selectRulesWizardData));
 
 		job.setUser(true);
 		job.schedule();

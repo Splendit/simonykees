@@ -2,7 +2,9 @@
 package eu.jsparrow.ui.wizard.impl;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
@@ -31,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -48,6 +51,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private static final String CUSTOM_PROFILE = Messages.SelectRulesWizardPage_CustomProfileLabel;
 
+	private final SelectRulesWizardData selectRulesWizardData;
+
 	private Composite filterComposite;
 
 	private Combo selectProfileCombo;
@@ -60,8 +65,10 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private boolean update = true;
 
-	public SelectRulesWizardPage(SelectRulesWizardPageModel model, SelectRulesWizardPageControler controler) {
+	public SelectRulesWizardPage(SelectRulesWizardPageModel model, SelectRulesWizardPageControler controler,
+			SelectRulesWizardData selectRulesWizardData) {
 		super(model, controler);
+		this.selectRulesWizardData = selectRulesWizardData;
 		setTitle(Messages.SelectRulesWizardPage_title);
 		setDescription(Messages.SelectRulesWizardPage_description);
 	}
@@ -200,7 +207,21 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 * preferences or to currently selected profile otherwise
 	 */
 	private void initializeGroupFilterCombo() {
-		String currentProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
+
+		List<RefactoringRule> customRulesSelection = selectRulesWizardData.getCustomRulesSelection();
+		if (!customRulesSelection.isEmpty()) {
+
+			selectCustomProfile();
+			List<String> ruleIdList = customRulesSelection.stream()
+				.map(RefactoringRule::getId)
+				.collect(Collectors.toList());
+			((SelectRulesWizardPageControler) controler).selectCustomProfile(ruleIdList);
+			return;
+		}
+
+		String defaultProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
+		String currentProfileId = selectRulesWizardData.getSelectedProfileId()
+			.orElse(defaultProfileId);
 
 		/*
 		 * only show the Free Rules Profile, if jSparrow free or starter is
@@ -370,5 +391,16 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		super.getLeftTreeViewer().addDoubleClickListener(doubleClickEvent -> selectCustomProfile());
 
 		super.getRightTableViewer().addDoubleClickListener(doubleClickEvent -> selectCustomProfile());
+	}
+
+	public Optional<String> getSelectedProfileId() {
+
+		int selectionIndex = selectProfileCombo.getSelectionIndex();
+		List<String> allProfileIds = SimonykeesPreferenceManager.getAllProfileIds();
+
+		if (selectionIndex >= 0 && selectionIndex < allProfileIds.size()) {
+			return Optional.of(allProfileIds.get(selectionIndex));
+		}
+		return Optional.empty();
 	}
 }

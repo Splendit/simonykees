@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -32,12 +35,14 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.statistics.RuleStatisticsSection;
+import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionUpdater;
-import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
+import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
+import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
 
 /**
  * This {@link Wizard} holds a {@link RefactoringPreviewWizardPage} for every
@@ -62,20 +67,25 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	protected StatisticsSection summaryPageStatisticsSection;
 	protected StatisticsSectionUpdater updater;
 	private Image windowIcon;
-	
+
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private StandaloneStatisticsMetadata statisticsMetadata;
 	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
+	private SelectRulesWizardData selectRulesWizardData;
+	private boolean reuseRefactoringPipeline;
 
-	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline, StandaloneStatisticsMetadata standaloneStatisticsMetadata) {
+	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
+			StandaloneStatisticsMetadata standaloneStatisticsMetadata, SelectRulesWizardData selectRulesWizardData) {
 		this(refactoringPipeline);
 		this.statisticsMetadata = standaloneStatisticsMetadata;
+		this.selectRulesWizardData = selectRulesWizardData;
 	}
-	
+
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
 		this.statisticsSection = StatisticsSectionFactory.createStatisticsSection(refactoringPipeline);
-		this.summaryPageStatisticsSection = StatisticsSectionFactory.createStatisticsSectionForSummaryPage(refactoringPipeline);
+		this.summaryPageStatisticsSection = StatisticsSectionFactory
+			.createStatisticsSectionForSummaryPage(refactoringPipeline);
 		this.updater = new StatisticsSectionUpdater(statisticsSection, summaryPageStatisticsSection);
 		this.refactoringPipeline = refactoringPipeline;
 		this.shell = PlatformUI.getWorkbench()
@@ -102,14 +112,15 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		 * First summary page is created to collect all initial source from
 		 * working copies
 		 */
-		
+
 		model = new RefactoringPreviewWizardModel();
 		refactoringPipeline.getRules()
 			.forEach(rule -> {
 				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
 				if (!changes.isEmpty()) {
 					RuleStatisticsSection ruleStats = StatisticsSectionFactory.createRuleStatisticsSection(rule);
-					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish(), ruleStats, updater);
+					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model,
+							canFinish(), ruleStats, updater);
 					previewPage.setTotalStatisticsSection(statisticsSection);
 					addPage(previewPage);
 				}
@@ -118,11 +129,12 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.size() == 1
 				&& refactoringPipeline.getRules()
 					.get(0) instanceof StandardLoggerRule)) {
-			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsMetadata, summaryPageStatisticsSection);
+			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(),
+					statisticsMetadata, summaryPageStatisticsSection);
 			addPage(summaryPage);
 		}
 	}
-	
+
 	@Override
 	public void updateViewsOnNavigation(IWizardPage page) {
 		if (page instanceof RefactoringPreviewWizardPage) {
@@ -209,19 +221,21 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public boolean canFinish() {
 		if (licenseUtil.isFreeLicense()) {
-			return licenseUtil.isActiveRegistration()  && containsOnlyFreeRules();
+			return licenseUtil.isActiveRegistration() && containsOnlyFreeRules();
 		}
-		
+
 		LicenseValidationResult result = licenseUtil.getValidationResult();
 		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
 			return super.canFinish();
 		}
-		boolean enoughCredit =  payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
+		boolean enoughCredit = payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
 		return enoughCredit && super.canFinish();
 	}
 
 	private boolean containsOnlyFreeRules() {
-		return refactoringPipeline.getRules().stream().allMatch(RefactoringRule::isFree);
+		return refactoringPipeline.getRules()
+			.stream()
+			.allMatch(RefactoringRule::isFree);
 	}
 
 	/*
@@ -294,13 +308,49 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 */
 	@Override
 	public boolean performCancel() {
-		refactoringPipeline.clearStates();
-		return super.performCancel();
+		if (selectRulesWizardData != null) {
+			reuseRefactoringPipeline = true;
+
+			Display.getCurrent()
+				.asyncExec(() -> {
+					Job job = createJobToShowSelectRulesWizard(refactoringPipeline, selectRulesWizardData,
+							"Cancelling file changes and opening Select Rules Wizard."); //$NON-NLS-1$
+
+					job.setUser(true);
+					job.schedule();
+				});
+
+		} else {
+			Activator.setRunning(false);
+		}
+		return true;
+	}
+
+	public static Job createJobToShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,
+			SelectRulesWizardData selectRulesWizardData, String jobName) {
+
+		return new Job(jobName) {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				IStatus status = refactoringPipeline.cancelFileChanges(monitor);
+				if (!status.isOK()) {
+					refactoringPipeline.clearStates();
+					Activator.setRunning(false);
+					return Status.CANCEL_STATUS;
+				}
+				SelectRulesWizard.synchronizeWithUIShowSelectRulesWizard(refactoringPipeline,
+						selectRulesWizardData);
+				return Status.OK_STATUS;
+			}
+		};
 	}
 
 	@Override
 	public void dispose() {
-		refactoringPipeline.clearStates();
+		if (!reuseRefactoringPipeline) {
+			refactoringPipeline.clearStates();
+		}
 		windowIcon.dispose();
 		super.dispose();
 	}

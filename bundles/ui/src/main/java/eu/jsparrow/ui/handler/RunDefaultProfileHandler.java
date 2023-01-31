@@ -38,6 +38,7 @@ import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
+import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
 import eu.jsparrow.ui.wizard.impl.RunDefaultProfileImplicitWizard;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -53,7 +54,6 @@ public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunDefaultProfileHandler.class);
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
-	private RunDefaultProfileImplicitWizard implicitWizard = new RunDefaultProfileImplicitWizard();
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -155,7 +155,12 @@ public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 			.filter(rule -> profileRuleIds.contains(rule.getId()))
 			.filter(RefactoringRule::isEnabled)
 			.collect(Collectors.toList());
-		implicitWizard.computeRefactoring(refactoringPipeline, javaProjects, rules);
+		SelectRulesWizardData selectRulesWizardData = SelectRulesWizard
+			.createSelectRulesWizardData(selectedJavaElements.keySet());
+
+		RunDefaultProfileImplicitWizard implicitWizard = new RunDefaultProfileImplicitWizard(refactoringPipeline,
+				selectRulesWizardData);
+		implicitWizard.computeRefactoring(javaProjects, rules);
 
 	}
 
