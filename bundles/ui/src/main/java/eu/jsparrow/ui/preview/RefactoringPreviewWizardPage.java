@@ -99,7 +99,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 			.stream()
 			.forEach(x -> wizardModel.addFileToRule(rule, x.getHandleIdentifier()));
 
-		this.changesForRule = changesForRule;
+		this.setChangesForRule(changesForRule);
 		this.rule = rule;
 
 		this.setCurrentCompilationUnit(changesForRule.keySet()
@@ -155,7 +155,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 		createFileView(sashForm);
 		createPreviewViewer(sashForm);
 
-		if (!changesForRule.keySet()
+		if (!getChangesForRule().keySet()
 			.isEmpty()) {
 			this.setCurrentCompilationUnit((ICompilationUnit) viewer.getElementAt(0));
 		}
@@ -208,7 +208,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 				.removeAll();
 		}
 		// adding all elements in table and checking appropriately
-		changesForRule.keySet()
+		getChangesForRule().keySet()
 			.stream()
 			.forEach(entry -> {
 				viewer.add(entry);
@@ -314,7 +314,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 	}
 
 	private DocumentChange getCurrentDocumentChange() {
-		if (null == changesForRule.get(getCurrentCompilationUnit())) {
+		if (null == getChangesForRule().get(getCurrentCompilationUnit())) {
 			DocumentChange documentChange = null;
 			try {
 				/*
@@ -331,7 +331,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 			}
 			return documentChange;
 		} else {
-			return changesForRule.get(getCurrentCompilationUnit());
+			return getChangesForRule().get(getCurrentCompilationUnit());
 		}
 	}
 

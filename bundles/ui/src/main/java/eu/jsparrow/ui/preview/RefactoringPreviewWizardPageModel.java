@@ -14,7 +14,7 @@ import eu.jsparrow.rules.common.RefactoringRule;
 
 public abstract class RefactoringPreviewWizardPageModel extends WizardPage {
 	private ICompilationUnit currentCompilationUnit;
-	Map<ICompilationUnit, DocumentChange> changesForRule;
+	private Map<ICompilationUnit, DocumentChange> changesForRule;
 	RefactoringRule rule;
 
 	/*
@@ -83,7 +83,7 @@ public abstract class RefactoringPreviewWizardPageModel extends WizardPage {
 	 * @param changesForRule
 	 */
 	public void update(Map<ICompilationUnit, DocumentChange> changesForRule) {
-		this.changesForRule = changesForRule;
+		this.setChangesForRule(changesForRule);
 		changesForRule.keySet()
 			.stream()
 			.filter(unit -> unit.getElementName()
@@ -98,4 +98,12 @@ public abstract class RefactoringPreviewWizardPageModel extends WizardPage {
 	void setCurrentCompilationUnit(ICompilationUnit currentCompilationUnit) {
 		this.currentCompilationUnit = currentCompilationUnit;
 	}
+
+	public Map<ICompilationUnit, DocumentChange> getChangesForRule() {
+		return changesForRule;
+	}
+
+	public void setChangesForRule(Map<ICompilationUnit, DocumentChange> changesForRule) {
+		this.changesForRule = changesForRule;
+	}	
 }
