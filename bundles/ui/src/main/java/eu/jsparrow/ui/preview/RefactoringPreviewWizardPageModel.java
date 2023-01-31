@@ -13,7 +13,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import eu.jsparrow.rules.common.RefactoringRule;
 
 public abstract class RefactoringPreviewWizardPageModel extends WizardPage {
-	ICompilationUnit currentCompilationUnit;
+	private ICompilationUnit currentCompilationUnit;
 	Map<ICompilationUnit, DocumentChange> changesForRule;
 	RefactoringRule rule;
 
@@ -89,5 +89,13 @@ public abstract class RefactoringPreviewWizardPageModel extends WizardPage {
 			.filter(unit -> unit.getElementName()
 				.equals(currentCompilationUnit.getElementName()) && !unit.equals(currentCompilationUnit))
 			.forEach(unit -> currentCompilationUnit = unit);
+	}
+
+	ICompilationUnit getCurrentCompilationUnit() {
+		return currentCompilationUnit;
+	}
+
+	void setCurrentCompilationUnit(ICompilationUnit currentCompilationUnit) {
+		this.currentCompilationUnit = currentCompilationUnit;
 	}
 }

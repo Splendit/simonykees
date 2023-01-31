@@ -102,10 +102,10 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 		this.changesForRule = changesForRule;
 		this.rule = rule;
 
-		this.currentCompilationUnit = changesForRule.keySet()
+		this.setCurrentCompilationUnit(changesForRule.keySet()
 			.stream()
 			.findFirst()
-			.orElse(null);
+			.orElse(null));
 
 		fSelectionStatus = new StatusInfo();
 	}
@@ -157,7 +157,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 
 		if (!changesForRule.keySet()
 			.isEmpty()) {
-			this.currentCompilationUnit = (ICompilationUnit) viewer.getElementAt(0);
+			this.setCurrentCompilationUnit((ICompilationUnit) viewer.getElementAt(0));
 		}
 		/*
 		 * sets height relation between children to be 1:3 when it has two
@@ -236,8 +236,8 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 
 			if (sel.size() == 1) {
 				ICompilationUnit newSelection = (ICompilationUnit) sel.getFirstElement();
-				if (!newSelection.equals(currentCompilationUnit)) {
-					currentCompilationUnit = newSelection;
+				if (!newSelection.equals(getCurrentCompilationUnit())) {
+					this.setCurrentCompilationUnit(newSelection);
 					if (isCurrentPage()) {
 						populatePreviewViewer();
 					}
@@ -306,7 +306,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 
 		currentPreviewViewer.setInput(CustomTextEditChangePreviewViewer.createInput(getCurrentDocumentChange()));
 		((CompareViewerSwitchingPane) currentPreviewViewer.getControl())
-			.setTitleArgument(currentCompilationUnit.getElementName());
+			.setTitleArgument(getCurrentCompilationUnit().getElementName());
 
 		currentPreviewViewer.getControl()
 			.getParent()
@@ -314,7 +314,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 	}
 
 	private DocumentChange getCurrentDocumentChange() {
-		if (null == changesForRule.get(currentCompilationUnit)) {
+		if (null == changesForRule.get(getCurrentCompilationUnit())) {
 			DocumentChange documentChange = null;
 			try {
 				/*
@@ -324,14 +324,14 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 				 * document change with text type java but with no changes.
 				 */
 				TextEdit edit = new MultiTextEdit();
-				return RefactoringUtil.generateDocumentChange(currentCompilationUnit.getElementName(),
-						new Document(currentCompilationUnit.getSource()), edit);
+				return RefactoringUtil.generateDocumentChange(getCurrentCompilationUnit().getElementName(),
+						new Document(getCurrentCompilationUnit().getSource()), edit);
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
 			}
 			return documentChange;
 		} else {
-			return changesForRule.get(currentCompilationUnit);
+			return changesForRule.get(getCurrentCompilationUnit());
 		}
 	}
 
@@ -351,7 +351,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 		if (forcePreviewViewerUpdate) {
 			populatePreviewViewer();
 		}
-		viewer.setSelection(new StructuredSelection(currentCompilationUnit));
+		viewer.setSelection(new StructuredSelection(getCurrentCompilationUnit()));
 	}
 
 	/**
