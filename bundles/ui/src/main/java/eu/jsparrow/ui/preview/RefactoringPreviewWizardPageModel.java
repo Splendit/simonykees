@@ -15,7 +15,7 @@ import eu.jsparrow.rules.common.RefactoringRule;
 public abstract class RefactoringPreviewWizardPageModel extends WizardPage {
 	private ICompilationUnit currentCompilationUnit;
 	private Map<ICompilationUnit, DocumentChange> changesForRule;
-	RefactoringRule rule;
+	private RefactoringRule rule;
 
 	/*
 	 * map that contains all names of working copies and working copies that
@@ -105,5 +105,9 @@ public abstract class RefactoringPreviewWizardPageModel extends WizardPage {
 
 	public void setChangesForRule(Map<ICompilationUnit, DocumentChange> changesForRule) {
 		this.changesForRule = changesForRule;
+	}
+
+	public void setRule(RefactoringRule rule) {
+		this.rule = rule;
 	}	
 }

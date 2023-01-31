@@ -100,7 +100,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 			.forEach(x -> wizardModel.addFileToRule(rule, x.getHandleIdentifier()));
 
 		this.setChangesForRule(changesForRule);
-		this.rule = rule;
+		this.setRule(rule);
 
 		this.setCurrentCompilationUnit(changesForRule.keySet()
 			.stream()
@@ -261,7 +261,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 					unselectedChange.remove(newSelection);
 				}
 				clearCounterForChangedFile(newSelection);
-				wizardModel.addFileToRule(rule, newSelection.getHandleIdentifier());
+				wizardModel.addFileToRule(getRule(), newSelection.getHandleIdentifier());
 				immediatelyUpdateForSelected(newSelection);
 			} else {
 				// add in list with unselected classes
@@ -269,11 +269,11 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 					unselectedChange.add(newSelection);
 				}
 				clearCounterForChangedFile(newSelection);
-				wizardModel.removeFileFromRule(rule, newSelection.getHandleIdentifier());
+				wizardModel.removeFileFromRule(getRule(), newSelection.getHandleIdentifier());
 			}
 			// This method simply counts checked items in the table. Not very
 			// MVC, and should be replaced with a proper solution
-			statisticsUpdater.update(ruleStatisticsSection, rule, wizardModel);
+			statisticsUpdater.update(ruleStatisticsSection, getRule(), wizardModel);
 		};
 	}
 
@@ -284,7 +284,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 	public void setVisible(boolean visible) {
 		if (visible) {
 			populatePreviewViewer();
-			if (rule instanceof StandardLoggerRule) {
+			if (getRule() instanceof StandardLoggerRule) {
 				doStatusUpdate();
 			}
 		} else {
@@ -294,7 +294,7 @@ public class RefactoringPreviewWizardPage extends RefactoringPreviewWizardPageMo
 	}
 
 	private void immediatelyUpdateForSelected(ICompilationUnit newSelection) {
-		((RefactoringPreviewWizard) getWizard()).imediatelyUpdateForSelected(newSelection, rule);
+		((RefactoringPreviewWizard) getWizard()).imediatelyUpdateForSelected(newSelection, getRule());
 	}
 
 	private void populatePreviewViewer() {
