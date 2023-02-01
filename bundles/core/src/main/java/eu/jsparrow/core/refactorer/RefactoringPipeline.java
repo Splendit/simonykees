@@ -525,6 +525,58 @@ public class RefactoringPipeline {
 	}
 
 	/**
+	 * Commit the working copies to the underlying {@link ICompilationUnit}s
+	 * 
+	 * @throws RefactoringException
+	 *             if no working copies were found
+	 * @throws ReconcileException
+	 *             if a working copy cannot be applied to the underlying
+	 *             {@link ICompilationUnit}
+	 * 
+	 * @since 0.9
+	 */
+	public void commitRefactoring(IProgressMonitor monitor) throws RefactoringException, ReconcileException {
+		if (refactoringStates.isEmpty()) {
+			logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
+			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
+		}
+
+		/*
+		 * Converts the monitor to a SubMonitor and sets name of task on
+		 * progress monitor dialog. Size is set to number 100 and then scaled to
+		 * size of the compilationUnits list. Each compilation unit increases
+		 * worked amount for same size.
+		 */
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
+			.setWorkRemaining(refactoringStates.size());
+		subMonitor.setTaskName(""); //$NON-NLS-1$
+
+		List<RefactoringStateNotCommited> refactoringStatesNotCommited = new LinkedList<>();
+		for (Iterator<RefactoringState> iterator = refactoringStates.iterator(); iterator.hasNext();) {
+			RefactoringState refactoringState = iterator.next();
+			subMonitor.subTask(refactoringState.getWorkingCopyName());
+			try {
+				refactoringState.commitAndDiscardWorkingCopy();
+				iterator.remove();
+			} catch (JavaModelException e) {
+				logger.error(e.getMessage(), e);
+				refactoringStatesNotCommited.add(new RefactoringStateNotCommited(refactoringState.getWorkingCopy()
+					.getPath()
+					.toString(), e));
+			}
+			subMonitor.worked(1);
+		}
+		if (!refactoringStatesNotCommited.isEmpty()) {
+			String notWorkingRulesCollected = refactoringStatesNotCommited.stream()
+				.map(Object::toString)
+				.collect(Collectors.joining("\n")); //$NON-NLS-1$
+			throw new ReconcileException(
+					NLS.bind(ExceptionMessages.RefactoringPipeline_reconcile_failed, notWorkingRulesCollected),
+					NLS.bind(ExceptionMessages.RefactoringPipeline_user_reconcile_failed, notWorkingRulesCollected));
+		}
+	}
+
+	/**
 	 * Clears everything.
 	 * <p>
 	 * This method should be called when canceling or finishing refactorings.

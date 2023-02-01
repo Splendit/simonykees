@@ -262,7 +262,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 				});
 
 			try {
-				refactoringPipeline.commitRefactoring();
+				refactoringPipeline.commitRefactoring(monitor);
 				int sum = payPerUseCalculator.findTotalRequiredCredit(refactoringPipeline.getRules());
 				licenseUtil.reserveQuantity(sum);
 				Activator.setRunning(false);
@@ -280,6 +280,9 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 		try {
 			getContainer().run(true, true, job);
+			SimonykeesMessageDialog.openMessageDialog(shell, "Changes committed successfully.", //$NON-NLS-1$
+					MessageDialog.INFORMATION);
+
 		} catch (InvocationTargetException | InterruptedException e) {
 			SimonykeesMessageDialog.openMessageDialog(shell, Messages.RefactoringPreviewWizard_err_runnableWithProgress,
 					MessageDialog.ERROR);
