@@ -160,12 +160,19 @@ public abstract class AbstractRuleWizard extends Wizard {
 			@Override
 			protected void finishPressed() {
 				summaryButtonPressed();
-				getButton(SUMMARY_BUTTON_ID).setVisible(false);
-				getButton(IDialogConstants.CANCEL_ID).setVisible(false);
-				getButton(IDialogConstants.NEXT_ID).setVisible(false);
-				getButton(IDialogConstants.BACK_ID).setVisible(false);
+				previewWizard.tryDoAdditionalRefactoring();
+				if (previewWizard.hasAnyChange()) {					
+					getButton(SUMMARY_BUTTON_ID).setVisible(false);
+					getButton(IDialogConstants.CANCEL_ID).setVisible(false);
+					getButton(IDialogConstants.NEXT_ID).setVisible(false);
+					getButton(IDialogConstants.BACK_ID).setVisible(false);
+					super.finishPressed();
 
-				super.finishPressed();
+				} else {
+					SimonykeesMessageDialog.openMessageDialog(shell,
+							"Cannot commit because all changes have been deselected.", //$NON-NLS-1$
+							MessageDialog.ERROR);
+				}
 			}
 
 			private void summaryButtonPressed() {

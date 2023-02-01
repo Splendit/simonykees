@@ -2,6 +2,7 @@ package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -23,6 +24,7 @@ import org.eclipse.ui.PlatformUI;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
@@ -246,20 +248,17 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public boolean performFinish() {
 
+		boolean hasAnyChange0 = hasAnyChange();
+		if (!hasAnyChange0) {
+			return false;
+		}
+
 		IRunnableWithProgress job = monitor -> {
 			/*
 			 * Update all changes and unselected classes that were unselected in
 			 * the last page shown before finish was pressed
 			 */
-			Arrays.asList(getPages())
-				.stream()
-				.filter(page -> (page instanceof RefactoringPreviewWizardPage)
-						&& !((RefactoringPreviewWizardPage) page).getUnselectedChange()
-							.isEmpty())
-				.forEach(page -> {
-					tryDoAdditionalRefactoring(monitor, page);
-					((RefactoringPreviewWizardPage) page).applyUnselectedChange();
-				});
+			tryDoAdditionalRefactoring(monitor);
 
 			try {
 				refactoringPipeline.commitRefactoring(monitor);
@@ -290,6 +289,53 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		}
 
 		return true;
+	}
+
+	public void tryDoAdditionalRefactoring() {
+
+		try {
+			getContainer().run(true, true, this::tryDoAdditionalRefactoring);
+
+		} catch (InvocationTargetException | InterruptedException e) {
+			SimonykeesMessageDialog.openMessageDialog(shell,
+					Messages.RefactoringPreviewWizard_err_runnableWithProgress,
+					MessageDialog.ERROR);
+			Activator.setRunning(false);
+		}
+
+	}
+
+	public void tryDoAdditionalRefactoring(IProgressMonitor monitor) {
+		Arrays.asList(getPages())
+			.stream()
+			.filter(page -> (page instanceof RefactoringPreviewWizardPage)
+					&& !((RefactoringPreviewWizardPage) page).getUnselectedChange()
+						.isEmpty())
+			.forEach(page -> {
+				tryDoAdditionalRefactoring(monitor, page);
+				((RefactoringPreviewWizardPage) page).applyUnselectedChange();
+			});
+	}
+
+	public boolean hasAnyChange() {
+		int changes = 0;
+		List<RefactoringState> refactoringStates = refactoringPipeline.getRefactoringStates();
+		for (RefactoringState state : refactoringStates) {
+			boolean hasChange = state.hasChange();
+			if (hasChange) {
+				for (RefactoringRule rule : refactoringPipeline.getRules()) {
+					DocumentChange changeIfPresent = state.getChangeIfPresent(rule);
+					if (changeIfPresent != null) {
+						changes++;
+					}
+				}
+			}
+		}
+		boolean hasAnyChange = false;
+		if (changes > 0) {
+			hasAnyChange = true;
+		}
+		return hasAnyChange;
 	}
 
 	private void tryDoAdditionalRefactoring(IProgressMonitor monitor, IWizardPage page) {
