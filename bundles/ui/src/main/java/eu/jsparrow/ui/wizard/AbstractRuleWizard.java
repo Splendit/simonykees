@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -45,6 +46,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  */
 public abstract class AbstractRuleWizard extends Wizard {
 
+	private static final int SUMMARY_BUTTON_ID = 9;
 	private static final Logger logger = LoggerFactory.getLogger(AbstractRuleWizard.class);
 	private StandaloneStatisticsMetadata statisticsMetadata;
 
@@ -142,17 +144,28 @@ public abstract class AbstractRuleWizard extends Wizard {
 
 			@Override
 			protected void createButtonsForButtonBar(Composite parent) {
-				createButton(parent, 9, Messages.SelectRulesWizard_Summary, false);
+				createButton(parent, SUMMARY_BUTTON_ID, Messages.SelectRulesWizard_Summary, false);
 				super.createButtonsForButtonBar(parent);
 			}
 
 			@Override
 			protected void buttonPressed(int buttonId) {
-				if (buttonId == 9) {
+				if (buttonId == SUMMARY_BUTTON_ID) {
 					summaryButtonPressed();
 				} else {
 					super.buttonPressed(buttonId);
 				}
+			}
+
+			@Override
+			protected void finishPressed() {
+				summaryButtonPressed();
+				getButton(SUMMARY_BUTTON_ID).setVisible(false);
+				getButton(IDialogConstants.CANCEL_ID).setVisible(false);
+				getButton(IDialogConstants.NEXT_ID).setVisible(false);
+				getButton(IDialogConstants.BACK_ID).setVisible(false);
+
+				super.finishPressed();
 			}
 
 			private void summaryButtonPressed() {
