@@ -146,6 +146,7 @@ public abstract class AbstractRuleWizard extends Wizard {
 			protected void createButtonsForButtonBar(Composite parent) {
 				createButton(parent, SUMMARY_BUTTON_ID, Messages.SelectRulesWizard_Summary, false);
 				super.createButtonsForButtonBar(parent);
+				getButton(IDialogConstants.FINISH_ID).setText("Commit"); //$NON-NLS-1$
 			}
 
 			@Override
