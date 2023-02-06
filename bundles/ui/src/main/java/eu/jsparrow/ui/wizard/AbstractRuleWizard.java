@@ -162,13 +162,13 @@ public abstract class AbstractRuleWizard extends Wizard {
 			protected void finishPressed() {
 				summaryButtonPressed();
 				previewWizard.tryDoAdditionalRefactoring();
-				if (previewWizard.hasAnyChange()) {					
+				boolean canCommit = previewWizard.hasAnyChange();
+				if (canCommit) {
 					getButton(SUMMARY_BUTTON_ID).setVisible(false);
 					getButton(IDialogConstants.CANCEL_ID).setVisible(false);
 					getButton(IDialogConstants.NEXT_ID).setVisible(false);
 					getButton(IDialogConstants.BACK_ID).setVisible(false);
 					super.finishPressed();
-
 				} else {
 					SimonykeesMessageDialog.openMessageDialog(shell,
 							"Cannot commit because all changes have been deselected.", //$NON-NLS-1$

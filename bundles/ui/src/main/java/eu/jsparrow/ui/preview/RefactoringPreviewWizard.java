@@ -254,11 +254,6 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		}
 
 		IRunnableWithProgress job = monitor -> {
-			/*
-			 * Update all changes and unselected classes that were unselected in
-			 * the last page shown before finish was pressed
-			 */
-			tryDoAdditionalRefactoring(monitor);
 
 			try {
 				refactoringPipeline.commitRefactoring(monitor);
@@ -305,7 +300,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	}
 
-	public void tryDoAdditionalRefactoring(IProgressMonitor monitor) {
+	private void tryDoAdditionalRefactoring(IProgressMonitor monitor) {
 		Arrays.asList(getPages())
 			.stream()
 			.filter(page -> (page instanceof RefactoringPreviewWizardPage)
