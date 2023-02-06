@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -75,6 +76,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
 	private SelectRulesWizardData selectRulesWizardData;
 	private boolean reuseRefactoringPipeline;
+	
+	private Runnable lambdaUpdateDialogOnCommit;
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
 			StandaloneStatisticsMetadata standaloneStatisticsMetadata, SelectRulesWizardData selectRulesWizardData) {
@@ -247,11 +250,27 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 */
 	@Override
 	public boolean performFinish() {
+		
+		try {
+			getContainer().run(true, true, this::tryDoAdditionalRefactoring);
 
-		boolean hasAnyChange0 = hasAnyChange();
-		if (!hasAnyChange0) {
+		} catch (InvocationTargetException | InterruptedException e) {
+			SimonykeesMessageDialog.openMessageDialog(shell,
+					Messages.RefactoringPreviewWizard_err_runnableWithProgress,
+					MessageDialog.ERROR);
+			Activator.setRunning(false);
+			return true;
+		}
+
+
+		if (!hasAnyChange()) {
+			SimonykeesMessageDialog.openMessageDialog(shell,
+					"Cannot commit because all changes have been deselected.", //$NON-NLS-1$
+					MessageDialog.ERROR);
 			return false;
 		}
+		
+		Optional.of(lambdaUpdateDialogOnCommit).ifPresent(Runnable::run);
 
 		IRunnableWithProgress job = monitor -> {
 
@@ -468,5 +487,9 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	public RefactoringSummaryWizardPage getSummaryPage() {
 		return this.summaryPage;
+	}
+
+	public void setLambdaUpdateDialogOnCommit(Runnable lambdaUpdateDialogOnCommit) {
+		this.lambdaUpdateDialogOnCommit = lambdaUpdateDialogOnCommit;
 	}
 }

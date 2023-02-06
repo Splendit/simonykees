@@ -128,7 +128,12 @@ public abstract class AbstractRuleWizard extends Wizard {
 		RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline,
 				statisticsMetadata, selectRulesWizardData);
 
-		final WizardDialog dialog = new WizardDialog(shell, previewWizard) {
+		class RefactoringPreviewWizardDialog extends WizardDialog {
+
+			public RefactoringPreviewWizardDialog(Shell parentShell, RefactoringPreviewWizard newWizard) {
+				super(parentShell, newWizard);
+				newWizard.setLambdaUpdateDialogOnCommit(this::updateDialogOnCommit);
+			}
 
 			@Override
 			protected void nextPressed() {
@@ -161,19 +166,7 @@ public abstract class AbstractRuleWizard extends Wizard {
 			@Override
 			protected void finishPressed() {
 				summaryButtonPressed();
-				previewWizard.tryDoAdditionalRefactoring();
-				boolean canCommit = previewWizard.hasAnyChange();
-				if (canCommit) {
-					getButton(SUMMARY_BUTTON_ID).setVisible(false);
-					getButton(IDialogConstants.CANCEL_ID).setVisible(false);
-					getButton(IDialogConstants.NEXT_ID).setVisible(false);
-					getButton(IDialogConstants.BACK_ID).setVisible(false);
-					super.finishPressed();
-				} else {
-					SimonykeesMessageDialog.openMessageDialog(shell,
-							"Cannot commit because all changes have been deselected.", //$NON-NLS-1$
-							MessageDialog.ERROR);
-				}
+				super.finishPressed();
 			}
 
 			private void summaryButtonPressed() {
@@ -183,11 +176,20 @@ public abstract class AbstractRuleWizard extends Wizard {
 				}
 				showPage(previewWizard.getSummaryPage());
 			}
-		};
+
+			protected void updateDialogOnCommit() {
+				getButton(SUMMARY_BUTTON_ID).setVisible(false);
+				getButton(IDialogConstants.CANCEL_ID).setVisible(false);
+				getButton(IDialogConstants.NEXT_ID).setVisible(false);
+				getButton(IDialogConstants.BACK_ID).setVisible(false);
+			}
+		}
 
 		Rectangle rectangle = Display.getCurrent()
 			.getPrimaryMonitor()
 			.getBounds();
+
+		final RefactoringPreviewWizardDialog dialog = new RefactoringPreviewWizardDialog(shell, previewWizard);
 
 		// maximizes the RefactoringPreviewWizard
 		dialog.setPageSize(rectangle.width, rectangle.height);

@@ -10,7 +10,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Rectangle;
@@ -26,7 +25,6 @@ import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.Activator;
-import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
@@ -156,8 +154,15 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
+
 				RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactorer);
-				final WizardDialog dialog = new WizardDialog(shell, previewWizard) {
+
+				class RefactoringPreviewWizardDialog extends WizardDialog {
+
+					public RefactoringPreviewWizardDialog(Shell parentShell, RefactoringPreviewWizard newWizard) {
+						super(parentShell, newWizard);
+						newWizard.setLambdaUpdateDialogOnCommit(this::updateDialogOnCommit);
+					}
 
 					@Override
 					protected void createButtonsForButtonBar(Composite parent) {
@@ -165,19 +170,12 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 						getButton(IDialogConstants.FINISH_ID).setText("Commit"); //$NON-NLS-1$
 					}
 
-					@Override
-					protected void finishPressed() {
-						previewWizard.tryDoAdditionalRefactoring();
-						if (previewWizard.hasAnyChange()) {
-							getButton(IDialogConstants.CANCEL_ID).setVisible(false);
-							super.finishPressed();
-						} else {
-							SimonykeesMessageDialog.openMessageDialog(shell,
-									"Cannot commit because all changes have been deselected.", //$NON-NLS-1$
-									MessageDialog.ERROR);
-						}
+					protected void updateDialogOnCommit() {
+						getButton(IDialogConstants.CANCEL_ID).setVisible(false);
 					}
-				};
+				}
+
+				final RefactoringPreviewWizardDialog dialog = new RefactoringPreviewWizardDialog(shell, previewWizard);
 
 				// maximizes the RefactoringPreviewWizard
 				dialog.setPageSize(rectangle.width, rectangle.height);
