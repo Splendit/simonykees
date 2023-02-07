@@ -9,11 +9,9 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -26,6 +24,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
+import eu.jsparrow.ui.preview.PreviewWizardDialog;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -157,25 +156,7 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 
 				RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactorer);
 
-				class RefactoringPreviewWizardDialog extends WizardDialog {
-
-					public RefactoringPreviewWizardDialog(Shell parentShell, RefactoringPreviewWizard newWizard) {
-						super(parentShell, newWizard);
-						newWizard.setLambdaUpdateDialogOnCommit(this::updateDialogOnCommit);
-					}
-
-					@Override
-					protected void createButtonsForButtonBar(Composite parent) {
-						super.createButtonsForButtonBar(parent);
-						getButton(IDialogConstants.FINISH_ID).setText("Commit"); //$NON-NLS-1$
-					}
-
-					protected void updateDialogOnCommit() {
-						getButton(IDialogConstants.CANCEL_ID).setVisible(false);
-					}
-				}
-
-				final RefactoringPreviewWizardDialog dialog = new RefactoringPreviewWizardDialog(shell, previewWizard);
+				final PreviewWizardDialog dialog = new PreviewWizardDialog(shell, previewWizard);
 
 				// maximizes the RefactoringPreviewWizard
 				dialog.setPageSize(rectangle.width, rectangle.height);

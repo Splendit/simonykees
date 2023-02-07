@@ -1,5 +1,8 @@
 package eu.jsparrow.ui.preview;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -18,6 +21,8 @@ import eu.jsparrow.ui.util.LicenseUtilService;
 public abstract class AbstractPreviewWizard extends Wizard {
 
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
+
+	private final List<Runnable> updateOnCommitLambdas = new ArrayList<>();
 
 	protected AbstractPreviewWizard() {
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
@@ -49,5 +54,13 @@ public abstract class AbstractPreviewWizard extends Wizard {
 	public IWizardPage getNextPage(IWizardPage page) {
 		updateViewsOnNavigation(page);
 		return super.getNextPage(page);
+	}
+
+	public void updateOnCommit() {
+		updateOnCommitLambdas.forEach(Runnable::run);
+	}
+
+	public void addUpdateOnCommitLambda(Runnable lambda) {
+		updateOnCommitLambdas.add(lambda);
 	}
 }

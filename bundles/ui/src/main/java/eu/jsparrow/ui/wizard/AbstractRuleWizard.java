@@ -11,13 +11,10 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -32,6 +29,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.preview.PreviewWizardDialog;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
@@ -46,7 +44,6 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  */
 public abstract class AbstractRuleWizard extends Wizard {
 
-	private static final int SUMMARY_BUTTON_ID = 9;
 	private static final Logger logger = LoggerFactory.getLogger(AbstractRuleWizard.class);
 	private StandaloneStatisticsMetadata statisticsMetadata;
 
@@ -128,11 +125,10 @@ public abstract class AbstractRuleWizard extends Wizard {
 		RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline,
 				statisticsMetadata, selectRulesWizardData);
 
-		class RefactoringPreviewWizardDialog extends WizardDialog {
+		class RefactoringPreviewWizardDialog extends PreviewWizardDialog {
 
-			public RefactoringPreviewWizardDialog(Shell parentShell, RefactoringPreviewWizard newWizard) {
-				super(parentShell, newWizard);
-				newWizard.setLambdaUpdateDialogOnCommit(this::updateDialogOnCommit);
+			public RefactoringPreviewWizardDialog(Shell parentShell, RefactoringPreviewWizard previewWizard) {
+				super(parentShell, previewWizard);
 			}
 
 			@Override
@@ -148,40 +144,17 @@ public abstract class AbstractRuleWizard extends Wizard {
 			}
 
 			@Override
-			protected void createButtonsForButtonBar(Composite parent) {
-				createButton(parent, SUMMARY_BUTTON_ID, Messages.SelectRulesWizard_Summary, false);
-				super.createButtonsForButtonBar(parent);
-				getButton(IDialogConstants.FINISH_ID).setText("Commit"); //$NON-NLS-1$
-			}
-
-			@Override
-			protected void buttonPressed(int buttonId) {
-				if (buttonId == SUMMARY_BUTTON_ID) {
-					summaryButtonPressed();
-				} else {
-					super.buttonPressed(buttonId);
-				}
-			}
-
-			@Override
-			protected void finishPressed() {
-				summaryButtonPressed();
-				super.finishPressed();
-			}
-
-			private void summaryButtonPressed() {
+			protected void summaryButtonPressed() {
 				if (getCurrentPage() instanceof RefactoringPreviewWizardPage) {
 					previewWizard.updateViewsOnNavigation(getCurrentPage());
 					((RefactoringPreviewWizardPage) getCurrentPage()).disposeControl();
 				}
 				showPage(previewWizard.getSummaryPage());
 			}
-
-			protected void updateDialogOnCommit() {
-				getButton(SUMMARY_BUTTON_ID).setVisible(false);
-				getButton(IDialogConstants.CANCEL_ID).setVisible(false);
-				getButton(IDialogConstants.NEXT_ID).setVisible(false);
-				getButton(IDialogConstants.BACK_ID).setVisible(false);
+			
+			@Override
+			protected boolean needsSummaryButton() {
+				return true;
 			}
 		}
 
