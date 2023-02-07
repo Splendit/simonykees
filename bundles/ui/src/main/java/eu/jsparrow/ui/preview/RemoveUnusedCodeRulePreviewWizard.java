@@ -401,6 +401,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	 * recalculation if needed. Disposes control from current page which wont be
 	 * visible any more
 	 */
+	@Override
 	public void pressedNext() {
 		IWizardContainer container = getContainer();
 		if (container == null) {
@@ -419,6 +420,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	 * Called from {@link WizardDialog} when Back button is pressed. Disposes
 	 * all controls to be recalculated and created when needed
 	 */
+	@Override
 	public void pressedBack() {
 		IWizardContainer container = getContainer();
 		if (container == null) {

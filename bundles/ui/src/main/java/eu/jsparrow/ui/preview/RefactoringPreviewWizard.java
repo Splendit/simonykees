@@ -440,6 +440,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 * recalculation if needed. Disposes control from current page which wont be
 	 * visible any more
 	 */
+	@Override
 	public void pressedNext() {
 		if (null != getContainer()) {
 			((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
@@ -451,6 +452,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 * Called from {@link WizardDialog} when Back button is pressed. Disposes
 	 * all controls to be recalculated and created when needed
 	 */
+	@Override
 	public void pressedBack() {
 		if (null != getContainer()) {
 			if (getContainer().getCurrentPage() instanceof RefactoringPreviewWizardPage) {

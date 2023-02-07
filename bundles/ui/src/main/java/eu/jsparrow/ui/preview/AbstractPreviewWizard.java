@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -63,4 +64,17 @@ public abstract class AbstractPreviewWizard extends Wizard {
 	public void addUpdateOnCommitLambda(Runnable lambda) {
 		updateOnCommitLambdas.add(lambda);
 	}
+
+	/**
+	 * Called from {@link WizardDialog} when Next button is pressed. Triggers
+	 * recalculation if needed. Disposes control from current page which wont be
+	 * visible any more
+	 */
+	protected abstract void pressedNext();
+
+	/**
+	 * Called from {@link WizardDialog} when Back button is pressed. Disposes
+	 * all controls to be recalculated and created when needed
+	 */
+	protected abstract void pressedBack();
 }
