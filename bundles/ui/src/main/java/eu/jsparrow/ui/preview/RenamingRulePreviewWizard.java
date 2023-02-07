@@ -329,4 +329,24 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		return this.summaryPage;
 	}
 
+	@Override
+	protected boolean needsSummaryPage() {
+		return true;
+	}
+	
+	@Override
+	public void showSummaryPage() {
+		/*
+		 * If summary button is pressed on any page that is not
+		 * Summary page, views have to be check for change and
+		 * updated, and preview control has to be disposed on
+		 * current page. If it is already on Summary page, just
+		 * refresh.
+		 */
+		if (getContainer().getCurrentPage() instanceof RenamingRulePreviewWizardPage) {
+			updateViewsOnNavigation(getContainer().getCurrentPage());
+			((RenamingRulePreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
+		}
+		getContainer().showPage(getSummaryPage());
+	}
 }

@@ -38,7 +38,6 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RenamingRulePreviewWizard;
-import eu.jsparrow.ui.preview.RenamingRulePreviewWizardPage;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -360,19 +359,9 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 					}
 
 					private void summaryButtonPressed() {
-						/*
-						 * If summary button is pressed on any page that is not
-						 * Summary page, views have to be check for change and
-						 * updated, and preview control has to be disposed on
-						 * current page. If it is already on Summary page, just
-						 * refresh.
-						 */
-						if (getCurrentPage() instanceof RenamingRulePreviewWizardPage) {
-							renamingPreviewWizard.updateViewsOnNavigation(getCurrentPage());
-							((RenamingRulePreviewWizardPage) getCurrentPage()).disposeControl();
-						}
-						showPage(renamingPreviewWizard.getSummaryPage());
+						renamingPreviewWizard.showSummaryPage();
 					}
+
 				};
 
 				// maximizes the RefactoringPreviewWizard

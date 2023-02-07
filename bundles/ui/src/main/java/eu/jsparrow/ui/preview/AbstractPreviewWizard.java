@@ -73,4 +73,10 @@ public abstract class AbstractPreviewWizard extends Wizard {
 	 * all controls to be recalculated and created when needed
 	 */
 	protected abstract void pressedBack();
+	
+	
+	protected abstract boolean needsSummaryPage();
+	
+	
+	public abstract void showSummaryPage();
 }

@@ -53,16 +53,28 @@ public class PreviewWizardDialog extends WizardDialog {
 	}
 
 	@Override
+	protected void nextPressed() {
+		((AbstractPreviewWizard) getWizard()).pressedNext();
+		super.nextPressed();
+	}
+
+	@Override
+	protected void backPressed() {
+		((AbstractPreviewWizard) getWizard()).pressedBack();
+		super.backPressed();
+	}
+
+	@Override
 	protected void finishPressed() {
 		summaryButtonPressed();
 		super.finishPressed();
 	}
 
 	protected void summaryButtonPressed() {
-		// empty method to be optionally implemented by subclasses
+		((AbstractPreviewWizard) getWizard()).showSummaryPage();
 	}
-	
-	protected boolean needsSummaryButton() {
-		return false;
+
+	private boolean needsSummaryButton() {
+		return ((AbstractPreviewWizard) getWizard()).needsSummaryPage();
 	}
 }

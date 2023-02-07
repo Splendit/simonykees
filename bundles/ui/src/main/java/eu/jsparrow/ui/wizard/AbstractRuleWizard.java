@@ -31,7 +31,6 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.PreviewWizardDialog;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
-import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
@@ -125,44 +124,11 @@ public abstract class AbstractRuleWizard extends Wizard {
 		RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline,
 				statisticsMetadata, selectRulesWizardData);
 
-		class RefactoringPreviewWizardDialog extends PreviewWizardDialog {
-
-			public RefactoringPreviewWizardDialog(Shell parentShell, RefactoringPreviewWizard previewWizard) {
-				super(parentShell, previewWizard);
-			}
-
-			@Override
-			protected void nextPressed() {
-				((RefactoringPreviewWizard) getWizard()).pressedNext();
-				super.nextPressed();
-			}
-
-			@Override
-			protected void backPressed() {
-				((RefactoringPreviewWizard) getWizard()).pressedBack();
-				super.backPressed();
-			}
-
-			@Override
-			protected void summaryButtonPressed() {
-				if (getCurrentPage() instanceof RefactoringPreviewWizardPage) {
-					previewWizard.updateViewsOnNavigation(getCurrentPage());
-					((RefactoringPreviewWizardPage) getCurrentPage()).disposeControl();
-				}
-				showPage(previewWizard.getSummaryPage());
-			}
-			
-			@Override
-			protected boolean needsSummaryButton() {
-				return true;
-			}
-		}
-
 		Rectangle rectangle = Display.getCurrent()
 			.getPrimaryMonitor()
 			.getBounds();
 
-		final RefactoringPreviewWizardDialog dialog = new RefactoringPreviewWizardDialog(shell, previewWizard);
+		final PreviewWizardDialog dialog = new PreviewWizardDialog(shell, previewWizard);
 
 		// maximizes the RefactoringPreviewWizard
 		dialog.setPageSize(rectangle.width, rectangle.height);

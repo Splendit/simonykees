@@ -127,10 +127,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 					addPage(previewPage);
 				}
 			});
-		if (!(refactoringPipeline.getRules()
-			.size() == 1
-				&& refactoringPipeline.getRules()
-					.get(0) instanceof StandardLoggerRule)) {
+		if (needsSummaryPage()) {
 			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(),
 					statisticsMetadata, summaryPageStatisticsSection);
 			addPage(summaryPage);
@@ -265,7 +262,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 					MessageDialog.ERROR);
 			return false;
 		}
-		
+
 		updateContainerOnCommit();
 
 		IRunnableWithProgress job = monitor -> {
@@ -471,5 +468,31 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	public RefactoringSummaryWizardPage getSummaryPage() {
 		return this.summaryPage;
+	}
+
+	protected boolean needsSummaryPage() {
+		return !(refactoringPipeline.getRules()
+			.size() == 1
+				&& refactoringPipeline.getRules()
+					.get(0) instanceof StandardLoggerRule);
+	}
+	
+	@Override
+	public void showSummaryPage() {
+		if(getSummaryPage() == null) {
+			return;
+		}
+		/*
+		 * If summary button is pressed on any page that is not
+		 * Summary page, views have to be check for change and
+		 * updated, and preview control has to be disposed on
+		 * current page. If it is already on Summary page, just
+		 * refresh.
+		 */
+		if (getContainer().getCurrentPage() instanceof RefactoringPreviewWizardPage) {
+			updateViewsOnNavigation(getContainer().getCurrentPage());
+			((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
+		}
+		getContainer().showPage(getSummaryPage());
 	}
 }

@@ -46,7 +46,6 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RemoveUnusedCodeRulePreviewWizard;
-import eu.jsparrow.ui.preview.RemoveUnusedCodeRulePreviewWizardPage;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -156,7 +155,8 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 						options);
 				List<UnusedMethodWrapper> unusedMethods = findUnusedMethods(unusedMethodsEngine, subMonitor,
 						methodSubmonitorSplit, options);
-				List<UnusedTypeWrapper> unusedTypes = findUnusedTypes(unusedTypeEngine, subMonitor, typesSubmonitorSplit, options, unusedMethods);
+				List<UnusedTypeWrapper> unusedTypes = findUnusedTypes(unusedTypeEngine, subMonitor,
+						typesSubmonitorSplit, options, unusedMethods);
 
 				if (unusedFields.isEmpty() && unusedMethods.isEmpty() && unusedTypes.isEmpty()) {
 					WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
@@ -259,25 +259,25 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 		}
 		return unusedMethods;
 	}
-	
+
 	private List<UnusedTypeWrapper> findUnusedTypes(UnusedTypesEngine unusedTypeEngine, SubMonitor subMonitor,
 			int typesSubmonitorSplit, Map<String, Boolean> options, List<UnusedMethodWrapper> unusedMethods) {
-		
 
-		if(!hasClassMemberOptionsChecked(model, "class")) {
+		if (!hasClassMemberOptionsChecked(model, "class")) {
 			return Collections.emptyList();
 		}
-		
+
 		SubMonitor removeUnusedTypesSubMonitor = subMonitor.split(typesSubmonitorSplit);
 		removeUnusedTypesSubMonitor.setWorkRemaining(selectedJavaElements.size());
 		removeUnusedTypesSubMonitor.setTaskName("Finding unused types");
-		
-		List<UnusedTypeWrapper> unusedTypes = unusedTypeEngine.findUnusedTypes(selectedJavaElements, options, removeUnusedTypesSubMonitor, unusedMethods);
-		
-		if(removeUnusedTypesSubMonitor.isCanceled()) {
+
+		List<UnusedTypeWrapper> unusedTypes = unusedTypeEngine.findUnusedTypes(selectedJavaElements, options,
+				removeUnusedTypesSubMonitor, unusedMethods);
+
+		if (removeUnusedTypesSubMonitor.isCanceled()) {
 			return Collections.emptyList();
 		}
-		
+
 		return unusedTypes;
 	}
 
@@ -292,10 +292,10 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	}
 
 	private int calcFieldsSubMonitorSplit(boolean fieldsChecked, boolean methodsChecked, boolean typesChecked) {
-		if(fieldsChecked) {
-			if(methodsChecked && typesChecked) {
+		if (fieldsChecked) {
+			if (methodsChecked && typesChecked) {
 				return 20;
-			} else if(methodsChecked || typesChecked) {
+			} else if (methodsChecked || typesChecked) {
 				return 30;
 			} else {
 				return 70;
@@ -400,18 +400,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 					}
 
 					private void summaryButtonPressed() {
-						/*
-						 * If summary button is pressed on any page that is not
-						 * Summary page, views have to be check for change and
-						 * updated, and preview control has to be disposed on
-						 * current page. If it is already on Summary page, just
-						 * refresh.
-						 */
-						if (getCurrentPage() instanceof RemoveUnusedCodeRulePreviewWizardPage) {
-							removeUnusedCodePreviewWizard.updateViewsOnNavigation(getCurrentPage());
-							((RemoveUnusedCodeRulePreviewWizardPage) getCurrentPage()).disposeControl();
-						}
-						showPage(removeUnusedCodePreviewWizard.getSummaryPage());
+						removeUnusedCodePreviewWizard.showSummaryPage();
 					}
 				};
 
