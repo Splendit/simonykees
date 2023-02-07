@@ -14,7 +14,6 @@ public class PreviewWizardDialog extends WizardDialog {
 
 	public PreviewWizardDialog(Shell parentShell, AbstractPreviewWizard previewWizard) {
 		super(parentShell, previewWizard);
-		previewWizard.addUpdateOnCommitLambda(this::updateOnCommit);
 	}
 
 	@Override

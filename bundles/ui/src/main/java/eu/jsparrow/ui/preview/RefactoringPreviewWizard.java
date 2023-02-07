@@ -266,7 +266,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			return false;
 		}
 		
-		updateOnCommit();
+		updateContainerOnCommit();
 
 		IRunnableWithProgress job = monitor -> {
 
