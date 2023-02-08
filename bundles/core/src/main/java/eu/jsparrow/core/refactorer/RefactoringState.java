@@ -99,7 +99,6 @@ public class RefactoringState {
 			if (entry.getValue() != null) {
 				return true;
 			}
-			logger.debug("entry.getValue() == null"); //$NON-NLS-1$
 		}
 		return false;
 	}

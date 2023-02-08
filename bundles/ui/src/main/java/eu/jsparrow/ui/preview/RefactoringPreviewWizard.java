@@ -255,9 +255,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		}
 
 		if (!refactoringPipeline.hasAnyValidChange()) {
-			SimonykeesMessageDialog.openMessageDialog(shell,
-					"Cannot commit because all changes have been deselected.", //$NON-NLS-1$
-					MessageDialog.ERROR);
+			showNoChangeFoundToCommit();
 			return false;
 		}
 
@@ -306,7 +304,6 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 				((RefactoringPreviewWizardPage) page).applyUnselectedChange();
 			});
 	}
-
 
 	private void tryDoAdditionalRefactoring(IProgressMonitor monitor, IWizardPage page) {
 		try {
@@ -453,18 +450,17 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 				&& refactoringPipeline.getRules()
 					.get(0) instanceof StandardLoggerRule);
 	}
-	
+
 	@Override
 	public void showSummaryPage() {
-		if(getSummaryPage() == null) {
+		if (getSummaryPage() == null) {
 			return;
 		}
 		/*
-		 * If summary button is pressed on any page that is not
-		 * Summary page, views have to be check for change and
-		 * updated, and preview control has to be disposed on
-		 * current page. If it is already on Summary page, just
-		 * refresh.
+		 * If summary button is pressed on any page that is not Summary page,
+		 * views have to be check for change and updated, and preview control
+		 * has to be disposed on current page. If it is already on Summary page,
+		 * just refresh.
 		 */
 		if (getContainer().getCurrentPage() instanceof RefactoringPreviewWizardPage) {
 			updateViewsOnNavigation(getContainer().getCurrentPage());

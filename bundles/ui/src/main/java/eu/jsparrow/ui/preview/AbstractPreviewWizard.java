@@ -67,7 +67,13 @@ public abstract class AbstractPreviewWizard extends Wizard {
 		SimonykeesMessageDialog.openMessageDialog(getShell(), "Changes committed successfully.", //$NON-NLS-1$
 				MessageDialog.INFORMATION);
 	}
-	
+
+	protected void showNoChangeFoundToCommit() {
+		SimonykeesMessageDialog.openMessageDialog(getShell(),
+				"Cannot commit because all changes have been deselected.", //$NON-NLS-1$
+				MessageDialog.ERROR);
+	}
+
 	/**
 	 * Called from {@link WizardDialog} when Next button is pressed. Triggers
 	 * recalculation if needed. Disposes control from current page which wont be
@@ -80,10 +86,8 @@ public abstract class AbstractPreviewWizard extends Wizard {
 	 * all controls to be recalculated and created when needed
 	 */
 	protected abstract void pressedBack();
-	
-	
+
 	protected abstract boolean needsSummaryPage();
-	
-	
+
 	public abstract void showSummaryPage();
 }

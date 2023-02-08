@@ -171,6 +171,10 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		if (container != null) {
 			IWizardPage currentPage = container.getCurrentPage();
 			updateViewsOnNavigation(currentPage);
+			if (!refactoringPipeline.hasAnyValidChange()) {
+				showNoChangeFoundToCommit();
+				return false;
+			}
 			commitChanges();
 		}
 		return true;
