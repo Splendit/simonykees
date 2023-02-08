@@ -286,8 +286,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 		try {
 			getContainer().run(true, true, job);
-			SimonykeesMessageDialog.openMessageDialog(shell, "Changes committed successfully.", //$NON-NLS-1$
-					MessageDialog.INFORMATION);
+			showSuccessfulCommitMessage();
 
 		} catch (InvocationTargetException | InterruptedException e) {
 			SimonykeesMessageDialog.openMessageDialog(shell, Messages.RefactoringPreviewWizard_err_runnableWithProgress,

@@ -194,10 +194,12 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 * committing changes, message about exception is displayed.
 	 */
 	private void commitChanges() {
+		updateContainerOnCommit();
 		try {
 			refactoringPipeline.commitRefactoring();
 			int sum = payPerUseCalculator.findTotalRequiredCredit(refactoringPipeline.getRules());
 			licenseUtil.reserveQuantity(sum);
+			showSuccessfulCommitMessage();
 			Activator.setRunning(false);
 		} catch (RefactoringException | ReconcileException e) {
 			WizardMessageDialog.synchronizeWithUIShowError(e);

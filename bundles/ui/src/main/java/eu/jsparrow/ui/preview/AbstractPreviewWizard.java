@@ -1,12 +1,14 @@
 package eu.jsparrow.ui.preview;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
 
@@ -61,6 +63,11 @@ public abstract class AbstractPreviewWizard extends Wizard {
 		}
 	}
 
+	protected void showSuccessfulCommitMessage() {
+		SimonykeesMessageDialog.openMessageDialog(getShell(), "Changes committed successfully.", //$NON-NLS-1$
+				MessageDialog.INFORMATION);
+	}
+	
 	/**
 	 * Called from {@link WizardDialog} when Next button is pressed. Triggers
 	 * recalculation if needed. Disposes control from current page which wont be

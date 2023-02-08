@@ -21,7 +21,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -37,6 +36,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.preview.PreviewWizardDialog;
 import eu.jsparrow.ui.preview.RenamingRulePreviewWizard;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
@@ -56,7 +56,6 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 	private static final Logger logger = LoggerFactory.getLogger(ConfigureRenameFieldsRuleWizard.class);
 
 	private static final String WINDOW_ICON = "icons/jsparrow-icon-16-003.png"; //$NON-NLS-1$
-	private static final int SUMMARY_BUTTON_ID = 9;
 
 	private ConfigureRenameFieldsRuleWizardPageModel model;
 
@@ -330,39 +329,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 					.getShell();
 				RenamingRulePreviewWizard renamingPreviewWizard = new RenamingRulePreviewWizard(refactoringPipeline,
 						metadata, changes, targetCompilationUnits, renameFieldsRule);
-				final WizardDialog dialog = new WizardDialog(shell, renamingPreviewWizard) {
-					@Override
-					protected void nextPressed() {
-						((RenamingRulePreviewWizard) getWizard()).pressedNext();
-						super.nextPressed();
-					}
-
-					@Override
-					protected void backPressed() {
-						((RenamingRulePreviewWizard) getWizard()).pressedBack();
-						super.backPressed();
-					}
-
-					@Override
-					protected void createButtonsForButtonBar(Composite parent) {
-						createButton(parent, SUMMARY_BUTTON_ID, Messages.SelectRulesWizard_Summary, false);
-						super.createButtonsForButtonBar(parent);
-					}
-
-					@Override
-					protected void buttonPressed(int buttonId) {
-						if (buttonId == SUMMARY_BUTTON_ID) {
-							summaryButtonPressed();
-						} else {
-							super.buttonPressed(buttonId);
-						}
-					}
-
-					private void summaryButtonPressed() {
-						renamingPreviewWizard.showSummaryPage();
-					}
-
-				};
+				final WizardDialog dialog = new PreviewWizardDialog(shell, renamingPreviewWizard);
 
 				// maximizes the RefactoringPreviewWizard
 				dialog.setPageSize(rectangle.width, rectangle.height);
