@@ -57,8 +57,6 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	private static final String WINDOW_ICON = "icons/jsparrow-icon-16-003.png"; //$NON-NLS-1$
 
-	private RefactoringPipeline refactoringPipeline;
-
 	private Shell shell;
 
 	private RefactoringPreviewWizardModel model;
@@ -82,12 +80,11 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	}
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
-		super();
+		super(refactoringPipeline);
 		this.statisticsSection = StatisticsSectionFactory.createStatisticsSection(refactoringPipeline);
 		this.summaryPageStatisticsSection = StatisticsSectionFactory
 			.createStatisticsSectionForSummaryPage(refactoringPipeline);
 		this.updater = new StatisticsSectionUpdater(statisticsSection, summaryPageStatisticsSection);
-		this.refactoringPipeline = refactoringPipeline;
 		this.shell = PlatformUI.getWorkbench()
 			.getActiveWorkbenchWindow()
 			.getShell();
@@ -114,9 +111,9 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		 */
 
 		model = new RefactoringPreviewWizardModel();
-		refactoringPipeline.getRules()
+		getPipelineRules()
 			.forEach(rule -> {
-				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
+				Map<ICompilationUnit, DocumentChange> changes = getChangesForRule(rule);
 				if (!changes.isEmpty()) {
 					RuleStatisticsSection ruleStats = StatisticsSectionFactory.createRuleStatisticsSection(rule);
 					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model,
@@ -190,7 +187,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 				this.statisticsSection.updateForSelected();
 				this.summaryPageStatisticsSection.updateForSelected();
 				if (monitor.isCanceled()) {
-					refactoringPipeline.clearStates();
+					clearRefactoringPipelineState();
 				}
 			} catch (RuleException e) {
 				synchronizeWithUIShowError(e);
@@ -210,7 +207,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		for (IWizardPage page : getPages()) {
 			if (page instanceof RefactoringPreviewWizardPage) {
 				((RefactoringPreviewWizardPage) page)
-					.update(refactoringPipeline.getChangesForRule(((RefactoringPreviewWizardPage) page).getRule()));
+					.update(getChangesForRule(((RefactoringPreviewWizardPage) page).getRule()));
 			}
 		}
 	}
@@ -225,12 +222,12 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
 			return super.canFinish();
 		}
-		boolean enoughCredit = payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
+		boolean enoughCredit = payPerUseCalculator.validateCredit(getPipelineRules());
 		return enoughCredit && super.canFinish();
 	}
 
 	private boolean containsOnlyFreeRules() {
-		return refactoringPipeline.getRules()
+		return getPipelineRules()
 			.stream()
 			.allMatch(RefactoringRule::isFree);
 	}
@@ -265,7 +262,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 			try {
 				refactoringPipeline.commitRefactoring(monitor);
-				int sum = payPerUseCalculator.findTotalRequiredCredit(refactoringPipeline.getRules());
+				int sum = payPerUseCalculator.findTotalRequiredCredit(getPipelineRules());
 				licenseUtil.reserveQuantity(sum);
 				Activator.setRunning(false);
 			} catch (RefactoringException e) {
@@ -310,7 +307,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			refactoringPipeline.doAdditionalRefactoring(((RefactoringPreviewWizardPage) page).getUnselectedChange(),
 					((RefactoringPreviewWizardPage) page).getRule(), monitor);
 			if (monitor.isCanceled()) {
-				refactoringPipeline.clearStates();
+				clearRefactoringPipelineState();
 			}
 		} catch (RuleException e) {
 			synchronizeWithUIShowError(e);
@@ -365,7 +362,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public void dispose() {
 		if (!reuseRefactoringPipeline) {
-			refactoringPipeline.clearStates();
+			clearRefactoringPipelineState();
 		}
 		windowIcon.dispose();
 		super.dispose();
@@ -445,9 +442,9 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	}
 
 	protected boolean needsSummaryPage() {
-		return !(refactoringPipeline.getRules()
+		return !(getPipelineRules()
 			.size() == 1
-				&& refactoringPipeline.getRules()
+				&& getPipelineRules()
 					.get(0) instanceof StandardLoggerRule);
 	}
 

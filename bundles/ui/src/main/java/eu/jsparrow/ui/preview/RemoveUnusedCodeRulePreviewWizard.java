@@ -52,8 +52,6 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(RemoveUnusedCodeRulePreviewWizard.class);
 
-	private RefactoringPipeline refactoringPipeline;
-
 	private Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> documentChanges;
 	private RemoveUnusedFieldsRule rule;
 
@@ -77,7 +75,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 			RemoveUnusedFieldsRule rule,
 			RemoveUnusedMethodsRule unusedMethodsRule,
 			RemoveUnusedTypesRule unusedTypesRule) throws JavaModelException {
-		this.refactoringPipeline = refactoringPipeline;
+		super(refactoringPipeline);
 		this.documentChanges = rule.computeDocumentChangesPerField();
 		this.methodDocumentChanges = unusedMethodsRule.computeDocumentChangesPerMethod();
 		this.typeDocumentChanges = unusedTypesRule.computeDocumentChangesPerType();
@@ -112,11 +110,9 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public void addPages() {
 		RefactoringPreviewWizardModel model = new RefactoringPreviewWizardModel();
-		Map<ICompilationUnit, DocumentChange> changesPerRule = refactoringPipeline.getChangesForRule(rule);
-		Map<ICompilationUnit, DocumentChange> methodChangesPerRule = refactoringPipeline
-			.getChangesForRule(unusedMethodsRule);
-		Map<ICompilationUnit, DocumentChange> typeChangesPerRule = refactoringPipeline
-			.getChangesForRule(unusedTypesRule);
+		Map<ICompilationUnit, DocumentChange> changesPerRule = getChangesForRule(rule);
+		Map<ICompilationUnit, DocumentChange> methodChangesPerRule = getChangesForRule(unusedMethodsRule);
+		Map<ICompilationUnit, DocumentChange> typeChangesPerRule = getChangesForRule(unusedTypesRule);
 
 		Map<UnusedClassMemberWrapper, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(
 				documentChanges,
@@ -306,13 +302,13 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 
 	@Override
 	public boolean performCancel() {
-		refactoringPipeline.clearStates();
+		clearRefactoringPipelineState();
 		return super.performCancel();
 	}
 
 	@Override
 	public void dispose() {
-		refactoringPipeline.clearStates();
+		clearRefactoringPipelineState();
 		super.dispose();
 	}
 
@@ -351,7 +347,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 				 * Create refactoring states for all compilation units from
 				 * targetCompilationUnits list
 				 */
-				refactoringPipeline.clearStates();
+				clearRefactoringPipelineState();
 				refactoringPipeline.createRefactoringStates(targetCompilationUnits);
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
@@ -365,7 +361,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 				refactoringPipeline.doRefactoring(monitor);
 				statisticsSection.updateForSelected();
 				if (monitor.isCanceled()) {
-					refactoringPipeline.clearStates();
+					clearRefactoringPipelineState();
 				}
 			} catch (RuleException e) {
 				logger.error(e.getMessage(), e);

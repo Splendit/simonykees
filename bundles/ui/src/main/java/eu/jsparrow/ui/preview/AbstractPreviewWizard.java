@@ -1,12 +1,19 @@
 package eu.jsparrow.ui.preview;
 
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
 
+import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -21,10 +28,13 @@ import eu.jsparrow.ui.util.LicenseUtilService;
  */
 public abstract class AbstractPreviewWizard extends Wizard {
 
+	protected RefactoringPipeline refactoringPipeline;
+
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
-	protected AbstractPreviewWizard() {
+	protected AbstractPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
+		this.refactoringPipeline = refactoringPipeline;
 	}
 
 	@Override
@@ -72,6 +82,18 @@ public abstract class AbstractPreviewWizard extends Wizard {
 		SimonykeesMessageDialog.openMessageDialog(getShell(),
 				"Cannot commit because all changes have been deselected.", //$NON-NLS-1$
 				MessageDialog.ERROR);
+	}
+
+	protected Map<ICompilationUnit, DocumentChange> getChangesForRule(RefactoringRule rule) {
+		return refactoringPipeline.getChangesForRule(rule);
+	}
+	
+	protected void clearRefactoringPipelineState() {
+		refactoringPipeline.clearStates();
+	}
+	
+	protected List<RefactoringRule> getPipelineRules() {
+		return refactoringPipeline.getRules();
 	}
 
 	/**

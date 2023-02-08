@@ -51,7 +51,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(RenamingRulePreviewWizard.class);
-	private RefactoringPipeline refactoringPipeline;
+
 	private List<FieldMetaData> metaData;
 
 	private Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges;
@@ -67,8 +67,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			List<ICompilationUnit> targetCompilationUnits, FieldsRenamingRule rule) {
-		super();
-		this.refactoringPipeline = refactoringPipeline;
+		super(refactoringPipeline);
 		this.metaData = metadata;
 		this.documentChanges = documentChanges;
 		this.targetCompilationUnits = targetCompilationUnits;
@@ -100,7 +99,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public void addPages() {
 		RefactoringPreviewWizardModel model = new RefactoringPreviewWizardModel();
-		Map<ICompilationUnit, DocumentChange> changesPerRule = refactoringPipeline.getChangesForRule(rule);
+		Map<ICompilationUnit, DocumentChange> changesPerRule = getChangesForRule(rule);
 
 		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(
 				JavaAccessModifier.PUBLIC);
@@ -182,13 +181,13 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 
 	@Override
 	public boolean performCancel() {
-		refactoringPipeline.clearStates();
+		clearRefactoringPipelineState();
 		return super.performCancel();
 	}
 
 	@Override
 	public void dispose() {
-		refactoringPipeline.clearStates();
+		clearRefactoringPipelineState();
 		super.dispose();
 	}
 
@@ -227,7 +226,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				 * Create refactoring states for all compilation units from
 				 * targetCompilationUnits list
 				 */
-				refactoringPipeline.clearStates();
+				clearRefactoringPipelineState();
 				refactoringPipeline.createRefactoringStates(targetCompilationUnits);
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
@@ -241,7 +240,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				refactoringPipeline.doRefactoring(monitor);
 				this.statisticsSection.updateForSelected();
 				if (monitor.isCanceled()) {
-					refactoringPipeline.clearStates();
+					clearRefactoringPipelineState();
 				}
 			} catch (RuleException e) {
 				logger.error(e.getMessage(), e);
@@ -339,15 +338,14 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	protected boolean needsSummaryPage() {
 		return true;
 	}
-	
+
 	@Override
 	public void showSummaryPage() {
 		/*
-		 * If summary button is pressed on any page that is not
-		 * Summary page, views have to be check for change and
-		 * updated, and preview control has to be disposed on
-		 * current page. If it is already on Summary page, just
-		 * refresh.
+		 * If summary button is pressed on any page that is not Summary page,
+		 * views have to be check for change and updated, and preview control
+		 * has to be disposed on current page. If it is already on Summary page,
+		 * just refresh.
 		 */
 		if (getContainer().getCurrentPage() instanceof RenamingRulePreviewWizardPage) {
 			updateViewsOnNavigation(getContainer().getCurrentPage());
