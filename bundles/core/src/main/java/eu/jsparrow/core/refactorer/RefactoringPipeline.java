@@ -163,6 +163,22 @@ public class RefactoringPipeline {
 	}
 
 	/**
+	 * Whether or not any valid change has been calculated for the given
+	 * refactoring state.
+	 * 
+	 * @return true if at least one {@link RefactoringState} can be found which has
+	 *         at least one valid change. which is not null, otherwise false
+	 */
+	public boolean hasAnyValidChange() {
+		for (RefactoringState state : refactoringStates) {
+			if (state.hasAnyValidChange()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * When prepare refactoring is finished it can happen that there is no
 	 * refactoringStates if all selected classes have compilation errors.
 	 * 

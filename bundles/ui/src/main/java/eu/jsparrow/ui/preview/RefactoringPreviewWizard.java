@@ -2,7 +2,6 @@ package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,7 +23,6 @@ import org.eclipse.ui.PlatformUI;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
@@ -256,7 +254,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			return true;
 		}
 
-		if (!hasAnyChange()) {
+		if (!refactoringPipeline.hasAnyValidChange()) {
 			SimonykeesMessageDialog.openMessageDialog(shell,
 					"Cannot commit because all changes have been deselected.", //$NON-NLS-1$
 					MessageDialog.ERROR);
@@ -309,26 +307,6 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			});
 	}
 
-	public boolean hasAnyChange() {
-		int changes = 0;
-		List<RefactoringState> refactoringStates = refactoringPipeline.getRefactoringStates();
-		for (RefactoringState state : refactoringStates) {
-			boolean hasChange = state.hasChange();
-			if (hasChange) {
-				for (RefactoringRule rule : refactoringPipeline.getRules()) {
-					DocumentChange changeIfPresent = state.getChangeIfPresent(rule);
-					if (changeIfPresent != null) {
-						changes++;
-					}
-				}
-			}
-		}
-		boolean hasAnyChange = false;
-		if (changes > 0) {
-			hasAnyChange = true;
-		}
-		return hasAnyChange;
-	}
 
 	private void tryDoAdditionalRefactoring(IProgressMonitor monitor, IWizardPage page) {
 		try {
