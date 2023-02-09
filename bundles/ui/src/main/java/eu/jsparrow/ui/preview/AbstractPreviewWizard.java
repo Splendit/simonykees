@@ -1,26 +1,32 @@
 package eu.jsparrow.ui.preview;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
+import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
+import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
  * A parent class for all preview wizards.
@@ -33,8 +39,7 @@ public abstract class AbstractPreviewWizard extends Wizard {
 
 	protected RefactoringPipeline refactoringPipeline;
 	protected PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
-
-	private LicenseUtilService licenseUtil = LicenseUtil.get();
+	protected LicenseUtil licenseUtil = LicenseUtil.get();
 
 	protected AbstractPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
@@ -104,9 +109,38 @@ public abstract class AbstractPreviewWizard extends Wizard {
 			return true;
 		}
 		SimonykeesMessageDialog.openMessageDialog(getShell(),
-		"Cannot commit because all changes have been deselected.", //$NON-NLS-1$
-		MessageDialog.ERROR);
+				"Cannot commit because all changes have been deselected.", //$NON-NLS-1$
+				MessageDialog.ERROR);
 		return false;
+	}
+
+	protected void commitChanges() {
+		updateContainerOnCommit();
+		IRunnableWithProgress job = monitor -> {
+			try {
+				commitChanges(monitor);
+				Activator.setRunning(false);
+			} catch (RefactoringException | ReconcileException e) {
+				WizardMessageDialog.synchronizeWithUIShowError(e);
+				Activator.setRunning(false);
+			}
+		};
+
+		try {
+			getContainer().run(true, true, job);
+			showSuccessfulCommitMessage();
+		} catch (InvocationTargetException | InterruptedException e) {
+			SimonykeesMessageDialog.openMessageDialog(getShell(),
+					Messages.RefactoringPreviewWizard_err_runnableWithProgress,
+					MessageDialog.ERROR);
+			Activator.setRunning(false);
+		}
+	}
+
+	protected void commitChanges(IProgressMonitor monitor) throws RefactoringException, ReconcileException {
+		refactoringPipeline.commitRefactoring(monitor);
+		int sum = payPerUseCalculator.findTotalRequiredCredit(getPipelineRules());
+		licenseUtil.reserveQuantity(sum);
 	}
 
 	/**

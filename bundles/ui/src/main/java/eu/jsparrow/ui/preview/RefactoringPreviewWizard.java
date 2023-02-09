@@ -20,14 +20,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
-import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.exception.SimonykeesException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
@@ -36,7 +34,6 @@ import eu.jsparrow.ui.preview.statistics.RuleStatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionUpdater;
-import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
@@ -63,7 +60,6 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	protected StatisticsSectionUpdater updater;
 	private Image windowIcon;
 
-	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private StandaloneStatisticsMetadata statisticsMetadata;
 	private SelectRulesWizardData selectRulesWizardData;
 	private boolean reuseRefactoringPipeline;
@@ -231,31 +227,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			return false;
 		}
 
-		updateContainerOnCommit();
-		IRunnableWithProgress job = monitor -> {
-
-			try {
-				refactoringPipeline.commitRefactoring(monitor);
-				int sum = payPerUseCalculator.findTotalRequiredCredit(getPipelineRules());
-				licenseUtil.reserveQuantity(sum);
-				Activator.setRunning(false);
-			} catch (RefactoringException | ReconcileException e) {
-				synchronizeWithUIShowError(e);
-				Activator.setRunning(false);
-				return;
-			}
-			return;
-		};
-
-		try {
-			getContainer().run(true, true, job);
-			showSuccessfulCommitMessage();
-
-		} catch (InvocationTargetException | InterruptedException e) {
-			SimonykeesMessageDialog.openMessageDialog(shell, Messages.RefactoringPreviewWizard_err_runnableWithProgress,
-					MessageDialog.ERROR);
-			Activator.setRunning(false);
-		}
+		commitChanges();
 
 		return true;
 	}

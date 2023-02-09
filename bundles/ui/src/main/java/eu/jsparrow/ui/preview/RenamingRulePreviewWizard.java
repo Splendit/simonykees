@@ -19,7 +19,6 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
@@ -33,7 +32,6 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
-import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -58,7 +56,6 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	private Map<IPath, Document> originalDocuments;
 	private RenamingRuleSummaryWizardPage summaryPage;
 	private StatisticsSection statisticsSection;
-	private LicenseUtil licenseUtil = LicenseUtil.get();
 
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
@@ -164,36 +161,6 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	public void dispose() {
 		clearRefactoringPipelineState();
 		super.dispose();
-	}
-
-	/**
-	 * Checks if license if valid. If it is, changes are committed, otherwise
-	 * shows license expired message dialog. If exception occurred while
-	 * committing changes, message about exception is displayed.
-	 */
-	private void commitChanges() {
-		updateContainerOnCommit();
-		IRunnableWithProgress job = monitor -> {
-			try {
-				refactoringPipeline.commitRefactoring(monitor);
-				int sum = payPerUseCalculator.findTotalRequiredCredit(refactoringPipeline.getRules());
-				licenseUtil.reserveQuantity(sum);
-				Activator.setRunning(false);
-			} catch (RefactoringException | ReconcileException e) {
-				WizardMessageDialog.synchronizeWithUIShowError(e);
-				Activator.setRunning(false);
-			}
-		};
-
-		try {
-			getContainer().run(true, true, job);
-			showSuccessfulCommitMessage();
-		} catch (InvocationTargetException | InterruptedException e) {
-			SimonykeesMessageDialog.openMessageDialog(getShell(),
-					Messages.RefactoringPreviewWizard_err_runnableWithProgress,
-					MessageDialog.ERROR);
-			Activator.setRunning(false);
-		}
 	}
 
 	/**

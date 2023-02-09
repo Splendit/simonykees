@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -35,7 +36,6 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
-import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -63,7 +63,6 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	private RefactoringSummaryWizardPage summaryPage;
 	private StatisticsSection statisticsSection;
 	private StandaloneStatisticsMetadata standaloneStatisticsMetadata;
-	private LicenseUtil licenseUtil = LicenseUtil.get();
 
 	public RemoveUnusedCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline,
 			StandaloneStatisticsMetadata standaloneStatisticsMetadata,
@@ -289,37 +288,6 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	}
 
 	/**
-	 * Checks if license if valid. If it is, changes are committed, otherwise
-	 * shows license expired message dialog. If exception occurred while
-	 * committing changes, message about exception is displayed.
-	 */
-	private void commitChanges() {
-		updateContainerOnCommit();
-		IRunnableWithProgress job = monitor -> {
-			try {
-				refactoringPipeline.commitRefactoring(monitor);
-				int sum = payPerUseCalculator.findTotalRequiredCredit(refactoringPipeline.getRules());
-				licenseUtil.reserveQuantity(sum);
-				unusedTypesRule.deleteEmptyCompilationUnits();
-				Activator.setRunning(false);
-			} catch (RefactoringException | ReconcileException e) {
-				WizardMessageDialog.synchronizeWithUIShowError(e);
-				Activator.setRunning(false);
-			}
-		};
-
-		try {
-			getContainer().run(true, true, job);
-			showSuccessfulCommitMessage();
-		} catch (InvocationTargetException | InterruptedException e) {
-			SimonykeesMessageDialog.openMessageDialog(getShell(),
-					Messages.RefactoringPreviewWizard_err_runnableWithProgress,
-					MessageDialog.ERROR);
-			Activator.setRunning(false);
-		}
-	}
-
-	/**
 	 * Creates a runnable which creates and sets to refactoringPipeline new
 	 * RefactoringStates without unchecked Fields. Than calls doRefactoring on
 	 * refactoringPipeline to recalculate all changes. At the end it computes
@@ -481,5 +449,11 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	@Override
 	protected boolean canFinishWithFreeLicense() {
 		return false;
+	}
+
+	@Override
+	protected void commitChanges(IProgressMonitor monitor) throws RefactoringException, ReconcileException {
+		super.commitChanges(monitor);
+		unusedTypesRule.deleteEmptyCompilationUnits();
 	}
 }
