@@ -26,8 +26,6 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.api.LicenseType;
-import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.exception.SimonykeesException;
@@ -208,26 +206,6 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 					.update(getChangesForRule(((RefactoringPreviewWizardPage) page).getRule()));
 			}
 		}
-	}
-
-	@Override
-	public boolean canFinish() {
-		if (licenseUtil.isFreeLicense()) {
-			return licenseUtil.isActiveRegistration() && containsOnlyFreeRules();
-		}
-
-		LicenseValidationResult result = licenseUtil.getValidationResult();
-		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
-			return super.canFinish();
-		}
-		boolean enoughCredit = payPerUseCalculator.validateCredit(getPipelineRules());
-		return enoughCredit && super.canFinish();
-	}
-
-	private boolean containsOnlyFreeRules() {
-		return getPipelineRules()
-			.stream()
-			.allMatch(RefactoringRule::isFree);
 	}
 
 	/*
@@ -462,5 +440,15 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
 		}
 		getContainer().showPage(getSummaryPage());
+	}
+
+	protected boolean canFinishWithFreeLicense() {
+		return licenseUtil.isActiveRegistration() && containsOnlyFreeRules();
+	}
+
+	private boolean containsOnlyFreeRules() {
+		return getPipelineRules()
+			.stream()
+			.allMatch(RefactoringRule::isFree);
 	}
 }

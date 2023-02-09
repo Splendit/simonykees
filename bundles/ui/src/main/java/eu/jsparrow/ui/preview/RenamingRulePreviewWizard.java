@@ -27,8 +27,6 @@ import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.api.LicenseType;
-import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
@@ -140,20 +138,6 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				.getFieldModifier()
 				.equals(modifier))
 			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-	}
-
-	@Override
-	public boolean canFinish() {
-		if (licenseUtil.isFreeLicense()) {
-			return super.canFinish();
-		}
-
-		LicenseValidationResult result = licenseUtil.getValidationResult();
-		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
-			return super.canFinish();
-		}
-		boolean enoughCredit = payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
-		return enoughCredit && super.canFinish();
 	}
 
 	/**
@@ -350,5 +334,10 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 			((RenamingRulePreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
 		}
 		getContainer().showPage(getSummaryPage());
+	}
+
+	@Override
+	protected boolean canFinishWithFreeLicense() {
+		return false;
 	}
 }

@@ -13,6 +13,8 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.license.api.LicenseType;
+import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
@@ -48,9 +50,14 @@ public abstract class AbstractPreviewWizard extends Wizard {
 	@Override
 	public boolean canFinish() {
 		if (licenseUtil.isFreeLicense()) {
-			return false;
+			return canFinishWithFreeLicense() && super.canFinish();
 		}
-		return super.canFinish();
+		LicenseValidationResult result = licenseUtil.getValidationResult();
+		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
+			return super.canFinish();
+		}
+		boolean enoughCredit = payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
+		return enoughCredit && super.canFinish();
 	}
 
 	public abstract void updateViewsOnNavigation(IWizardPage page);
@@ -114,4 +121,6 @@ public abstract class AbstractPreviewWizard extends Wizard {
 	protected abstract boolean needsSummaryPage();
 
 	public abstract void showSummaryPage();
+	
+	protected abstract boolean canFinishWithFreeLicense();
 }
