@@ -38,7 +38,6 @@ import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
 import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -67,7 +66,6 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	private StatisticsSection statisticsSection;
 	private StandaloneStatisticsMetadata standaloneStatisticsMetadata;
 	private LicenseUtil licenseUtil = LicenseUtil.get();
-	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
 
 	public RemoveUnusedCodeRulePreviewWizard(RefactoringPipeline refactoringPipeline,
 			StandaloneStatisticsMetadata standaloneStatisticsMetadata,

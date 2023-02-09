@@ -39,7 +39,6 @@ import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionUpdater;
 import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
@@ -68,7 +67,6 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private StandaloneStatisticsMetadata statisticsMetadata;
-	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
 	private SelectRulesWizardData selectRulesWizardData;
 	private boolean reuseRefactoringPipeline;
 

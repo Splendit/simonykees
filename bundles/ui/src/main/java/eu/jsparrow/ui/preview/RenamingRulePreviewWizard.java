@@ -33,10 +33,9 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
+import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
 import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
-import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -62,7 +61,6 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	private RenamingRuleSummaryWizardPage summaryPage;
 	private StatisticsSection statisticsSection;
 	private LicenseUtil licenseUtil = LicenseUtil.get();
-	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
 
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,

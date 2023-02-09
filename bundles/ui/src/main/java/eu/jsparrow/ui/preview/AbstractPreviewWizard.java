@@ -18,6 +18,7 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
+import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 
 /**
  * A parent class for all preview wizards.
@@ -29,7 +30,8 @@ import eu.jsparrow.ui.util.LicenseUtilService;
 public abstract class AbstractPreviewWizard extends Wizard {
 
 	protected RefactoringPipeline refactoringPipeline;
-
+	protected PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
+	
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	protected AbstractPreviewWizard(RefactoringPipeline refactoringPipeline) {
