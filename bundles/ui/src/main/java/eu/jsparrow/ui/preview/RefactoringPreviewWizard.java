@@ -179,7 +179,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 				this.statisticsSection.updateForSelected();
 				this.summaryPageStatisticsSection.updateForSelected();
 				if (monitor.isCanceled()) {
-					clearRefactoringPipelineState();
+					clearPipelineState();
 				}
 			} catch (RuleException e) {
 				synchronizeWithUIShowError(e);
@@ -249,7 +249,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			refactoringPipeline.doAdditionalRefactoring(((RefactoringPreviewWizardPage) page).getUnselectedChange(),
 					((RefactoringPreviewWizardPage) page).getRule(), monitor);
 			if (monitor.isCanceled()) {
-				clearRefactoringPipelineState();
+				clearPipelineState();
 			}
 		} catch (RuleException e) {
 			synchronizeWithUIShowError(e);
@@ -304,7 +304,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public void dispose() {
 		if (!reuseRefactoringPipeline) {
-			clearRefactoringPipelineState();
+			clearPipelineState();
 		}
 		windowIcon.dispose();
 		super.dispose();
@@ -408,13 +408,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		getContainer().showPage(getSummaryPage());
 	}
 
+	@Override
 	protected boolean canFinishWithFreeLicense() {
-		return licenseUtil.isActiveRegistration() && containsOnlyFreeRules();
-	}
-
-	private boolean containsOnlyFreeRules() {
-		return getPipelineRules()
-			.stream()
-			.allMatch(RefactoringRule::isFree);
+		return true;
 	}
 }

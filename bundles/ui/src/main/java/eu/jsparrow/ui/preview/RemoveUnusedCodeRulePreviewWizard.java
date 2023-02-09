@@ -283,7 +283,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 
 	@Override
 	public void dispose() {
-		clearRefactoringPipelineState();
+		clearPipelineState();
 		super.dispose();
 	}
 
@@ -302,7 +302,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 				 * Create refactoring states for all compilation units from
 				 * targetCompilationUnits list
 				 */
-				clearRefactoringPipelineState();
+				clearPipelineState();
 				refactoringPipeline.createRefactoringStates(targetCompilationUnits);
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
@@ -316,7 +316,7 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 				refactoringPipeline.doRefactoring(monitor);
 				statisticsSection.updateForSelected();
 				if (monitor.isCanceled()) {
-					clearRefactoringPipelineState();
+					clearPipelineState();
 				}
 			} catch (RuleException e) {
 				logger.error(e.getMessage(), e);
@@ -447,13 +447,13 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	}
 
 	@Override
-	protected boolean canFinishWithFreeLicense() {
-		return false;
-	}
-
-	@Override
 	protected void commitChanges(IProgressMonitor monitor) throws RefactoringException, ReconcileException {
 		super.commitChanges(monitor);
 		unusedTypesRule.deleteEmptyCompilationUnits();
+	}
+	
+	@Override
+	protected boolean canFinishWithFreeLicense() {
+		return false;
 	}
 }

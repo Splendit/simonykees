@@ -38,8 +38,8 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 public abstract class AbstractPreviewWizard extends Wizard {
 
 	protected RefactoringPipeline refactoringPipeline;
-	protected PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
-	protected LicenseUtil licenseUtil = LicenseUtil.get();
+	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
+	private LicenseUtil licenseUtil = LicenseUtil.get();
 
 	protected AbstractPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
@@ -54,15 +54,23 @@ public abstract class AbstractPreviewWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
+		if (!super.canFinish()) {
+			return false;
+		}
 		if (licenseUtil.isFreeLicense()) {
-			return canFinishWithFreeLicense() && super.canFinish();
+			return canFinishWithFreeLicense() && licenseUtil.isActiveRegistration() && containsOnlyFreeRules();
 		}
 		LicenseValidationResult result = licenseUtil.getValidationResult();
 		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
-			return super.canFinish();
+			return true;
 		}
-		boolean enoughCredit = payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
-		return enoughCredit && super.canFinish();
+		return payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
+	}
+
+	protected boolean containsOnlyFreeRules() {
+		return refactoringPipeline.getRules()
+			.stream()
+			.allMatch(RefactoringRule::isFree);
 	}
 
 	public abstract void updateViewsOnNavigation(IWizardPage page);
@@ -96,7 +104,7 @@ public abstract class AbstractPreviewWizard extends Wizard {
 		return refactoringPipeline.getChangesForRule(rule);
 	}
 
-	protected void clearRefactoringPipelineState() {
+	protected void clearPipelineState() {
 		refactoringPipeline.clearStates();
 	}
 

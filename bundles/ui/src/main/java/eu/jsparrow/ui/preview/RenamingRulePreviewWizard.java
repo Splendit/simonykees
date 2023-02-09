@@ -159,7 +159,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 
 	@Override
 	public void dispose() {
-		clearRefactoringPipelineState();
+		clearPipelineState();
 		super.dispose();
 	}
 
@@ -178,7 +178,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				 * Create refactoring states for all compilation units from
 				 * targetCompilationUnits list
 				 */
-				clearRefactoringPipelineState();
+				clearPipelineState();
 				refactoringPipeline.createRefactoringStates(targetCompilationUnits);
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
@@ -192,7 +192,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				refactoringPipeline.doRefactoring(monitor);
 				this.statisticsSection.updateForSelected();
 				if (monitor.isCanceled()) {
-					clearRefactoringPipelineState();
+					clearPipelineState();
 				}
 			} catch (RuleException e) {
 				logger.error(e.getMessage(), e);
