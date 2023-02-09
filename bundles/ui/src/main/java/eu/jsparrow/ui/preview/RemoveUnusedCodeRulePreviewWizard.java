@@ -283,12 +283,6 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	}
 
 	@Override
-	public boolean performCancel() {
-		clearRefactoringPipelineState();
-		return super.performCancel();
-	}
-
-	@Override
 	public void dispose() {
 		clearRefactoringPipelineState();
 		super.dispose();
