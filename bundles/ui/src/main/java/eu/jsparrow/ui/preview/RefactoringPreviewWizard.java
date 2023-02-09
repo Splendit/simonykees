@@ -227,13 +227,11 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			return true;
 		}
 
-		if (!refactoringPipeline.hasAnyValidChange()) {
-			showNoChangeFoundToCommit();
+		if (!hasAnyValidChange()) {
 			return false;
 		}
 
 		updateContainerOnCommit();
-
 		IRunnableWithProgress job = monitor -> {
 
 			try {
@@ -241,15 +239,11 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 				int sum = payPerUseCalculator.findTotalRequiredCredit(getPipelineRules());
 				licenseUtil.reserveQuantity(sum);
 				Activator.setRunning(false);
-			} catch (RefactoringException e) {
+			} catch (RefactoringException | ReconcileException e) {
 				synchronizeWithUIShowError(e);
 				Activator.setRunning(false);
 				return;
-			} catch (ReconcileException e) {
-				synchronizeWithUIShowError(e);
-				Activator.setRunning(false);
 			}
-
 			return;
 		};
 

@@ -273,10 +273,10 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 		if (container != null) {
 			IWizardPage currentPage = container.getCurrentPage();
 			updateViewsOnNavigation(currentPage);
-			if (!refactoringPipeline.hasAnyValidChange()) {
-				showNoChangeFoundToCommit();
+			if (!hasAnyValidChange()) {
 				return false;
 			}
+
 			commitChanges();
 		}
 		return true;
@@ -295,15 +295,26 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	 */
 	private void commitChanges() {
 		updateContainerOnCommit();
+		IRunnableWithProgress job = monitor -> {
+			try {
+				refactoringPipeline.commitRefactoring(monitor);
+				int sum = payPerUseCalculator.findTotalRequiredCredit(refactoringPipeline.getRules());
+				licenseUtil.reserveQuantity(sum);
+				unusedTypesRule.deleteEmptyCompilationUnits();
+				Activator.setRunning(false);
+			} catch (RefactoringException | ReconcileException e) {
+				WizardMessageDialog.synchronizeWithUIShowError(e);
+				Activator.setRunning(false);
+			}
+		};
+
 		try {
-			refactoringPipeline.commitRefactoring();
-			int sum = payPerUseCalculator.findTotalRequiredCredit(refactoringPipeline.getRules());
-			licenseUtil.reserveQuantity(sum);
-			unusedTypesRule.deleteEmptyCompilationUnits();
+			getContainer().run(true, true, job);
 			showSuccessfulCommitMessage();
-			Activator.setRunning(false);
-		} catch (RefactoringException | ReconcileException e) {
-			WizardMessageDialog.synchronizeWithUIShowError(e);
+		} catch (InvocationTargetException | InterruptedException e) {
+			SimonykeesMessageDialog.openMessageDialog(getShell(),
+					Messages.RefactoringPreviewWizard_err_runnableWithProgress,
+					MessageDialog.ERROR);
 			Activator.setRunning(false);
 		}
 	}

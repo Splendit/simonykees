@@ -33,7 +33,7 @@ public abstract class AbstractPreviewWizard extends Wizard {
 
 	protected RefactoringPipeline refactoringPipeline;
 	protected PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
-	
+
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	protected AbstractPreviewWizard(RefactoringPipeline refactoringPipeline) {
@@ -87,22 +87,26 @@ public abstract class AbstractPreviewWizard extends Wizard {
 				MessageDialog.INFORMATION);
 	}
 
-	protected void showNoChangeFoundToCommit() {
-		SimonykeesMessageDialog.openMessageDialog(getShell(),
-				"Cannot commit because all changes have been deselected.", //$NON-NLS-1$
-				MessageDialog.ERROR);
-	}
-
 	protected Map<ICompilationUnit, DocumentChange> getChangesForRule(RefactoringRule rule) {
 		return refactoringPipeline.getChangesForRule(rule);
 	}
-	
+
 	protected void clearRefactoringPipelineState() {
 		refactoringPipeline.clearStates();
 	}
-	
+
 	protected List<RefactoringRule> getPipelineRules() {
 		return refactoringPipeline.getRules();
+	}
+
+	protected boolean hasAnyValidChange() {
+		if (refactoringPipeline.hasAnyValidChange()) {
+			return true;
+		}
+		SimonykeesMessageDialog.openMessageDialog(getShell(),
+		"Cannot commit because all changes have been deselected.", //$NON-NLS-1$
+		MessageDialog.ERROR);
+		return false;
 	}
 
 	/**
@@ -121,6 +125,6 @@ public abstract class AbstractPreviewWizard extends Wizard {
 	protected abstract boolean needsSummaryPage();
 
 	public abstract void showSummaryPage();
-	
+
 	protected abstract boolean canFinishWithFreeLicense();
 }
