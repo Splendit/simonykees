@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -146,14 +147,25 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public boolean performFinish() {
 		IWizardContainer container = getContainer();
-		if (container != null) {
-			IWizardPage currentPage = container.getCurrentPage();
-			updateViewsOnNavigation(currentPage);
-			if (!hasAnyValidChange()) {
-				return false;
-			}
-			commitChanges();
+		if (container == null) {
+			return true;
 		}
+		try {
+			container.run(true, true, (IProgressMonitor monitor) -> {
+				IWizardPage currentPage = container.getCurrentPage();
+				updateViewsOnNavigation(currentPage);
+			});
+		} catch (InvocationTargetException | InterruptedException e) {
+			SimonykeesMessageDialog.openMessageDialog(getShell(),
+					Messages.RefactoringPreviewWizard_err_runnableWithProgress,
+					MessageDialog.ERROR);
+			Activator.setRunning(false);
+			return true;
+		}
+		if (!hasAnyValidChange()) {
+			return false;
+		}
+		commitChanges();
 		return true;
 	}
 

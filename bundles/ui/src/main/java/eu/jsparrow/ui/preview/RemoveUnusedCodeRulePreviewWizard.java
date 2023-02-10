@@ -269,15 +269,25 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public boolean performFinish() {
 		IWizardContainer container = getContainer();
-		if (container != null) {
-			IWizardPage currentPage = container.getCurrentPage();
-			updateViewsOnNavigation(currentPage);
-			if (!hasAnyValidChange()) {
-				return false;
-			}
-
-			commitChanges();
+		if (container == null) {
+			return true;
 		}
+		try {
+			container.run(true, true, (IProgressMonitor monitor) -> {
+				IWizardPage currentPage = container.getCurrentPage();
+				updateViewsOnNavigation(currentPage);
+			});
+		} catch (InvocationTargetException | InterruptedException e) {
+			SimonykeesMessageDialog.openMessageDialog(getShell(),
+					Messages.RefactoringPreviewWizard_err_runnableWithProgress,
+					MessageDialog.ERROR);
+			Activator.setRunning(false);
+			return true;
+		}
+		if (!hasAnyValidChange()) {
+			return false;
+		}
+		commitChanges();
 		return true;
 	}
 
@@ -450,5 +460,5 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	protected void commitChanges(IProgressMonitor monitor) throws RefactoringException, ReconcileException {
 		super.commitChanges(monitor);
 		unusedTypesRule.deleteEmptyCompilationUnits();
-	}	
+	}
 }
