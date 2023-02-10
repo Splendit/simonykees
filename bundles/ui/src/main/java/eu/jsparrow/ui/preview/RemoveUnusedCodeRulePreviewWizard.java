@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -260,35 +261,14 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
-	/**
-	 * If page contains unchecked fields, remove uncheckedFields from metadata,
-	 * create and set to refactoringPipeline new RefactoringStates without
-	 * unchecked Fields -> doRefactoring -> commitRefactoring. Otherwise just
-	 * commit refactoring changes.
-	 */
 	@Override
-	public boolean performFinish() {
-		IWizardContainer container = getContainer();
-		if (container == null) {
-			return true;
-		}
-		try {
-			container.run(true, true, (IProgressMonitor monitor) -> {
-				IWizardPage currentPage = container.getCurrentPage();
-				updateViewsOnNavigation(currentPage);
-			});
-		} catch (InvocationTargetException | InterruptedException e) {
-			SimonykeesMessageDialog.openMessageDialog(getShell(),
-					Messages.RefactoringPreviewWizard_err_runnableWithProgress,
-					MessageDialog.ERROR);
-			Activator.setRunning(false);
-			return true;
-		}
-		if (!hasAnyValidChange()) {
-			return false;
-		}
-		commitChanges();
-		return true;
+	protected void prepareForCommit(IProgressMonitor monitor) {
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
+			.setWorkRemaining(1);
+		subMonitor.subTask("prepare for commit"); //$NON-NLS-1$
+		IWizardPage currentPage = getContainer().getCurrentPage();
+		updateViewsOnNavigation(currentPage);
+		subMonitor.worked(1);
 	}
 
 	@Override

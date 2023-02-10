@@ -58,7 +58,7 @@ public abstract class AbstractPreviewWizard extends Wizard {
 			return false;
 		}
 		if (licenseUtil.isFreeLicense()) {
-			return canHaveFreeRule() && containsOnlyFreeRules() && licenseUtil.isActiveRegistration() ;
+			return canHaveFreeRule() && containsOnlyFreeRules() && licenseUtil.isActiveRegistration();
 		}
 		LicenseValidationResult result = licenseUtil.getValidationResult();
 		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
@@ -66,7 +66,7 @@ public abstract class AbstractPreviewWizard extends Wizard {
 		}
 		return payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
 	}
-	
+
 	protected boolean canHaveFreeRule() {
 		return false;
 	}
@@ -114,6 +114,28 @@ public abstract class AbstractPreviewWizard extends Wizard {
 
 	protected List<RefactoringRule> getPipelineRules() {
 		return refactoringPipeline.getRules();
+	}
+
+	@Override
+	public boolean performFinish() {
+		IWizardContainer container = getContainer();
+		if (container == null) {
+			return true;
+		}
+		try {
+			container.run(true, true, this::prepareForCommit);
+		} catch (InvocationTargetException | InterruptedException e) {
+			SimonykeesMessageDialog.openMessageDialog(getShell(),
+					Messages.RefactoringPreviewWizard_err_runnableWithProgress,
+					MessageDialog.ERROR);
+			Activator.setRunning(false);
+			return true;
+		}
+		if (!hasAnyValidChange()) {
+			return false;
+		}
+		commitChanges();
+		return true;
 	}
 
 	protected boolean hasAnyValidChange() {
@@ -171,4 +193,6 @@ public abstract class AbstractPreviewWizard extends Wizard {
 	protected abstract boolean needsSummaryPage();
 
 	public abstract void showSummaryPage();
+
+	protected abstract void prepareForCommit(IProgressMonitor monitor);
 }

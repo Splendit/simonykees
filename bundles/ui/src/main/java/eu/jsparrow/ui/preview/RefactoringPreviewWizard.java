@@ -11,7 +11,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -205,34 +204,9 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
-	 */
-	@Override
-	public boolean performFinish() {
-		IWizardContainer container = getContainer();
-		if (container == null) {
-			return true;
-		}
-		try {
-			container.run(true, true, this::tryDoAdditionalRefactoring);
-		} catch (InvocationTargetException | InterruptedException e) {
-			SimonykeesMessageDialog.openMessageDialog(shell,
-					Messages.RefactoringPreviewWizard_err_runnableWithProgress,
-					MessageDialog.ERROR);
-			Activator.setRunning(false);
-			return true;
-		}
-		if (!hasAnyValidChange()) {
-			return false;
-		}
-		commitChanges();
-		return true;
-	}
 
-	private void tryDoAdditionalRefactoring(IProgressMonitor monitor) {
+	@Override
+	protected void prepareForCommit(IProgressMonitor monitor) {
 		Arrays.asList(getPages())
 			.stream()
 			.filter(page -> (page instanceof RefactoringPreviewWizardPage)
