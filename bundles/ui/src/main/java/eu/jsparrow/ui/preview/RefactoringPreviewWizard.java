@@ -409,7 +409,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	}
 
 	@Override
-	protected boolean canFinishWithFreeLicense() {
+	protected boolean canHaveFreeRule() {
 		return true;
 	}
 }

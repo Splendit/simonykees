@@ -305,9 +305,4 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		}
 		getContainer().showPage(getSummaryPage());
 	}
-
-	@Override
-	protected boolean canFinishWithFreeLicense() {
-		return false;
-	}
 }

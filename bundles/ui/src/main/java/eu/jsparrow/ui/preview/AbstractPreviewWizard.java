@@ -58,13 +58,17 @@ public abstract class AbstractPreviewWizard extends Wizard {
 			return false;
 		}
 		if (licenseUtil.isFreeLicense()) {
-			return canFinishWithFreeLicense() && licenseUtil.isActiveRegistration() && containsOnlyFreeRules();
+			return canHaveFreeRule() && containsOnlyFreeRules() && licenseUtil.isActiveRegistration() ;
 		}
 		LicenseValidationResult result = licenseUtil.getValidationResult();
 		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
 			return true;
 		}
 		return payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
+	}
+	
+	protected boolean canHaveFreeRule() {
+		return false;
 	}
 
 	protected boolean containsOnlyFreeRules() {
@@ -167,6 +171,4 @@ public abstract class AbstractPreviewWizard extends Wizard {
 	protected abstract boolean needsSummaryPage();
 
 	public abstract void showSummaryPage();
-
-	protected abstract boolean canFinishWithFreeLicense();
 }

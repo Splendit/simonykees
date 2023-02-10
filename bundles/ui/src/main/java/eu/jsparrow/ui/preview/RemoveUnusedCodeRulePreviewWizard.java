@@ -450,10 +450,5 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	protected void commitChanges(IProgressMonitor monitor) throws RefactoringException, ReconcileException {
 		super.commitChanges(monitor);
 		unusedTypesRule.deleteEmptyCompilationUnits();
-	}
-	
-	@Override
-	protected boolean canFinishWithFreeLicense() {
-		return false;
-	}
+	}	
 }
