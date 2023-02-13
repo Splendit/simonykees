@@ -47,8 +47,6 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 	private IJavaProject selectedJavaProjekt;
 	private final StandardLoggerRule rule;
 
-	private RefactoringPipeline refactoringPipeline;
-
 	public LoggerRuleWizard(IJavaProject selectedJavaProjekt, RefactoringRule rule,
 			RefactoringPipeline refactoringPipeline) {
 		super();
@@ -68,12 +66,6 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 	public void addPages() {
 		model = new LoggerRuleWizardPageModel(rule);
 		addPage(new LoggerRuleWizardPage(model));
-	}
-
-	@Override
-	public boolean performCancel() {
-		Activator.setRunning(false);
-		return super.performCancel();
 	}
 
 	@Override

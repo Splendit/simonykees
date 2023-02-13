@@ -68,7 +68,6 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	private List<ICompilationUnit> selectedJavaElements;
 	private Rectangle rectangle;
 
-	private RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 	private RemoveUnusedFieldsRule rule;
 	private RemoveUnusedMethodsRule unusedMethodsRule;
 	private RemoveUnusedTypesRule unusedTypesRule;
@@ -77,6 +76,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 
 	public RemoveUnusedCodeWizard(List<ICompilationUnit> selectedJavaElements) {
 		this.selectedJavaElements = selectedJavaElements;
+		this.refactoringPipeline = new RefactoringPipeline();
 		setNeedsProgressMonitor(true);
 		windowDefaultImage = ResourceHelper.createImage(WINDOW_ICON);
 		Window.setDefaultImage(windowDefaultImage);
@@ -99,12 +99,6 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 		model = new RemoveUnusedCodeWizardPageModel();
 		RemoveUnusedCodeWizardPage page = new RemoveUnusedCodeWizardPage(model);
 		addPage(page);
-	}
-
-	@Override
-	public boolean performCancel() {
-		Activator.setRunning(false);
-		return super.performCancel();
 	}
 
 	@Override

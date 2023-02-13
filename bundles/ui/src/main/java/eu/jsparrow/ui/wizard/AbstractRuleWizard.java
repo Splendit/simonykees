@@ -12,7 +12,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
@@ -41,10 +40,11 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  * @since 2.3.1
  *
  */
-public abstract class AbstractRuleWizard extends Wizard {
+public abstract class AbstractRuleWizard extends AbstractJSparrowWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractRuleWizard.class);
 	private StandaloneStatisticsMetadata statisticsMetadata;
+	protected RefactoringPipeline refactoringPipeline;
 
 	protected void preRefactoring() {
 		StopWatchUtil.start();
@@ -171,5 +171,16 @@ public abstract class AbstractRuleWizard extends Wizard {
 				}
 			}
 		};
+	}
+	
+	@Override
+	public boolean performCancel() {
+		if(super.performCancel()) {
+			if(refactoringPipeline != null) {
+				refactoringPipeline.clearStates();
+			}
+			return true;
+		}
+		return false;
 	}
 }

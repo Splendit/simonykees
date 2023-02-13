@@ -26,7 +26,6 @@ public class RunDefaultProfileImplicitWizard extends AbstractRuleWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunDefaultProfileImplicitWizard.class);
 	
-	private RefactoringPipeline refactoringPipeline;
 	private SelectRulesWizardData selectRulesWizardData;
 
 	public RunDefaultProfileImplicitWizard(RefactoringPipeline refactoringPipeline,

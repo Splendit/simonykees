@@ -62,7 +62,6 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 	private IJavaProject selectedJavaProjekt;
 	private List<ICompilationUnit> selectedJavaElements;
 
-	private RefactoringPipeline refactoringPipeline;
 	private List<FieldMetaData> metadata;
 	private FieldsRenamingRule renameFieldsRule;
 
@@ -88,12 +87,6 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 		model = new ConfigureRenameFieldsRuleWizardPageModel();
 		ConfigureRenameFieldsRuleWizardPage page = new ConfigureRenameFieldsRuleWizardPage(model);
 		addPage(page);
-	}
-
-	@Override
-	public boolean performCancel() {
-		Activator.setRunning(false);
-		return super.performCancel();
 	}
 
 	@Override
