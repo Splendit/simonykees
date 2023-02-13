@@ -204,7 +204,6 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		}
 	}
 
-
 	@Override
 	protected void prepareForCommit(IProgressMonitor monitor) {
 		Arrays.asList(getPages())
@@ -239,7 +238,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	public boolean performCancel() {
 		if (selectRulesWizardData != null) {
 			reuseRefactoringPipeline = true;
-
+			
 			Display.getCurrent()
 				.asyncExec(() -> {
 					Job job = createJobToShowSelectRulesWizard(refactoringPipeline, selectRulesWizardData,
@@ -248,11 +247,9 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 					job.setUser(true);
 					job.schedule();
 				});
-
-		} else {
-			Activator.setRunning(false);
+			return true;
 		}
-		return true;
+		return super.performCancel();
 	}
 
 	public static Job createJobToShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,

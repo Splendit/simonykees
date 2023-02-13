@@ -11,7 +11,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
@@ -26,6 +25,7 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
+import eu.jsparrow.ui.wizard.AbstractJSparrowWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -35,7 +35,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  * @since 2.3.1
  *
  */
-public abstract class AbstractPreviewWizard extends Wizard {
+public abstract class AbstractPreviewWizard extends AbstractJSparrowWizard {
 
 	protected RefactoringPipeline refactoringPipeline;
 	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
@@ -44,12 +44,6 @@ public abstract class AbstractPreviewWizard extends Wizard {
 	protected AbstractPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 		this.refactoringPipeline = refactoringPipeline;
-	}
-
-	@Override
-	public boolean performCancel() {
-		Activator.setRunning(false);
-		return super.performCancel();
 	}
 
 	@Override
