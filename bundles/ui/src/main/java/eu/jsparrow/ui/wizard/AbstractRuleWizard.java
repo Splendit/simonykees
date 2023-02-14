@@ -40,7 +40,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  * @since 2.3.1
  *
  */
-public abstract class AbstractRuleWizard extends AbstractJSparrowWizard {
+public abstract class AbstractRuleWizard extends AbstractRefactoringWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractRuleWizard.class);
 	private StandaloneStatisticsMetadata statisticsMetadata;

@@ -7,7 +7,7 @@ import org.eclipse.swt.widgets.Shell;
 import eu.jsparrow.ui.Activator;
 
 @SuppressWarnings("nls")
-public abstract class AbstractJSparrowWizard extends Wizard {
+public abstract class AbstractRefactoringWizard extends Wizard {
 
 	private static final String CANCEL_DIALOG_MESSAGE = "Cancelling stops the complete refactoring process!";
 	private static final String CANCEL_DIALOG_TITLE = "Confirm Cancel";

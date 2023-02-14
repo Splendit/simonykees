@@ -25,7 +25,7 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
-import eu.jsparrow.ui.wizard.AbstractJSparrowWizard;
+import eu.jsparrow.ui.wizard.AbstractRefactoringWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -35,7 +35,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  * @since 2.3.1
  *
  */
-public abstract class AbstractPreviewWizard extends AbstractJSparrowWizard {
+public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 
 	protected RefactoringPipeline refactoringPipeline;
 	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
