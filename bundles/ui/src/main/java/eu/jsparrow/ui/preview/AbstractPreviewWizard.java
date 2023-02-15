@@ -35,6 +35,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  * @since 2.3.1
  *
  */
+@SuppressWarnings("nls")
 public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 
 	protected RefactoringPipeline refactoringPipeline;
@@ -93,9 +94,14 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 		}
 	}
 
-	protected void showSuccessfulCommitMessage() {
-		SimonykeesMessageDialog.openMessageDialog(getShell(), "Changes committed successfully.", //$NON-NLS-1$
-				MessageDialog.INFORMATION);
+	protected void showCommitSuccessfulDialog() {
+		new MessageDialog(getShell(), "Commit Successful", null, "Changes committed successfully!",
+				MessageDialog.INFORMATION, 0, "OK").open();
+	}
+	
+	protected void showNoChangesToCommitDialog() {
+		new MessageDialog(getShell(), "No Changes to Commit", null, "Cannot commit because all changes have been deselected!",
+				MessageDialog.INFORMATION, 0, "OK").open();
 	}
 
 	protected Map<ICompilationUnit, DocumentChange> getChangesForRule(RefactoringRule rule) {
@@ -136,9 +142,7 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 		if (refactoringPipeline.hasAnyValidChange()) {
 			return true;
 		}
-		SimonykeesMessageDialog.openMessageDialog(getShell(),
-				"Cannot commit because all changes have been deselected.", //$NON-NLS-1$
-				MessageDialog.ERROR);
+		showNoChangesToCommitDialog();
 		return false;
 	}
 
@@ -156,7 +160,7 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 
 		try {
 			getContainer().run(true, true, job);
-			showSuccessfulCommitMessage();
+			showCommitSuccessfulDialog();
 		} catch (InvocationTargetException | InterruptedException e) {
 			SimonykeesMessageDialog.openMessageDialog(getShell(),
 					Messages.RefactoringPreviewWizard_err_runnableWithProgress,
@@ -189,4 +193,5 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 	public abstract void showSummaryPage();
 
 	protected abstract void prepareForCommit(IProgressMonitor monitor);
+
 }
