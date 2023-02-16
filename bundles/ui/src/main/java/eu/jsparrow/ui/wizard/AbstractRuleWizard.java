@@ -12,11 +12,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -31,8 +28,8 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.preview.PreviewWizardDialog;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
-import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
@@ -43,10 +40,11 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  * @since 2.3.1
  *
  */
-public abstract class AbstractRuleWizard extends Wizard {
+public abstract class AbstractRuleWizard extends AbstractRefactoringWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractRuleWizard.class);
 	private StandaloneStatisticsMetadata statisticsMetadata;
+	protected RefactoringPipeline refactoringPipeline;
 
 	protected void preRefactoring() {
 		StopWatchUtil.start();
@@ -126,47 +124,11 @@ public abstract class AbstractRuleWizard extends Wizard {
 		RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline,
 				statisticsMetadata, selectRulesWizardData);
 
-		final WizardDialog dialog = new WizardDialog(shell, previewWizard) {
-
-			@Override
-			protected void nextPressed() {
-				((RefactoringPreviewWizard) getWizard()).pressedNext();
-				super.nextPressed();
-			}
-
-			@Override
-			protected void backPressed() {
-				((RefactoringPreviewWizard) getWizard()).pressedBack();
-				super.backPressed();
-			}
-
-			@Override
-			protected void createButtonsForButtonBar(Composite parent) {
-				createButton(parent, 9, Messages.SelectRulesWizard_Summary, false);
-				super.createButtonsForButtonBar(parent);
-			}
-
-			@Override
-			protected void buttonPressed(int buttonId) {
-				if (buttonId == 9) {
-					summaryButtonPressed();
-				} else {
-					super.buttonPressed(buttonId);
-				}
-			}
-
-			private void summaryButtonPressed() {
-				if (getCurrentPage() instanceof RefactoringPreviewWizardPage) {
-					previewWizard.updateViewsOnNavigation(getCurrentPage());
-					((RefactoringPreviewWizardPage) getCurrentPage()).disposeControl();
-				}
-				showPage(previewWizard.getSummaryPage());
-			}
-		};
-
 		Rectangle rectangle = Display.getCurrent()
 			.getPrimaryMonitor()
 			.getBounds();
+
+		final PreviewWizardDialog dialog = new PreviewWizardDialog(shell, previewWizard);
 
 		// maximizes the RefactoringPreviewWizard
 		dialog.setPageSize(rectangle.width, rectangle.height);
@@ -209,5 +171,16 @@ public abstract class AbstractRuleWizard extends Wizard {
 				}
 			}
 		};
+	}
+	
+	@Override
+	public boolean performCancel() {
+		if(super.performCancel()) {
+			if(refactoringPipeline != null) {
+				refactoringPipeline.clearStates();
+			}
+			return true;
+		}
+		return false;
 	}
 }

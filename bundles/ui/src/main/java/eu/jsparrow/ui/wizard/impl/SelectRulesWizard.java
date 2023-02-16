@@ -48,7 +48,6 @@ import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
@@ -81,7 +80,6 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	private final Collection<IJavaProject> javaProjects;
 	private final List<RefactoringRule> rules;
 
-	private RefactoringPipeline refactoringPipeline;
 	private Image windowIcon;
 	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
 	private final SelectRulesWizardData selectRulesWizardData;
@@ -229,13 +227,6 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 	public void showSimonykeesUpdateLicenseDialog() {
 		page.showSimonykeesUpdateLicenseDialog();
-	}
-
-	@Override
-	public boolean performCancel() {
-		Activator.setRunning(false);
-		refactoringPipeline.clearStates();
-		return super.performCancel();
 	}
 
 	@Override

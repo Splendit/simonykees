@@ -23,7 +23,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -45,8 +44,8 @@ import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.preview.PreviewWizardDialog;
 import eu.jsparrow.ui.preview.RemoveUnusedCodeRulePreviewWizard;
-import eu.jsparrow.ui.preview.RemoveUnusedCodeRulePreviewWizardPage;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -62,7 +61,6 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	private static final Logger logger = LoggerFactory.getLogger(RemoveUnusedCodeWizard.class);
 
 	private static final String WINDOW_ICON = "icons/jsparrow-icon-16-003.png"; //$NON-NLS-1$
-	private static final int SUMMARY_BUTTON_ID = 9;
 
 	private RemoveUnusedCodeWizardPageModel model;
 
@@ -70,7 +68,6 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	private List<ICompilationUnit> selectedJavaElements;
 	private Rectangle rectangle;
 
-	private RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 	private RemoveUnusedFieldsRule rule;
 	private RemoveUnusedMethodsRule unusedMethodsRule;
 	private RemoveUnusedTypesRule unusedTypesRule;
@@ -79,6 +76,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 
 	public RemoveUnusedCodeWizard(List<ICompilationUnit> selectedJavaElements) {
 		this.selectedJavaElements = selectedJavaElements;
+		this.refactoringPipeline = new RefactoringPipeline();
 		setNeedsProgressMonitor(true);
 		windowDefaultImage = ResourceHelper.createImage(WINDOW_ICON);
 		Window.setDefaultImage(windowDefaultImage);
@@ -101,12 +99,6 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 		model = new RemoveUnusedCodeWizardPageModel();
 		RemoveUnusedCodeWizardPage page = new RemoveUnusedCodeWizardPage(model);
 		addPage(page);
-	}
-
-	@Override
-	public boolean performCancel() {
-		Activator.setRunning(false);
-		return super.performCancel();
 	}
 
 	@Override
@@ -156,7 +148,8 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 						options);
 				List<UnusedMethodWrapper> unusedMethods = findUnusedMethods(unusedMethodsEngine, subMonitor,
 						methodSubmonitorSplit, options);
-				List<UnusedTypeWrapper> unusedTypes = findUnusedTypes(unusedTypeEngine, subMonitor, typesSubmonitorSplit, options, unusedMethods);
+				List<UnusedTypeWrapper> unusedTypes = findUnusedTypes(unusedTypeEngine, subMonitor,
+						typesSubmonitorSplit, options, unusedMethods);
 
 				if (unusedFields.isEmpty() && unusedMethods.isEmpty() && unusedTypes.isEmpty()) {
 					WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
@@ -259,25 +252,25 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 		}
 		return unusedMethods;
 	}
-	
+
 	private List<UnusedTypeWrapper> findUnusedTypes(UnusedTypesEngine unusedTypeEngine, SubMonitor subMonitor,
 			int typesSubmonitorSplit, Map<String, Boolean> options, List<UnusedMethodWrapper> unusedMethods) {
-		
 
-		if(!hasClassMemberOptionsChecked(model, "class")) {
+		if (!hasClassMemberOptionsChecked(model, "class")) {
 			return Collections.emptyList();
 		}
-		
+
 		SubMonitor removeUnusedTypesSubMonitor = subMonitor.split(typesSubmonitorSplit);
 		removeUnusedTypesSubMonitor.setWorkRemaining(selectedJavaElements.size());
 		removeUnusedTypesSubMonitor.setTaskName("Finding unused types");
-		
-		List<UnusedTypeWrapper> unusedTypes = unusedTypeEngine.findUnusedTypes(selectedJavaElements, options, removeUnusedTypesSubMonitor, unusedMethods);
-		
-		if(removeUnusedTypesSubMonitor.isCanceled()) {
+
+		List<UnusedTypeWrapper> unusedTypes = unusedTypeEngine.findUnusedTypes(selectedJavaElements, options,
+				removeUnusedTypesSubMonitor, unusedMethods);
+
+		if (removeUnusedTypesSubMonitor.isCanceled()) {
 			return Collections.emptyList();
 		}
-		
+
 		return unusedTypes;
 	}
 
@@ -292,10 +285,10 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 	}
 
 	private int calcFieldsSubMonitorSplit(boolean fieldsChecked, boolean methodsChecked, boolean typesChecked) {
-		if(fieldsChecked) {
-			if(methodsChecked && typesChecked) {
+		if (fieldsChecked) {
+			if (methodsChecked && typesChecked) {
 				return 20;
-			} else if(methodsChecked || typesChecked) {
+			} else if (methodsChecked || typesChecked) {
 				return 30;
 			} else {
 				return 70;
@@ -370,50 +363,7 @@ public class RemoveUnusedCodeWizard extends AbstractRuleWizard {
 					return;
 				}
 
-				final WizardDialog dialog = new WizardDialog(shell, removeUnusedCodePreviewWizard) {
-					@Override
-					protected void nextPressed() {
-						((RemoveUnusedCodeRulePreviewWizard) getWizard()).pressedNext();
-						super.nextPressed();
-					}
-
-					@Override
-					protected void backPressed() {
-						((RemoveUnusedCodeRulePreviewWizard) getWizard()).pressedBack();
-						super.backPressed();
-					}
-
-					@Override
-					protected void createButtonsForButtonBar(Composite parent) {
-						createButton(parent, SUMMARY_BUTTON_ID, Messages.RemoveUnusedCodeWizard_summaryButtonName,
-								false);
-						super.createButtonsForButtonBar(parent);
-					}
-
-					@Override
-					protected void buttonPressed(int buttonId) {
-						if (buttonId == SUMMARY_BUTTON_ID) {
-							summaryButtonPressed();
-						} else {
-							super.buttonPressed(buttonId);
-						}
-					}
-
-					private void summaryButtonPressed() {
-						/*
-						 * If summary button is pressed on any page that is not
-						 * Summary page, views have to be check for change and
-						 * updated, and preview control has to be disposed on
-						 * current page. If it is already on Summary page, just
-						 * refresh.
-						 */
-						if (getCurrentPage() instanceof RemoveUnusedCodeRulePreviewWizardPage) {
-							removeUnusedCodePreviewWizard.updateViewsOnNavigation(getCurrentPage());
-							((RemoveUnusedCodeRulePreviewWizardPage) getCurrentPage()).disposeControl();
-						}
-						showPage(removeUnusedCodePreviewWizard.getSummaryPage());
-					}
-				};
+				final WizardDialog dialog = new PreviewWizardDialog(shell, removeUnusedCodePreviewWizard);
 
 				// maximizes the RefactoringPreviewWizard
 				dialog.setPageSize(rectangle.width, rectangle.height);

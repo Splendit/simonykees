@@ -6,10 +6,11 @@ import java.util.List;
 import eu.jsparrow.i18n.Messages;
 
 /**
- * Profile object
+ * Represents the custom profile in the wizard to select rules for re-factoring.
+ * It indicates a set of selected rules which have not yet been saved as
+ * profile.
  * 
- * @author Andreja Sambolec
- * @since 1.2
+ * @since 4.15.0
  *
  */
 public class CustomProfile implements SimonykeesProfile {

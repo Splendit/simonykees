@@ -2,12 +2,10 @@ package eu.jsparrow.ui.preview;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.compare.CompareViewerSwitchingPane;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
@@ -71,29 +69,15 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private StatisticsSection statisticsSection;
 	private StatisticsSectionUpdater statisticsUpdater;
 
-	private ICompilationUnit currentCompilationUnit;
 	private IChangePreviewViewer currentPreviewViewer;
 	private CheckboxTableViewer viewer;
-	private Map<ICompilationUnit, DocumentChange> changesForRule;
-	private RefactoringRule rule;
-	private List<Image>disposables = new ArrayList<>();
+	private List<Image> disposables = new ArrayList<>();
 
-
-	/*
-	 * map that contains all names of working copies and working copies that
-	 * were unselected for this page
-	 */
-	private Map<String, ICompilationUnit> unselected = new HashMap<>();
 	private Composite previewContainer;
-	/*
-	 * map that contains working copies that are unselected in one iteration
-	 * when this page is active
-	 */
-	private List<ICompilationUnit> unselectedChange = new ArrayList<>();
 	protected IStatus fSelectionStatus;
 
 	private RefactoringPreviewWizardModel wizardModel;
-
+	private RefactoringPreviewWizardPageModel model;
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule, RefactoringRule rule,
@@ -101,6 +85,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			StatisticsSectionUpdater statisticsUpdater) {
 		super(rule.getRuleDescription()
 			.getName());
+		this.model = new RefactoringPreviewWizardPageModel();
 		this.statisticsUpdater = statisticsUpdater;
 		CustomTextEditChangePreviewViewer.setEnableDiffView(enabled);
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
@@ -116,13 +101,13 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			.stream()
 			.forEach(x -> wizardModel.addFileToRule(rule, x.getHandleIdentifier()));
 
-		this.changesForRule = changesForRule;
-		this.rule = rule;
+		this.setChangesForRule(changesForRule);
+		this.setRule(rule);
 
-		this.currentCompilationUnit = changesForRule.keySet()
+		this.setCurrentCompilationUnit(changesForRule.keySet()
 			.stream()
 			.findFirst()
-			.orElse(null);
+			.orElse(null));
 
 		fSelectionStatus = new StatusInfo();
 	}
@@ -130,15 +115,14 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	public void setTotalStatisticsSection(StatisticsSection statisticsSection) {
 		this.statisticsSection = statisticsSection;
 	}
-	
+
 	private Optional<StatisticsSection> getTotalStatisticsSection() {
 		return Optional.ofNullable(this.statisticsSection);
 	}
-	
+
 	private void initializeDataBindings() {
 		this.ruleStatisticsSection.initializeDataBindings();
 		getTotalStatisticsSection().ifPresent(StatisticsSection::initializeDataBindings);
-
 	}
 
 	/*
@@ -173,9 +157,9 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		createFileView(sashForm);
 		createPreviewViewer(sashForm);
 
-		if (!changesForRule.keySet()
+		if (!getChangesForRule().keySet()
 			.isEmpty()) {
-			this.currentCompilationUnit = (ICompilationUnit) viewer.getElementAt(0);
+			this.setCurrentCompilationUnit((ICompilationUnit) viewer.getElementAt(0));
 		}
 		/*
 		 * sets height relation between children to be 1:3 when it has two
@@ -183,7 +167,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		 */
 		sashForm.setWeights(1, 3);
 		List<Image> images = getTotalStatisticsSection().map(statistics -> statistics.createView(container))
-				.orElse(Collections.emptyList());
+			.orElse(Collections.emptyList());
 		disposables.addAll(images);
 		initializeDataBindings();
 	}
@@ -216,7 +200,6 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		viewer.addCheckStateListener(createCheckStateListener());
 
 		populateFileView();
-
 	}
 
 	protected void populateFileView() {
@@ -227,37 +210,14 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				.removeAll();
 		}
 		// adding all elements in table and checking appropriately
-		changesForRule.keySet()
+		getChangesForRule().keySet()
 			.stream()
 			.forEach(entry -> {
 				viewer.add(entry);
 				viewer.setChecked(entry,
-						!(unselected.containsKey(entry.getElementName()) || unselectedChange.contains(entry)));
+						!(getUnselected().containsKey(entry.getElementName())
+								|| getUnselectedChange().contains(entry)));
 			});
-	}
-
-	/**
-	 * Returns the class name of an {@link ICompilationUnit}, including ".java"
-	 * 
-	 * @param compilationUnit
-	 * @return
-	 */
-	private String getClassNameString(ICompilationUnit compilationUnit) {
-		return compilationUnit.getElementName();
-	}
-
-	/**
-	 * Returns the path of an {@link ICompilationUnit} without leading slash
-	 * (the same as in the Externalize Strings refactoring view).
-	 * 
-	 * @param compilationUnit
-	 * @return
-	 */
-	private String getPathString(ICompilationUnit compilationUnit) {
-		String temp = compilationUnit.getParent()
-			.getPath()
-			.toString();
-		return StringUtils.startsWith(temp, "/") ? StringUtils.substring(temp, 1) : temp; //$NON-NLS-1$
 	}
 
 	private void createPreviewViewer(Composite parent) {
@@ -279,8 +239,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 			if (sel.size() == 1) {
 				ICompilationUnit newSelection = (ICompilationUnit) sel.getFirstElement();
-				if (!newSelection.equals(currentCompilationUnit)) {
-					currentCompilationUnit = newSelection;
+				if (!newSelection.equals(getCurrentCompilationUnit())) {
+					this.setCurrentCompilationUnit(newSelection);
 					if (isCurrentPage()) {
 						populatePreviewViewer();
 					}
@@ -297,26 +257,26 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				 * remove from unselected and recalculate rules for this
 				 * compilationUnit
 				 */
-				if (unselected.containsKey(newSelection.getElementName())) {
-					unselected.remove(newSelection.getElementName());
+				if (getUnselected().containsKey(newSelection.getElementName())) {
+					getUnselected().remove(newSelection.getElementName());
 				}
-				if (unselectedChange.contains(newSelection)) {
-					unselectedChange.remove(newSelection);
+				if (getUnselectedChange().contains(newSelection)) {
+					getUnselectedChange().remove(newSelection);
 				}
 				clearCounterForChangedFile(newSelection);
-				wizardModel.addFileToRule(rule, newSelection.getHandleIdentifier());
+				wizardModel.addFileToRule(getRule(), newSelection.getHandleIdentifier());
 				immediatelyUpdateForSelected(newSelection);
 			} else {
 				// add in list with unselected classes
-				if (!unselected.containsKey(newSelection.getElementName())) {
-					unselectedChange.add(newSelection);
+				if (!getUnselected().containsKey(newSelection.getElementName())) {
+					getUnselectedChange().add(newSelection);
 				}
 				clearCounterForChangedFile(newSelection);
-				wizardModel.removeFileFromRule(rule, newSelection.getHandleIdentifier());
+				wizardModel.removeFileFromRule(getRule(), newSelection.getHandleIdentifier());
 			}
 			// This method simply counts checked items in the table. Not very
 			// MVC, and should be replaced with a proper solution
-			statisticsUpdater.update(ruleStatisticsSection, rule, wizardModel);
+			statisticsUpdater.update(ruleStatisticsSection, getRule(), wizardModel);
 		};
 	}
 
@@ -327,7 +287,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	public void setVisible(boolean visible) {
 		if (visible) {
 			populatePreviewViewer();
-			if (rule instanceof StandardLoggerRule) {
+			if (getRule() instanceof StandardLoggerRule) {
 				doStatusUpdate();
 			}
 		} else {
@@ -337,7 +297,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	}
 
 	private void immediatelyUpdateForSelected(ICompilationUnit newSelection) {
-		((RefactoringPreviewWizard) getWizard()).imediatelyUpdateForSelected(newSelection, rule);
+		((RefactoringPreviewWizard) getWizard()).imediatelyUpdateForSelected(newSelection, getRule());
 	}
 
 	private void populatePreviewViewer() {
@@ -349,7 +309,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 		currentPreviewViewer.setInput(CustomTextEditChangePreviewViewer.createInput(getCurrentDocumentChange()));
 		((CompareViewerSwitchingPane) currentPreviewViewer.getControl())
-			.setTitleArgument(currentCompilationUnit.getElementName());
+			.setTitleArgument(getCurrentCompilationUnit().getElementName());
 
 		currentPreviewViewer.getControl()
 			.getParent()
@@ -357,7 +317,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	}
 
 	private DocumentChange getCurrentDocumentChange() {
-		if (null == changesForRule.get(currentCompilationUnit)) {
+		if (null == getChangesForRule().get(getCurrentCompilationUnit())) {
 			DocumentChange documentChange = null;
 			try {
 				/*
@@ -367,49 +327,15 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				 * document change with text type java but with no changes.
 				 */
 				TextEdit edit = new MultiTextEdit();
-				return RefactoringUtil.generateDocumentChange(currentCompilationUnit.getElementName(),
-						new Document(currentCompilationUnit.getSource()), edit);
+				return RefactoringUtil.generateDocumentChange(getCurrentCompilationUnit().getElementName(),
+						new Document(getCurrentCompilationUnit().getSource()), edit);
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
 			}
 			return documentChange;
 		} else {
-			return changesForRule.get(currentCompilationUnit);
+			return getChangesForRule().get(getCurrentCompilationUnit());
 		}
-	}
-
-	public List<ICompilationUnit> getUnselectedChange() {
-		return unselectedChange;
-	}
-
-	/**
-	 * When page is no more in focus, all changes are already stored and
-	 * calculated, so unselected changes go to unselected map and cleans
-	 * unselectedChanges list.
-	 */
-	public void applyUnselectedChange() {
-		unselectedChange.stream()
-			.forEach(unit -> unselected.put(unit.getElementName(), unit));
-		unselectedChange.clear();
-	}
-
-	public RefactoringRule getRule() {
-		return rule;
-	}
-
-	/**
-	 * Updates changes for this page. IF there were changes in currently
-	 * displayed working copy, it needs to be updated too.
-	 * 
-	 * @param changesForRule
-	 */
-	public void update(Map<ICompilationUnit, DocumentChange> changesForRule) {
-		this.changesForRule = changesForRule;
-		changesForRule.keySet()
-			.stream()
-			.filter(unit -> unit.getElementName()
-				.equals(currentCompilationUnit.getElementName()) && !unit.equals(currentCompilationUnit))
-			.forEach(unit -> currentCompilationUnit = unit);
 	}
 
 	/**
@@ -428,7 +354,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		if (forcePreviewViewerUpdate) {
 			populatePreviewViewer();
 		}
-		viewer.setSelection(new StructuredSelection(currentCompilationUnit));
+		viewer.setSelection(new StructuredSelection(getCurrentCompilationUnit()));
 	}
 
 	/**
@@ -487,7 +413,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				.getApplicationsForFile(newSelection.getHandleIdentifier()))
 			.forEach(FileChangeCount::clear);
 	}
-	
+
 	@Override
 	public void dispose() {
 		ruleStatisticsSection.dispose();
@@ -496,4 +422,55 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		super.dispose();
 	}
 
+	String getClassNameString(ICompilationUnit compilationUnit) {
+		return model.getClassNameString(compilationUnit);
+	}
+
+	String getPathString(ICompilationUnit compilationUnit) {
+		return model.getPathString(compilationUnit);
+	}
+
+	public List<ICompilationUnit> getUnselectedChange() {
+		return model.getUnselectedChange();
+	}
+
+	public void applyUnselectedChange() {
+		model.applyUnselectedChange();
+	}
+
+	public RefactoringRule getRule() {
+		return model.getRule();
+	}
+
+	public void update(Map<ICompilationUnit, DocumentChange> changesForRule) {
+		model.update(changesForRule);
+	}
+
+	ICompilationUnit getCurrentCompilationUnit() {
+		return model.getCurrentCompilationUnit();
+	}
+
+	void setCurrentCompilationUnit(ICompilationUnit currentCompilationUnit) {
+		model.setCurrentCompilationUnit(currentCompilationUnit);
+	}
+
+	public Map<ICompilationUnit, DocumentChange> getChangesForRule() {
+		return model.getChangesForRule();
+	}
+
+	public void setChangesForRule(Map<ICompilationUnit, DocumentChange> changesForRule) {
+		model.setChangesForRule(changesForRule);
+	}
+
+	public void setRule(RefactoringRule rule) {
+		model.setRule(rule);
+	}
+
+	public Map<String, ICompilationUnit> getUnselected() {
+		return model.getUnselected();
+	}
+
+	public void setUnselected(Map<String, ICompilationUnit> unselected) {
+		model.setUnselected(unselected);
+	}
 }
