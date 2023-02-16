@@ -417,11 +417,6 @@ public class RemoveUnusedCodeRulePreviewWizard extends AbstractPreviewWizard {
 	}
 
 	@Override
-	protected boolean needsSummaryPage() {
-		return true;
-	}
-
-	@Override
 	public void showSummaryPage() {
 		/*
 		 * If summary button is pressed on any page that is not Summary page,

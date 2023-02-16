@@ -7,6 +7,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardContainer;
@@ -38,6 +39,10 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 @SuppressWarnings("nls")
 public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 
+	private static final String NO_CHANGES_TO_COMMIT_MESSAGE = "Cannot commit because all changes have been deselected!";
+	private static final String NO_CHANGES_TO_COMMIT_TITLE = "No Changes to Commit";
+	private static final String COMMIT_SUCCESSFUL_MESSAGE = "Changes committed successfully!";
+	private static final String COMMIT_SUCCESSFUL_TITLE = "Commit Successful";
 	protected RefactoringPipeline refactoringPipeline;
 	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
 	private LicenseUtil licenseUtil = LicenseUtil.get();
@@ -94,14 +99,9 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 		}
 	}
 
-	protected void showCommitSuccessfulDialog() {
-		new MessageDialog(getShell(), "Commit Successful", null, "Changes committed successfully!",
-				MessageDialog.INFORMATION, 0, "OK").open();
-	}
-	
-	protected void showNoChangesToCommitDialog() {
-		new MessageDialog(getShell(), "No Changes to Commit", null, "Cannot commit because all changes have been deselected!",
-				MessageDialog.INFORMATION, 0, "OK").open();
+	private void showDialogOnPerformFinish(String dialogTitle, String dialogMessage) {
+		new MessageDialog(getShell(), dialogTitle, null, dialogMessage,
+				MessageDialog.INFORMATION, 0, IDialogConstants.OK_LABEL).open();
 	}
 
 	protected Map<ICompilationUnit, DocumentChange> getChangesForRule(RefactoringRule rule) {
@@ -132,6 +132,7 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 			return true;
 		}
 		if (!hasAnyValidChange()) {
+			showDialogOnPerformFinish(NO_CHANGES_TO_COMMIT_TITLE, NO_CHANGES_TO_COMMIT_MESSAGE);
 			return false;
 		}
 		commitChanges();
@@ -139,11 +140,7 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 	}
 
 	protected boolean hasAnyValidChange() {
-		if (refactoringPipeline.hasAnyValidChange()) {
-			return true;
-		}
-		showNoChangesToCommitDialog();
-		return false;
+		return refactoringPipeline.hasAnyValidChange();
 	}
 
 	protected void commitChanges() {
@@ -160,7 +157,7 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 
 		try {
 			getContainer().run(true, true, job);
-			showCommitSuccessfulDialog();
+			showDialogOnPerformFinish(COMMIT_SUCCESSFUL_TITLE, COMMIT_SUCCESSFUL_MESSAGE);
 		} catch (InvocationTargetException | InterruptedException e) {
 			SimonykeesMessageDialog.openMessageDialog(getShell(),
 					Messages.RefactoringPreviewWizard_err_runnableWithProgress,
@@ -175,6 +172,10 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 		licenseUtil.reserveQuantity(sum);
 	}
 
+	protected boolean needsSummaryPage() {
+		return true;
+	}
+
 	/**
 	 * Called from {@link WizardDialog} when Next button is pressed. Triggers
 	 * recalculation if needed. Disposes control from current page which wont be
@@ -187,8 +188,6 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 	 * all controls to be recalculated and created when needed
 	 */
 	protected abstract void pressedBack();
-
-	protected abstract boolean needsSummaryPage();
 
 	public abstract void showSummaryPage();
 
