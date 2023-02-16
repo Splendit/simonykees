@@ -10,8 +10,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import eu.jsparrow.rules.common.RefactoringRule;
 
 /**
- * Stores a set of {@link IJavaProject} instances and the corresponding list of
- * all available {@link RefactoringRule} instances.
+ * Stores informations which are necessary to open a wizard to select rules for
+ * re-factoring.
+ * 
+ * @since 4.15.0
  */
 public class SelectRulesWizardData {
 	private final List<RefactoringRule> rulesChoice;
@@ -42,7 +44,7 @@ public class SelectRulesWizardData {
 	}
 
 	public List<RefactoringRule> getCustomRulesSelection() {
-		if(customRulesSelection != null) {
+		if (customRulesSelection != null) {
 			return customRulesSelection;
 		}
 		return Collections.emptyList();

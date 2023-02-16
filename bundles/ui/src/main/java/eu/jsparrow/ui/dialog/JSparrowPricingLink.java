@@ -2,6 +2,12 @@ package eu.jsparrow.ui.dialog;
 
 import eu.jsparrow.i18n.Messages;
 
+/**
+ * Needed to standardize the text for links to the jSparrpw pricing page.
+ * 
+ * @since 4.15.0
+ * 
+ */
 public enum JSparrowPricingLink {
 	UPGRADE_LICENSE_TO_APPLY_ALL_RULES(Messages.JSparrowPricingLink_upgradeLicenceToApplyAllRules),
 	TO_UNLOCK_ALL_RULES_REGISTER_FOR_PREMIUM_LICENSE(
