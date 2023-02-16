@@ -8,6 +8,12 @@ import org.eclipse.swt.widgets.Shell;
 
 import eu.jsparrow.i18n.Messages;
 
+/**
+ * Intended to be used for preview wizards which are subclasses of
+ * {@link AbstractPreviewWizard}.
+ * 
+ * @since 4.15.0
+ */
 public class PreviewWizardDialog extends WizardDialog {
 
 	public static final int SUMMARY_BUTTON_ID = 9;

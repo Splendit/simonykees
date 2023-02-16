@@ -11,6 +11,12 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.rules.common.RefactoringRule;
 
+/**
+ * Model class intended to be used by wizard pages of re-factoring preview
+ * wizards which show the Issues found in a Java file.
+ * 
+ * @since 4.15.0
+ */
 public class RefactoringPreviewWizardPageModel {
 	private ICompilationUnit currentCompilationUnit;
 	private Map<ICompilationUnit, DocumentChange> changesForRule;
@@ -112,5 +118,5 @@ public class RefactoringPreviewWizardPageModel {
 
 	public void setUnselected(Map<String, ICompilationUnit> unselected) {
 		this.unselected = unselected;
-	}	
+	}
 }

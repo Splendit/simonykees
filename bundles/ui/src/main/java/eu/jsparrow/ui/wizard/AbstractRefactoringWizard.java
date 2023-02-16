@@ -6,6 +6,12 @@ import org.eclipse.swt.widgets.Shell;
 
 import eu.jsparrow.ui.Activator;
 
+/**
+ * Intended to be extended by classes which are used in connection with the
+ * re-factoring Java files by the-rules offered by jSparrow.
+ * 
+ * @since 4.15.0
+ */
 @SuppressWarnings("nls")
 public abstract class AbstractRefactoringWizard extends Wizard {
 
