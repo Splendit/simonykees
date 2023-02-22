@@ -24,6 +24,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
+import eu.jsparrow.ui.preview.PreviewWizardDialog;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -46,8 +47,6 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 	private IJavaProject selectedJavaProjekt;
 	private final StandardLoggerRule rule;
 
-	private RefactoringPipeline refactoringPipeline;
-
 	public LoggerRuleWizard(IJavaProject selectedJavaProjekt, RefactoringRule rule,
 			RefactoringPipeline refactoringPipeline) {
 		super();
@@ -67,12 +66,6 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 	public void addPages() {
 		model = new LoggerRuleWizardPageModel(rule);
 		addPage(new LoggerRuleWizardPage(model));
-	}
-
-	@Override
-	public boolean performCancel() {
-		Activator.setRunning(false);
-		return super.performCancel();
 	}
 
 	@Override
@@ -152,7 +145,10 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactorer));
+
+				RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactorer);
+
+				final PreviewWizardDialog dialog = new PreviewWizardDialog(shell, previewWizard);
 
 				// maximizes the RefactoringPreviewWizard
 				dialog.setPageSize(rectangle.width, rectangle.height);

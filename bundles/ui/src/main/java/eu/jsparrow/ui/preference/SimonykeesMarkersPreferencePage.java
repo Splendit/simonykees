@@ -29,6 +29,7 @@ import org.eclipse.ui.PlatformUI;
 import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.preference.marker.CheckboxTreeViewerWrapper;
 import eu.jsparrow.ui.preference.marker.MarkerContentProvider;
 import eu.jsparrow.ui.preference.marker.MarkerItemWrapper;
@@ -71,7 +72,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		if (licenseUtil.isFreeLicense()) {
 			Link jSparrowLink = new Link(group, SWT.NONE);
 			jSparrowLink.setFont(parent.getFont());
-			jSparrowLink.setText(Messages.SimonykeesMarkersPreferencePage_to_be_able_to_use_jsparrow_markers);
+			jSparrowLink.setText(JSparrowPricingLink.TO_USE_JSPARROW_MARKERS_UPGRADE_HERE.getText());
 			jSparrowLink.setEnabled(true);
 			jSparrowLink.addSelectionListener(new SelectionAdapter() {
 				@Override

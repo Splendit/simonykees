@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -81,6 +82,25 @@ public class RefactoringState {
 	 */
 	public boolean hasChange() {
 		return !changes.isEmpty();
+	}
+
+	/**
+	 * Whether or not any change has been calculated for the given refactoring
+	 * state.
+	 * 
+	 * @return true if at least one rule generated a {@link DocumentChange}
+	 *         which is not null, otherwise false
+	 */
+	public boolean hasAnyValidChange() {
+		if (changes.isEmpty()) {
+			return false;
+		}
+		for (Entry<RefactoringRule, DocumentChange> entry : changes.entrySet()) {
+			if (entry.getValue() != null) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -229,5 +249,15 @@ public class RefactoringState {
 			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_reset_working_copy, workingCopy.getPath()
 				.toString(), e.getMessage()), e);
 		}
+	}
+
+	/**
+	 * When working copy gets unselected in preview view its state has to be
+	 * returned to original
+	 */
+	public void resetAll() {
+		resetWorkingCopy();
+		initialChanges.clear();
+		ignoredRules.clear();
 	}
 }

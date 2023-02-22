@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -17,27 +20,23 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
-import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.api.LicenseType;
-import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.exception.SimonykeesException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.statistics.RuleStatisticsSection;
+import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
 import eu.jsparrow.ui.preview.statistics.StatisticsSectionUpdater;
-import eu.jsparrow.ui.preview.statistics.StatisticsSection;
-import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
+import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
+import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
 
 /**
  * This {@link Wizard} holds a {@link RefactoringPreviewWizardPage} for every
@@ -52,8 +51,6 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	private static final String WINDOW_ICON = "icons/jsparrow-icon-16-003.png"; //$NON-NLS-1$
 
-	private RefactoringPipeline refactoringPipeline;
-
 	private Shell shell;
 
 	private RefactoringPreviewWizardModel model;
@@ -62,22 +59,24 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	protected StatisticsSection summaryPageStatisticsSection;
 	protected StatisticsSectionUpdater updater;
 	private Image windowIcon;
-	
-	private LicenseUtil licenseUtil = LicenseUtil.get();
-	private StandaloneStatisticsMetadata statisticsMetadata;
-	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
 
-	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline, StandaloneStatisticsMetadata standaloneStatisticsMetadata) {
+	private StandaloneStatisticsMetadata statisticsMetadata;
+	private SelectRulesWizardData selectRulesWizardData;
+	private boolean reuseRefactoringPipeline;
+
+	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
+			StandaloneStatisticsMetadata standaloneStatisticsMetadata, SelectRulesWizardData selectRulesWizardData) {
 		this(refactoringPipeline);
 		this.statisticsMetadata = standaloneStatisticsMetadata;
+		this.selectRulesWizardData = selectRulesWizardData;
 	}
-	
+
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
-		super();
+		super(refactoringPipeline);
 		this.statisticsSection = StatisticsSectionFactory.createStatisticsSection(refactoringPipeline);
-		this.summaryPageStatisticsSection = StatisticsSectionFactory.createStatisticsSectionForSummaryPage(refactoringPipeline);
+		this.summaryPageStatisticsSection = StatisticsSectionFactory
+			.createStatisticsSectionForSummaryPage(refactoringPipeline);
 		this.updater = new StatisticsSectionUpdater(statisticsSection, summaryPageStatisticsSection);
-		this.refactoringPipeline = refactoringPipeline;
 		this.shell = PlatformUI.getWorkbench()
 			.getActiveWorkbenchWindow()
 			.getShell();
@@ -102,27 +101,26 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		 * First summary page is created to collect all initial source from
 		 * working copies
 		 */
-		
+
 		model = new RefactoringPreviewWizardModel();
-		refactoringPipeline.getRules()
+		getPipelineRules()
 			.forEach(rule -> {
-				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
+				Map<ICompilationUnit, DocumentChange> changes = getChangesForRule(rule);
 				if (!changes.isEmpty()) {
 					RuleStatisticsSection ruleStats = StatisticsSectionFactory.createRuleStatisticsSection(rule);
-					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish(), ruleStats, updater);
+					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model,
+							canFinish(), ruleStats, updater);
 					previewPage.setTotalStatisticsSection(statisticsSection);
 					addPage(previewPage);
 				}
 			});
-		if (!(refactoringPipeline.getRules()
-			.size() == 1
-				&& refactoringPipeline.getRules()
-					.get(0) instanceof StandardLoggerRule)) {
-			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsMetadata, summaryPageStatisticsSection);
+		if (needsSummaryPage()) {
+			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(),
+					statisticsMetadata, summaryPageStatisticsSection);
 			addPage(summaryPage);
 		}
 	}
-	
+
 	@Override
 	public void updateViewsOnNavigation(IWizardPage page) {
 		if (page instanceof RefactoringPreviewWizardPage) {
@@ -181,7 +179,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 				this.statisticsSection.updateForSelected();
 				this.summaryPageStatisticsSection.updateForSelected();
 				if (monitor.isCanceled()) {
-					refactoringPipeline.clearStates();
+					clearPipelineState();
 				}
 			} catch (RuleException e) {
 				synchronizeWithUIShowError(e);
@@ -201,78 +199,22 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		for (IWizardPage page : getPages()) {
 			if (page instanceof RefactoringPreviewWizardPage) {
 				((RefactoringPreviewWizardPage) page)
-					.update(refactoringPipeline.getChangesForRule(((RefactoringPreviewWizardPage) page).getRule()));
+					.update(getChangesForRule(((RefactoringPreviewWizardPage) page).getRule()));
 			}
 		}
 	}
 
 	@Override
-	public boolean canFinish() {
-		if (licenseUtil.isFreeLicense()) {
-			return licenseUtil.isActiveRegistration()  && containsOnlyFreeRules();
-		}
-		
-		LicenseValidationResult result = licenseUtil.getValidationResult();
-		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
-			return super.canFinish();
-		}
-		boolean enoughCredit =  payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
-		return enoughCredit && super.canFinish();
-	}
-
-	private boolean containsOnlyFreeRules() {
-		return refactoringPipeline.getRules().stream().allMatch(RefactoringRule::isFree);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
-	 */
-	@Override
-	public boolean performFinish() {
-
-		IRunnableWithProgress job = monitor -> {
-			/*
-			 * Update all changes and unselected classes that were unselected in
-			 * the last page shown before finish was pressed
-			 */
-			Arrays.asList(getPages())
-				.stream()
-				.filter(page -> (page instanceof RefactoringPreviewWizardPage)
-						&& !((RefactoringPreviewWizardPage) page).getUnselectedChange()
-							.isEmpty())
-				.forEach(page -> {
-					tryDoAdditionalRefactoring(monitor, page);
-					((RefactoringPreviewWizardPage) page).applyUnselectedChange();
-				});
-
-			try {
-				refactoringPipeline.commitRefactoring();
-				int sum = payPerUseCalculator.findTotalRequiredCredit(refactoringPipeline.getRules());
-				licenseUtil.reserveQuantity(sum);
-				Activator.setRunning(false);
-			} catch (RefactoringException e) {
-				synchronizeWithUIShowError(e);
-				Activator.setRunning(false);
-				return;
-			} catch (ReconcileException e) {
-				synchronizeWithUIShowError(e);
-				Activator.setRunning(false);
-			}
-
-			return;
-		};
-
-		try {
-			getContainer().run(true, true, job);
-		} catch (InvocationTargetException | InterruptedException e) {
-			SimonykeesMessageDialog.openMessageDialog(shell, Messages.RefactoringPreviewWizard_err_runnableWithProgress,
-					MessageDialog.ERROR);
-			Activator.setRunning(false);
-		}
-
-		return true;
+	protected void prepareForCommit(IProgressMonitor monitor) {
+		Arrays.asList(getPages())
+			.stream()
+			.filter(page -> (page instanceof RefactoringPreviewWizardPage)
+					&& !((RefactoringPreviewWizardPage) page).getUnselectedChange()
+						.isEmpty())
+			.forEach(page -> {
+				tryDoAdditionalRefactoring(monitor, page);
+				((RefactoringPreviewWizardPage) page).applyUnselectedChange();
+			});
 	}
 
 	private void tryDoAdditionalRefactoring(IProgressMonitor monitor, IWizardPage page) {
@@ -280,7 +222,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			refactoringPipeline.doAdditionalRefactoring(((RefactoringPreviewWizardPage) page).getUnselectedChange(),
 					((RefactoringPreviewWizardPage) page).getRule(), monitor);
 			if (monitor.isCanceled()) {
-				refactoringPipeline.clearStates();
+				clearPipelineState();
 			}
 		} catch (RuleException e) {
 			synchronizeWithUIShowError(e);
@@ -294,13 +236,47 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 */
 	@Override
 	public boolean performCancel() {
-		refactoringPipeline.clearStates();
+		if (selectRulesWizardData != null) {
+			reuseRefactoringPipeline = true;
+			
+			Display.getCurrent()
+				.asyncExec(() -> {
+					Job job = createJobToShowSelectRulesWizard(refactoringPipeline, selectRulesWizardData,
+							"Cancelling file changes and opening Select Rules Wizard."); //$NON-NLS-1$
+
+					job.setUser(true);
+					job.schedule();
+				});
+			return true;
+		}
 		return super.performCancel();
+	}
+
+	public static Job createJobToShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,
+			SelectRulesWizardData selectRulesWizardData, String jobName) {
+
+		return new Job(jobName) {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				IStatus status = refactoringPipeline.cancelFileChanges(monitor);
+				if (!status.isOK()) {
+					refactoringPipeline.clearStates();
+					Activator.setRunning(false);
+					return Status.CANCEL_STATUS;
+				}
+				SelectRulesWizard.synchronizeWithUIShowSelectRulesWizard(refactoringPipeline,
+						selectRulesWizardData);
+				return Status.OK_STATUS;
+			}
+		};
 	}
 
 	@Override
 	public void dispose() {
-		refactoringPipeline.clearStates();
+		if (!reuseRefactoringPipeline) {
+			clearPipelineState();
+		}
 		windowIcon.dispose();
 		super.dispose();
 	}
@@ -345,6 +321,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 * recalculation if needed. Disposes control from current page which wont be
 	 * visible any more
 	 */
+	@Override
 	public void pressedNext() {
 		if (null != getContainer()) {
 			((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
@@ -356,6 +333,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 * Called from {@link WizardDialog} when Back button is pressed. Disposes
 	 * all controls to be recalculated and created when needed
 	 */
+	@Override
 	public void pressedBack() {
 		if (null != getContainer()) {
 			if (getContainer().getCurrentPage() instanceof RefactoringPreviewWizardPage) {
@@ -374,5 +352,35 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	public RefactoringSummaryWizardPage getSummaryPage() {
 		return this.summaryPage;
+	}
+
+	protected boolean needsSummaryPage() {
+		return !(getPipelineRules()
+			.size() == 1
+				&& getPipelineRules()
+					.get(0) instanceof StandardLoggerRule);
+	}
+
+	@Override
+	public void showSummaryPage() {
+		if (getSummaryPage() == null) {
+			return;
+		}
+		/*
+		 * If summary button is pressed on any page that is not Summary page,
+		 * views have to be check for change and updated, and preview control
+		 * has to be disposed on current page. If it is already on Summary page,
+		 * just refresh.
+		 */
+		if (getContainer().getCurrentPage() instanceof RefactoringPreviewWizardPage) {
+			updateViewsOnNavigation(getContainer().getCurrentPage());
+			((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
+		}
+		getContainer().showPage(getSummaryPage());
+	}
+
+	@Override
+	protected boolean canHaveFreeRule() {
+		return true;
 	}
 }

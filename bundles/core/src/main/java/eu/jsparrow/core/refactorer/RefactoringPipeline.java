@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -158,6 +160,22 @@ public class RefactoringPipeline {
 	public boolean hasChanges() {
 		return refactoringStates.stream()
 			.anyMatch(RefactoringState::hasChange);
+	}
+
+	/**
+	 * Whether or not any valid change has been calculated for the given
+	 * refactoring state.
+	 * 
+	 * @return true if at least one {@link RefactoringState} can be found which has
+	 *         at least one valid change. which is not null, otherwise false
+	 */
+	public boolean hasAnyValidChange() {
+		for (RefactoringState state : refactoringStates) {
+			if (state.hasAnyValidChange()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -523,6 +541,58 @@ public class RefactoringPipeline {
 	}
 
 	/**
+	 * Commit the working copies to the underlying {@link ICompilationUnit}s
+	 * 
+	 * @throws RefactoringException
+	 *             if no working copies were found
+	 * @throws ReconcileException
+	 *             if a working copy cannot be applied to the underlying
+	 *             {@link ICompilationUnit}
+	 * 
+	 * @since 0.9
+	 */
+	public void commitRefactoring(IProgressMonitor monitor) throws RefactoringException, ReconcileException {
+		if (refactoringStates.isEmpty()) {
+			logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
+			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
+		}
+
+		/*
+		 * Converts the monitor to a SubMonitor and sets name of task on
+		 * progress monitor dialog. Size is set to number 100 and then scaled to
+		 * size of the compilationUnits list. Each compilation unit increases
+		 * worked amount for same size.
+		 */
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
+			.setWorkRemaining(refactoringStates.size());
+		subMonitor.setTaskName(""); //$NON-NLS-1$
+
+		List<RefactoringStateNotCommited> refactoringStatesNotCommited = new LinkedList<>();
+		for (Iterator<RefactoringState> iterator = refactoringStates.iterator(); iterator.hasNext();) {
+			RefactoringState refactoringState = iterator.next();
+			subMonitor.subTask(refactoringState.getWorkingCopyName());
+			try {
+				refactoringState.commitAndDiscardWorkingCopy();
+				iterator.remove();
+			} catch (JavaModelException e) {
+				logger.error(e.getMessage(), e);
+				refactoringStatesNotCommited.add(new RefactoringStateNotCommited(refactoringState.getWorkingCopy()
+					.getPath()
+					.toString(), e));
+			}
+			subMonitor.worked(1);
+		}
+		if (!refactoringStatesNotCommited.isEmpty()) {
+			String notWorkingRulesCollected = refactoringStatesNotCommited.stream()
+				.map(Object::toString)
+				.collect(Collectors.joining("\n")); //$NON-NLS-1$
+			throw new ReconcileException(
+					NLS.bind(ExceptionMessages.RefactoringPipeline_reconcile_failed, notWorkingRulesCollected),
+					NLS.bind(ExceptionMessages.RefactoringPipeline_user_reconcile_failed, notWorkingRulesCollected));
+		}
+	}
+
+	/**
 	 * Clears everything.
 	 * <p>
 	 * This method should be called when canceling or finishing refactorings.
@@ -585,7 +655,8 @@ public class RefactoringPipeline {
 			if (hasChanges) {
 				Version jdtVersion = JdtCoreVersionBindingUtil.findCurrentJDTCoreVersion();
 				ICompilationUnit workingCopy = refactoringState.getWorkingCopy();
-				newAstRoot = workingCopy.reconcile(JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion), true, null, null);
+				newAstRoot = workingCopy.reconcile(JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion), true, null,
+						null);
 			}
 		} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 			logger.error(e.getMessage(), e);
@@ -619,6 +690,44 @@ public class RefactoringPipeline {
 	}
 
 	/**
+	 * This method is intended to be called before re-using the same
+	 * {@link RefactoringPipeline} instance to open a wizard for selecting rules
+	 * after having cancelled the refactoring preview wizard.
+	 */
+	public IStatus cancelFileChanges(IProgressMonitor monitor) {
+
+		/*
+		 * Converts the monitor to a SubMonitor and sets name of task on
+		 * progress monitor dialog. Size is set to number 100 and then scaled to
+		 * size of the compilationUnits list. Each compilation unit increases
+		 * worked amount for same size.
+		 */
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
+			.setWorkRemaining(refactoringStates.size());
+		subMonitor.setTaskName(""); //$NON-NLS-1$
+
+		for (RefactoringState refactoringState : refactoringStates) {
+
+			subMonitor.subTask(refactoringState.getWorkingCopyName());
+			refactoringState.resetAll();
+
+			/*
+			 * If cancel is pressed on progress monitor, abort all and return,
+			 * else continue
+			 */
+			if (subMonitor.isCanceled()) {
+				return Status.CANCEL_STATUS;
+			} else {
+				subMonitor.worked(1);
+			}
+		}
+
+		initialSource.clear();
+
+		return Status.OK_STATUS;
+	}
+
+	/**
 	 * Getter for map with original source code for all refactoring states
 	 * 
 	 * @return
@@ -640,5 +749,4 @@ public class RefactoringPipeline {
 	public int getFileCount() {
 		return fileCount;
 	}
-
 }

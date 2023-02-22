@@ -1,9 +1,7 @@
 package eu.jsparrow.ui.util;
 
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_FREE_J_SPARROW_TRIAL;
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.UPGRADE_YOUR_LICENSE;
 import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog._TO_BE_ABLE_TO_APPLY_20_OF_OUR_MOST_LIKED_RULES;
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog._TO_BE_ABLE_TO_APPLY_ALL_OUR_RULES;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,8 +34,9 @@ import eu.jsparrow.license.api.RegistrationService;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
-import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
+import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
 import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
@@ -171,12 +170,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			return true;
 		}
 
-		// When starting with an expired demo license we show the wizard dialog
-		if (result.getLicenseType() == LicenseType.DEMO && !result.isValid()) {
-			BuyLicenseDialog dialog = new BuyLicenseDialog(shell);
-			dialog.open();
-			return true;
-		}
 		// When starting with an demo license we offer to register for free
 		// rules if not registered yet
 		if (isFreeLicense() && !isActiveRegistration()) {
@@ -185,8 +178,8 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 						.addLabel(
 								REGISTER_FOR_A_FREE_J_SPARROW_TRIAL + _TO_BE_ABLE_TO_APPLY_20_OF_OUR_MOST_LIKED_RULES),
 					SuggestRegistrationDialog::addRegisterForFreeButton,
-					dialog -> dialog.addLinkToUnlockAllRules("", //$NON-NLS-1$
-							UPGRADE_YOUR_LICENSE, _TO_BE_ABLE_TO_APPLY_ALL_OUR_RULES),
+					dialog -> dialog.addLinkToJSparrowPricingPage(
+							JSparrowPricingLink.UPGRADE_LICENSE_TO_APPLY_ALL_RULES),
 					SuggestRegistrationDialog::addRegisterForPremiumButton);
 			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(shell, addComponentLambdas);
 			dialog.useSkipAsLastButton();

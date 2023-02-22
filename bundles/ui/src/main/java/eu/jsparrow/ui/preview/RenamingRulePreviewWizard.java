@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -19,7 +21,6 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
@@ -27,16 +28,12 @@ import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.api.LicenseType;
-import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
-import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
-import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.preview.statistics.StatisticsSection;
+import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -51,7 +48,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(RenamingRulePreviewWizard.class);
-	private RefactoringPipeline refactoringPipeline;
+
 	private List<FieldMetaData> metaData;
 
 	private Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges;
@@ -61,14 +58,11 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	private Map<IPath, Document> originalDocuments;
 	private RenamingRuleSummaryWizardPage summaryPage;
 	private StatisticsSection statisticsSection;
-	private LicenseUtil licenseUtil = LicenseUtil.get();
-	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
 
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			List<ICompilationUnit> targetCompilationUnits, FieldsRenamingRule rule) {
-		super();
-		this.refactoringPipeline = refactoringPipeline;
+		super(refactoringPipeline);
 		this.metaData = metadata;
 		this.documentChanges = documentChanges;
 		this.targetCompilationUnits = targetCompilationUnits;
@@ -100,7 +94,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public void addPages() {
 		RefactoringPreviewWizardModel model = new RefactoringPreviewWizardModel();
-		Map<ICompilationUnit, DocumentChange> changesPerRule = refactoringPipeline.getChangesForRule(rule);
+		Map<ICompilationUnit, DocumentChange> changesPerRule = getChangesForRule(rule);
 
 		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(
 				JavaAccessModifier.PUBLIC);
@@ -146,64 +140,19 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	}
 
 	@Override
-	public boolean canFinish() {
-		if (licenseUtil.isFreeLicense()) {
-			return super.canFinish();
-		}
-
-		LicenseValidationResult result = licenseUtil.getValidationResult();
-		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
-			return super.canFinish();
-		}
-		boolean enoughCredit = payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
-		return enoughCredit && super.canFinish();
-	}
-
-	/**
-	 * If page contains unchecked fields, remove uncheckedFields from metadata,
-	 * create and set to refactoringPipeline new RefactoringStates without
-	 * unchecked Fields -> doRefactoring -> commitRefactoring. Otherwise just
-	 * commit refactoring changes.
-	 */
-	@Override
-	public boolean performFinish() {
-		IWizardContainer container = getContainer();
-		if (container != null) {
-			IWizardPage currentPage = container.getCurrentPage();
-			updateViewsOnNavigation(currentPage);
-			commitChanges();
-		}
-		return true;
-	}
-
-	@Override
-	public boolean performCancel() {
-		refactoringPipeline.clearStates();
-		return super.performCancel();
+	protected void prepareForCommit(IProgressMonitor monitor) {
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
+			.setWorkRemaining(1);
+		subMonitor.subTask("prepare for commit"); //$NON-NLS-1$
+		IWizardPage currentPage = getContainer().getCurrentPage();
+		updateViewsOnNavigation(currentPage);
+		subMonitor.worked(1);
 	}
 
 	@Override
 	public void dispose() {
-		refactoringPipeline.clearStates();
+		clearPipelineState();
 		super.dispose();
-	}
-
-	/**
-	 * Checks if license if valid. If it is, changes are committed, otherwise
-	 * shows license expired message dialog. If exception occurred while
-	 * committing changes, message about exception is displayed.
-	 */
-	private void commitChanges() {
-		try {
-			refactoringPipeline.commitRefactoring();
-			int sum = payPerUseCalculator.findTotalRequiredCredit(refactoringPipeline.getRules());
-			licenseUtil.reserveQuantity(sum);
-			Activator.setRunning(false);
-		} catch (RefactoringException | ReconcileException e) {
-			WizardMessageDialog.synchronizeWithUIShowError(e);
-			Activator.setRunning(false);
-		}
-
 	}
 
 	/**
@@ -221,7 +170,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				 * Create refactoring states for all compilation units from
 				 * targetCompilationUnits list
 				 */
-				refactoringPipeline.clearStates();
+				clearPipelineState();
 				refactoringPipeline.createRefactoringStates(targetCompilationUnits);
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
@@ -235,7 +184,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				refactoringPipeline.doRefactoring(monitor);
 				this.statisticsSection.updateForSelected();
 				if (monitor.isCanceled()) {
-					refactoringPipeline.clearStates();
+					clearPipelineState();
 				}
 			} catch (RuleException e) {
 				logger.error(e.getMessage(), e);
@@ -287,6 +236,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 * recalculation if needed. Disposes control from current page which wont be
 	 * visible any more
 	 */
+	@Override
 	public void pressedNext() {
 		IWizardContainer container = getContainer();
 		if (container == null) {
@@ -305,6 +255,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 * Called from {@link WizardDialog} when Back button is pressed. Disposes
 	 * all controls to be recalculated and created when needed
 	 */
+	@Override
 	public void pressedBack() {
 		IWizardContainer container = getContainer();
 		if (container == null) {
@@ -327,4 +278,18 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		return this.summaryPage;
 	}
 
+	@Override
+	public void showSummaryPage() {
+		/*
+		 * If summary button is pressed on any page that is not Summary page,
+		 * views have to be check for change and updated, and preview control
+		 * has to be disposed on current page. If it is already on Summary page,
+		 * just refresh.
+		 */
+		if (getContainer().getCurrentPage() instanceof RenamingRulePreviewWizardPage) {
+			updateViewsOnNavigation(getContainer().getCurrentPage());
+			((RenamingRulePreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
+		}
+		getContainer().showPage(getSummaryPage());
+	}
 }
