@@ -170,12 +170,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			return true;
 		}
 
-		// When starting with an expired demo license we show the wizard dialog
-		if (result.getLicenseType() == LicenseType.DEMO && !result.isValid()) {
-			BuyLicenseDialog dialog = new BuyLicenseDialog(shell);
-			dialog.open();
-			return true;
-		}
 		// When starting with an demo license we offer to register for free
 		// rules if not registered yet
 		if (isFreeLicense() && !isActiveRegistration()) {
