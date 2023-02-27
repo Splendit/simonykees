@@ -33,7 +33,6 @@ import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.RegistrationService;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
-import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;

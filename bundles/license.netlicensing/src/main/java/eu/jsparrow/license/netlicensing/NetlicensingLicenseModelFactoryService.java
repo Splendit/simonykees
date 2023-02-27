@@ -19,7 +19,7 @@ public class NetlicensingLicenseModelFactoryService implements LicenseModelFacto
 
 	@Override
 	public LicenseModel createDemoLicenseModel(ZonedDateTime expirationDate) {
-		return new DemoLicenseModel(expirationDate);
+		return new DemoLicenseModel();
 	}
 
 	@Override
