@@ -1,5 +1,7 @@
 package eu.jsparrow.license.netlicensing.model;
 
+import java.time.Year;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
@@ -11,25 +13,14 @@ public class DemoLicenseModel implements LicenseModel {
 
 	private static final long serialVersionUID = 5753428747671948588L;
 
+	private static final ZonedDateTime EXPIRATION_IN_FAR_FUTURE = ZonedDateTime.of(Year.MAX_VALUE, 12, 1, 0, 0, 0, 0,
+			ZoneId.systemDefault());
+
 	private static final LicenseType TYPE = LicenseType.DEMO;
-
-	private ZonedDateTime expirationDate;
-
-	public DemoLicenseModel() {
-		expirationDate = ZonedDateTime.now().plusDays(5);
-	}
-
-	public DemoLicenseModel(ZonedDateTime expirationDate) {
-		this.expirationDate = expirationDate;
-	}
-
-	public void setExpirationDate(ZonedDateTime expirationDate) {
-		this.expirationDate = expirationDate;
-	}
 
 	@Override
 	public ZonedDateTime getExpirationDate() {
-		return expirationDate;
+		return EXPIRATION_IN_FAR_FUTURE;
 	}
 
 	@Override
@@ -41,5 +32,4 @@ public class DemoLicenseModel implements LicenseModel {
 	public String toString() {
 		return ReflectionToStringBuilder.toString(this);
 	}
-
 }
