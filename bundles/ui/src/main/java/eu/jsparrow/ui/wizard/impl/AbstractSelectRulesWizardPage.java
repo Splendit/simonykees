@@ -42,7 +42,6 @@ import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
 import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
-import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -592,11 +591,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			}
 		}
 
-	}
-
-	public void showRegistrationDialog() {
-		RegistrationDialog registrationDialog = new RegistrationDialog(getShell(), afterLicenseUpdateListeners);
-		registrationDialog.open();
 	}
 
 	public void showSimonykeesUpdateLicenseDialog() {

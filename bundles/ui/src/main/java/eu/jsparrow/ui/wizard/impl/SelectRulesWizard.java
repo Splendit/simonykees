@@ -208,10 +208,6 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		addPage(page);
 	}
 
-	public void showRegistrationDialog() {
-		page.showRegistrationDialog();
-	}
-
 	public void showSimonykeesUpdateLicenseDialog() {
 		page.showSimonykeesUpdateLicenseDialog();
 	}
