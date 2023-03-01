@@ -1,7 +1,5 @@
 package eu.jsparrow.ui.preference;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -11,31 +9,24 @@ import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 
 import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
-import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.preference.marker.CheckboxTreeViewerWrapper;
 import eu.jsparrow.ui.preference.marker.MarkerContentProvider;
 import eu.jsparrow.ui.preference.marker.MarkerItemWrapper;
 import eu.jsparrow.ui.preference.marker.MarkerLabelProvider;
 import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
-import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * A preference page for activating and deactivating jSparrow Markers.
@@ -139,5 +130,4 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		searchField.setText(string);
 
 	}
-
 }

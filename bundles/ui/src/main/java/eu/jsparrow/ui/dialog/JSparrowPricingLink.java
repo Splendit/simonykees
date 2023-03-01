@@ -9,6 +9,7 @@ import eu.jsparrow.i18n.Messages;
  * 
  */
 public enum JSparrowPricingLink {
+	VISIT_US_TO_OBTAIN_A_LICENSE("<a>Visit jSparrow</a> to obtain a premium license, enter the license key and activate."), //$NON-NLS-1$
 	TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE(Messages.JSparrowPricingLink_toUnlockPremiumRulesUpgradeLicense), // used!!
 	OBTAIN_NEW_LICENSE(Messages.JSparrowPricingLink_obtainNewLicense),
 	TO_GET_FULL_ACCESS_UPGRADE_LICENSE(Messages.JSparrowPricingLink_toGetFullAccessUpgradeLicense);

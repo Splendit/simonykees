@@ -2,8 +2,6 @@ package eu.jsparrow.ui.dialog;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
-import java.util.function.Consumer;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -20,8 +18,6 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-
-import eu.jsparrow.i18n.Messages;
 
 /**
  * Dialog that shows when user has free license and is not registered for free
@@ -40,16 +36,12 @@ public class SuggestRegistrationDialog extends Dialog {
 
 	private static final String ENTER_YOUR_LICENSE_KEY = "Enter your license key";
 
-	private final List<Consumer<SuggestRegistrationDialog>> addComponentLambdas;
-
 	private Composite area;
-	private boolean cancelAsLastButton;
-	private boolean skipAsLastButton;
-	private String textForShell;
+	private final String lastButtonLabel;
 
-	public SuggestRegistrationDialog(Shell parentShell, List<Consumer<SuggestRegistrationDialog>> addComponentLambdas) {
+	public SuggestRegistrationDialog(Shell parentShell, String lastButtonLabel) {
 		super(parentShell);
-		this.addComponentLambdas = addComponentLambdas;
+		this.lastButtonLabel = lastButtonLabel;
 	}
 
 	@Override
@@ -61,7 +53,9 @@ public class SuggestRegistrationDialog extends Dialog {
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		area.setLayoutData(gridData);
 
-		addComponentLambdas.forEach(lambda -> lambda.accept(this));
+		addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES);
+		addLinkToJSparrowPricingPage(JSparrowPricingLink.TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE);
+		addRegisterForPremiumButton();
 
 		Control[] children = area.getChildren();
 		for (Control child : children) {
@@ -70,26 +64,12 @@ public class SuggestRegistrationDialog extends Dialog {
 		return composite;
 	}
 
-	public void useCancelAsLastButton() {
-		cancelAsLastButton = true;
-		skipAsLastButton = false;
-	}
-
-	public void useSkipAsLastButton() {
-		skipAsLastButton = true;
-		cancelAsLastButton = false;
-	}
-
-	public void setTextForShell(String text) {
-		textForShell = text;
-	}
-
-	public void addLabel(String lableText) {
+	private void addLabel(String lableText) {
 		Label label = new Label(area, SWT.NONE);
 		label.setText(lableText);
 	}
 
-	public void addLinkToJSparrowPricingPage(JSparrowPricingLink jSparrowPricingLink) {
+	private void addLinkToJSparrowPricingPage(JSparrowPricingLink jSparrowPricingLink) {
 		Link linkToUnlockRules = new Link(area, SWT.NONE);
 		linkToUnlockRules
 			.setText(jSparrowPricingLink.getText());
@@ -108,7 +88,7 @@ public class SuggestRegistrationDialog extends Dialog {
 		});
 	}
 
-	public void addRegisterForPremiumButton() {
+	private void addRegisterForPremiumButton() {
 		Button registerForPremiumButton = new Button(area, SWT.PUSH);
 		registerForPremiumButton.setText(ENTER_YOUR_LICENSE_KEY);
 		registerForPremiumButton.addSelectionListener(new SelectionAdapter() {
@@ -122,17 +102,14 @@ public class SuggestRegistrationDialog extends Dialog {
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		if (textForShell != null) {
-			shell.setText(textForShell);
-		}
-
+		shell.setText(UNLOCK_SELECTED_RULES);
 	}
 
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		if (skipAsLastButton) {
-			createButton(parent, IDialogConstants.OK_ID, Messages.SuggestRegistrationDialog_skipButtonText, false);
-		} else if (cancelAsLastButton) {
+		if (IDialogConstants.SKIP_LABEL.equals(lastButtonLabel)) {
+			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.SKIP_LABEL, false);
+		} else if (IDialogConstants.CANCEL_LABEL.equals(lastButtonLabel)) {
 			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		}
 	}

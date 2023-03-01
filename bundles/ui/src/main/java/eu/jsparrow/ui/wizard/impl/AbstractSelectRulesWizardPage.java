@@ -1,13 +1,8 @@
 package eu.jsparrow.ui.wizard.impl;
 
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.UNLOCK_SELECTED_RULES;
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -38,9 +33,7 @@ import org.eclipse.swt.widgets.Label;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
 import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
@@ -566,29 +559,12 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			return;
 		}
 
-		List<Consumer<SuggestRegistrationDialog>> addComponentLambdas = null;
-
 		boolean allRulesFree = selectedEnabledRules
 			.stream()
 			.allMatch(RefactoringRule::isFree);
 
 		if (!allRulesFree) {
-			addComponentLambdas = Arrays.asList(//
-					dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
-					dialog -> dialog
-						.addLinkToJSparrowPricingPage(JSparrowPricingLink.TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE),
-					SuggestRegistrationDialog::addRegisterForPremiumButton);
-		}
-
-		if (addComponentLambdas != null) {
-			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(getShell(), addComponentLambdas);
-			dialog.useCancelAsLastButton();
-			dialog.setTextForShell(UNLOCK_SELECTED_RULES);
-
-			int returnCode = dialog.open();
-			if (returnCode == SuggestRegistrationDialog.BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
-				showSimonykeesUpdateLicenseDialog();
-			}
+			showSimonykeesUpdateLicenseDialog();
 		}
 
 	}

@@ -1,14 +1,10 @@
 package eu.jsparrow.ui.wizard.impl;
 
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.UNLOCK_SELECTED_RULES;
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -44,8 +40,6 @@ import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.ui.dialog.JSparrowPricingLink;
-import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -257,35 +251,18 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		return true;
 	}
 
-	public void showOptionalLockedRuleSelectionDialog(List<RefactoringRule> selectedRules) {
+	private void showOptionalLockedRuleSelectionDialog(List<RefactoringRule> selectedRules) {
 		LicenseUtil licenseUtil = LicenseUtil.get();
 		if (!licenseUtil.isFreeLicense() || selectedRules.isEmpty()) {
 			return;
 		}
-
-		List<Consumer<SuggestRegistrationDialog>> addComponentLambdas = null;
 
 		boolean allRulesFree = selectedRules
 			.stream()
 			.allMatch(RefactoringRule::isFree);
 
 		if (!allRulesFree) {
-			addComponentLambdas = Arrays.asList(//
-					dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
-					dialog -> dialog
-						.addLinkToJSparrowPricingPage(JSparrowPricingLink.TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE),
-					SuggestRegistrationDialog::addRegisterForPremiumButton);
-		}
-
-		if (addComponentLambdas != null) {
-			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(getShell(), addComponentLambdas);
-			dialog.useSkipAsLastButton();
-			dialog.setTextForShell(UNLOCK_SELECTED_RULES);
-			
-			int returnCode = dialog.open();
-			if (returnCode == SuggestRegistrationDialog.BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
-				showSimonykeesUpdateLicenseDialog();
-			}
+			showSimonykeesUpdateLicenseDialog();
 		}
 	}
 

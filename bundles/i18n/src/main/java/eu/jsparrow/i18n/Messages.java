@@ -564,8 +564,6 @@ public class Messages extends NLS {
 	public static String SimonykeesUpdateLicenseDialog_invalid_license_key;
 	public static String SimonykeesUpdateLicenseDialog_license_updated_successfully;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_label;
-	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_message;
-	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_title;
 	public static String SimonykeesUpdateLicenseDialog_update_llicense_dialog_button;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_group_title;
 	public static String StandaloneActivator_noValidLicenseFound;
@@ -608,7 +606,6 @@ public class Messages extends NLS {
 	public static String SuggestRegistrationDialog_dontShowAgainCheckbox;
 	public static String SuggestRegistrationDialog_noFreemiumLiceseWarning;
 	public static String SuggestRegistrationDialog_registerButtonText;
-	public static String SuggestRegistrationDialog_skipButtonText;
 	public static String SuggestRegistrationDialog_suggestToRegister;
 	public static String SummaryWizardPage_Files;
 	public static String SummaryWizardPage_Rule;
