@@ -27,17 +27,10 @@ public interface RegistrationUtilService {
 	 * Activates a customer registration.
 	 * 
 	 * @param activationEntity
-	 *             entity containing information for activating customer registration.
+	 *            entity containing information for activating customer
+	 *            registration.
 	 * @return {@code true} if the activation is successful and {@code false}
 	 *         otherwise
 	 */
 	boolean activateRegistration(ActivationEntity activationEntity);
-
-	/**
-	 * Checks if customers has an active registration.
-	 * 
-	 * @return {@code true} if the activation is successful and {@code false}
-	 *         otherwise.
-	 */
-	boolean isActiveRegistration();
 }

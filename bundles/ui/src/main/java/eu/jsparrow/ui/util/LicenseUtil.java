@@ -304,18 +304,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		return false;
 	}
 
-	@Override
-	public boolean isActiveRegistration() {
-		String hardwareId = systemInfoWrapper.createUniqueHardwareId();
-		try {
-			String secret = registrationPersistenceSerice.loadFromPersistence();
-			return registrationService.validate(hardwareId, secret);
-		} catch (PersistenceException e) {
-			logger.warn("Failed to load registration model", e); //$NON-NLS-1$
-		}
-		return false;
-	}
-
 	public void updateValidationResult() {
 		LicenseModel model = tryLoadModelFromPersistence();
 
