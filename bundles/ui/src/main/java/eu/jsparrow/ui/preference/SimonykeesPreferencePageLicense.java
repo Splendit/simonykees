@@ -39,7 +39,6 @@ import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
-import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -65,8 +64,6 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 	private Label licenseLabel;
 
 	private Label expirationLabel;
-
-	private Button registerForFreeButton;
 
 	Link jSparrowLink;
 
@@ -116,19 +113,6 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		licenseLabel.setLayoutData(licenseRowData);
 		licenseLabel.setFont(parent.getFont());
 
-		registerForFreeButton = new Button(composite, SWT.PUSH);
-		registerForFreeButton.setText(Messages.SimonykeesPreferencePageLicense_register_for_free_jsparrow_trial);
-		registerForFreeButton.setFont(parent.getFont());
-		registerForFreeButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				RegistrationDialog dialog = new RegistrationDialog(getShell());
-				dialog.create();
-				dialog.open();
-				updateDisplayedInformation();
-			}
-		});
-
 		jSparrowLink = new Link(composite, SWT.NONE);
 		jSparrowLink.setFont(parent.getFont());
 		jSparrowLink.addSelectionListener(new SelectionAdapter() {
@@ -175,14 +159,13 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		String licenseModelInfo = computeLicenseLabel(result);
 
 		licenseLabel.setText(licenseModelInfo);
-		boolean freeWithStarter = !licenseUtil.isProLicense() && licenseUtil.isActiveRegistration();
+		boolean freeWithStarter = !licenseUtil.isProLicense();
 		if (!result.isValid() && !freeWithStarter) {
 			expirationLabel.setText(result.getDetail());
 		} else {
 			expirationLabel.setText(""); //$NON-NLS-1$
 		}
 
-		registerForFreeButton.setVisible(isButtonToRegisterForFreeVisible(result));
 		jSparrowLink.setText(computeJSparrowLinkText(result).getText());
 
 		licenseLabel.getParent()
@@ -200,23 +183,13 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		return JSparrowPricingLink.TO_GET_FULL_ACCESS_UPGRADE_LICENSE;
 	}
 
-	private boolean isButtonToRegisterForFreeVisible(LicenseValidationResult result) {
-		boolean isFullLicense = licenseUtil.isProLicense();
-		boolean activeRegistration = licenseUtil.isActiveRegistration();
-		boolean isValid = result.isValid();
-		boolean fullValid = isFullLicense && isValid;
-		return !fullValid && !activeRegistration;
-	}
-
 	private String computeLicenseLabel(LicenseValidationResult result) {
 		boolean isFullLicense = licenseUtil.isProLicense();
-		boolean activeRegistration = licenseUtil.isActiveRegistration();
 		boolean isValid = result.isValid();
 		boolean fullValid = isFullLicense && isValid;
 
 		if (!fullValid) {
-			return activeRegistration ? Messages.SimonykeesPreferencePageLicense_jsparrow_free
-					: Messages.SimonykeesPreferencePageLicense_currently_not_registered;
+			return Messages.SimonykeesPreferencePageLicense_jsparrow_free;
 		}
 
 		LicenseType licenseType = result.getLicenseType();

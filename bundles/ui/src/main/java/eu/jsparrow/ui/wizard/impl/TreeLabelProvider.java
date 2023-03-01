@@ -41,7 +41,6 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 	private Image lockedRuleImage;
 
 	private boolean freeLicense;
-	private boolean activeRegistration;
 
 	private static final String F_GREEN_ICON_PATH = "icons/icon-check.png"; //$NON-NLS-1$
 	private static final String ICON_LOCK = "icons/icon-lock.png"; //$NON-NLS-1$
@@ -65,7 +64,6 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 
 		LicenseUtil licenseUtil = LicenseUtil.get();
 		freeLicense = licenseUtil.isFreeLicense();
-		activeRegistration = licenseUtil.isActiveRegistration();
 	}
 
 	@Override
@@ -91,7 +89,7 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 				return JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_INFO);
 			}
 
-			if (freeLicense && (!activeRegistration || !rule.isFree())) {
+			if (freeLicense && !rule.isFree()) {
 				return lockedRuleImage;
 			}
 

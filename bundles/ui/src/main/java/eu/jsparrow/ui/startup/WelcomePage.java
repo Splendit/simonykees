@@ -143,7 +143,7 @@ public class WelcomePage extends FormPage {
 		Button licenseButton = new Button(gettingStartedGroup, SWT.PUSH);
 		licenseButton.setLayoutData(buttonGridData);
 		licenseButton.setText(Messages.WelcomePage_buy_license_button);
-		createButtonListenerToOpenWebpage(licenseButton, JSparrowPricingLink.getJSparrowPricingPageAddress()); 
+		createButtonListenerToOpenWebpage(licenseButton, JSparrowPricingLink.getJSparrowPricingPageAddress());
 
 		Button marketplaceButton = new Button(gettingStartedGroup, SWT.PUSH);
 		marketplaceButton.setLayoutData(buttonGridData);
@@ -178,37 +178,6 @@ public class WelcomePage extends FormPage {
 		createButtonListenerToOpenPreferences(markerPreferencesButton,
 				"eu.jsparrow.ui.preference.MarkersPreferencePage"); //$NON-NLS-1$
 		markerPreferencesButton.setVisible(true);
-
-		if (!LicenseUtil.get()
-			.isValidProLicensePresentInSecureStore()
-				&& !LicenseUtil.get()
-					.isActiveRegistration()) {
-			Group freemiumGroup = new Group(rightComposite, SWT.NONE);
-			freemiumGroup.setText(Messages.WelcomePage_starterRegistration);
-			groupGridData = new GridData(GridData.FILL_HORIZONTAL);
-			groupGridData.heightHint = 52;
-			groupGridData.horizontalIndent = 5;
-			groupGridData.verticalIndent = 65;
-			freemiumGroup.setLayoutData(groupGridData);
-			freemiumGroup.setLayout(new GridLayout(1, false));
-			Button freemiumRegistrationButton = new Button(freemiumGroup, SWT.PUSH);
-			freemiumRegistrationButton.setLayoutData(buttonGridData);
-			freemiumRegistrationButton.setText("Register for a free trial"); //$NON-NLS-1$
-			freemiumRegistrationButton.addSelectionListener(new SelectionAdapter() {
-
-				@Override
-				public void widgetSelected(SelectionEvent event) {
-					PlatformUI.getWorkbench()
-						.getDisplay()
-						.asyncExec(() -> {
-							Shell activeShell = PlatformUI.getWorkbench()
-								.getActiveWorkbenchWindow()
-								.getShell();
-							new RegistrationDialog(activeShell).open();
-						});
-				}
-			});
-		}
 	}
 
 	private void createButtonListenerToOpenPreferences(Button openPreferencesButton, String activePreferencePageId) {

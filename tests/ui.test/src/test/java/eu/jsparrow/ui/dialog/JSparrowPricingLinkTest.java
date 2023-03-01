@@ -30,22 +30,6 @@ class JSparrowPricingLinkTest {
 	public static Stream<Arguments> testLinkTextContentArguments() throws Exception {
 		return Stream.of(
 				Arguments.of(
-						"",
-						"Upgrade your license",
-						" to be able to apply all our rules!",
-						UPGRADE_LICENSE_TO_APPLY_ALL_RULES),
-				Arguments.of(
-						"To unlock all our rules, ",
-						"register for a premium license",
-						".",
-						TO_UNLOCK_ALL_RULES_REGISTER_FOR_PREMIUM_LICENSE),
-
-				Arguments.of(
-						"To unlock them, ",
-						"register for a premium license",
-						".",
-						TO_UNLOCK_THEM_REGISTER_FOR_PREMIUM_LICENSE),
-				Arguments.of(
 						"To unlock premium rules, ",
 						"upgrade your license",
 						".",
@@ -64,12 +48,7 @@ class JSparrowPricingLinkTest {
 						"If you want to be able to use the jSparrow markers, ",
 						"upgrade here",
 						".",
-						TO_USE_JSPARROW_MARKERS_UPGRADE_HERE),
-				Arguments.of(
-						"Upgrade your license ",
-						"here",
-						".",
-						UPGRADE_YOUR_LICENSE_HERE));
+						TO_USE_JSPARROW_MARKERS_UPGRADE_HERE));
 	}
 
 	@ParameterizedTest

@@ -17,7 +17,6 @@ public class Messages extends NLS {
 	public static String AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 	public static String AbstractSelectRulesWizardPage_error_NoRulesSelected;
 	public static String AbstractSelectRulesWizardPage_freemiumRegirementsMessage;
-	public static String AbstractSelectRulesWizardPage_neitherRegisteredNorLicensed_statusInfoMessage;
 	public static String AbstractSelectRulesWizardPage_notOnlyFreemiumSelected_statusInfoMessage;
 	public static String AbstractSelectRulesWizardPage_seeDocumentation;
 	public static String AbstractSelectRulesWizardPage_warning_RulesInProfileNotApplicable;
@@ -307,12 +306,8 @@ public class Messages extends NLS {
 	public static String JSparrowPricingLink_link_startTag_formatstring;
 	public static String JSparrowPricingLink_obtainNewLicense;
 	public static String JSparrowPricingLink_toGetFullAccessUpgradeLicense;
-	public static String JSparrowPricingLink_toUnlockAllRulesRegisterForPremiumLicense;
 	public static String JSparrowPricingLink_toUnlockPremiumRulesUpgradeLicense;
-	public static String JSparrowPricingLink_toUnlockThemRegisterForPremiumLicense;
 	public static String JSparrowPricingLink_toUseJSparrowMarkersUpgradeHere;
-	public static String JSparrowPricingLink_upgradeLicenceToApplyAllRules;
-	public static String JSparrowPricingLink_upgradeLicenseHere;
 	public static String Netlicensing_persistenceError_failedtoLoad;
 	public static String Netlicensing_persistenceError_failedToSave;
 	public static String Netlicensing_validationResult_freeLicenseExpired0;
@@ -597,7 +592,6 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_useProfileOptionNoProfile;
 	public static String SimonykeesPreferencePage_useProfileOptionRadioGroupTitle;
 	public static String SimonykeesPreferencePage_useProfileOptionSelectedProfile;
-	public static String SimonykeesPreferencePageLicense_currently_not_registered;
 	public static String SimonykeesPreferencePageLicense_jsparrow_free;
 	public static String SimonykeesPreferencePageLicense_jsparrow_pay_per_use_available_credit;
 	public static String SimonykeesPreferencePageLicense_jsparrow_pro_valid_until;
@@ -649,7 +643,6 @@ public class Messages extends NLS {
 	public static String StringUtilsRule_name;
 	public static String SuggestRegistrationDialog_descriptionOfFreemiumLicense;
 	public static String SuggestRegistrationDialog_dontShowAgainCheckbox;
-	public static String SuggestRegistrationDialog_getFreeRulesTitle;
 	public static String SuggestRegistrationDialog_noFreemiumLiceseWarning;
 	public static String SuggestRegistrationDialog_registerButtonText;
 	public static String SuggestRegistrationDialog_skipButtonText;
@@ -728,7 +721,6 @@ public class Messages extends NLS {
 	public static String WelcomePage_license_preferences_button;
 	public static String WelcomePage_market_place_button;
 	public static String WelcomePage_preferences_button;
-	public static String WelcomePage_starterRegistration;
 	public static String WelcomePage_title;
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;

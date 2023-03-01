@@ -9,15 +9,10 @@ import eu.jsparrow.i18n.Messages;
  * 
  */
 public enum JSparrowPricingLink {
-	UPGRADE_LICENSE_TO_APPLY_ALL_RULES(Messages.JSparrowPricingLink_upgradeLicenceToApplyAllRules),
-	TO_UNLOCK_ALL_RULES_REGISTER_FOR_PREMIUM_LICENSE(
-			Messages.JSparrowPricingLink_toUnlockAllRulesRegisterForPremiumLicense),
-	TO_UNLOCK_THEM_REGISTER_FOR_PREMIUM_LICENSE(Messages.JSparrowPricingLink_toUnlockThemRegisterForPremiumLicense),
-	TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE(Messages.JSparrowPricingLink_toUnlockPremiumRulesUpgradeLicense),
+	TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE(Messages.JSparrowPricingLink_toUnlockPremiumRulesUpgradeLicense), // used!!
 	OBTAIN_NEW_LICENSE(Messages.JSparrowPricingLink_obtainNewLicense),
 	TO_GET_FULL_ACCESS_UPGRADE_LICENSE(Messages.JSparrowPricingLink_toGetFullAccessUpgradeLicense),
-	TO_USE_JSPARROW_MARKERS_UPGRADE_HERE(Messages.JSparrowPricingLink_toUseJSparrowMarkersUpgradeHere),
-	UPGRADE_YOUR_LICENSE_HERE(Messages.JSparrowPricingLink_upgradeLicenseHere);
+	TO_USE_JSPARROW_MARKERS_UPGRADE_HERE(Messages.JSparrowPricingLink_toUseJSparrowMarkersUpgradeHere);
 
 	private final String text;
 

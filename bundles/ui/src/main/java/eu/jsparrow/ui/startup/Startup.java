@@ -42,13 +42,6 @@ public class Startup implements IStartup {
 			.getDisplay()
 			.asyncExec(() -> {
 
-				if (!licenseUtil.isValidProLicensePresentInSecureStore() && !licenseUtil.isActiveRegistration()) {
-
-					Shell activeShell = PlatformUI.getWorkbench()
-						.getActiveWorkbenchWindow()
-						.getShell();
-					new RegistrationDialog(activeShell).open();
-				}
 				if (SimonykeesPreferenceManager.getEnableDashboard()) {
 					IWorkbenchPage page = PlatformUI.getWorkbench()
 						.getActiveWorkbenchWindow()
@@ -76,7 +69,8 @@ public class Startup implements IStartup {
 						currentLineColor);
 				MarkerFactory markerFactory = new MarkerFactory(jSparrowMarkerHighlightColor);
 				CoreRefactoringEventManager eventManager = new CoreRefactoringEventManager();
-				MarkerIdProvider markerIdProvider = new MarkerIdProvider(ResolverVisitorsFactory.getAllMarkerDescriptions());
+				MarkerIdProvider markerIdProvider = new MarkerIdProvider(
+						ResolverVisitorsFactory.getAllMarkerDescriptions());
 				MarkerEngine engine = new MarkerEngine(markerFactory, eventManager, markerIdProvider);
 				engine.track(workbench);
 				JavaCore.addElementChangedListener(engine);
