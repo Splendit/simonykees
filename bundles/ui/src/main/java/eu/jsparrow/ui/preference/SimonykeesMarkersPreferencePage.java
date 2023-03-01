@@ -68,27 +68,6 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		GridData groupLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		groupLayoutData.heightHint = 400;
 
-		LicenseUtil licenseUtil = LicenseUtil.get();
-		if (licenseUtil.isFreeLicense()) {
-			Link jSparrowLink = new Link(group, SWT.NONE);
-			jSparrowLink.setFont(parent.getFont());
-			jSparrowLink.setText(JSparrowPricingLink.TO_USE_JSPARROW_MARKERS_UPGRADE_HERE.getText());
-			jSparrowLink.setEnabled(true);
-			jSparrowLink.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					try {
-						PlatformUI.getWorkbench()
-							.getBrowserSupport()
-							.getExternalBrowser()
-							.openURL(new URL(arg0.text));
-					} catch (PartInitException | MalformedURLException e) {
-						// nothing...
-					}
-				}
-			});
-		}
-
 		Composite searchComposite = new Composite(group, SWT.NONE);
 		searchComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		searchComposite.setLayout(new GridLayout(1, true));

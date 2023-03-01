@@ -43,12 +43,7 @@ class JSparrowPricingLinkTest {
 						"To get full access and unlock all our rules, ",
 						"upgrade your license",
 						".",
-						TO_GET_FULL_ACCESS_UPGRADE_LICENSE),
-				Arguments.of(
-						"If you want to be able to use the jSparrow markers, ",
-						"upgrade here",
-						".",
-						TO_USE_JSPARROW_MARKERS_UPGRADE_HERE));
+						TO_GET_FULL_ACCESS_UPGRADE_LICENSE));
 	}
 
 	@ParameterizedTest

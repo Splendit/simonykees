@@ -11,8 +11,7 @@ import eu.jsparrow.i18n.Messages;
 public enum JSparrowPricingLink {
 	TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE(Messages.JSparrowPricingLink_toUnlockPremiumRulesUpgradeLicense), // used!!
 	OBTAIN_NEW_LICENSE(Messages.JSparrowPricingLink_obtainNewLicense),
-	TO_GET_FULL_ACCESS_UPGRADE_LICENSE(Messages.JSparrowPricingLink_toGetFullAccessUpgradeLicense),
-	TO_USE_JSPARROW_MARKERS_UPGRADE_HERE(Messages.JSparrowPricingLink_toUseJSparrowMarkersUpgradeHere);
+	TO_GET_FULL_ACCESS_UPGRADE_LICENSE(Messages.JSparrowPricingLink_toGetFullAccessUpgradeLicense);
 
 	private final String text;
 

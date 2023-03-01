@@ -307,7 +307,6 @@ public class Messages extends NLS {
 	public static String JSparrowPricingLink_obtainNewLicense;
 	public static String JSparrowPricingLink_toGetFullAccessUpgradeLicense;
 	public static String JSparrowPricingLink_toUnlockPremiumRulesUpgradeLicense;
-	public static String JSparrowPricingLink_toUseJSparrowMarkersUpgradeHere;
 	public static String Netlicensing_persistenceError_failedtoLoad;
 	public static String Netlicensing_persistenceError_failedToSave;
 	public static String Netlicensing_validationResult_freeLicenseExpired0;
