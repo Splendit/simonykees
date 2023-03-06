@@ -564,13 +564,14 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			.allMatch(RefactoringRule::isFree);
 
 		if (!allRulesFree) {
-			showSimonykeesUpdateLicenseDialog();
+			showSimonykeesUpdateLicenseDialog(
+					SimonykeesUpdateLicenseDialog.Explanation.ADDED_LOCKED_RULES_TO_SELECTION);
 		}
 
 	}
 
-	public void showSimonykeesUpdateLicenseDialog() {
-		SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell(),
+	public void showSimonykeesUpdateLicenseDialog(SimonykeesUpdateLicenseDialog.Explanation explanation) {
+		SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell(), explanation,
 				afterLicenseUpdateListeners);
 		dialog.create();
 		dialog.open();

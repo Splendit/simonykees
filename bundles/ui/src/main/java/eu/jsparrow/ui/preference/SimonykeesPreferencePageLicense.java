@@ -1,9 +1,9 @@
 package eu.jsparrow.ui.preference;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -27,18 +27,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Bundle;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.ui.Activator;
-import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -64,8 +60,6 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 	private Label licenseLabel;
 
 	private Label expirationLabel;
-
-	Link jSparrowLink;
 
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 
@@ -113,29 +107,14 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		licenseLabel.setLayoutData(licenseRowData);
 		licenseLabel.setFont(parent.getFont());
 
-		jSparrowLink = new Link(composite, SWT.NONE);
-		jSparrowLink.setFont(parent.getFont());
-		jSparrowLink.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				try {
-					PlatformUI.getWorkbench()
-						.getBrowserSupport()
-						.getExternalBrowser()
-						.openURL(new URL(arg0.text));
-				} catch (PartInitException | MalformedURLException e) {
-					// nothing...
-				}
-			}
-		});
-
 		Button updateButton = new Button(composite, SWT.PUSH);
 		updateButton.setText(Messages.SimonykeesPreferencePageLicense_update_license_key_button);
 		updateButton.setFont(parent.getFont());
 		updateButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell());
+				SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell(),
+						SimonykeesUpdateLicenseDialog.Explanation.NONE, new ArrayList<>());
 				dialog.create();
 				dialog.open();
 				updateDisplayedInformation();
@@ -166,21 +145,10 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			expirationLabel.setText(""); //$NON-NLS-1$
 		}
 
-		jSparrowLink.setText(computeJSparrowLinkText(result).getText());
-
 		licenseLabel.getParent()
 			.pack();
 		licenseLabel.getParent()
 			.layout(true);
-	}
-
-	private JSparrowPricingLink computeJSparrowLinkText(LicenseValidationResult result) {
-		boolean isFullLicense = licenseUtil.isProLicense();
-		boolean isValid = result.isValid();
-		if (isFullLicense && isValid) {
-			return JSparrowPricingLink.OBTAIN_NEW_LICENSE;
-		}
-		return JSparrowPricingLink.TO_GET_FULL_ACCESS_UPGRADE_LICENSE;
 	}
 
 	private String computeLicenseLabel(LicenseValidationResult result) {

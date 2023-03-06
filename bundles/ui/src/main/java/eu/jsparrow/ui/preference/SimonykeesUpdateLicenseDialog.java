@@ -11,13 +11,12 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TrayDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.HelpEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -54,7 +53,7 @@ import eu.jsparrow.ui.util.LicenseUtil.LicenseUpdateResult;
  * @since 1.0
  *
  */
-public class SimonykeesUpdateLicenseDialog extends TrayDialog {
+public class SimonykeesUpdateLicenseDialog extends Dialog {
 
 	private static final String LOGO_ACTIVE_LICENSE_PATH = SimonykeesPreferencePageLicense.LOGO_ACTIVE_LICENSE_PATH;
 	private static final String TICKMARK_GREEN_ICON_PATH = "icons/if_Tick_Mark_20px.png"; //$NON-NLS-1$
@@ -63,20 +62,25 @@ public class SimonykeesUpdateLicenseDialog extends TrayDialog {
 	private String licenseKey = ""; //$NON-NLS-1$
 	private CLabel updatedLabel;
 	private Label updatedIconLabel;
+	private Image jSparrowImageActive;
+	private Image tickmarkGreenIconImage;
+	private Image closeRedIconImage;
 	private Image scaledJSparrowImageActive;
 	private Image scaledTickmarkGreenIconImage;
 	private Image scaledCloseRedIconImage;
+	private String explainingText;
+	private int explainingTextHeight;
 	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
 
-	public SimonykeesUpdateLicenseDialog(Shell parentShell, List<Runnable> afterLicenseUpdateListeners) {
-		this(parentShell);
-		this.afterLicenseUpdateListeners.addAll(afterLicenseUpdateListeners);
-	}
-
-	public SimonykeesUpdateLicenseDialog(Shell parentShell) {
+	public SimonykeesUpdateLicenseDialog(Shell parentShell, Explanation explanation,
+			List<Runnable> afterLicenseUpdateListeners) {
 		super(parentShell);
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
-
+		this.explainingText = explanation.getExplainingText();
+		if (!explainingText.isEmpty()) {
+			explainingTextHeight = 50;
+		}
+		this.afterLicenseUpdateListeners.addAll(afterLicenseUpdateListeners);
 	}
 
 	@Override
@@ -108,15 +112,14 @@ public class SimonykeesUpdateLicenseDialog extends TrayDialog {
 		IPath iPathActive = new Path(LOGO_ACTIVE_LICENSE_PATH);
 		URL urlActive = FileLocator.find(bundle, iPathActive, new HashMap<>());
 		ImageDescriptor imageDescActive = ImageDescriptor.createFromURL(urlActive);
-		Image jSparrowImageActive = imageDescActive.createImage();
+		jSparrowImageActive = imageDescActive.createImage();
 		ImageData imageDataActive = jSparrowImageActive.getImageData();
 		scaledJSparrowImageActive = new Image(container.getDisplay(), imageDataActive);
-		scaledJSparrowImageActive = createScaledJSparrowImage(container, bundle);
 
 		updatedIconLabel.setImage(scaledJSparrowImageActive);
 		updatedIconLabel.setVisible(true);
-		addEmptyLineLabel(container);
-		addLinkToJSparrowPricingPage(container, JSparrowPricingLink.VISIT_US_TO_OBTAIN_A_LICENSE);
+
+		addLinkToJSparrowPricingPage(container, JSparrowPricingLink.OBTAIN_NEW_LICENSE);
 		addEmptyLineLabel(container);
 
 		// enter new key group
@@ -188,35 +191,20 @@ public class SimonykeesUpdateLicenseDialog extends TrayDialog {
 		IPath iPathTickMarkGreen = new Path(TICKMARK_GREEN_ICON_PATH);
 		URL urlTickMarkGreen = FileLocator.find(bundle, iPathTickMarkGreen, new HashMap<>());
 		ImageDescriptor imageDescTickMarkGreen = ImageDescriptor.createFromURL(urlTickMarkGreen);
-		Image tickmarkGreenIconImage = imageDescTickMarkGreen.createImage();
+		tickmarkGreenIconImage = imageDescTickMarkGreen.createImage();
 		ImageData imageDataTickmarkGreen = tickmarkGreenIconImage.getImageData();
 		scaledTickmarkGreenIconImage = new Image(container.getDisplay(), imageDataTickmarkGreen);
 
 		IPath iPathCloseRed = new Path(CLOSE_RED_ICON_PATH);
 		URL urlCloseRed = FileLocator.find(bundle, iPathCloseRed, new HashMap<>());
 		ImageDescriptor imageDescCloseRed = ImageDescriptor.createFromURL(urlCloseRed);
-		Image closeRedIconImage = imageDescCloseRed.createImage();
+		closeRedIconImage = imageDescCloseRed.createImage();
 		ImageData imageDataCloseRed = closeRedIconImage.getImageData();
 		scaledCloseRedIconImage = new Image(container.getDisplay(), imageDataCloseRed);
 
 		updatedLabel.setImage(scaledTickmarkGreenIconImage);
 		updatedLabel.setText(Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
 		updatedLabel.setVisible(false);
-
-		/*
-		 * Automatic release does not work for Image, so we do it manually when
-		 * container is disposed
-		 */
-		container.addDisposeListener((DisposeEvent e) -> {
-			tickmarkGreenIconImage.dispose();
-			closeRedIconImage.dispose();
-			// jSparrowImageInactive.dispose();
-			jSparrowImageActive.dispose();
-			scaledJSparrowImageActive.dispose();
-			// scaledJSparrowImageInactive.dispose();
-			scaledTickmarkGreenIconImage.dispose();
-			scaledCloseRedIconImage.dispose();
-		});
 
 		return container;
 	}
@@ -226,18 +214,12 @@ public class SimonykeesUpdateLicenseDialog extends TrayDialog {
 		emptyLine.setText(""); //$NON-NLS-1$
 	}
 
-	private Image createScaledJSparrowImage(Composite container, Bundle bundle) {
-		IPath iPathActive = new Path(LOGO_ACTIVE_LICENSE_PATH);
-		URL urlActive = FileLocator.find(bundle, iPathActive, new HashMap<>());
-		ImageDescriptor imageDescActive = ImageDescriptor.createFromURL(urlActive);
-		Image jSparrowImageActive = imageDescActive.createImage();
-		ImageData imageDataActive = jSparrowImageActive.getImageData();
-		return new Image(container.getDisplay(), imageDataActive);
-
-	}
-
 	private void addLinkToJSparrowPricingPage(Composite parent, JSparrowPricingLink jSparrowPricingLink) {
-		Link linkToUnlockRules = new Link(parent, SWT.NONE);
+
+		GridData styledTextGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		styledTextGridData.minimumHeight = 90;
+		Link linkToUnlockRules = new Link(parent, SWT.WRAP);
+		linkToUnlockRules.setLayoutData(styledTextGridData);
 		linkToUnlockRules
 			.setText(jSparrowPricingLink.getText());
 		linkToUnlockRules.addSelectionListener(new SelectionAdapter() {
@@ -262,7 +244,7 @@ public class SimonykeesUpdateLicenseDialog extends TrayDialog {
 
 	@Override
 	protected Point getInitialSize() {
-		return new Point(550, 450);
+		return new Point(560, 470);
 	}
 
 	@Override
@@ -275,4 +257,42 @@ public class SimonykeesUpdateLicenseDialog extends TrayDialog {
 		return licenseKey;
 	}
 
+	@Override
+	public boolean close() {
+		tickmarkGreenIconImage.dispose();
+		closeRedIconImage.dispose();
+		jSparrowImageActive.dispose();
+		scaledJSparrowImageActive.dispose();
+		scaledTickmarkGreenIconImage.dispose();
+		scaledCloseRedIconImage.dispose();
+		return super.close();
+	}
+
+	@SuppressWarnings("nls")
+	public enum Explanation {
+		ADDED_LOCKED_RULES_TO_SELECTION(
+				""
+						+ "You have added one or more premium rules to your selection"
+						+ " which are locked and cannot be applied (see the lock symbol)."
+						+ " You need a premium license to unlock and apply them."),
+		SELECTION_CONTAINS_LOCKED_RULES(
+				""
+						+ "Your selection contains one or more premium rules"
+						+ " which are locked and cannot be applied (see the lock symbol)."
+						+ " You need a premium license to unlock and apply them."),
+		CANNOT_COMMIT_WITH_LOCKED_RULES(
+				""
+						+ "Committing the changes is not possible bercause you need a premium license to apply premium rules."),
+		NONE("");
+
+		private final String explainingText;
+
+		private Explanation(String explainingText) {
+			this.explainingText = explainingText;
+		}
+
+		public String getExplainingText() {
+			return explainingText;
+		}
+	}
 }

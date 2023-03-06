@@ -30,32 +30,29 @@ class JSparrowPricingLinkTest {
 	public static Stream<Arguments> testLinkTextContentArguments() throws Exception {
 		return Stream.of(
 				Arguments.of(
-						"To unlock premium rules, ",
-						"upgrade your license",
-						".",
-						TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE),
+						"You have added one or more premium rules to your selection which cannot be applied because thy are locked (see the lock symbol).\r\n"
+						+ "\r\n"
+						+ "To unlock them, <a href=\"https://jsparrow.io/pricing/\">visit jSparrow</a> to obtain a premium license, enter the license key and activate.",
+						ADDED_LOCKED_RULES_TO_SELECTION),
 				Arguments.of(
-						"",
-						"Obtain a new license",
-						".",
-						OBTAIN_NEW_LICENSE),
+						"Your selection contains one or more premium rules which cannot be applied because thy are locked (see the lock symbol).\r\n"
+						+ "\r\n"
+						+ "To unlock them, <a href=\"https://jsparrow.io/pricing/\">visit jSparrow</a> to obtain a premium license, enter the license key and activate.",
+						SELECTION_CONTAINS_LOCKED_RULES),
 				Arguments.of(
-						"To get full access and unlock all our rules, ",
-						"upgrade your license",
-						".",
-						TO_GET_FULL_ACCESS_UPGRADE_LICENSE));
+						"You cannot commit because your changes need the execution of premium rules which cannot be applied because thy are locked.\r\n"
+						+ "\r\n"
+						+ "If you want to commit your changes, <a href=\"https://jsparrow.io/pricing/\">visit jSparrow</a> to obtain a premium license, enter the license key and activate.",
+						CANNOT_COMMIT_WITH_LOCKED_RULES),
+				Arguments.of(
+						"To obtain a new license, <a href=\"https://jsparrow.io/pricing/\">visit jSparrow</a>, enter the license key and activate.",
+						OBTAIN_NEW_LICENSE));
 	}
 
 	@ParameterizedTest
 	@MethodSource("testLinkTextContentArguments")
-	void testLinkTextContent(String textBeforeLink, String linkedText, String textAfterLink,
-			JSparrowPricingLink pricingLink) {
-		assertEquals(textBeforeLink
-				+ LINK_TO_JSPARROW_IO_PRICING_STARTTAG
-				+ linkedText
-				+ LINK_ENDTAG
-				+ textAfterLink,
-				pricingLink.getText());
+	void testLinkTextContent(String pricingLinkText, JSparrowPricingLink pricingLink) {
+		assertEquals(pricingLinkText, pricingLink.getText());
 	}
 
 	@Test

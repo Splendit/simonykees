@@ -1,15 +1,7 @@
 package eu.jsparrow.ui.dialog;
 
-import eu.jsparrow.i18n.Messages;
-
-/**
- * Needed to standardize the text for links to the jSparrpw pricing page.
- * 
- * @since 4.15.0
- * 
- */
 @SuppressWarnings("nls")
-public enum JSparrowPricingLink {
+public enum JSparrowPricingLinkText {
 	ADDED_LOCKED_RULES_TO_SELECTION(
 			""
 					+ "You have added one or more premium rules to your selection"
@@ -35,20 +27,13 @@ public enum JSparrowPricingLink {
 			""
 					+ "To obtain a new license, <a>visit jSparrow</a>, enter the license key and activate.");
 
-	private final String text;
+	private final String explainingText;
 
-	private JSparrowPricingLink(String template) {
-		String linkStartTag = String.format(Messages.JSparrowPricingLink_link_startTag_formatstring,
-				getJSparrowPricingPageAddress());
-		this.text = template.replace(Messages.JSparrowPricingLink_link_startTag, linkStartTag);
+	private JSparrowPricingLinkText(String explainingText) {
+		this.explainingText = explainingText;
 	}
 
-	public static String getJSparrowPricingPageAddress() {
-		return Messages.JSparrowPricingLink_jSparrowPricingPage_url;
+	public String getExplainingText() {
+		return explainingText;
 	}
-
-	public String getText() {
-		return text;
-	}
-
 }
