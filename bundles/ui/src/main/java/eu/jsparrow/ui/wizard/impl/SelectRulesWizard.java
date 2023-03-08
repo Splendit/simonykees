@@ -41,6 +41,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
+import eu.jsparrow.ui.dialog.ObtainLicenseButtonData;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -86,8 +87,6 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 				class SelectRulesWizardDialog extends WizardDialog {
 
-					private static final int BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY = 11002;
-
 					public SelectRulesWizardDialog(Shell parentShell, SelectRulesWizard newWizard) {
 						super(parentShell, newWizard);
 						newWizard.addLicenseUpdateListener(this::updateButtonsForButtonBar);
@@ -131,7 +130,8 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 					@Override
 					protected void createButtonsForButtonBar(Composite parent) {
-						createButton(parent, BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY, "Enter premium license key", false);
+						createButton(parent, ObtainLicenseButtonData.BUTTON_ID_UNLOCK_PREMIUM_RULES,
+								ObtainLicenseButtonData.BUTTON_TEXT_UNLOCK_PREMIUM_RULES, false);
 						super.createButtonsForButtonBar(parent);
 
 						Button finish = getButton(IDialogConstants.FINISH_ID);
@@ -146,13 +146,15 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 						if (licenseUtil.isFreeLicense()) {
 							showEnterPremiumLicenseKey = true;
 						}
-						getButton(BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY).setVisible(showEnterPremiumLicenseKey);
+						getButton(ObtainLicenseButtonData.BUTTON_ID_UNLOCK_PREMIUM_RULES)
+							.setVisible(showEnterPremiumLicenseKey);
 					}
 
 					@Override
 					protected void buttonPressed(int buttonId) {
-						if (buttonId == BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
-							selectRulesWizard.showSimonykeesUpdateLicenseDialog(JSparrowPricingLink.UNLOCK_ALL_PREMIUM_RULES);
+						if (buttonId == ObtainLicenseButtonData.BUTTON_ID_UNLOCK_PREMIUM_RULES) {
+							selectRulesWizard
+								.showSimonykeesUpdateLicenseDialog(JSparrowPricingLink.UNLOCK_ALL_PREMIUM_RULES);
 						} else {
 							super.buttonPressed(buttonId);
 						}

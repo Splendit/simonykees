@@ -36,6 +36,7 @@ import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
+import eu.jsparrow.ui.dialog.ObtainLicenseButtonData;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -61,6 +62,8 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 	private Label licenseLabel;
 
 	private Label expirationLabel;
+
+	private Button updateButton;
 
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 
@@ -108,22 +111,21 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		licenseLabel.setLayoutData(licenseRowData);
 		licenseLabel.setFont(parent.getFont());
 
-		Button updateButton = new Button(composite, SWT.PUSH);
-		updateButton.setText(Messages.SimonykeesPreferencePageLicense_update_license_key_button);
+		updateButton = new Button(composite, SWT.PUSH);
 		updateButton.setFont(parent.getFont());
 		updateButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell(),
-						JSparrowPricingLink.OBTAIN_NEW_LICENSE, new ArrayList<>());
+						computeJSparrowLink(), new ArrayList<>());
 				dialog.create();
 				dialog.open();
 				updateDisplayedInformation();
 			}
 		});
-
-		updateDisplayedInformation();
 		updateButton.setVisible(true);
+		updateDisplayedInformation();
+
 		composite.addDisposeListener((DisposeEvent e) -> {
 			jSparrowImageActive.dispose();
 			expirationLabel.getFont()
@@ -150,6 +152,19 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			.pack();
 		licenseLabel.getParent()
 			.layout(true);
+
+		if (licenseUtil.isFreeLicense()) {
+			updateButton.setText(ObtainLicenseButtonData.BUTTON_TEXT_UNLOCK_PREMIUM_RULES);
+		} else {
+			updateButton.setText(ObtainLicenseButtonData.BUTTON_TEXT_OBTAIN_NEW_LICENSE);
+		}
+	}
+
+	private JSparrowPricingLink computeJSparrowLink() {
+		if (licenseUtil.isFreeLicense()) {
+			return JSparrowPricingLink.UNLOCK_ALL_PREMIUM_RULES;
+		}
+		return JSparrowPricingLink.OBTAIN_NEW_LICENSE;
 	}
 
 	private String computeLicenseLabel(LicenseValidationResult result) {

@@ -21,7 +21,7 @@ public class JSparrowPricingLinkText {
 			+ "\r\n"
 			+ "If you want to commit your changes, <a>visit jSparrow</a> to obtain a premium license, enter the license key and activate.";
 	public static final String UNLOCK_ALL_PREMIUM_RULES = ""
-			+ "To unlock all premium rules, <a>visit jSparrow</a> to obtain a premium license, enter the license key and activate.";
+			+ "To unlock all premium rules (see the lock symbol), <a>visit jSparrow</a> to obtain a premium license, enter the license key and activate.";
 	public static final String OBTAIN_NEW_LICENSE = ""
 			+ "To obtain a new license, <a>visit jSparrow</a>, enter the license key and activate.";
 

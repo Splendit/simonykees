@@ -557,7 +557,6 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePageLicense_jsparrow_pro_valid_until;
 	public static String SimonykeesPreferencePageLicense_jsparrow_starter;
 	public static String SimonykeesPreferencePageLicense_register_for_free_jsparrow_trial;
-	public static String SimonykeesPreferencePageLicense_update_license_key_button;
 	public static String SimonykeesUpdateLicenseDialog_invalid_license_key;
 	public static String SimonykeesUpdateLicenseDialog_license_updated_successfully;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_label;

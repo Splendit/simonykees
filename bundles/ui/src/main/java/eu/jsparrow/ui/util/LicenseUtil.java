@@ -286,7 +286,6 @@ public class LicenseUtil implements LicenseUtilService {
 			isValid = ZonedDateTime.now()
 				.isBefore(model.getExpirationDate());
 		}
-
 		return isValid && type != LicenseType.DEMO;
 	}
 
