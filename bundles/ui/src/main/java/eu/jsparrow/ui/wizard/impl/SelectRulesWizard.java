@@ -40,8 +40,8 @@ import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
-import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.ResourceHelper;
@@ -152,7 +152,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 					@Override
 					protected void buttonPressed(int buttonId) {
 						if (buttonId == BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
-							selectRulesWizard.showSimonykeesUpdateLicenseDialog(SimonykeesUpdateLicenseDialog.Explanation.NONE);
+							selectRulesWizard.showSimonykeesUpdateLicenseDialog(JSparrowPricingLink.UNLOCK_ALL_PREMIUM_RULES);
 						} else {
 							super.buttonPressed(buttonId);
 						}
@@ -203,7 +203,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		addPage(page);
 	}
 
-	public void showSimonykeesUpdateLicenseDialog(SimonykeesUpdateLicenseDialog.Explanation explanation) {
+	public void showSimonykeesUpdateLicenseDialog(JSparrowPricingLink explanation) {
 		page.showSimonykeesUpdateLicenseDialog(explanation);
 	}
 
@@ -263,7 +263,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 			.allMatch(RefactoringRule::isFree);
 
 		if (!allRulesFree) {
-			showSimonykeesUpdateLicenseDialog(SimonykeesUpdateLicenseDialog.Explanation.SELECTION_CONTAINS_LOCKED_RULES);
+			showSimonykeesUpdateLicenseDialog(JSparrowPricingLink.SELECTION_CONTAINS_LOCKED_RULES);
 		}
 	}
 

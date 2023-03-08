@@ -68,18 +68,14 @@ public class SimonykeesUpdateLicenseDialog extends Dialog {
 	private Image scaledJSparrowImageActive;
 	private Image scaledTickmarkGreenIconImage;
 	private Image scaledCloseRedIconImage;
-	private String explainingText;
-	private int explainingTextHeight;
+	private JSparrowPricingLink pricingLink;
 	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
 
-	public SimonykeesUpdateLicenseDialog(Shell parentShell, Explanation explanation,
+	public SimonykeesUpdateLicenseDialog(Shell parentShell, JSparrowPricingLink pricingLink,
 			List<Runnable> afterLicenseUpdateListeners) {
 		super(parentShell);
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
-		this.explainingText = explanation.getExplainingText();
-		if (!explainingText.isEmpty()) {
-			explainingTextHeight = 50;
-		}
+		this.pricingLink = pricingLink;
 		this.afterLicenseUpdateListeners.addAll(afterLicenseUpdateListeners);
 	}
 
@@ -118,8 +114,8 @@ public class SimonykeesUpdateLicenseDialog extends Dialog {
 
 		updatedIconLabel.setImage(scaledJSparrowImageActive);
 		updatedIconLabel.setVisible(true);
-
-		addLinkToJSparrowPricingPage(container, JSparrowPricingLink.OBTAIN_NEW_LICENSE);
+		Link linkToJSparrowPricingPage = createPricingLink(container, pricingLink);
+		linkToJSparrowPricingPage.setText(pricingLink.getText());
 		addEmptyLineLabel(container);
 
 		// enter new key group
@@ -171,6 +167,7 @@ public class SimonykeesUpdateLicenseDialog extends Dialog {
 						updatedLabel.setImage(scaledTickmarkGreenIconImage);
 						licenseUtil.updateValidationResult();
 						afterLicenseUpdateListeners.forEach(Runnable::run);
+						linkToJSparrowPricingPage.setVisible(false);
 					}
 					updatedLabel.setText(result.getDetailMessage());
 					updatedLabel.setVisible(true);
@@ -214,14 +211,12 @@ public class SimonykeesUpdateLicenseDialog extends Dialog {
 		emptyLine.setText(""); //$NON-NLS-1$
 	}
 
-	private void addLinkToJSparrowPricingPage(Composite parent, JSparrowPricingLink jSparrowPricingLink) {
+	private static Link createPricingLink(Composite parent,  JSparrowPricingLink pricingLink) {
 
 		GridData styledTextGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		styledTextGridData.minimumHeight = 90;
+		styledTextGridData.minimumHeight = pricingLink.getMinimumControlHeight();
 		Link linkToUnlockRules = new Link(parent, SWT.WRAP);
 		linkToUnlockRules.setLayoutData(styledTextGridData);
-		linkToUnlockRules
-			.setText(jSparrowPricingLink.getText());
 		linkToUnlockRules.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -235,6 +230,7 @@ public class SimonykeesUpdateLicenseDialog extends Dialog {
 				}
 			}
 		});
+		return linkToUnlockRules;
 	}
 
 	@Override
@@ -244,7 +240,7 @@ public class SimonykeesUpdateLicenseDialog extends Dialog {
 
 	@Override
 	protected Point getInitialSize() {
-		return new Point(560, 470);
+		return new Point(560, 330 + pricingLink.getMinimumControlHeight());
 	}
 
 	@Override
@@ -266,33 +262,5 @@ public class SimonykeesUpdateLicenseDialog extends Dialog {
 		scaledTickmarkGreenIconImage.dispose();
 		scaledCloseRedIconImage.dispose();
 		return super.close();
-	}
-
-	@SuppressWarnings("nls")
-	public enum Explanation {
-		ADDED_LOCKED_RULES_TO_SELECTION(
-				""
-						+ "You have added one or more premium rules to your selection"
-						+ " which are locked and cannot be applied (see the lock symbol)."
-						+ " You need a premium license to unlock and apply them."),
-		SELECTION_CONTAINS_LOCKED_RULES(
-				""
-						+ "Your selection contains one or more premium rules"
-						+ " which are locked and cannot be applied (see the lock symbol)."
-						+ " You need a premium license to unlock and apply them."),
-		CANNOT_COMMIT_WITH_LOCKED_RULES(
-				""
-						+ "Committing the changes is not possible bercause you need a premium license to apply premium rules."),
-		NONE("");
-
-		private final String explainingText;
-
-		private Explanation(String explainingText) {
-			this.explainingText = explainingText;
-		}
-
-		public String getExplainingText() {
-			return explainingText;
-		}
 	}
 }

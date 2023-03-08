@@ -35,6 +35,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -114,7 +115,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell(),
-						SimonykeesUpdateLicenseDialog.Explanation.NONE, new ArrayList<>());
+						JSparrowPricingLink.OBTAIN_NEW_LICENSE, new ArrayList<>());
 				dialog.create();
 				dialog.open();
 				updateDisplayedInformation();

@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Label;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -565,12 +566,12 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		if (!allRulesFree) {
 			showSimonykeesUpdateLicenseDialog(
-					SimonykeesUpdateLicenseDialog.Explanation.ADDED_LOCKED_RULES_TO_SELECTION);
+					JSparrowPricingLink.ADDED_LOCKED_RULES_TO_SELECTION);
 		}
 
 	}
 
-	public void showSimonykeesUpdateLicenseDialog(SimonykeesUpdateLicenseDialog.Explanation explanation) {
+	public void showSimonykeesUpdateLicenseDialog(JSparrowPricingLink explanation) {
 		SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell(), explanation,
 				afterLicenseUpdateListeners);
 		dialog.create();
