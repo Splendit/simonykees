@@ -16,7 +16,6 @@ public class Messages extends NLS {
 	public static String AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
 	public static String AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 	public static String AbstractSelectRulesWizardPage_error_NoRulesSelected;
-	public static String AbstractSelectRulesWizardPage_freemiumRegirementsMessage;
 	public static String AbstractSelectRulesWizardPage_notOnlyFreemiumSelected_statusInfoMessage;
 	public static String AbstractSelectRulesWizardPage_seeDocumentation;
 	public static String AbstractSelectRulesWizardPage_warning_RulesInProfileNotApplicable;

@@ -29,8 +29,9 @@ import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.util.LicenseUtil;
 
+@SuppressWarnings("nls")
 class RuleDescriptionStyledText extends StyledText {
-
+	
 	private static final String FULLSTOP = "."; //$NON-NLS-1$
 	private static final String UPGRADE_YOUR_LICENSE = "upgrade your license";
 
@@ -107,7 +108,7 @@ class RuleDescriptionStyledText extends StyledText {
 		String requiredLibrariesValue = (null != rule.requiredLibraries()) ? rule.requiredLibraries()
 				: Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
 		String jSparrowStarterValue = (rule.isFree() && licenseUtil.isFreeLicense())
-				? Messages.AbstractSelectRulesWizardPage_freemiumRegirementsMessage + lineDelimiter
+				? "This rule is included in the free license." + lineDelimiter
 				: ""; //$NON-NLS-1$
 		String tagsValue = StringUtils.join(rule.getRuleDescription()
 			.getTags()
