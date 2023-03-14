@@ -14,15 +14,6 @@ public interface LicenseModelFactoryService {
 	public LicenseModel createDemoLicenseModel();
 
 	/**
-	 * Create a new license model with a expiration date.
-	 * 
-	 * @param expirationDate
-	 *            expiration date of the license
-	 * @return a license model with type DEMO
-	 */
-	public LicenseModel createDemoLicenseModel(ZonedDateTime expirationDate);
-
-	/**
 	 * Create a new node locked license model.
 	 * 
 	 * @param key
