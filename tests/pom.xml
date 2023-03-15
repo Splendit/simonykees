@@ -21,7 +21,6 @@
 		<module>test.framework</module>
 		<module>test.common</module>
 		<module>license.netlicensing.test</module>
-		<module>registration.test</module>
 		<module>test</module>
 		<module>ui.test</module>
 		<module>eu.jsparrow.rules.api.test</module>

@@ -13,12 +13,9 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ide.ResourceUtil;
 
-import eu.jsparrow.license.api.LicenseType;
-import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
-import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * An engine for creating and clearing jSparrow markers based on the generated
@@ -38,7 +35,8 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 	private RefactoringEventManager eventGenerator;
 	private MarkerIdProvider resolverIdProvider;
 
-	public MarkerEngine(MarkerFactory markerFactory, RefactoringEventManager eventGenerator, MarkerIdProvider resolverIdProvider) {
+	public MarkerEngine(MarkerFactory markerFactory, RefactoringEventManager eventGenerator,
+			MarkerIdProvider resolverIdProvider) {
 		this.markerFactory = markerFactory;
 		this.eventGenerator = eventGenerator;
 		this.resolverIdProvider = resolverIdProvider;
@@ -137,22 +135,8 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 	private void handleParentSourceReference(ICompilationUnit cu) {
 		List<RefactoringMarkerEvent> oldEvents = RefactoringMarkers.getAllEvents();
 		RefactoringMarkers.clear();
-		LicenseUtil licenseUtil = LicenseUtil.get();
-		LicenseValidationResult validationResult = licenseUtil.getValidationResult();
-		LicenseType type = validationResult.getLicenseType();
-		boolean valid = LicenseType.DEMO != type && validationResult.isValid();
-		if (!valid) {
-			return;
-		}
 		List<String> availableMarkerIds = resolverIdProvider.findAvailableFor(cu);
-		if (type == LicenseType.PAY_PER_USE) {
-			int availableCredit = validationResult.getCredit()
-					.orElse(0);
-			List<String> filteredByCredit = resolverIdProvider.filterWithSufficientCredit(availableCredit, availableMarkerIds);
-			eventGenerator.discoverRefactoringEvents(cu, filteredByCredit);
-		} else {
-			eventGenerator.discoverRefactoringEvents(cu, availableMarkerIds);
-		}
+		eventGenerator.discoverRefactoringEvents(cu, availableMarkerIds);
 
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		if (oldEvents.equals(events)) {

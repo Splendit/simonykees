@@ -58,7 +58,7 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 			return false;
 		}
 		if (licenseUtil.isFreeLicense()) {
-			return canHaveFreeRule() && containsOnlyFreeRules() && licenseUtil.isActiveRegistration();
+			return canHaveFreeRule() && containsOnlyFreeRules();
 		}
 		LicenseValidationResult result = licenseUtil.getValidationResult();
 		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {

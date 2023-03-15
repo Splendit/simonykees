@@ -29,11 +29,10 @@ import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.util.LicenseUtil;
 
+@SuppressWarnings("nls")
 class RuleDescriptionStyledText extends StyledText {
-
-	private static final String DBL_QUOT = "\""; //$NON-NLS-1$
+	
 	private static final String FULLSTOP = "."; //$NON-NLS-1$
-	private static final String REGISTER_FOR_A_FREE_TRIAL = "Register for a free trial";
 	private static final String UPGRADE_YOUR_LICENSE = "upgrade your license";
 
 	private String selectedRuleLink = ""; //$NON-NLS-1$
@@ -109,7 +108,7 @@ class RuleDescriptionStyledText extends StyledText {
 		String requiredLibrariesValue = (null != rule.requiredLibraries()) ? rule.requiredLibraries()
 				: Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
 		String jSparrowStarterValue = (rule.isFree() && licenseUtil.isFreeLicense())
-				? Messages.AbstractSelectRulesWizardPage_freemiumRegirementsMessage + lineDelimiter
+				? "This rule is included in the free license." + lineDelimiter
 				: ""; //$NON-NLS-1$
 		String tagsValue = StringUtils.join(rule.getRuleDescription()
 			.getTags()
@@ -148,8 +147,7 @@ class RuleDescriptionStyledText extends StyledText {
 		StyleContainer upgradeLicenseStyleContainer = null;
 		if (licenseUtil.isFreeLicense()) {
 			upgradeLicenseStyleContainer = createBlueLink(UPGRADE_YOUR_LICENSE);
-			List<StyleContainer> unlockSuggestions = getUnlockSuggestions(rule, upgradeLicenseStyleContainer,
-					licenseUtil.isActiveRegistration());
+			List<StyleContainer> unlockSuggestions = getUnlockSuggestions(rule, upgradeLicenseStyleContainer);
 			descriptionList.addAll(unlockSuggestions);
 		}
 
@@ -216,32 +214,7 @@ class RuleDescriptionStyledText extends StyledText {
 	}
 
 	private static List<StyleContainer> getUnlockSuggestions(RefactoringRule rule,
-			StyleContainer upgradeLicenseStyleContainer, boolean activeRegistration) {
-
-		if (!activeRegistration) {
-			if (rule.isFree()) {
-				return Arrays.asList(
-						createLineDelimiter(),
-						new StyleContainer(
-								"This is one of the 20 free rules of jSparrow trial. To unlock it, press the button " +
-										DBL_QUOT + REGISTER_FOR_A_FREE_TRIAL + DBL_QUOT + " below."),
-						createLineDelimiter(),
-						createLineDelimiter(),
-						new StyleContainer("To unlock all our rules, "),
-						upgradeLicenseStyleContainer,
-						new StyleContainer(FULLSTOP), // $NON-NLS-1$
-						createLineDelimiter(),
-						createLineDelimiter());
-			}
-
-			return Arrays.asList(
-					createLineDelimiter(),
-					new StyleContainer("This is a premium rule. To unlock it and all other rules, "),
-					upgradeLicenseStyleContainer,
-					new StyleContainer(FULLSTOP), // $NON-NLS-1$
-					createLineDelimiter(),
-					createLineDelimiter());
-		}
+			StyleContainer upgradeLicenseStyleContainer) {
 
 		if (rule.isFree()) {
 			return Arrays.asList(

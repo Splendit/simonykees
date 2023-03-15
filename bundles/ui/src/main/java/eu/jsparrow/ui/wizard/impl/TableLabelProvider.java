@@ -33,7 +33,6 @@ public class TableLabelProvider extends BaseLabelProvider implements ITableLabel
 	private Image lockedRuleImage;
 
 	private boolean freeLicense;
-	private boolean activeRegistration;
 
 	private static final String ICON_CHECK = "icons/icon-check.png"; //$NON-NLS-1$
 	private static final String ICON_LOCK = "icons/icon-lock.png"; //$NON-NLS-1$
@@ -57,7 +56,6 @@ public class TableLabelProvider extends BaseLabelProvider implements ITableLabel
 
 		LicenseUtil licenseUtil = LicenseUtil.get();
 		freeLicense = licenseUtil.isFreeLicense();
-		activeRegistration = licenseUtil.isActiveRegistration();
 	}
 
 	@Override
@@ -65,7 +63,7 @@ public class TableLabelProvider extends BaseLabelProvider implements ITableLabel
 		if (element instanceof RefactoringRule) {
 			RefactoringRule rule = (RefactoringRule) element;
 
-			if (freeLicense && (!activeRegistration || !rule.isFree())) {
+			if (freeLicense && !rule.isFree()) {
 				return lockedRuleImage;
 			}
 

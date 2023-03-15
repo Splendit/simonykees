@@ -1,18 +1,10 @@
 package eu.jsparrow.ui.wizard.impl;
 
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.ALL_RULES_IN_YOUR_SELECTION_ARE_FREE;
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_FREE_TRIAL_VERSION;
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES;
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.TO_UNLOCK_THEM;
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.UNLOCK_SELECTED_RULES;
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +41,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
-import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
+import eu.jsparrow.ui.dialog.ObtainLicenseButtonData;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -83,7 +75,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	private Image windowIcon;
 	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
 	private final SelectRulesWizardData selectRulesWizardData;
-	
+
 	public static void synchronizeWithUIShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,
 			SelectRulesWizardData selectRulesWizardData) {
 		Display.getDefault()
@@ -94,9 +86,6 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 				SelectRulesWizard selectRulesWizard = new SelectRulesWizard(refactoringPipeline, selectRulesWizardData);
 
 				class SelectRulesWizardDialog extends WizardDialog {
-
-					private static final int BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL = 11001;
-					private static final int BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY = 11002;
 
 					public SelectRulesWizardDialog(Shell parentShell, SelectRulesWizard newWizard) {
 						super(parentShell, newWizard);
@@ -141,8 +130,8 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 					@Override
 					protected void createButtonsForButtonBar(Composite parent) {
-						createButton(parent, BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL, "Register for a free trial", false);
-						createButton(parent, BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY, "Enter premium license key", false);
+						createButton(parent, ObtainLicenseButtonData.BUTTON_ID_UNLOCK_PREMIUM_RULES,
+								ObtainLicenseButtonData.BUTTON_TEXT_UNLOCK_PREMIUM_RULES, false);
 						super.createButtonsForButtonBar(parent);
 
 						Button finish = getButton(IDialogConstants.FINISH_ID);
@@ -152,25 +141,20 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 					}
 
 					private void updateButtonsForButtonBar() {
-						boolean showRegisterForAFreeTrial = false;
 						boolean showEnterPremiumLicenseKey = false;
 						LicenseUtil licenseUtil = LicenseUtil.get();
 						if (licenseUtil.isFreeLicense()) {
-							if (!licenseUtil.isActiveRegistration()) {
-								showRegisterForAFreeTrial = true;
-							}
 							showEnterPremiumLicenseKey = true;
 						}
-						getButton(BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL).setVisible(showRegisterForAFreeTrial);
-						getButton(BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY).setVisible(showEnterPremiumLicenseKey);
+						getButton(ObtainLicenseButtonData.BUTTON_ID_UNLOCK_PREMIUM_RULES)
+							.setVisible(showEnterPremiumLicenseKey);
 					}
 
 					@Override
 					protected void buttonPressed(int buttonId) {
-						if (buttonId == BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
-							selectRulesWizard.showRegistrationDialog();
-						} else if (buttonId == BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
-							selectRulesWizard.showSimonykeesUpdateLicenseDialog();
+						if (buttonId == ObtainLicenseButtonData.BUTTON_ID_UNLOCK_PREMIUM_RULES) {
+							selectRulesWizard
+								.showSimonykeesUpdateLicenseDialog(JSparrowPricingLink.UNLOCK_ALL_PREMIUM_RULES);
 						} else {
 							super.buttonPressed(buttonId);
 						}
@@ -221,12 +205,8 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		addPage(page);
 	}
 
-	public void showRegistrationDialog() {
-		page.showRegistrationDialog();
-	}
-
-	public void showSimonykeesUpdateLicenseDialog() {
-		page.showSimonykeesUpdateLicenseDialog();
+	public void showSimonykeesUpdateLicenseDialog(JSparrowPricingLink explanation) {
+		page.showSimonykeesUpdateLicenseDialog(explanation);
 	}
 
 	@Override
@@ -274,64 +254,18 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		return true;
 	}
 
-	public void showOptionalLockedRuleSelectionDialog(List<RefactoringRule> selectedRules) {
+	private void showOptionalLockedRuleSelectionDialog(List<RefactoringRule> selectedRules) {
 		LicenseUtil licenseUtil = LicenseUtil.get();
 		if (!licenseUtil.isFreeLicense() || selectedRules.isEmpty()) {
 			return;
 		}
 
-		List<Consumer<SuggestRegistrationDialog>> addComponentLambdas = null;
-		if (licenseUtil.isActiveRegistration()) {
-			boolean allRulesFree = selectedRules
-				.stream()
-				.allMatch(RefactoringRule::isFree);
+		boolean allRulesFree = selectedRules
+			.stream()
+			.allMatch(RefactoringRule::isFree);
 
-			if (!allRulesFree) {
-				addComponentLambdas = Arrays.asList(//
-						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
-						dialog -> dialog
-							.addLinkToJSparrowPricingPage(JSparrowPricingLink.TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE),
-						SuggestRegistrationDialog::addRegisterForPremiumButton);
-			}
-		} else {
-			boolean allRulesFree = selectedRules
-				.stream()
-				.allMatch(RefactoringRule::isFree);
-
-			if (allRulesFree) {
-				addComponentLambdas = Arrays.asList(//
-						dialog -> dialog.addLabel(ALL_RULES_IN_YOUR_SELECTION_ARE_FREE),
-						dialog -> dialog.addLabel(TO_UNLOCK_THEM + REGISTER_FOR_A_FREE_TRIAL_VERSION),
-						dialog -> dialog
-							.addLabel(REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES),
-						SuggestRegistrationDialog::addRegisterForFreeButton,
-						dialog -> dialog.addLinkToJSparrowPricingPage(
-								JSparrowPricingLink.TO_UNLOCK_ALL_RULES_REGISTER_FOR_PREMIUM_LICENSE),
-						SuggestRegistrationDialog::addRegisterForPremiumButton);
-			} else {
-				addComponentLambdas = Arrays.asList(//
-						dialog -> dialog.addLabel(YOUR_SELECTION_IS_INCLUDING_PREMIUM_RULES),
-						dialog -> dialog.addLinkToJSparrowPricingPage(
-								JSparrowPricingLink.TO_UNLOCK_THEM_REGISTER_FOR_PREMIUM_LICENSE),
-						SuggestRegistrationDialog::addRegisterForPremiumButton,
-						dialog -> dialog
-							.addLabel(
-									REGISTRATION_FOR_A_FREE_TRIAL_WILL_UNLOCK_20_OF_OUR_MOST_LIKED_RULES),
-						SuggestRegistrationDialog::addRegisterForFreeButton);
-			}
-
-		}
-
-		if (addComponentLambdas != null) {
-			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(getShell(), addComponentLambdas);
-			dialog.useSkipAsLastButton();
-			dialog.setTextForShell(UNLOCK_SELECTED_RULES);
-			int returnCode = dialog.open();
-			if (returnCode == SuggestRegistrationDialog.BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
-				showRegistrationDialog();
-			} else if (returnCode == SuggestRegistrationDialog.BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
-				showSimonykeesUpdateLicenseDialog();
-			}
+		if (!allRulesFree) {
+			showSimonykeesUpdateLicenseDialog(JSparrowPricingLink.SELECTION_CONTAINS_LOCKED_RULES);
 		}
 	}
 

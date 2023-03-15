@@ -34,7 +34,6 @@
 		<!-- licensing -->
 		<module>license.api</module>
 		<module>license.netlicensing</module>
-		<module>registration</module>
 
 		<!-- plug-in functionality -->
 		<module>core</module>

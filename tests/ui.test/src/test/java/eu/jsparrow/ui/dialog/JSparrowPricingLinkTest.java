@@ -30,58 +30,29 @@ class JSparrowPricingLinkTest {
 	public static Stream<Arguments> testLinkTextContentArguments() throws Exception {
 		return Stream.of(
 				Arguments.of(
-						"",
-						"Upgrade your license",
-						" to be able to apply all our rules!",
-						UPGRADE_LICENSE_TO_APPLY_ALL_RULES),
+						"You have added one or more premium rules to your selection which cannot be applied because thy are locked (see the lock symbol).\r\n"
+						+ "\r\n"
+						+ "To unlock them, <a href=\"https://jsparrow.io/pricing/\">visit jSparrow</a> to obtain a premium license, enter the license key and activate.",
+						ADDED_LOCKED_RULES_TO_SELECTION),
 				Arguments.of(
-						"To unlock all our rules, ",
-						"register for a premium license",
-						".",
-						TO_UNLOCK_ALL_RULES_REGISTER_FOR_PREMIUM_LICENSE),
-
+						"Your selection contains one or more premium rules which cannot be applied because thy are locked (see the lock symbol).\r\n"
+						+ "\r\n"
+						+ "To unlock them, <a href=\"https://jsparrow.io/pricing/\">visit jSparrow</a> to obtain a premium license, enter the license key and activate.",
+						SELECTION_CONTAINS_LOCKED_RULES),
 				Arguments.of(
-						"To unlock them, ",
-						"register for a premium license",
-						".",
-						TO_UNLOCK_THEM_REGISTER_FOR_PREMIUM_LICENSE),
+						"You cannot commit because your changes need the execution of premium rules which cannot be applied because thy are locked.\r\n"
+						+ "\r\n"
+						+ "If you want to commit your changes, <a href=\"https://jsparrow.io/pricing/\">visit jSparrow</a> to obtain a premium license, enter the license key and activate.",
+						CANNOT_COMMIT_WITH_LOCKED_RULES),
 				Arguments.of(
-						"To unlock premium rules, ",
-						"upgrade your license",
-						".",
-						TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE),
-				Arguments.of(
-						"",
-						"Obtain a new license",
-						".",
-						OBTAIN_NEW_LICENSE),
-				Arguments.of(
-						"To get full access and unlock all our rules, ",
-						"upgrade your license",
-						".",
-						TO_GET_FULL_ACCESS_UPGRADE_LICENSE),
-				Arguments.of(
-						"If you want to be able to use the jSparrow markers, ",
-						"upgrade here",
-						".",
-						TO_USE_JSPARROW_MARKERS_UPGRADE_HERE),
-				Arguments.of(
-						"Upgrade your license ",
-						"here",
-						".",
-						UPGRADE_YOUR_LICENSE_HERE));
+						"To obtain a new license, <a href=\"https://jsparrow.io/pricing/\">visit jSparrow</a>, enter the license key and activate.",
+						OBTAIN_NEW_LICENSE));
 	}
 
 	@ParameterizedTest
 	@MethodSource("testLinkTextContentArguments")
-	void testLinkTextContent(String textBeforeLink, String linkedText, String textAfterLink,
-			JSparrowPricingLink pricingLink) {
-		assertEquals(textBeforeLink
-				+ LINK_TO_JSPARROW_IO_PRICING_STARTTAG
-				+ linkedText
-				+ LINK_ENDTAG
-				+ textAfterLink,
-				pricingLink.getText());
+	void testLinkTextContent(String pricingLinkText, JSparrowPricingLink pricingLink) {
+		assertEquals(pricingLinkText, pricingLink.getText());
 	}
 
 	@Test

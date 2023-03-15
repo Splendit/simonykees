@@ -9,22 +9,20 @@ import eu.jsparrow.i18n.Messages;
  * 
  */
 public enum JSparrowPricingLink {
-	UPGRADE_LICENSE_TO_APPLY_ALL_RULES(Messages.JSparrowPricingLink_upgradeLicenceToApplyAllRules),
-	TO_UNLOCK_ALL_RULES_REGISTER_FOR_PREMIUM_LICENSE(
-			Messages.JSparrowPricingLink_toUnlockAllRulesRegisterForPremiumLicense),
-	TO_UNLOCK_THEM_REGISTER_FOR_PREMIUM_LICENSE(Messages.JSparrowPricingLink_toUnlockThemRegisterForPremiumLicense),
-	TO_UNLOCK_PREMIUM_RULES_UPGRADE_LICENSE(Messages.JSparrowPricingLink_toUnlockPremiumRulesUpgradeLicense),
-	OBTAIN_NEW_LICENSE(Messages.JSparrowPricingLink_obtainNewLicense),
-	TO_GET_FULL_ACCESS_UPGRADE_LICENSE(Messages.JSparrowPricingLink_toGetFullAccessUpgradeLicense),
-	TO_USE_JSPARROW_MARKERS_UPGRADE_HERE(Messages.JSparrowPricingLink_toUseJSparrowMarkersUpgradeHere),
-	UPGRADE_YOUR_LICENSE_HERE(Messages.JSparrowPricingLink_upgradeLicenseHere);
+	ADDED_LOCKED_RULES_TO_SELECTION(JSparrowPricingLinkText.ADDED_LOCKED_RULES_TO_SELECTION, 80),
+	SELECTION_CONTAINS_LOCKED_RULES(JSparrowPricingLinkText.SELECTION_CONTAINS_LOCKED_RULES, 80),
+	CANNOT_COMMIT_WITH_LOCKED_RULES(JSparrowPricingLinkText.CANNOT_COMMIT_WITH_LOCKED_RULES, 80),
+	UNLOCK_ALL_PREMIUM_RULES(JSparrowPricingLinkText.UNLOCK_ALL_PREMIUM_RULES, 30),
+	OBTAIN_NEW_LICENSE(JSparrowPricingLinkText.OBTAIN_NEW_LICENSE, 30);
 
 	private final String text;
-
-	private JSparrowPricingLink(String template) {
+	private final int minimumControlHeight;
+	
+	private JSparrowPricingLink(String template, int minimumControlHeight) {
 		String linkStartTag = String.format(Messages.JSparrowPricingLink_link_startTag_formatstring,
 				getJSparrowPricingPageAddress());
 		this.text = template.replace(Messages.JSparrowPricingLink_link_startTag, linkStartTag);
+		this.minimumControlHeight = minimumControlHeight;
 	}
 
 	public static String getJSparrowPricingPageAddress() {
@@ -34,5 +32,8 @@ public enum JSparrowPricingLink {
 	public String getText() {
 		return text;
 	}
-
+	
+	public int getMinimumControlHeight() {
+		return minimumControlHeight;
+	}
 }
