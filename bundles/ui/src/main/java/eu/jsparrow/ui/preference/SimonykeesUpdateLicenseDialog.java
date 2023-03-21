@@ -119,23 +119,28 @@ public class SimonykeesUpdateLicenseDialog extends Dialog {
 		addEmptyLineLabel(container);
 
 		// enter new key group
-		Group newKeyGroup = new Group(container, SWT.NONE);
-		newKeyGroup.setText(Messages.SimonykeesUpdateLicenseDialog_update_license_dialog_group_title);
+		Composite newKeyGroup = new Composite(container, SWT.NONE);
 
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gridData.horizontalIndent = 0;
 		gridData.horizontalSpan = 1;
+		
 		newKeyGroup.setLayoutData(gridData);
 
 		GridLayout groupGridLayout = new GridLayout(3, false);
+		groupGridLayout.marginWidth = 0;
+		groupGridLayout.marginHeight = 0;
 		newKeyGroup.setLayout(groupGridLayout);
 
-		GridData groupGridData = new GridData(SWT.CENTER, SWT.FILL, false, false);
-		groupGridData.horizontalIndent = 10;
+		GridData groupGridData = new GridData(SWT.LEFT, SWT.FILL, false, false);
+		groupGridData.horizontalIndent = 0;
 		groupGridData.verticalIndent = 5;
 
 		Label licenseKeyLabel = new Label(newKeyGroup, SWT.NONE);
 		licenseKeyLabel.setText(Messages.SimonykeesUpdateLicenseDialog_update_license_dialog_label);
 		licenseKeyLabel.setLayoutData(groupGridData);
+		
+		
 
 		groupGridData = new GridData(SWT.FILL, SWT.FILL, true, false);
 		groupGridData.horizontalIndent = 20;
