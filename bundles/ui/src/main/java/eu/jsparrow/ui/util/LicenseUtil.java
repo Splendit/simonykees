@@ -1,17 +1,11 @@
 package eu.jsparrow.ui.util;
 
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog.REGISTER_FOR_A_FREE_J_SPARROW_TRIAL;
-import static eu.jsparrow.ui.dialog.SuggestRegistrationDialog._TO_BE_ABLE_TO_APPLY_20_OF_OUR_MOST_LIKED_RULES;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.function.Consumer;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
@@ -30,17 +24,9 @@ import eu.jsparrow.license.api.LicensePersistenceService;
 import eu.jsparrow.license.api.LicenseService;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
-import eu.jsparrow.license.api.RegistrationService;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
-import eu.jsparrow.ui.dialog.BuyLicenseDialog;
-import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
-import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
-import eu.jsparrow.ui.startup.registration.RegistrationDialog;
-import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
-import eu.jsparrow.ui.startup.registration.entity.RegistrationEntity;
 
 /**
  * Implements {@link LicenseUtilService}. The purpose of this class is to wrap
@@ -49,7 +35,7 @@ import eu.jsparrow.ui.startup.registration.entity.RegistrationEntity;
  * 
  * It uses various services from the License API package.
  */
-public class LicenseUtil implements LicenseUtilService, RegistrationUtilService {
+public class LicenseUtil implements LicenseUtilService {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
@@ -57,11 +43,9 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	private static LicenseUtil instance;
 
 	private LicenseService licenseService;
-	private RegistrationService registrationService;
 
 	private LicensePersistenceService<LicenseModel> persistenceService;
 	private LicensePersistenceService<String> endpointPersistenceService;
-	private LicensePersistenceService<String> registrationPersistenceSerice;
 
 	private LicenseModelFactoryService factoryService;
 
@@ -86,10 +70,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		ServiceReference<LicenseService> licenseReference = bundleContext.getServiceReference(LicenseService.class);
 		licenseService = bundleContext.getService(licenseReference);
 
-		ServiceReference<RegistrationService> registrationReference = bundleContext
-			.getServiceReference(RegistrationService.class);
-		registrationService = bundleContext.getService(registrationReference);
-
 		initPersistenceServices(bundleContext);
 
 		ServiceReference<LicenseModelFactoryService> factoryReference = bundleContext
@@ -100,17 +80,11 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initPersistenceServices(BundleContext bundleContext) {
 		try {
-			ServiceReference[] registrationReferences = bundleContext
-				.getServiceReferences(LicensePersistenceService.class.getName(), "(licenseType=registration)"); //$NON-NLS-1$
 			ServiceReference[] netlicensingReferences = bundleContext
 				.getServiceReferences(LicensePersistenceService.class.getName(), "(licenseType=default)"); //$NON-NLS-1$
 			ServiceReference[] endpointReferences = bundleContext
 				.getServiceReferences(LicensePersistenceService.class.getName(), "(licenseType=endpoint)"); //$NON-NLS-1$
 
-			if (registrationReferences.length != 0) {
-				this.registrationPersistenceSerice = (LicensePersistenceService<String>) bundleContext
-					.getService(registrationReferences[0]);
-			}
 			if (netlicensingReferences.length != 0) {
 				this.persistenceService = (LicensePersistenceService<LicenseModel>) bundleContext
 					.getService(netlicensingReferences[0]);
@@ -168,32 +142,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		} catch (ValidationException | EndpointEncryptionException e) {
 			handleStartUpValidationFailure(shell, e);
 			return true;
-		}
-
-		// When starting with an demo license we offer to register for free
-		// rules if not registered yet
-		if (isFreeLicense() && !isActiveRegistration()) {
-			List<Consumer<SuggestRegistrationDialog>> addComponentLambdas = Arrays.asList(
-					dialog -> dialog
-						.addLabel(
-								REGISTER_FOR_A_FREE_J_SPARROW_TRIAL + _TO_BE_ABLE_TO_APPLY_20_OF_OUR_MOST_LIKED_RULES),
-					SuggestRegistrationDialog::addRegisterForFreeButton,
-					dialog -> dialog.addLinkToJSparrowPricingPage(
-							JSparrowPricingLink.UPGRADE_LICENSE_TO_APPLY_ALL_RULES),
-					SuggestRegistrationDialog::addRegisterForPremiumButton);
-			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(shell, addComponentLambdas);
-			dialog.useSkipAsLastButton();
-			dialog.setTextForShell(Messages.SuggestRegistrationDialog_getFreeRulesTitle);
-			int returnCode = dialog.open();
-			if (returnCode == SuggestRegistrationDialog.BUTTON_ID_REGISTER_FOR_A_FREE_TRIAL) {
-				RegistrationDialog registrationDialog = new RegistrationDialog(shell);
-				registrationDialog.open();
-
-			} else if (returnCode == SuggestRegistrationDialog.BUTTON_ID_ENTER_PREMIUM_LICENSE_KEY) {
-				SimonykeesUpdateLicenseDialog simonykeesUpdateLicenseDialog = new SimonykeesUpdateLicenseDialog(shell);
-				simonykeesUpdateLicenseDialog.create();
-				simonykeesUpdateLicenseDialog.open();
-			}
 		}
 		return true;
 	}
@@ -308,51 +256,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		return result;
 	}
 
-	@Override
-	public boolean activateRegistration(ActivationEntity activationEntity) {
-		String secret = systemInfoWrapper.createUniqueHardwareId();
-		String activationKey = activationEntity.getActivationKey();
-		try {
-			boolean successful = registrationService.activate(activationKey);
-			if (successful) {
-				registrationPersistenceSerice.saveToPersistence(secret);
-				return true;
-			}
-		} catch (PersistenceException e) {
-			logger.warn("Failed to persist registration", e); //$NON-NLS-1$
-		} catch (ValidationException e) {
-			logger.warn("Cannot activate registration key: '{}'", activationKey, e); //$NON-NLS-1$
-		}
-		return false;
-	}
-
-	@Override
-	public boolean register(RegistrationEntity registerEntity) {
-		String email = registerEntity.getEmail();
-		String firstName = registerEntity.getFirstName();
-		String lastName = registerEntity.getLastName();
-		String company = registerEntity.getCompany();
-		boolean subscribe = registerEntity.isAgreeToNewsletter();
-		try {
-			return registrationService.register(email, firstName, lastName, company, subscribe);
-		} catch (ValidationException e) {
-			logger.warn("Failed to register", e); //$NON-NLS-1$
-		}
-		return false;
-	}
-
-	@Override
-	public boolean isActiveRegistration() {
-		String hardwareId = systemInfoWrapper.createUniqueHardwareId();
-		try {
-			String secret = registrationPersistenceSerice.loadFromPersistence();
-			return registrationService.validate(hardwareId, secret);
-		} catch (PersistenceException e) {
-			logger.warn("Failed to load registration model", e); //$NON-NLS-1$
-		}
-		return false;
-	}
-
 	public void updateValidationResult() {
 		LicenseModel model = tryLoadModelFromPersistence();
 
@@ -383,7 +286,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			isValid = ZonedDateTime.now()
 				.isBefore(model.getExpirationDate());
 		}
-
 		return isValid && type != LicenseType.DEMO;
 	}
 

@@ -2,7 +2,7 @@
 <feature
       id="eu.jsparrow.photon.feature"
       label="jsparrow"
-      version="4.15.0.qualifier"
+      version="4.16.0.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
 
    <description url="https://jsparrow.github.io/">
@@ -86,13 +86,6 @@
 
    <plugin
          id="eu.jsparrow.rules.java10"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="eu.jsparrow.registration"
          download-size="0"
          install-size="0"
          version="0.0.0"

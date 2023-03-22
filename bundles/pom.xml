@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>eu.jsparrow</artifactId>
-		<version>4.15.0-SNAPSHOT</version>
+		<version>4.16.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>bundles</artifactId>
@@ -34,7 +34,6 @@
 		<!-- licensing -->
 		<module>license.api</module>
 		<module>license.netlicensing</module>
-		<module>registration</module>
 
 		<!-- plug-in functionality -->
 		<module>core</module>

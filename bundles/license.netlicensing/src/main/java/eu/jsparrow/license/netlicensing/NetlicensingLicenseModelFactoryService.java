@@ -18,11 +18,6 @@ public class NetlicensingLicenseModelFactoryService implements LicenseModelFacto
 	}
 
 	@Override
-	public LicenseModel createDemoLicenseModel(ZonedDateTime expirationDate) {
-		return new DemoLicenseModel(expirationDate);
-	}
-
-	@Override
 	public LicenseModel createNewNodeLockedModel(String key, String secret, String productNr, String moduleNr) {
 		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, LicenseType.NODE_LOCKED);
 	}
