@@ -1,5 +1,9 @@
 package eu.jsparrow.ui.dialog;
 
+/**
+ * @since 4.16.0
+ * 
+ */
 @SuppressWarnings("nls")
 public class JSparrowPricingLinkText {
 	public static final String ADDED_LOCKED_RULES_TO_SELECTION = ""
