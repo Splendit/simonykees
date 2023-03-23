@@ -30,17 +30,17 @@ class JSparrowPricingLinkTest {
 	public static Stream<Arguments> testLinkTextContentArguments() throws Exception {
 		return Stream.of(
 				Arguments.of(
-						"You have added one or more premium rules to your selection which cannot be applied because thy are locked (see the lock symbol).\r\n"
+						"You have added one or more premium rules to your selection which cannot be applied because they are locked (see the lock symbol).\r\n"
 						+ "\r\n"
 						+ "To unlock them, <a href=\"https://jsparrow.io/pricing/\">visit jSparrow</a> to obtain a premium license, enter the license key and activate.",
 						ADDED_LOCKED_RULES_TO_SELECTION),
 				Arguments.of(
-						"Your selection contains one or more premium rules which cannot be applied because thy are locked (see the lock symbol).\r\n"
+						"Your selection contains one or more premium rules which cannot be applied because they are locked (see the lock symbol).\r\n"
 						+ "\r\n"
 						+ "To unlock them, <a href=\"https://jsparrow.io/pricing/\">visit jSparrow</a> to obtain a premium license, enter the license key and activate.",
 						SELECTION_CONTAINS_LOCKED_RULES),
 				Arguments.of(
-						"You cannot commit because your changes need the execution of premium rules which cannot be applied because thy are locked.\r\n"
+						"You cannot commit because your changes need the execution of premium rules which cannot be applied because they are locked.\r\n"
 						+ "\r\n"
 						+ "If you want to commit your changes, <a href=\"https://jsparrow.io/pricing/\">visit jSparrow</a> to obtain a premium license, enter the license key and activate.",
 						CANNOT_COMMIT_WITH_LOCKED_RULES),
