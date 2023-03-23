@@ -16,10 +16,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.wizard.ProgressMonitorPart;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -94,33 +90,7 @@ public abstract class AbstractRuleWizardHandler extends AbstractHandler {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				final RuleWizardDialog dialog = new RuleWizardDialog(shell, wizardGenerator.apply(selectedJavaElements)) {
-					/*
-					 * Removed unnecessary empty space on the bottom of the
-					 * wizard intended for ProgressMonitor that is not
-					 * used(non-Javadoc)
-					 * 
-					 * @see org.eclipse.jface.wizard.WizardDialog#
-					 * createDialogArea(org.eclipse.swt.widgets. Composite)
-					 */
-					@Override
-					protected Control createDialogArea(Composite parent) {
-						Control ctrl = super.createDialogArea(parent);
-						getProgressMonitor();
-						return ctrl;
-					}
-
-					@Override
-					protected IProgressMonitor getProgressMonitor() {
-						ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
-						GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-						gridData.heightHint = 0;
-						monitor.setLayoutData(gridData);
-						monitor.setVisible(false);
-						return monitor;
-					}
-				};
-
+				final RuleWizardDialog dialog = new RuleWizardDialog(shell, wizardGenerator.apply(selectedJavaElements));
 				dialog.open();
 			});
 	}
