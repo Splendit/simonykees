@@ -17,14 +17,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -37,7 +34,6 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
-import eu.jsparrow.ui.dialog.ObtainLicenseButtonData;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -104,37 +100,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 						newShell.setMinimumSize(680, 600);
 					}
 
-					@Override
-					protected void createButtonsForButtonBar(Composite parent) {
-						createButton(parent, ObtainLicenseButtonData.BUTTON_ID_UNLOCK_PREMIUM_RULES,
-								ObtainLicenseButtonData.BUTTON_TEXT_UNLOCK_PREMIUM_RULES, false);
-						super.createButtonsForButtonBar(parent);
 
-						Button finish = getButton(IDialogConstants.FINISH_ID);
-						finish.setText(Messages.SelectRulesWizardHandler_finishButtonText);
-						setButtonLayoutData(finish);
-						updateButtonsForButtonBar();
-					}
-
-					private void updateButtonsForButtonBar() {
-						boolean showEnterPremiumLicenseKey = false;
-						LicenseUtil licenseUtil = LicenseUtil.get();
-						if (licenseUtil.isFreeLicense()) {
-							showEnterPremiumLicenseKey = true;
-						}
-						getButton(ObtainLicenseButtonData.BUTTON_ID_UNLOCK_PREMIUM_RULES)
-							.setVisible(showEnterPremiumLicenseKey);
-					}
-
-					@Override
-					protected void buttonPressed(int buttonId) {
-						if (buttonId == ObtainLicenseButtonData.BUTTON_ID_UNLOCK_PREMIUM_RULES) {
-							selectRulesWizard
-								.showSimonykeesUpdateLicenseDialog(JSparrowPricingLink.UNLOCK_ALL_PREMIUM_RULES);
-						} else {
-							super.buttonPressed(buttonId);
-						}
-					}
 				}
 
 				SelectRulesWizardDialog dialog = new SelectRulesWizardDialog(shell, selectRulesWizard);
