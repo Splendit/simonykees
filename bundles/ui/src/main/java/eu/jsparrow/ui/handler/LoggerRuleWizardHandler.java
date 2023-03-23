@@ -18,7 +18,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -41,6 +40,7 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
+import eu.jsparrow.ui.wizard.RuleWizardDialog;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 import eu.jsparrow.ui.wizard.semiautomatic.LoggerRuleWizard;
@@ -200,7 +200,7 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 					.getActiveWorkbenchWindow()
 					.getShell();
 				// HandlerUtil.getActiveShell(event)
-				final WizardDialog dialog = new WizardDialog(shell,
+				final RuleWizardDialog dialog = new RuleWizardDialog(shell,
 						new LoggerRuleWizard(selectedJavaProjekt, loggerRule, refactoringPipeline)) {
 					/*
 					 * Removed unnecessary empty space on the bottom of the

@@ -22,7 +22,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -47,6 +46,7 @@ import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
+import eu.jsparrow.ui.wizard.RuleWizardDialog;
 
 /**
  * {@link Wizard} holding the {@link AbstractSelectRulesWizardPage}, which
@@ -85,7 +85,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 					.getShell();
 				SelectRulesWizard selectRulesWizard = new SelectRulesWizard(refactoringPipeline, selectRulesWizardData);
 
-				class SelectRulesWizardDialog extends WizardDialog {
+				class SelectRulesWizardDialog extends RuleWizardDialog {
 
 					public SelectRulesWizardDialog(Shell parentShell, SelectRulesWizard newWizard) {
 						super(parentShell, newWizard);
