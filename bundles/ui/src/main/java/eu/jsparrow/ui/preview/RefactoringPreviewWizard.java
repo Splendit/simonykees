@@ -23,7 +23,6 @@ import org.eclipse.ui.PlatformUI;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
-import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.SimonykeesException;
@@ -66,13 +65,14 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
 			StandaloneStatisticsMetadata standaloneStatisticsMetadata, SelectRulesWizardData selectRulesWizardData) {
-		this(refactoringPipeline);
-		this.statisticsMetadata = standaloneStatisticsMetadata;
+		this(refactoringPipeline, standaloneStatisticsMetadata);
 		this.selectRulesWizardData = selectRulesWizardData;
 	}
 
-	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
+	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
+			StandaloneStatisticsMetadata standaloneStatisticsMetadata) {
 		super(refactoringPipeline);
+		this.statisticsMetadata = standaloneStatisticsMetadata;
 		this.statisticsSection = StatisticsSectionFactory.createStatisticsSection(refactoringPipeline);
 		this.summaryPageStatisticsSection = StatisticsSectionFactory
 			.createStatisticsSectionForSummaryPage(refactoringPipeline);
@@ -114,11 +114,11 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 					addPage(previewPage);
 				}
 			});
-		if (needsSummaryPage()) {
-			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(),
-					statisticsMetadata, summaryPageStatisticsSection);
-			addPage(summaryPage);
-		}
+
+		this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(),
+				statisticsMetadata, summaryPageStatisticsSection);
+		addPage(summaryPage);
+
 	}
 
 	@Override
@@ -238,7 +238,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	public boolean performCancel() {
 		if (selectRulesWizardData != null) {
 			reuseRefactoringPipeline = true;
-			
+
 			Display.getCurrent()
 				.asyncExec(() -> {
 					Job job = createJobToShowSelectRulesWizard(refactoringPipeline, selectRulesWizardData,
@@ -352,13 +352,6 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	public RefactoringSummaryWizardPage getSummaryPage() {
 		return this.summaryPage;
-	}
-
-	protected boolean needsSummaryPage() {
-		return !(getPipelineRules()
-			.size() == 1
-				&& getPipelineRules()
-					.get(0) instanceof StandardLoggerRule);
 	}
 
 	@Override

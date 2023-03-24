@@ -83,6 +83,7 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 
 		final List<RefactoringRule> rules = Arrays.asList(rule);
 		refactoringPipeline.setRules(rules);
+		refactoringPipeline.updateInitialSourceMap();
 
 		Rectangle rectangle = Display.getCurrent()
 			.getPrimaryMonitor()
@@ -146,7 +147,8 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 					.getActiveWorkbenchWindow()
 					.getShell();
 
-				RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactorer);
+				List<IJavaProject> selectedJavaProjects  = Arrays.asList(this.selectedJavaProjekt);
+				RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactorer, prepareStatisticsMetadata(selectedJavaProjects));
 
 				final PreviewWizardDialog dialog = new PreviewWizardDialog(shell, previewWizard);
 

@@ -28,9 +28,7 @@ public class PreviewWizardDialog extends AbstractRefactoringWizardDialog {
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, ObtainLicenseButtonData.BUTTON_ID_UNLOCK_PREMIUM_RULES,
 				ObtainLicenseButtonData.BUTTON_TEXT_UNLOCK_PREMIUM_RULES, false);
-		if (needsSummaryButton()) {
-			createButton(parent, SUMMARY_BUTTON_ID, Messages.SelectRulesWizard_Summary, false);
-		}
+		createButton(parent, SUMMARY_BUTTON_ID, Messages.SelectRulesWizard_Summary, false);
 		super.createButtonsForButtonBar(parent);
 		getButton(IDialogConstants.FINISH_ID).setText("Commit"); //$NON-NLS-1$
 		updateButtonsForButtonBar();
@@ -83,10 +81,6 @@ public class PreviewWizardDialog extends AbstractRefactoringWizardDialog {
 
 	protected void summaryButtonPressed() {
 		((AbstractPreviewWizard) getWizard()).showSummaryPage();
-	}
-
-	private boolean needsSummaryButton() {
-		return ((AbstractPreviewWizard) getWizard()).needsSummaryPage();
 	}
 
 	@Override
