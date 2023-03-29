@@ -158,11 +158,18 @@ public abstract class AbstractRuleWizard extends AbstractRefactoringWizard {
 										Messages.SelectRulesWizard_warning_no_refactorings,
 										MessageDialog.INFORMATION);
 
-								Job job = RefactoringPreviewWizard.createJobToShowSelectRulesWizard(refactoringPipeline,
-										selectRulesWizardData, "Opening Select Rules Wizard."); //$NON-NLS-1$
+								if (selectRulesWizardData != null) {
 
-								job.setUser(true);
-								job.schedule();
+									Job job = RefactoringPreviewWizard.createJobToShowSelectRulesWizard(
+											refactoringPipeline,
+											selectRulesWizardData, "Opening Select Rules Wizard."); //$NON-NLS-1$
+
+									job.setUser(true);
+									job.schedule();
+								} else {
+									refactoringPipeline.clearStates();
+									Activator.setRunning(false);
+								}
 							});
 					}
 				} else {
@@ -172,11 +179,11 @@ public abstract class AbstractRuleWizard extends AbstractRefactoringWizard {
 			}
 		};
 	}
-	
+
 	@Override
 	public boolean performCancel() {
-		if(super.performCancel()) {
-			if(refactoringPipeline != null) {
+		if (super.performCancel()) {
+			if (refactoringPipeline != null) {
 				refactoringPipeline.clearStates();
 			}
 			return true;

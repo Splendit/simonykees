@@ -170,8 +170,6 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		final List<RefactoringRule> selectedRules = model.getSelectionAsList();
 		showOptionalLockedRuleSelectionDialog(selectedRules);
 
-		refactoringPipeline.setRules(selectedRules);
-		refactoringPipeline.updateInitialSourceMap();
 
 		String selectedProfileId = page.getSelectedProfileId()
 			.orElse(null);
@@ -180,6 +178,9 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		} else {
 			selectRulesWizardData.setCustomRulesSelection(selectedRules);
 		}
+		
+		refactoringPipeline.setRules(selectedRules);
+		refactoringPipeline.updateInitialSourceMap();
 
 		Display.getCurrent()
 			.asyncExec(() -> {
