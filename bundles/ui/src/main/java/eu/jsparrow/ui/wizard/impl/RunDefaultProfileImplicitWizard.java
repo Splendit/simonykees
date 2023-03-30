@@ -42,7 +42,7 @@ public class RunDefaultProfileImplicitWizard extends AbstractRuleWizard {
 					.collect(Collectors.joining(";"))); //$NON-NLS-1$
 		logger.info(message);
 
-		proceedToRefactoringPreviewWizard(javaProjects, selectedRules, selectRulesWizardData);
+		proceedToRefactoringPreviewWizard(javaProjects, selectedRules, selectRulesWizardData, null);
 		return true;
 	}
 

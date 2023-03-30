@@ -34,6 +34,7 @@ import eu.jsparrow.ui.preview.PreviewWizardDialog;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
+import eu.jsparrow.ui.wizard.semiautomatic.LoggerRuleWizardData;
 
 /**
  * A parent for all rule wizards.
@@ -76,16 +77,17 @@ public abstract class AbstractRuleWizard extends AbstractRefactoringWizard {
 
 		return Status.OK_STATUS;
 	}
-	
+
 	protected void proceedToRefactoringPreviewWizard(Collection<IJavaProject> javaProjects,
-			List<RefactoringRule> selectedRules, SelectRulesWizardData selectRulesWizardData) {
+			List<RefactoringRule> selectedRules, SelectRulesWizardData selectRulesWizardData,
+			LoggerRuleWizardData loggerRuleWizardData) {
 
 		refactoringPipeline.setRules(selectedRules);
 		refactoringPipeline.updateInitialSourceMap();
 
 		Job job = createRefactoringJob(refactoringPipeline, javaProjects);
 		job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects,
-				selectRulesWizardData));
+				selectRulesWizardData, loggerRuleWizardData));
 		job.setUser(true);
 		job.schedule();
 	}
@@ -118,7 +120,8 @@ public abstract class AbstractRuleWizard extends AbstractRefactoringWizard {
 	}
 
 	private void showRefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
-			Collection<IJavaProject> javaProjects, SelectRulesWizardData selectRulesWizardData) {
+			Collection<IJavaProject> javaProjects, SelectRulesWizardData selectRulesWizardData,
+			LoggerRuleWizardData loggerRuleWizardData) {
 		String endRefactoringInProject = NLS.bind(Messages.SelectRulesWizard_end_refactoring,
 				this.getClass()
 					.getSimpleName(),
@@ -137,7 +140,7 @@ public abstract class AbstractRuleWizard extends AbstractRefactoringWizard {
 			.getActiveWorkbenchWindow()
 			.getShell();
 		RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline,
-				statisticsMetadata, selectRulesWizardData);
+				statisticsMetadata, selectRulesWizardData, loggerRuleWizardData);
 
 		Rectangle rectangle = Display.getCurrent()
 			.getPrimaryMonitor()
@@ -150,8 +153,9 @@ public abstract class AbstractRuleWizard extends AbstractRefactoringWizard {
 		dialog.open();
 	}
 
-	protected JobChangeAdapter createPreviewWizardJobChangeAdapter(RefactoringPipeline refactoringPipeline,
-			Collection<IJavaProject> javaProjects, SelectRulesWizardData selectRulesWizardData) {
+	private JobChangeAdapter createPreviewWizardJobChangeAdapter(RefactoringPipeline refactoringPipeline,
+			Collection<IJavaProject> javaProjects, SelectRulesWizardData selectRulesWizardData,
+			LoggerRuleWizardData loggerRuleWizardData) {
 		return new JobChangeAdapter() {
 
 			@Override
@@ -162,7 +166,7 @@ public abstract class AbstractRuleWizard extends AbstractRefactoringWizard {
 					if (refactoringPipeline.hasChanges()) {
 						Display.getDefault()
 							.asyncExec(() -> showRefactoringPreviewWizard(refactoringPipeline, javaProjects,
-									selectRulesWizardData));
+									selectRulesWizardData, loggerRuleWizardData));
 					} else {
 						Display.getDefault()
 							.asyncExec(() -> {

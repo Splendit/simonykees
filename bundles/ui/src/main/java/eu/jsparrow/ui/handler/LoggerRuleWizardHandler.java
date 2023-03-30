@@ -36,10 +36,10 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
-import eu.jsparrow.ui.wizard.RuleWizardDialog;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 import eu.jsparrow.ui.wizard.semiautomatic.LoggerRuleWizard;
+import eu.jsparrow.ui.wizard.semiautomatic.LoggerRuleWizardData;
 
 /**
  * Handler for semi-automatic logging rule
@@ -165,8 +165,8 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 						refactoringPipeline, loggerRule,
 						selectedJavaProjekt);
 			} else {
-				synchronizeWithUIShowLoggerRuleWizard(refactoringPipeline,
-						loggerRule, selectedJavaProjekt);
+				LoggerRuleWizardData loggerRuleWizardData = new LoggerRuleWizardData(selectedJavaProjekt, loggerRule);
+				LoggerRuleWizard.synchronizeWithUIShowLoggerRuleWizard(refactoringPipeline, loggerRuleWizardData);
 			}
 
 		} catch (RefactoringException e) {
@@ -183,24 +183,6 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 		}
 
 		return Status.OK_STATUS;
-	}
-
-	/**
-	 * Method used to open SelectRulesWizard from non UI thread
-	 */
-	private void synchronizeWithUIShowLoggerRuleWizard(RefactoringPipeline refactoringPipeline,
-			StandardLoggerRule loggerRule, IJavaProject selectedJavaProjekt) {
-		Display.getDefault()
-			.asyncExec(() -> {
-				Shell shell = PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow()
-					.getShell();
-				// HandlerUtil.getActiveShell(event)
-				final RuleWizardDialog dialog = new RuleWizardDialog(shell,
-						new LoggerRuleWizard(selectedJavaProjekt, loggerRule, refactoringPipeline));
-
-				dialog.open();
-			});
 	}
 
 	/**
@@ -222,8 +204,10 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 				dialog.open();
 				if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
 					if (refactoringPipeline.hasRefactoringStates()) {
-						synchronizeWithUIShowLoggerRuleWizard(refactoringPipeline,
-								loggerRule, selectedJavaProjekt);
+						LoggerRuleWizardData loggerRuleWizardData = new LoggerRuleWizardData(selectedJavaProjekt,
+								loggerRule);
+						LoggerRuleWizard.synchronizeWithUIShowLoggerRuleWizard(refactoringPipeline,
+								loggerRuleWizardData);
 					} else {
 						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitWithoutErrorsDialog();
 					}

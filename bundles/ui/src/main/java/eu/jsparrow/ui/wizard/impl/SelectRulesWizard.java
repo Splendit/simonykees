@@ -175,7 +175,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		} else {
 			selectRulesWizardData.setCustomRulesSelection(selectedRules);
 		}
-		proceedToRefactoringPreviewWizard(javaProjects, selectedRules, selectRulesWizardData);
+		proceedToRefactoringPreviewWizard(javaProjects, selectedRules, selectRulesWizardData, null);
 		return true;
 	}
 

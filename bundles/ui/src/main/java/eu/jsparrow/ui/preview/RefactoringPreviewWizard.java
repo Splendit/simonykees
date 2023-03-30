@@ -36,6 +36,8 @@ import eu.jsparrow.ui.preview.statistics.StatisticsSectionUpdater;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
+import eu.jsparrow.ui.wizard.semiautomatic.LoggerRuleWizard;
+import eu.jsparrow.ui.wizard.semiautomatic.LoggerRuleWizardData;
 
 /**
  * This {@link Wizard} holds a {@link RefactoringPreviewWizardPage} for every
@@ -61,12 +63,15 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	private StandaloneStatisticsMetadata statisticsMetadata;
 	private SelectRulesWizardData selectRulesWizardData;
+	private LoggerRuleWizardData loggerRuleWizardData;
 	private boolean reuseRefactoringPipeline;
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
-			StandaloneStatisticsMetadata standaloneStatisticsMetadata, SelectRulesWizardData selectRulesWizardData) {
+			StandaloneStatisticsMetadata standaloneStatisticsMetadata, SelectRulesWizardData selectRulesWizardData,
+			LoggerRuleWizardData loggerRuleWizardData) {
 		this(refactoringPipeline, standaloneStatisticsMetadata);
 		this.selectRulesWizardData = selectRulesWizardData;
+		this.loggerRuleWizardData = loggerRuleWizardData;
 	}
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
@@ -238,11 +243,22 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	public boolean performCancel() {
 		if (selectRulesWizardData != null) {
 			reuseRefactoringPipeline = true;
-
 			Display.getCurrent()
 				.asyncExec(() -> {
 					Job job = createJobToShowSelectRulesWizard(refactoringPipeline, selectRulesWizardData,
 							"Cancelling file changes and opening Select Rules Wizard."); //$NON-NLS-1$
+
+					job.setUser(true);
+					job.schedule();
+				});
+			return true;
+		}
+		if (loggerRuleWizardData != null) {
+			reuseRefactoringPipeline = true;
+			Display.getCurrent()
+				.asyncExec(() -> {
+					Job job = createJobToShowLoggerRuleWizard(refactoringPipeline, loggerRuleWizardData,
+							"Cancelling file changes and opening Logger Rule Wizard."); //$NON-NLS-1$
 
 					job.setUser(true);
 					job.schedule();
@@ -267,6 +283,25 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 				}
 				SelectRulesWizard.synchronizeWithUIShowSelectRulesWizard(refactoringPipeline,
 						selectRulesWizardData);
+				return Status.OK_STATUS;
+			}
+		};
+	}
+
+	public static Job createJobToShowLoggerRuleWizard(RefactoringPipeline refactoringPipeline,
+			LoggerRuleWizardData loggerRuleWizardData, String jobName) {
+
+		return new Job(jobName) {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				IStatus status = refactoringPipeline.cancelFileChanges(monitor);
+				if (!status.isOK()) {
+					refactoringPipeline.clearStates();
+					Activator.setRunning(false);
+					return Status.CANCEL_STATUS;
+				}
+				LoggerRuleWizard.synchronizeWithUIShowLoggerRuleWizard(refactoringPipeline, loggerRuleWizardData);
 				return Status.OK_STATUS;
 			}
 		};

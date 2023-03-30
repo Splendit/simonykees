@@ -7,6 +7,9 @@ import java.util.List;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +19,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
+import eu.jsparrow.ui.wizard.RuleWizardDialog;
 
 /**
  * Wizard for configuring logger rule when applying to selected resources
@@ -34,13 +38,32 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 
 	private IJavaProject selectedJavaProjekt;
 	private final StandardLoggerRule rule;
+	private final LoggerRuleWizardData loggerRuleWizardData;
 
-	public LoggerRuleWizard(IJavaProject selectedJavaProjekt, RefactoringRule rule,
-			RefactoringPipeline refactoringPipeline) {
+	/**
+	 * Method used to open SelectRulesWizard from non UI thread
+	 */
+	public static void synchronizeWithUIShowLoggerRuleWizard(RefactoringPipeline refactoringPipeline,
+			LoggerRuleWizardData loggerRuleWizardData) {
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				// HandlerUtil.getActiveShell(event)
+				final RuleWizardDialog dialog = new RuleWizardDialog(shell,
+						new LoggerRuleWizard(refactoringPipeline, loggerRuleWizardData));
+
+				dialog.open();
+			});
+	}
+
+	public LoggerRuleWizard(RefactoringPipeline refactoringPipeline, LoggerRuleWizardData loggerRuleWizardData) {
 		super();
-		this.selectedJavaProjekt = selectedJavaProjekt;
+		this.loggerRuleWizardData = loggerRuleWizardData;
+		this.selectedJavaProjekt = loggerRuleWizardData.getSelectedJavaProject();
 		this.refactoringPipeline = refactoringPipeline;
-		this.rule = (StandardLoggerRule) rule;
+		this.rule = loggerRuleWizardData.getRule();
 		setNeedsProgressMonitor(true);
 		Window.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
 	}
@@ -58,14 +81,12 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 
 	@Override
 	public boolean canFinish() {
-		return (!model.getSelectionStatus()
-			.equals(Messages.LoggerRuleWizardPageModel_err_noTransformation));
+		return model.getSelectionStatus().isEmpty();
 	}
 
 	@Override
 	public boolean performFinish() {
-
-		String bind = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
+			String bind = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
 			.getSimpleName(), selectedJavaProjekt.getElementName());
 		logger.info(bind);
 
@@ -73,7 +94,7 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 
 		final List<RefactoringRule> selectedRules = Arrays.asList(rule);
 		Collection<IJavaProject> javaProjects = Arrays.asList(selectedJavaProjekt);
-		proceedToRefactoringPreviewWizard(javaProjects, selectedRules, null);
+		proceedToRefactoringPreviewWizard(javaProjects, selectedRules, null, loggerRuleWizardData);
 
 		return true;
 	}
