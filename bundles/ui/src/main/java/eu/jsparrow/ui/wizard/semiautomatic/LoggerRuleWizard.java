@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
@@ -72,17 +71,9 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 
 		rule.activateOptions(model.getCurrentSelectionMap());
 
-		final List<RefactoringRule> rules = Arrays.asList(rule);
+		final List<RefactoringRule> selectedRules = Arrays.asList(rule);
 		Collection<IJavaProject> javaProjects = Arrays.asList(selectedJavaProjekt);
-
-		refactoringPipeline.setRules(rules);
-		refactoringPipeline.updateInitialSourceMap();
-
-		Job job = createRefactoringJob(refactoringPipeline, javaProjects);
-		job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects, null));
-
-		job.setUser(true);
-		job.schedule();
+		proceedToRefactoringPreviewWizard(javaProjects, selectedRules, null);
 
 		return true;
 	}

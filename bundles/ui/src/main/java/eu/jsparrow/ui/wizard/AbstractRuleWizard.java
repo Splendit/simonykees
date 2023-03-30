@@ -2,6 +2,7 @@ package eu.jsparrow.ui.wizard;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,6 +26,7 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.statistic.StopWatchUtil;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
@@ -73,6 +75,19 @@ public abstract class AbstractRuleWizard extends AbstractRefactoringWizard {
 		}
 
 		return Status.OK_STATUS;
+	}
+	
+	protected void proceedToRefactoringPreviewWizard(Collection<IJavaProject> javaProjects,
+			List<RefactoringRule> selectedRules, SelectRulesWizardData selectRulesWizardData) {
+
+		refactoringPipeline.setRules(selectedRules);
+		refactoringPipeline.updateInitialSourceMap();
+
+		Job job = createRefactoringJob(refactoringPipeline, javaProjects);
+		job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects,
+				selectRulesWizardData));
+		job.setUser(true);
+		job.schedule();
 	}
 
 	protected StandaloneStatisticsMetadata prepareStatisticsMetadata(Collection<IJavaProject> javaProjects) {

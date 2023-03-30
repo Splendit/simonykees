@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -100,7 +99,6 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 						newShell.setMinimumSize(680, 600);
 					}
 
-
 				}
 
 				SelectRulesWizardDialog dialog = new SelectRulesWizardDialog(shell, selectRulesWizard);
@@ -170,7 +168,6 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		final List<RefactoringRule> selectedRules = model.getSelectionAsList();
 		showOptionalLockedRuleSelectionDialog(selectedRules);
 
-
 		String selectedProfileId = page.getSelectedProfileId()
 			.orElse(null);
 		if (selectedProfileId != null) {
@@ -178,22 +175,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		} else {
 			selectRulesWizardData.setCustomRulesSelection(selectedRules);
 		}
-		
-		refactoringPipeline.setRules(selectedRules);
-		refactoringPipeline.updateInitialSourceMap();
-
-		Display.getCurrent()
-			.asyncExec(() -> {
-
-				Job job = createRefactoringJob(refactoringPipeline, javaProjects);
-
-				job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects,
-						selectRulesWizardData));
-
-				job.setUser(true);
-				job.schedule();
-			});
-
+		proceedToRefactoringPreviewWizard(javaProjects, selectedRules, selectRulesWizardData);
 		return true;
 	}
 
