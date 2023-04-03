@@ -4,6 +4,9 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 
+/**
+ * @since 4.17.0
+ */
 public class LoggerRuleWizardData {
 
 	private final IJavaProject selectedJavaProject;

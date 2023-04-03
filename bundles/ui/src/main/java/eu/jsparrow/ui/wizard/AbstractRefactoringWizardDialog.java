@@ -12,6 +12,9 @@ import eu.jsparrow.ui.dialog.ObtainLicenseButtonData;
 import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
+/**
+ * @since 4.17.0
+ */
 public abstract class AbstractRefactoringWizardDialog extends WizardDialog {
 
 	protected AbstractRefactoringWizardDialog(Shell parentShell, AbstractRefactoringWizard newWizard) {
