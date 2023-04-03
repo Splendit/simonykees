@@ -172,10 +172,6 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 		licenseUtil.reserveQuantity(sum);
 	}
 
-	protected boolean needsSummaryPage() {
-		return true;
-	}
-
 	/**
 	 * Called from {@link WizardDialog} when Next button is pressed. Triggers
 	 * recalculation if needed. Disposes control from current page which wont be

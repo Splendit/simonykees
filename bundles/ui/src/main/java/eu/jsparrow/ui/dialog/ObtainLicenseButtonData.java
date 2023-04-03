@@ -1,5 +1,9 @@
 package eu.jsparrow.ui.dialog;
 
+/**
+ * @since 4.16.0
+ * 
+ */
 @SuppressWarnings("nls")
 public class ObtainLicenseButtonData {
 	public static final String BUTTON_TEXT_UNLOCK_PREMIUM_RULES = "Unlock Premium Rules...";

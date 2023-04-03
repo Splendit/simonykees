@@ -568,7 +568,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			showSimonykeesUpdateLicenseDialog(
 					JSparrowPricingLink.ADDED_LOCKED_RULES_TO_SELECTION);
 		}
-
 	}
 
 	public void showSimonykeesUpdateLicenseDialog(JSparrowPricingLink explanation) {

@@ -17,12 +17,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.wizard.ProgressMonitorPart;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -44,6 +39,7 @@ import eu.jsparrow.ui.util.WizardHandlerUtil;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 import eu.jsparrow.ui.wizard.semiautomatic.LoggerRuleWizard;
+import eu.jsparrow.ui.wizard.semiautomatic.LoggerRuleWizardData;
 
 /**
  * Handler for semi-automatic logging rule
@@ -126,7 +122,7 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 			Activator.setRunning(false);
 			return null;
 		}
-		
+
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 		Job job = new Job(Messages.ProgressMonitor_verifying_project_information) {
 			@Override
@@ -141,7 +137,7 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 
 		return true;
 	}
-	
+
 	private IStatus startLoggerRuleWizard(List<IJavaElement> selectedElements,
 			IJavaProject selectedJavaProjekt, StandardLoggerRule loggerRule,
 			RefactoringPipeline refactoringPipeline, IProgressMonitor monitor) {
@@ -153,8 +149,8 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 				.prepareRefactoring(compilationUnits, monitor);
 			if (monitor.isCanceled()) {
 				/*
-				 * Workaround that prevents selection of multiple
-				 * projects in the Package Explorer.
+				 * Workaround that prevents selection of multiple projects in
+				 * the Package Explorer.
 				 * 
 				 * See SIM-496
 				 */
@@ -169,8 +165,8 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 						refactoringPipeline, loggerRule,
 						selectedJavaProjekt);
 			} else {
-				synchronizeWithUIShowLoggerRuleWizard(refactoringPipeline,
-						loggerRule, selectedJavaProjekt);
+				LoggerRuleWizardData loggerRuleWizardData = new LoggerRuleWizardData(selectedJavaProjekt, loggerRule);
+				LoggerRuleWizard.synchronizeWithUIShowLoggerRuleWizard(refactoringPipeline, loggerRuleWizardData);
 			}
 
 		} catch (RefactoringException e) {
@@ -187,49 +183,6 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 		}
 
 		return Status.OK_STATUS;
-	}
-
-	/**
-	 * Method used to open SelectRulesWizard from non UI thread
-	 */
-	private void synchronizeWithUIShowLoggerRuleWizard(RefactoringPipeline refactoringPipeline,
-			StandardLoggerRule loggerRule, IJavaProject selectedJavaProjekt) {
-		Display.getDefault()
-			.asyncExec(() -> {
-				Shell shell = PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow()
-					.getShell();
-				// HandlerUtil.getActiveShell(event)
-				final WizardDialog dialog = new WizardDialog(shell,
-						new LoggerRuleWizard(selectedJavaProjekt, loggerRule, refactoringPipeline)) {
-					/*
-					 * Removed unnecessary empty space on the bottom of the
-					 * wizard intended for ProgressMonitor that is not
-					 * used(non-Javadoc)
-					 * 
-					 * @see org.eclipse.jface.wizard.WizardDialog#
-					 * createDialogArea(org.eclipse.swt.widgets. Composite)
-					 */
-					@Override
-					protected Control createDialogArea(Composite parent) {
-						Control ctrl = super.createDialogArea(parent);
-						getProgressMonitor();
-						return ctrl;
-					}
-
-					@Override
-					protected IProgressMonitor getProgressMonitor() {
-						ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
-						GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-						gridData.heightHint = 0;
-						monitor.setLayoutData(gridData);
-						monitor.setVisible(false);
-						return monitor;
-					}
-				};
-
-				dialog.open();
-			});
 	}
 
 	/**
@@ -251,8 +204,10 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 				dialog.open();
 				if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
 					if (refactoringPipeline.hasRefactoringStates()) {
-						synchronizeWithUIShowLoggerRuleWizard(refactoringPipeline,
-								loggerRule, selectedJavaProjekt);
+						LoggerRuleWizardData loggerRuleWizardData = new LoggerRuleWizardData(selectedJavaProjekt,
+								loggerRule);
+						LoggerRuleWizard.synchronizeWithUIShowLoggerRuleWizard(refactoringPipeline,
+								loggerRuleWizardData);
 					} else {
 						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitWithoutErrorsDialog();
 					}

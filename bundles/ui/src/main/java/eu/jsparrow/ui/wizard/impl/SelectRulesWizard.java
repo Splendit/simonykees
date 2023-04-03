@@ -10,25 +10,17 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.ProgressMonitorPart;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -41,12 +33,12 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
-import eu.jsparrow.ui.dialog.ObtainLicenseButtonData;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
+import eu.jsparrow.ui.wizard.RuleWizardDialog;
 
 /**
  * {@link Wizard} holding the {@link AbstractSelectRulesWizardPage}, which
@@ -85,32 +77,11 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 					.getShell();
 				SelectRulesWizard selectRulesWizard = new SelectRulesWizard(refactoringPipeline, selectRulesWizardData);
 
-				class SelectRulesWizardDialog extends WizardDialog {
+				class SelectRulesWizardDialog extends RuleWizardDialog {
 
 					public SelectRulesWizardDialog(Shell parentShell, SelectRulesWizard newWizard) {
 						super(parentShell, newWizard);
 						newWizard.addLicenseUpdateListener(this::updateButtonsForButtonBar);
-					}
-
-					/*
-					 * Removed unnecessary empty space on the bottom of the
-					 * wizard intended for ProgressMonitor that is not used
-					 */
-					@Override
-					protected Control createDialogArea(Composite parent) {
-						Control ctrl = super.createDialogArea(parent);
-						getProgressMonitor();
-						return ctrl;
-					}
-
-					@Override
-					protected IProgressMonitor getProgressMonitor() {
-						ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
-						GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-						gridData.heightHint = 0;
-						monitor.setLayoutData(gridData);
-						monitor.setVisible(false);
-						return monitor;
 					}
 
 					/**
@@ -128,37 +99,6 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 						newShell.setMinimumSize(680, 600);
 					}
 
-					@Override
-					protected void createButtonsForButtonBar(Composite parent) {
-						createButton(parent, ObtainLicenseButtonData.BUTTON_ID_UNLOCK_PREMIUM_RULES,
-								ObtainLicenseButtonData.BUTTON_TEXT_UNLOCK_PREMIUM_RULES, false);
-						super.createButtonsForButtonBar(parent);
-
-						Button finish = getButton(IDialogConstants.FINISH_ID);
-						finish.setText(Messages.SelectRulesWizardHandler_finishButtonText);
-						setButtonLayoutData(finish);
-						updateButtonsForButtonBar();
-					}
-
-					private void updateButtonsForButtonBar() {
-						boolean showEnterPremiumLicenseKey = false;
-						LicenseUtil licenseUtil = LicenseUtil.get();
-						if (licenseUtil.isFreeLicense()) {
-							showEnterPremiumLicenseKey = true;
-						}
-						getButton(ObtainLicenseButtonData.BUTTON_ID_UNLOCK_PREMIUM_RULES)
-							.setVisible(showEnterPremiumLicenseKey);
-					}
-
-					@Override
-					protected void buttonPressed(int buttonId) {
-						if (buttonId == ObtainLicenseButtonData.BUTTON_ID_UNLOCK_PREMIUM_RULES) {
-							selectRulesWizard
-								.showSimonykeesUpdateLicenseDialog(JSparrowPricingLink.UNLOCK_ALL_PREMIUM_RULES);
-						} else {
-							super.buttonPressed(buttonId);
-						}
-					}
 				}
 
 				SelectRulesWizardDialog dialog = new SelectRulesWizardDialog(shell, selectRulesWizard);
@@ -228,9 +168,6 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		final List<RefactoringRule> selectedRules = model.getSelectionAsList();
 		showOptionalLockedRuleSelectionDialog(selectedRules);
 
-		refactoringPipeline.setRules(selectedRules);
-		refactoringPipeline.updateInitialSourceMap();
-
 		String selectedProfileId = page.getSelectedProfileId()
 			.orElse(null);
 		if (selectedProfileId != null) {
@@ -238,19 +175,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		} else {
 			selectRulesWizardData.setCustomRulesSelection(selectedRules);
 		}
-
-		Display.getCurrent()
-			.asyncExec(() -> {
-
-				Job job = createRefactoringJob(refactoringPipeline, javaProjects);
-
-				job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects,
-						selectRulesWizardData));
-
-				job.setUser(true);
-				job.schedule();
-			});
-
+		proceedToRefactoringPreviewWizard(javaProjects, selectedRules, selectRulesWizardData, null);
 		return true;
 	}
 
