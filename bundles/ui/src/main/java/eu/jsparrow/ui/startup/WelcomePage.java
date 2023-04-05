@@ -1,12 +1,7 @@
 package eu.jsparrow.ui.startup;
 
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.swt.SWT;
@@ -29,7 +24,8 @@ import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
-import eu.jsparrow.core.refactorer.JavaCompilationUnitsCollector;
+import eu.jsparrow.core.refactorer.JavaPackageNode;
+import eu.jsparrow.core.refactorer.JavaProjectNode;
 import eu.jsparrow.core.refactorer.JavaProjectsCollector;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
@@ -216,31 +212,13 @@ public class WelcomePage extends FormPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-
-				List<IJavaProject> javaProjectsToRefactor = JavaProjectsCollector.collectJavaProjectsToRefactor();
-
-				for (IJavaProject javaProject : javaProjectsToRefactor) {
-					try {
-						analyzeJavaProject(javaProject);
-					} catch (JavaModelException e) {
-						e.printStackTrace();
-					}
+				List<JavaProjectNode> javaProjectsNodes = JavaProjectsCollector.collectJavaProjectsNodes();
+				for (JavaProjectNode projectNode : javaProjectsNodes) {
+					List<JavaPackageNode> javaPackageNodes = projectNode.getJavaPackages();
+					int size = javaPackageNodes.size();
 				}
+
 			}
 		});
 	}
-
-	private void analyzeJavaProject(IJavaProject javaProject) throws JavaModelException {
-
-		JavaCompilationUnitsCollector collector = new JavaCompilationUnitsCollector();
-		Map<IPackageFragment, List<ICompilationUnit>> packageToCompilationUnitsMap = collector
-			.collectPackageToCompilationUnitsMap(javaProject);
-		debug(packageToCompilationUnitsMap);
-
-	}
-
-	private void debug(Map<IPackageFragment, List<ICompilationUnit>> packageToCompilationUnitsMap) {
-		// empty by intention
-	}
-
 }

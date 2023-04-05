@@ -16,16 +16,22 @@ import org.eclipse.jdt.core.IJavaProject;
 
 public class JavaProjectsCollector {
 
-	public static List<IJavaProject> collectJavaProjectsToRefactor() {
+	public static List<JavaProjectNode> collectJavaProjectsNodes() {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
 		IProject[] projects = root.getProjects();
 
 		return Arrays.stream(projects)
-			.map(JavaProjectsCollector::findJavaProjectNature)
+			.map(JavaProjectsCollector::findJavaProjectNode)
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.collect(Collectors.toList());
+	}
+
+	
+	
+	private static Optional<JavaProjectNode> findJavaProjectNode(IProject project) {
+		return findJavaProjectNature(project).map(JavaProjectNode::new);
 	}
 
 	private static Optional<IJavaProject> findJavaProjectNature(IProject project) {

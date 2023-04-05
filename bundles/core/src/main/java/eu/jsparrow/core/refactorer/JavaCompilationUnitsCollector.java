@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -45,6 +46,21 @@ public class JavaCompilationUnitsCollector {
 		}
 
 		return packageToCompilationUnitsMap;
+	}
+
+	@Deprecated
+	public List<JavaPackageNode> loadJavaPackageNodeList(IJavaProject javaProject)
+			throws JavaModelException {
+		List<IPackageFragmentRoot> sourcePackageFragmentRoots = collectSourcePackageFragmentRoots(javaProject);
+		packageToCompilationUnitsMap = new HashMap<>();
+		for (IPackageFragmentRoot sourcePackageFragmentRoot : sourcePackageFragmentRoots) {
+			analyzePackageFragmentRoot(sourcePackageFragmentRoot);
+		}
+
+		return packageToCompilationUnitsMap.entrySet()
+			.stream()
+			.map(entry -> new JavaPackageNode(entry.getKey(), entry.getValue()))
+			.collect(Collectors.toList());
 	}
 
 	private void analyzePackageFragmentRoot(IPackageFragmentRoot packageFragmentRoot) throws JavaModelException {
