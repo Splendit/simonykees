@@ -1,6 +1,5 @@
 package eu.jsparrow.core.refactorer;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -14,8 +13,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 
 public class JavaProjectsCollector {
 
@@ -55,25 +52,6 @@ public class JavaProjectsCollector {
 		return Optional.empty();
 	}
 
-	public static List<IPackageFragmentRoot> collectSourcePackageFragmentRoots(IJavaProject javaProject)
-			throws JavaModelException {
-		IPackageFragmentRoot[] packageFragmentRoots = javaProject.getPackageFragmentRoots();
-		List<IPackageFragmentRoot> sourcePackageFragmentRoots = new ArrayList<>();
-		for (IPackageFragmentRoot packageFragmentRoot : packageFragmentRoots) {
-			if (isSourcePackageFragmentRoot(packageFragmentRoot)) {
-				sourcePackageFragmentRoots.add(packageFragmentRoot);
-			}
-		}
-		return sourcePackageFragmentRoots;
-	}
-
-	private static boolean isSourcePackageFragmentRoot(IPackageFragmentRoot packageFragmentRoot)
-			throws JavaModelException {
-
-		return packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE &&
-				!packageFragmentRoot.isExternal() &&
-				!packageFragmentRoot.isArchive();
-	}
 
 	private JavaProjectsCollector() {
 		/*

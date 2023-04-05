@@ -1,12 +1,11 @@
 package eu.jsparrow.ui.startup;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.FontDescriptor;
@@ -30,6 +29,7 @@ import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
+import eu.jsparrow.core.refactorer.JavaCompilationUnitsCollector;
 import eu.jsparrow.core.refactorer.JavaProjectsCollector;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
@@ -232,38 +232,15 @@ public class WelcomePage extends FormPage {
 
 	private void analyzeJavaProject(IJavaProject javaProject) throws JavaModelException {
 
-		List<IPackageFragmentRoot> sourcePackageFragmentRoots = JavaProjectsCollector
-			.collectSourcePackageFragmentRoots(javaProject);
-		for (IPackageFragmentRoot sourcePackageFragmentRoot : sourcePackageFragmentRoots) {
-			analyzePackageFragmentRoot(sourcePackageFragmentRoot);
-		}
+		JavaCompilationUnitsCollector collector = new JavaCompilationUnitsCollector();
+		Map<IPackageFragment, List<ICompilationUnit>> packageToCompilationUnitsMap = collector
+			.collectPackageToCompilationUnitsMap(javaProject);
+		debug(packageToCompilationUnitsMap);
+
 	}
 
-	private void analyzePackageFragmentRoot(IPackageFragmentRoot packageFragmentRoot) throws JavaModelException {
-		IJavaElement[] javaPackageChildren = packageFragmentRoot.getChildren();
-		for (IJavaElement javaElement : javaPackageChildren) {
-			if (javaElement instanceof IPackageFragment) {
-				analyzePackageFragment((IPackageFragment) javaElement);
-			} else if (javaElement instanceof ICompilationUnit) {
-				analyzeCompilationUnit((ICompilationUnit) javaElement);
-			}
-		}
-	}
-
-	private void analyzePackageFragment(IPackageFragment packageFragment) throws JavaModelException {
-		IJavaElement[] javaPackageChildren = packageFragment.getChildren();
-		for (IJavaElement javaElement : javaPackageChildren) {
-			if (javaElement instanceof IPackageFragment) {
-				analyzePackageFragment((IPackageFragment) javaElement);
-			} else if (javaElement instanceof ICompilationUnit) {
-				analyzeCompilationUnit((ICompilationUnit) javaElement);
-			}
-		}
-	}
-
-	private void analyzeCompilationUnit(ICompilationUnit compilationUnit) {
-		String elementName = compilationUnit.getElementName();
-		elementName.length();
+	private void debug(Map<IPackageFragment, List<ICompilationUnit>> packageToCompilationUnitsMap) {
+		// empty by intention
 	}
 
 }
