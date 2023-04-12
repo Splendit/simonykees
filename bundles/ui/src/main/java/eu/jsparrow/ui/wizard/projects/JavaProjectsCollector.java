@@ -14,12 +14,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 
+import eu.jsparrow.ui.wizard.projects.wrapper.JavaProjectWrapper;
+
 /**
  * @since 4.17.0
  */
 public class JavaProjectsCollector {
 
-	public static List<JavaProjectNode> collectJavaProjectsNodes() {
+	public static List<JavaProjectWrapper> collectJavaProjectsNodes() {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
 		IProject[] projects = root.getProjects();
@@ -31,8 +33,8 @@ public class JavaProjectsCollector {
 			.collect(Collectors.toList());
 	}
 
-	private static Optional<JavaProjectNode> findJavaProjectNode(IProject project) {
-		return findJavaProjectNature(project).map(JavaProjectNode::new);
+	private static Optional<JavaProjectWrapper> findJavaProjectNode(IProject project) {
+		return findJavaProjectNature(project).map(JavaProjectWrapper::new);
 	}
 
 	private static Optional<IJavaProject> findJavaProjectNature(IProject project) {

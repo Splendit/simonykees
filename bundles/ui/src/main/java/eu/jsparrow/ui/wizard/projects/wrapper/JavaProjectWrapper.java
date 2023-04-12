@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.wizard.projects;
+package eu.jsparrow.ui.wizard.projects.wrapper;
 
 import java.util.Collections;
 import java.util.List;
@@ -6,16 +6,18 @@ import java.util.List;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import eu.jsparrow.ui.wizard.projects.JavaCompilationUnitsCollector;
+
 /**
  * @since 4.17.0
  */
-public class JavaProjectNode {
+public class JavaProjectWrapper {
 
 	private final IJavaProject javaProject;
 	// TODO: use a list of PackageRootNode as child list!!!
-	private List<JavaPackageNode> javaPackages;
+	private List<PackageFragmentWrapper> javaPackages;
 
-	public JavaProjectNode(IJavaProject javaProject) {
+	public JavaProjectWrapper(IJavaProject javaProject) {
 		this.javaProject = javaProject;
 	}
 
@@ -28,7 +30,7 @@ public class JavaProjectNode {
 	 * objects.
 	 */
 	@Deprecated
-	public List<JavaPackageNode> getJavaPackages() {
+	public List<PackageFragmentWrapper> getJavaPackages() {
 		if (javaPackages == null) {
 			try {
 				javaPackages = new JavaCompilationUnitsCollector().loadJavaPackageNodeList(javaProject);

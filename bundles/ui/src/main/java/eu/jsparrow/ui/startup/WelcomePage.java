@@ -26,9 +26,9 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
-import eu.jsparrow.ui.wizard.projects.JavaPackageNode;
-import eu.jsparrow.ui.wizard.projects.JavaProjectNode;
 import eu.jsparrow.ui.wizard.projects.JavaProjectsCollector;
+import eu.jsparrow.ui.wizard.projects.wrapper.JavaProjectWrapper;
+import eu.jsparrow.ui.wizard.projects.wrapper.PackageFragmentWrapper;
 
 /**
  * Content displayed in Eclipse editor when the jSparrow plugin is installed.
@@ -212,9 +212,9 @@ public class WelcomePage extends FormPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				List<JavaProjectNode> javaProjectsNodes = JavaProjectsCollector.collectJavaProjectsNodes();
-				for (JavaProjectNode projectNode : javaProjectsNodes) {
-					List<JavaPackageNode> javaPackageNodes = projectNode.getJavaPackages();
+				List<JavaProjectWrapper> javaProjectsNodes = JavaProjectsCollector.collectJavaProjectsNodes();
+				for (JavaProjectWrapper projectNode : javaProjectsNodes) {
+					List<PackageFragmentWrapper> javaPackageNodes = projectNode.getJavaPackages();
 					int size = javaPackageNodes.size();
 				}
 

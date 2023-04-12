@@ -1,16 +1,16 @@
-package eu.jsparrow.ui.wizard.projects;
+package eu.jsparrow.ui.wizard.projects.wrapper;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
 /**
  * @since 4.17.0
  */
-public class JavaFileNode extends JavaPackageChildNode {
+public class CompilationUnitWrapper extends PackageFragmentChildWrapper {
 
 	private final ICompilationUnit compilationUnit;
 	private final String javaFileName;
 
-	JavaFileNode(ICompilationUnit compilationUnit) {
+	CompilationUnitWrapper(ICompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
 		this.javaFileName = compilationUnit.getElementName();
 	}

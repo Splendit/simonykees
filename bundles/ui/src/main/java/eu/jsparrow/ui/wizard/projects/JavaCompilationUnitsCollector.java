@@ -13,6 +13,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import eu.jsparrow.ui.wizard.projects.wrapper.PackageFragmentWrapper;
+
 /**
  * @since 4.17.0
  */
@@ -52,7 +54,7 @@ public class JavaCompilationUnitsCollector {
 	}
 
 	@Deprecated
-	public List<JavaPackageNode> loadJavaPackageNodeList(IJavaProject javaProject)
+	public List<PackageFragmentWrapper> loadJavaPackageNodeList(IJavaProject javaProject)
 			throws JavaModelException {
 		List<IPackageFragmentRoot> sourcePackageFragmentRoots = collectSourcePackageFragmentRoots(javaProject);
 		packageToCompilationUnitsMap = new HashMap<>();
@@ -62,7 +64,7 @@ public class JavaCompilationUnitsCollector {
 
 		return packageToCompilationUnitsMap.entrySet()
 			.stream()
-			.map(entry -> new JavaPackageNode(entry.getKey(), entry.getValue()))
+			.map(entry -> new PackageFragmentWrapper(entry.getKey(), entry.getValue()))
 			.collect(Collectors.toList());
 	}
 

@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.wizard.projects;
+package eu.jsparrow.ui.wizard.projects.wrapper;
 
 /**
  * @since 4.17.0
@@ -6,13 +6,13 @@ package eu.jsparrow.ui.wizard.projects;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 /**
- * TODO: Use this class in a child list for the Class {@link JavaProjectNode}.
+ * TODO: Use this class in a child list for the Class {@link JavaProjectWrapper}.
  *
  */
-public class PackageRootNode {
+public class PackageFragmentRootWrapper {
 	private final IPackageFragmentRoot packageFragmentRoot;
 
-	PackageRootNode(IPackageFragmentRoot packageFragmentRoot) {
+	PackageFragmentRootWrapper(IPackageFragmentRoot packageFragmentRoot) {
 		this.packageFragmentRoot = packageFragmentRoot;
 	}
 

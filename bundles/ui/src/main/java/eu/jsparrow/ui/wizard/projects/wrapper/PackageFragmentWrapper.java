@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.wizard.projects;
+package eu.jsparrow.ui.wizard.projects.wrapper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,23 +12,23 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * @since 4.17.0
  */
-public class JavaPackageNode extends JavaPackageChildNode {
+public class PackageFragmentWrapper extends PackageFragmentChildWrapper {
 	private final String packageName;
 	private final IPackageFragment packageFragment;
 	// TODO: abolish the field compilationUnits
 	@Deprecated
 	private final List<ICompilationUnit> compilationUnits;
 	// field children instead of compilationUnits
-	private List<JavaPackageChildNode> children;
+	private List<PackageFragmentChildWrapper> children;
 
 	@Deprecated
-	public JavaPackageNode(IPackageFragment packageFragment, List<ICompilationUnit> compilationUnits) {
+	public PackageFragmentWrapper(IPackageFragment packageFragment, List<ICompilationUnit> compilationUnits) {
 		this.packageFragment = packageFragment;
 		this.packageName = packageFragment.getElementName();
 		this.compilationUnits = compilationUnits;
 	}
 
-	public JavaPackageNode(IPackageFragment packageFragment) {
+	public PackageFragmentWrapper(IPackageFragment packageFragment) {
 		this.packageFragment = packageFragment;
 		this.packageName = packageFragment.getElementName();
 		this.compilationUnits = Collections.emptyList();
@@ -43,7 +43,7 @@ public class JavaPackageNode extends JavaPackageChildNode {
 		return packageName;
 	}
 
-	public List<JavaPackageChildNode> getChildren() {
+	public List<PackageFragmentChildWrapper> getChildren() {
 		if (children == null) {
 			children = new ArrayList<>();
 			IJavaElement[] javaPackageChildren;
@@ -51,9 +51,9 @@ public class JavaPackageNode extends JavaPackageChildNode {
 				javaPackageChildren = packageFragment.getChildren();
 				for (IJavaElement javaElement : javaPackageChildren) {
 					if (javaElement instanceof IPackageFragment) {
-						children.add(new JavaPackageNode((IPackageFragment) javaElement));
+						children.add(new PackageFragmentWrapper((IPackageFragment) javaElement));
 					} else if (javaElement instanceof ICompilationUnit) {
-						children.add(new JavaFileNode((ICompilationUnit) javaElement));
+						children.add(new CompilationUnitWrapper((ICompilationUnit) javaElement));
 					}
 				}
 			} catch (JavaModelException e) {
