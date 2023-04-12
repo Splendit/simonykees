@@ -161,14 +161,14 @@ public class CheckboxTreeViewerWrapper {
 	}
 
 	/**
-	 * Creates a listener to check and uncheck markers in the
+	 * Method for a listener to check and uncheck markers in the
 	 * {@link CheckboxTreeViewer}. Markers with the same ID occurring in
 	 * multiple subtrees are simultaneously checked/unchecked.
 	 * 
 	 * @param event
 	 *            the generated event.
 	 */
-	public void createCheckListener(CheckStateChangedEvent event) {
+	public void checkStateChanged(CheckStateChangedEvent event) {
 		MarkerItemWrapper treeEntryWrapper = (MarkerItemWrapper) event.getElement();
 		boolean checked = event.getChecked();
 		checkboxTreeViewer.setSubtreeChecked(treeEntryWrapper, checked);
@@ -204,14 +204,14 @@ public class CheckboxTreeViewerWrapper {
 	}
 
 	/**
-	 * The listener functionality for modifying the search field in
+	 * Method for the listener functionality for modifying the search field in
 	 * {@link SimonykeesMarkersPreferencePage}. As soon as the search field is
 	 * modified, the tree view is converted into a flat view.
 	 * 
 	 * @param modifyEvent
 	 *            the generated event.
 	 */
-	public void createSearchFieldModifyListener(ModifyEvent modifyEvent) {
+	public void modifyText(ModifyEvent modifyEvent) {
 		Text source = (Text) modifyEvent.getSource();
 		String searchText = source.getText();
 		if (StringUtils.isEmpty(StringUtils.trim(searchText))) {

@@ -81,7 +81,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		Map<String, RuleDescription> allMarkerDescriptions = ResolverVisitorsFactory.getAllMarkerDescriptions();
 		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
 		treeViewerWrapper.populateCheckboxTreeView(allMarkerDescriptions, allActiveMarkers);
-		checkboxTreeViewer.addCheckStateListener(treeViewerWrapper::createCheckListener);
+		checkboxTreeViewer.addCheckStateListener(treeViewerWrapper::checkStateChanged);
 		checkboxTreeViewer.setComparator(new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
@@ -91,7 +91,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 			}
 		});
 
-		searchField.addModifyListener(treeViewerWrapper::createSearchFieldModifyListener);
+		searchField.addModifyListener(treeViewerWrapper::modifyText);
 
 		Composite bulkActionsComposite = new Composite(mainComposite, SWT.NONE);
 		bulkActionsComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
