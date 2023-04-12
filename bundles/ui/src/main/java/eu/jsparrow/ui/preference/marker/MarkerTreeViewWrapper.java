@@ -2,6 +2,7 @@ package eu.jsparrow.ui.preference.marker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,15 +14,15 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.ITreeViewerListener;
+import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Text;
 
 import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.i18n.Messages;
@@ -29,6 +30,7 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.preference.SimonykeesMarkersPreferencePage;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
+import eu.jsparrow.ui.treeview.AbstractCheckBoxTreeView;
 
 /**
  * Wraps a {@link CheckboxTreeViewer} that is used for de/activating markers in
@@ -39,58 +41,13 @@ import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
  * @since 4.10.0
  *
  */
-public class MarkerTreeViewWrapper {
+public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 
-	private Text searchField;
-	private CheckboxTreeViewer checkboxTreeViewer;
-	private final List<MarkerItemWrapper> allItems = new ArrayList<>();
+	private final List<MarkerItemWrapper> allMarkerItemWrappers = Collections
+		.unmodifiableList(createMarkerItemWrapperList());
 
-	public MarkerTreeViewWrapper(Composite mainComposite) {
-		Group group = new Group(mainComposite, SWT.NONE);
-		group.setText(Messages.SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText);
-		group.setLayout(new GridLayout(1, false));
-		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		GridData groupLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		groupLayoutData.heightHint = 400;
-
-		Composite searchComposite = new Composite(group, SWT.NONE);
-		searchComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		searchComposite.setLayout(new GridLayout(1, true));
-
-		searchField = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
-		searchField.setMessage(Messages.SimonykeesMarkersPreferencePage_searchLabelMessage);
-		GridData searchFieldGridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
-		searchFieldGridData.widthHint = 180;
-		searchField.setLayoutData(searchFieldGridData);
-		searchField.addModifyListener(this::modifyText);
-
-
-		checkboxTreeViewer = new CheckboxTreeViewer(group);
-		checkboxTreeViewer.getTree()
-			.setLayoutData(new GridData(GridData.FILL_BOTH));
-		checkboxTreeViewer.setContentProvider(new MarkerContentProvider());
-		checkboxTreeViewer.setLabelProvider(new MarkerLabelProvider());
-		checkboxTreeViewer.setInput("root"); //$NON-NLS-1$
-		checkboxTreeViewer.addCheckStateListener(this::checkStateChanged);
-		checkboxTreeViewer.setComparator(new ViewerComparator() {
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				Comparator<MarkerItemWrapper> comparator = Comparator
-					.comparing(MarkerItemWrapper::getName);
-				return comparator.compare((MarkerItemWrapper) e1, (MarkerItemWrapper) e2);
-			}
-		});
-		populateCheckBoxTreeView();
-	}
-
-	/**
-	 * Creates an entry in the tree for each marker. Markers are grouped in
-	 * subtrees by their {@link Tag}s. Markers that contain multiple tags are
-	 * shown in the all the corresponding subtrees.
-	 * 
-	 */
-	public void populateCheckBoxTreeView() {
-
+	private static List<MarkerItemWrapper> createMarkerItemWrapperList() {
+		List<MarkerItemWrapper> allItems = new ArrayList<>();
 		Map<String, RuleDescription> allMarkerDescriptions = ResolverVisitorsFactory.getAllMarkerDescriptions();
 		List<String> tags = Arrays.stream(Tag.getAllTags())
 			.filter(StringUtils::isAlphaSpace)
@@ -120,12 +77,50 @@ public class MarkerTreeViewWrapper {
 				Arrays.asList(12, 13, 14, 15, 16));
 		java11PlusItems.forEach((key, value) -> java16.addChild(key, value.getName()));
 		allItems.add(java16);
-		MarkerItemWrapper[] input = allItems.toArray(new MarkerItemWrapper[] {});
-		checkboxTreeViewer.setInput(input);
+		return allItems;
+	}
 
-		updateMarkerItemSelection();
-		updateCategorySelection();
+	private static Map<String, RuleDescription> findByJavaVersion(Map<String, RuleDescription> allMarkerDescriptions,
+			List<Integer> versions) {
+		Map<String, RuleDescription> map = new HashMap<>();
+		for (Map.Entry<String, RuleDescription> entry : allMarkerDescriptions.entrySet()) {
+			RuleDescription description = entry.getValue();
+			for (Tag ruleTag : description.getTags()) {
+				boolean matched = ruleTag.getTagNames()
+					.stream()
+					.filter(StringUtils::isNumeric)
+					.map(Integer::parseInt)
+					.anyMatch(versions::contains);
+				if (matched) {
+					map.put(entry.getKey(), description);
+				}
+			}
+		}
+		return map;
+	}
 
+	private static void persistMarkerItemSelection(boolean checked, MarkerItemWrapper item) {
+		if (checked) {
+			SimonykeesPreferenceManager.addActiveMarker(item.getMarkerId());
+		} else {
+			SimonykeesPreferenceManager.removeActiveMarker(item.getMarkerId());
+		}
+	}
+
+	public MarkerTreeViewWrapper(Composite mainComposite) {
+		Group group = new Group(mainComposite, SWT.NONE);
+		group.setText(getGroupTitle());
+		group.setLayout(new GridLayout(1, false));
+		
+		GridData groupLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+		groupLayoutData.heightHint = getTreeViewerGroupHeight();
+		group.setLayoutData(groupLayoutData);
+
+		createSearchTextField(group);
+		createCheckBoxTreeViewer(group);
+		updateCheckboxTreeViewerInput();
+		checkboxTreeViewer.expandToLevel(allMarkerItemWrappers.get(0), 1);
+		checkboxTreeViewer.expandToLevel(allMarkerItemWrappers.get(1).getChildern().get(0), 0);
 	}
 
 	/**
@@ -137,20 +132,19 @@ public class MarkerTreeViewWrapper {
 	public void selectMarkers(List<String> allActiveMarkers) {
 		bulkUpdate(false);
 
-		allItems.stream()
+		allMarkerItemWrappers.stream()
 			.flatMap(item -> item.getChildern()
 				.stream())
 			.filter(item -> allActiveMarkers.contains(item.getMarkerId()))
-			.forEach(item -> this.persistMarkerItemSelection(true, item));
+			.forEach(item -> persistMarkerItemSelection(true, item));
 
-		updateMarkerItemSelection();
-		updateCategorySelection();
+		updateTreeViewerSelectionState();
 
 	}
 
 	private void updateMarkerItemSelection() {
 		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
-		allItems.stream()
+		allMarkerItemWrappers.stream()
 			.flatMap(itemWrapper -> itemWrapper.getChildern()
 				.stream())
 			.forEach(itemWrapper -> {
@@ -162,7 +156,7 @@ public class MarkerTreeViewWrapper {
 	}
 
 	private void updateCategorySelection() {
-		allItems.stream()
+		allMarkerItemWrappers.stream()
 			.forEach(itemWrapper -> {
 				List<MarkerItemWrapper> children = itemWrapper.getChildern();
 				boolean allChecked = children.stream()
@@ -182,33 +176,89 @@ public class MarkerTreeViewWrapper {
 			});
 	}
 
-	private Map<String, RuleDescription> findByJavaVersion(Map<String, RuleDescription> allMarkerDescriptions,
-			List<Integer> versions) {
-		Map<String, RuleDescription> map = new HashMap<>();
-		for (Map.Entry<String, RuleDescription> entry : allMarkerDescriptions.entrySet()) {
-			RuleDescription description = entry.getValue();
-			for (Tag ruleTag : description.getTags()) {
-				boolean matched = ruleTag.getTagNames()
-					.stream()
-					.filter(StringUtils::isNumeric)
-					.map(Integer::parseInt)
-					.anyMatch(versions::contains);
-				if (matched) {
-					map.put(entry.getKey(), description);
+	/**
+	 * Activates or deactivates all the entries of the
+	 * {@link CheckboxTreeViewer}. The preference store is updated accordingly.
+	 * 
+	 * @param selection
+	 *            whether the markers should be activated or deactivated.
+	 */
+	public void bulkUpdate(boolean selection) {
+		allMarkerItemWrappers.stream()
+			.flatMap(item -> item.getChildern()
+				.stream())
+			.forEach(item -> persistMarkerItemSelection(selection, item));
+		allMarkerItemWrappers.forEach(item -> checkboxTreeViewer.setSubtreeChecked(item, selection));
+	}
+
+	public void setSearchFieldText(String string) {
+		searchField.setText(string);
+	}
+	
+	@Override
+	protected int getTreeViewerGroupHeight() {
+		return 400;
+	}
+
+	@Override
+	protected String getGroupTitle() {
+		return Messages.SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText;
+	}
+
+	@Override
+	protected String getSearchFieldMessage() {
+		return Messages.SimonykeesMarkersPreferencePage_searchLabelMessage;
+	}
+
+	@Override
+	protected MarkerContentProvider createTreeViewerContentProvider() {
+		return new MarkerContentProvider();
+	}
+
+	@Override
+	protected MarkerLabelProvider createTreeViewerLabelProvider() {
+		return new MarkerLabelProvider();
+	}
+
+	@Override
+	protected ViewerComparator createTreeViewerComparator() {
+		return new ViewerComparator() {
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				Comparator<MarkerItemWrapper> comparator = Comparator
+					.comparing(MarkerItemWrapper::getName);
+				return comparator.compare((MarkerItemWrapper) e1, (MarkerItemWrapper) e2);
+			}
+		};
+	}
+
+	@Override
+	protected ITreeViewerListener createTreeViewerListener() {
+		return new ITreeViewerListener() {
+
+			@Override
+			public void treeCollapsed(TreeExpansionEvent event) {
+				Object source = event.getSource();
+			}
+
+			@Override
+			public void treeExpanded(TreeExpansionEvent event) {
+				Object element = event.getElement();
+				if (element instanceof MarkerItemWrapper) {
+					MarkerItemWrapper category = (MarkerItemWrapper) element;
+					String name = category.getName();
+					name.getClass();
 				}
 			}
-		}
-		return map;
+		};
 	}
 
 	/**
-	 * Method for a listener to check and uncheck markers in the
+	 * Method for the listener functionality to check or uncheck markers in the
 	 * {@link CheckboxTreeViewer}. Markers with the same ID occurring in
 	 * multiple subtrees are simultaneously checked/unchecked.
-	 * 
-	 * @param event
-	 *            the generated event.
 	 */
+	@Override
 	public void checkStateChanged(CheckStateChangedEvent event) {
 		MarkerItemWrapper treeEntryWrapper = (MarkerItemWrapper) event.getElement();
 		boolean checked = event.getChecked();
@@ -227,7 +277,7 @@ public class MarkerTreeViewWrapper {
 			persistMarkerItemSelection(checked, treeEntryWrapper);
 		}
 
-		allItems.stream()
+		allMarkerItemWrappers.stream()
 			.flatMap(item -> item.getChildern()
 				.stream())
 			.filter(item -> updated.contains(item.getMarkerId()))
@@ -236,40 +286,22 @@ public class MarkerTreeViewWrapper {
 		updateCategorySelection();
 	}
 
-	private void persistMarkerItemSelection(boolean checked, MarkerItemWrapper item) {
-		if (checked) {
-			SimonykeesPreferenceManager.addActiveMarker(item.getMarkerId());
-		} else {
-			SimonykeesPreferenceManager.removeActiveMarker(item.getMarkerId());
-		}
+	@Override
+	protected MarkerItemWrapper[] createAllAvailableInput() {
+		return allMarkerItemWrappers.toArray(new MarkerItemWrapper[] {});
 	}
 
-	/**
-	 * Method for the listener functionality for modifying the search field in
-	 * {@link SimonykeesMarkersPreferencePage}. As soon as the search field is
-	 * modified, the tree view is converted into a flat view.
-	 * 
-	 * @param modifyEvent
-	 *            the generated event.
-	 */
-	public void modifyText(ModifyEvent modifyEvent) {
-		Text source = (Text) modifyEvent.getSource();
-		String searchText = source.getText();
-		if (StringUtils.isEmpty(StringUtils.trim(searchText))) {
-			checkboxTreeViewer.setInput(allItems.toArray(new MarkerItemWrapper[] {}));
-			updateMarkerItemSelection();
-			updateCategorySelection();
-			return;
-		}
+	@Override
+	protected MarkerItemWrapper[] createFilteredInput(String textRetrievalFilter) {
 		Set<MarkerItemWrapper> searchResult = new HashSet<>();
-		for (MarkerItemWrapper item : allItems) {
+		for (MarkerItemWrapper item : allMarkerItemWrappers) {
 			boolean categoryMatch = StringUtils.contains(StringUtils.lowerCase(item.getName()),
-					StringUtils.lowerCase(searchText));
+					StringUtils.lowerCase(textRetrievalFilter));
 			List<MarkerItemWrapper> children = item.getChildern();
 			for (MarkerItemWrapper child : children) {
 				boolean markerMatch = StringUtils.contains(
 						StringUtils.lowerCase(child.getName()),
-						StringUtils.lowerCase(searchText));
+						StringUtils.lowerCase(textRetrievalFilter));
 				boolean alreadyInResult = searchResult.stream()
 					.map(MarkerItemWrapper::getMarkerId)
 					.anyMatch(r -> r.equals(child.getMarkerId()));
@@ -278,28 +310,12 @@ public class MarkerTreeViewWrapper {
 				}
 			}
 		}
-		checkboxTreeViewer.setInput(searchResult.toArray(new MarkerItemWrapper[] {}));
+		return searchResult.toArray(new MarkerItemWrapper[] {});
+	}
+
+	@Override
+	protected void updateTreeViewerSelectionState() {
 		updateMarkerItemSelection();
 		updateCategorySelection();
-
-	}
-
-	/**
-	 * Activates or deactivates all the entries of the
-	 * {@link CheckboxTreeViewer}. The preference store is updated accordingly.
-	 * 
-	 * @param selection
-	 *            whether the markers should be activated or deactivated.
-	 */
-	public void bulkUpdate(boolean selection) {
-		allItems.stream()
-			.flatMap(item -> item.getChildern()
-				.stream())
-			.forEach(item -> this.persistMarkerItemSelection(selection, item));
-		allItems.forEach(item -> checkboxTreeViewer.setSubtreeChecked(item, selection));
-	}
-
-	public void setSearchFieldText(String string) {
-		searchField.setText(string);
 	}
 }
