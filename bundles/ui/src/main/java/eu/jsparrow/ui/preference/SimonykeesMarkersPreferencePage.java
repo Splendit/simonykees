@@ -1,8 +1,6 @@
 package eu.jsparrow.ui.preference;
 
 import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
@@ -19,9 +17,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.ui.preference.marker.CheckboxTreeViewerWrapper;
 import eu.jsparrow.ui.preference.marker.MarkerContentProvider;
 import eu.jsparrow.ui.preference.marker.MarkerItemWrapper;
@@ -77,10 +73,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		checkboxTreeViewer.setInput("root"); //$NON-NLS-1$
 
 		treeViewerWrapper = new CheckboxTreeViewerWrapper(checkboxTreeViewer);
-
-		Map<String, RuleDescription> allMarkerDescriptions = ResolverVisitorsFactory.getAllMarkerDescriptions();
-		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
-		treeViewerWrapper.populateCheckboxTreeView(allMarkerDescriptions, allActiveMarkers);
+		treeViewerWrapper.populateCheckBoxTreeView();
 		checkboxTreeViewer.addCheckStateListener(treeViewerWrapper::checkStateChanged);
 		checkboxTreeViewer.setComparator(new ViewerComparator() {
 			@Override

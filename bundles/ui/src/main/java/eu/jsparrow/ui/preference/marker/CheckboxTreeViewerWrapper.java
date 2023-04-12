@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.widgets.Text;
 
+import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.preference.SimonykeesMarkersPreferencePage;
@@ -43,15 +44,10 @@ public class CheckboxTreeViewerWrapper {
 	 * subtrees by their {@link Tag}s. Markers that contain multiple tags are
 	 * shown in the all the corresponding subtrees.
 	 * 
-	 * @param allMarkerDescriptions
-	 *            a map all marker IDs to their corresponding rule description.
-	 * @param allActiveMarkers
-	 *            the list of all markers that are activated. This can always be
-	 *            taken from {@link SimonykeesPreferenceManager}.
 	 */
-	public void populateCheckboxTreeView(Map<String, RuleDescription> allMarkerDescriptions,
-			List<String> allActiveMarkers) {
+	public void populateCheckBoxTreeView() {
 
+		Map<String, RuleDescription> allMarkerDescriptions = ResolverVisitorsFactory.getAllMarkerDescriptions();
 		List<String> tags = Arrays.stream(Tag.getAllTags())
 			.filter(StringUtils::isAlphaSpace)
 			.filter(tag -> !"free".equalsIgnoreCase(tag)) //$NON-NLS-1$
@@ -83,7 +79,7 @@ public class CheckboxTreeViewerWrapper {
 		MarkerItemWrapper[] input = allItems.toArray(new MarkerItemWrapper[] {});
 		checkboxTreeViewer.setInput(input);
 
-		udpateMarkerItemSelection(allActiveMarkers);
+		udpateMarkerItemSelection();
 		updateCategorySelection();
 
 	}
@@ -103,12 +99,13 @@ public class CheckboxTreeViewerWrapper {
 			.filter(item -> allActiveMarkers.contains(item.getMarkerId()))
 			.forEach(item -> this.persistMarkerItemSelection(true, item));
 
-		udpateMarkerItemSelection(allActiveMarkers);
+		udpateMarkerItemSelection();
 		updateCategorySelection();
 
 	}
 
-	private void udpateMarkerItemSelection(List<String> allActiveMarkers) {
+	private void udpateMarkerItemSelection() {
+		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
 		allItems.stream()
 			.flatMap(itemWrapper -> itemWrapper.getChildern()
 				.stream())
@@ -216,7 +213,7 @@ public class CheckboxTreeViewerWrapper {
 		String searchText = source.getText();
 		if (StringUtils.isEmpty(StringUtils.trim(searchText))) {
 			checkboxTreeViewer.setInput(allItems.toArray(new MarkerItemWrapper[] {}));
-			udpateMarkerItemSelection(SimonykeesPreferenceManager.getAllActiveMarkers());
+			udpateMarkerItemSelection();
 			updateCategorySelection();
 			return;
 		}
@@ -238,7 +235,7 @@ public class CheckboxTreeViewerWrapper {
 			}
 		}
 		checkboxTreeViewer.setInput(searchResult.toArray(new MarkerItemWrapper[] {}));
-		udpateMarkerItemSelection(SimonykeesPreferenceManager.getAllActiveMarkers());
+		udpateMarkerItemSelection();
 		updateCategorySelection();
 
 	}
