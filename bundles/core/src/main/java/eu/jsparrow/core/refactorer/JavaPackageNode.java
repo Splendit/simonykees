@@ -9,6 +9,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
+/**
+ * @since 4.17.0
+ */
 public class JavaPackageNode extends JavaPackageChildNode {
 	private final String packageName;
 	private final IPackageFragment packageFragment;

@@ -6,6 +6,9 @@ import java.util.List;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+/**
+ * @since 4.17.0
+ */
 public class JavaProjectNode {
 
 	private final IJavaProject javaProject;

@@ -14,6 +14,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 
+/**
+ * @since 4.17.0
+ */
 public class JavaProjectsCollector {
 
 	public static List<JavaProjectNode> collectJavaProjectsNodes() {
@@ -28,8 +31,6 @@ public class JavaProjectsCollector {
 			.collect(Collectors.toList());
 	}
 
-	
-	
 	private static Optional<JavaProjectNode> findJavaProjectNode(IProject project) {
 		return findJavaProjectNature(project).map(JavaProjectNode::new);
 	}
@@ -57,7 +58,6 @@ public class JavaProjectsCollector {
 		}
 		return Optional.empty();
 	}
-
 
 	private JavaProjectsCollector() {
 		/*

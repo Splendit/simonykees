@@ -13,6 +13,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+/**
+ * @since 4.17.0
+ */
 public class JavaCompilationUnitsCollector {
 
 	private Map<IPackageFragment, List<ICompilationUnit>> packageToCompilationUnitsMap;

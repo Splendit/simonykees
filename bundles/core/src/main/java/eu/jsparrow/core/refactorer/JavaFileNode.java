@@ -2,6 +2,9 @@ package eu.jsparrow.core.refactorer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+/**
+ * @since 4.17.0
+ */
 public class JavaFileNode extends JavaPackageChildNode {
 
 	private final ICompilationUnit compilationUnit;
