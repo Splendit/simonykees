@@ -24,11 +24,11 @@ import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
-import eu.jsparrow.core.refactorer.JavaPackageNode;
-import eu.jsparrow.core.refactorer.JavaProjectNode;
-import eu.jsparrow.core.refactorer.JavaProjectsCollector;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
+import eu.jsparrow.ui.wizard.projects.JavaPackageNode;
+import eu.jsparrow.ui.wizard.projects.JavaProjectNode;
+import eu.jsparrow.ui.wizard.projects.JavaProjectsCollector;
 
 /**
  * Content displayed in Eclipse editor when the jSparrow plugin is installed.

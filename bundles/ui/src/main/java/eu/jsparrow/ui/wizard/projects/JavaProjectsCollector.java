@@ -1,4 +1,4 @@
-package eu.jsparrow.core.refactorer;
+package eu.jsparrow.ui.wizard.projects;
 
 import java.util.Arrays;
 import java.util.List;
