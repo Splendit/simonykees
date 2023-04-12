@@ -39,13 +39,13 @@ import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
  * @since 4.10.0
  *
  */
-public class CheckboxTreeViewerWrapper {
+public class MarkerTreeViewWrapper {
 
 	private Text searchField;
 	private CheckboxTreeViewer checkboxTreeViewer;
 	private final List<MarkerItemWrapper> allItems = new ArrayList<>();
 
-	public CheckboxTreeViewerWrapper(Composite mainComposite) {
+	public MarkerTreeViewWrapper(Composite mainComposite) {
 		Group group = new Group(mainComposite, SWT.NONE);
 		group.setText(Messages.SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText);
 		group.setLayout(new GridLayout(1, false));
@@ -123,7 +123,7 @@ public class CheckboxTreeViewerWrapper {
 		MarkerItemWrapper[] input = allItems.toArray(new MarkerItemWrapper[] {});
 		checkboxTreeViewer.setInput(input);
 
-		udpateMarkerItemSelection();
+		updateMarkerItemSelection();
 		updateCategorySelection();
 
 	}
@@ -143,12 +143,12 @@ public class CheckboxTreeViewerWrapper {
 			.filter(item -> allActiveMarkers.contains(item.getMarkerId()))
 			.forEach(item -> this.persistMarkerItemSelection(true, item));
 
-		udpateMarkerItemSelection();
+		updateMarkerItemSelection();
 		updateCategorySelection();
 
 	}
 
-	private void udpateMarkerItemSelection() {
+	private void updateMarkerItemSelection() {
 		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
 		allItems.stream()
 			.flatMap(itemWrapper -> itemWrapper.getChildern()
@@ -257,7 +257,7 @@ public class CheckboxTreeViewerWrapper {
 		String searchText = source.getText();
 		if (StringUtils.isEmpty(StringUtils.trim(searchText))) {
 			checkboxTreeViewer.setInput(allItems.toArray(new MarkerItemWrapper[] {}));
-			udpateMarkerItemSelection();
+			updateMarkerItemSelection();
 			updateCategorySelection();
 			return;
 		}
@@ -279,7 +279,7 @@ public class CheckboxTreeViewerWrapper {
 			}
 		}
 		checkboxTreeViewer.setInput(searchResult.toArray(new MarkerItemWrapper[] {}));
-		udpateMarkerItemSelection();
+		updateMarkerItemSelection();
 		updateCategorySelection();
 
 	}

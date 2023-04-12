@@ -1,10 +1,6 @@
 package eu.jsparrow.ui.preference;
 
-import java.util.Comparator;
-
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -15,8 +11,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.ui.preference.marker.CheckboxTreeViewerWrapper;
-import eu.jsparrow.ui.preference.marker.MarkerItemWrapper;
+import eu.jsparrow.ui.preference.marker.MarkerTreeViewWrapper;
 import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
 
 /**
@@ -27,7 +22,7 @@ import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
  */
 public class SimonykeesMarkersPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	private CheckboxTreeViewerWrapper treeViewerWrapper;
+	private MarkerTreeViewWrapper treeViewerWrapper;
 
 	@Override
 	public void init(IWorkbench workbench) {
@@ -42,7 +37,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		mainComposite.setLayoutData(gd);
 		mainComposite.setLayout(new GridLayout(1, true));
 
-		treeViewerWrapper = new CheckboxTreeViewerWrapper(mainComposite);
+		treeViewerWrapper = new MarkerTreeViewWrapper(mainComposite);
 
 		Composite bulkActionsComposite = new Composite(mainComposite, SWT.NONE);
 		bulkActionsComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
@@ -61,7 +56,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		SimonykeesPreferenceManager.removeActiveMarker(markerId);
 	}
 
-	protected void addButton(Composite composite, String name, boolean turn, CheckboxTreeViewerWrapper treeWrapper) {
+	protected void addButton(Composite composite, String name, boolean turn, MarkerTreeViewWrapper treeWrapper) {
 		Button thisButton = new Button(composite, SWT.PUSH);
 		thisButton.setLayoutData(new GridData(SWT.DEFAULT, SWT.DEFAULT, false, false));
 		thisButton.setText(name);
