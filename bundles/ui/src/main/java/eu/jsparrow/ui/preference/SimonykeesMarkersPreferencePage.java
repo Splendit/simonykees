@@ -3,7 +3,6 @@ package eu.jsparrow.ui.preference;
 import java.util.Comparator;
 
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
@@ -12,16 +11,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.preference.marker.CheckboxTreeViewerWrapper;
-import eu.jsparrow.ui.preference.marker.MarkerContentProvider;
 import eu.jsparrow.ui.preference.marker.MarkerItemWrapper;
-import eu.jsparrow.ui.preference.marker.MarkerLabelProvider;
 import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
 
 /**
@@ -33,7 +28,6 @@ import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
 public class SimonykeesMarkersPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	private CheckboxTreeViewerWrapper treeViewerWrapper;
-	private Text searchField;
 
 	@Override
 	public void init(IWorkbench workbench) {
@@ -48,43 +42,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		mainComposite.setLayoutData(gd);
 		mainComposite.setLayout(new GridLayout(1, true));
 
-		Group group = new Group(mainComposite, SWT.NONE);
-		group.setText(Messages.SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText);
-		group.setLayout(new GridLayout(1, false));
-		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		GridData groupLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		groupLayoutData.heightHint = 400;
-
-		Composite searchComposite = new Composite(group, SWT.NONE);
-		searchComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		searchComposite.setLayout(new GridLayout(1, true));
-
-		searchField = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
-		searchField.setMessage(Messages.SimonykeesMarkersPreferencePage_searchLabelMessage);
-		GridData searchFieldGridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
-		searchFieldGridData.widthHint = 180;
-		searchField.setLayoutData(searchFieldGridData);
-
-		CheckboxTreeViewer checkboxTreeViewer = new CheckboxTreeViewer(group);
-		checkboxTreeViewer.getTree()
-			.setLayoutData(new GridData(GridData.FILL_BOTH));
-		checkboxTreeViewer.setContentProvider(new MarkerContentProvider());
-		checkboxTreeViewer.setLabelProvider(new MarkerLabelProvider());
-		checkboxTreeViewer.setInput("root"); //$NON-NLS-1$
-
-		treeViewerWrapper = new CheckboxTreeViewerWrapper(checkboxTreeViewer);
-		treeViewerWrapper.populateCheckBoxTreeView();
-		checkboxTreeViewer.addCheckStateListener(treeViewerWrapper::checkStateChanged);
-		checkboxTreeViewer.setComparator(new ViewerComparator() {
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				Comparator<MarkerItemWrapper> comparator = Comparator
-					.comparing(MarkerItemWrapper::getName);
-				return comparator.compare((MarkerItemWrapper) e1, (MarkerItemWrapper) e2);
-			}
-		});
-
-		searchField.addModifyListener(treeViewerWrapper::modifyText);
+		treeViewerWrapper = new CheckboxTreeViewerWrapper(mainComposite);
 
 		Composite bulkActionsComposite = new Composite(mainComposite, SWT.NONE);
 		bulkActionsComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
@@ -119,8 +77,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		}
 	}
 
-	public void setSearchField(String string) {
-		searchField.setText(string);
-
+	public void setSearchField(String string) {		
+		treeViewerWrapper.setSearchFieldText(string);
 	}
 }

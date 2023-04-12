@@ -2,6 +2,7 @@ package eu.jsparrow.ui.preference.marker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,10 +13,18 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 
 import eu.jsparrow.core.markers.ResolverVisitorsFactory;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.preference.SimonykeesMarkersPreferencePage;
@@ -32,11 +41,46 @@ import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
  */
 public class CheckboxTreeViewerWrapper {
 
+	private Text searchField;
 	private CheckboxTreeViewer checkboxTreeViewer;
-	private List<MarkerItemWrapper> allItems = new ArrayList<>();
+	private final List<MarkerItemWrapper> allItems = new ArrayList<>();
 
-	public CheckboxTreeViewerWrapper(CheckboxTreeViewer checkboxTreeViewer) {
-		this.checkboxTreeViewer = checkboxTreeViewer;
+	public CheckboxTreeViewerWrapper(Composite mainComposite) {
+		Group group = new Group(mainComposite, SWT.NONE);
+		group.setText(Messages.SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText);
+		group.setLayout(new GridLayout(1, false));
+		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridData groupLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		groupLayoutData.heightHint = 400;
+
+		Composite searchComposite = new Composite(group, SWT.NONE);
+		searchComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		searchComposite.setLayout(new GridLayout(1, true));
+
+		searchField = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
+		searchField.setMessage(Messages.SimonykeesMarkersPreferencePage_searchLabelMessage);
+		GridData searchFieldGridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
+		searchFieldGridData.widthHint = 180;
+		searchField.setLayoutData(searchFieldGridData);
+		searchField.addModifyListener(this::modifyText);
+
+
+		checkboxTreeViewer = new CheckboxTreeViewer(group);
+		checkboxTreeViewer.getTree()
+			.setLayoutData(new GridData(GridData.FILL_BOTH));
+		checkboxTreeViewer.setContentProvider(new MarkerContentProvider());
+		checkboxTreeViewer.setLabelProvider(new MarkerLabelProvider());
+		checkboxTreeViewer.setInput("root"); //$NON-NLS-1$
+		checkboxTreeViewer.addCheckStateListener(this::checkStateChanged);
+		checkboxTreeViewer.setComparator(new ViewerComparator() {
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				Comparator<MarkerItemWrapper> comparator = Comparator
+					.comparing(MarkerItemWrapper::getName);
+				return comparator.compare((MarkerItemWrapper) e1, (MarkerItemWrapper) e2);
+			}
+		});
+		populateCheckBoxTreeView();
 	}
 
 	/**
@@ -253,5 +297,9 @@ public class CheckboxTreeViewerWrapper {
 				.stream())
 			.forEach(item -> this.persistMarkerItemSelection(selection, item));
 		allItems.forEach(item -> checkboxTreeViewer.setSubtreeChecked(item, selection));
+	}
+
+	public void setSearchFieldText(String string) {
+		searchField.setText(string);
 	}
 }
