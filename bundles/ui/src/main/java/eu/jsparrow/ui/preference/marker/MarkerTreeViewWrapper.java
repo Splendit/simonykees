@@ -111,7 +111,7 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 		Group group = new Group(mainComposite, SWT.NONE);
 		group.setText(getGroupTitle());
 		group.setLayout(new GridLayout(1, false));
-		
+
 		GridData groupLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, true);
 		groupLayoutData.heightHint = getTreeViewerGroupHeight();
 		group.setLayoutData(groupLayoutData);
@@ -119,8 +119,6 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 		createSearchTextField(group);
 		createCheckBoxTreeViewer(group);
 		updateCheckboxTreeViewerInput();
-		checkboxTreeViewer.expandToLevel(allMarkerItemWrappers.get(0), 1);
-		checkboxTreeViewer.expandToLevel(allMarkerItemWrappers.get(1).getChildern().get(0), 0);
 	}
 
 	/**
@@ -194,7 +192,7 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 	public void setSearchFieldText(String string) {
 		searchField.setText(string);
 	}
-	
+
 	@Override
 	protected int getTreeViewerGroupHeight() {
 		return 400;
@@ -238,7 +236,11 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 
 			@Override
 			public void treeCollapsed(TreeExpansionEvent event) {
-				Object source = event.getSource();
+				Object element = event.getElement();
+				if (element instanceof MarkerItemWrapper) {
+					MarkerItemWrapper category = (MarkerItemWrapper) element;
+					category.setExpanded(false);
+				}
 			}
 
 			@Override
@@ -246,8 +248,7 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 				Object element = event.getElement();
 				if (element instanceof MarkerItemWrapper) {
 					MarkerItemWrapper category = (MarkerItemWrapper) element;
-					String name = category.getName();
-					name.getClass();
+					category.setExpanded(true);
 				}
 			}
 		};
@@ -311,6 +312,12 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 			}
 		}
 		return searchResult.toArray(new MarkerItemWrapper[] {});
+	}
+
+	protected void expandTreeNodesSelectively() {
+		allMarkerItemWrappers.stream()
+			.filter(MarkerItemWrapper::isExpanded)
+			.forEach(markerItemWrapper -> checkboxTreeViewer.expandToLevel(markerItemWrapper, 1));
 	}
 
 	@Override

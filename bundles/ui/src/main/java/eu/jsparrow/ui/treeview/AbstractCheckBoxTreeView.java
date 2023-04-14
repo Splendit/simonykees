@@ -58,6 +58,7 @@ public abstract class AbstractCheckBoxTreeView {
 	public void updateCheckboxTreeViewerInput() {
 		final Object input = createInput();
 		checkboxTreeViewer.setInput(input);
+		expandTreeNodesSelectively();
 		updateTreeViewerSelectionState();
 	}
 
@@ -97,6 +98,7 @@ public abstract class AbstractCheckBoxTreeView {
 	 */
 	protected abstract Object createFilteredInput(String textRetrievalFilter);
 
-	protected abstract void updateTreeViewerSelectionState();
+	protected abstract void expandTreeNodesSelectively();
 
+	protected abstract void updateTreeViewerSelectionState();
 }
