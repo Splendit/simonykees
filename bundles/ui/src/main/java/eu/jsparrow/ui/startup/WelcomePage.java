@@ -27,8 +27,11 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.wizard.projects.JavaProjectsCollector;
-import eu.jsparrow.ui.wizard.projects.wrapper.JavaProjectWrapper;
-import eu.jsparrow.ui.wizard.projects.wrapper.PackageFragmentWrapper;
+import eu.jsparrow.ui.wizard.projects.javaelement.AbstractJavaElementWrapper;
+import eu.jsparrow.ui.wizard.projects.javaelement.CompilationUnitWrapper;
+import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectWrapper;
+import eu.jsparrow.ui.wizard.projects.javaelement.PackageFragmentRootWrapper;
+import eu.jsparrow.ui.wizard.projects.javaelement.PackageFragmentWrapper;
 
 /**
  * Content displayed in Eclipse editor when the jSparrow plugin is installed.
@@ -212,13 +215,60 @@ public class WelcomePage extends FormPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				List<JavaProjectWrapper> javaProjectsNodes = JavaProjectsCollector.collectJavaProjectsNodes();
-				for (JavaProjectWrapper projectNode : javaProjectsNodes) {
-					List<PackageFragmentWrapper> javaPackageNodes = projectNode.getJavaPackages();
-					int size = javaPackageNodes.size();
-				}
+				debugJavaProjects();
 
 			}
 		});
+
+	}
+
+	private void debugJavaProjects() {
+		List<JavaProjectWrapper> javaProjects = JavaProjectsCollector.collectJavaProjects();
+		for (JavaProjectWrapper javaProject : javaProjects) {
+			debugJavaProject(javaProject);
+		}
+
+	}
+
+	private void debugJavaProject(JavaProjectWrapper javaProject) {
+		javaProject.loadChildren();
+		List<AbstractJavaElementWrapper> packageFragmentRootList = javaProject.getChildren();
+		for (AbstractJavaElementWrapper child : packageFragmentRootList) {
+			if(child instanceof PackageFragmentRootWrapper) {
+				debugPackageFragmentRoot((PackageFragmentRootWrapper)child);
+			}
+		}
+	}
+
+	private void debugPackageFragmentRoot(PackageFragmentRootWrapper packageFragmentRoot) {
+		packageFragmentRoot.loadChildren();
+		List<AbstractJavaElementWrapper> packageFragments = packageFragmentRoot.getChildren();
+		for (AbstractJavaElementWrapper child : packageFragments) {
+			
+			if(child instanceof PackageFragmentWrapper) {
+				debugPackageFragment((PackageFragmentWrapper)child);
+			}
+			
+		}
+	}
+
+	private void debugPackageFragment(PackageFragmentWrapper packageFragment) {
+		packageFragment.loadChildren();
+		List<AbstractJavaElementWrapper> children = packageFragment.getChildren();
+		for (AbstractJavaElementWrapper child : children) {
+			if (child instanceof PackageFragmentWrapper) {
+				debugPackageFragment((PackageFragmentWrapper) child);
+			} else if (child instanceof CompilationUnitWrapper) {
+				debugCompilationUnit((CompilationUnitWrapper) child);
+			}
+		}
+	}
+
+	private void debugCompilationUnit(CompilationUnitWrapper child) {
+		String javaFileName = child.getElementName();
+		int i = javaFileName.indexOf('.');
+		if (i != 0) {
+
+		}
 	}
 }

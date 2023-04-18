@@ -14,14 +14,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 
-import eu.jsparrow.ui.wizard.projects.wrapper.JavaProjectWrapper;
+import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectWrapper;
 
 /**
  * @since 4.17.0
  */
 public class JavaProjectsCollector {
 
-	public static List<JavaProjectWrapper> collectJavaProjectsNodes() {
+	public static List<JavaProjectWrapper> collectJavaProjects() {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
 		IProject[] projects = root.getProjects();
