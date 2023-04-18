@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -119,6 +120,13 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 		createSearchTextField(group);
 		createCheckBoxTreeViewer(group);
 		updateCheckboxTreeViewerInput();
+
+	}
+
+	@Override
+	protected ViewerFilter createFilter(String searchText) {
+		return new MarkerItemWrapperFilter(this, searchText);
+
 	}
 
 	/**
@@ -288,33 +296,12 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 	}
 
 	@Override
-	protected MarkerItemWrapper[] createAllAvailableInput() {
+	protected MarkerItemWrapper[] createInput() {
 		return allMarkerItemWrappers.toArray(new MarkerItemWrapper[] {});
 	}
 
-	@Override
-	protected MarkerItemWrapper[] createFilteredInput(String textRetrievalFilter) {
-		Set<MarkerItemWrapper> searchResult = new HashSet<>();
-		for (MarkerItemWrapper item : allMarkerItemWrappers) {
-			boolean categoryMatch = StringUtils.contains(StringUtils.lowerCase(item.getName()),
-					StringUtils.lowerCase(textRetrievalFilter));
-			List<MarkerItemWrapper> children = item.getChildern();
-			for (MarkerItemWrapper child : children) {
-				boolean markerMatch = StringUtils.contains(
-						StringUtils.lowerCase(child.getName()),
-						StringUtils.lowerCase(textRetrievalFilter));
-				boolean alreadyInResult = searchResult.stream()
-					.map(MarkerItemWrapper::getMarkerId)
-					.anyMatch(r -> r.equals(child.getMarkerId()));
-				if ((categoryMatch || markerMatch) && !alreadyInResult) {
-					searchResult.add(child);
-				}
-			}
-		}
-		return searchResult.toArray(new MarkerItemWrapper[] {});
-	}
-
 	protected void expandTreeNodesSelectively() {
+		checkboxTreeViewer.collapseAll();
 		allMarkerItemWrappers.stream()
 			.filter(MarkerItemWrapper::isExpanded)
 			.forEach(markerItemWrapper -> checkboxTreeViewer.expandToLevel(markerItemWrapper, 1));
@@ -324,5 +311,9 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 	protected void updateTreeViewerSelectionState() {
 		updateMarkerItemSelection();
 		updateCategorySelection();
+	}
+
+	public List<MarkerItemWrapper> getAllMarkerItemWrappers() {
+		return allMarkerItemWrappers;
 	}
 }

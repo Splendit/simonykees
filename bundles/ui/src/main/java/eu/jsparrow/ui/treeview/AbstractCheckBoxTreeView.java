@@ -1,12 +1,12 @@
 package eu.jsparrow.ui.treeview;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.layout.GridData;
@@ -16,7 +16,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 
 public abstract class AbstractCheckBoxTreeView {
-	private String searchText;
 	protected Text searchField;
 	protected CheckboxTreeViewer checkboxTreeViewer;
 
@@ -51,8 +50,9 @@ public abstract class AbstractCheckBoxTreeView {
 	 */
 	protected void textRetrievalModified(ModifyEvent modifyEvent) {
 		Text source = (Text) modifyEvent.getSource();
-		searchText = source.getText();
-		updateCheckboxTreeViewerInput();
+		String searchText = source.getText();
+		checkboxTreeViewer.setFilters(createFilter(searchText));
+		updateTreeViewerSelectionState();
 	}
 
 	public void updateCheckboxTreeViewerInput() {
@@ -60,13 +60,6 @@ public abstract class AbstractCheckBoxTreeView {
 		checkboxTreeViewer.setInput(input);
 		expandTreeNodesSelectively();
 		updateTreeViewerSelectionState();
-	}
-
-	protected Object createInput() {
-		if (searchText == null || StringUtils.isEmpty(StringUtils.trim(searchText))) {
-			return createAllAvailableInput();
-		}
-		return createFilteredInput(searchText);
 	}
 
 	protected abstract int getTreeViewerGroupHeight();
@@ -89,16 +82,11 @@ public abstract class AbstractCheckBoxTreeView {
 	 */
 	public abstract void checkStateChanged(CheckStateChangedEvent event);
 
-	protected abstract Object createAllAvailableInput();
-
-	/**
-	 * 
-	 * @param textRetrievalFilter
-	 *            expected to be not null and not empty
-	 */
-	protected abstract Object createFilteredInput(String textRetrievalFilter);
+	protected abstract Object createInput();
 
 	protected abstract void expandTreeNodesSelectively();
 
 	protected abstract void updateTreeViewerSelectionState();
+
+	protected abstract ViewerFilter createFilter(String searchText);
 }

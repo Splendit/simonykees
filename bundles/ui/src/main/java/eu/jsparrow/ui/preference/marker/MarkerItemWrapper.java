@@ -59,6 +59,5 @@ public class MarkerItemWrapper {
 
 	public void setExpanded(boolean expanded) {
 		this.expanded = expanded;
-	}	
-	
+	}
 }
