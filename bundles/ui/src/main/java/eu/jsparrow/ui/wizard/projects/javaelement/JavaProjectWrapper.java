@@ -3,6 +3,7 @@ package eu.jsparrow.ui.wizard.projects.javaelement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -10,15 +11,17 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * @since 4.17.0
  */
-public class JavaProjectWrapper extends AbstractJavaElementParentWrapper {
+public class JavaProjectWrapper extends AbstractJavaElementParentWrapper<PackageFragmentRootWrapper> {
 
 	private final IJavaProject javaProject;
+	private final IPath projectPath;
+	private final String pathToDisplay;
 	private final String projectName;
 
-	protected List<AbstractJavaElementWrapper> collectChildren()
+	protected List<PackageFragmentRootWrapper> collectChildren()
 			throws JavaModelException {
 		IPackageFragmentRoot[] packageFragmentRootArray = javaProject.getPackageFragmentRoots();
-		List<AbstractJavaElementWrapper> packageFragmentRootWrapperList = new ArrayList<>();
+		List<PackageFragmentRootWrapper> packageFragmentRootWrapperList = new ArrayList<>();
 		for (IPackageFragmentRoot packageFragmentRoot : packageFragmentRootArray) {
 			if (isSourcePackageFragmentRoot(packageFragmentRoot)) {
 				packageFragmentRootWrapperList.add(new PackageFragmentRootWrapper(this, packageFragmentRoot));
@@ -36,16 +39,33 @@ public class JavaProjectWrapper extends AbstractJavaElementParentWrapper {
 	}
 
 	public JavaProjectWrapper(IJavaProject javaProject) {
-		super(null);
 		this.javaProject = javaProject;
 		this.projectName = javaProject.getElementName();
+		this.projectPath = javaProject.getResource()
+			.getFullPath();
+		this.pathToDisplay = PathToString.pathToString(projectPath);
 	}
 
-	public IJavaProject getJavaProject() {
+	@Override
+	public AbstractJavaElementWrapper getParent() {
+		return null;
+	}
+
+	@Override
+	public IJavaProject getJavaElement() {
 		return javaProject;
 	}
 
+	@Override
 	public String getElementName() {
 		return projectName;
+	}
+
+	public IPath getProjectPath() {
+		return projectPath;
+	}
+
+	public String getPathToDisplay() {
+		return pathToDisplay;
 	}
 }

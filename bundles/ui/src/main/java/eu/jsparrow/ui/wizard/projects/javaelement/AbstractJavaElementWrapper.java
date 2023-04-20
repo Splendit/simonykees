@@ -1,14 +1,12 @@
 package eu.jsparrow.ui.wizard.projects.javaelement;
 
-public class AbstractJavaElementWrapper {
-	
-	private AbstractJavaElementParentWrapper parent;
-	
-	protected AbstractJavaElementWrapper(AbstractJavaElementParentWrapper parent) {
-		this.parent = parent;
-	}
+import org.eclipse.jdt.core.IJavaElement;
 
-	public AbstractJavaElementParentWrapper getParent() {
-		return parent;
-	}
+public interface AbstractJavaElementWrapper  {
+
+	AbstractJavaElementWrapper getParent();
+
+	IJavaElement getJavaElement();
+	
+	String getElementName();
 }

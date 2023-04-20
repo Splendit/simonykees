@@ -1,10 +1,9 @@
 package eu.jsparrow.ui.wizard.projects.javaelement;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.core.runtime.IPath;
 /**
  * @since 4.17.0
  */
@@ -14,33 +13,52 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * @since 4.17.0
  */
-public class PackageFragmentRootWrapper extends AbstractJavaElementParentWrapper {
-	private final IPackageFragmentRoot packageFragmentRoot;
+public class PackageFragmentRootWrapper extends AbstractJavaElementParentWrapper<PackageFragmentWrapper> {
+	private final JavaProjectWrapper parent;
+	private final IPackageFragmentRoot javaElement;
 	private final String elementName;
+	private final IPath pathRelativeToProject;
+	private final String pathToDisplay;
 
-	PackageFragmentRootWrapper(AbstractJavaElementParentWrapper parent, IPackageFragmentRoot packageFragmentRoot) {
-		super(parent);
-		this.packageFragmentRoot = packageFragmentRoot;
+	PackageFragmentRootWrapper(JavaProjectWrapper parent, IPackageFragmentRoot packageFragmentRoot) {
+		this.parent = parent;
+		this.javaElement = packageFragmentRoot;
 		this.elementName = packageFragmentRoot.getElementName();
+		IPath projectPath = parent.getProjectPath();
+		IPath fullPath = packageFragmentRoot.getResource()
+			.getFullPath();
+		this.pathRelativeToProject = fullPath.makeRelativeTo(projectPath);
+		this.pathToDisplay = PathToString.pathToString(pathRelativeToProject);
 	}
 
-	public IPackageFragmentRoot getPackageFragmentRoot() {
-		return packageFragmentRoot;
-	}
-
-	protected List<AbstractJavaElementWrapper> collectChildren()
+	protected List<PackageFragmentWrapper> collectChildren()
 			throws JavaModelException {
-		IJavaElement[] javaElementArray = packageFragmentRoot.getChildren();
-		List<AbstractJavaElementWrapper> packageFragmentWrapperList = new ArrayList<>();
-		for (IJavaElement javaElement : javaElementArray) {
-			if (javaElement instanceof IPackageFragment) {
-				packageFragmentWrapperList.add(new PackageFragmentWrapper(this, (IPackageFragment) javaElement));
-			}
-		}
-		return packageFragmentWrapperList;
+		RecursivePackageFragmentsCollector packageFragmentCollector = new RecursivePackageFragmentsCollector();
+		return packageFragmentCollector.collectPackagesContainingSources(javaElement)
+			.stream()
+			.map(packageFragment -> new PackageFragmentWrapper(this, packageFragment)).collect(Collectors.toList());
 	}
 
+	@Override
+	public JavaProjectWrapper getParent() {
+		return parent;
+	}
+
+	@Override
+	public IPackageFragmentRoot getJavaElement() {
+		return javaElement;
+	}
+
+	@Override
 	public String getElementName() {
 		return elementName;
+	}
+
+	public IPath getPathRelativeToProject() {
+		return pathRelativeToProject;
+	}
+
+	public String getPathToDisplay() {
+		return pathToDisplay;
 	}
 }

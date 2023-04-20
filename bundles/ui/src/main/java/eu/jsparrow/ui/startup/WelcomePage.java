@@ -2,6 +2,7 @@ package eu.jsparrow.ui.startup;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.swt.SWT;
@@ -27,7 +28,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.wizard.projects.JavaProjectsCollector;
-import eu.jsparrow.ui.wizard.projects.javaelement.AbstractJavaElementWrapper;
 import eu.jsparrow.ui.wizard.projects.javaelement.CompilationUnitWrapper;
 import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectWrapper;
 import eu.jsparrow.ui.wizard.projects.javaelement.PackageFragmentRootWrapper;
@@ -227,40 +227,34 @@ public class WelcomePage extends FormPage {
 		for (JavaProjectWrapper javaProject : javaProjects) {
 			debugJavaProject(javaProject);
 		}
-
 	}
 
 	private void debugJavaProject(JavaProjectWrapper javaProject) {
+		String pathToDisplay = javaProject.getPathToDisplay();
 		javaProject.loadChildren();
-		List<AbstractJavaElementWrapper> packageFragmentRootList = javaProject.getChildren();
-		for (AbstractJavaElementWrapper child : packageFragmentRootList) {
-			if(child instanceof PackageFragmentRootWrapper) {
-				debugPackageFragmentRoot((PackageFragmentRootWrapper)child);
-			}
+		List<PackageFragmentRootWrapper> packageFragmentRootList = javaProject.getChildren();
+		for (PackageFragmentRootWrapper child : packageFragmentRootList) {
+			debugPackageFragmentRoot(child);
 		}
 	}
 
 	private void debugPackageFragmentRoot(PackageFragmentRootWrapper packageFragmentRoot) {
+		String pathToDisplay = packageFragmentRoot.getPathToDisplay();
 		packageFragmentRoot.loadChildren();
-		List<AbstractJavaElementWrapper> packageFragments = packageFragmentRoot.getChildren();
-		for (AbstractJavaElementWrapper child : packageFragments) {
-			
-			if(child instanceof PackageFragmentWrapper) {
-				debugPackageFragment((PackageFragmentWrapper)child);
-			}
-			
+		List<PackageFragmentWrapper> packageFragments = packageFragmentRoot.getChildren();
+		for (PackageFragmentWrapper child : packageFragments) {
+			debugPackageFragment(child);
+
 		}
 	}
 
 	private void debugPackageFragment(PackageFragmentWrapper packageFragment) {
+		IPackageFragment javaElement = packageFragment.getJavaElement();
+		String elementName = javaElement.getElementName();
 		packageFragment.loadChildren();
-		List<AbstractJavaElementWrapper> children = packageFragment.getChildren();
-		for (AbstractJavaElementWrapper child : children) {
-			if (child instanceof PackageFragmentWrapper) {
-				debugPackageFragment((PackageFragmentWrapper) child);
-			} else if (child instanceof CompilationUnitWrapper) {
-				debugCompilationUnit((CompilationUnitWrapper) child);
-			}
+		List<CompilationUnitWrapper> children = packageFragment.getChildren();
+		for (CompilationUnitWrapper child : children) {
+			debugCompilationUnit(child);
 		}
 	}
 

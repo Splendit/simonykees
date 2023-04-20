@@ -5,13 +5,9 @@ import java.util.List;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-public abstract class AbstractJavaElementParentWrapper extends AbstractJavaElementWrapper {
+public abstract class AbstractJavaElementParentWrapper<C extends AbstractJavaElementWrapper> implements AbstractJavaElementWrapper {
 
-	protected AbstractJavaElementParentWrapper(AbstractJavaElementParentWrapper parent) {
-		super(parent);
-	}
-
-	protected List<AbstractJavaElementWrapper> children;
+	protected List<C> children;
 
 	public void loadChildren() {
 		if (children == null) {
@@ -26,7 +22,7 @@ public abstract class AbstractJavaElementParentWrapper extends AbstractJavaEleme
 		}
 	}
 
-	public List<AbstractJavaElementWrapper> getChildren() {
+	public List<C> getChildren() {
 		if (children == null) {
 			return Collections.emptyList();
 		}
@@ -37,6 +33,5 @@ public abstract class AbstractJavaElementParentWrapper extends AbstractJavaEleme
 		return children == null;
 	}
 
-	protected abstract List<AbstractJavaElementWrapper> collectChildren() throws JavaModelException;
-
+	protected abstract List<C> collectChildren() throws JavaModelException;
 }
