@@ -3,7 +3,6 @@ package eu.jsparrow.ui.preference.marker;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,8 +15,6 @@ import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -32,6 +29,7 @@ import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.preference.SimonykeesMarkersPreferencePage;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.treeview.AbstractCheckBoxTreeView;
+import eu.jsparrow.ui.treeviewer.generic.IContentProviderAdapter;
 
 /**
  * Wraps a {@link CheckboxTreeViewer} that is used for de/activating markers in
@@ -217,25 +215,8 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 	}
 
 	@Override
-	protected MarkerContentProvider createTreeViewerContentProvider() {
-		return new MarkerContentProvider();
-	}
-
-	@Override
 	protected MarkerLabelProvider createTreeViewerLabelProvider() {
 		return new MarkerLabelProvider();
-	}
-
-	@Override
-	protected ViewerComparator createTreeViewerComparator() {
-		return new ViewerComparator() {
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				Comparator<MarkerItemWrapper> comparator = Comparator
-					.comparing(MarkerItemWrapper::getName);
-				return comparator.compare((MarkerItemWrapper) e1, (MarkerItemWrapper) e2);
-			}
-		};
 	}
 
 	@Override
@@ -296,8 +277,8 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 	}
 
 	@Override
-	protected MarkerItemWrapper[] createInput() {
-		return allMarkerItemWrappers.toArray(new MarkerItemWrapper[] {});
+	protected IContentProviderAdapter[] createInput() {
+		return allMarkerItemWrappers.toArray(new IContentProviderAdapter[] {});
 	}
 
 	protected void expandTreeNodesSelectively() {

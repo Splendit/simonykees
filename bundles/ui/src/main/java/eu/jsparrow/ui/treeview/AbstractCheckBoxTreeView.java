@@ -2,8 +2,7 @@ package eu.jsparrow.ui.treeview;
 
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
-import org.eclipse.jface.viewers.IBaseLabelProvider;
-import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -14,6 +13,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
+
+import eu.jsparrow.ui.treeviewer.generic.GenericTreeContentProvider;
+import eu.jsparrow.ui.treeviewer.generic.IContentProviderAdapter;
 
 public abstract class AbstractCheckBoxTreeView {
 	protected Text searchField;
@@ -36,11 +38,11 @@ public abstract class AbstractCheckBoxTreeView {
 		checkboxTreeViewer = new CheckboxTreeViewer(group);
 		checkboxTreeViewer.getTree()
 			.setLayoutData(new GridData(GridData.FILL_BOTH));
-		checkboxTreeViewer.setContentProvider(createTreeViewerContentProvider());
+		checkboxTreeViewer.setContentProvider(new GenericTreeContentProvider());
 		checkboxTreeViewer.setLabelProvider(createTreeViewerLabelProvider());
 		checkboxTreeViewer.setInput("root"); //$NON-NLS-1$
 		checkboxTreeViewer.addCheckStateListener(this::checkStateChanged);
-		checkboxTreeViewer.setComparator(createTreeViewerComparator());
+		checkboxTreeViewer.setComparator(new ViewerComparator());
 		checkboxTreeViewer.addTreeListener(createTreeViewerListener());
 	}
 
@@ -56,7 +58,7 @@ public abstract class AbstractCheckBoxTreeView {
 	}
 
 	public void updateCheckboxTreeViewerInput() {
-		final Object input = createInput();
+		final IContentProviderAdapter[] input = createInput();
 		checkboxTreeViewer.setInput(input);
 		expandTreeNodesSelectively();
 		updateTreeViewerSelectionState();
@@ -68,11 +70,7 @@ public abstract class AbstractCheckBoxTreeView {
 
 	protected abstract String getSearchFieldMessage();
 
-	protected abstract IContentProvider createTreeViewerContentProvider();
-
-	protected abstract IBaseLabelProvider createTreeViewerLabelProvider();
-
-	protected abstract ViewerComparator createTreeViewerComparator();
+	protected abstract ILabelProvider createTreeViewerLabelProvider();
 
 	protected abstract ITreeViewerListener createTreeViewerListener();
 
@@ -82,7 +80,7 @@ public abstract class AbstractCheckBoxTreeView {
 	 */
 	public abstract void checkStateChanged(CheckStateChangedEvent event);
 
-	protected abstract Object createInput();
+	protected abstract IContentProviderAdapter[] createInput();
 
 	protected abstract void expandTreeNodesSelectively();
 
