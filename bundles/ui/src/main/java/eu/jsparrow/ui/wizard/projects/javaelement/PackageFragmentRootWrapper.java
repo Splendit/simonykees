@@ -19,10 +19,11 @@ public class PackageFragmentRootWrapper extends AbstractJavaElementParentWrapper
 	private final String elementName;
 	private final IPath pathRelativeToProject;
 	private final String pathToDisplay;
-	
-	PackageFragmentRootWrapper(JavaProjectWrapper parent, IPackageFragmentRoot packageFragmentRoot, IPackageFragment firstPackageFragment) {
+
+	PackageFragmentRootWrapper(JavaProjectWrapper parent, IPackageFragmentRoot packageFragmentRoot,
+			IPackageFragment firstPackageFragment) {
 		this(parent, packageFragmentRoot);
-		this.firstChild = new PackageFragmentWrapper(this, firstPackageFragment);
+		this.setFirstChild(new PackageFragmentWrapper(this, firstPackageFragment));
 	}
 
 	PackageFragmentRootWrapper(JavaProjectWrapper parent, IPackageFragmentRoot packageFragmentRoot) {

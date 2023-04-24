@@ -19,7 +19,7 @@ public class PackageFragmentWrapper extends AbstractJavaElementParentWrapper<Com
 	public PackageFragmentWrapper(PackageFragmentRootWrapper parent, IPackageFragment packageFragment,
 			ICompilationUnit firstCompilationUnit) {
 		this(parent, packageFragment);
-		this.firstChild = new CompilationUnitWrapper(this, firstCompilationUnit);
+		this.setFirstChild(new CompilationUnitWrapper(this, firstCompilationUnit));
 	}
 
 	public PackageFragmentWrapper(PackageFragmentRootWrapper parent, IPackageFragment packageFragment) {

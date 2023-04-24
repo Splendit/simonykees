@@ -5,10 +5,11 @@ import java.util.List;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-public abstract class AbstractJavaElementParentWrapper<C extends AbstractJavaElementWrapper> implements AbstractJavaElementWrapper {
+public abstract class AbstractJavaElementParentWrapper<C extends AbstractJavaElementWrapper>
+		implements AbstractJavaElementWrapper {
 
-	protected List<C> children;
-	protected C firstChild;
+	private List<C> children;
+	private C firstChild;
 
 	public void loadChildren() {
 		if (children == null) {
@@ -25,6 +26,9 @@ public abstract class AbstractJavaElementParentWrapper<C extends AbstractJavaEle
 
 	public List<C> getChildren() {
 		if (children == null) {
+			if (firstChild != null) {
+				return Collections.singletonList(firstChild);
+			}
 			return Collections.emptyList();
 		}
 		return children;
@@ -32,6 +36,10 @@ public abstract class AbstractJavaElementParentWrapper<C extends AbstractJavaEle
 
 	public boolean isChildListUnassigned() {
 		return children == null;
+	}
+
+	void setFirstChild(C firstChild) {
+		this.firstChild = firstChild;
 	}
 
 	protected abstract List<C> collectChildren() throws JavaModelException;
