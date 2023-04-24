@@ -15,12 +15,13 @@ import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Text;
 
 import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.i18n.Messages;
@@ -29,7 +30,6 @@ import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.preference.SimonykeesMarkersPreferencePage;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.treeview.AbstractCheckBoxTreeView;
-import eu.jsparrow.ui.treeviewer.generic.IContentProviderAdapter;
 
 /**
  * Wraps a {@link CheckboxTreeViewer} that is used for de/activating markers in
@@ -108,7 +108,7 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 
 	public MarkerTreeViewWrapper(Composite mainComposite) {
 		Group group = new Group(mainComposite, SWT.NONE);
-		group.setText(getGroupTitle());
+		group.setText(Messages.SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText);
 		group.setLayout(new GridLayout(1, false));
 
 		GridData groupLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, true);
@@ -117,14 +117,35 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 
 		createSearchTextField(group);
 		createCheckBoxTreeViewer(group);
-		updateCheckboxTreeViewerInput();
+		populateCheckboxTreeViewer();
 
 	}
 
-	@Override
-	protected ViewerFilter createFilter(String searchText) {
-		return new MarkerItemWrapperFilter(this, searchText);
+	protected void createSearchTextField(Group group) {
+		Composite searchComposite = new Composite(group, SWT.NONE);
+		searchComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		searchComposite.setLayout(new GridLayout(1, true));
 
+		searchField = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
+		searchField.setMessage(Messages.SimonykeesMarkersPreferencePage_searchLabelMessage);
+		GridData searchFieldGridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
+		searchFieldGridData.widthHint = 180;
+		searchField.setLayoutData(searchFieldGridData);
+		searchField.addModifyListener(this::textRetrievalModified);
+	}
+
+	/**
+	 * Method for the listener functionality for modifying text in
+	 * {@link #searchField}
+	 */
+	protected void textRetrievalModified(ModifyEvent modifyEvent) {
+		Text source = (Text) modifyEvent.getSource();
+		String searchText = source.getText();
+		setTreeViewerFilter(new MarkerItemWrapperFilter(this, searchText));
+	}
+
+	public List<MarkerItemWrapper> getAllMarkerItemWrappers() {
+		return allMarkerItemWrappers;
 	}
 
 	/**
@@ -205,16 +226,6 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 	}
 
 	@Override
-	protected String getGroupTitle() {
-		return Messages.SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText;
-	}
-
-	@Override
-	protected String getSearchFieldMessage() {
-		return Messages.SimonykeesMarkersPreferencePage_searchLabelMessage;
-	}
-
-	@Override
 	protected MarkerLabelProvider createTreeViewerLabelProvider() {
 		return new MarkerLabelProvider();
 	}
@@ -243,7 +254,79 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 		};
 	}
 
+	@Override
+	protected List<MarkerItemWrapper> createInput() {
+		return getAllMarkerItemWrappers();
+	}
+
+	protected void expandTreeNodesSelectively() {
+		checkboxTreeViewer.collapseAll();
+		allMarkerItemWrappers.stream()
+			.filter(MarkerItemWrapper::isExpanded)
+			.forEach(markerItemWrapper -> checkboxTreeViewer.expandToLevel(markerItemWrapper, 1));
+	}
+
+	@Override
+	protected void updateTreeViewerSelectionState() {
+		updateMarkerItemSelection();
+		updateCategorySelection();
+	}
+
 	/**
+	 * {@inheritDoc}
+	 * 
+	 */
+	@Override
+	public Object[] getElements(Object inputElement) {
+		if (inputElement == allMarkerItemWrappers) {
+			return allMarkerItemWrappers.toArray();
+		}
+		return new Object[] {};
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
+	@Override
+	public Object[] getChildren(Object parentElement) {
+		if (parentElement instanceof MarkerItemWrapper) {
+			MarkerItemWrapper markerItemWrapper = (MarkerItemWrapper) parentElement;
+			return markerItemWrapper.getChildern()
+				.toArray();
+		}
+		return new Object[] {};
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
+	@Override
+	public Object getParent(Object element) {
+		if (element instanceof MarkerItemWrapper) {
+			return ((MarkerItemWrapper) element).getParent();
+		}
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
+	@Override
+	public boolean hasChildren(Object element) {
+		if (element instanceof MarkerItemWrapper) {
+			return ((MarkerItemWrapper) element).hasChildren();
+		}
+		return false;
+	}
+
+	/**
+	 * 
+	 * {@inheritDoc}
+	 * 
+	 * 
 	 * Method for the listener functionality to check or uncheck markers in the
 	 * {@link CheckboxTreeViewer}. Markers with the same ID occurring in
 	 * multiple subtrees are simultaneously checked/unchecked.
@@ -274,27 +357,5 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
 			.forEach(item -> checkboxTreeViewer.setChecked(item, checked));
 
 		updateCategorySelection();
-	}
-
-	@Override
-	protected IContentProviderAdapter[] createInput() {
-		return allMarkerItemWrappers.toArray(new IContentProviderAdapter[] {});
-	}
-
-	protected void expandTreeNodesSelectively() {
-		checkboxTreeViewer.collapseAll();
-		allMarkerItemWrappers.stream()
-			.filter(MarkerItemWrapper::isExpanded)
-			.forEach(markerItemWrapper -> checkboxTreeViewer.expandToLevel(markerItemWrapper, 1));
-	}
-
-	@Override
-	protected void updateTreeViewerSelectionState() {
-		updateMarkerItemSelection();
-		updateCategorySelection();
-	}
-
-	public List<MarkerItemWrapper> getAllMarkerItemWrappers() {
-		return allMarkerItemWrappers;
 	}
 }

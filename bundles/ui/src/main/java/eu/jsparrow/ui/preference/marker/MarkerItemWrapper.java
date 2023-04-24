@@ -3,16 +3,14 @@ package eu.jsparrow.ui.preference.marker;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.jsparrow.ui.treeviewer.generic.IContentProviderAdapter;
-
 /**
- * A recursive data structure for the nodes of the {@link CheckboxTreeViewer} of
+ * A recursive data structure for the nodes of the {@code CheckboxTreeViewer} of
  * the markers preference page.
  * 
  * @since 4.10.0
  *
  */
-public class MarkerItemWrapper implements IContentProviderAdapter{
+public class MarkerItemWrapper {
 	private MarkerItemWrapper parent;
 	private boolean isParent;
 	private String markerId;
@@ -29,8 +27,6 @@ public class MarkerItemWrapper implements IContentProviderAdapter{
 		this.name = name;
 		this.childern = childern;
 	}
-
-
 
 	public String getMarkerId() {
 		return markerId;
@@ -56,28 +52,16 @@ public class MarkerItemWrapper implements IContentProviderAdapter{
 	public void setExpanded(boolean expanded) {
 		this.expanded = expanded;
 	}
-	
-	@Override
+
+
 	public MarkerItemWrapper getParent() {
 		return parent;
 	}
 
-	@Override
 	public boolean isParent() {
 		return isParent;
 	}
 
-	@Override
-	public String getComparisonKey() {
-		return getName();
-	}
-	
-	@Override
-	public Object[] getChildrenAsObjectArray() {
-		return getChildern().toArray();
-	}
-	
-	@Override
 	public boolean hasChildren() {
 		return isParent && !childern.isEmpty();
 	}
