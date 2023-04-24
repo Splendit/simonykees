@@ -2,9 +2,12 @@ package eu.jsparrow.ui.wizard.projects.javaelement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -24,13 +27,41 @@ public class JavaProjectWrapper extends AbstractJavaElementParentWrapper<Package
 		List<PackageFragmentRootWrapper> packageFragmentRootWrapperList = new ArrayList<>();
 		for (IPackageFragmentRoot packageFragmentRoot : packageFragmentRootArray) {
 			if (isSourcePackageFragmentRoot(packageFragmentRoot)) {
-				packageFragmentRootWrapperList.add(new PackageFragmentRootWrapper(this, packageFragmentRoot));
+				IPackageFragment firstPackageFragment = findFirstPackageFragment(packageFragmentRoot).orElse(null);
+				if (firstPackageFragment != null) {
+					packageFragmentRootWrapperList
+						.add(new PackageFragmentRootWrapper(this, packageFragmentRoot, firstPackageFragment));
+				}
 			}
 		}
 		return packageFragmentRootWrapperList;
 	}
+	
+	
 
-	private static boolean isSourcePackageFragmentRoot(IPackageFragmentRoot packageFragmentRoot)
+	public static boolean isPackageFragmentRootWithPackage (
+			IPackageFragmentRoot packageFragmentRoot) throws JavaModelException {
+		
+		if (isSourcePackageFragmentRoot(packageFragmentRoot)) {
+			IPackageFragment firstPackageFragment = findFirstPackageFragment(packageFragmentRoot).orElse(null);
+			return firstPackageFragment != null;
+		}
+
+		return false;
+	}
+
+	private static Optional<IPackageFragment> findFirstPackageFragment(IPackageFragmentRoot packageFragmentRoot)
+			throws JavaModelException {
+		IJavaElement[] javaElementChildArray = packageFragmentRoot.getChildren();
+		for (IJavaElement javaElement : javaElementChildArray) {
+			if (javaElement instanceof IPackageFragment) {
+				return Optional.of((IPackageFragment) javaElement);
+			}
+		}
+		return Optional.empty();
+	}
+
+	public static boolean isSourcePackageFragmentRoot(IPackageFragmentRoot packageFragmentRoot)
 			throws JavaModelException {
 
 		return packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE &&
@@ -38,12 +69,13 @@ public class JavaProjectWrapper extends AbstractJavaElementParentWrapper<Package
 				!packageFragmentRoot.isArchive();
 	}
 
-	public JavaProjectWrapper(IJavaProject javaProject) {
+	public JavaProjectWrapper(IJavaProject javaProject, IPackageFragmentRoot firstPackageFragmentRoot) {
 		this.javaProject = javaProject;
 		this.projectName = javaProject.getElementName();
 		this.projectPath = javaProject.getResource()
 			.getFullPath();
 		this.pathToDisplay = PathToString.pathToString(projectPath);
+		this.firstChild = new PackageFragmentRootWrapper(this, firstPackageFragmentRoot);
 	}
 
 	@Override

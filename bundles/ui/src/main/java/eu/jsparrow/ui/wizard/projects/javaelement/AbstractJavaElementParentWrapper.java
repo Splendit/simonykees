@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.JavaModelException;
 public abstract class AbstractJavaElementParentWrapper<C extends AbstractJavaElementWrapper> implements AbstractJavaElementWrapper {
 
 	protected List<C> children;
+	protected C firstChild;
 
 	public void loadChildren() {
 		if (children == null) {

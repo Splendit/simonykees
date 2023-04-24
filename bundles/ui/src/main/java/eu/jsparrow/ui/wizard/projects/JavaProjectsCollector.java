@@ -1,5 +1,6 @@
 package eu.jsparrow.ui.wizard.projects;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,8 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 
 import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectWrapper;
 
@@ -26,15 +29,37 @@ public class JavaProjectsCollector {
 		IWorkspaceRoot root = workspace.getRoot();
 		IProject[] projects = root.getProjects();
 
-		return Arrays.stream(projects)
-			.map(JavaProjectsCollector::findJavaProjectNode)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.collect(Collectors.toList());
+		List<JavaProjectWrapper> javaProjectWrapperList = new ArrayList<>();
+
+		for (IProject project : projects) {
+			try {
+				findJavaProjectWithPackage(project).ifPresent(javaProjectWrapperList::add);
+			} catch (JavaModelException e) {
+				e.printStackTrace();
+			}
+		}
+		return javaProjectWrapperList;
+
 	}
 
-	private static Optional<JavaProjectWrapper> findJavaProjectNode(IProject project) {
-		return findJavaProjectNature(project).map(JavaProjectWrapper::new);
+	private static Optional<JavaProjectWrapper> findJavaProjectWithPackage(IProject project) throws JavaModelException {
+		IJavaProject javaProject = findJavaProjectNature(project).orElse(null);
+		if(javaProject == null) {
+			return Optional.empty();
+		}
+
+		IPackageFragmentRoot[] packageFragmentRootArray = javaProject.getPackageFragmentRoots();
+		for(IPackageFragmentRoot packageFragmentRoot : packageFragmentRootArray) {
+			if(JavaProjectWrapper.isPackageFragmentRootWithPackage(packageFragmentRoot)) {
+				return Optional.of(new JavaProjectWrapper(javaProject, packageFragmentRoot));
+			}
+		}
+		
+
+		// isPackageFragmentRootWithPackage
+		// return javaProject.map(JavaProjectWrapper::new);
+
+		return Optional.empty();
 	}
 
 	private static Optional<IJavaProject> findJavaProjectNature(IProject project) {

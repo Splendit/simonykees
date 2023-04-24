@@ -11,12 +11,12 @@ import org.eclipse.jdt.core.JavaModelException;
 
 public class RecursivePackageFragmentsCollector {
 
-	private List<IPackageFragment> packageFragmentList;
+	private List<PackageFragmentWrapper> packageFragmentWrapperList;
 
-	public List<IPackageFragment> collectPackagesContainingSources(IPackageFragmentRoot sourcePackageFragmentRoot)
+	public List<PackageFragmentWrapper> collectPackagesContainingSources(IPackageFragmentRoot sourcePackageFragmentRoot)
 			throws JavaModelException {
 
-		packageFragmentList = new ArrayList<>();
+		packageFragmentWrapperList = new ArrayList<>();
 
 		IJavaElement[] childArray = sourcePackageFragmentRoot.getChildren();
 		for (IJavaElement child : childArray) {
@@ -24,14 +24,16 @@ public class RecursivePackageFragmentsCollector {
 				analyzePackageFragment((IPackageFragment) child);
 			}
 		}
-		return packageFragmentList;
+		return packageFragmentWrapperList;
 	}
 
 	private void analyzePackageFragment(IPackageFragment packageFragment) throws JavaModelException {
 		IJavaElement[] childArray = packageFragment.getChildren();
 		for (IJavaElement child : childArray) {
 			if (child instanceof ICompilationUnit) {
-				packageFragmentList.add(packageFragment);
+				ICompilationUnit firstCompilationUnit = (ICompilationUnit) child;
+				packageFragmentWrapperList
+					.add(new PackageFragmentWrapper(null, packageFragment, firstCompilationUnit));
 				break;
 			}
 		}

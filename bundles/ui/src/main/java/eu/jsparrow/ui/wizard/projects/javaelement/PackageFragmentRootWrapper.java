@@ -1,9 +1,9 @@
 package eu.jsparrow.ui.wizard.projects.javaelement;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IPackageFragment;
 /**
  * @since 4.17.0
  */
@@ -19,6 +19,11 @@ public class PackageFragmentRootWrapper extends AbstractJavaElementParentWrapper
 	private final String elementName;
 	private final IPath pathRelativeToProject;
 	private final String pathToDisplay;
+	
+	PackageFragmentRootWrapper(JavaProjectWrapper parent, IPackageFragmentRoot packageFragmentRoot, IPackageFragment firstPackageFragment) {
+		this(parent, packageFragmentRoot);
+		this.firstChild = new PackageFragmentWrapper(this, firstPackageFragment);
+	}
 
 	PackageFragmentRootWrapper(JavaProjectWrapper parent, IPackageFragmentRoot packageFragmentRoot) {
 		this.parent = parent;
@@ -34,9 +39,7 @@ public class PackageFragmentRootWrapper extends AbstractJavaElementParentWrapper
 	protected List<PackageFragmentWrapper> collectChildren()
 			throws JavaModelException {
 		RecursivePackageFragmentsCollector packageFragmentCollector = new RecursivePackageFragmentsCollector();
-		return packageFragmentCollector.collectPackagesContainingSources(javaElement)
-			.stream()
-			.map(packageFragment -> new PackageFragmentWrapper(this, packageFragment)).collect(Collectors.toList());
+		return packageFragmentCollector.collectPackagesContainingSources(javaElement);
 	}
 
 	@Override
