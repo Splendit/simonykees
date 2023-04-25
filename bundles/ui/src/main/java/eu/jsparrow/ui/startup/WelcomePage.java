@@ -28,6 +28,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.wizard.projects.JavaProjectsCollector;
+import eu.jsparrow.ui.wizard.projects.SelectSourcesToRefactorDialog;
 import eu.jsparrow.ui.wizard.projects.javaelement.CompilationUnitWrapper;
 import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectWrapper;
 import eu.jsparrow.ui.wizard.projects.javaelement.PackageFragmentRootWrapper;
@@ -211,10 +212,15 @@ public class WelcomePage extends FormPage {
 	}
 
 	private void createButtonListenerToOpenSelectProject(Button selectProjectButton) {
+
 		selectProjectButton.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
+				SelectSourcesToRefactorDialog selectSourcesDialog = new SelectSourcesToRefactorDialog(
+						Display.getDefault()
+							.getActiveShell());
+				selectSourcesDialog.open();
 				debugJavaProjects();
 
 			}
