@@ -9,12 +9,14 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Text;
 
 public abstract class AbstractCheckBoxTreeView implements ITreeContentProvider, ICheckStateListener {
-	protected Text searchField;
+
 	protected CheckboxTreeViewer checkboxTreeViewer;
 
+	protected AbstractCheckBoxTreeView(Group group) {
+		createCheckBoxTreeViewer(group);
+	}
 
 	protected void createCheckBoxTreeViewer(Group group) {
 		checkboxTreeViewer = new CheckboxTreeViewer(group);
@@ -22,14 +24,13 @@ public abstract class AbstractCheckBoxTreeView implements ITreeContentProvider, 
 			.setLayoutData(new GridData(GridData.FILL_BOTH));
 		checkboxTreeViewer.setContentProvider(this);
 		checkboxTreeViewer.setLabelProvider(createTreeViewerLabelProvider());
-		checkboxTreeViewer.setInput("root"); //$NON-NLS-1$
 		checkboxTreeViewer.addCheckStateListener(this);
 		checkboxTreeViewer.setComparator(new ViewerComparator());
 		checkboxTreeViewer.addTreeListener(createTreeViewerListener());
+		populateCheckboxTreeViewer();
 	}
 
-
-	protected void setTreeViewerFilter(ViewerFilter treeviewerFilter) {
+	public void setTreeViewerFilter(ViewerFilter treeviewerFilter) {
 		checkboxTreeViewer.setFilters(treeviewerFilter);
 		updateTreeViewerSelectionState();
 	}
@@ -39,8 +40,6 @@ public abstract class AbstractCheckBoxTreeView implements ITreeContentProvider, 
 		expandTreeNodesSelectively();
 		updateTreeViewerSelectionState();
 	}
-
-	protected abstract int getTreeViewerGroupHeight();
 
 	protected abstract ILabelProvider createTreeViewerLabelProvider();
 
