@@ -27,10 +27,10 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
-import eu.jsparrow.ui.wizard.projects.JavaProjectsCollector;
 import eu.jsparrow.ui.wizard.projects.SelectSourcesToRefactorDialog;
 import eu.jsparrow.ui.wizard.projects.javaelement.CompilationUnitWrapper;
 import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectWrapper;
+import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectsCollector;
 import eu.jsparrow.ui.wizard.projects.javaelement.PackageFragmentRootWrapper;
 import eu.jsparrow.ui.wizard.projects.javaelement.PackageFragmentWrapper;
 
