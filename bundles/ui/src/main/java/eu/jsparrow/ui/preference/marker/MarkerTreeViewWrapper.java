@@ -22,7 +22,7 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.preference.SimonykeesMarkersPreferencePage;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
-import eu.jsparrow.ui.treeview.AbstractCheckBoxTreeView;
+import eu.jsparrow.ui.treeview.AbstractCheckBoxTreeViewWrapper;
 
 /**
  * Wraps a {@link CheckboxTreeViewer} that is used for de/activating markers in
@@ -33,7 +33,7 @@ import eu.jsparrow.ui.treeview.AbstractCheckBoxTreeView;
  * @since 4.10.0
  *
  */
-public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeView {
+public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper {
 
 	private List<MarkerItemWrapper> allMarkerItemWrappers;
 

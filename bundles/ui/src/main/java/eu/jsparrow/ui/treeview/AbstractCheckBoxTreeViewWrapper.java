@@ -10,11 +10,11 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Group;
 
-public abstract class AbstractCheckBoxTreeView implements ITreeContentProvider, ICheckStateListener {
+public abstract class AbstractCheckBoxTreeViewWrapper implements ITreeContentProvider, ICheckStateListener {
 
 	protected CheckboxTreeViewer checkboxTreeViewer;
 
-	protected AbstractCheckBoxTreeView(Group group) {
+	protected AbstractCheckBoxTreeViewWrapper(Group group) {
 		createCheckBoxTreeViewer(group);
 	}
 
