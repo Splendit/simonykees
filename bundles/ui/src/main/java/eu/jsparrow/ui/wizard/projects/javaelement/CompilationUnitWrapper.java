@@ -5,7 +5,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 /**
  * @since 4.17.0
  */
-public class CompilationUnitWrapper implements AbstractJavaElementWrapper {
+public class CompilationUnitWrapper extends AbstractJavaElementWrapper {
 	private final PackageFragmentWrapper parent;
 	private final ICompilationUnit compilationUnit;
 	private final String javaFileName;

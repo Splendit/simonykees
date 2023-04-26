@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-public abstract class AbstractJavaElementParentWrapper<C extends AbstractJavaElementWrapper>
-		implements AbstractJavaElementWrapper {
+public abstract class AbstractJavaElementWrapperWithChildList<C extends AbstractJavaElementWrapper>
+		extends AbstractJavaElementWrapper {
 
 	private List<C> children;
 
@@ -24,21 +24,15 @@ public abstract class AbstractJavaElementParentWrapper<C extends AbstractJavaEle
 		return children;
 	}
 
-	public boolean isChildListUnassigned() {
-		return children == null;
+	public boolean isChildListAssigned() {
+		return children != null;
 	}
 
-	void setFirstChild(C firstChild) {
-		// this.firstChild = firstChild;
-	}
-
-	
-	
 	@Override
 	public boolean hasChildren() {
 		return true;
 	}
 
-	protected abstract List<C> collectChildren() throws JavaModelException;	
-	
+	protected abstract List<C> collectChildren() throws JavaModelException;
+
 }

@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * @since 4.17.0
  */
-public class PackageFragmentRootWrapper extends AbstractJavaElementParentWrapper<PackageFragmentWrapper> {
+public class PackageFragmentRootWrapper extends AbstractJavaElementWrapperWithChildList<PackageFragmentWrapper> {
 	private final JavaProjectWrapper parent;
 	private final IPackageFragmentRoot javaElement;
 	private final String elementName;
@@ -32,7 +32,7 @@ public class PackageFragmentRootWrapper extends AbstractJavaElementParentWrapper
 
 	protected List<PackageFragmentWrapper> collectChildren()
 			throws JavaModelException {
-		RecursivePackageFragmentsCollector packageFragmentCollector = new RecursivePackageFragmentsCollector();
+		RecursivePackageFragmentsCollector packageFragmentCollector = new RecursivePackageFragmentsCollector(this);
 		return packageFragmentCollector.collectPackagesContainingSources(javaElement);
 	}
 

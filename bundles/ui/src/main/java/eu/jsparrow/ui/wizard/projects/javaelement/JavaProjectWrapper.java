@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * @since 4.17.0
  */
-public class JavaProjectWrapper extends AbstractJavaElementParentWrapper<PackageFragmentRootWrapper> {
+public class JavaProjectWrapper extends AbstractJavaElementWrapperWithChildList<PackageFragmentRootWrapper> {
 
 	private final IJavaProject javaProject;
 	private final IPath projectPath;
