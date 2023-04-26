@@ -9,9 +9,8 @@ public abstract class AbstractJavaElementParentWrapper<C extends AbstractJavaEle
 		implements AbstractJavaElementWrapper {
 
 	private List<C> children;
-	private C firstChild;
 
-	public void loadChildren() {
+	public List<C> getChildren() {
 		if (children == null) {
 			try {
 				children = collectChildren();
@@ -22,15 +21,6 @@ public abstract class AbstractJavaElementParentWrapper<C extends AbstractJavaEle
 				children = Collections.emptyList();
 			}
 		}
-	}
-
-	public List<C> getChildren() {
-		if (children == null) {
-			if (firstChild != null) {
-				return Collections.singletonList(firstChild);
-			}
-			return Collections.emptyList();
-		}
 		return children;
 	}
 
@@ -39,8 +29,16 @@ public abstract class AbstractJavaElementParentWrapper<C extends AbstractJavaEle
 	}
 
 	void setFirstChild(C firstChild) {
-		this.firstChild = firstChild;
+		// this.firstChild = firstChild;
 	}
 
-	protected abstract List<C> collectChildren() throws JavaModelException;
+	
+	
+	@Override
+	public boolean hasChildren() {
+		return true;
+	}
+
+	protected abstract List<C> collectChildren() throws JavaModelException;	
+	
 }

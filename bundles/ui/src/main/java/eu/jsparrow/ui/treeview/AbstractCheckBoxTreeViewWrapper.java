@@ -10,7 +10,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Group;
 
-public abstract class AbstractCheckBoxTreeViewWrapper implements ITreeContentProvider, ICheckStateListener {
+public abstract class AbstractCheckBoxTreeViewWrapper implements ITreeContentProvider, ICheckStateListener, ITreeViewerListener {
 
 	protected CheckboxTreeViewer checkboxTreeViewer;
 
@@ -26,7 +26,7 @@ public abstract class AbstractCheckBoxTreeViewWrapper implements ITreeContentPro
 		checkboxTreeViewer.setLabelProvider(createTreeViewerLabelProvider());
 		checkboxTreeViewer.addCheckStateListener(this);
 		checkboxTreeViewer.setComparator(new ViewerComparator());
-		checkboxTreeViewer.addTreeListener(createTreeViewerListener());
+		checkboxTreeViewer.addTreeListener(this);
 		populateCheckboxTreeViewer();
 	}
 
@@ -42,8 +42,6 @@ public abstract class AbstractCheckBoxTreeViewWrapper implements ITreeContentPro
 	}
 
 	protected abstract ILabelProvider createTreeViewerLabelProvider();
-
-	protected abstract ITreeViewerListener createTreeViewerListener();
 
 	protected abstract Object createInput();
 

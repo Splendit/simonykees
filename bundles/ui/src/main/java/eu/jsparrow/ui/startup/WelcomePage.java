@@ -221,54 +221,57 @@ public class WelcomePage extends FormPage {
 						Display.getDefault()
 							.getActiveShell());
 				selectSourcesDialog.open();
-				debugJavaProjects();
-
 			}
 		});
 
 	}
 
-	private void debugJavaProjects() {
-		List<JavaProjectWrapper> javaProjects = JavaProjectsCollector.collectJavaProjects();
-		for (JavaProjectWrapper javaProject : javaProjects) {
-			debugJavaProject(javaProject);
-		}
-	}
-
-	private void debugJavaProject(JavaProjectWrapper javaProject) {
-		String pathToDisplay = javaProject.getPathToDisplay();
-		javaProject.loadChildren();
-		List<PackageFragmentRootWrapper> packageFragmentRootList = javaProject.getChildren();
-		for (PackageFragmentRootWrapper child : packageFragmentRootList) {
-			debugPackageFragmentRoot(child);
-		}
-	}
-
-	private void debugPackageFragmentRoot(PackageFragmentRootWrapper packageFragmentRoot) {
-		String pathToDisplay = packageFragmentRoot.getPathToDisplay();
-		packageFragmentRoot.loadChildren();
-		List<PackageFragmentWrapper> packageFragments = packageFragmentRoot.getChildren();
-		for (PackageFragmentWrapper child : packageFragments) {
-			debugPackageFragment(child);
-
-		}
-	}
-
-	private void debugPackageFragment(PackageFragmentWrapper packageFragment) {
-		IPackageFragment javaElement = packageFragment.getJavaElement();
-		String elementName = javaElement.getElementName();
-		packageFragment.loadChildren();
-		List<CompilationUnitWrapper> children = packageFragment.getChildren();
-		for (CompilationUnitWrapper child : children) {
-			debugCompilationUnit(child);
-		}
-	}
-
-	private void debugCompilationUnit(CompilationUnitWrapper child) {
-		String javaFileName = child.getElementName();
-		int i = javaFileName.indexOf('.');
-		if (i != 0) {
-
-		}
-	}
+	// private void debugJavaProjects() {
+	// List<JavaProjectWrapper> javaProjects =
+	// JavaProjectsCollector.collectJavaProjects();
+	// for (JavaProjectWrapper javaProject : javaProjects) {
+	// debugJavaProject(javaProject);
+	// }
+	// }
+	//
+	// private void debugJavaProject(JavaProjectWrapper javaProject) {
+	// String pathToDisplay = javaProject.getPathToDisplay();
+	// javaProject.loadChildren();
+	// List<PackageFragmentRootWrapper> packageFragmentRootList =
+	// javaProject.getChildren();
+	// for (PackageFragmentRootWrapper child : packageFragmentRootList) {
+	// debugPackageFragmentRoot(child);
+	// }
+	// }
+	//
+	// private void debugPackageFragmentRoot(PackageFragmentRootWrapper
+	// packageFragmentRoot) {
+	// String pathToDisplay = packageFragmentRoot.getPathToDisplay();
+	// packageFragmentRoot.loadChildren();
+	// List<PackageFragmentWrapper> packageFragments =
+	// packageFragmentRoot.getChildren();
+	// for (PackageFragmentWrapper child : packageFragments) {
+	// debugPackageFragment(child);
+	//
+	// }
+	// }
+	//
+	// private void debugPackageFragment(PackageFragmentWrapper packageFragment)
+	// {
+	// IPackageFragment javaElement = packageFragment.getJavaElement();
+	// String elementName = javaElement.getElementName();
+	// packageFragment.loadChildren();
+	// List<CompilationUnitWrapper> children = packageFragment.getChildren();
+	// for (CompilationUnitWrapper child : children) {
+	// debugCompilationUnit(child);
+	// }
+	// }
+	//
+	// private void debugCompilationUnit(CompilationUnitWrapper child) {
+	// String javaFileName = child.getElementName();
+	// int i = javaFileName.indexOf('.');
+	// if (i != 0) {
+	//
+	// }
+	// }
 }

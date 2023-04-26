@@ -29,8 +29,7 @@ public class JavaProjectWrapper extends AbstractJavaElementParentWrapper<Package
 			if (isSourcePackageFragmentRoot(packageFragmentRoot)) {
 				IPackageFragment firstPackageFragment = findFirstPackageFragment(packageFragmentRoot).orElse(null);
 				if (firstPackageFragment != null) {
-					packageFragmentRootWrapperList
-						.add(new PackageFragmentRootWrapper(this, packageFragmentRoot, firstPackageFragment));
+					packageFragmentRootWrapperList.add(new PackageFragmentRootWrapper(this, packageFragmentRoot));
 				}
 			}
 		}
@@ -67,13 +66,12 @@ public class JavaProjectWrapper extends AbstractJavaElementParentWrapper<Package
 				!packageFragmentRoot.isArchive();
 	}
 
-	public JavaProjectWrapper(IJavaProject javaProject, IPackageFragmentRoot firstPackageFragmentRoot) {
+	public JavaProjectWrapper(IJavaProject javaProject) {
 		this.javaProject = javaProject;
 		this.projectName = javaProject.getElementName();
 		this.projectPath = javaProject.getResource()
 			.getFullPath();
 		this.pathToDisplay = PathToString.pathToString(projectPath);
-		this.setFirstChild(new PackageFragmentRootWrapper(this, firstPackageFragmentRoot));
 	}
 
 	@Override

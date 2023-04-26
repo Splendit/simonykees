@@ -31,9 +31,8 @@ public class RecursivePackageFragmentsCollector {
 		IJavaElement[] childArray = packageFragment.getChildren();
 		for (IJavaElement child : childArray) {
 			if (child instanceof ICompilationUnit) {
-				ICompilationUnit firstCompilationUnit = (ICompilationUnit) child;
 				packageFragmentWrapperList
-					.add(new PackageFragmentWrapper(null, packageFragment, firstCompilationUnit));
+					.add(new PackageFragmentWrapper(null, packageFragment));
 				break;
 			}
 		}

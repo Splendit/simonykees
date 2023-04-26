@@ -30,4 +30,9 @@ public class CompilationUnitWrapper implements AbstractJavaElementWrapper {
 	public String getElementName() {
 		return javaFileName;
 	}
+
+	@Override
+	public boolean hasChildren() {
+		return false;
+	}
 }

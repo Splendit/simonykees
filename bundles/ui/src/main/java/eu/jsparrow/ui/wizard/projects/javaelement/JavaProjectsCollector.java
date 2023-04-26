@@ -40,21 +40,16 @@ public class JavaProjectsCollector {
 
 	private static Optional<JavaProjectWrapper> findJavaProjectWithPackage(IProject project) throws JavaModelException {
 		IJavaProject javaProject = findJavaProjectNature(project).orElse(null);
-		if(javaProject == null) {
+		if (javaProject == null) {
 			return Optional.empty();
 		}
 
 		IPackageFragmentRoot[] packageFragmentRootArray = javaProject.getPackageFragmentRoots();
-		for(IPackageFragmentRoot packageFragmentRoot : packageFragmentRootArray) {
-			if(JavaProjectWrapper.isPackageFragmentRootWithPackage(packageFragmentRoot)) {
-				return Optional.of(new JavaProjectWrapper(javaProject, packageFragmentRoot));
+		for (IPackageFragmentRoot packageFragmentRoot : packageFragmentRootArray) {
+			if (JavaProjectWrapper.isPackageFragmentRootWithPackage(packageFragmentRoot)) {
+				return Optional.of(new JavaProjectWrapper(javaProject));
 			}
 		}
-		
-
-		// isPackageFragmentRootWithPackage
-		// return javaProject.map(JavaProjectWrapper::new);
-
 		return Optional.empty();
 	}
 

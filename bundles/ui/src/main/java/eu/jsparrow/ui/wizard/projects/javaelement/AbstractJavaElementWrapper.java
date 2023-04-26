@@ -9,4 +9,6 @@ public interface AbstractJavaElementWrapper  {
 	IJavaElement getJavaElement();
 	
 	String getElementName();
+	
+	boolean hasChildren();
 }
