@@ -200,7 +200,7 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 			for (AbstractJavaElementWrapper child : wapperWithChildList.getChildren()) {
 				checkboxTreeViewer.setChecked(child, checked);
 				checkboxTreeViewer.setGrayed(child, false);
-				updateSelectedWrappers(wapperWithChildList, checked, false);
+				updateSelectedWrappers(child, checked, false);
 			}
 		}
 	}
