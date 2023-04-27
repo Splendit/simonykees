@@ -1,5 +1,10 @@
 package eu.jsparrow.ui.wizard.projects;
 
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
@@ -13,6 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 public class SelectSourcesToRefactorDialog extends Dialog {
 
 	private JavaProjectTreeViewWrapper javaProjectTreeVierWrapper;
+	private Map<IJavaProject, List<IJavaElement>> selectedJavaElementsMapping;
 
 	public SelectSourcesToRefactorDialog(Shell parentShell) {
 		super(parentShell);
@@ -41,8 +47,8 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		treeViewerGroup.setText("Java Sources"); //$NON-NLS-1$
 
 		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.widthHint = convertWidthInCharsToPixels(40);
-		gridData.heightHint = 160;
+		gridData.widthHint = convertWidthInCharsToPixels(60);
+		gridData.heightHint = 200;
 		treeViewerGroup.setLayoutData(gridData);
 		gridLayout = new GridLayout(1, false);
 		gridLayout.marginHeight = 0;
@@ -56,7 +62,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 
 		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.widthHint = convertWidthInCharsToPixels(40);
-		gridData.heightHint = 160;
+		gridData.heightHint = 200;
 		refactoring.setLayoutData(gridData);
 		gridLayout = new GridLayout(1, false);
 		gridLayout.marginHeight = 0;
@@ -69,5 +75,16 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 	public void setTreeViewerFilter(ViewerFilter treeviewerFilter) {
 		javaProjectTreeVierWrapper.setTreeViewerFilter(null);
 	}
+	
+	
+	@Override
+	protected void okPressed() {
+		SelectedJavaElementsCollector collector = new SelectedJavaElementsCollector();
+		selectedJavaElementsMapping = collector.getSelectedJavaElementsMapping(javaProjectTreeVierWrapper.getSelectedWrappers());
+		super.okPressed();
+	}
 
+	public Map<IJavaProject, List<IJavaElement>> getSelectedJavaElementsMapping() {
+		return selectedJavaElementsMapping;
+	}
 }

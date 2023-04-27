@@ -84,13 +84,13 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 			AbstractJavaElementWrapper wrapper = (AbstractJavaElementWrapper) element;
 			checkboxTreeViewer.setChecked(wrapper, checked);
 			checkboxTreeViewer.setGrayed(wrapper, false);
-			updateSelectedWrappers(wrapper, checked, false);
+			updateSelectedAndGrayedWrappers(wrapper, checked, false);
 			updateChildrenSelectionState(wrapper, checked);
 			updateParentSelectionState(wrapper);
 		}
 	}
 
-	protected void updateSelectedWrappers(AbstractJavaElementWrapper wrapper, boolean checked, boolean grayed) {
+	protected void updateSelectedAndGrayedWrappers(AbstractJavaElementWrapper wrapper, boolean checked, boolean grayed) {
 		if (checked) {
 			selectedWrappers.add(wrapper);
 			grayedWrappers.remove(wrapper);
@@ -110,7 +110,7 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 				for (AbstractJavaElementWrapper child : wapperWithChildList.getChildren()) {
 					checkboxTreeViewer.setChecked(child, checked);
 					checkboxTreeViewer.setGrayed(child, false);
-					updateSelectedWrappers(child, checked, false);
+					updateSelectedAndGrayedWrappers(child, checked, false);
 					updateChildrenSelectionState(child, checked);
 				}
 			}
@@ -128,15 +128,15 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 		if (allChildrenChecked(wapperWithChildList)) {
 			checkboxTreeViewer.setChecked(wapperWithChildList, true);
 			checkboxTreeViewer.setGrayed(wapperWithChildList, false);
-			updateSelectedWrappers(wapperWithChildList, true, false);
+			updateSelectedAndGrayedWrappers(wapperWithChildList, true, false);
 		} else if (allChildrenUnchecked(wapperWithChildList)) {
 			checkboxTreeViewer.setChecked(wapperWithChildList, false);
 			checkboxTreeViewer.setGrayed(wapperWithChildList, false);
-			updateSelectedWrappers(wapperWithChildList, false, false);
+			updateSelectedAndGrayedWrappers(wapperWithChildList, false, false);
 		} else {
 			checkboxTreeViewer.setChecked(wapperWithChildList, true);
 			checkboxTreeViewer.setGrayed(wapperWithChildList, true);
-			updateSelectedWrappers(wapperWithChildList, false, true);
+			updateSelectedAndGrayedWrappers(wapperWithChildList, false, true);
 		}
 		updateParentSelectionState(wapperWithChildList);
 	}
@@ -200,8 +200,12 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 			for (AbstractJavaElementWrapper child : wapperWithChildList.getChildren()) {
 				checkboxTreeViewer.setChecked(child, checked);
 				checkboxTreeViewer.setGrayed(child, false);
-				updateSelectedWrappers(child, checked, false);
+				updateSelectedAndGrayedWrappers(child, checked, false);
 			}
 		}
+	}
+
+	public Set<AbstractJavaElementWrapper> getSelectedWrappers() {
+		return selectedWrappers;
 	}
 }
