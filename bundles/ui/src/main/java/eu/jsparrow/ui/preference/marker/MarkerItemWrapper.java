@@ -16,7 +16,6 @@ public class MarkerItemWrapper {
 	private String markerId;
 	private String name;
 	private List<MarkerItemWrapper> childern = new ArrayList<>();
-	private boolean expanded;
 
 	public MarkerItemWrapper(MarkerItemWrapper parent, boolean isParent,
 			String markerId, String name,
@@ -44,15 +43,6 @@ public class MarkerItemWrapper {
 		MarkerItemWrapper item = new MarkerItemWrapper(this, false, markerId, markerName, new ArrayList<>());
 		this.childern.add(item);
 	}
-
-	public boolean isExpanded() {
-		return expanded;
-	}
-
-	public void setExpanded(boolean expanded) {
-		this.expanded = expanded;
-	}
-
 
 	public MarkerItemWrapper getParent() {
 		return parent;

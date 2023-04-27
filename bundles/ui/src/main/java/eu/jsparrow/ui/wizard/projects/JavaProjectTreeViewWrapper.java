@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.swt.widgets.Group;
 
@@ -17,7 +18,7 @@ import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectsCollector;
 import eu.jsparrow.ui.wizard.projects.javaelement.PackageFragmentRootWrapper;
 import eu.jsparrow.ui.wizard.projects.javaelement.PackageFragmentWrapper;
 
-public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper {
+public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper implements ITreeViewerListener {
 
 	private List<JavaProjectWrapper> javaProjects;
 	private Set<AbstractJavaElementWrapper> selectedWrappers = new HashSet<>();
@@ -25,6 +26,12 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 
 	protected JavaProjectTreeViewWrapper(Group group) {
 		super(group);
+	}
+
+	@Override
+	protected void createCheckBoxTreeViewer(Group group) {
+		super.createCheckBoxTreeViewer(group);
+		checkboxTreeViewer.addTreeListener(this);
 	}
 
 	@Override
@@ -166,12 +173,6 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 			javaProjects = JavaProjectsCollector.collectJavaProjects();
 		}
 		return javaProjects;
-	}
-
-	@Override
-	protected void expandTreeNodesSelectively() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

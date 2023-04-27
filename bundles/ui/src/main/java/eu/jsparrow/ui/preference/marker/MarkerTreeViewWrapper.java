@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
-import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.swt.widgets.Group;
 
 import eu.jsparrow.core.markers.ResolverVisitorsFactory;
@@ -187,13 +186,6 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper {
 		return getAllMarkerItemWrappers();
 	}
 
-	protected void expandTreeNodesSelectively() {
-		checkboxTreeViewer.collapseAll();
-		allMarkerItemWrappers.stream()
-			.filter(MarkerItemWrapper::isExpanded)
-			.forEach(markerItemWrapper -> checkboxTreeViewer.expandToLevel(markerItemWrapper, 1));
-	}
-
 	@Override
 	protected void updateTreeViewerSelectionState() {
 		updateMarkerItemSelection();
@@ -285,24 +277,5 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper {
 			.forEach(item -> checkboxTreeViewer.setChecked(item, checked));
 
 		updateCategorySelection();
-	}
-
-	@Override
-	public void treeCollapsed(TreeExpansionEvent event) {
-		Object element = event.getElement();
-		if (element instanceof MarkerItemWrapper) {
-			MarkerItemWrapper category = (MarkerItemWrapper) element;
-			category.setExpanded(false);
-		}
-	}
-
-	@Override
-	public void treeExpanded(TreeExpansionEvent event) {
-		Object element = event.getElement();
-		if (element instanceof MarkerItemWrapper) {
-			MarkerItemWrapper category = (MarkerItemWrapper) element;
-			category.setExpanded(true);
-		}
-		
 	}
 }
