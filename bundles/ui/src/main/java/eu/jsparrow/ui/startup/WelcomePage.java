@@ -209,12 +209,9 @@ public class WelcomePage extends FormPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				SelectSourcesToRefactorDialog selectSourcesDialog = new SelectSourcesToRefactorDialog(
-						Display.getDefault()
-							.getActiveShell());
-				selectSourcesDialog.open();
+				SelectSourcesToRefactorDialog.selectJavaSourcesToRefactor(Display.getDefault()
+					.getActiveShell());
 			}
 		});
-
 	}
 }

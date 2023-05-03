@@ -10,8 +10,10 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 
@@ -19,8 +21,65 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 
 	private JavaProjectTreeViewWrapper javaProjectTreeVierWrapper;
 	private Map<IJavaProject, List<IJavaElement>> selectedJavaElementsMapping;
+	private Button buttonRefactorWithDefaultRule;
+	private Button buttonSelectRulesToRefactor;
+	private Button buttonRefactorWithLoggingRule;
+	private Button buttonRenameFields;
+	private Button buttonRemoveUnusedCode;
+	private boolean flagRefactorWithDefaultRule;
+	private boolean flagSelectRulesToRefactor;
+	private boolean flagRefactorWithLoggingRule;
+	private boolean flagRenameFields;
+	private boolean flagRemoveUnusedCode;
 
-	public SelectSourcesToRefactorDialog(Shell parentShell) {
+	public static void selectJavaSourcesToRefactor(Shell parentShell) {
+		SelectSourcesToRefactorDialog selectSourcesDialog = new SelectSourcesToRefactorDialog(
+				Display.getDefault()
+					.getActiveShell());
+		selectSourcesDialog.open();
+
+		Map<IJavaProject, List<IJavaElement>> selectedJavaElementsMapping = selectSourcesDialog
+			.getSelectedJavaElementsMapping();
+		if (selectSourcesDialog.isFlagRefactorWithDefaultRule()) {
+			refactorWithDefaultRule(selectedJavaElementsMapping);
+		} else if (selectSourcesDialog.isFlagSelectRulesToRefactor()) {
+			selectRulesToRefactor(selectedJavaElementsMapping);
+		} else if (selectSourcesDialog.isFlagRefactorWithLoggingRule()) {
+			useLoggingRule(selectedJavaElementsMapping);
+		} else if (selectSourcesDialog.isFlagRenameFields()) {
+			useRenameFieldsRule(selectedJavaElementsMapping);
+		} else if(selectSourcesDialog.isFlagRemoveUnusedCode()) {
+			removeUnusedCode(selectedJavaElementsMapping);
+		}
+	}
+
+	public static void refactorWithDefaultRule(Map<IJavaProject, List<IJavaElement>> selectedJavaElementsMapping) {
+		// Not implemented yet
+	}
+
+	public static void selectRulesToRefactor(Map<IJavaProject, List<IJavaElement>> selectedJavaElementsMapping) {
+		// Not implemented yet
+	}
+
+	public static void useLoggingRule(Map<IJavaProject, List<IJavaElement>> selectedJavaElementsMapping) {
+		// Not implemented yet
+	}
+
+	public static void useRenameFieldsRule(Map<IJavaProject, List<IJavaElement>> selectedJavaElementsMapping) {
+		// Not implemented yet
+	}
+
+	public static void removeUnusedCode(Map<IJavaProject, List<IJavaElement>> selectedJavaElementsMapping) {
+		// Not implemented yet
+	}
+
+	private static Button createRefactoringRadioButton(Composite parent, String text) {
+		Button radioButton = new Button(parent, SWT.RADIO);
+		radioButton.setText(text);
+		return radioButton;
+	}
+
+	private SelectSourcesToRefactorDialog(Shell parentShell) {
 		super(parentShell);
 	}
 
@@ -47,7 +106,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		treeViewerGroup.setText("Java Sources"); //$NON-NLS-1$
 
 		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.widthHint = convertWidthInCharsToPixels(60);
+		gridData.widthHint = convertWidthInCharsToPixels(65);
 		gridData.heightHint = 200;
 		treeViewerGroup.setLayoutData(gridData);
 		gridLayout = new GridLayout(1, false);
@@ -58,10 +117,10 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		javaProjectTreeVierWrapper = new JavaProjectTreeViewWrapper(treeViewerGroup);
 
 		Group refactoring = new Group(sourceSelectionComposite, SWT.NONE);
-		refactoring.setText("Refactoring with JSparrow"); //$NON-NLS-1$
+		refactoring.setText("JSparrow"); //$NON-NLS-1$
 
 		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.widthHint = convertWidthInCharsToPixels(40);
+		gridData.widthHint = convertWidthInCharsToPixels(35);
 		gridData.heightHint = 200;
 		refactoring.setLayoutData(gridData);
 		gridLayout = new GridLayout(1, false);
@@ -69,22 +128,57 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		gridLayout.marginWidth = 0;
 		refactoring.setLayout(gridLayout);
 
+		buttonRefactorWithDefaultRule = createRefactoringRadioButton(refactoring, "Refactor with Default Profile"); //$NON-NLS-1$
+		buttonSelectRulesToRefactor = createRefactoringRadioButton(refactoring, "Select Rules to Refactor"); //$NON-NLS-1$
+		buttonRefactorWithLoggingRule = createRefactoringRadioButton(refactoring, "Refactor with Logging Rule"); //$NON-NLS-1$
+		buttonRenameFields = createRefactoringRadioButton(refactoring, "Rename Fields"); //$NON-NLS-1$
+		buttonRemoveUnusedCode = createRefactoringRadioButton(refactoring, "Remove Unused Code"); //$NON-NLS-1$
+
+		buttonSelectRulesToRefactor.setSelection(true);
+
 		return area;
 	}
 
 	public void setTreeViewerFilter(ViewerFilter treeviewerFilter) {
-		javaProjectTreeVierWrapper.setTreeViewerFilter(null);
+		javaProjectTreeVierWrapper.setTreeViewerFilter(treeviewerFilter);
 	}
-	
-	
+
 	@Override
 	protected void okPressed() {
 		SelectedJavaElementsCollector collector = new SelectedJavaElementsCollector();
-		selectedJavaElementsMapping = collector.getSelectedJavaElementsMapping(javaProjectTreeVierWrapper.getSelectedWrappers());
+		selectedJavaElementsMapping = collector
+			.getSelectedJavaElementsMapping(javaProjectTreeVierWrapper.getSelectedWrappers());
+
+		flagRefactorWithDefaultRule = buttonRefactorWithDefaultRule.getSelection();
+		flagSelectRulesToRefactor = buttonSelectRulesToRefactor.getSelection();
+		flagRefactorWithLoggingRule = buttonRefactorWithLoggingRule.getSelection();
+		flagRenameFields = buttonRenameFields.getSelection();
+		flagRemoveUnusedCode = buttonRemoveUnusedCode.getSelection();
+
 		super.okPressed();
 	}
 
 	public Map<IJavaProject, List<IJavaElement>> getSelectedJavaElementsMapping() {
 		return selectedJavaElementsMapping;
+	}
+
+	public boolean isFlagRefactorWithDefaultRule() {
+		return flagRefactorWithDefaultRule;
+	}
+
+	public boolean isFlagSelectRulesToRefactor() {
+		return flagSelectRulesToRefactor;
+	}
+
+	public boolean isFlagRefactorWithLoggingRule() {
+		return flagRefactorWithLoggingRule;
+	}
+
+	public boolean isFlagRenameFields() {
+		return flagRenameFields;
+	}
+
+	public boolean isFlagRemoveUnusedCode() {
+		return flagRemoveUnusedCode;
 	}
 }
