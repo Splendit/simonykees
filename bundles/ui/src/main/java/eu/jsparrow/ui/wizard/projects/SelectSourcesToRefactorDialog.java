@@ -2,6 +2,7 @@ package eu.jsparrow.ui.wizard.projects;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -16,6 +17,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
+
+import eu.jsparrow.ui.wizard.projects.javaelement.AbstractJavaElementWrapper;
 
 public class SelectSourcesToRefactorDialog extends Dialog {
 
@@ -38,39 +41,44 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 					.getActiveShell());
 		selectSourcesDialog.open();
 
-		Map<IJavaProject, List<IJavaElement>> selectedJavaElementsMapping = selectSourcesDialog
-			.getSelectedJavaElementsMapping();
+		Set<AbstractJavaElementWrapper> selectedWrappers = selectSourcesDialog.getSelectedWrappers();
+		SelectedJavaElementsCollector collector = new SelectedJavaElementsCollector(selectedWrappers);
 		if (selectSourcesDialog.isFlagRefactorWithDefaultRule()) {
-			refactorWithDefaultRule(selectedJavaElementsMapping);
+			refactorWithDefaultRule(collector);
 		} else if (selectSourcesDialog.isFlagSelectRulesToRefactor()) {
-			selectRulesToRefactor(selectedJavaElementsMapping);
+			selectRulesToRefactor(collector);
 		} else if (selectSourcesDialog.isFlagRefactorWithLoggingRule()) {
-			useLoggingRule(selectedJavaElementsMapping);
+			useLoggingRule(collector);
 		} else if (selectSourcesDialog.isFlagRenameFields()) {
-			useRenameFieldsRule(selectedJavaElementsMapping);
-		} else if(selectSourcesDialog.isFlagRemoveUnusedCode()) {
-			removeUnusedCode(selectedJavaElementsMapping);
+			useRenameFieldsRule(collector);
+		} else if (selectSourcesDialog.isFlagRemoveUnusedCode()) {
+			removeUnusedCode(collector);
 		}
 	}
 
-	public static void refactorWithDefaultRule(Map<IJavaProject, List<IJavaElement>> selectedJavaElementsMapping) {
-		// Not implemented yet
+	public static void refactorWithDefaultRule(SelectedJavaElementsCollector collector) {
+		Map<IJavaProject, List<IJavaElement>> selectedJavaElements = collector.getSelectedJavaElements();
+		selectedJavaElements.size();
 	}
 
-	public static void selectRulesToRefactor(Map<IJavaProject, List<IJavaElement>> selectedJavaElementsMapping) {
-		// Not implemented yet
+	public static void selectRulesToRefactor(SelectedJavaElementsCollector collector) {
+		Map<IJavaProject, List<IJavaElement>> selectedJavaElements = collector.getSelectedJavaElements();
+		selectedJavaElements.size();
 	}
 
-	public static void useLoggingRule(Map<IJavaProject, List<IJavaElement>> selectedJavaElementsMapping) {
-		// Not implemented yet
+	public static void useLoggingRule(SelectedJavaElementsCollector collector) {
+		Map<IJavaProject, List<IJavaElement>> selectedJavaElements = collector.getSelectedJavaElements();
+		selectedJavaElements.size();
 	}
 
-	public static void useRenameFieldsRule(Map<IJavaProject, List<IJavaElement>> selectedJavaElementsMapping) {
-		// Not implemented yet
+	public static void useRenameFieldsRule(SelectedJavaElementsCollector collector) {
+		Map<IJavaProject, List<IJavaElement>> selectedJavaElements = collector.getSelectedJavaElements();
+		selectedJavaElements.size();
 	}
 
-	public static void removeUnusedCode(Map<IJavaProject, List<IJavaElement>> selectedJavaElementsMapping) {
-		// Not implemented yet
+	public static void removeUnusedCode(SelectedJavaElementsCollector collector) {
+		Map<IJavaProject, List<IJavaElement>> selectedJavaElements = collector.getSelectedJavaElements();
+		selectedJavaElements.size();
 	}
 
 	private static Button createRefactoringRadioButton(Composite parent, String text) {
@@ -145,9 +153,11 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 
 	@Override
 	protected void okPressed() {
-		SelectedJavaElementsCollector collector = new SelectedJavaElementsCollector();
-		selectedJavaElementsMapping = collector
-			.getSelectedJavaElementsMapping(javaProjectTreeVierWrapper.getSelectedWrappers());
+
+		Set<AbstractJavaElementWrapper> selectedWrappers = getSelectedWrappers();
+		SelectedJavaElementsCollector collector = new SelectedJavaElementsCollector(selectedWrappers);
+
+		selectedJavaElementsMapping = collector.getSelectedJavaElements();
 
 		flagRefactorWithDefaultRule = buttonRefactorWithDefaultRule.getSelection();
 		flagSelectRulesToRefactor = buttonSelectRulesToRefactor.getSelection();
@@ -156,6 +166,10 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		flagRemoveUnusedCode = buttonRemoveUnusedCode.getSelection();
 
 		super.okPressed();
+	}
+
+	private Set<AbstractJavaElementWrapper> getSelectedWrappers() {
+		return javaProjectTreeVierWrapper.getSelectedWrappers();
 	}
 
 	public Map<IJavaProject, List<IJavaElement>> getSelectedJavaElementsMapping() {
