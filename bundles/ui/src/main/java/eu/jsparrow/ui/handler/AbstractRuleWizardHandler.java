@@ -44,6 +44,8 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 public abstract class AbstractRuleWizardHandler extends AbstractHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractRuleWizardHandler.class);
+	
+	public abstract Object execute(IJavaElementsSelectionProvider javaElementsSelectionProvider);
 
 	protected void openAlreadyRunningDialog() {
 		Display display = Display.getDefault();

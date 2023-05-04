@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -21,7 +20,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +35,9 @@ import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
-import eu.jsparrow.ui.util.WizardHandlerUtil;
-import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
 import eu.jsparrow.ui.wizard.impl.RunDefaultProfileImplicitWizard;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
+import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -57,29 +54,28 @@ public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		return execute(new ExecutionEventToJavaElementsSelection(event));
+
+	}
+
+	@Override
+	public Object execute(IJavaElementsSelectionProvider javaElementsSelectionProvider) {
 
 		if (Activator.isRunning()) {
 			super.openAlreadyRunningDialog();
 			return null;
 		}
 		Activator.setRunning(true);
-		final Shell shell = HandlerUtil.getActiveShell(event);
+
+		final Shell shell = Display.getDefault()
+			.getActiveShell();
+
 		if (!licenseUtil.checkAtStartUp(shell)) {
 			Activator.setRunning(false);
 			return null;
 		}
 
-		Map<IJavaProject, List<IJavaElement>> selectedJavaElements;
-		try {
-			selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
-		} catch (CoreException e) {
-			logger.error(e.getMessage(), e);
-			WizardMessageDialog.synchronizeWithUIShowError(new RefactoringException(
-					Messages.SelectRulesWizardHandler_getting_selected_resources_failed + e.getMessage(),
-					Messages.SelectRulesWizardHandler_user_getting_selected_resources_failed, e));
-			return null;
-		}
-
+		Map<IJavaProject, List<IJavaElement>> selectedJavaElements = javaElementsSelectionProvider.getSelectedJavaElements();
 		if (selectedJavaElements.isEmpty()) {
 			WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
 			logger.error(Messages.WizardMessageDialog_selectionDidNotContainAnyJavaFiles);
