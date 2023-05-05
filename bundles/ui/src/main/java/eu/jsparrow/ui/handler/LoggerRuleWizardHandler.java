@@ -3,9 +3,8 @@ package eu.jsparrow.ui.handler;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -31,8 +30,6 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 import eu.jsparrow.ui.wizard.semiautomatic.LoggerRuleWizard;
@@ -49,44 +46,16 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoggerRuleWizardHandler.class);
 
-	private LicenseUtilService licenseUtil = LicenseUtil.get();
-
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		return execute(new ExecutionEventToJavaElementsSelection(event));
-
-	}
-	
-	@Override
-	public Object execute(IJavaElementsSelectionProvider javaElementsSelectionProvider) {
-
-		if (Activator.isRunning()) {
-			openAlreadyRunningDialog();
-			return null;
-		}
-
-		Activator.setRunning(true);
-		final Shell shell = Display.getDefault()
+	protected Optional<Job> createJob(Map<IJavaProject, List<IJavaElement>> selectedJavaElements) {
+		Shell shell = Display.getDefault()
 			.getActiveShell();
-
-		if (!licenseUtil.checkAtStartUp(shell)) {
-			Activator.setRunning(false);
-			return null;
-		}
-
-		Map<IJavaProject, List<IJavaElement>> selectedJavaElements = javaElementsSelectionProvider
-			.getSelectedJavaElements();
-
-		if (selectedJavaElements.isEmpty()) {
-			WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
-			logger.error(Messages.WizardMessageDialog_selectionDidNotContainAnyJavaFiles);
-			Activator.setRunning(false);
-			return null;
-		}
-
 		if (selectedJavaElements.size() != 1) {
-			synchronizeWithUIShowSelectionErrorMessage();
-			return false;
+			String title = Messages.LoggerRuleWizardHandler_multipleProjectsSelected;
+			String message = Messages.LoggerRuleWizardHandler_loggerRuleOnOneProjectOnly;
+
+			synchronizeWithUIShowSelectionErrorMessage(shell, title, message);
+			return Optional.empty();
 		}
 
 		List<IJavaElement> selectedElements = selectedJavaElements.entrySet()
@@ -101,7 +70,7 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 			SimonykeesMessageDialog.openMessageDialog(shell,
 					"The Java Project of the selected sources could not be found.", MessageDialog.WARNING); //$NON-NLS-1$
 			Activator.setRunning(false);
-			return null;
+			return Optional.empty();
 		}
 
 		loggerRule.calculateEnabledForProject(selectedJavaProjekt);
@@ -109,7 +78,7 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 			SimonykeesMessageDialog.openMessageDialog(shell, Messages.LoggerRuleWizardHandler_noLogger,
 					MessageDialog.WARNING);
 			Activator.setRunning(false);
-			return null;
+			return Optional.empty();
 		}
 
 		boolean confirmed = SimonykeesMessageDialog.openConfirmDialog(shell,
@@ -117,7 +86,7 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 						loggerRule.getAvailableLoggerType()));
 		if (!confirmed) {
 			Activator.setRunning(false);
-			return null;
+			return Optional.empty();
 		}
 
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
@@ -129,10 +98,7 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 			}
 		};
 
-		job.setUser(true);
-		job.schedule();
-
-		return true;
+		return Optional.of(job);
 	}
 
 	private IStatus startLoggerRuleWizard(List<IJavaElement> selectedElements,
@@ -211,19 +177,6 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 				} else {
 					Activator.setRunning(false);
 				}
-			});
-	}
-
-	private void synchronizeWithUIShowSelectionErrorMessage() {
-		Display.getDefault()
-			.syncExec(() -> {
-				Shell shell = PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow()
-					.getShell();
-				MessageDialog.openWarning(shell, Messages.LoggerRuleWizardHandler_multipleProjectsSelected,
-						Messages.LoggerRuleWizardHandler_loggerRuleOnOneProjectOnly);
-
-				Activator.setRunning(false);
 			});
 	}
 }

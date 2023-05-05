@@ -3,13 +3,17 @@ package eu.jsparrow.ui.handler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -29,6 +33,8 @@ import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.RuleWizardDialog;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
@@ -42,12 +48,51 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  *
  */
 public abstract class AbstractRuleWizardHandler extends AbstractHandler {
-
 	private static final Logger logger = LoggerFactory.getLogger(AbstractRuleWizardHandler.class);
-	
-	public abstract Object execute(IJavaElementsSelectionProvider javaElementsSelectionProvider);
+	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
-	protected void openAlreadyRunningDialog() {
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		if (Activator.isRunning()) {
+			openAlreadyRunningDialog();
+			return null;
+		}
+		Activator.setRunning(true);
+		return execute(new ExecutionEventToJavaElementsSelection(event));
+	}
+
+	public final Object execute(IJavaElementsSelectionProvider javaElementsSelectionProvider) {
+
+		final Shell shell = Display.getDefault()
+			.getActiveShell();
+
+		if (!licenseUtil.checkAtStartUp(shell)) {
+			Activator.setRunning(false);
+			return null;
+		}
+
+		Map<IJavaProject, List<IJavaElement>> selectedJavaElements = javaElementsSelectionProvider
+			.getSelectedJavaElements();
+
+		if (selectedJavaElements.isEmpty()) {
+			WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
+			logger.error(Messages.WizardMessageDialog_selectionDidNotContainAnyJavaFiles);
+			Activator.setRunning(false);
+			return null;
+		}
+
+		Job job = createJob(selectedJavaElements).orElse(null);
+		if (job != null) {
+			job.setUser(true);
+			job.schedule();
+			return true;
+		}
+
+		Activator.setRunning(false);
+		return false;
+	}
+
+	public static void openAlreadyRunningDialog() {
 		Display display = Display.getDefault();
 		Shell activeShell = display.getActiveShell();
 		SimonykeesMessageDialog.openMessageDialog(activeShell, Messages.SelectRulesWizardHandler_allready_running,
@@ -92,7 +137,8 @@ public abstract class AbstractRuleWizardHandler extends AbstractHandler {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				final RuleWizardDialog dialog = new RuleWizardDialog(shell, wizardGenerator.apply(selectedJavaElements));
+				final RuleWizardDialog dialog = new RuleWizardDialog(shell,
+						wizardGenerator.apply(selectedJavaElements));
 				dialog.open();
 			});
 	}
@@ -127,14 +173,10 @@ public abstract class AbstractRuleWizardHandler extends AbstractHandler {
 			});
 	}
 
-	protected void synchronizeWithUIShowSelectionErrorMessage(String title, String message) {
+	protected void synchronizeWithUIShowSelectionErrorMessage(Shell shell, String title, String message) {
 		Display.getDefault()
 			.syncExec(() -> {
-				Shell shell = PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow()
-					.getShell();
 				MessageDialog.openWarning(shell, title, message);
-
 				Activator.setRunning(false);
 			});
 	}
@@ -174,4 +216,6 @@ public abstract class AbstractRuleWizardHandler extends AbstractHandler {
 
 		return Status.OK_STATUS;
 	}
+
+	protected abstract Optional<Job> createJob(Map<IJavaProject, List<IJavaElement>> selectedJavaElements);
 }

@@ -2,10 +2,9 @@ package eu.jsparrow.ui.handler;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
@@ -14,15 +13,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.ui.Activator;
-import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
-import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 import eu.jsparrow.ui.wizard.semiautomatic.RemoveUnusedCodeWizard;
 
 /**
@@ -34,46 +27,15 @@ import eu.jsparrow.ui.wizard.semiautomatic.RemoveUnusedCodeWizard;
  */
 public class RemoveUnusedCodeWizardHandler extends AbstractRuleWizardHandler {
 
-	private static final Logger logger = LoggerFactory.getLogger(RemoveUnusedCodeWizardHandler.class);
-
-	private LicenseUtilService licenseUtil = LicenseUtil.get();
-
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		return execute(new ExecutionEventToJavaElementsSelection(event));
-
-	}
-
-	@Override
-	public Object execute(IJavaElementsSelectionProvider javaElementsSelectionProvider) {
-
-		if (Activator.isRunning()) {
-			openAlreadyRunningDialog();
-			return null;
-		}
-		Activator.setRunning(true);
-		
-		final Shell shell = Display.getDefault()
-				.getActiveShell();
-
-		if (!licenseUtil.checkAtStartUp(shell)) {
-			Activator.setRunning(false);
-			return null;
-		}
-
-		Map<IJavaProject, List<IJavaElement>> selectedJavaElements = javaElementsSelectionProvider.getSelectedJavaElements();
-		if (selectedJavaElements.isEmpty()) {
-			WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
-			logger.error(Messages.WizardMessageDialog_selectionDidNotContainAnyJavaFiles);
-			Activator.setRunning(false);
-			return null;
-		}
-
+	protected Optional<Job> createJob(Map<IJavaProject, List<IJavaElement>> selectedJavaElements) {
 		if (selectedJavaElements.size() != 1) {
 			String title = Messages.RemoveUnusedCodeWizardHandler_multipleProjectsSelected;
 			String message = Messages.RemoveUnusedCodeWizardHandler_removeUnusedCodeOneProjectOnly;
-			synchronizeWithUIShowSelectionErrorMessage(title, message);
-			return false;
+			Shell shell = Display.getDefault()
+				.getActiveShell();
+			synchronizeWithUIShowSelectionErrorMessage(shell, title, message);
+			return Optional.empty();
 		}
 
 		Job job = new Job("Find dead code") { //$NON-NLS-1$
@@ -84,8 +46,6 @@ public class RemoveUnusedCodeWizardHandler extends AbstractRuleWizardHandler {
 			}
 		};
 
-		job.setUser(true);
-		job.schedule();
-		return true;
+		return Optional.of(job);
 	}
 }

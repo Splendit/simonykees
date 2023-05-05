@@ -3,10 +3,9 @@ package eu.jsparrow.ui.handler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -28,7 +27,6 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
-import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
@@ -45,39 +43,7 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizardHandler.class);
 
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		return execute(new ExecutionEventToJavaElementsSelection(event));
-
-	}
-
-	@Override
-	public Object execute(IJavaElementsSelectionProvider javaElementsSelectionProvider) {
-
-		if (Activator.isRunning()) {
-			super.openAlreadyRunningDialog();
-			return null;
-		}
-		Activator.setRunning(true);
-
-		final Shell shell = Display.getDefault()
-			.getActiveShell();
-		
-		LicenseUtil licenseUtil = LicenseUtil.get();
-		if (!licenseUtil.checkAtStartUp(shell)) {
-			Activator.setRunning(false);
-			return null;
-		}
-
-		Map<IJavaProject, List<IJavaElement>> selectedJavaElements = javaElementsSelectionProvider
-			.getSelectedJavaElements();
-
-		if (selectedJavaElements.isEmpty()) {
-			WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
-			logger.error(Messages.WizardMessageDialog_selectionDidNotContainAnyJavaFiles);
-			Activator.setRunning(false);
-			return null;
-		}
-
+	protected Optional<Job> createJob(Map<IJavaProject, List<IJavaElement>> selectedJavaElements) {
 		Job job = new Job(Messages.ProgressMonitor_verifying_project_information) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -85,11 +51,7 @@ public class SelectRulesWizardHandler extends AbstractRuleWizardHandler {
 				return startSelectRulesWizard(selectedJavaElements, monitor, refactoringPipeline);
 			}
 		};
-
-		job.setUser(true);
-		job.schedule();
-
-		return true;
+		return Optional.of(job);
 	}
 
 	/**

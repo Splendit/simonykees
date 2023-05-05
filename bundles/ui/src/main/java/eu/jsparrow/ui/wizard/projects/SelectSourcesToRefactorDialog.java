@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 
+import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.handler.AbstractRuleWizardHandler;
 import eu.jsparrow.ui.handler.LoggerRuleWizardHandler;
 import eu.jsparrow.ui.handler.RemoveUnusedCodeWizardHandler;
@@ -33,6 +34,12 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 	private AbstractRuleWizardHandler abstractRuleWizardHandler;
 
 	public static void selectJavaSourcesToRefactor(Shell parentShell) {
+		if (Activator.isRunning()) {
+			AbstractRuleWizardHandler.openAlreadyRunningDialog();
+			return;
+		}
+
+		Activator.setRunning(true);
 		SelectSourcesToRefactorDialog selectSourcesDialog = new SelectSourcesToRefactorDialog(parentShell);
 		selectSourcesDialog.open();
 

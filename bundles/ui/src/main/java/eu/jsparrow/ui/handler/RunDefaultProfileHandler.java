@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -33,8 +32,6 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
-import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.wizard.impl.RunDefaultProfileImplicitWizard;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizardData;
@@ -50,39 +47,9 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunDefaultProfileHandler.class);
-	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		return execute(new ExecutionEventToJavaElementsSelection(event));
-
-	}
-
-	@Override
-	public Object execute(IJavaElementsSelectionProvider javaElementsSelectionProvider) {
-
-		if (Activator.isRunning()) {
-			super.openAlreadyRunningDialog();
-			return null;
-		}
-		Activator.setRunning(true);
-
-		final Shell shell = Display.getDefault()
-			.getActiveShell();
-
-		if (!licenseUtil.checkAtStartUp(shell)) {
-			Activator.setRunning(false);
-			return null;
-		}
-
-		Map<IJavaProject, List<IJavaElement>> selectedJavaElements = javaElementsSelectionProvider.getSelectedJavaElements();
-		if (selectedJavaElements.isEmpty()) {
-			WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
-			logger.error(Messages.WizardMessageDialog_selectionDidNotContainAnyJavaFiles);
-			Activator.setRunning(false);
-			return null;
-		}
-
+	protected Optional<Job> createJob(Map<IJavaProject, List<IJavaElement>> selectedJavaElements) {
 		Job job = new Job(Messages.RunDefaultProfileHandler_startJSparrowWithDefaultProfile) {
 
 			@Override
@@ -91,11 +58,7 @@ public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 				return runDefaultProfile(selectedJavaElements, monitor, refactoringPipeline);
 			}
 		};
-
-		job.setUser(true);
-		job.schedule();
-
-		return true;
+		return Optional.of(job);
 	}
 
 	private IStatus runDefaultProfile(Map<IJavaProject, List<IJavaElement>> selectedJavaElements,
@@ -187,5 +150,4 @@ public class RunDefaultProfileHandler extends AbstractRuleWizardHandler {
 				}
 			});
 	}
-
 }
