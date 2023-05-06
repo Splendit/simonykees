@@ -43,12 +43,15 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		SelectSourcesToRefactorDialog selectSourcesDialog = new SelectSourcesToRefactorDialog(parentShell);
 		selectSourcesDialog.open();
 
-		selectSourcesDialog.getAbstractRuleWizardHandler()
-			.ifPresent(handler -> {
-				Set<AbstractJavaElementWrapper> selectedWrappers = selectSourcesDialog.getSelectedWrappers();
-				SelectedJavaElementsCollector collector = new SelectedJavaElementsCollector(selectedWrappers);
-				handler.execute(collector);
-			});
+		AbstractRuleWizardHandler ruleWizardHandler = selectSourcesDialog.getAbstractRuleWizardHandler()
+			.orElse(null);
+		if (ruleWizardHandler != null) {
+			Set<AbstractJavaElementWrapper> selectedWrappers = selectSourcesDialog.getSelectedWrappers();
+			SelectedJavaElementsCollector collector = new SelectedJavaElementsCollector(selectedWrappers);
+			ruleWizardHandler.execute(collector);
+		} else {
+			Activator.setRunning(false);
+		}
 	}
 
 	private static Button createRefactoringRadioButton(Composite parent, String text) {

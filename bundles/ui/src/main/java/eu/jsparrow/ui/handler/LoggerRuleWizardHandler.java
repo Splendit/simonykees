@@ -69,7 +69,6 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 		if (null == selectedJavaProjekt) {
 			SimonykeesMessageDialog.openMessageDialog(shell,
 					"The Java Project of the selected sources could not be found.", MessageDialog.WARNING); //$NON-NLS-1$
-			Activator.setRunning(false);
 			return Optional.empty();
 		}
 
@@ -77,7 +76,6 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 		if (!loggerRule.isEnabled()) {
 			SimonykeesMessageDialog.openMessageDialog(shell, Messages.LoggerRuleWizardHandler_noLogger,
 					MessageDialog.WARNING);
-			Activator.setRunning(false);
 			return Optional.empty();
 		}
 
@@ -85,7 +83,6 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 				NLS.bind(Messages.LoggerRuleWizardHandler_info_supportedFrameworkFound,
 						loggerRule.getAvailableLoggerType()));
 		if (!confirmed) {
-			Activator.setRunning(false);
 			return Optional.empty();
 		}
 
