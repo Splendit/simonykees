@@ -75,7 +75,7 @@ public class JavaProjectWrapper extends AbstractJavaElementWrapperWithChildList<
 	}
 
 	@Override
-	public AbstractJavaElementWrapper getParent() {
+	public IJavaElementWrapper getParent() {
 		return null;
 	}
 

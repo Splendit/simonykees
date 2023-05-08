@@ -1,5 +1,8 @@
 package eu.jsparrow.ui.preference;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -14,6 +17,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.preference.marker.MarkerItemWrapper;
 import eu.jsparrow.ui.preference.marker.MarkerItemWrapperFilter;
 import eu.jsparrow.ui.preference.marker.MarkerTreeViewWrapper;
 import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
@@ -52,7 +56,9 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 
 		createSearchTextField(group);
 
-		treeViewerWrapper = new MarkerTreeViewWrapper(group);
+		List<MarkerItemWrapper> createMarkerItemWrapperList = Collections
+			.unmodifiableList(MarkerTreeViewWrapper.createMarkerItemWrapperList());
+		treeViewerWrapper = new MarkerTreeViewWrapper(group, createMarkerItemWrapperList);
 
 		Composite bulkActionsComposite = new Composite(mainComposite, SWT.NONE);
 		bulkActionsComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
@@ -74,7 +80,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		searchField.setLayoutData(searchFieldGridData);
 		searchField.addModifyListener(this::textRetrievalModified);
 	}
-	
+
 	/**
 	 * Method for the listener functionality for modifying text in
 	 * {@link #searchField}
@@ -84,7 +90,6 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		String searchText = source.getText();
 		treeViewerWrapper.setTreeViewerFilter(new MarkerItemWrapperFilter(treeViewerWrapper, searchText));
 	}
-
 
 	protected void addActiveMarker(String markerId) {
 		SimonykeesPreferenceManager.addActiveMarker(markerId);

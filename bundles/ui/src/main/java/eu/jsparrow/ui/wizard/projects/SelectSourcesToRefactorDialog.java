@@ -1,8 +1,15 @@
 package eu.jsparrow.ui.wizard.projects;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
@@ -11,6 +18,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 
@@ -21,7 +29,9 @@ import eu.jsparrow.ui.handler.RemoveUnusedCodeWizardHandler;
 import eu.jsparrow.ui.handler.RenameFieldsRuleWizardHandler;
 import eu.jsparrow.ui.handler.RunDefaultProfileHandler;
 import eu.jsparrow.ui.handler.SelectRulesWizardHandler;
-import eu.jsparrow.ui.wizard.projects.javaelement.AbstractJavaElementWrapper;
+import eu.jsparrow.ui.wizard.projects.javaelement.IJavaElementWrapper;
+import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectWrapper;
+import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectsCollector;
 
 public class SelectSourcesToRefactorDialog extends Dialog {
 
@@ -32,6 +42,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 	private Button buttonRenameFields;
 	private Button buttonRemoveUnusedCode;
 	private AbstractRuleWizardHandler abstractRuleWizardHandler;
+	private List<JavaProjectWrapper> javaProjects;
 
 	public static void selectJavaSourcesToRefactor(Shell parentShell) {
 		if (Activator.isRunning()) {
@@ -40,18 +51,46 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		}
 
 		Activator.setRunning(true);
-		SelectSourcesToRefactorDialog selectSourcesDialog = new SelectSourcesToRefactorDialog(parentShell);
-		selectSourcesDialog.open();
 
-		AbstractRuleWizardHandler ruleWizardHandler = selectSourcesDialog.getAbstractRuleWizardHandler()
-			.orElse(null);
-		if (ruleWizardHandler != null) {
-			Set<AbstractJavaElementWrapper> selectedWrappers = selectSourcesDialog.getSelectedWrappers();
-			SelectedJavaElementsCollector collector = new SelectedJavaElementsCollector(selectedWrappers);
-			ruleWizardHandler.execute(collector);
-		} else {
-			Activator.setRunning(false);
-		}
+		JavaProjectsCollector javaProjectsCollector = new JavaProjectsCollector();
+		Job job = new Job("Collecting Java Sources to refactor") { //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				javaProjectsCollector.collectJavaProjects(monitor);
+				return Status.OK_STATUS;
+			}
+		};
+
+		JobChangeAdapter jobChangeAdapter = new JobChangeAdapter() {
+
+			@Override
+			public void done(IJobChangeEvent event) {
+
+				Display.getDefault()
+					.asyncExec(() -> {
+						SelectSourcesToRefactorDialog selectSourcesDialog = new SelectSourcesToRefactorDialog(
+								parentShell,
+								javaProjectsCollector.getJavaProjectWrapperList());
+						selectSourcesDialog.open();
+
+						AbstractRuleWizardHandler ruleWizardHandler = selectSourcesDialog.getAbstractRuleWizardHandler()
+							.orElse(null);
+						if (ruleWizardHandler != null) {
+							Set<IJavaElementWrapper> selectedWrappers = selectSourcesDialog.getSelectedWrappers();
+							SelectedJavaElementsCollector collector = new SelectedJavaElementsCollector(
+									selectedWrappers);
+							ruleWizardHandler.execute(collector);
+						} else {
+							Activator.setRunning(false);
+						}
+					});
+			}
+		};
+		job.addJobChangeListener(jobChangeAdapter);
+
+		job.setUser(true);
+		job.schedule();
+
 	}
 
 	private static Button createRefactoringRadioButton(Composite parent, String text) {
@@ -60,8 +99,9 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		return radioButton;
 	}
 
-	private SelectSourcesToRefactorDialog(Shell parentShell) {
+	private SelectSourcesToRefactorDialog(Shell parentShell, List<JavaProjectWrapper> javaProjects) {
 		super(parentShell);
+		this.javaProjects = javaProjects;
 	}
 
 	@Override
@@ -95,7 +135,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		gridLayout.marginWidth = 0;
 		treeViewerGroup.setLayout(gridLayout);
 
-		javaProjectTreeVierWrapper = new JavaProjectTreeViewWrapper(treeViewerGroup);
+		javaProjectTreeVierWrapper = new JavaProjectTreeViewWrapper(treeViewerGroup, javaProjects);
 
 		Group refactoring = new Group(sourceSelectionComposite, SWT.NONE);
 		refactoring.setText("JSparrow"); //$NON-NLS-1$
@@ -140,7 +180,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		super.okPressed();
 	}
 
-	private Set<AbstractJavaElementWrapper> getSelectedWrappers() {
+	private Set<IJavaElementWrapper> getSelectedWrappers() {
 		return javaProjectTreeVierWrapper.getSelectedWrappers();
 	}
 

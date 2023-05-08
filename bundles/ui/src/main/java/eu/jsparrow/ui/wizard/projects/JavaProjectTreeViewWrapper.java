@@ -6,82 +6,29 @@ import java.util.Set;
 
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.swt.widgets.Group;
 
 import eu.jsparrow.ui.treeview.AbstractCheckBoxTreeViewWrapper;
-import eu.jsparrow.ui.wizard.projects.javaelement.AbstractJavaElementWrapper;
 import eu.jsparrow.ui.wizard.projects.javaelement.AbstractJavaElementWrapperWithChildList;
+import eu.jsparrow.ui.wizard.projects.javaelement.IJavaElementWrapper;
 import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectWrapper;
-import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectsCollector;
-import eu.jsparrow.ui.wizard.projects.javaelement.PackageFragmentRootWrapper;
-import eu.jsparrow.ui.wizard.projects.javaelement.PackageFragmentWrapper;
 
-public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper implements ITreeViewerListener {
+public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper {
 
-	private List<JavaProjectWrapper> javaProjects;
-	private Set<AbstractJavaElementWrapper> selectedWrappers = new HashSet<>();
-	private Set<AbstractJavaElementWrapper> grayedWrappers = new HashSet<>();
+	private Set<IJavaElementWrapper> selectedWrappers = new HashSet<>();
+	private Set<IJavaElementWrapper> grayedWrappers = new HashSet<>();
 
-	protected JavaProjectTreeViewWrapper(Group group) {
-		super(group);
-	}
-
-	@Override
-	protected void createCheckBoxTreeViewer(Group group) {
-		super.createCheckBoxTreeViewer(group);
-		checkboxTreeViewer.addTreeListener(this);
-	}
-
-	@Override
-	public Object[] getElements(Object inputElement) {
-		if (inputElement == javaProjects) {
-			return javaProjects.toArray();
-		}
-		return new Object[] {};
-	}
-
-	@Override
-	public Object[] getChildren(Object parentElement) {
-
-		if (parentElement instanceof JavaProjectWrapper) {
-			return ((JavaProjectWrapper) parentElement).getChildren()
-				.toArray();
-		}
-		if (parentElement instanceof PackageFragmentRootWrapper) {
-			return ((PackageFragmentRootWrapper) parentElement).getChildren()
-				.toArray();
-		}
-		if (parentElement instanceof PackageFragmentWrapper) {
-			return ((PackageFragmentWrapper) parentElement).getChildren()
-				.toArray();
-		}
-		return new Object[] {};
-	}
-
-	@Override
-	public Object getParent(Object element) {
-		if (element instanceof AbstractJavaElementWrapper) {
-			return ((AbstractJavaElementWrapper) element).getParent();
-		}
-		return null;
-	}
-
-	@Override
-	public boolean hasChildren(Object element) {
-		if (element instanceof AbstractJavaElementWrapper) {
-			return ((AbstractJavaElementWrapper) element).hasChildren();
-		}
-		return false;
+	protected JavaProjectTreeViewWrapper(Group group, List<JavaProjectWrapper> javaProjects) {
+		this.createCheckBoxTreeViewer(group, javaProjects);
 	}
 
 	@Override
 	public void checkStateChanged(CheckStateChangedEvent event) {
 		Object element = event.getElement();
-		if (element instanceof AbstractJavaElementWrapper) {
+		if (element instanceof IJavaElementWrapper) {
 			boolean checked = event.getChecked();
-			AbstractJavaElementWrapper wrapper = (AbstractJavaElementWrapper) element;
+			IJavaElementWrapper wrapper = (IJavaElementWrapper) element;
 			checkboxTreeViewer.setChecked(wrapper, checked);
 			checkboxTreeViewer.setGrayed(wrapper, false);
 			updateSelectedAndGrayedWrappers(wrapper, checked, false);
@@ -90,7 +37,8 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 		}
 	}
 
-	protected void updateSelectedAndGrayedWrappers(AbstractJavaElementWrapper wrapper, boolean checked, boolean grayed) {
+	protected void updateSelectedAndGrayedWrappers(IJavaElementWrapper wrapper, boolean checked,
+			boolean grayed) {
 		if (checked) {
 			selectedWrappers.add(wrapper);
 			grayedWrappers.remove(wrapper);
@@ -103,11 +51,11 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 		}
 	}
 
-	private void updateChildrenSelectionState(AbstractJavaElementWrapper wrapper, boolean checked) {
+	private void updateChildrenSelectionState(IJavaElementWrapper wrapper, boolean checked) {
 		if (wrapper instanceof AbstractJavaElementWrapperWithChildList) {
 			AbstractJavaElementWrapperWithChildList<?> wapperWithChildList = (AbstractJavaElementWrapperWithChildList<?>) wrapper;
 			if (wapperWithChildList.isChildListAssigned()) {
-				for (AbstractJavaElementWrapper child : wapperWithChildList.getChildren()) {
+				for (IJavaElementWrapper child : wapperWithChildList.getChildren()) {
 					checkboxTreeViewer.setChecked(child, checked);
 					checkboxTreeViewer.setGrayed(child, false);
 					updateSelectedAndGrayedWrappers(child, checked, false);
@@ -117,8 +65,8 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 		}
 	}
 
-	private void updateParentSelectionState(AbstractJavaElementWrapper wrapper) {
-		AbstractJavaElementWrapper parent = wrapper.getParent();
+	private void updateParentSelectionState(IJavaElementWrapper wrapper) {
+		IJavaElementWrapper parent = wrapper.getParent();
 		if (!(parent instanceof AbstractJavaElementWrapperWithChildList)) {
 			return;
 		}
@@ -142,7 +90,7 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 	}
 
 	private boolean allChildrenChecked(AbstractJavaElementWrapperWithChildList<?> wapperWithChildList) {
-		for (AbstractJavaElementWrapper child : wapperWithChildList.getChildren()) {
+		for (IJavaElementWrapper child : wapperWithChildList.getChildren()) {
 			if (!selectedWrappers.contains(child)) {
 				return false;
 			}
@@ -151,7 +99,7 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 	}
 
 	private boolean allChildrenUnchecked(AbstractJavaElementWrapperWithChildList<?> wapperWithChildList) {
-		for (AbstractJavaElementWrapper child : wapperWithChildList.getChildren()) {
+		for (IJavaElementWrapper child : wapperWithChildList.getChildren()) {
 			if (selectedWrappers.contains(child)) {
 				return false;
 			}
@@ -168,22 +116,9 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 	}
 
 	@Override
-	protected List<JavaProjectWrapper> createInput() {
-		if (javaProjects == null) {
-			javaProjects = JavaProjectsCollector.collectJavaProjects();
-		}
-		return javaProjects;
-	}
-
-	@Override
 	protected void updateTreeViewerSelectionState() {
 		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public void treeCollapsed(TreeExpansionEvent event) {
-		// ...
 	}
 
 	@Override
@@ -197,7 +132,7 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 		if (element instanceof AbstractJavaElementWrapperWithChildList) {
 			AbstractJavaElementWrapperWithChildList<?> wapperWithChildList = (AbstractJavaElementWrapperWithChildList<?>) element;
 			boolean checked = checkboxTreeViewer.getChecked(element);
-			for (AbstractJavaElementWrapper child : wapperWithChildList.getChildren()) {
+			for (IJavaElementWrapper child : wapperWithChildList.getChildren()) {
 				checkboxTreeViewer.setChecked(child, checked);
 				checkboxTreeViewer.setGrayed(child, false);
 				updateSelectedAndGrayedWrappers(child, checked, false);
@@ -205,7 +140,7 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 		}
 	}
 
-	public Set<AbstractJavaElementWrapper> getSelectedWrappers() {
+	public Set<IJavaElementWrapper> getSelectedWrappers() {
 		return selectedWrappers;
 	}
 }

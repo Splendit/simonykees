@@ -5,7 +5,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 /**
  * @since 4.17.0
  */
-public class CompilationUnitWrapper extends AbstractJavaElementWrapper {
+public class CompilationUnitWrapper implements IJavaElementWrapper {
 	private final PackageFragmentWrapper parent;
 	private final ICompilationUnit compilationUnit;
 	private final String javaFileName;
@@ -34,5 +34,10 @@ public class CompilationUnitWrapper extends AbstractJavaElementWrapper {
 	@Override
 	public boolean hasChildren() {
 		return false;
+	}
+
+	@Override
+	public Object[] getChildrenAsObjectArray() {
+		return new Object[] {};
 	}
 }

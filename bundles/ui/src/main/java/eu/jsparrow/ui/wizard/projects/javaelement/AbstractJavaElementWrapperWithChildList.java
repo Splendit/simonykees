@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-public abstract class AbstractJavaElementWrapperWithChildList<C extends AbstractJavaElementWrapper>
-		extends AbstractJavaElementWrapper {
+public abstract class AbstractJavaElementWrapperWithChildList<C extends IJavaElementWrapper>
+		implements IJavaElementWrapper {
 
 	private List<C> children;
 
@@ -34,5 +34,10 @@ public abstract class AbstractJavaElementWrapperWithChildList<C extends Abstract
 	}
 
 	protected abstract List<C> collectChildren() throws JavaModelException;
+	
+	@Override
+	public Object[] getChildrenAsObjectArray() {
+		return getChildren().toArray();
+	}	
 
 }

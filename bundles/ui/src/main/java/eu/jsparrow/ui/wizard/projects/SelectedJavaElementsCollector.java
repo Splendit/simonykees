@@ -10,18 +10,18 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
 import eu.jsparrow.ui.handler.IJavaElementsSelectionProvider;
-import eu.jsparrow.ui.wizard.projects.javaelement.AbstractJavaElementWrapper;
+import eu.jsparrow.ui.wizard.projects.javaelement.IJavaElementWrapper;
 
 public class SelectedJavaElementsCollector implements IJavaElementsSelectionProvider {
 	
-	private final Set<AbstractJavaElementWrapper> selectedJavaElementWrappers;
+	private final Set<IJavaElementWrapper> selectedJavaElementWrappers;
 	
-	SelectedJavaElementsCollector(Set<AbstractJavaElementWrapper> selectedJavaElementWrappers) {
+	SelectedJavaElementsCollector(Set<IJavaElementWrapper> selectedJavaElementWrappers) {
 		this.selectedJavaElementWrappers = selectedJavaElementWrappers;
 	}
 
-	private List<AbstractJavaElementWrapper> getSelectedElementsWithoutSelectedParent() {
-		List<AbstractJavaElementWrapper> selectedElementsWithoutSelectedParent = new ArrayList<>();
+	private List<IJavaElementWrapper> getSelectedElementsWithoutSelectedParent() {
+		List<IJavaElementWrapper> selectedElementsWithoutSelectedParent = new ArrayList<>();
 
 		selectedJavaElementWrappers.forEach(element -> {
 			if (element.getParent() == null || !selectedJavaElementWrappers.contains(element.getParent())) {
@@ -35,8 +35,8 @@ public class SelectedJavaElementsCollector implements IJavaElementsSelectionProv
 	@Override
 	public Map<IJavaProject, List<IJavaElement>> getSelectedJavaElements() {
 		Map<IJavaProject, List<IJavaElement>> mapping = new HashMap<>();
-		List<AbstractJavaElementWrapper> selectedElementsWithoutSelectedParent = getSelectedElementsWithoutSelectedParent();
-		for (AbstractJavaElementWrapper elementWrapper : selectedElementsWithoutSelectedParent) {
+		List<IJavaElementWrapper> selectedElementsWithoutSelectedParent = getSelectedElementsWithoutSelectedParent();
+		for (IJavaElementWrapper elementWrapper : selectedElementsWithoutSelectedParent) {
 			IJavaElement javaElement = elementWrapper.getJavaElement();
 			IJavaProject javaProject = javaElement.getJavaProject();
 			mapping.computeIfAbsent(javaProject, key -> new ArrayList<IJavaElement>());

@@ -26,7 +26,7 @@ public class MarkerItemWrapperFilter extends ViewerFilter {
 				matchingCategories.add(category);
 			}
 
-			List<MarkerItemWrapper> markers = category.getChildern();
+			List<MarkerItemWrapper> markers = category.getChildren();
 			for (MarkerItemWrapper marker : markers) {
 				if (!matchingMarkers.contains(marker)
 						&& StringUtils.contains(StringUtils.lowerCase(marker.getName()), lowerCaseSearchText)) {
@@ -51,7 +51,7 @@ public class MarkerItemWrapperFilter extends ViewerFilter {
 			MarkerItemWrapper markerItemWrapper = (MarkerItemWrapper) element;
 
 			if (markerItemWrapper.isParent()) {
-				return markerItemWrapper.getChildern()
+				return markerItemWrapper.getChildren()
 					.stream()
 					.anyMatch(matchingMarkers::contains);
 			}
