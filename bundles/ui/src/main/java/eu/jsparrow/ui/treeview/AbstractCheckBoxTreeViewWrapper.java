@@ -31,8 +31,8 @@ public abstract class AbstractCheckBoxTreeViewWrapper
 		updateTreeViewerSelectionState();
 	}
 
-	public void setTreeViewerFilter(ViewerFilter treeviewerFilter) {
-		checkboxTreeViewer.setFilters(treeviewerFilter);
+	public void setTreeViewerFilters(ViewerFilter... filters) {
+		checkboxTreeViewer.setFilters(filters);
 		updateTreeViewerSelectionState();
 	}
 

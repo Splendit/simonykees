@@ -11,8 +11,8 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -20,7 +20,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.handler.AbstractRuleWizardHandler;
@@ -35,12 +37,21 @@ import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectsCollector;
 
 public class SelectSourcesToRefactorDialog extends Dialog {
 
+	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 	private JavaProjectTreeViewWrapper javaProjectTreeVierWrapper;
+	private Text textFilterProjects;
+	private Text textFilterPackageRoots;
+	private Text textFilterPackages;
+	private Text textFilterCompilationUnits;
 	private Button buttonRefactorWithDefaultProfile;
 	private Button buttonSelectRulesToRefactor;
 	private Button buttonRefactorWithLoggingRule;
 	private Button buttonRenameFields;
 	private Button buttonRemoveUnusedCode;
+	private JavaProjectFilter javaProjectFilter = new JavaProjectFilter(EMPTY_STRING);
+	private JavaPackageRootFilter javaPackageRootFilter = new JavaPackageRootFilter(EMPTY_STRING);
+	private JavaPackageFilter javaPackageFilter = new JavaPackageFilter(EMPTY_STRING);
+	private JavaFileFilter javaFileFilter = new JavaFileFilter(EMPTY_STRING);
 	private AbstractRuleWizardHandler abstractRuleWizardHandler;
 	private List<JavaProjectWrapper> javaProjects;
 
@@ -128,7 +139,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 
 		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.widthHint = convertWidthInCharsToPixels(65);
-		gridData.heightHint = 200;
+		gridData.heightHint = 250;
 		treeViewerGroup.setLayoutData(gridData);
 		gridLayout = new GridLayout(1, false);
 		gridLayout.marginHeight = 0;
@@ -137,12 +148,37 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 
 		javaProjectTreeVierWrapper = new JavaProjectTreeViewWrapper(treeViewerGroup, javaProjects);
 
-		Group refactoring = new Group(sourceSelectionComposite, SWT.NONE);
+		Composite rightComposite = new Composite(sourceSelectionComposite, SWT.NONE);
+		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		rightComposite.setLayoutData(gridData);
+		gridLayout = new GridLayout(1, false);
+		rightComposite.setLayout(gridLayout);
+		gridLayout.marginHeight = 0;
+		gridLayout.marginWidth = 0;
+
+		Group filter = new Group(rightComposite, SWT.NONE);
+		filter.setText("Filter"); //$NON-NLS-1$
+
+		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gridData.widthHint = convertWidthInCharsToPixels(50);
+		gridData.heightHint = 150;
+		filter.setLayoutData(gridData);
+		gridLayout = new GridLayout(1, false);
+		gridLayout.marginHeight = 0;
+		gridLayout.marginWidth = 0;
+		gridLayout.verticalSpacing = 1;
+		filter.setLayout(gridLayout);
+		textFilterProjects = createFilterTextField(filter, "Projects"); //$NON-NLS-1$
+		textFilterPackageRoots = createFilterTextField(filter, "Package Roots"); //$NON-NLS-1$
+		textFilterPackages = createFilterTextField(filter, "Packages"); //$NON-NLS-1$
+		textFilterCompilationUnits = createFilterTextField(filter, "Java Files"); //$NON-NLS-1$
+
+		Group refactoring = new Group(rightComposite, SWT.NONE);
 		refactoring.setText("JSparrow"); //$NON-NLS-1$
 
 		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.widthHint = convertWidthInCharsToPixels(35);
-		gridData.heightHint = 200;
+		gridData.widthHint = convertWidthInCharsToPixels(50);
+		gridData.heightHint = 100;
 		refactoring.setLayoutData(gridData);
 		gridLayout = new GridLayout(1, false);
 		gridLayout.marginHeight = 0;
@@ -160,8 +196,40 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		return area;
 	}
 
-	public void setTreeViewerFilter(ViewerFilter treeviewerFilter) {
-		javaProjectTreeVierWrapper.setTreeViewerFilter(treeviewerFilter);
+	protected Text createFilterTextField(Group group, String message) {
+		Composite searchComposite = new Composite(group, SWT.NONE);
+		searchComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		GridLayout searchCompositeGridLayout = new GridLayout(2, false);
+		searchCompositeGridLayout.marginHeight = 0;
+		searchComposite.setLayout(searchCompositeGridLayout);
+		Label label = new Label(searchComposite, SWT.NONE);
+		label.setText(message);
+		GridData labelGridData = new GridData(GridData.FILL, GridData.CENTER, false, false);
+		labelGridData.widthHint = convertWidthInCharsToPixels(15);
+		label.setLayoutData(labelGridData);
+		Text filterText = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
+		filterText.setMessage("Filter " + message); //$NON-NLS-1$
+		GridData searchFieldGridData = new GridData(GridData.FILL, GridData.CENTER, false, false);
+		searchFieldGridData.widthHint = convertWidthInCharsToPixels(27);
+		filterText.setLayoutData(searchFieldGridData);
+		filterText.addModifyListener(this::textRetrievalModified);
+		return filterText;
+	}
+
+	protected void textRetrievalModified(ModifyEvent modifyEvent) {
+		Text source = (Text) modifyEvent.getSource();
+		String searchText = source.getText();
+		if (source == textFilterProjects) {
+			javaProjectFilter = new JavaProjectFilter(searchText);
+		} else if (source == textFilterPackageRoots) {
+			javaPackageRootFilter = new JavaPackageRootFilter(searchText);
+		} else if (source == textFilterPackages) {
+			javaPackageFilter = new JavaPackageFilter(searchText);
+		} else if(source == textFilterCompilationUnits) {
+			javaFileFilter = new JavaFileFilter(searchText);
+		}
+		javaProjectTreeVierWrapper.setTreeViewerFilters(javaProjectFilter, javaPackageRootFilter, javaPackageFilter,
+				javaFileFilter);
 	}
 
 	@Override

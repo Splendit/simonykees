@@ -88,7 +88,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 	protected void textRetrievalModified(ModifyEvent modifyEvent) {
 		Text source = (Text) modifyEvent.getSource();
 		String searchText = source.getText();
-		treeViewerWrapper.setTreeViewerFilter(new MarkerItemWrapperFilter(treeViewerWrapper, searchText));
+		treeViewerWrapper.setTreeViewerFilters(new MarkerItemWrapperFilter(treeViewerWrapper, searchText));
 	}
 
 	protected void addActiveMarker(String markerId) {

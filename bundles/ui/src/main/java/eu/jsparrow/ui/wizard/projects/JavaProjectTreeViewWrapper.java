@@ -18,8 +18,10 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 
 	private Set<IJavaElementWrapper> selectedWrappers = new HashSet<>();
 	private Set<IJavaElementWrapper> grayedWrappers = new HashSet<>();
+	private List<JavaProjectWrapper> javaProjects;
 
 	protected JavaProjectTreeViewWrapper(Group group, List<JavaProjectWrapper> javaProjects) {
+		this.javaProjects = javaProjects;
 		this.createCheckBoxTreeViewer(group, javaProjects);
 	}
 
@@ -55,7 +57,8 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 		if (wrapper instanceof AbstractJavaElementWrapperWithChildList) {
 			AbstractJavaElementWrapperWithChildList<?> wapperWithChildList = (AbstractJavaElementWrapperWithChildList<?>) wrapper;
 			if (wapperWithChildList.isChildListAssigned()) {
-				for (IJavaElementWrapper child : wapperWithChildList.getChildren()) {
+				List<? extends IJavaElementWrapper> children = wapperWithChildList.getChildren();
+				for (IJavaElementWrapper child : children) {
 					checkboxTreeViewer.setChecked(child, checked);
 					checkboxTreeViewer.setGrayed(child, false);
 					updateSelectedAndGrayedWrappers(child, checked, false);
@@ -117,8 +120,33 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 
 	@Override
 	protected void updateTreeViewerSelectionState() {
-		// TODO Auto-generated method stub
+		this.javaProjects.forEach(javaProjectWrapper -> setTreeViewerCheckStateForSubTree(javaProjectWrapper, false));
+		this.selectedWrappers.forEach(wrapper -> {
+			checkboxTreeViewer.setChecked(wrapper, true);
+			checkboxTreeViewer.setGrayed(wrapper, false);
+		});
+		this.grayedWrappers.forEach(wrapper -> {
+			checkboxTreeViewer.setChecked(wrapper, true);
+			checkboxTreeViewer.setGrayed(wrapper, true);
+		});
+	}
 
+	private void setTreeViewerCheckStateForSubTree(IJavaElementWrapper javaElementWrapper, boolean checked) {
+		setTreeViewerCheckStateForElement(javaElementWrapper, checked);
+
+		if (javaElementWrapper instanceof AbstractJavaElementWrapperWithChildList) {
+			AbstractJavaElementWrapperWithChildList<?> wapperWithChildList = (AbstractJavaElementWrapperWithChildList<?>) javaElementWrapper;
+			if (wapperWithChildList.isChildListAssigned()) {
+				for (IJavaElementWrapper child : wapperWithChildList.getChildren()) {
+					setTreeViewerCheckStateForSubTree(child, checked);
+				}
+			}
+		}
+	}
+
+	private void setTreeViewerCheckStateForElement(Object element, boolean checked) {
+		checkboxTreeViewer.setChecked(element, checked);
+		checkboxTreeViewer.setGrayed(element, false);
 	}
 
 	@Override
