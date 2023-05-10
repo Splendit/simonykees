@@ -18,7 +18,7 @@ public abstract class AbstractCheckBoxTreeViewWrapper
 
 	protected CheckboxTreeViewer checkboxTreeViewer;
 
-	protected void createCheckBoxTreeViewer(Group group, List<? extends ICheckBoxTreeViewNode> elementList) {
+	protected void createCheckBoxTreeViewer(Group group, List<? extends ICheckBoxTreeViewNode<?>> elementList) {
 		checkboxTreeViewer = new CheckboxTreeViewer(group);
 		checkboxTreeViewer.getTree()
 			.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -44,8 +44,8 @@ public abstract class AbstractCheckBoxTreeViewWrapper
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof ICheckBoxTreeViewNode) {
-			ICheckBoxTreeViewNode node = (ICheckBoxTreeViewNode) parentElement;
-			return node.getChildrenAsObjectArray();
+			ICheckBoxTreeViewNode<?> node = (ICheckBoxTreeViewNode<?>) parentElement;
+			return node.getChildren().toArray();
 		}
 		return new Object[] {};
 	}
@@ -53,7 +53,7 @@ public abstract class AbstractCheckBoxTreeViewWrapper
 	@Override
 	public Object getParent(Object element) {
 		if (element instanceof ICheckBoxTreeViewNode) {
-			return ((ICheckBoxTreeViewNode) element).getParent();
+			return ((ICheckBoxTreeViewNode<?>) element).getParent();
 		}
 		return null;
 	}
@@ -61,7 +61,7 @@ public abstract class AbstractCheckBoxTreeViewWrapper
 	@Override
 	public boolean hasChildren(Object element) {
 		if (element instanceof ICheckBoxTreeViewNode) {
-			return ((ICheckBoxTreeViewNode) element).hasChildren();
+			return ((ICheckBoxTreeViewNode<?>) element).hasChildren();
 		}
 		return false;
 	}

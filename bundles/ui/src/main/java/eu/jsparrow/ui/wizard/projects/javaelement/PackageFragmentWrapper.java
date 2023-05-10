@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * @since 4.17.0
  */
-public class PackageFragmentWrapper extends AbstractJavaElementWrapperWithChildList<CompilationUnitWrapper> {
+public class PackageFragmentWrapper extends AbstractJavaElementWrapperWithChildList {
 	private final PackageFragmentRootWrapper parent;
 	private final String packageName;
 	private final IPackageFragment packageFragment;
@@ -22,10 +22,10 @@ public class PackageFragmentWrapper extends AbstractJavaElementWrapperWithChildL
 		this.packageName = packageFragment.getElementName();
 	}
 
-	protected List<CompilationUnitWrapper> collectChildren()
+	protected List<IJavaElementWrapper> collectChildren()
 			throws JavaModelException {
 		IJavaElement[] javaElementArray;
-		List<CompilationUnitWrapper> packageFragmentChildWrapperList = new ArrayList<>();
+		List<IJavaElementWrapper> packageFragmentChildWrapperList = new ArrayList<>();
 		javaElementArray = packageFragment.getChildren();
 		for (IJavaElement javaElement : javaElementArray) {
 			if (javaElement instanceof ICompilationUnit) {

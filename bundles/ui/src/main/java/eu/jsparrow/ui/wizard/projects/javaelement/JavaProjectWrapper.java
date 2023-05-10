@@ -14,17 +14,17 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * @since 4.17.0
  */
-public class JavaProjectWrapper extends AbstractJavaElementWrapperWithChildList<PackageFragmentRootWrapper> {
+public class JavaProjectWrapper extends AbstractJavaElementWrapperWithChildList {
 
 	private final IJavaProject javaProject;
 	private final IPath projectPath;
 	private final String pathToDisplay;
 	private final String projectName;
 
-	protected List<PackageFragmentRootWrapper> collectChildren()
+	protected List<IJavaElementWrapper> collectChildren()
 			throws JavaModelException {
 		IPackageFragmentRoot[] packageFragmentRootArray = javaProject.getPackageFragmentRoots();
-		List<PackageFragmentRootWrapper> packageFragmentRootWrapperList = new ArrayList<>();
+		List<IJavaElementWrapper> packageFragmentRootWrapperList = new ArrayList<>();
 		for (IPackageFragmentRoot packageFragmentRoot : packageFragmentRootArray) {
 			if (isSourcePackageFragmentRoot(packageFragmentRoot)) {
 				IPackageFragment firstPackageFragment = findFirstPackageFragment(packageFragmentRoot).orElse(null);

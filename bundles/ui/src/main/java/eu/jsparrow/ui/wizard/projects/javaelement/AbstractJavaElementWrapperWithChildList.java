@@ -5,12 +5,11 @@ import java.util.List;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-public abstract class AbstractJavaElementWrapperWithChildList<C extends IJavaElementWrapper>
-		implements IJavaElementWrapper {
+public abstract class AbstractJavaElementWrapperWithChildList implements IJavaElementWrapper {
 
-	private List<C> children;
+	private List<IJavaElementWrapper> children;
 
-	public List<C> getChildren() {
+	public List<IJavaElementWrapper> getChildren() {
 		if (children == null) {
 			try {
 				children = collectChildren();
@@ -24,20 +23,15 @@ public abstract class AbstractJavaElementWrapperWithChildList<C extends IJavaEle
 		return children;
 	}
 
-	public boolean isChildListAssigned() {
-		return children != null;
-	}
-
 	@Override
 	public boolean hasChildren() {
 		return true;
 	}
 
-	protected abstract List<C> collectChildren() throws JavaModelException;
-	
 	@Override
-	public Object[] getChildrenAsObjectArray() {
-		return getChildren().toArray();
-	}	
+	public boolean hasChildListAtHand() {
+		return children != null;
+	}
 
+	protected abstract List<IJavaElementWrapper> collectChildren() throws JavaModelException;
 }

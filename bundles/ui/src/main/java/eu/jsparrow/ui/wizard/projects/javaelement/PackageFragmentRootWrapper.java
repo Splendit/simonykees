@@ -1,5 +1,6 @@
 package eu.jsparrow.ui.wizard.projects.javaelement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
@@ -12,7 +13,7 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * @since 4.17.0
  */
-public class PackageFragmentRootWrapper extends AbstractJavaElementWrapperWithChildList<PackageFragmentWrapper> {
+public class PackageFragmentRootWrapper extends AbstractJavaElementWrapperWithChildList {
 	private final JavaProjectWrapper parent;
 	private final IPackageFragmentRoot javaElement;
 	private final String elementName;
@@ -30,10 +31,12 @@ public class PackageFragmentRootWrapper extends AbstractJavaElementWrapperWithCh
 		this.pathToDisplay = PathToString.pathToString(pathRelativeToProject);
 	}
 
-	protected List<PackageFragmentWrapper> collectChildren()
+	protected List<IJavaElementWrapper> collectChildren()
 			throws JavaModelException {
 		RecursivePackageFragmentsCollector packageFragmentCollector = new RecursivePackageFragmentsCollector(this);
-		return packageFragmentCollector.collectPackagesContainingSources(javaElement);
+		List<IJavaElementWrapper> childList = new ArrayList<>();
+		packageFragmentCollector.collectPackagesContainingSources(javaElement).forEach(childList::add);
+		return childList;
 	}
 
 	@Override

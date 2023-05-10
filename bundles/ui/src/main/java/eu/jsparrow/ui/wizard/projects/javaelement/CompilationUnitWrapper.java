@@ -1,5 +1,8 @@
 package eu.jsparrow.ui.wizard.projects.javaelement;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 
 /**
@@ -37,7 +40,12 @@ public class CompilationUnitWrapper implements IJavaElementWrapper {
 	}
 
 	@Override
-	public Object[] getChildrenAsObjectArray() {
-		return new Object[] {};
+	public List<IJavaElementWrapper> getChildren() {
+		return Collections.emptyList();
+	}
+
+	@Override
+	public boolean hasChildListAtHand() {
+		return false;
 	}
 }

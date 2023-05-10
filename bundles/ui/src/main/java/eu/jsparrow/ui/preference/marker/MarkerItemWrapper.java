@@ -12,7 +12,7 @@ import eu.jsparrow.ui.treeview.ICheckBoxTreeViewNode;
  * @since 4.10.0
  *
  */
-public class MarkerItemWrapper implements ICheckBoxTreeViewNode {
+public class MarkerItemWrapper implements ICheckBoxTreeViewNode<MarkerItemWrapper> {
 	private MarkerItemWrapper parent;
 	private boolean isParent;
 	private String markerId;
@@ -37,6 +37,7 @@ public class MarkerItemWrapper implements ICheckBoxTreeViewNode {
 		return name;
 	}
 
+	@Override
 	public List<MarkerItemWrapper> getChildren() {
 		return children;
 	}
@@ -61,7 +62,7 @@ public class MarkerItemWrapper implements ICheckBoxTreeViewNode {
 	}
 
 	@Override
-	public Object[] getChildrenAsObjectArray() {
-		return getChildren().toArray();
-	}	
+	public boolean hasChildListAtHand() {
+		return  hasChildren();
+	}
 }
