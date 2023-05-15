@@ -30,9 +30,7 @@ import eu.jsparrow.ui.treeview.AbstractCheckBoxTreeViewWrapper;
  * @since 4.10.0
  *
  */
-public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper {
-
-	private List<MarkerItemWrapper> allMarkerItemWrappers;
+public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<MarkerItemWrapper> {
 
 	public static List<MarkerItemWrapper> createMarkerItemWrapperList() {
 		List<MarkerItemWrapper> allItems = new ArrayList<>();
@@ -95,13 +93,12 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper {
 		}
 	}
 
-	public MarkerTreeViewWrapper(Group group, List<MarkerItemWrapper> allMarkerItemWrappers) {
-		this.allMarkerItemWrappers = allMarkerItemWrappers;
-		this.createCheckBoxTreeViewer(group, allMarkerItemWrappers);
+	public MarkerTreeViewWrapper(Group group) {
+		this.createCheckBoxTreeViewer(group, createMarkerItemWrapperList());
 	}
 
 	public List<MarkerItemWrapper> getAllMarkerItemWrappers() {
-		return allMarkerItemWrappers;
+		return elements;
 	}
 
 	/**
@@ -113,7 +110,7 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper {
 	public void selectMarkers(List<String> allActiveMarkers) {
 		bulkUpdate(false);
 
-		allMarkerItemWrappers.stream()
+		elements.stream()
 			.flatMap(item -> item.getChildren()
 				.stream())
 			.filter(item -> allActiveMarkers.contains(item.getMarkerId()))
@@ -125,7 +122,7 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper {
 
 	private void updateMarkerItemSelection() {
 		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
-		allMarkerItemWrappers.stream()
+		elements.stream()
 			.flatMap(itemWrapper -> itemWrapper.getChildren()
 				.stream())
 			.forEach(itemWrapper -> {
@@ -137,7 +134,7 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper {
 	}
 
 	private void updateCategorySelection() {
-		allMarkerItemWrappers.stream()
+		elements.stream()
 			.forEach(itemWrapper -> {
 				List<MarkerItemWrapper> children = itemWrapper.getChildren();
 				boolean allChecked = children.stream()
@@ -165,11 +162,11 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper {
 	 *            whether the markers should be activated or deactivated.
 	 */
 	public void bulkUpdate(boolean selection) {
-		allMarkerItemWrappers.stream()
+		elements.stream()
 			.flatMap(item -> item.getChildren()
 				.stream())
 			.forEach(item -> persistMarkerItemSelection(selection, item));
-		allMarkerItemWrappers.forEach(item -> checkboxTreeViewer.setSubtreeChecked(item, selection));
+		elements.forEach(item -> checkboxTreeViewer.setSubtreeChecked(item, selection));
 	}
 
 	@Override
@@ -211,7 +208,7 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper {
 			persistMarkerItemSelection(checked, treeEntryWrapper);
 		}
 
-		allMarkerItemWrappers.stream()
+		elements.stream()
 			.flatMap(item -> item.getChildren()
 				.stream())
 			.filter(item -> updated.contains(item.getMarkerId()))

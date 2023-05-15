@@ -2,7 +2,7 @@ package eu.jsparrow.ui.treeview;
 
 import java.util.List;
 
-public interface ICheckBoxTreeViewNode<T extends ICheckBoxTreeViewNode<?>> {
+public interface ICheckBoxTreeViewNode<T extends ICheckBoxTreeViewNode<T>> {
 
 	T getParent();
 

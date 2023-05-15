@@ -56,9 +56,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 
 		createSearchTextField(group);
 
-		List<MarkerItemWrapper> createMarkerItemWrapperList = Collections
-			.unmodifiableList(MarkerTreeViewWrapper.createMarkerItemWrapperList());
-		treeViewerWrapper = new MarkerTreeViewWrapper(group, createMarkerItemWrapperList);
+		treeViewerWrapper = new MarkerTreeViewWrapper(group);
 
 		Composite bulkActionsComposite = new Composite(mainComposite, SWT.NONE);
 		bulkActionsComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));

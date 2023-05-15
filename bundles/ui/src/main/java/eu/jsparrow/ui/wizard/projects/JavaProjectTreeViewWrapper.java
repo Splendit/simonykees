@@ -1,5 +1,6 @@
 package eu.jsparrow.ui.wizard.projects;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -14,16 +15,20 @@ import eu.jsparrow.ui.wizard.projects.javaelement.AbstractJavaElementWrapperWith
 import eu.jsparrow.ui.wizard.projects.javaelement.IJavaElementWrapper;
 import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectWrapper;
 
-public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper {
+public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<IJavaElementWrapper> {
 
-	private List<JavaProjectWrapper> javaProjects;
-	private CheckBoxSelectionStateStore<IJavaElementWrapper> selectionStateStore = new CheckBoxSelectionStateStore<IJavaElementWrapper>();
+	private CheckBoxSelectionStateStore<IJavaElementWrapper> selectionStateStore = new CheckBoxSelectionStateStore<>();
 
-	protected JavaProjectTreeViewWrapper(Group group, List<JavaProjectWrapper> javaProjects) {
-		this.javaProjects = javaProjects;
-		this.createCheckBoxTreeViewer(group, javaProjects);
+	private static List<IJavaElementWrapper> projectsToElementList(List<JavaProjectWrapper> javaProjects) {
+		 List<IJavaElementWrapper> elements =  new ArrayList<>();
+		 javaProjects.forEach(elements::add);
+		 return elements;
 	}
 
+	protected JavaProjectTreeViewWrapper(Group group, List<JavaProjectWrapper> javaProjects) {
+		this.createCheckBoxTreeViewer(group, projectsToElementList(javaProjects));
+	}
+	
 	@Override
 	public void checkStateChanged(CheckStateChangedEvent event) {
 		Object element = event.getElement();
@@ -41,7 +46,7 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 
 	@Override
 	protected void updateTreeViewerSelectionState() {
-		this.javaProjects.forEach(this::setTreeViewerUnselectedForSubTree);
+		this.elements.forEach(this::setTreeViewerUnselectedForSubTree);
 
 		selectionStateStore.getSelectedElements()
 			.forEach(wrapper -> {
@@ -69,7 +74,7 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper 
 		}
 	}
 
-	private void setTreeViewerUnselectedForElement(Object element) {
+	private void setTreeViewerUnselectedForElement(IJavaElementWrapper element) {
 		checkboxTreeViewer.setChecked(element, false);
 		checkboxTreeViewer.setGrayed(element, false);
 	}

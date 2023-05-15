@@ -13,12 +13,14 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Group;
 
-public abstract class AbstractCheckBoxTreeViewWrapper
+public abstract class AbstractCheckBoxTreeViewWrapper<T extends ICheckBoxTreeViewNode<T>>
 		implements ITreeContentProvider, ICheckStateListener, ITreeViewerListener {
 
+	protected List<T> elements;
 	protected CheckboxTreeViewer checkboxTreeViewer;
 
-	protected void createCheckBoxTreeViewer(Group group, List<? extends ICheckBoxTreeViewNode<?>> elementList) {
+	protected void createCheckBoxTreeViewer(Group group, List<T> elementList) {
+		this.elements = elementList;
 		checkboxTreeViewer = new CheckboxTreeViewer(group);
 		checkboxTreeViewer.getTree()
 			.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -27,7 +29,7 @@ public abstract class AbstractCheckBoxTreeViewWrapper
 		checkboxTreeViewer.addCheckStateListener(this);
 		checkboxTreeViewer.setComparator(new ViewerComparator());
 		checkboxTreeViewer.addTreeListener(this);
-		checkboxTreeViewer.setInput(elementList.toArray());
+		checkboxTreeViewer.setInput(elements.toArray());
 		updateTreeViewerSelectionState();
 	}
 
