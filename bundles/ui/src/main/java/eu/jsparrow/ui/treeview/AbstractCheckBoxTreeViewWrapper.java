@@ -30,7 +30,6 @@ public abstract class AbstractCheckBoxTreeViewWrapper<T extends ICheckBoxTreeVie
 		checkboxTreeViewer.setComparator(new ViewerComparator());
 		checkboxTreeViewer.addTreeListener(this);
 		checkboxTreeViewer.setInput(elements.toArray());
-		updateTreeViewerSelectionState();
 	}
 
 	public void setTreeViewerFilters(ViewerFilter... filters) {
@@ -47,7 +46,8 @@ public abstract class AbstractCheckBoxTreeViewWrapper<T extends ICheckBoxTreeVie
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof ICheckBoxTreeViewNode) {
 			ICheckBoxTreeViewNode<?> node = (ICheckBoxTreeViewNode<?>) parentElement;
-			return node.getChildren().toArray();
+			return node.getChildren()
+				.toArray();
 		}
 		return new Object[] {};
 	}
@@ -76,6 +76,20 @@ public abstract class AbstractCheckBoxTreeViewWrapper<T extends ICheckBoxTreeVie
 	@Override
 	public void treeExpanded(TreeExpansionEvent event) {
 		// doing nothing and can be overridden optionally
+	}
+
+	protected void setTreeViewerUnselectedForSubTree(T element) {
+		setTreeViewerUnselectedForElement(element);
+		if (element.hasChildListAtHand()) {
+			for (T child : element.getChildren()) {
+				setTreeViewerUnselectedForSubTree(child);
+			}
+		}
+	}
+
+	protected void setTreeViewerUnselectedForElement(T element) {
+		checkboxTreeViewer.setChecked(element, false);
+		checkboxTreeViewer.setGrayed(element, false);
 	}
 
 	protected abstract ILabelProvider createTreeViewerLabelProvider();

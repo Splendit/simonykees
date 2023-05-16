@@ -20,15 +20,15 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<
 	private CheckBoxSelectionStateStore<IJavaElementWrapper> selectionStateStore = new CheckBoxSelectionStateStore<>();
 
 	private static List<IJavaElementWrapper> projectsToElementList(List<JavaProjectWrapper> javaProjects) {
-		 List<IJavaElementWrapper> elements =  new ArrayList<>();
-		 javaProjects.forEach(elements::add);
-		 return elements;
+		List<IJavaElementWrapper> elements = new ArrayList<>();
+		javaProjects.forEach(elements::add);
+		return elements;
 	}
 
 	protected JavaProjectTreeViewWrapper(Group group, List<JavaProjectWrapper> javaProjects) {
 		this.createCheckBoxTreeViewer(group, projectsToElementList(javaProjects));
 	}
-	
+
 	@Override
 	public void checkStateChanged(CheckStateChangedEvent event) {
 		Object element = event.getElement();
@@ -46,6 +46,10 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<
 
 	@Override
 	protected void updateTreeViewerSelectionState() {
+		updateTreeViewerSelectionStateFromStore();
+	}
+
+	private void updateTreeViewerSelectionStateFromStore() {
 		this.elements.forEach(this::setTreeViewerUnselectedForSubTree);
 
 		selectionStateStore.getSelectedElements()
@@ -61,23 +65,6 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<
 			});
 	}
 
-	private void setTreeViewerUnselectedForSubTree(IJavaElementWrapper javaElementWrapper) {
-		setTreeViewerUnselectedForElement(javaElementWrapper);
-
-		if (javaElementWrapper instanceof AbstractJavaElementWrapperWithChildList) {
-			AbstractJavaElementWrapperWithChildList wapperWithChildList = (AbstractJavaElementWrapperWithChildList) javaElementWrapper;
-			if (wapperWithChildList.hasChildListAtHand()) {
-				for (IJavaElementWrapper child : wapperWithChildList.getChildren()) {
-					setTreeViewerUnselectedForSubTree(child);
-				}
-			}
-		}
-	}
-
-	private void setTreeViewerUnselectedForElement(IJavaElementWrapper element) {
-		checkboxTreeViewer.setChecked(element, false);
-		checkboxTreeViewer.setGrayed(element, false);
-	}
 
 	@Override
 	public void treeExpanded(TreeExpansionEvent event) {

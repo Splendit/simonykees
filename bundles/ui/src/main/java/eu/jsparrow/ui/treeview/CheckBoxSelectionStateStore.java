@@ -14,6 +14,15 @@ public class CheckBoxSelectionStateStore<T extends ICheckBoxTreeViewNode<T>> {
 		storeParentSelectionState(element);
 	}
 
+	public void setSelectionState(List<T> elements, boolean checked) {
+		elements.forEach(element -> setSelectionState(element, checked));
+	}
+
+	public void unselectAll() {
+		selectedElements.clear();
+		grayedElements.clear();
+	}
+
 	private void storeElementWithSelectionState(T element, boolean checked,
 			boolean grayed) {
 		if (checked) {

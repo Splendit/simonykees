@@ -2,6 +2,7 @@ package eu.jsparrow.ui.preference.marker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +20,9 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.preference.SimonykeesMarkersPreferencePage;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
+import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
 import eu.jsparrow.ui.treeview.AbstractCheckBoxTreeViewWrapper;
+import eu.jsparrow.ui.treeview.CheckBoxSelectionStateStore;
 
 /**
  * Wraps a {@link CheckboxTreeViewer} that is used for de/activating markers in
@@ -31,6 +34,8 @@ import eu.jsparrow.ui.treeview.AbstractCheckBoxTreeViewWrapper;
  *
  */
 public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<MarkerItemWrapper> {
+
+	private CheckBoxSelectionStateStore<MarkerItemWrapper> selectionStateStore = new CheckBoxSelectionStateStore<>();
 
 	public static List<MarkerItemWrapper> createMarkerItemWrapperList() {
 		List<MarkerItemWrapper> allItems = new ArrayList<>();
@@ -85,16 +90,35 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<Marke
 		return map;
 	}
 
-	private static void persistMarkerItemSelection(boolean checked, MarkerItemWrapper item) {
-		if (checked) {
-			SimonykeesPreferenceManager.addActiveMarker(item.getMarkerId());
-		} else {
-			SimonykeesPreferenceManager.removeActiveMarker(item.getMarkerId());
-		}
-	}
-
 	public MarkerTreeViewWrapper(Group group) {
 		this.createCheckBoxTreeViewer(group, createMarkerItemWrapperList());
+		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
+		storeMarkersSelectionState(true, allActiveMarkers);
+		updateTreeViewerSelectionState();
+	}
+	
+	private void storeMarkersSelectionState(boolean checked, Collection<String> updated) {
+		elements.stream()
+			.flatMap(item -> item.getChildren()
+				.stream())
+			.filter(item -> updated.contains(item.getMarkerId()))
+			.forEach(item -> selectionStateStore.setSelectionState(item, checked));
+	}
+
+	private void updateTreeViewerSelectionStateFromStore() {
+		this.elements.forEach(this::setTreeViewerUnselectedForSubTree);
+
+		selectionStateStore.getSelectedElements()
+			.forEach(wrapper -> {
+				checkboxTreeViewer.setChecked(wrapper, true);
+				checkboxTreeViewer.setGrayed(wrapper, false);
+			});
+
+		selectionStateStore.getGrayedElements()
+			.forEach(wrapper -> {
+				checkboxTreeViewer.setChecked(wrapper, true);
+				checkboxTreeViewer.setGrayed(wrapper, true);
+			});
 	}
 
 	public List<MarkerItemWrapper> getAllMarkerItemWrappers() {
@@ -107,51 +131,11 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<Marke
 	 * @param allActiveMarkers
 	 *            the marker IDs to be activated.
 	 */
-	public void selectMarkers(List<String> allActiveMarkers) {
-		bulkUpdate(false);
-
-		elements.stream()
-			.flatMap(item -> item.getChildren()
-				.stream())
-			.filter(item -> allActiveMarkers.contains(item.getMarkerId()))
-			.forEach(item -> persistMarkerItemSelection(true, item));
-
+	public void selectDefaultMarkers(DefaultActiveMarkers defaultMarkers) {		
+		selectionStateStore.unselectAll();
+		List<String> allActiveMarkers = defaultMarkers.getActiveMarkers();
+		storeMarkersSelectionState(true, allActiveMarkers);
 		updateTreeViewerSelectionState();
-
-	}
-
-	private void updateMarkerItemSelection() {
-		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
-		elements.stream()
-			.flatMap(itemWrapper -> itemWrapper.getChildren()
-				.stream())
-			.forEach(itemWrapper -> {
-				String id = itemWrapper.getMarkerId();
-				if (allActiveMarkers.contains(id)) {
-					checkboxTreeViewer.setSubtreeChecked(itemWrapper, true);
-				}
-			});
-	}
-
-	private void updateCategorySelection() {
-		elements.stream()
-			.forEach(itemWrapper -> {
-				List<MarkerItemWrapper> children = itemWrapper.getChildren();
-				boolean allChecked = children.stream()
-					.allMatch(child -> checkboxTreeViewer.getChecked(child));
-				boolean noneChecked = children.stream()
-					.noneMatch(child -> checkboxTreeViewer.getChecked(child));
-				if (allChecked) {
-					checkboxTreeViewer.setChecked(itemWrapper, true);
-					checkboxTreeViewer.setGrayed(itemWrapper, false);
-				} else if (noneChecked) {
-					checkboxTreeViewer.setChecked(itemWrapper, false);
-					checkboxTreeViewer.setGrayed(itemWrapper, false);
-				} else {
-					checkboxTreeViewer.setChecked(itemWrapper, true);
-					checkboxTreeViewer.setGrayed(itemWrapper, true);
-				}
-			});
 	}
 
 	/**
@@ -162,11 +146,12 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<Marke
 	 *            whether the markers should be activated or deactivated.
 	 */
 	public void bulkUpdate(boolean selection) {
-		elements.stream()
-			.flatMap(item -> item.getChildren()
-				.stream())
-			.forEach(item -> persistMarkerItemSelection(selection, item));
-		elements.forEach(item -> checkboxTreeViewer.setSubtreeChecked(item, selection));
+		if (selection) {
+			selectionStateStore.setSelectionState(elements, true);
+		} else {
+			selectionStateStore.unselectAll();
+		}
+		updateTreeViewerSelectionState();
 	}
 
 	@Override
@@ -176,8 +161,7 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<Marke
 
 	@Override
 	protected void updateTreeViewerSelectionState() {
-		updateMarkerItemSelection();
-		updateCategorySelection();
+		updateTreeViewerSelectionStateFromStore();
 	}
 
 	/**
@@ -191,29 +175,30 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<Marke
 	 */
 	@Override
 	public void checkStateChanged(CheckStateChangedEvent event) {
+
 		MarkerItemWrapper treeEntryWrapper = (MarkerItemWrapper) event.getElement();
 		boolean checked = event.getChecked();
-		checkboxTreeViewer.setSubtreeChecked(treeEntryWrapper, checked);
 		Set<String> updated = new HashSet<>();
 
 		if (treeEntryWrapper.isParent()) {
 			List<MarkerItemWrapper> children = treeEntryWrapper.getChildren();
 			for (MarkerItemWrapper item : children) {
-				// Update the preference store for this item.
 				updated.add(item.getMarkerId());
-				persistMarkerItemSelection(checked, item);
 			}
 		} else {
 			updated.add(treeEntryWrapper.getMarkerId());
-			persistMarkerItemSelection(checked, treeEntryWrapper);
 		}
 
-		elements.stream()
-			.flatMap(item -> item.getChildren()
-				.stream())
-			.filter(item -> updated.contains(item.getMarkerId()))
-			.forEach(item -> checkboxTreeViewer.setChecked(item, checked));
+		storeMarkersSelectionState(checked, updated);
+		updateTreeViewerSelectionState();
+	}
 
-		updateCategorySelection();
+
+	public Set<String> getSelectedMarkersToApply() {
+		return selectionStateStore.getSelectedElements()
+			.stream()
+			.filter(element -> !element.isParent())
+			.map(MarkerItemWrapper::getMarkerId)
+			.collect(Collectors.toSet());
 	}
 }

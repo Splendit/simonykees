@@ -1,7 +1,6 @@
 package eu.jsparrow.ui.preference;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -17,7 +16,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.ui.preference.marker.MarkerItemWrapper;
 import eu.jsparrow.ui.preference.marker.MarkerItemWrapperFilter;
 import eu.jsparrow.ui.preference.marker.MarkerTreeViewWrapper;
 import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
@@ -108,9 +106,15 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 	protected void performDefaults() {
 		super.performDefaults();
 		if (treeViewerWrapper != null) {
-			DefaultActiveMarkers defaultMarkers = new DefaultActiveMarkers();
-			treeViewerWrapper.selectMarkers(defaultMarkers.getActiveMarkers());
+			treeViewerWrapper.selectDefaultMarkers(new DefaultActiveMarkers());
 		}
+	}
+	
+	@Override
+	public boolean performOk() {
+		Set<String> selectedMarkersToApply = treeViewerWrapper.getSelectedMarkersToApply();
+		SimonykeesPreferenceManager.setAllActiveMarkers(selectedMarkersToApply);
+		return true;
 	}
 
 	public void setSearchField(String string) {
