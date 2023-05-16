@@ -22,7 +22,6 @@ import eu.jsparrow.ui.preference.SimonykeesMarkersPreferencePage;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
 import eu.jsparrow.ui.treeview.AbstractCheckBoxTreeViewWrapper;
-import eu.jsparrow.ui.treeview.CheckBoxSelectionStateStore;
 
 /**
  * Wraps a {@link CheckboxTreeViewer} that is used for de/activating markers in
@@ -34,8 +33,6 @@ import eu.jsparrow.ui.treeview.CheckBoxSelectionStateStore;
  *
  */
 public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<MarkerItemWrapper> {
-
-	private CheckBoxSelectionStateStore<MarkerItemWrapper> selectionStateStore = new CheckBoxSelectionStateStore<>();
 
 	public static List<MarkerItemWrapper> createMarkerItemWrapperList() {
 		List<MarkerItemWrapper> allItems = new ArrayList<>();
@@ -96,29 +93,13 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<Marke
 		storeMarkersSelectionState(true, allActiveMarkers);
 		updateTreeViewerSelectionState();
 	}
-	
+
 	private void storeMarkersSelectionState(boolean checked, Collection<String> updated) {
 		elements.stream()
 			.flatMap(item -> item.getChildren()
 				.stream())
 			.filter(item -> updated.contains(item.getMarkerId()))
 			.forEach(item -> selectionStateStore.setSelectionState(item, checked));
-	}
-
-	private void updateTreeViewerSelectionStateFromStore() {
-		this.elements.forEach(this::setTreeViewerUnselectedForSubTree);
-
-		selectionStateStore.getSelectedElements()
-			.forEach(wrapper -> {
-				checkboxTreeViewer.setChecked(wrapper, true);
-				checkboxTreeViewer.setGrayed(wrapper, false);
-			});
-
-		selectionStateStore.getGrayedElements()
-			.forEach(wrapper -> {
-				checkboxTreeViewer.setChecked(wrapper, true);
-				checkboxTreeViewer.setGrayed(wrapper, true);
-			});
 	}
 
 	public List<MarkerItemWrapper> getAllMarkerItemWrappers() {
@@ -131,7 +112,7 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<Marke
 	 * @param allActiveMarkers
 	 *            the marker IDs to be activated.
 	 */
-	public void selectDefaultMarkers(DefaultActiveMarkers defaultMarkers) {		
+	public void selectDefaultMarkers(DefaultActiveMarkers defaultMarkers) {
 		selectionStateStore.unselectAll();
 		List<String> allActiveMarkers = defaultMarkers.getActiveMarkers();
 		storeMarkersSelectionState(true, allActiveMarkers);
@@ -157,11 +138,6 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<Marke
 	@Override
 	protected MarkerLabelProvider createTreeViewerLabelProvider() {
 		return new MarkerLabelProvider();
-	}
-
-	@Override
-	protected void updateTreeViewerSelectionState() {
-		updateTreeViewerSelectionStateFromStore();
 	}
 
 	/**
@@ -192,7 +168,6 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<Marke
 		storeMarkersSelectionState(checked, updated);
 		updateTreeViewerSelectionState();
 	}
-
 
 	public Set<String> getSelectedMarkersToApply() {
 		return selectionStateStore.getSelectedElements()

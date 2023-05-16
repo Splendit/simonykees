@@ -17,6 +17,7 @@ public abstract class AbstractCheckBoxTreeViewWrapper<T extends ICheckBoxTreeVie
 		implements ITreeContentProvider, ICheckStateListener, ITreeViewerListener {
 
 	protected List<T> elements;
+	protected CheckBoxSelectionStateStore<T> selectionStateStore = new CheckBoxSelectionStateStore<>();
 	protected CheckboxTreeViewer checkboxTreeViewer;
 
 	protected void createCheckBoxTreeViewer(Group group, List<T> elementList) {
@@ -92,7 +93,21 @@ public abstract class AbstractCheckBoxTreeViewWrapper<T extends ICheckBoxTreeVie
 		checkboxTreeViewer.setGrayed(element, false);
 	}
 
-	protected abstract ILabelProvider createTreeViewerLabelProvider();
+	protected void updateTreeViewerSelectionState() {
+		this.elements.forEach(this::setTreeViewerUnselectedForSubTree);
 
-	protected abstract void updateTreeViewerSelectionState();
+		selectionStateStore.getSelectedElements()
+			.forEach(wrapper -> {
+				checkboxTreeViewer.setChecked(wrapper, true);
+				checkboxTreeViewer.setGrayed(wrapper, false);
+			});
+
+		selectionStateStore.getGrayedElements()
+			.forEach(wrapper -> {
+				checkboxTreeViewer.setChecked(wrapper, true);
+				checkboxTreeViewer.setGrayed(wrapper, true);
+			});
+	}
+
+	protected abstract ILabelProvider createTreeViewerLabelProvider();
 }

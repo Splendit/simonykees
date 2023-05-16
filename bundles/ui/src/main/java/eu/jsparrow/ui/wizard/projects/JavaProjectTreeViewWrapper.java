@@ -10,14 +10,11 @@ import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.swt.widgets.Group;
 
 import eu.jsparrow.ui.treeview.AbstractCheckBoxTreeViewWrapper;
-import eu.jsparrow.ui.treeview.CheckBoxSelectionStateStore;
 import eu.jsparrow.ui.wizard.projects.javaelement.AbstractJavaElementWrapperWithChildList;
 import eu.jsparrow.ui.wizard.projects.javaelement.IJavaElementWrapper;
 import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectWrapper;
 
 public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<IJavaElementWrapper> {
-
-	private CheckBoxSelectionStateStore<IJavaElementWrapper> selectionStateStore = new CheckBoxSelectionStateStore<>();
 
 	private static List<IJavaElementWrapper> projectsToElementList(List<JavaProjectWrapper> javaProjects) {
 		List<IJavaElementWrapper> elements = new ArrayList<>();
@@ -43,28 +40,6 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<
 	protected ILabelProvider createTreeViewerLabelProvider() {
 		return new JavaElementLabelProvider();
 	}
-
-	@Override
-	protected void updateTreeViewerSelectionState() {
-		updateTreeViewerSelectionStateFromStore();
-	}
-
-	private void updateTreeViewerSelectionStateFromStore() {
-		this.elements.forEach(this::setTreeViewerUnselectedForSubTree);
-
-		selectionStateStore.getSelectedElements()
-			.forEach(wrapper -> {
-				checkboxTreeViewer.setChecked(wrapper, true);
-				checkboxTreeViewer.setGrayed(wrapper, false);
-			});
-
-		selectionStateStore.getGrayedElements()
-			.forEach(wrapper -> {
-				checkboxTreeViewer.setChecked(wrapper, true);
-				checkboxTreeViewer.setGrayed(wrapper, true);
-			});
-	}
-
 
 	@Override
 	public void treeExpanded(TreeExpansionEvent event) {
