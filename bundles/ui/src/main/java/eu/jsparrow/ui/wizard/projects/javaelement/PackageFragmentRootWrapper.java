@@ -35,7 +35,8 @@ public class PackageFragmentRootWrapper extends AbstractJavaElementWrapperWithCh
 			throws JavaModelException {
 		RecursivePackageFragmentsCollector packageFragmentCollector = new RecursivePackageFragmentsCollector(this);
 		List<IJavaElementWrapper> childList = new ArrayList<>();
-		packageFragmentCollector.collectPackagesContainingSources(javaElement).forEach(childList::add);
+		packageFragmentCollector.collectPackagesContainingSources(javaElement)
+			.forEach(childList::add);
 		return childList;
 	}
 
@@ -60,5 +61,10 @@ public class PackageFragmentRootWrapper extends AbstractJavaElementWrapperWithCh
 
 	public String getPathToDisplay() {
 		return pathToDisplay;
+	}
+
+	@Override
+	public String getLabelText() {
+		return getPathToDisplay();
 	}
 }

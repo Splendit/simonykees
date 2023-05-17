@@ -13,7 +13,7 @@ public class JavaProjectFilter extends AbstractJavaElementWrapperFilter {
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if (element instanceof JavaProjectWrapper) {
-			return isMatching(((JavaProjectWrapper) element).getPathToDisplay());
+			return isMatching(((JavaProjectWrapper) element));
 		}
 		return true;
 	}

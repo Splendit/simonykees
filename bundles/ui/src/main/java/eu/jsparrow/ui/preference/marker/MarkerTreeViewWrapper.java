@@ -135,11 +135,6 @@ public class MarkerTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<Marke
 		updateTreeViewerSelectionState();
 	}
 
-	@Override
-	protected MarkerLabelProvider createTreeViewerLabelProvider() {
-		return new MarkerLabelProvider();
-	}
-
 	/**
 	 * 
 	 * {@inheritDoc}

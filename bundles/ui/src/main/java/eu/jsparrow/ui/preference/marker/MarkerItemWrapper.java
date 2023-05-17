@@ -3,6 +3,8 @@ package eu.jsparrow.ui.preference.marker;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import eu.jsparrow.ui.treeview.ICheckBoxTreeViewNode;
 
 /**
@@ -64,5 +66,10 @@ public class MarkerItemWrapper implements ICheckBoxTreeViewNode<MarkerItemWrappe
 	@Override
 	public boolean hasChildListAtHand() {
 		return  hasChildren();
+	}
+
+	@Override
+	public String getLabelText() {
+		return StringUtils.capitalize(getName());
 	}
 }

@@ -96,4 +96,9 @@ public class JavaProjectWrapper extends AbstractJavaElementWrapperWithChildList 
 	public String getPathToDisplay() {
 		return pathToDisplay;
 	}
+
+	@Override
+	public String getLabelText() {
+		return getPathToDisplay();
+	}
 }

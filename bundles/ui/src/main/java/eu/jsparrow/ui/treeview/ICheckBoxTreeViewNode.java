@@ -2,7 +2,14 @@ package eu.jsparrow.ui.treeview;
 
 import java.util.List;
 
-public interface ICheckBoxTreeViewNode<T extends ICheckBoxTreeViewNode<T>> {
+/**
+ * Instances of classes implementing this interface are intended to be used for
+ * the tree structure by {@link AbstractCheckBoxTreeViewWrapper}.
+ * 
+ * @since 4.17.0
+ * 
+ */
+public interface ICheckBoxTreeViewNode<T extends ICheckBoxTreeViewNode<T>> extends ILabelTextProvider {
 
 	T getParent();
 

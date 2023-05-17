@@ -49,4 +49,9 @@ public class PackageFragmentWrapper extends AbstractJavaElementWrapperWithChildL
 	public String getElementName() {
 		return packageName;
 	}
+
+	@Override
+	public String getLabelText() {
+		return getElementName();
+	}
 }

@@ -13,7 +13,7 @@ public class JavaFileFilter extends AbstractJavaElementWrapperFilter {
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if (element instanceof CompilationUnitWrapper) {
-			return isMatching(((CompilationUnitWrapper) element).getElementName());
+			return isMatching(((CompilationUnitWrapper) element));
 		}
 		return true;
 	}

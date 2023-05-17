@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.swt.widgets.Group;
 
@@ -34,11 +33,6 @@ public class JavaProjectTreeViewWrapper extends AbstractCheckBoxTreeViewWrapper<
 			selectionStateStore.setSelectionState((IJavaElementWrapper) element, checked);
 			updateTreeViewerSelectionState();
 		}
-	}
-
-	@Override
-	protected ILabelProvider createTreeViewerLabelProvider() {
-		return new JavaElementLabelProvider();
 	}
 
 	@Override

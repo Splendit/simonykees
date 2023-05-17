@@ -4,6 +4,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Stores a Set of all objects used by a CheckboxTreeViewer where the
+ * corresponding check box is selected and a Set of all objects used by the same
+ * CheckboxTreeViewer where the corresponding check box is grayed.
+ * 
+ * @since 4.17.0
+ * 
+ */
 public class CheckBoxSelectionStateStore<T extends ICheckBoxTreeViewNode<T>> {
 	private final Set<T> selectedElements = new HashSet<>();
 	private final Set<T> grayedElements = new HashSet<>();

@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
@@ -13,6 +12,13 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Group;
 
+/**
+ * Wraps a CheckboxTreeViewer which must fulfill special requirements on
+ * functionality.
+ * 
+ * @since 4.17.0
+ * 
+ */
 public abstract class AbstractCheckBoxTreeViewWrapper<T extends ICheckBoxTreeViewNode<T>>
 		implements ITreeContentProvider, ICheckStateListener, ITreeViewerListener {
 
@@ -26,7 +32,7 @@ public abstract class AbstractCheckBoxTreeViewWrapper<T extends ICheckBoxTreeVie
 		checkboxTreeViewer.getTree()
 			.setLayoutData(new GridData(GridData.FILL_BOTH));
 		checkboxTreeViewer.setContentProvider(this);
-		checkboxTreeViewer.setLabelProvider(createTreeViewerLabelProvider());
+		checkboxTreeViewer.setLabelProvider(new CheckBoxTreeLabelProvider());
 		checkboxTreeViewer.addCheckStateListener(this);
 		checkboxTreeViewer.setComparator(new ViewerComparator());
 		checkboxTreeViewer.addTreeListener(this);
@@ -108,6 +114,4 @@ public abstract class AbstractCheckBoxTreeViewWrapper<T extends ICheckBoxTreeVie
 				checkboxTreeViewer.setGrayed(wrapper, true);
 			});
 	}
-
-	protected abstract ILabelProvider createTreeViewerLabelProvider();
 }

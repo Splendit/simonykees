@@ -13,7 +13,7 @@ public class JavaPackageRootFilter extends AbstractJavaElementWrapperFilter {
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if (element instanceof PackageFragmentRootWrapper) {
-			return isMatching(((PackageFragmentRootWrapper) element).getPathToDisplay());
+			return isMatching(((PackageFragmentRootWrapper) element));
 		}
 		return true;
 	}

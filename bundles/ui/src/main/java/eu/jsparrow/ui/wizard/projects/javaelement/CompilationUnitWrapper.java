@@ -48,4 +48,9 @@ public class CompilationUnitWrapper implements IJavaElementWrapper {
 	public boolean hasChildListAtHand() {
 		return false;
 	}
+
+	@Override
+	public String getLabelText() {
+		return getElementName();
+	}
 }
