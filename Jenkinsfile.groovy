@@ -17,7 +17,7 @@ import groovy.transform.Field
 @Field boolean isLiveEnvironment = false
 
 void setLiveEnvironment(def url) {
-    def liveUrl = "ssh://git@bitbucket.splendit.loc:7999/lm/simonykees.git"
+    def liveUrl = "ssh://git@gitlab.splendit.at:10022/legacy-migration/simonykees.git"
     if (liveUrl == url) {
         println "Live environment is enabled"
         isLiveEnvironment = true
