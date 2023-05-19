@@ -55,6 +55,15 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 	private AbstractRuleWizardHandler abstractRuleWizardHandler;
 	private List<JavaProjectWrapper> javaProjects;
 
+	private static GridLayout createDefaultGridLayout(int numColumns) {
+		GridLayout gridLayout = new GridLayout(numColumns, false);
+		gridLayout.marginHeight = 0;
+		gridLayout.marginWidth = 0;
+		gridLayout.verticalSpacing = 5;
+		gridLayout.horizontalSpacing = 5;
+		return gridLayout;
+	}
+
 	public static void selectJavaSourcesToRefactor(Shell parentShell) {
 		if (Activator.isRunning()) {
 			AbstractRuleWizardHandler.openAlreadyRunningDialog();
@@ -129,9 +138,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.heightHint = convertHeightInCharsToPixels(20);
 		sourceSelectionComposite.setLayoutData(gridData);
-		GridLayout gridLayout = new GridLayout(2, false);
-		gridLayout.marginHeight = 0;
-		gridLayout.marginWidth = 0;
+		GridLayout gridLayout = createDefaultGridLayout(2);
 		sourceSelectionComposite.setLayout(gridLayout);
 
 		Group treeViewerGroup = new Group(sourceSelectionComposite, SWT.NONE);
@@ -141,9 +148,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		gridData.widthHint = convertWidthInCharsToPixels(65);
 		gridData.heightHint = 250;
 		treeViewerGroup.setLayoutData(gridData);
-		gridLayout = new GridLayout(1, false);
-		gridLayout.marginHeight = 0;
-		gridLayout.marginWidth = 0;
+		gridLayout = createDefaultGridLayout(1);
 		treeViewerGroup.setLayout(gridLayout);
 
 		javaProjectTreeVierWrapper = new JavaProjectTreeViewWrapper(treeViewerGroup, javaProjects);
@@ -151,10 +156,8 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		Composite rightComposite = new Composite(sourceSelectionComposite, SWT.NONE);
 		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		rightComposite.setLayoutData(gridData);
-		gridLayout = new GridLayout(1, false);
+		gridLayout = createDefaultGridLayout(1);
 		rightComposite.setLayout(gridLayout);
-		gridLayout.marginHeight = 0;
-		gridLayout.marginWidth = 0;
 
 		Group filter = new Group(rightComposite, SWT.NONE);
 		filter.setText("Filter"); //$NON-NLS-1$
@@ -163,10 +166,8 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		gridData.widthHint = convertWidthInCharsToPixels(50);
 		gridData.heightHint = 150;
 		filter.setLayoutData(gridData);
-		gridLayout = new GridLayout(1, false);
-		gridLayout.marginHeight = 0;
-		gridLayout.marginWidth = 0;
-		gridLayout.verticalSpacing = 1;
+		gridLayout = createDefaultGridLayout(1);
+
 		filter.setLayout(gridLayout);
 		textFilterProjects = createFilterTextField(filter, "Projects"); //$NON-NLS-1$
 		textFilterPackageRoots = createFilterTextField(filter, "Package Roots"); //$NON-NLS-1$
@@ -180,9 +181,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		gridData.widthHint = convertWidthInCharsToPixels(50);
 		gridData.heightHint = 100;
 		refactoring.setLayoutData(gridData);
-		gridLayout = new GridLayout(1, false);
-		gridLayout.marginHeight = 0;
-		gridLayout.marginWidth = 0;
+		gridLayout = createDefaultGridLayout(1);
 		refactoring.setLayout(gridLayout);
 
 		buttonRefactorWithDefaultProfile = createRefactoringRadioButton(refactoring, "Refactor with Default Profile"); //$NON-NLS-1$
@@ -199,8 +198,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 	protected Text createFilterTextField(Group group, String message) {
 		Composite searchComposite = new Composite(group, SWT.NONE);
 		searchComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		GridLayout searchCompositeGridLayout = new GridLayout(2, false);
-		searchCompositeGridLayout.marginHeight = 0;
+		GridLayout searchCompositeGridLayout = createDefaultGridLayout(2);
 		searchComposite.setLayout(searchCompositeGridLayout);
 		Label label = new Label(searchComposite, SWT.NONE);
 		label.setText(message);
@@ -225,7 +223,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 			javaPackageRootFilter = new JavaPackageRootFilter(searchText);
 		} else if (source == textFilterPackages) {
 			javaPackageFilter = new JavaPackageFilter(searchText);
-		} else if(source == textFilterCompilationUnits) {
+		} else if (source == textFilterCompilationUnits) {
 			javaFileFilter = new JavaFileFilter(searchText);
 		}
 		javaProjectTreeVierWrapper.setTreeViewerFilters(javaProjectFilter, javaPackageRootFilter, javaPackageFilter,

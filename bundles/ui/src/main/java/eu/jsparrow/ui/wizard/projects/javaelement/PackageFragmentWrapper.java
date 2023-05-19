@@ -52,6 +52,10 @@ public class PackageFragmentWrapper extends AbstractJavaElementWrapperWithChildL
 
 	@Override
 	public String getLabelText() {
-		return getElementName();
+		String labelText = getElementName();
+		if (labelText == null || labelText.isEmpty()) {
+			return "(default package)"; //$NON-NLS-1$
+		}
+		return labelText;
 	}
 }
