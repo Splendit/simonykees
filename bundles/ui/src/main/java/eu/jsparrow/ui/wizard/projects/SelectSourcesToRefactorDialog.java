@@ -146,7 +146,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 
 		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.widthHint = convertWidthInCharsToPixels(65);
-		gridData.heightHint = 250;
+		gridData.heightHint = 270;
 		treeViewerGroup.setLayoutData(gridData);
 		gridLayout = createDefaultGridLayout(1);
 		treeViewerGroup.setLayout(gridLayout);
@@ -164,7 +164,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 
 		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.widthHint = convertWidthInCharsToPixels(50);
-		gridData.heightHint = 150;
+		gridData.heightHint = 140;
 		filter.setLayoutData(gridData);
 		gridLayout = createDefaultGridLayout(1);
 
@@ -179,7 +179,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 
 		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.widthHint = convertWidthInCharsToPixels(50);
-		gridData.heightHint = 100;
+		gridData.heightHint = 130;
 		refactoring.setLayoutData(gridData);
 		gridLayout = createDefaultGridLayout(1);
 		refactoring.setLayout(gridLayout);
