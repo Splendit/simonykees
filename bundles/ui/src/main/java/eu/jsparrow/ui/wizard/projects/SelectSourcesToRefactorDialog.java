@@ -38,8 +38,8 @@ import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectsCollector;
 public class SelectSourcesToRefactorDialog extends Dialog {
 	
 	private static final int GRID_LAYOUT_VERTICAL_SPACING = 5;
-	private static final int FILTER_GROUP_HEIGHT_HINT = 170;
-	private static final int REFACTORING_GROUP_HEIGHT_HINT = 170;
+	private static final int FILTER_GROUP_HEIGHT_HINT = 160;
+	private static final int REFACTORING_GROUP_HEIGHT_HINT = 160;
 	
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 	private JavaProjectTreeViewWrapper javaProjectTreeVierWrapper;
@@ -138,11 +138,8 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite area = (Composite) super.createDialogArea(parent);
 		Composite sourceSelectionComposite = new Composite(area, SWT.NONE);
-
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		sourceSelectionComposite.setLayoutData(gridData);
-		GridLayout gridLayout = createDefaultGridLayout(2);
-		sourceSelectionComposite.setLayout(gridLayout);
+		sourceSelectionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		sourceSelectionComposite.setLayout(createDefaultGridLayout(2));
 		createTreeViewerGroup(sourceSelectionComposite);
 		createRightComposite(sourceSelectionComposite);
 		return area;
@@ -156,8 +153,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		gridData.widthHint = convertWidthInCharsToPixels(65);
 		gridData.heightHint = calculateTreeViewerGroupHeightHint();
 		treeViewerGroup.setLayoutData(gridData);
-		GridLayout gridLayout = createDefaultGridLayout(1);
-		treeViewerGroup.setLayout(gridLayout);
+		treeViewerGroup.setLayout(createDefaultGridLayout(1));
 		javaProjectTreeVierWrapper = new JavaProjectTreeViewWrapper(treeViewerGroup, javaProjects);
 	}
 
@@ -166,8 +162,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.heightHint = calculateRightCompositeHeightHint();
 		rightComposite.setLayoutData(gridData);
-		GridLayout gridLayout = createDefaultGridLayout(1);
-		rightComposite.setLayout(gridLayout);
+		rightComposite.setLayout(createDefaultGridLayout(1));
 
 		createFilterGroup(rightComposite);
 		createRefactoringRadioButtonGroup(rightComposite);
@@ -189,9 +184,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		gridData.widthHint = convertWidthInCharsToPixels(50);
 		gridData.heightHint = FILTER_GROUP_HEIGHT_HINT;
 		filter.setLayoutData(gridData);
-		GridLayout gridLayout = createDefaultGridLayout(1);
-
-		filter.setLayout(gridLayout);
+		filter.setLayout(createDefaultGridLayout(1));
 		textFilterProjects = createFilterTextField(filter, "Projects"); //$NON-NLS-1$
 		textFilterPackageRoots = createFilterTextField(filter, "Package Roots"); //$NON-NLS-1$
 		textFilterPackages = createFilterTextField(filter, "Packages"); //$NON-NLS-1$
@@ -202,8 +195,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 	protected Text createFilterTextField(Group group, String message) {
 		Composite searchComposite = new Composite(group, SWT.NONE);
 		searchComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		GridLayout searchCompositeGridLayout = createDefaultGridLayout(2);
-		searchComposite.setLayout(searchCompositeGridLayout);
+		searchComposite.setLayout(createDefaultGridLayout(2));
 		Label label = new Label(searchComposite, SWT.NONE);
 		label.setText(message);
 		GridData labelGridData = new GridData(GridData.FILL, GridData.CENTER, false, false);
@@ -227,6 +219,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		gridData.heightHint = REFACTORING_GROUP_HEIGHT_HINT;
 		refactoring.setLayoutData(gridData);
 		GridLayout gridLayout = createDefaultGridLayout(1);
+		gridLayout.marginTop = 10;
 		refactoring.setLayout(gridLayout);
 
 		buttonRefactorWithDefaultProfile = createRefactoringRadioButton(refactoring, "Refactor with Default Profile"); //$NON-NLS-1$
