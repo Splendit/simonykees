@@ -177,8 +177,17 @@ void checkout() {
 void pushToGithub() {
 
     def stageName = "Push to Github"
+    def verifyCredentials = "Verify GitHub Credentials"
 
     if (isLiveEnvironment) {
+    
+    	stage(verifyCredentials) {
+    		println "Checking knon hosts..."
+    		sshagent([sshCredentials]) {
+    			sh("ssh-keygen -H -F  github.com")
+    		}
+    	}
+    	
         stage(stageName) {
             println "Pushing to GitHub..."
             sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
