@@ -36,7 +36,11 @@ import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectWrapper;
 import eu.jsparrow.ui.wizard.projects.javaelement.JavaProjectsCollector;
 
 public class SelectSourcesToRefactorDialog extends Dialog {
-
+	
+	private static final int GRID_LAYOUT_VERTICAL_SPACING = 5;
+	private static final int FILTER_GROUP_HEIGHT_HINT = 160;
+	private static final int REFACTORING_GROUP_HEIGHT_HINT = 160;
+	
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 	private JavaProjectTreeViewWrapper javaProjectTreeVierWrapper;
 	private Text textFilterProjects;
@@ -59,7 +63,7 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		GridLayout gridLayout = new GridLayout(numColumns, false);
 		gridLayout.marginHeight = 0;
 		gridLayout.marginWidth = 0;
-		gridLayout.verticalSpacing = 5;
+		gridLayout.verticalSpacing = GRID_LAYOUT_VERTICAL_SPACING;
 		gridLayout.horizontalSpacing = 5;
 		return gridLayout;
 	}
@@ -134,72 +138,64 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite area = (Composite) super.createDialogArea(parent);
 		Composite sourceSelectionComposite = new Composite(area, SWT.NONE);
+		sourceSelectionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		sourceSelectionComposite.setLayout(createDefaultGridLayout(2));
+		createTreeViewerGroup(sourceSelectionComposite);
+		createRightComposite(sourceSelectionComposite);
+		return area;
+	}
 
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.heightHint = convertHeightInCharsToPixels(20);
-		sourceSelectionComposite.setLayoutData(gridData);
-		GridLayout gridLayout = createDefaultGridLayout(2);
-		sourceSelectionComposite.setLayout(gridLayout);
-
+	private void createTreeViewerGroup(Composite sourceSelectionComposite) {
 		Group treeViewerGroup = new Group(sourceSelectionComposite, SWT.NONE);
 		treeViewerGroup.setText("Java Sources"); //$NON-NLS-1$
 
-		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.widthHint = convertWidthInCharsToPixels(65);
-		gridData.heightHint = 250;
+		gridData.heightHint = calculateTreeViewerGroupHeightHint();
 		treeViewerGroup.setLayoutData(gridData);
-		gridLayout = createDefaultGridLayout(1);
-		treeViewerGroup.setLayout(gridLayout);
-
+		treeViewerGroup.setLayout(createDefaultGridLayout(1));
 		javaProjectTreeVierWrapper = new JavaProjectTreeViewWrapper(treeViewerGroup, javaProjects);
+	}
 
+	private void createRightComposite(Composite sourceSelectionComposite) {
 		Composite rightComposite = new Composite(sourceSelectionComposite, SWT.NONE);
-		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gridData.heightHint = calculateRightCompositeHeightHint();
 		rightComposite.setLayoutData(gridData);
-		gridLayout = createDefaultGridLayout(1);
-		rightComposite.setLayout(gridLayout);
+		rightComposite.setLayout(createDefaultGridLayout(1));
 
+		createFilterGroup(rightComposite);
+		createRefactoringRadioButtonGroup(rightComposite);
+	}
+	
+	private int calculateTreeViewerGroupHeightHint() {
+		return calculateRightCompositeHeightHint();
+	}
+
+	private int calculateRightCompositeHeightHint() {
+		return FILTER_GROUP_HEIGHT_HINT + REFACTORING_GROUP_HEIGHT_HINT + GRID_LAYOUT_VERTICAL_SPACING;
+	}
+
+	private void createFilterGroup(Composite rightComposite) {
 		Group filter = new Group(rightComposite, SWT.NONE);
 		filter.setText("Filter"); //$NON-NLS-1$
 
-		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.widthHint = convertWidthInCharsToPixels(50);
-		gridData.heightHint = 150;
+		gridData.heightHint = FILTER_GROUP_HEIGHT_HINT;
 		filter.setLayoutData(gridData);
-		gridLayout = createDefaultGridLayout(1);
-
-		filter.setLayout(gridLayout);
+		filter.setLayout(createDefaultGridLayout(1));
 		textFilterProjects = createFilterTextField(filter, "Projects"); //$NON-NLS-1$
 		textFilterPackageRoots = createFilterTextField(filter, "Package Roots"); //$NON-NLS-1$
 		textFilterPackages = createFilterTextField(filter, "Packages"); //$NON-NLS-1$
 		textFilterCompilationUnits = createFilterTextField(filter, "Java Files"); //$NON-NLS-1$
 
-		Group refactoring = new Group(rightComposite, SWT.NONE);
-		refactoring.setText("JSparrow"); //$NON-NLS-1$
-
-		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.widthHint = convertWidthInCharsToPixels(50);
-		gridData.heightHint = 100;
-		refactoring.setLayoutData(gridData);
-		gridLayout = createDefaultGridLayout(1);
-		refactoring.setLayout(gridLayout);
-
-		buttonRefactorWithDefaultProfile = createRefactoringRadioButton(refactoring, "Refactor with Default Profile"); //$NON-NLS-1$
-		buttonSelectRulesToRefactor = createRefactoringRadioButton(refactoring, "Select Rules to Refactor"); //$NON-NLS-1$
-		buttonRefactorWithLoggingRule = createRefactoringRadioButton(refactoring, "Refactor with Logging Rule"); //$NON-NLS-1$
-		buttonRenameFields = createRefactoringRadioButton(refactoring, "Rename Fields"); //$NON-NLS-1$
-		buttonRemoveUnusedCode = createRefactoringRadioButton(refactoring, "Remove Unused Code"); //$NON-NLS-1$
-
-		buttonSelectRulesToRefactor.setSelection(true);
-
-		return area;
 	}
 
 	protected Text createFilterTextField(Group group, String message) {
 		Composite searchComposite = new Composite(group, SWT.NONE);
 		searchComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		GridLayout searchCompositeGridLayout = createDefaultGridLayout(2);
-		searchComposite.setLayout(searchCompositeGridLayout);
+		searchComposite.setLayout(createDefaultGridLayout(2));
 		Label label = new Label(searchComposite, SWT.NONE);
 		label.setText(message);
 		GridData labelGridData = new GridData(GridData.FILL, GridData.CENTER, false, false);
@@ -212,6 +208,26 @@ public class SelectSourcesToRefactorDialog extends Dialog {
 		filterText.setLayoutData(searchFieldGridData);
 		filterText.addModifyListener(this::textRetrievalModified);
 		return filterText;
+	}
+
+	private void createRefactoringRadioButtonGroup(Composite rightComposite) {
+		Group refactoring = new Group(rightComposite, SWT.NONE);
+		refactoring.setText("JSparrow"); //$NON-NLS-1$
+
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gridData.widthHint = convertWidthInCharsToPixels(50);
+		gridData.heightHint = REFACTORING_GROUP_HEIGHT_HINT;
+		refactoring.setLayoutData(gridData);
+		GridLayout gridLayout = createDefaultGridLayout(1);
+		gridLayout.marginTop = 10;
+		refactoring.setLayout(gridLayout);
+
+		buttonRefactorWithDefaultProfile = createRefactoringRadioButton(refactoring, "Refactor with Default Profile"); //$NON-NLS-1$
+		buttonSelectRulesToRefactor = createRefactoringRadioButton(refactoring, "Select Rules to Refactor"); //$NON-NLS-1$
+		buttonSelectRulesToRefactor.setSelection(true);
+		buttonRefactorWithLoggingRule = createRefactoringRadioButton(refactoring, "Refactor with Logging Rule"); //$NON-NLS-1$
+		buttonRenameFields = createRefactoringRadioButton(refactoring, "Rename Fields"); //$NON-NLS-1$
+		buttonRemoveUnusedCode = createRefactoringRadioButton(refactoring, "Remove Unused Code"); //$NON-NLS-1$
 	}
 
 	protected void textRetrievalModified(ModifyEvent modifyEvent) {
