@@ -35,13 +35,21 @@ public class CoreRefactoringEventManager implements RefactoringEventManager {
 	private static final Logger logger = LoggerFactory.getLogger(CoreRefactoringEventManager.class);
 
 	@Override
-	public void discoverRefactoringEvents(ICompilationUnit iCompilationUnit, List<String>markerIds) {
+	public void discoverRefactoringEvents(ICompilationUnit iCompilationUnit, List<String> markerIds) {
 		CompilationUnit compilationUnit = RefactoringUtil.parse(iCompilationUnit);
 		List<AbstractASTRewriteASTVisitor> resolvers = ResolverVisitorsFactory.getAllResolvers(markerIds, node -> true);
-		for (AbstractASTRewriteASTVisitor resolver : resolvers) {
-			final ASTRewrite astRewrite = ASTRewrite.create(compilationUnit.getAST());
-			resolver.setASTRewrite(astRewrite);
-			compilationUnit.accept(resolver);
+		/**
+		 * The following surrounding try-catch block is only a temporary FIX and
+		 * therefore a more detailed FIX needs to be discussed.
+		 */
+		try {
+			for (AbstractASTRewriteASTVisitor resolver : resolvers) {
+				final ASTRewrite astRewrite = ASTRewrite.create(compilationUnit.getAST());
+				resolver.setASTRewrite(astRewrite);
+				compilationUnit.accept(resolver);
+			}
+		} catch (NullPointerException exc) {
+			// Do nothing so as to avoid too much entries in the log files.
 		}
 	}
 

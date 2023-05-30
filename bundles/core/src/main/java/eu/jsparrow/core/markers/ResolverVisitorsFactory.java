@@ -106,7 +106,6 @@ import eu.jsparrow.core.markers.visitor.security.random.UseSecureRandomResolver;
 import eu.jsparrow.core.markers.visitor.stream.tolist.ReplaceStreamCollectByToListResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.MultiCatchResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.TryWithResourceResolver;
-import eu.jsparrow.core.rule.impl.ReplaceSetRemoveAllWithForEachRule;
 import eu.jsparrow.rules.api.MarkerService;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;

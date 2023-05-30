@@ -1,12 +1,14 @@
 package eu.jsparrow.ui.preview;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.dialog.ObtainLicenseButtonData;
+import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.wizard.AbstractRefactoringWizardDialog;
 
 /**
  * Intended to be used for preview wizards which are subclasses of
@@ -14,7 +16,7 @@ import eu.jsparrow.i18n.Messages;
  * 
  * @since 4.15.0
  */
-public class PreviewWizardDialog extends WizardDialog {
+public class PreviewWizardDialog extends AbstractRefactoringWizardDialog {
 
 	public static final int SUMMARY_BUTTON_ID = 9;
 
@@ -24,11 +26,12 @@ public class PreviewWizardDialog extends WizardDialog {
 
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		if (needsSummaryButton()) {
-			createButton(parent, SUMMARY_BUTTON_ID, Messages.SelectRulesWizard_Summary, false);
-		}
+		createButton(parent, ObtainLicenseButtonData.BUTTON_ID_UNLOCK_PREMIUM_RULES,
+				ObtainLicenseButtonData.BUTTON_TEXT_UNLOCK_PREMIUM_RULES, false);
+		createButton(parent, SUMMARY_BUTTON_ID, Messages.SelectRulesWizard_Summary, false);
 		super.createButtonsForButtonBar(parent);
 		getButton(IDialogConstants.FINISH_ID).setText("Commit"); //$NON-NLS-1$
+		updateButtonsForButtonBar();
 	}
 
 	protected void updateOnCommit() {
@@ -80,7 +83,11 @@ public class PreviewWizardDialog extends WizardDialog {
 		((AbstractPreviewWizard) getWizard()).showSummaryPage();
 	}
 
-	private boolean needsSummaryButton() {
-		return ((AbstractPreviewWizard) getWizard()).needsSummaryPage();
+	@Override
+	protected void updateButtonsForButtonBar() {
+		boolean enableCommitButton = !LicenseUtil.get()
+			.isFreeLicense();
+		getButton(IDialogConstants.FINISH_ID).setEnabled(enableCommitButton);
+		super.updateButtonsForButtonBar();
 	}
 }

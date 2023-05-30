@@ -3,10 +3,8 @@ package eu.jsparrow.ui.handler;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -17,16 +15,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.wizard.ProgressMonitorPart;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,12 +30,10 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.LicenseUtilService;
-import eu.jsparrow.ui.util.WizardHandlerUtil;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 import eu.jsparrow.ui.wizard.semiautomatic.LoggerRuleWizard;
+import eu.jsparrow.ui.wizard.semiautomatic.LoggerRuleWizardData;
 
 /**
  * Handler for semi-automatic logging rule
@@ -56,44 +46,16 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoggerRuleWizardHandler.class);
 
-	private LicenseUtilService licenseUtil = LicenseUtil.get();
-
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-
-		if (Activator.isRunning()) {
-			openAlreadyRunningDialog();
-			return null;
-		}
-
-		Activator.setRunning(true);
-
-		final Shell shell = HandlerUtil.getActiveShell(event);
-		if (!licenseUtil.checkAtStartUp(shell)) {
-			Activator.setRunning(false);
-			return null;
-		}
-
-		Map<IJavaProject, List<IJavaElement>> selectedJavaElements;
-		try {
-			selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
-		} catch (CoreException e) {
-			logger.error(e.getMessage(), e);
-			WizardMessageDialog.synchronizeWithUIShowError(new RefactoringException(
-					Messages.SelectRulesWizardHandler_getting_selected_resources_failed + e.getMessage(),
-					Messages.SelectRulesWizardHandler_user_getting_selected_resources_failed, e));
-			return null;
-		}
-		if (selectedJavaElements.isEmpty()) {
-			WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
-			logger.error(Messages.WizardMessageDialog_selectionDidNotContainAnyJavaFiles);
-			Activator.setRunning(false);
-			return null;
-		}
-
+	protected Optional<Job> createJob(Map<IJavaProject, List<IJavaElement>> selectedJavaElements) {
+		Shell shell = Display.getDefault()
+			.getActiveShell();
 		if (selectedJavaElements.size() != 1) {
-			synchronizeWithUIShowSelectionErrorMessage();
-			return false;
+			String title = Messages.LoggerRuleWizardHandler_multipleProjectsSelected;
+			String message = Messages.LoggerRuleWizardHandler_loggerRuleOnOneProjectOnly;
+
+			synchronizeWithUIShowSelectionErrorMessage(shell, title, message);
+			return Optional.empty();
 		}
 
 		List<IJavaElement> selectedElements = selectedJavaElements.entrySet()
@@ -105,28 +67,25 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 		StandardLoggerRule loggerRule = new StandardLoggerRule();
 
 		if (null == selectedJavaProjekt) {
-			SimonykeesMessageDialog.openMessageDialog(HandlerUtil.getActiveShell(event),
+			SimonykeesMessageDialog.openMessageDialog(shell,
 					"The Java Project of the selected sources could not be found.", MessageDialog.WARNING); //$NON-NLS-1$
-			Activator.setRunning(false);
-			return null;
+			return Optional.empty();
 		}
 
 		loggerRule.calculateEnabledForProject(selectedJavaProjekt);
 		if (!loggerRule.isEnabled()) {
-			SimonykeesMessageDialog.openMessageDialog(HandlerUtil.getActiveShell(event),
-					Messages.LoggerRuleWizardHandler_noLogger, MessageDialog.WARNING);
-			Activator.setRunning(false);
-			return null;
+			SimonykeesMessageDialog.openMessageDialog(shell, Messages.LoggerRuleWizardHandler_noLogger,
+					MessageDialog.WARNING);
+			return Optional.empty();
 		}
 
-		boolean confirmed = SimonykeesMessageDialog.openConfirmDialog(HandlerUtil.getActiveShell(event),
+		boolean confirmed = SimonykeesMessageDialog.openConfirmDialog(shell,
 				NLS.bind(Messages.LoggerRuleWizardHandler_info_supportedFrameworkFound,
 						loggerRule.getAvailableLoggerType()));
 		if (!confirmed) {
-			Activator.setRunning(false);
-			return null;
+			return Optional.empty();
 		}
-		
+
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 		Job job = new Job(Messages.ProgressMonitor_verifying_project_information) {
 			@Override
@@ -136,12 +95,9 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 			}
 		};
 
-		job.setUser(true);
-		job.schedule();
-
-		return true;
+		return Optional.of(job);
 	}
-	
+
 	private IStatus startLoggerRuleWizard(List<IJavaElement> selectedElements,
 			IJavaProject selectedJavaProjekt, StandardLoggerRule loggerRule,
 			RefactoringPipeline refactoringPipeline, IProgressMonitor monitor) {
@@ -153,8 +109,8 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 				.prepareRefactoring(compilationUnits, monitor);
 			if (monitor.isCanceled()) {
 				/*
-				 * Workaround that prevents selection of multiple
-				 * projects in the Package Explorer.
+				 * Workaround that prevents selection of multiple projects in
+				 * the Package Explorer.
 				 * 
 				 * See SIM-496
 				 */
@@ -169,8 +125,8 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 						refactoringPipeline, loggerRule,
 						selectedJavaProjekt);
 			} else {
-				synchronizeWithUIShowLoggerRuleWizard(refactoringPipeline,
-						loggerRule, selectedJavaProjekt);
+				LoggerRuleWizardData loggerRuleWizardData = new LoggerRuleWizardData(selectedJavaProjekt, loggerRule);
+				LoggerRuleWizard.synchronizeWithUIShowLoggerRuleWizard(refactoringPipeline, loggerRuleWizardData);
 			}
 
 		} catch (RefactoringException e) {
@@ -187,49 +143,6 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 		}
 
 		return Status.OK_STATUS;
-	}
-
-	/**
-	 * Method used to open SelectRulesWizard from non UI thread
-	 */
-	private void synchronizeWithUIShowLoggerRuleWizard(RefactoringPipeline refactoringPipeline,
-			StandardLoggerRule loggerRule, IJavaProject selectedJavaProjekt) {
-		Display.getDefault()
-			.asyncExec(() -> {
-				Shell shell = PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow()
-					.getShell();
-				// HandlerUtil.getActiveShell(event)
-				final WizardDialog dialog = new WizardDialog(shell,
-						new LoggerRuleWizard(selectedJavaProjekt, loggerRule, refactoringPipeline)) {
-					/*
-					 * Removed unnecessary empty space on the bottom of the
-					 * wizard intended for ProgressMonitor that is not
-					 * used(non-Javadoc)
-					 * 
-					 * @see org.eclipse.jface.wizard.WizardDialog#
-					 * createDialogArea(org.eclipse.swt.widgets. Composite)
-					 */
-					@Override
-					protected Control createDialogArea(Composite parent) {
-						Control ctrl = super.createDialogArea(parent);
-						getProgressMonitor();
-						return ctrl;
-					}
-
-					@Override
-					protected IProgressMonitor getProgressMonitor() {
-						ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
-						GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-						gridData.heightHint = 0;
-						monitor.setLayoutData(gridData);
-						monitor.setVisible(false);
-						return monitor;
-					}
-				};
-
-				dialog.open();
-			});
 	}
 
 	/**
@@ -251,27 +164,16 @@ public class LoggerRuleWizardHandler extends AbstractRuleWizardHandler {
 				dialog.open();
 				if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
 					if (refactoringPipeline.hasRefactoringStates()) {
-						synchronizeWithUIShowLoggerRuleWizard(refactoringPipeline,
-								loggerRule, selectedJavaProjekt);
+						LoggerRuleWizardData loggerRuleWizardData = new LoggerRuleWizardData(selectedJavaProjekt,
+								loggerRule);
+						LoggerRuleWizard.synchronizeWithUIShowLoggerRuleWizard(refactoringPipeline,
+								loggerRuleWizardData);
 					} else {
 						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitWithoutErrorsDialog();
 					}
 				} else {
 					Activator.setRunning(false);
 				}
-			});
-	}
-
-	private void synchronizeWithUIShowSelectionErrorMessage() {
-		Display.getDefault()
-			.syncExec(() -> {
-				Shell shell = PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow()
-					.getShell();
-				MessageDialog.openWarning(shell, Messages.LoggerRuleWizardHandler_multipleProjectsSelected,
-						Messages.LoggerRuleWizardHandler_loggerRuleOnOneProjectOnly);
-
-				Activator.setRunning(false);
 			});
 	}
 }
