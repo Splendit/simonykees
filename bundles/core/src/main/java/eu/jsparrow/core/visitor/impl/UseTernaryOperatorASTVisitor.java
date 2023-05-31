@@ -215,7 +215,6 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	private ConditionalExpression createConditionalExpression(TransformationData data) {
 		AST ast = astRewrite.getAST();
 		ConditionalExpression conditionalExpression = ast.newConditionalExpression();
-		astRewrite.createCopyTarget(data.getCondition());
 		ASTNode expressionCopyTarget = astRewrite.createCopyTarget(data.getCondition());
 		conditionalExpression.setExpression((Expression) expressionCopyTarget);
 		ASTNode thenExpressionCopyTarget = astRewrite.createCopyTarget(data.getResultIf());
