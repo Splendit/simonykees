@@ -8,11 +8,7 @@ public class CodeFormatterRule {
 	}
 
 	public int b(int i) {
-		if (0 == i) {
-			return 1;
-		} else {
-			return 0;
-		}
+		return 0 == i ? 1 : 0;
 	}
 
 	/**
