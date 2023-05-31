@@ -73,6 +73,7 @@ public class RulesContainer {
 				/*
 				 * Coding conventions
 				 */
+				new UseTernaryOperatorRule(),
 				new RemoveUnusedLocalVariablesRule(),
 				new TryWithResourceRule(), new MultiCatchRule(), new FunctionalInterfaceRule(),
 				new CollectionRemoveAllRule(), new ReplaceSetRemoveAllWithForEachRule(),
