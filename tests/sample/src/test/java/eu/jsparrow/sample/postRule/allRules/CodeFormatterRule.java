@@ -25,4 +25,14 @@ public class CodeFormatterRule {
 		return i + 3;
 	}
 
+	public void d(int i) {
+		if (0 == i) {
+			use(1);
+		} else {
+			use(0);
+		}
+	}
+
+	public void use(int i) {
+	}
 }

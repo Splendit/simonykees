@@ -15,6 +15,16 @@ public class TestBracketsToControlRule {
 		i = i == 0 ? 0 : 0;
 	}
 
+	public static void testforIfWithSystemOut() {
+		final int i = 0;
+
+		if (i == 0) {
+			logger.info("0");
+		} else {
+			logger.info("0");
+		}
+	}
+
 	public static void testforLoop() {
 		for (int i = 1; i < 2; i++) {
 		}
