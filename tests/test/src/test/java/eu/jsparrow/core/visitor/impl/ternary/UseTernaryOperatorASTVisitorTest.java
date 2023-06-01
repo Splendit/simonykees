@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
-import eu.jsparrow.core.visitor.impl.ternary.UseTernaryOperatorASTVisitor;
 
 @SuppressWarnings({ "nls" })
 public class UseTernaryOperatorASTVisitorTest extends UsesJDTUnitFixture {

@@ -32,66 +32,80 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(IfStatement ifStatement) {
-		TransformationData data = findTransformationData(ifStatement).orElse(null);
-		if (data instanceof ReturnTernaryExpressionData) {
-			replaceIfStatementByTernary(ifStatement, (ReturnTernaryExpressionData) data);
-			return false;
-		}
-		if (data instanceof AssignTernaryExpressionData) {
-			replaceIfStatementByTernary(ifStatement, (AssignTernaryExpressionData) data);
+		Runnable transformer = findTransformer(ifStatement).orElse(null);
+		if (transformer != null) {
+			transformer.run();
+			onRewrite();
 			return false;
 		}
 		return true;
-
 	}
 
-	Optional<TransformationData> findTransformationData(IfStatement ifStatement) {
-
+	private Optional<Runnable> findTransformer(IfStatement ifStatement) {
 		Statement unwrappedThenStatement = unwrapToSingleStatement(ifStatement.getThenStatement()).orElse(null);
 		if (unwrappedThenStatement == null) {
 			return Optional.empty();
 		}
+		if (unwrappedThenStatement.getNodeType() == ASTNode.RETURN_STATEMENT) {
+			ReturnStatement returnStatementWhenTrue = (ReturnStatement) unwrappedThenStatement;
+			return findTransformerToReturnOfTernaryExpression(returnStatementWhenTrue, ifStatement);
+		}
+		return findTransformerToAssignmentOfTernaryExpression(unwrappedThenStatement, ifStatement);
+	}
+
+	private Optional<Runnable> findTransformerToReturnOfTernaryExpression(ReturnStatement returnStatementWhenTrue,
+			IfStatement ifStatement) {
+		Expression ifCondition = ifStatement.getExpression();
+		Expression expressionWhenTrue = returnStatementWhenTrue.getExpression();
+		Expression expressionWhenFalse;
+		ReturnStatement returnStatementToRemove;
 		Statement elseStatement = ifStatement.getElseStatement();
 
 		if (elseStatement == null) {
-			if (unwrappedThenStatement.getNodeType() != ASTNode.RETURN_STATEMENT) {
+			returnStatementToRemove = findReturnStatementFollowingIf(ifStatement).orElse(null);
+			if (returnStatementToRemove == null) {
 				return Optional.empty();
 			}
-			ReturnStatement returnStatementWhenFalse = findReturnStatementFollowingIf(ifStatement).orElse(null);
-			if (returnStatementWhenFalse == null) {
+			expressionWhenFalse = returnStatementToRemove.getExpression();
+		} else {
+			returnStatementToRemove = null;
+			Statement unwrappedElseStatement = unwrapToSingleStatement(elseStatement).orElse(null);
+			if (unwrappedElseStatement == null) {
 				return Optional.empty();
 			}
-			ReturnStatement returnStatementWhenTrue = (ReturnStatement) unwrappedThenStatement;
+			if (unwrappedElseStatement.getNodeType() != ASTNode.RETURN_STATEMENT) {
+				return Optional.empty();
+			}
+			expressionWhenFalse = ((ReturnStatement) unwrappedElseStatement).getExpression();
+		}
+		if (!checkTypes(expressionWhenTrue, expressionWhenFalse)) {
+			return Optional.empty();
+		}
+		if (returnStatementToRemove != null) {
+			return Optional.of(() -> {
+				ConditionalExpression conditionalExpression = newConditionalExpression(ifCondition,
+						expressionWhenTrue, expressionWhenFalse);
+				replaceIfStatementByReturnTernary(ifStatement, conditionalExpression, returnStatementToRemove);
+			});
+		}
+		return Optional.of(() -> {
+			ConditionalExpression conditionalExpression = newConditionalExpression(ifCondition,
+					expressionWhenTrue, expressionWhenFalse);
+			replaceIfStatementByReturnTernary(ifStatement, conditionalExpression);
+		});
+	}
 
-			Expression expressionWhenTrue = returnStatementWhenTrue.getExpression();
-			Expression expressionWhenFalse = returnStatementWhenFalse.getExpression();
-			if (checkTypes(expressionWhenTrue, expressionWhenFalse)) {
-				Expression ifCondition = ifStatement.getExpression();
-				return Optional
-					.of(new ReturnTernaryExpressionData(ifCondition, expressionWhenTrue, expressionWhenFalse,
-							returnStatementWhenFalse));
-			}
+	private Optional<Runnable> findTransformerToAssignmentOfTernaryExpression(
+			Statement unwrappedThenStatement,
+			IfStatement ifStatement) {
+
+		Statement elseStatement = ifStatement.getElseStatement();
+		if (elseStatement == null) {
 			return Optional.empty();
 		}
 
 		Statement unwrappedElseStatement = unwrapToSingleStatement(elseStatement).orElse(null);
 		if (unwrappedElseStatement == null) {
-			return Optional.empty();
-		}
-
-		if (unwrappedThenStatement.getNodeType() == ASTNode.RETURN_STATEMENT
-				&& unwrappedElseStatement.getNodeType() == ASTNode.RETURN_STATEMENT) {
-
-			ReturnStatement returnStatementWhenTrue = (ReturnStatement) unwrappedThenStatement;
-			ReturnStatement returnStatementWhenFalse = (ReturnStatement) unwrappedElseStatement;
-
-			Expression expressionWhenTrue = returnStatementWhenTrue.getExpression();
-			Expression expressionWhenFalse = returnStatementWhenFalse.getExpression();
-			if (checkTypes(expressionWhenTrue, expressionWhenFalse)) {
-				Expression ifCondition = ifStatement.getExpression();
-				return Optional
-					.of(new ReturnTernaryExpressionData(ifCondition, expressionWhenTrue, expressionWhenFalse));
-			}
 			return Optional.empty();
 		}
 
@@ -112,18 +126,22 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (isVariableWithSideEffect(leftHandSideWhenTrue)) {
 			return Optional.empty();
 		}
+
 		Expression expressionWhenTrue = assignmentWhenTrue.getRightHandSide();
 		Expression expressionWhenFalse = assignmentWhenFalse.getRightHandSide();
-		if (checkTypes(expressionWhenTrue, expressionWhenFalse)) {
-			Expression ifCondition = ifStatement.getExpression();
-			return Optional
-				.of(new AssignTernaryExpressionData(leftHandSideWhenTrue,
-						ifCondition, expressionWhenTrue, expressionWhenFalse));
+		if (!checkTypes(expressionWhenTrue, expressionWhenFalse)) {
+			return Optional.empty();
 		}
-		return Optional.empty();
+
+		Expression ifCondition = ifStatement.getExpression();
+		return Optional.of(() -> {
+			ConditionalExpression conditionalExpression = newConditionalExpression(ifCondition, expressionWhenTrue,
+					expressionWhenFalse);
+			replaceIfStatementByAssignmentOfTernary(ifStatement, leftHandSideWhenTrue, conditionalExpression);
+		});
 	}
 
-	Optional<Statement> unwrapToSingleStatement(Statement statement) {
+	private Optional<Statement> unwrapToSingleStatement(Statement statement) {
 		if (statement.getNodeType() == ASTNode.BLOCK) {
 			Block block = (Block) statement;
 			if (block.statements()
@@ -186,101 +204,40 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		return true;
 	}
 
-	private void replaceIfStatementByTernary(IfStatement ifStatement, ReturnTernaryExpressionData data) {
-
-		ConditionalExpression conditionalExpression = createConditionalExpression(data);
-
+	private void replaceIfStatementByReturnTernary(IfStatement ifStatement,
+			ConditionalExpression conditionalExpression) {
 		AST ast = astRewrite.getAST();
 		ReturnStatement returnStatement = ast.newReturnStatement();
 		returnStatement.setExpression(conditionalExpression);
 		astRewrite.replace(ifStatement, returnStatement, null);
-		data.getReturnStatementToRemove()
-			.ifPresent(returnStatementToRemove -> astRewrite.remove(returnStatementToRemove, null));
-
-		onRewrite();
-
 	}
 
-	private void replaceIfStatementByTernary(IfStatement ifStatement, AssignTernaryExpressionData data) {
-		ConditionalExpression conditionalExpression = createConditionalExpression(data);
+	private void replaceIfStatementByReturnTernary(IfStatement ifStatement,
+			ConditionalExpression conditionalExpression, ReturnStatement returnStatementToRemove) {
+		replaceIfStatementByReturnTernary(ifStatement, conditionalExpression);
+		astRewrite.remove(returnStatementToRemove, null);
+	}
+
+	private void replaceIfStatementByAssignmentOfTernary(IfStatement ifStatement, Expression leftHandSide,
+			ConditionalExpression conditionalExpression) {
 		AST ast = astRewrite.getAST();
 		Assignment assignment = ast.newAssignment();
-		ASTNode leftHandSideCopyTarget = astRewrite.createCopyTarget(data.getAssignmentLHS());
+		ASTNode leftHandSideCopyTarget = astRewrite.createCopyTarget(leftHandSide);
 		assignment.setLeftHandSide((Expression) leftHandSideCopyTarget);
 		assignment.setRightHandSide(conditionalExpression);
 		astRewrite.replace(ifStatement, ast.newExpressionStatement(assignment), null);
-		onRewrite();
 	}
 
-	private ConditionalExpression createConditionalExpression(TransformationData data) {
+	private ConditionalExpression newConditionalExpression(Expression condition, Expression thenExpression,
+			Expression elseExpression) {
 		AST ast = astRewrite.getAST();
 		ConditionalExpression conditionalExpression = ast.newConditionalExpression();
-		ASTNode expressionCopyTarget = astRewrite.createCopyTarget(data.getCondition());
-		conditionalExpression.setExpression((Expression) expressionCopyTarget);
-		ASTNode thenExpressionCopyTarget = astRewrite.createCopyTarget(data.getResultIf());
+		ASTNode conditionCopyTarget = astRewrite.createCopyTarget(condition);
+		conditionalExpression.setExpression((Expression) conditionCopyTarget);
+		ASTNode thenExpressionCopyTarget = astRewrite.createCopyTarget(thenExpression);
 		conditionalExpression.setThenExpression((Expression) thenExpressionCopyTarget);
-		ASTNode elseExpressionCopyTarget = astRewrite.createCopyTarget(data.getResultElse());
+		ASTNode elseExpressionCopyTarget = astRewrite.createCopyTarget(elseExpression);
 		conditionalExpression.setElseExpression((Expression) elseExpressionCopyTarget);
 		return conditionalExpression;
-	}
-
-	abstract class TransformationData {
-		private final Expression condition;
-		// Problems can arise if one expression is primitive and the other is a
-		// reference type, for example int and Integer
-		// say, in cases where there is a boxing and unboxing
-		private final Expression resultIf;
-		private final Expression resultElse;
-
-		protected TransformationData(Expression condition, Expression resultIf, Expression resultElse) {
-			this.condition = condition;
-			this.resultIf = resultIf;
-			this.resultElse = resultElse;
-		}
-
-		Expression getCondition() {
-			return condition;
-		}
-
-		Expression getResultIf() {
-			return resultIf;
-		}
-
-		Expression getResultElse() {
-			return resultElse;
-		}
-	}
-
-	class AssignTernaryExpressionData extends TransformationData {
-		private final Expression assignmentLHS;
-
-		AssignTernaryExpressionData(Expression assignmentLHS, Expression condition, Expression resultIf,
-				Expression resultElse) {
-			super(condition, resultIf, resultElse);
-			this.assignmentLHS = assignmentLHS;
-		}
-
-		Expression getAssignmentLHS() {
-			return assignmentLHS;
-		}
-
-	}
-
-	class ReturnTernaryExpressionData extends TransformationData {
-		private ReturnStatement returnStatementToRemove;
-
-		ReturnTernaryExpressionData(Expression condition, Expression resultIf, Expression resultElse,
-				ReturnStatement returnStatementToRemove) {
-			super(condition, resultIf, resultElse);
-			this.returnStatementToRemove = returnStatementToRemove;
-		}
-
-		protected ReturnTernaryExpressionData(Expression condition, Expression resultIf, Expression resultElse) {
-			super(condition, resultIf, resultElse);
-		}
-
-		Optional<ReturnStatement> getReturnStatementToRemove() {
-			return Optional.ofNullable(returnStatementToRemove);
-		}
 	}
 }
