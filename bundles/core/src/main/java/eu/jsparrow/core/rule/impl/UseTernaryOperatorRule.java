@@ -6,7 +6,7 @@ import java.util.Arrays;
 import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.CollapseIfStatementsASTVisitor;
-import eu.jsparrow.core.visitor.impl.UseTernaryOperatorASTVisitor;
+import eu.jsparrow.core.visitor.impl.ternary.UseTernaryOperatorASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;

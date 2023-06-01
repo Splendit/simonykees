@@ -1,10 +1,11 @@
-package eu.jsparrow.core.visitor.impl;
+package eu.jsparrow.core.visitor.impl.ternary;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
+import eu.jsparrow.core.visitor.impl.ternary.UseTernaryOperatorASTVisitor;
 
 @SuppressWarnings({ "nls" })
 public class UseTernaryOperatorASTVisitorTest extends UsesJDTUnitFixture {

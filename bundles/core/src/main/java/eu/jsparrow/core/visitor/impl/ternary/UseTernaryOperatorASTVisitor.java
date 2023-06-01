@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl;
+package eu.jsparrow.core.visitor.impl.ternary;
 
 import java.util.List;
 import java.util.Optional;
