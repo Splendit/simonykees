@@ -14,8 +14,10 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.VariableDeclarationBeforeStatement;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -48,12 +50,12 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 		if (unwrappedThenStatement.getNodeType() == ASTNode.RETURN_STATEMENT) {
 			ReturnStatement returnStatementWhenTrue = (ReturnStatement) unwrappedThenStatement;
-			return findTransformerToReturnOfTernaryExpression(returnStatementWhenTrue, ifStatement);
+			return findTransformerToReturnOfTernary(returnStatementWhenTrue, ifStatement);
 		}
-		return findTransformerToAssignmentOfTernaryExpression(unwrappedThenStatement, ifStatement);
+		return findTransformerToAssignmentOfTernary(unwrappedThenStatement, ifStatement);
 	}
 
-	private Optional<Runnable> findTransformerToReturnOfTernaryExpression(ReturnStatement returnStatementWhenTrue,
+	private Optional<Runnable> findTransformerToReturnOfTernary(ReturnStatement returnStatementWhenTrue,
 			IfStatement ifStatement) {
 		Expression ifCondition = ifStatement.getExpression();
 		Expression expressionWhenTrue = returnStatementWhenTrue.getExpression();
@@ -95,7 +97,7 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		});
 	}
 
-	private Optional<Runnable> findTransformerToAssignmentOfTernaryExpression(
+	private Optional<Runnable> findTransformerToAssignmentOfTernary(
 			Statement unwrappedThenStatement,
 			IfStatement ifStatement) {
 
@@ -134,6 +136,18 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		Expression ifCondition = ifStatement.getExpression();
+		VariableDeclarationFragment declarationFragnentBeforeIf = VariableDeclarationBeforeStatement
+			.findDeclaringFragment(leftHandSideWhenTrue, ifStatement, getCompilationUnit())
+			.orElse(null);
+
+		if (declarationFragnentBeforeIf != null) {
+			return Optional.of(() -> {
+				ConditionalExpression conditionalExpression = newConditionalExpression(ifCondition, expressionWhenTrue,
+						expressionWhenFalse);
+				replaceByInitializationWithTernary(ifStatement, conditionalExpression, declarationFragnentBeforeIf);
+			});
+		}
+
 		return Optional.of(() -> {
 			ConditionalExpression conditionalExpression = newConditionalExpression(ifCondition, expressionWhenTrue,
 					expressionWhenFalse);
@@ -226,6 +240,12 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		assignment.setLeftHandSide((Expression) leftHandSideCopyTarget);
 		assignment.setRightHandSide(conditionalExpression);
 		astRewrite.replace(ifStatement, ast.newExpressionStatement(assignment), null);
+	}
+
+	private void replaceByInitializationWithTernary(IfStatement ifStatement,
+			ConditionalExpression conditionalExpression, VariableDeclarationFragment fragment) {
+		astRewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, conditionalExpression, null);
+		astRewrite.remove(ifStatement, null);
 	}
 
 	private ConditionalExpression newConditionalExpression(Expression condition, Expression thenExpression,

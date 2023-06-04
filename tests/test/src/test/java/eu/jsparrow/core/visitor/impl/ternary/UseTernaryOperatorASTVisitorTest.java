@@ -19,36 +19,8 @@ public class UseTernaryOperatorASTVisitorTest extends UsesJDTUnitFixture {
 		fixtureProject.clear();
 	}
 
-	/**
-	 * This test is expected to fail as soon as the corresponding visitor will
-	 * have been optimized:
-	 * 
-	 * The following code
-	 * 
-	 * <pre>
-	 * int x;
-	 * if (condition) {
-	 * 	x = 1;
-	 * } else {
-	 * 	x = 0;
-	 * }
-	 * </pre>
-	 * 
-	 * should be transformed to
-	 * 
-	 * <pre>
-	 * int x = condition ? 1 : 0;
-	 * </pre>
-	 * 
-	 * and not to
-	 * 
-	 * <pre>
-	 * int x;
-	 * x = condition ? 1 : 0;
-	 * </pre>
-	 */
 	@Test
-	public void visit_firstExampleWithAssignment_shouldTransform() throws Exception {
+	void visit_replaceWithTernaryAsInitializer_shouldTransform() throws Exception {
 		String original = ""
 				+ "	void test() {\n"
 				+ "		boolean condition = true;\n"
@@ -62,8 +34,31 @@ public class UseTernaryOperatorASTVisitorTest extends UsesJDTUnitFixture {
 		String expected = ""
 				+ "	void test() {\n"
 				+ "		boolean condition = true;\n"
+				+ "		int x=condition ? 1 : 0;\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_replaceWithTernaryAsAssignmentRightHandSide_shouldTransform() throws Exception {
+		String original = ""
+				+ "	void test() {\n"
+				+ "		boolean condition = true;\n"
 				+ "		int x;\n"
-				+ "		x=condition ? 1 : 0;\n"
+				+ "		x = 1;\n"
+				+ "		if (condition) {\n"
+				+ "			x = 1;\n"
+				+ "		} else {\n"
+				+ "			x = 0;\n"
+				+ "		}\n"
+				+ "	}";
+		String expected = ""
+				+ "	void test() {\n"
+				+ "		boolean condition = true;\n"
+				+ "		int x;\n"
+				+ "		x = 1;\n"
+				+ "		x = condition ? 1 : 0;\n"
 				+ "	}";
 
 		assertChange(original, expected);
@@ -95,7 +90,7 @@ public class UseTernaryOperatorASTVisitorTest extends UsesJDTUnitFixture {
 	 * 
 	 */
 	@Test
-	public void visit_exampleWithReturnInsteadOfElse_shouldTransform() throws Exception {
+	void visit_exampleWithReturnInsteadOfElse_shouldTransform() throws Exception {
 		String original = ""
 				+ "	int test() {\n"
 				+ "		boolean condition = true;\n"

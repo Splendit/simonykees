@@ -24,10 +24,10 @@ import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.YieldStatement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.VariableDeclarationBeforeStatement;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public abstract class AbstractReplaceBySwitchASTVisitor extends AbstractASTRewriteASTVisitor {
@@ -43,9 +43,10 @@ public abstract class AbstractReplaceBySwitchASTVisitor extends AbstractASTRewri
 				.orElse(null);
 
 			if (variableToAssignSwitchExpression != null) {
-				VariableDeclarationFragment fragment = findDeclaringFragment(variableToAssignSwitchExpression,
-						statementToReplace)
-							.orElse(null);
+				CompilationUnit compilationUnit = getCompilationUnit();
+				VariableDeclarationFragment fragment = VariableDeclarationBeforeStatement
+					.findDeclaringFragment(variableToAssignSwitchExpression, statementToReplace, compilationUnit)
+					.orElse(null);
 
 				if (fragment != null) {
 					return () -> replaceByInitializationWithSwitch(statementToReplace, switchHeaderExpression, clauses,
@@ -203,58 +204,6 @@ public abstract class AbstractReplaceBySwitchASTVisitor extends AbstractASTRewri
 		}
 		IVariableBinding variableBinding = (IVariableBinding) binding;
 		return Optional.ofNullable(compilationUnit.findDeclaringNode(variableBinding));
-	}
-
-	protected Optional<VariableDeclarationFragment> findDeclaringFragment(Expression assigned, Statement statement) {
-		CompilationUnit compilationUnit = getCompilationUnit();
-		if (assigned.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return Optional.empty();
-		}
-		SimpleName simpleName = (SimpleName) assigned;
-
-		IBinding binding = simpleName.resolveBinding();
-		ASTNode declaringNode = compilationUnit.findDeclaringNode(binding);
-		if (declaringNode == null) {
-			return Optional.empty();
-		}
-		int declaringNodeType = declaringNode.getNodeType();
-		if (declaringNodeType != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return Optional.empty();
-		}
-		VariableDeclarationFragment fragment = (VariableDeclarationFragment) declaringNode;
-		if (fragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-			return Optional.empty();
-		}
-		VariableDeclarationStatement declaraingStatement = (VariableDeclarationStatement) fragment.getParent();
-		if (declaraingStatement.fragments()
-			.size() != 1) {
-			return Optional.empty();
-		}
-		boolean areStatementsInBlock = declaraingStatement.getLocationInParent() == Block.STATEMENTS_PROPERTY
-				&& statement.getLocationInParent() == Block.STATEMENTS_PROPERTY;
-		if (!areStatementsInBlock) {
-			return Optional.empty();
-		}
-		Block declarationParent = (Block) declaraingStatement.getParent();
-		Block statementParent = (Block) statement.getParent();
-		if (statementParent != declarationParent) {
-			return Optional.empty();
-		}
-		List<Statement> blockStatements = ASTNodeUtil.convertToTypedList(declarationParent.statements(),
-				Statement.class);
-		int declarationIndex = blockStatements.indexOf(declaraingStatement);
-		int statementIndex = blockStatements.indexOf(statement);
-
-		if (statementIndex != declarationIndex + 1) {
-			return Optional.empty();
-		}
-
-		Expression initializer = fragment.getInitializer();
-		if (initializer != null && initializer.getNodeType() != ASTNode.SIMPLE_NAME
-				&& !ASTNodeUtil.isLiteral(initializer)) {
-			return Optional.empty();
-		}
-		return Optional.of(fragment);
 	}
 
 	protected boolean areReturningValue(List<? extends SwitchCaseClause> clauses) {
