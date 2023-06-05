@@ -536,4 +536,41 @@ class SwitchAssigningValueASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
+	@Test
+	void visit_assignmentToEvaluatedVariable_shouldTransform() throws Exception {
+		String original = ""
+				+ "	class SampleReassignment8Switch {\n"
+				+ "		void test() {\n"
+				+ "			int value = 0;"
+				+ "			switch (value) {\n"
+				+ "			case (0):\n"
+				+ "				value = \"ZERO\";\n"
+				+ "				break;\n"
+				+ "			case (1):\n"
+				+ "				value = \"ONE\";\n"
+				+ "				break;\n"
+				+ "			case (2):\n"
+				+ "				value = \"TWO\";\n"
+				+ "				break;\n"
+				+ "			default:\n"
+				+ "				value = \"ZERO\";\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "		}"
+				+ "	}";
+
+		String expected = ""
+				+ "	class SampleReassignment8Switch {\n"
+				+ "		void test() {\n"
+				+ "			int value = 0;"
+				+ "			value = switch (value) {\n"
+				+ "			case 0 -> \"ZERO\";\n"
+				+ "			case 1 -> \"ONE\";\n"
+				+ "			case 2 -> \"TWO\";\n"
+				+ "			default -> \"ZERO\";\n"
+				+ "			};\n"
+				+ "		}\n"
+				+ "	}";
+		assertChange(original, expected);
+	}
 }

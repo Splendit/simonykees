@@ -789,6 +789,38 @@ class ReplaceMultiBranchIfBySwitchASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
+	void visit_assignmentToEvaluatedVariable_shouldTransform() throws Exception {
+		String original = ""
+				+ "	public static void test() {\n"
+				+ "		int i = 0;\n"
+				+ "\n"
+				+ "		if (i == 0) {\n"
+				+ "			i = 1;\n"
+				+ "		} else if (i == 1) {\n"
+				+ "			i = 2;\n"
+				+ "		} else if (i == 2) {\n"
+				+ "			i = 3;\n"
+				+ "		} else {\n"
+				+ "			i = 0;\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = ""
+				+ "	public static void test() {\n"
+				+ "		int i = 0;\n"
+				+ "\n"
+				+ "		i = switch (i) {\n"
+				+ "		case 0 -> 1;\n"
+				+ "		case 1 -> 2;\n"
+				+ "		case 2 -> 3;\n"
+				+ "		default -> 0;\n"
+				+ "		};\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	void visit_noEqualsOperationFound_shouldNotTransform() throws Exception {
 
 		String original = ""
