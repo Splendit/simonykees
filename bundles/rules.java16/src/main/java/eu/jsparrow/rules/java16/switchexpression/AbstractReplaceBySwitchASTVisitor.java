@@ -43,14 +43,19 @@ public abstract class AbstractReplaceBySwitchASTVisitor extends AbstractASTRewri
 				.orElse(null);
 
 			if (variableToAssignSwitchExpression != null) {
-				CompilationUnit compilationUnit = getCompilationUnit();
-				VariableDeclarationFragment fragment = VariableDeclarationBeforeStatement
-					.findDeclaringFragment(variableToAssignSwitchExpression, statementToReplace, compilationUnit)
-					.orElse(null);
 
-				if (fragment != null) {
-					return () -> replaceByInitializationWithSwitch(statementToReplace, switchHeaderExpression, clauses,
-							fragment);
+				if (variableToAssignSwitchExpression.getNodeType() == ASTNode.SIMPLE_NAME
+						&& !switchHeaderExpression.subtreeMatch(matcher, variableToAssignSwitchExpression)) {
+					SimpleName assignedSimpleName = (SimpleName) variableToAssignSwitchExpression;
+					CompilationUnit compilationUnit = getCompilationUnit();
+					VariableDeclarationFragment fragment = VariableDeclarationBeforeStatement
+						.findDeclaringFragment(assignedSimpleName, statementToReplace, compilationUnit)
+						.orElse(null);
+
+					if (fragment != null) {
+						return () -> replaceByInitializationWithSwitch(statementToReplace, switchHeaderExpression,
+								clauses, fragment);
+					}
 				}
 
 				return () -> replaceByAssignmentWithSwitch(variableToAssignSwitchExpression, statementToReplace,

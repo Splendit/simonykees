@@ -13,12 +13,14 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.VariableDeclarationBeforeStatement;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * A visitor that searches for nested {@link IfStatement} and collapses them to
@@ -136,16 +138,22 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		Expression ifCondition = ifStatement.getExpression();
-		VariableDeclarationFragment declarationFragnentBeforeIf = VariableDeclarationBeforeStatement
-			.findDeclaringFragment(leftHandSideWhenTrue, ifStatement, getCompilationUnit())
-			.orElse(null);
 
-		if (declarationFragnentBeforeIf != null) {
-			return Optional.of(() -> {
-				ConditionalExpression conditionalExpression = newConditionalExpression(ifCondition, expressionWhenTrue,
-						expressionWhenFalse);
-				replaceByInitializationWithTernary(ifStatement, conditionalExpression, declarationFragnentBeforeIf);
-			});
+		if (leftHandSideWhenTrue.getNodeType() == ASTNode.SIMPLE_NAME) {
+			SimpleName leftHandSideSimpleName = (SimpleName) leftHandSideWhenTrue;
+			VariableDeclarationFragment declarationFragmentBeforeIf = VariableDeclarationBeforeStatement
+				.findDeclaringFragment(leftHandSideSimpleName, ifStatement, getCompilationUnit())
+				.orElse(null);
+
+			if (declarationFragmentBeforeIf != null
+					&& !isVariableUsedInIfCondition(leftHandSideSimpleName, ifCondition)) {
+				return Optional.of(() -> {
+					ConditionalExpression conditionalExpression = newConditionalExpression(ifCondition,
+							expressionWhenTrue,
+							expressionWhenFalse);
+					replaceByInitializationWithTernary(ifStatement, conditionalExpression, declarationFragmentBeforeIf);
+				});
+			}
 		}
 
 		return Optional.of(() -> {
@@ -153,6 +161,13 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					expressionWhenFalse);
 			replaceIfStatementByAssignmentOfTernary(ifStatement, leftHandSideWhenTrue, conditionalExpression);
 		});
+	}
+
+	private boolean isVariableUsedInIfCondition(SimpleName variableName, Expression ifCondition) {
+		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(variableName);
+		ifCondition.accept(visitor);
+		return !visitor.getUsages()
+			.isEmpty();
 	}
 
 	private Optional<Statement> unwrapToSingleStatement(Statement statement) {
