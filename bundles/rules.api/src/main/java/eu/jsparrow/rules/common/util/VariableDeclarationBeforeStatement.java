@@ -1,6 +1,5 @@
 package eu.jsparrow.rules.common.util;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -55,52 +54,47 @@ public class VariableDeclarationBeforeStatement {
 	 *         not fulfilled completely.
 	 */
 	public static Optional<VariableDeclarationFragment> findDeclaringFragment(SimpleName simpleName,
-			Statement statement,
-			CompilationUnit compilationUnit) {
+			Statement statement, CompilationUnit compilationUnit) {
+
+		if (statement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return Optional.empty();
+		}
+
+		Block parentBlock = (Block) statement.getParent();
+		VariableDeclarationStatement declarationStatementBefore = ASTNodeUtil
+			.findListElementBefore(parentBlock.statements(), statement, VariableDeclarationStatement.class)
+			.orElse(null);
+
+		if (declarationStatementBefore == null) {
+			return Optional.empty();
+		}
+
+		VariableDeclarationFragment declarationFragment = ASTNodeUtil
+			.findSingletonListElement(declarationStatementBefore.fragments(), VariableDeclarationFragment.class)
+			.orElse(null);
+
+		if (declarationFragment == null) {
+			return Optional.empty();
+		}
+
+		if (hasInitializerWithSideEffect(declarationFragment)) {
+			return Optional.empty();
+		}
 
 		IBinding binding = simpleName.resolveBinding();
 		ASTNode declaringNode = compilationUnit.findDeclaringNode(binding);
-		if (declaringNode == null) {
-			return Optional.empty();
-		}
-		int declaringNodeType = declaringNode.getNodeType();
-		if (declaringNodeType != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return Optional.empty();
-		}
-		VariableDeclarationFragment fragment = (VariableDeclarationFragment) declaringNode;
-		if (fragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-			return Optional.empty();
-		}
-		VariableDeclarationStatement declaraingStatement = (VariableDeclarationStatement) fragment.getParent();
-		if (declaraingStatement.fragments()
-			.size() != 1) {
-			return Optional.empty();
-		}
-		boolean areStatementsInBlock = declaraingStatement.getLocationInParent() == Block.STATEMENTS_PROPERTY
-				&& statement.getLocationInParent() == Block.STATEMENTS_PROPERTY;
-		if (!areStatementsInBlock) {
-			return Optional.empty();
-		}
-		Block declarationParent = (Block) declaraingStatement.getParent();
-		Block statementParent = (Block) statement.getParent();
-		if (statementParent != declarationParent) {
-			return Optional.empty();
-		}
-		List<Statement> blockStatements = ASTNodeUtil.convertToTypedList(declarationParent.statements(),
-				Statement.class);
-		int declarationIndex = blockStatements.indexOf(declaraingStatement);
-		int statementIndex = blockStatements.indexOf(statement);
 
-		if (statementIndex != declarationIndex + 1) {
+		if (declaringNode != declarationFragment) {
 			return Optional.empty();
 		}
 
+		return Optional.of(declarationFragment);
+	}
+
+	private static boolean hasInitializerWithSideEffect(VariableDeclarationFragment fragment) {
 		Expression initializer = fragment.getInitializer();
-		if (initializer != null && initializer.getNodeType() != ASTNode.SIMPLE_NAME
-				&& !ASTNodeUtil.isLiteral(initializer)) {
-			return Optional.empty();
-		}
-		return Optional.of(fragment);
+		return initializer != null && initializer.getNodeType() != ASTNode.SIMPLE_NAME
+				&& !ASTNodeUtil.isLiteral(initializer);
 	}
 
 	private VariableDeclarationBeforeStatement() {

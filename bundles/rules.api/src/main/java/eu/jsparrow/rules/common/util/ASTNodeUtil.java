@@ -310,6 +310,26 @@ public class ASTNodeUtil {
 	}
 
 	/**
+	 * 
+	 * @return An Optional containing the element before the element specified
+	 *         by the 2nd paramneter which is expected to be an instance of the
+	 *         type specified by the 3rd parameter. In all other cases an empty
+	 *         optional is returned.
+	 * 
+	 */
+	public static <T extends ASTNode> Optional<T> findListElementBefore(@SuppressWarnings("rawtypes") List rawlist,
+			ASTNode element,
+			Class<T> type) {
+		int indexBefore = rawlist.indexOf(element) - 1;
+		if (indexBefore < 0) {
+			return Optional.empty();
+		}
+		return Optional.of(rawlist.get(indexBefore))
+			.filter(type::isInstance)
+			.map(type::cast);
+	}
+
+	/**
 	 * Filters a list of modifiers if specific modifiers are present defined by
 	 * the predicate
 	 * 

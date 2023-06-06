@@ -314,6 +314,33 @@ class SwitchAssigningValueASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
+	
+	@Test
+	void visit_expectNoInitializationWithSwitchExpression_shouldTransform() throws Exception {
+		String original = ""
+				+ "int digit = 10;"
+				+ "String value;\n"
+				+ "String value1;\n"
+				+ "	switch(digit) {\n"
+				+ "	case 0: value = \"zero\"; break;\n"
+				+ "	case 1: value = \"one\"; break;\n"
+				+ "	case 2: value = \"two\"; break;\n"
+				+ "	default: value = \"other\"; break;\n"
+				+ "}";
+
+		String expected = ""
+				+ "int digit = 10;"
+				+ "String value;\n"
+				+ "String value1;\n"				
+				+ "value = switch (digit) {\n"
+				+ "	case 0 -> \"zero\";\n"
+				+ "	case 1 -> \"one\";\n"
+				+ "	case 2 -> \"two\";\n"
+				+ "	default -> \"other\";\n"
+				+ "};";
+
+		assertChange(original, expected);
+	}
 
 	@Test
 	void visit_reassignedMissingDefault_shouldTransform() throws Exception {

@@ -262,6 +262,19 @@ class ReplaceMultiBranchIfBySwitchASTVisitorTest extends UsesJDTUnitFixture {
 						""
 								+ "	void expectAssignmentWithSwitchExpression(int value) {\n"
 								+ "		String result;\n"
+								+ "		String result1;\n"
+								+ multibranchIf + "\n"
+								+ "	}",
+						""
+								+ "	void expectAssignmentWithSwitchExpression(int value) {\n"
+								+ "		String result;\n"
+								+ "		String result1;\n"
+								+ assignmentWithSwitchExpression + "\n"
+								+ "	}"),
+				Arguments.of(
+						""
+								+ "	void expectAssignmentWithSwitchExpression(int value) {\n"
+								+ "		String result;\n"
 								+ "		{\n"
 								+ multibranchIf + "\n"
 								+ "		}\n"
