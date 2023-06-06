@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.impl.ternary;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
@@ -35,9 +36,6 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(IfStatement ifStatement) {
-		if(ifStatement.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
-			return true;
-		}
 		Runnable transformer = findTransformer(ifStatement).orElse(null);
 		if (transformer != null) {
 			transformer.run();
@@ -48,88 +46,35 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private Optional<Runnable> findTransformer(IfStatement ifStatement) {
-		Statement unwrappedThenStatement = unwrapToSingleStatement(ifStatement.getThenStatement()).orElse(null);
-		if (unwrappedThenStatement == null) {
+		if (ifStatement.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
 			return Optional.empty();
 		}
-		if (unwrappedThenStatement.getNodeType() == ASTNode.RETURN_STATEMENT) {
-			ReturnStatement returnStatementWhenTrue = (ReturnStatement) unwrappedThenStatement;
-			return findTransformerToReturnOfTernary(returnStatementWhenTrue, ifStatement);
+		Statement thenStatement = ifStatement.getThenStatement();
+		Assignment assignmentWhenTrue = extractSingleAssignment(thenStatement).orElse(null);
+		if (assignmentWhenTrue != null) {
+			return findTransformer(ifStatement, assignmentWhenTrue);
 		}
-		return findTransformerToAssignmentOfTernary(unwrappedThenStatement, ifStatement);
+
+		ReturnStatement returnStatementWhenTrue = extractSingleReturnStatement(thenStatement).orElse(null);
+		if (returnStatementWhenTrue != null) {
+			return findTransformer(ifStatement, returnStatementWhenTrue);
+		}
+
+		return Optional.empty();
 	}
 
-	private Optional<Runnable> findTransformerToReturnOfTernary(ReturnStatement returnStatementWhenTrue,
-			IfStatement ifStatement) {
-		Expression ifCondition = ifStatement.getExpression();
-		Expression expressionWhenTrue = returnStatementWhenTrue.getExpression();
-		Expression expressionWhenFalse;
-		ReturnStatement returnStatementToRemove;
-		Statement elseStatement = ifStatement.getElseStatement();
-
-		if (elseStatement == null) {
-			if (ifStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-				return Optional.empty();
-			}
-			Block block = (Block) ifStatement.getParent();
-			returnStatementToRemove = ASTNodeUtil
-				.findListElementAfter(block.statements(), ifStatement, ReturnStatement.class)
-				.orElse(null);
-			if (returnStatementToRemove == null) {
-				return Optional.empty();
-			}
-			expressionWhenFalse = returnStatementToRemove.getExpression();
-		} else {
-			returnStatementToRemove = null;
-			Statement unwrappedElseStatement = unwrapToSingleStatement(elseStatement).orElse(null);
-			if (unwrappedElseStatement == null) {
-				return Optional.empty();
-			}
-			if (unwrappedElseStatement.getNodeType() != ASTNode.RETURN_STATEMENT) {
-				return Optional.empty();
-			}
-			expressionWhenFalse = ((ReturnStatement) unwrappedElseStatement).getExpression();
-		}
-		if (!checkTypes(expressionWhenTrue, expressionWhenFalse)) {
-			return Optional.empty();
-		}
-		if (returnStatementToRemove != null) {
-			return Optional.of(() -> {
-				ConditionalExpression conditionalExpression = newConditionalExpression(ifCondition,
-						expressionWhenTrue, expressionWhenFalse);
-				replaceIfStatementByReturnTernary(ifStatement, conditionalExpression, returnStatementToRemove);
-			});
-		}
-		return Optional.of(() -> {
-			ConditionalExpression conditionalExpression = newConditionalExpression(ifCondition,
-					expressionWhenTrue, expressionWhenFalse);
-			replaceIfStatementByReturnTernary(ifStatement, conditionalExpression);
-		});
-	}
-
-	private Optional<Runnable> findTransformerToAssignmentOfTernary(
-			Statement unwrappedThenStatement,
-			IfStatement ifStatement) {
+	private Optional<Runnable> findTransformer(IfStatement ifStatement, Assignment assignmentWhenTrue) {
 
 		Statement elseStatement = ifStatement.getElseStatement();
 		if (elseStatement == null) {
 			return Optional.empty();
 		}
 
-		Statement unwrappedElseStatement = unwrapToSingleStatement(elseStatement).orElse(null);
-		if (unwrappedElseStatement == null) {
-			return Optional.empty();
-		}
-
-		Assignment assignmentWhenTrue = extractAssignment(unwrappedThenStatement).orElse(null);
-		if (assignmentWhenTrue == null) {
-			return Optional.empty();
-		}
-
-		Assignment assignmentWhenFalse = extractAssignment(unwrappedElseStatement).orElse(null);
+		Assignment assignmentWhenFalse = extractSingleAssignment(elseStatement).orElse(null);
 		if (assignmentWhenFalse == null) {
 			return Optional.empty();
 		}
+
 		Expression leftHandSideWhenTrue = assignmentWhenTrue.getLeftHandSide();
 		Expression leftHandSideWhenFalse = assignmentWhenFalse.getLeftHandSide();
 		if (!leftHandSideWhenTrue.subtreeMatch(matcher, leftHandSideWhenFalse)) {
@@ -141,67 +86,101 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		Expression expressionWhenTrue = assignmentWhenTrue.getRightHandSide();
 		Expression expressionWhenFalse = assignmentWhenFalse.getRightHandSide();
+		Supplier<ConditionalExpression> supplier = findNewConditionalExpressionSupplier(ifStatement, expressionWhenTrue,
+				expressionWhenFalse).orElse(null);
+		if (supplier == null) {
+			return Optional.empty();
+		}
+
+		if (leftHandSideWhenTrue.getNodeType() == ASTNode.SIMPLE_NAME) {
+			SimpleName leftHandSideSimpleName = (SimpleName) leftHandSideWhenTrue;
+			VariableDeclarationFragment declarationBeforeIf = VariableDeclarationBeforeStatement
+				.findDeclaringFragment(leftHandSideSimpleName, ifStatement, getCompilationUnit())
+				.orElse(null);
+
+			if (declarationBeforeIf != null
+					&& !isVariableUsedInIfCondition(leftHandSideSimpleName, ifStatement.getExpression())) {
+				return Optional
+					.of(() -> replaceByInitializationWithTernary(ifStatement, declarationBeforeIf, supplier));
+			}
+		}
+		return Optional.of(() -> replaceIfStatementByAssignmentOfTernary(ifStatement, leftHandSideWhenTrue, supplier));
+	}
+
+	private Optional<Runnable> findTransformer(
+			IfStatement ifStatement, ReturnStatement returnStatementWhenTrue) {
+		Expression expressionWhenTrue = returnStatementWhenTrue.getExpression();
+		Expression expressionWhenFalse;
+		ReturnStatement returnStatementToRemove;
+		Statement elseStatement = ifStatement.getElseStatement();
+
+		if (elseStatement == null) {
+			returnStatementToRemove = findReturnStatementFollowingIf(ifStatement).orElse(null);
+			if (returnStatementToRemove == null) {
+				return Optional.empty();
+			}
+			expressionWhenFalse = returnStatementToRemove.getExpression();
+		} else {
+			returnStatementToRemove = null;
+			expressionWhenFalse = extractSingleReturnStatement(elseStatement)
+				.map(ReturnStatement::getExpression)
+				.orElse(null);
+			if (expressionWhenFalse == null) {
+				return Optional.empty();
+			}
+		}
+		Supplier<ConditionalExpression> supplier = findNewConditionalExpressionSupplier(ifStatement, expressionWhenTrue,
+				expressionWhenFalse).orElse(null);
+
+		if (supplier == null) {
+			return Optional.empty();
+		}
+
+		if (returnStatementToRemove != null) {
+			return Optional.of(() -> replaceIfStatementByReturnTernary(ifStatement, supplier, returnStatementToRemove));
+		}
+		return Optional.of(() -> replaceIfStatementByReturnTernary(ifStatement, supplier));
+	}
+
+	private Optional<Assignment> extractSingleAssignment(Statement statement) {
+		return unwrapToSingleStatement(statement, ExpressionStatement.class)
+			.map(ExpressionStatement::getExpression)
+			.filter(Assignment.class::isInstance)
+			.map(Assignment.class::cast);
+	}
+
+	private Optional<ReturnStatement> extractSingleReturnStatement(Statement statement) {
+		return unwrapToSingleStatement(statement, ReturnStatement.class);
+	}
+
+	private <T extends Statement> Optional<T> unwrapToSingleStatement(Statement statement, Class<T> type) {
+		if (statement.getNodeType() == ASTNode.BLOCK) {
+			Block block = (Block) statement;
+			return ASTNodeUtil.findSingletonListElement(block.statements(), type);
+		}
+		return Optional.of(statement)
+			.filter(type::isInstance)
+			.map(type::cast);
+	}
+
+	private Optional<ReturnStatement> findReturnStatementFollowingIf(IfStatement ifStatement) {
+		if (ifStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return Optional.empty();
+		}
+		Block block = (Block) ifStatement.getParent();
+		return ASTNodeUtil
+			.findListElementAfter(block.statements(), ifStatement, ReturnStatement.class);
+	}
+
+	private Optional<Supplier<ConditionalExpression>> findNewConditionalExpressionSupplier(IfStatement ifStatement,
+			Expression expressionWhenTrue, Expression expressionWhenFalse) {
+
 		if (!checkTypes(expressionWhenTrue, expressionWhenFalse)) {
 			return Optional.empty();
 		}
 
 		Expression ifCondition = ifStatement.getExpression();
-
-		if (leftHandSideWhenTrue.getNodeType() == ASTNode.SIMPLE_NAME) {
-			SimpleName leftHandSideSimpleName = (SimpleName) leftHandSideWhenTrue;
-			VariableDeclarationFragment declarationFragmentBeforeIf = VariableDeclarationBeforeStatement
-				.findDeclaringFragment(leftHandSideSimpleName, ifStatement, getCompilationUnit())
-				.orElse(null);
-
-			if (declarationFragmentBeforeIf != null
-					&& !isVariableUsedInIfCondition(leftHandSideSimpleName, ifCondition)) {
-				return Optional.of(() -> {
-					ConditionalExpression conditionalExpression = newConditionalExpression(ifCondition,
-							expressionWhenTrue,
-							expressionWhenFalse);
-					replaceByInitializationWithTernary(ifStatement, conditionalExpression, declarationFragmentBeforeIf);
-				});
-			}
-		}
-
-		return Optional.of(() -> {
-			ConditionalExpression conditionalExpression = newConditionalExpression(ifCondition, expressionWhenTrue,
-					expressionWhenFalse);
-			replaceIfStatementByAssignmentOfTernary(ifStatement, leftHandSideWhenTrue, conditionalExpression);
-		});
-	}
-
-	private boolean isVariableUsedInIfCondition(SimpleName variableName, Expression ifCondition) {
-		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(variableName);
-		ifCondition.accept(visitor);
-		return !visitor.getUsages()
-			.isEmpty();
-	}
-
-	private Optional<Statement> unwrapToSingleStatement(Statement statement) {
-		if (statement.getNodeType() == ASTNode.BLOCK) {
-			Block block = (Block) statement;
-			return ASTNodeUtil.findSingletonListElement(block.statements(), Statement.class);
-		}
-		return Optional.of(statement);
-	}
-
-	private Optional<Assignment> extractAssignment(Statement statement) {
-		if (statement.getNodeType() != ASTNode.EXPRESSION_STATEMENT) {
-			return Optional.empty();
-		}
-		Expression expression = ((ExpressionStatement) statement).getExpression();
-		if (expression.getNodeType() != ASTNode.ASSIGNMENT) {
-			return Optional.empty();
-		}
-
-		return Optional.of((Assignment) expression);
-	}
-
-	private boolean isVariableWithSideEffect(Expression expression) {
-		// TODO Auto-generated method stub
-		// use VariableWithoutSideEffect
-		return false;
+		return Optional.of(() -> newConditionalExpression(ifCondition, expressionWhenTrue, expressionWhenFalse));
 	}
 
 	/**
@@ -217,32 +196,47 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		return true;
 	}
 
+	private boolean isVariableUsedInIfCondition(SimpleName variableName, Expression ifCondition) {
+		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(variableName);
+		ifCondition.accept(visitor);
+		return !visitor.getUsages()
+			.isEmpty();
+	}
+
+	private boolean isVariableWithSideEffect(Expression expression) {
+		// TODO Auto-generated method stub
+		// use VariableWithoutSideEffect
+		return false;
+	}
+
 	private void replaceIfStatementByReturnTernary(IfStatement ifStatement,
-			ConditionalExpression conditionalExpression) {
+			Supplier<ConditionalExpression> conditionalExpressionSupplier) {
 		AST ast = astRewrite.getAST();
 		ReturnStatement returnStatement = ast.newReturnStatement();
-		returnStatement.setExpression(conditionalExpression);
+		returnStatement.setExpression(conditionalExpressionSupplier.get());
 		astRewrite.replace(ifStatement, returnStatement, null);
 	}
 
 	private void replaceIfStatementByReturnTernary(IfStatement ifStatement,
-			ConditionalExpression conditionalExpression, ReturnStatement returnStatementToRemove) {
-		replaceIfStatementByReturnTernary(ifStatement, conditionalExpression);
+			Supplier<ConditionalExpression> conditionalExpressionSupplier, ReturnStatement returnStatementToRemove) {
+		replaceIfStatementByReturnTernary(ifStatement, conditionalExpressionSupplier);
 		astRewrite.remove(returnStatementToRemove, null);
 	}
 
 	private void replaceIfStatementByAssignmentOfTernary(IfStatement ifStatement, Expression leftHandSide,
-			ConditionalExpression conditionalExpression) {
+			Supplier<ConditionalExpression> conditionalExpressionSupplier) {
 		AST ast = astRewrite.getAST();
 		Assignment assignment = ast.newAssignment();
 		ASTNode leftHandSideCopyTarget = astRewrite.createCopyTarget(leftHandSide);
 		assignment.setLeftHandSide((Expression) leftHandSideCopyTarget);
+		ConditionalExpression conditionalExpression = conditionalExpressionSupplier.get();
 		assignment.setRightHandSide(conditionalExpression);
 		astRewrite.replace(ifStatement, ast.newExpressionStatement(assignment), null);
 	}
 
-	private void replaceByInitializationWithTernary(IfStatement ifStatement,
-			ConditionalExpression conditionalExpression, VariableDeclarationFragment fragment) {
+	private void replaceByInitializationWithTernary(IfStatement ifStatement, VariableDeclarationFragment fragment,
+			Supplier<ConditionalExpression> conditionalExpressionSupplier) {
+		ConditionalExpression conditionalExpression = conditionalExpressionSupplier.get();
 		astRewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, conditionalExpression, null);
 		astRewrite.remove(ifStatement, null);
 	}
@@ -259,4 +253,5 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		conditionalExpression.setElseExpression((Expression) elseExpressionCopyTarget);
 		return conditionalExpression;
 	}
+
 }
