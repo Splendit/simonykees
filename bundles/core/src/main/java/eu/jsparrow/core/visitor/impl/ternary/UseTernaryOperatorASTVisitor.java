@@ -173,13 +173,7 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	private Optional<Statement> unwrapToSingleStatement(Statement statement) {
 		if (statement.getNodeType() == ASTNode.BLOCK) {
 			Block block = (Block) statement;
-			if (block.statements()
-				.size() != 1) {
-				return Optional.empty();
-			}
-			return Optional.of((Statement) block.statements()
-				.get(0));
-
+			return ASTNodeUtil.findSingletonListElement(block.statements(), Statement.class);
 		}
 		return Optional.of(statement);
 	}

@@ -3,6 +3,7 @@ package eu.jsparrow.rules.common.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -289,6 +290,23 @@ public class ASTNodeUtil {
 			.filter(type::isInstance)
 			.map(type::cast)
 			.collect(Collectors.toList());
+	}
+
+	/**
+	 * @return if the List specified by the first parameter contains exactly one
+	 *         element which is an instance of the type specified by the 2nd
+	 *         parameter, then an Optional is returned which stores the element
+	 *         of the list. In all other cases an empty optional is returned.
+	 */
+	public static <T extends ASTNode> Optional<T> findSingletonListElement(@SuppressWarnings("rawtypes") List rawlist,
+			Class<T> type) {
+		if (rawlist.size() != 1) {
+			return Optional.empty();
+		}
+
+		return Optional.of(rawlist.get(0))
+			.filter(type::isInstance)
+			.map(type::cast);
 	}
 
 	/**
@@ -645,7 +663,7 @@ public class ASTNodeUtil {
 	 * 
 	 * @param simpleName
 	 *            a {@link SimpleName} to check if it represents a label.
-	 * @return true if the given  {@link SimpleName} is a label.
+	 * @return true if the given {@link SimpleName} is a label.
 	 */
 	public static boolean isLabel(SimpleName simpleName) {
 		StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
