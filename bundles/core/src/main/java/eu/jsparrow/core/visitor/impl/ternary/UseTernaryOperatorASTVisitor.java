@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.impl.ternary;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -66,7 +65,13 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		Statement elseStatement = ifStatement.getElseStatement();
 
 		if (elseStatement == null) {
-			returnStatementToRemove = findReturnStatementFollowingIf(ifStatement).orElse(null);
+			if (ifStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+				return Optional.empty();
+			}
+			Block block = (Block) ifStatement.getParent();
+			returnStatementToRemove = ASTNodeUtil
+				.findListElementAfter(block.statements(), ifStatement, ReturnStatement.class)
+				.orElse(null);
 			if (returnStatementToRemove == null) {
 				return Optional.empty();
 			}
@@ -176,24 +181,6 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 			return ASTNodeUtil.findSingletonListElement(block.statements(), Statement.class);
 		}
 		return Optional.of(statement);
-	}
-
-	private Optional<ReturnStatement> findReturnStatementFollowingIf(IfStatement ifStatement) {
-		if (ifStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return Optional.empty();
-		}
-		Block block = (Block) ifStatement.getParent();
-		List<Statement> blockStatements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
-		int ifStatementIndex = blockStatements.indexOf(ifStatement);
-		int followingStatementIndex = ifStatementIndex + 1;
-		if (followingStatementIndex >= blockStatements.size()) {
-			return Optional.empty();
-		}
-		Statement statementFollowingIf = blockStatements.get(followingStatementIndex);
-		if (statementFollowingIf.getNodeType() != ASTNode.RETURN_STATEMENT) {
-			return Optional.empty();
-		}
-		return Optional.of((ReturnStatement) statementFollowingIf);
 	}
 
 	private Optional<Assignment> extractAssignment(Statement statement) {

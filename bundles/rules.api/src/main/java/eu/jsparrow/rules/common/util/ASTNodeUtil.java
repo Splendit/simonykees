@@ -328,6 +328,27 @@ public class ASTNodeUtil {
 			.filter(type::isInstance)
 			.map(type::cast);
 	}
+	
+	/**
+	 * 
+	 * @return An Optional containing the element after the element specified
+	 *         by the 2nd paramneter which is expected to be an instance of the
+	 *         type specified by the 3rd parameter. In all other cases an empty
+	 *         optional is returned.
+	 * 
+	 */
+	public static <T extends ASTNode> Optional<T> findListElementAfter(@SuppressWarnings("rawtypes") List rawlist,
+			ASTNode element,
+			Class<T> type) {
+		int indexAfter = rawlist.indexOf(element) + 1;
+		if (indexAfter >= rawlist.size()) {
+			return Optional.empty();
+		}
+		return Optional.of(rawlist.get(indexAfter))
+			.filter(type::isInstance)
+			.map(type::cast);
+	}
+
 
 	/**
 	 * Filters a list of modifiers if specific modifiers are present defined by

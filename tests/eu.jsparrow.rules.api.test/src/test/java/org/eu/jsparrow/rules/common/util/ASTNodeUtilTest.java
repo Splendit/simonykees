@@ -53,7 +53,7 @@ class ASTNodeUtilTest {
 	}
 
 	@Test
-	void findListElement_shouldFindVariableDeclarationStatementBefore() throws Exception {
+	void findListElementBefore_shouldFindVariableDeclarationStatement() throws Exception {
 		String code = ""
 				+ "		boolean condition = true;\n"
 				+ "		if (condition) {\n"
@@ -68,7 +68,7 @@ class ASTNodeUtilTest {
 	}
 
 	@Test
-	void findListElement_shouldNotFindIfStatementBefore() throws Exception {
+	void findListElementBefore_shouldNotFindIfStatement() throws Exception {
 		String code = ""
 				+ "		boolean condition = true;\n"
 				+ "		if (condition) {\n"
@@ -83,7 +83,7 @@ class ASTNodeUtilTest {
 	}
 
 	@Test
-	void findListElement_shouldNotFindAnyStatementBefore() throws Exception {
+	void findListElementBefore_shouldNotFindAnyStatement() throws Exception {
 		String code = ""
 				+ "		if (condition) {\n"
 				+ "		}";
@@ -91,6 +91,52 @@ class ASTNodeUtilTest {
 		Block block = ASTNodeBuilder.createBlockFromString(code);
 		assertNotNull(block);
 		Optional<Statement> optionalDeclaration = ASTNodeUtil.findListElementBefore(block.statements(),
+				(IfStatement) block.statements()
+					.get(0),
+				Statement.class);
+		assertFalse(optionalDeclaration.isPresent());
+	}
+	
+	
+	@Test
+	void findListElementAfter_shouldFindIfStatement() throws Exception {
+		String code = ""
+				+ "		boolean condition = true;\n"
+				+ "		if (condition) {\n"
+				+ "		}";
+
+		Block block = ASTNodeBuilder.createBlockFromString(code);
+		assertNotNull(block);
+		Optional<IfStatement> optionalDeclaration = ASTNodeUtil
+			.findListElementAfter(block.statements(), (VariableDeclarationStatement) block.statements()
+				.get(0), IfStatement.class);
+		assertTrue(optionalDeclaration.isPresent());
+	}
+
+	@Test
+	void findListElementAfter_shouldNotFindVariableDeclarationStatement() throws Exception {
+		String code = ""
+				+ "		boolean condition = true;\n"
+				+ "		if (condition) {\n"
+				+ "		}";
+
+		Block block = ASTNodeBuilder.createBlockFromString(code);
+		assertNotNull(block);
+		Optional<VariableDeclarationStatement> optionalDeclaration = ASTNodeUtil
+			.findListElementAfter(block.statements(), (VariableDeclarationStatement) block.statements()
+				.get(0), VariableDeclarationStatement.class);
+		assertFalse(optionalDeclaration.isPresent());
+	}
+
+	@Test
+	void findListElementAfter_shouldNotFindAnyStatement() throws Exception {
+		String code = ""
+				+ "		if (condition) {\n"
+				+ "		}";
+
+		Block block = ASTNodeBuilder.createBlockFromString(code);
+		assertNotNull(block);
+		Optional<Statement> optionalDeclaration = ASTNodeUtil.findListElementAfter(block.statements(),
 				(IfStatement) block.statements()
 					.get(0),
 				Statement.class);
