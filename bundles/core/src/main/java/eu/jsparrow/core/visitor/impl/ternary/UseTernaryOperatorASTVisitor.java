@@ -35,6 +35,9 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(IfStatement ifStatement) {
+		if(ifStatement.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
+			return true;
+		}
 		Runnable transformer = findTransformer(ifStatement).orElse(null);
 		if (transformer != null) {
 			transformer.run();
