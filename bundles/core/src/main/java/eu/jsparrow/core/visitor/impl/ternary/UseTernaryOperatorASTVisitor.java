@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.core.markers.common.UseTernaryOperatorEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.VariableDeclarationBeforeStatement;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -30,7 +31,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @since 4.18.0
  *
  */
-public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
+public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor implements UseTernaryOperatorEvent {
 
 	private final ASTMatcher matcher = new ASTMatcher();
 
@@ -40,6 +41,7 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (transformer != null) {
 			transformer.run();
 			onRewrite();
+			addMarkerEvent(ifStatement);
 			return false;
 		}
 		return true;
