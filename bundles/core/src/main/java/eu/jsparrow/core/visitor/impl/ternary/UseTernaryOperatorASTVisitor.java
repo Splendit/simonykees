@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -194,8 +195,20 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 	 *         be found.
 	 */
 	private boolean checkTypes(Expression expressionWhenTrue, Expression expressionWhenFalse) {
-		// TODO Auto-generated method stub
-		return true;
+
+		ITypeBinding typeBindingWhenTrue = expressionWhenTrue.resolveTypeBinding();
+		if (typeBindingWhenTrue == null) {
+			return false;
+		}
+		ITypeBinding typeBindingWhenFalse = expressionWhenFalse.resolveTypeBinding();
+		if (typeBindingWhenFalse == null) {
+			return false;
+		}
+
+		boolean primitiveWhenTrue = typeBindingWhenTrue.isPrimitive();
+		boolean primitiveWhenFalse = typeBindingWhenFalse.isPrimitive();
+
+		return primitiveWhenTrue == primitiveWhenFalse;
 	}
 
 	private boolean isVariableUsedInIfCondition(SimpleName variableName, Expression ifCondition) {
