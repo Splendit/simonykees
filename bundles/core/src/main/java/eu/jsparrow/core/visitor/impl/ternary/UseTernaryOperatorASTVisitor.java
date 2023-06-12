@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Assignment.Operator;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
@@ -78,6 +79,11 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 			return Optional.empty();
 		}
 
+		Operator operatorWhenTrue = assignmentWhenTrue.getOperator();
+		if (operatorWhenTrue != assignmentWhenFalse.getOperator()) {
+			return Optional.empty();
+		}
+
 		Expression leftHandSideWhenTrue = assignmentWhenTrue.getLeftHandSide();
 		Expression leftHandSideWhenFalse = assignmentWhenFalse.getLeftHandSide();
 		if (!leftHandSideWhenTrue.subtreeMatch(matcher, leftHandSideWhenFalse)) {
@@ -95,7 +101,8 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 			return Optional.empty();
 		}
 
-		if (leftHandSideWhenTrue.getNodeType() == ASTNode.SIMPLE_NAME) {
+		if (leftHandSideWhenTrue.getNodeType() == ASTNode.SIMPLE_NAME
+				&& operatorWhenTrue == Assignment.Operator.ASSIGN) {
 			SimpleName leftHandSideSimpleName = (SimpleName) leftHandSideWhenTrue;
 			VariableDeclarationFragment declarationBeforeIf = VariableDeclarationBeforeStatement
 				.findDeclaringFragment(leftHandSideSimpleName, ifStatement, getCompilationUnit())
@@ -107,7 +114,7 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 					.of(() -> replaceByInitializationWithTernary(ifStatement, declarationBeforeIf, supplier));
 			}
 		}
-		return Optional.of(() -> replaceIfStatementByAssignmentOfTernary(ifStatement, leftHandSideWhenTrue, supplier));
+		return Optional.of(() -> replaceIfStatementByAssignmentOfTernary(ifStatement, leftHandSideWhenTrue, operatorWhenTrue, supplier));
 	}
 
 	private Optional<Runnable> findTransformer(
@@ -239,6 +246,7 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 	}
 
 	private void replaceIfStatementByAssignmentOfTernary(IfStatement ifStatement, Expression leftHandSide,
+			Assignment.Operator assignmentOperator,
 			Supplier<ConditionalExpression> conditionalExpressionSupplier) {
 		AST ast = astRewrite.getAST();
 		Assignment assignment = ast.newAssignment();
@@ -246,6 +254,7 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 		assignment.setLeftHandSide((Expression) leftHandSideCopyTarget);
 		ConditionalExpression conditionalExpression = conditionalExpressionSupplier.get();
 		assignment.setRightHandSide(conditionalExpression);
+		assignment.setOperator(assignmentOperator);
 		astRewrite.replace(ifStatement, ast.newExpressionStatement(assignment), null);
 	}
 
