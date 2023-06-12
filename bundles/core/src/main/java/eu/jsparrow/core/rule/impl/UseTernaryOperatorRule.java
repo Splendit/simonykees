@@ -26,7 +26,7 @@ public class UseTernaryOperatorRule extends RefactoringRuleImpl<UseTernaryOperat
 		this.visitorClass = UseTernaryOperatorASTVisitor.class;
 		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.UseTernaryOperatorRule_name,
-				Messages.UseTernaryOperatorRule_description, Duration.ofMinutes(10),
+				Messages.UseTernaryOperatorRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY));
 	}
 
