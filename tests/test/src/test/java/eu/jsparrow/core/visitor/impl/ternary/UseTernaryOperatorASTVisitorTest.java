@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
@@ -24,22 +25,29 @@ public class UseTernaryOperatorASTVisitorTest extends UsesJDTUnitFixture {
 		fixtureProject.clear();
 	}
 
-	@Test
-	void visit_replaceWithTernaryAsInitializer_shouldTransform() throws Exception {
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"", "0", "valueWhenFalse", "Integer.MIN_VALUE"
+	})
+	void visit_replaceWithTernaryAsInitializer_shouldTransform(String initializer) throws Exception {
+		String variableDeclaration;
+		if (initializer.isEmpty()) {
+			variableDeclaration = "int x;";
+		} else {
+			variableDeclaration = "int x = " + initializer + ";";
+		}
 		String original = ""
-				+ "	void test() {\n"
-				+ "		boolean condition = true;\n"
-				+ "		int x;\n"
+				+ "	void test(boolean condition, int valueWhenTrue, int valueWhenFalse) {\n"
+				+ "		" + variableDeclaration + "\n"
 				+ "		if (condition) {\n"
-				+ "			x = 1;\n"
+				+ "			x = valueWhenTrue;\n"
 				+ "		} else {\n"
-				+ "			x = 0;\n"
+				+ "			x = valueWhenFalse;\n"
 				+ "		}\n"
 				+ "	}";
 		String expected = ""
-				+ "	void test() {\n"
-				+ "		boolean condition = true;\n"
-				+ "		int x=condition ? 1 : 0;\n"
+				+ "	void test(boolean condition, int valueWhenTrue, int valueWhenFalse) {\n"
+				+ "		int x = condition ? valueWhenTrue : valueWhenFalse;\n"
 				+ "	}";
 
 		assertChange(original, expected);

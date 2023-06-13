@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.YieldStatement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.VariableDeclarationBeforeStatement;
+import eu.jsparrow.rules.common.util.VariableWithoutSideEffect;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public abstract class AbstractReplaceBySwitchASTVisitor extends AbstractASTRewriteASTVisitor {

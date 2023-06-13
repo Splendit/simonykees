@@ -93,8 +93,13 @@ public class VariableDeclarationBeforeStatement {
 
 	private static boolean hasInitializerWithSideEffect(VariableDeclarationFragment fragment) {
 		Expression initializer = fragment.getInitializer();
-		return initializer != null && initializer.getNodeType() != ASTNode.SIMPLE_NAME
-				&& !ASTNodeUtil.isLiteral(initializer);
+		if(initializer == null) {
+			return false;
+		}
+		if(ASTNodeUtil.isLiteral(initializer)) {
+			return false;
+		}
+		return !VariableWithoutSideEffect.isVariableWithoutSideEffect(initializer);
 	}
 
 	private VariableDeclarationBeforeStatement() {
