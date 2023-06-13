@@ -49,6 +49,21 @@ public class UseTernaryOperatorASTVisitorTest extends UsesJDTUnitFixture {
 		return Stream.of(
 				Arguments.of(
 						""
+								+ "	void test() {\n"
+								+ "		int i = 1;\n"
+								+ "		if (i == 1) {\n"
+								+ "			i = 10;\n"
+								+ "		} else {\n"
+								+ "			i = 0;\n"
+								+ "		}\n"
+								+ "	}",
+						""
+								+ "	void test() {\n"
+								+ "		int i = 1;\n"
+								+ "		i = i == 1 ? 10 : 0;\n"
+								+ "	}"),
+				Arguments.of(
+						""
 								+ "	void test(boolean condition) {\n"
 								+ "		int x;\n"
 								+ "		x = 1;\n"
@@ -63,6 +78,21 @@ public class UseTernaryOperatorASTVisitorTest extends UsesJDTUnitFixture {
 								+ "		int x;\n"
 								+ "		x = 1;\n"
 								+ "		x = condition ? 1 : 0;\n"
+								+ "	}"),
+				Arguments.of(
+						""
+								+ "	void test(boolean condition) {\n"
+								+ "		int x = 0;\n"
+								+ "		if (condition) {\n"
+								+ "			x += 1;\n"
+								+ "		} else {\n"
+								+ "			x += 0;\n"
+								+ "		}\n"
+								+ "	}",
+						""
+								+ "	void test(boolean condition) {\n"
+								+ "		int x = 0;\n"
+								+ "		x += condition ? 1 : 0;\n"
 								+ "	}"),
 				Arguments.of(
 						""
@@ -171,11 +201,6 @@ public class UseTernaryOperatorASTVisitorTest extends UsesJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
-	/**
-	 * This test is expected to fail as soon as the corresponding visitor will
-	 * have been implemented.
-	 * 
-	 */
 	@Test
 	void visit_exampleWithReturnInsteadOfElse_shouldTransform() throws Exception {
 		String original = ""
