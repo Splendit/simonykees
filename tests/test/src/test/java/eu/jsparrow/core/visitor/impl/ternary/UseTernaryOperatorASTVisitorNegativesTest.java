@@ -194,4 +194,46 @@ public class UseTernaryOperatorASTVisitorNegativesTest extends UsesJDTUnitFixtur
 				+ "		}";
 		assertNoChange(original);
 	}
+	
+	@Test
+	void visit_returnInMultibranchIf_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "	int test(boolean condition1, boolean condition2) {\n"
+				+ "		if (condition1) {\n"
+				+ "			return 1;\n"
+				+ "		} else if (condition2) {\n"
+				+ "			return 2;\n"
+				+ "		} else {\n"
+				+ "			return 0;\n"
+				+ "		}\n"
+				+ "	}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_emptyBlockWhenTrue_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "	int test() {\n"
+				+ "		boolean condition = true;\n"
+				+ "		if(condition) {\n"
+				+ "		} else {\n"
+				+ "			return 0;\n"
+				+ "		}\n"
+				+ "		return 1;\n"
+				+ "	}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_IfContainingIfContainingReturnFollowedByReturn_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "	int test(boolean condition1, boolean condition2) {\n"
+				+ "		if (condition1)\n"
+				+ "			if (condition2) {\n"
+				+ "				return 2;\n"
+				+ "			}\n"
+				+ "		return 0;\n"
+				+ "	}";
+		assertNoChange(original);
+	}
 }
