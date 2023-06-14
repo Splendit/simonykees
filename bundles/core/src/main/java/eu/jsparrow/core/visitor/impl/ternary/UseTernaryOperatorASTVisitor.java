@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.impl.ternary;
 
+import static eu.jsparrow.core.visitor.impl.ternary.SupportedTernaryOperand.isSupportedTernaryOperand;
+
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -114,7 +116,8 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 					.of(() -> replaceByInitializationWithTernary(ifStatement, declarationBeforeIf, supplier));
 			}
 		}
-		return Optional.of(() -> replaceIfStatementByAssignmentOfTernary(ifStatement, leftHandSideWhenTrue, operatorWhenTrue, supplier));
+		return Optional.of(() -> replaceIfStatementByAssignmentOfTernary(ifStatement, leftHandSideWhenTrue,
+				operatorWhenTrue, supplier));
 	}
 
 	private Optional<Runnable> findTransformer(
@@ -184,12 +187,20 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 
 	private Optional<Supplier<ConditionalExpression>> findNewConditionalExpressionSupplier(IfStatement ifStatement,
 			Expression expressionWhenTrue, Expression expressionWhenFalse) {
+		Expression ifCondition = ifStatement.getExpression();
+
+		boolean supportedOperands = isSupportedTernaryOperand(ifCondition)
+				&& isSupportedTernaryOperand(expressionWhenTrue)
+				&& isSupportedTernaryOperand(expressionWhenFalse);
+
+		if (!supportedOperands) {
+			return Optional.empty();
+		}
 
 		if (!checkTypes(expressionWhenTrue, expressionWhenFalse)) {
 			return Optional.empty();
 		}
 
-		Expression ifCondition = ifStatement.getExpression();
 		return Optional.of(() -> newConditionalExpression(ifCondition, expressionWhenTrue, expressionWhenFalse));
 	}
 
