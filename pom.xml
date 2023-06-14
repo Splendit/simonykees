@@ -215,11 +215,6 @@
 			<url>http://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/</url>
 		</repository>
 		<repository>
-			<id>external</id>
-			<layout>p2</layout>
-			<url>http://packagedrone-vm-01.splendit.loc:8080/p2/jsparrow-external-osgi-dependencies/</url>
-		</repository>
-		<repository>
 			<id>mylyn</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/mylyn/releases/latest/</url>
