@@ -1,73 +1,21 @@
 package eu.jsparrow.core.visitor.impl.ternary;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ArrayAccess;
-import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
-import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.InstanceofExpression;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.ThisExpression;
-import org.eclipse.jdt.core.dom.TypeLiteral;
 
 public class SupportedTernaryOperand {
 
-	private static final Set<Class<?>> SUPPORTED_EXPRESSION_TYPES = createSupportedTypesSet();
-
-	private static Set<Class<?>> createSupportedTypesSet() {
-		Set<Class<?>> supportedTypes = new HashSet<>();
-		supportedTypes.add(ArrayAccess.class);
-		supportedTypes.add(ArrayCreation.class);
-		supportedTypes.add(BooleanLiteral.class);
-		supportedTypes.add(CastExpression.class);
-		supportedTypes.add(CharacterLiteral.class);
-		supportedTypes.add(ClassInstanceCreation.class);
-		supportedTypes.add(FieldAccess.class);
-		supportedTypes.add(InfixExpression.class);
-		supportedTypes.add(InstanceofExpression.class);
-		supportedTypes.add(MethodInvocation.class);
-		supportedTypes.add(QualifiedName.class);
-		supportedTypes.add(SimpleName.class);
-		supportedTypes.add(NullLiteral.class);
-		supportedTypes.add(NumberLiteral.class);
-		supportedTypes.add(ParenthesizedExpression.class);
-		supportedTypes.add(PostfixExpression.class);
-		supportedTypes.add(PrefixExpression.class);
-		supportedTypes.add(StringLiteral.class);
-		supportedTypes.add(SuperFieldAccess.class);
-		supportedTypes.add(SuperMethodInvocation.class);
-		supportedTypes.add(ThisExpression.class);
-		supportedTypes.add(TypeLiteral.class);
-		return Collections.unmodifiableSet(supportedTypes);
-	}
-
 	static boolean isSupportedTernaryOperand(Expression expression) {
-		if (SUPPORTED_EXPRESSION_TYPES.contains(expression.getClass())) {
-			SignificantExpressionLengthVisitor lengthVisitor = new SignificantExpressionLengthVisitor();
-			expression.accept(lengthVisitor);
-			return lengthVisitor.isExpressionSupported();
-		}
-		return false;
+		SupportedTernaryOperandVisitor lengthVisitor = new SupportedTernaryOperandVisitor();
+		expression.accept(lengthVisitor);
+		return lengthVisitor.isSupportedExpression();
 	}
 
 	private SupportedTernaryOperand() {
@@ -83,72 +31,93 @@ public class SupportedTernaryOperand {
 	 * this example.
 	 * 
 	 */
-	static class SignificantExpressionLengthVisitor extends ASTVisitor {
+	static class SupportedTernaryOperandVisitor extends ASTVisitor {
 
-		private static final int MAX_LENGTH = 30;
+		private static final int MAX_LENGTH = 20;
 
-		private boolean unsupportedNode;
+		private boolean supportedExpression = true;
 		private int totalSignificantLength;
 
-		private static boolean isUnsupportedNode(ASTNode node) {
-			int nodeType = node.getNodeType();
-			return nodeType == ASTNode.TEXT_BLOCK
-					|| nodeType == ASTNode.ASSIGNMENT
-					|| nodeType == ASTNode.CONDITIONAL_EXPRESSION
-					|| nodeType == ASTNode.LAMBDA_EXPRESSION
-					|| nodeType == ASTNode.ANONYMOUS_CLASS_DECLARATION;
+		static boolean isSupportedNodeType(int nodeType) {
+			return nodeType == ASTNode.ARRAY_ACCESS ||
+					nodeType == ASTNode.ARRAY_CREATION ||
+					nodeType == ASTNode.ARRAY_INITIALIZER ||
+					nodeType == ASTNode.BOOLEAN_LITERAL ||
+					nodeType == ASTNode.CAST_EXPRESSION ||
+					nodeType == ASTNode.CHARACTER_LITERAL ||
+					nodeType == ASTNode.CLASS_INSTANCE_CREATION ||
+					nodeType == ASTNode.FIELD_ACCESS ||
+					nodeType == ASTNode.INFIX_EXPRESSION ||
+					nodeType == ASTNode.INSTANCEOF_EXPRESSION ||
+					nodeType == ASTNode.METHOD_INVOCATION ||
+					nodeType == ASTNode.QUALIFIED_NAME ||
+					nodeType == ASTNode.SIMPLE_NAME ||
+					nodeType == ASTNode.NULL_LITERAL ||
+					nodeType == ASTNode.NUMBER_LITERAL ||
+					nodeType == ASTNode.PARENTHESIZED_EXPRESSION ||
+					nodeType == ASTNode.POSTFIX_EXPRESSION ||
+					nodeType == ASTNode.PREFIX_EXPRESSION ||
+					nodeType == ASTNode.STRING_LITERAL ||
+					nodeType == ASTNode.SUPER_FIELD_ACCESS ||
+					nodeType == ASTNode.SUPER_METHOD_INVOCATION ||
+					nodeType == ASTNode.THIS_EXPRESSION ||
+					nodeType == ASTNode.TYPE_LITERAL ||
+					nodeType == ASTNode.SIMPLE_TYPE ||
+					nodeType == ASTNode.PRIMITIVE_TYPE ||
+					nodeType == ASTNode.ARRAY_TYPE ||
+					nodeType == ASTNode.PARAMETERIZED_TYPE ||
+					nodeType == ASTNode.DIMENSION;
 		}
 
 		@Override
 		public boolean preVisit2(ASTNode node) {
-			unsupportedNode = unsupportedNode || isUnsupportedNode(node);
-			if (unsupportedNode || totalSignificantLength > MAX_LENGTH) {
-				return false;
-			}
-			return super.preVisit2(node);
+			supportedExpression = supportedExpression && isSupportedNodeType(node.getNodeType());
+			return supportedExpression;
 		}
 
 		@Override
 		public boolean visit(BooleanLiteral node) {
-			totalSignificantLength += node.getLength();
+			addNodeLength(node);
 			return false;
 		}
 
 		@Override
 		public boolean visit(CharacterLiteral node) {
-			totalSignificantLength += node.getLength();
+			addNodeLength(node);
 			return false;
 		}
 
 		@Override
 		public boolean visit(NullLiteral node) {
-			totalSignificantLength += node.getLength();
+			addNodeLength(node);
 			return false;
 		}
 
 		@Override
 		public boolean visit(NumberLiteral node) {
-			totalSignificantLength += node.getLength();
+			addNodeLength(node);
 			return false;
 		}
 
 		@Override
 		public boolean visit(StringLiteral node) {
-			totalSignificantLength += node.getLength();
+			addNodeLength(node);
 			return false;
 		}
 
 		@Override
 		public boolean visit(SimpleName node) {
-			totalSignificantLength += node.getLength();
+			addNodeLength(node);
 			return false;
 		}
 
-		public boolean isExpressionSupported() {
-			if (unsupportedNode) {
-				return false;
-			}
-			return totalSignificantLength <= MAX_LENGTH;
+		private void addNodeLength(ASTNode node) {
+			totalSignificantLength += node.getLength();
+			supportedExpression = totalSignificantLength <= MAX_LENGTH;
+		}
+
+		public boolean isSupportedExpression() {
+			return supportedExpression;
 		}
 	}
 }
