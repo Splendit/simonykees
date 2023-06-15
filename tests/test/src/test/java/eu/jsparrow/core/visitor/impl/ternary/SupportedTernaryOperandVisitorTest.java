@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings({ "nls" })
-public class SupportedTernaryOperandTest {
+public class SupportedTernaryOperandVisitorTest {
 
 	@ParameterizedTest
 	@ValueSource(strings = {
@@ -46,7 +46,7 @@ public class SupportedTernaryOperandTest {
 	})
 	void testIsSupportedTernaryOperand_shouldReturnTrue(String code) throws Exception {
 		Expression expressionToTest = ASTNodeBuilder.createExpressionFromString(code);
-		assertTrue(SupportedTernaryOperand.isSupportedTernaryOperand(expressionToTest));
+		assertTrue(SupportedTernaryOperandVisitor.isSupportedTernaryOperand(expressionToTest));
 	}
 
 	@ParameterizedTest
@@ -76,7 +76,7 @@ public class SupportedTernaryOperandTest {
 	})
 	void testIsSupportedTernaryOperand_shouldReturnFalse(String code) throws Exception {
 		Expression expressionToTest = ASTNodeBuilder.createExpressionFromString(code);
-		assertFalse(SupportedTernaryOperand.isSupportedTernaryOperand(expressionToTest));
+		assertFalse(SupportedTernaryOperandVisitor.isSupportedTernaryOperand(expressionToTest));
 	}
 
 	@ParameterizedTest
@@ -88,7 +88,7 @@ public class SupportedTernaryOperandTest {
 	void testWithBigOperand_shouldReturnFalse(String code) throws Exception {
 		Expression expressionToTest = ASTNodeBuilder
 			.createExpressionFromString(code);
-		assertFalse(SupportedTernaryOperand.isSupportedTernaryOperand(expressionToTest));
+		assertFalse(SupportedTernaryOperandVisitor.isSupportedTernaryOperand(expressionToTest));
 	}
 	
 	
@@ -102,6 +102,6 @@ public class SupportedTernaryOperandTest {
 	void testWithBiggestPossibleOperand_shouldReturnTrue(String code) throws Exception {
 		Expression expressionToTest = ASTNodeBuilder
 			.createExpressionFromString(code);
-		assertTrue(SupportedTernaryOperand.isSupportedTernaryOperand(expressionToTest));
+		assertTrue(SupportedTernaryOperandVisitor.isSupportedTernaryOperand(expressionToTest));
 	}
 }

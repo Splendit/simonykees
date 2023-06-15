@@ -1,6 +1,6 @@
 package eu.jsparrow.core.visitor.impl.ternary;
 
-import static eu.jsparrow.core.visitor.impl.ternary.SupportedTernaryOperand.isSupportedTernaryOperand;
+import static eu.jsparrow.core.visitor.impl.ternary.SupportedTernaryOperandVisitor.isSupportedTernaryOperand;
 
 import java.util.Optional;
 import java.util.function.Supplier;
