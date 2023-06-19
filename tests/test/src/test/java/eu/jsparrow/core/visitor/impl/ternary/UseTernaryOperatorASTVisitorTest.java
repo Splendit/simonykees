@@ -227,4 +227,27 @@ public class UseTernaryOperatorASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
+
+	@Test
+	void visit_AssignmentWithLongestPossibleKeyword_shouldTransform() throws Exception {
+		String largestPossibleIdentifier = "p123456789_123456789";
+		String original = ""
+				+ "		void test(int "	+ largestPossibleIdentifier	+ ") {\n"
+				+ "			boolean condition = true;\n"
+				+ "			int x;\n"
+				+ "			if (condition) {\n"
+				+ "				x = " + largestPossibleIdentifier	+ ";\n"
+				+ "			} else {\n"
+				+ "				x = 0;\n"
+				+ "			}\n"
+				+ "		}";
+
+		String expected = ""
+				+ "		void test(int "	+ largestPossibleIdentifier	+ ") {\n"
+				+ "			boolean condition = true;\n"
+				+ "			int x = condition ? "  + largestPossibleIdentifier	+ " : 0;\n"
+				+ "		}";
+
+		assertChange(original, expected);
+	}
 }

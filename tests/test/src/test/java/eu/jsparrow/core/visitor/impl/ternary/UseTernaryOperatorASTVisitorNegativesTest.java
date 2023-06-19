@@ -3,6 +3,8 @@ package eu.jsparrow.core.visitor.impl.ternary;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
@@ -137,7 +139,7 @@ public class UseTernaryOperatorASTVisitorNegativesTest extends UsesJDTUnitFixtur
 				+ "		}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_returnWhenTrueEmptyElse_shouldNotTransform() throws Exception {
 		String original = ""
@@ -151,7 +153,7 @@ public class UseTernaryOperatorASTVisitorNegativesTest extends UsesJDTUnitFixtur
 				+ "		}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_returnWhenTrueMethodCallWhenElse_shouldNotTransform() throws Exception {
 		String original = ""
@@ -166,7 +168,7 @@ public class UseTernaryOperatorASTVisitorNegativesTest extends UsesJDTUnitFixtur
 				+ "		}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_returnWhenTrueNoElseAndNoReturnAfterIf_shouldNotTransform() throws Exception {
 		String original = ""
@@ -180,7 +182,7 @@ public class UseTernaryOperatorASTVisitorNegativesTest extends UsesJDTUnitFixtur
 				+ "		}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_returnIntWhenTrueIntegerWhenFalse_shouldNotTransform() throws Exception {
 		String original = ""
@@ -194,7 +196,7 @@ public class UseTernaryOperatorASTVisitorNegativesTest extends UsesJDTUnitFixtur
 				+ "		}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_returnInMultibranchIf_shouldNotTransform() throws Exception {
 		String original = ""
@@ -209,7 +211,7 @@ public class UseTernaryOperatorASTVisitorNegativesTest extends UsesJDTUnitFixtur
 				+ "	}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_emptyBlockWhenTrue_shouldNotTransform() throws Exception {
 		String original = ""
@@ -223,7 +225,7 @@ public class UseTernaryOperatorASTVisitorNegativesTest extends UsesJDTUnitFixtur
 				+ "	}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_IfContainingIfContainingReturnFollowedByReturn_shouldNotTransform() throws Exception {
 		String original = ""
@@ -233,6 +235,56 @@ public class UseTernaryOperatorASTVisitorNegativesTest extends UsesJDTUnitFixtur
 				+ "				return 2;\n"
 				+ "			}\n"
 				+ "		return 0;\n"
+				+ "	}";
+		assertNoChange(original);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			""
+					+ "		void test(int pX_123456789_Y_123456789_Z_123456789) {\n"
+					+ "			boolean condition = true;\n"
+					+ "			int x;\n"
+					+ "			if (condition) {\n"
+					+ "				x = pX_123456789_Y_123456789_Z_123456789;\n"
+					+ "			} else {\n"
+					+ "				x = 0;\n"
+					+ "			}\n"
+					+ "		}",
+			""
+					+ "		void test(int pX_123456789_Y_123456789_Z_123456789) {\n"
+					+ "			boolean condition = true;\n"
+					+ "			int x;\n"
+					+ "			if (condition) {\n"
+					+ "				x = 1;\n"
+					+ "			} else {\n"
+					+ "				x = pX_123456789_Y_123456789_Z_123456789;\n"
+					+ "			}\n"
+					+ "		}",
+			""
+					+ "		void test(int pX_123456789_Y_123456789_Z_123456789) {\n"
+					+ "			int x;\n"
+					+ "			if (pX_123456789_Y_123456789_Z_123456789 < 0) {\n"
+					+ "				x = 1;\n"
+					+ "			} else {\n"
+					+ "				x = 0;\n"
+					+ "			}\n"
+					+ "		}"
+	})
+	void visit_largeSimpleNames_shouldNotTransform(String original) throws Exception {
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_assignTernaryExpression_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "	void test(boolean condition, boolean condition2) {\n"
+				+ "		int x;\n"
+				+ "		if(condition) {\n"
+				+ "			x = condition2 ? 10 : 1;\n"
+				+ "		} else {\n"
+				+ "			x = 0;\n"
+				+ "		}\n"
 				+ "	}";
 		assertNoChange(original);
 	}

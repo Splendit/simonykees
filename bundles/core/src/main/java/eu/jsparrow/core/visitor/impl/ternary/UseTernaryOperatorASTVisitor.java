@@ -1,7 +1,5 @@
 package eu.jsparrow.core.visitor.impl.ternary;
 
-import static eu.jsparrow.core.visitor.impl.ternary.SupportedTernaryOperandVisitor.isSupportedTernaryOperand;
-
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -37,6 +35,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  */
 public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor implements UseTernaryOperatorEvent {
 
+	private static final int MAX_COMPLEXITY = 20;
 	private final ASTMatcher matcher = new ASTMatcher();
 
 	@Override
@@ -204,6 +203,12 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 		return Optional.of(() -> newConditionalExpression(ifCondition, expressionWhenTrue, expressionWhenFalse));
 	}
 
+	static boolean isSupportedTernaryOperand(Expression expression) {
+		SupportedExpressionComplexityVisitor lengthVisitor = new SupportedExpressionComplexityVisitor();
+		expression.accept(lengthVisitor);
+		return lengthVisitor.isSupportedExpression() && lengthVisitor.getTotalComplexity() <= MAX_COMPLEXITY;
+	}
+
 	/**
 	 * 
 	 * @return true if either both expressions have a primitive type or both
@@ -288,5 +293,4 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 		conditionalExpression.setElseExpression((Expression) elseExpressionCopyTarget);
 		return conditionalExpression;
 	}
-
 }

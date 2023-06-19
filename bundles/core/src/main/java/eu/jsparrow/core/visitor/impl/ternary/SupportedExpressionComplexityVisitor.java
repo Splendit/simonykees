@@ -4,33 +4,27 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 
 /**
- * Determines the length of the sum of the string equivalents of simple
- * names and literals which are contained in the given expression.
+ * Determines the length of the sum of the string equivalents of simple names
+ * and literals which are contained in the given expression.
  * 
  * For example, the two expressions {@code x + y + z}, {@code xyz} and
- * {@code 123} have the same value for the significant length which is 3 in
- * this example.
+ * {@code 123} have the same value for the significant length which is 3 in this
+ * example.
  * 
  */
-class SupportedTernaryOperandVisitor extends ASTVisitor {
+class SupportedExpressionComplexityVisitor extends ASTVisitor {
 
-	private static final int MAX_LENGTH = 20;
-
+	private static final String KEYWORD_CLASS = "class"; //$NON-NLS-1$
+	private static final int DEFAULT_COMPLEXITY = 4;
 	private boolean supportedExpression = true;
-	private int totalSignificantLength;
-	
-	static boolean isSupportedTernaryOperand(Expression expression) {
-		SupportedTernaryOperandVisitor lengthVisitor = new SupportedTernaryOperandVisitor();
-		expression.accept(lengthVisitor);
-		return lengthVisitor.isSupportedExpression();
-	}
+	private int totalComplexity;
 
 
 	private static boolean isSupportedNodeType(int nodeType) {
@@ -72,46 +66,60 @@ class SupportedTernaryOperandVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(BooleanLiteral node) {
-		addNodeLength(node);
+		addComplexity(DEFAULT_COMPLEXITY);
 		return false;
 	}
 
 	@Override
 	public boolean visit(CharacterLiteral node) {
-		addNodeLength(node);
+		addNodeLengthToComplexity(node);
 		return false;
 	}
 
 	@Override
 	public boolean visit(NullLiteral node) {
-		addNodeLength(node);
+		addComplexity(DEFAULT_COMPLEXITY);
 		return false;
 	}
 
 	@Override
 	public boolean visit(NumberLiteral node) {
-		addNodeLength(node);
+		addNodeLengthToComplexity(node);
 		return false;
 	}
 
 	@Override
 	public boolean visit(StringLiteral node) {
-		addNodeLength(node);
+		addNodeLengthToComplexity(node);
 		return false;
+	}
+	
+	@Override
+	public boolean visit(TypeLiteral node) {
+		addComplexity(KEYWORD_CLASS.length());
+		return true;
 	}
 
 	@Override
 	public boolean visit(SimpleName node) {
-		addNodeLength(node);
+		addNodeLengthToComplexity(node);
 		return false;
 	}
 
-	private void addNodeLength(ASTNode node) {
-		totalSignificantLength += node.getLength();
-		supportedExpression = totalSignificantLength <= MAX_LENGTH;
+	private void addNodeLengthToComplexity(ASTNode node) {
+		int length = node.getLength();
+		addComplexity(length);
+	}
+
+	private void addComplexity(int complexity) {
+		totalComplexity += complexity;
 	}
 
 	public boolean isSupportedExpression() {
 		return supportedExpression;
+	}
+
+	public int getTotalComplexity() {
+		return totalComplexity;
 	}
 }
