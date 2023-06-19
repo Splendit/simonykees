@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.core.markers.common.UseTernaryOperatorEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.VariableDeclarationBeforeStatement;
+import eu.jsparrow.rules.common.util.VariableWithoutSideEffect;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
@@ -90,7 +91,8 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 		if (!leftHandSideWhenTrue.subtreeMatch(matcher, leftHandSideWhenFalse)) {
 			return Optional.empty();
 		}
-		if (isVariableWithSideEffect(leftHandSideWhenTrue)) {
+
+		if (!VariableWithoutSideEffect.isVariableWithoutSideEffect(leftHandSideWhenTrue)) {
 			return Optional.empty();
 		}
 
@@ -239,12 +241,6 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 		ifCondition.accept(visitor);
 		return !visitor.getUsages()
 			.isEmpty();
-	}
-
-	private boolean isVariableWithSideEffect(Expression expression) {
-		// TODO Auto-generated method stub
-		// use VariableWithoutSideEffect
-		return false;
 	}
 
 	private void replaceIfStatementByReturnTernary(IfStatement ifStatement,

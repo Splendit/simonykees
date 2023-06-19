@@ -288,4 +288,27 @@ public class UseTernaryOperatorASTVisitorNegativesTest extends UsesJDTUnitFixtur
 				+ "	}";
 		assertNoChange(original);
 	}
+	
+	@Test
+	void visit_assignmentToFieldOfReturnValue_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "	private final Wrapper wrapper = new Wrapper();\n"
+				+ "	\n"
+				+ "	void assignResult(boolean condition) {\n"
+				+ "		if (condition) {\n"
+				+ "			 getWrapper().value = 1;\n"
+				+ "		} else {\n"
+				+ "			 getWrapper().value = 0;\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	Wrapper getWrapper() {\n"
+				+ "		return wrapper;\n"
+				+ "	}\n"
+				+ "	\n"
+				+ "	class Wrapper{\n"
+				+ "		int value;\n"
+				+ "	}";
+		assertNoChange(original);
+	}
 }

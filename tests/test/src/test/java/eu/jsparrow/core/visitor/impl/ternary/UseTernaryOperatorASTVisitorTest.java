@@ -89,6 +89,27 @@ public class UseTernaryOperatorASTVisitorTest extends UsesJDTUnitFixture {
 								+ "	}"),
 				Arguments.of(
 						""
+								+ "	int getInitialX() {\n"
+								+ "		return 0;\n"
+								+ "	}"
+								+ "	void test(boolean condition) {\n"
+								+ "		int x = getInitialX();\n"
+								+ "		if (condition) {\n"
+								+ "			x = 1;\n"
+								+ "		} else {\n"
+								+ "			x = 0;\n"
+								+ "		}\n"
+								+ "	}",
+						""
+								+ "	int getInitialX() {\n"
+								+ "		return 0;\n"
+								+ "	}"
+								+ "	void test(boolean condition) {\n"
+								+ "		int x = getInitialX();\n"
+								+ "		x = condition ? 1 : 0;\n"
+								+ "	}"),
+				Arguments.of(
+						""
 								+ "	void test(boolean condition) {\n"
 								+ "		int x = 0;\n"
 								+ "		if (condition) {\n"
@@ -232,20 +253,20 @@ public class UseTernaryOperatorASTVisitorTest extends UsesJDTUnitFixture {
 	void visit_AssignmentWithLongestPossibleKeyword_shouldTransform() throws Exception {
 		String largestPossibleIdentifier = "p123456789_123456789";
 		String original = ""
-				+ "		void test(int "	+ largestPossibleIdentifier	+ ") {\n"
+				+ "		void test(int " + largestPossibleIdentifier + ") {\n"
 				+ "			boolean condition = true;\n"
 				+ "			int x;\n"
 				+ "			if (condition) {\n"
-				+ "				x = " + largestPossibleIdentifier	+ ";\n"
+				+ "				x = " + largestPossibleIdentifier + ";\n"
 				+ "			} else {\n"
 				+ "				x = 0;\n"
 				+ "			}\n"
 				+ "		}";
 
 		String expected = ""
-				+ "		void test(int "	+ largestPossibleIdentifier	+ ") {\n"
+				+ "		void test(int " + largestPossibleIdentifier + ") {\n"
 				+ "			boolean condition = true;\n"
-				+ "			int x = condition ? "  + largestPossibleIdentifier	+ " : 0;\n"
+				+ "			int x = condition ? " + largestPossibleIdentifier + " : 0;\n"
 				+ "		}";
 
 		assertChange(original, expected);

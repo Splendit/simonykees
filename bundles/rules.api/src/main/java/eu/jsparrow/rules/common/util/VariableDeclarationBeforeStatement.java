@@ -93,10 +93,10 @@ public class VariableDeclarationBeforeStatement {
 
 	private static boolean hasInitializerWithSideEffect(VariableDeclarationFragment fragment) {
 		Expression initializer = fragment.getInitializer();
-		if(initializer == null) {
+		if (initializer == null) {
 			return false;
 		}
-		if(ASTNodeUtil.isLiteral(initializer)) {
+		if (ASTNodeUtil.isLiteral(initializer)) {
 			return false;
 		}
 		return !VariableWithoutSideEffect.isVariableWithoutSideEffect(initializer);
