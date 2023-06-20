@@ -62,8 +62,9 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor impl
 			return true;
 		}
 
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		if (arguments.size() != 1) {
+		Expression onlyArgument = ASTNodeUtil.findSingletonListElement(methodInvocation.arguments(), Expression.class)
+			.orElse(null);
+		if (onlyArgument == null) {
 			return true;
 		}
 
@@ -93,7 +94,7 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor impl
 			return true;
 		}
 
-		replace(methodInvocation, arguments.get(0), defaultValue, followingStatement);
+		replace(methodInvocation, onlyArgument, defaultValue, followingStatement);
 		return true;
 	}
 

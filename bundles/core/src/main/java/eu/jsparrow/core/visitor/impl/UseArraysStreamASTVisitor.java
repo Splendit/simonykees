@@ -212,23 +212,23 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor imple
 		if (BLOCKED_LIST.contains(name.getIdentifier())) {
 			return false;
 		}
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(method.arguments(), Expression.class);
-		if (arguments.size() != 1) {
-			return false;
-		}
-		Expression argument = arguments.get(0);
-		if (argument.getNodeType() != ASTNode.LAMBDA_EXPRESSION) {
+
+		LambdaExpression lambdaExpressionAsOnlyArgument = ASTNodeUtil
+			.findSingletonListElement(method.arguments(), LambdaExpression.class)
+			.orElse(null);
+		if (lambdaExpressionAsOnlyArgument == null) {
 			return false;
 		}
 
-		LambdaExpression lambdaExpression = (LambdaExpression) argument;
-		ASTNode lambdaBody = lambdaExpression.getBody();
-		List<VariableDeclarationFragment> parameters = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
-				VariableDeclarationFragment.class);
-		if (parameters.size() != 1) {
+		ASTNode lambdaBody = lambdaExpressionAsOnlyArgument.getBody();
+
+		VariableDeclarationFragment parameter = ASTNodeUtil
+			.findSingletonListElement(lambdaExpressionAsOnlyArgument.parameters(), VariableDeclarationFragment.class)
+			.orElse(null);
+		if (parameter == null) {
 			return false;
 		}
-		VariableDeclarationFragment parameter = parameters.get(0);
+
 		UnboxCompatibilityVisitor visitor = new UnboxCompatibilityVisitor(parameter.getName());
 		lambdaBody.accept(visitor);
 		return !visitor.isIncompatible();

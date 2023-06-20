@@ -295,8 +295,9 @@ public class ASTNodeUtil {
 	/**
 	 * @return if the List specified by the first parameter contains exactly one
 	 *         element which is an instance of the type specified by the 2nd
-	 *         parameter, then an Optional is returned which stores the element
-	 *         of the list. In all other cases an empty optional is returned.
+	 *         parameter, then an Optional is returned which stores the only one
+	 *         element of the list. In all other cases an empty optional is
+	 *         returned.
 	 */
 	public static <T extends ASTNode> Optional<T> findSingletonListElement(@SuppressWarnings("rawtypes") List rawlist,
 			Class<T> type) {
@@ -328,11 +329,11 @@ public class ASTNodeUtil {
 			.filter(type::isInstance)
 			.map(type::cast);
 	}
-	
+
 	/**
 	 * 
-	 * @return An Optional containing the element after the element specified
-	 *         by the 2nd paramneter which is expected to be an instance of the
+	 * @return An Optional containing the element after the element specified by
+	 *         the 2nd paramneter which is expected to be an instance of the
 	 *         type specified by the 3rd parameter. In all other cases an empty
 	 *         optional is returned.
 	 * 
@@ -348,7 +349,6 @@ public class ASTNodeUtil {
 			.filter(type::isInstance)
 			.map(type::cast);
 	}
-
 
 	/**
 	 * Filters a list of modifiers if specific modifiers are present defined by

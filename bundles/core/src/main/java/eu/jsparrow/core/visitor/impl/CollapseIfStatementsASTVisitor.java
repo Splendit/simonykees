@@ -137,7 +137,7 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 			.map(IfStatement::getExpression)
 			.allMatch(OperatorUtil::isSimpleExpression);
 	}
-	
+
 	@Override
 	public void endVisit(CompilationUnit compilationUnit) {
 		aliveVariableScope.clearCompilationUnitScope(compilationUnit);
@@ -208,15 +208,9 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 			innerIfStatement = (IfStatement) thenStatement;
 		} else if (thenStatement.getNodeType() == ASTNode.BLOCK) {
 			Block block = (Block) thenStatement;
-			List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
-			if (statements.size() != 1) {
-				return Collections.emptyList();
-			}
-			Statement singleBodyStatement = statements.get(0);
-			if (singleBodyStatement.getNodeType() != ASTNode.IF_STATEMENT) {
-				return Collections.emptyList();
-			}
-			innerIfStatement = (IfStatement) singleBodyStatement;
+			innerIfStatement = ASTNodeUtil
+				.findSingletonListElement(block.statements(), IfStatement.class)
+				.orElse(null);
 		}
 		if (innerIfStatement == null) {
 			return Collections.emptyList();

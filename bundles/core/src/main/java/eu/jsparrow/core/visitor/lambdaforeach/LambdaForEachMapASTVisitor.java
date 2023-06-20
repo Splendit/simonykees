@@ -85,15 +85,15 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			return true;
 		}
 
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		if (arguments.size() != 1 || ASTNode.LAMBDA_EXPRESSION != arguments.get(0)
-			.getNodeType()) {
+		LambdaExpression lambdaExpressionAsOnlyArgument = ASTNodeUtil
+			.findSingletonListElement(methodInvocation.arguments(), LambdaExpression.class)
+			.orElse(null);
+		if (lambdaExpressionAsOnlyArgument == null) {
 			return true;
 		}
-
-		LambdaExpression lambdaExpression = (LambdaExpression) arguments.get(0);
-		SimpleName parameter = extractSingleParameter(lambdaExpression);
-		Block body = extractLambdaExpressionBlockBody(lambdaExpression);
+		
+		SimpleName parameter = extractSingleParameter(lambdaExpressionAsOnlyArgument);
+		Block body = extractLambdaExpressionBlockBody(lambdaExpressionAsOnlyArgument);
 
 		if (body == null) {
 			return false;
@@ -107,8 +107,8 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		if (!analyzer.foundExtractableMapStatement()) {
 			return true;
 		}
-		
-		if(isGeneratedNode(analyzer.getNewForEachParameterType())) {
+
+		if (isGeneratedNode(analyzer.getNewForEachParameterType())) {
 			return true;
 		}
 
@@ -135,7 +135,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 		ListRewrite argumentsPropertyRewriter = astRewrite.getListRewrite(mapInvocation,
 				MethodInvocation.ARGUMENTS_PROPERTY);
-		LambdaExpression mapExpression = generateLambdaExpression(ast, extractableBlock, lambdaExpression);
+		LambdaExpression mapExpression = generateLambdaExpression(ast, extractableBlock, lambdaExpressionAsOnlyArgument);
 		argumentsPropertyRewriter.insertFirst(mapExpression, null);
 
 		/*
@@ -151,26 +151,26 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		 * replace the parameter of the forEach lambda expression
 		 */
 		astRewrite.replace(parameter, newForEachParamName, null);
-		LambdaNodeUtil.saveComments(getCommentRewriter(), analyzer,findParentStatement(methodInvocation));
+		LambdaNodeUtil.saveComments(getCommentRewriter(), analyzer, findParentStatement(methodInvocation));
 		addMarkerEvent(methodInvocation);
 		onRewrite();
 
 		/*
 		 * Replace the type of the parameter if any
 		 */
-		Type type = LambdaNodeUtil.extractSingleParameterType(lambdaExpression);
+		Type type = LambdaNodeUtil.extractSingleParameterType(lambdaExpressionAsOnlyArgument);
 		if (type != null) {
 			Type newType = analyzer.getNewForEachParameterType();
 			if (newType.isPrimitiveType()) {
 				/*
 				 * implicit boxing! primitives are not allowed in forEach
 				 */
-				astRewrite.replace((ASTNode) lambdaExpression.parameters()
+				astRewrite.replace((ASTNode) lambdaExpressionAsOnlyArgument.parameters()
 					.get(0), newForEachParamName, null);
 			} else {
 				astRewrite.replace(type, newType, null);
 				Modifier modifier = analyzer.getNewForEachParameterModifier();
-				LambdaNodeUtil.insertModifier(lambdaExpression, modifier, astRewrite);
+				LambdaNodeUtil.insertModifier(lambdaExpressionAsOnlyArgument, modifier, astRewrite);
 			}
 		}
 

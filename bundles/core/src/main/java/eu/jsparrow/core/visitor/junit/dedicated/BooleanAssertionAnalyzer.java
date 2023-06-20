@@ -159,12 +159,13 @@ public class BooleanAssertionAnalyzer {
 		if (leftOperand == null) {
 			return Collections.emptyList();
 		}
-		List<Expression> equalsInvocationArguments = ASTNodeUtil.convertToTypedList(equalsInvocation.arguments(),
-				Expression.class);
-		if (equalsInvocationArguments.size() != 1) {
+
+		Expression rightOperand = ASTNodeUtil
+			.findSingletonListElement(equalsInvocation.arguments(), Expression.class)
+			.orElse(null);
+		if (rightOperand == null) {
 			return Collections.emptyList();
 		}
-		Expression rightOperand = equalsInvocationArguments.get(0);
 
 		int modifiers = methodBinding.getModifiers();
 		if (Modifier.isStatic(modifiers)) {

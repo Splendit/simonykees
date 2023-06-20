@@ -23,25 +23,28 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
- * Extracts an {@link Optional#filter(Predicate)} from the consumer used in {@link Optional#ifPresent(Consumer)}. 
- * For example:
+ * Extracts an {@link Optional#filter(Predicate)} from the consumer used in
+ * {@link Optional#ifPresent(Consumer)}. For example:
  * 
  * <pre>
- *	oUser.ifPresent(user -> {
- *		if (isSpecial(user)) {
- *			sendMail(user.getMail());
- *		}
- *	});
+ * oUser.ifPresent(user -> {
+ * 	if (isSpecial(user)) {
+ * 		sendMail(user.getMail());
+ * 	}
+ * });
  * </pre>
  * 
- * is transformed to: 
+ * is transformed to:
+ * 
  * <pre>
- *	oUser.filter(user -> isSpecial(user)).ifPresent(user -> {
- *		sendMail(user.getMail());
- *	});
+ * oUser.filter(user -> isSpecial(user))
+ * 	.ifPresent(user -> {
+ * 		sendMail(user.getMail());
+ * 	});
  * </pre>
  * 
- * This transformation is feasible only if the entire consumer's body is wrapped into an if-statement. 
+ * This transformation is feasible only if the entire consumer's body is wrapped
+ * into an if-statement.
  * 
  * @since 3.14.0
  *
@@ -73,27 +76,22 @@ public class OptionalFilterASTVisitor extends AbstractOptionalASTVisitor impleme
 		}
 
 		Block body = (Block) lambdaBody;
-		List<Statement> statements = ASTNodeUtil.convertToTypedList(body.statements(), Statement.class);
-		if (statements.size() != 1) {
+		IfStatement singleIfStatement = ASTNodeUtil
+			.findSingletonListElement(body.statements(), IfStatement.class)
+			.orElse(null);
+		if (singleIfStatement == null) {
 			return true;
 		}
 
-		Statement singleStatement = statements.get(0);
-		if (singleStatement.getNodeType() != ASTNode.IF_STATEMENT) {
+		VariableDeclaration variableDeclaration = ASTNodeUtil
+			.findSingletonListElement(lambdaExpression.parameters(), VariableDeclaration.class)
+			.orElse(null);
+		if (variableDeclaration == null) {
 			return true;
 		}
-
-		List<VariableDeclaration> lambdaExpressionParams = ASTNodeUtil.convertToTypedList(lambdaExpression.parameters(),
-				VariableDeclaration.class);
-		if (lambdaExpressionParams.size() != 1) {
-			return true;
-		}
-
-		VariableDeclaration variableDeclaration = lambdaExpressionParams.get(0);
 		SimpleName paramName = variableDeclaration.getName();
 
-		IfStatement ifStatement = (IfStatement) singleStatement;
-		Expression ifExpression = ifStatement.getExpression();
+		Expression ifExpression = singleIfStatement.getExpression();
 		// check if the condition expression is using the lambda parameter
 		boolean usesParameter = usesSimpleName(ifExpression, paramName);
 		if (!usesParameter) {
@@ -101,15 +99,14 @@ public class OptionalFilterASTVisitor extends AbstractOptionalASTVisitor impleme
 		}
 
 		// check if there is an else statement
-		if (ifStatement.getElseStatement() != null) {
+		if (singleIfStatement.getElseStatement() != null) {
 			return true;
 		}
 
 		// replace
+		replace(lambdaExpression, methodInvocation, variableDeclaration, singleIfStatement);
+		saveComments(methodInvocation, variableDeclaration, singleIfStatement);
 
-		replace(lambdaExpression, methodInvocation, variableDeclaration, ifStatement);
-		saveComments(methodInvocation, variableDeclaration, ifStatement);
-		
 		return true;
 	}
 
