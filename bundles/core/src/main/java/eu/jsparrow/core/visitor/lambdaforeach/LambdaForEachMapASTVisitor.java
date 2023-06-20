@@ -92,7 +92,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			return true;
 		}
 		
-		SimpleName parameter = extractSingleParameter(lambdaExpressionAsOnlyArgument);
+		SimpleName parameter = extractSingleParameter(lambdaExpressionAsOnlyArgument).orElse(null);
 		Block body = extractLambdaExpressionBlockBody(lambdaExpressionAsOnlyArgument);
 
 		if (body == null) {
@@ -158,7 +158,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		/*
 		 * Replace the type of the parameter if any
 		 */
-		Type type = LambdaNodeUtil.extractSingleParameterType(lambdaExpressionAsOnlyArgument);
+		Type type = LambdaNodeUtil.extractSingleParameterType(lambdaExpressionAsOnlyArgument).orElse(null);
 		if (type != null) {
 			Type newType = analyzer.getNewForEachParameterType();
 			if (newType.isPrimitiveType()) {

@@ -272,11 +272,11 @@ public abstract class LoopIteratingIndexVisitor extends ASTVisitor {
 			}
 		} else if (ASTNode.VARIABLE_DECLARATION_EXPRESSION == initExpresion.getNodeType()) {
 			VariableDeclarationExpression declExpresion = (VariableDeclarationExpression) initExpresion;
-			List<VariableDeclarationFragment> fragments = ASTNodeUtil.returnTypedList(declExpresion.fragments(),
-					VariableDeclarationFragment.class);
-			if (fragments.size() == 1) {
-				VariableDeclarationFragment fragment = fragments.get(0);
-				Expression initializer = fragment.getInitializer();
+			VariableDeclarationFragment singleFragment = ASTNodeUtil
+				.findSingletonListElement(declExpresion.fragments(), VariableDeclarationFragment.class)
+				.orElse(null);
+			if (singleFragment != null) {
+				Expression initializer = singleFragment.getInitializer();
 				if (initializer != null && ASTNode.NUMBER_LITERAL == initializer.getNodeType()) {
 					assignedToZero = ((NumberLiteral) initializer).getToken()
 						.equals(ZERO);

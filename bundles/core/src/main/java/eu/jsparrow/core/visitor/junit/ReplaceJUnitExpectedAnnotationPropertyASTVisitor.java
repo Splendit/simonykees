@@ -113,11 +113,11 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 		if (body == null) {
 			return Optional.empty();
 		}
-		List<ExpressionStatement> expressionStatements = ASTNodeUtil.returnTypedList(body.statements(),
-				ExpressionStatement.class);
-		if (expressionStatements.size() == 1) {
-			ExpressionStatement expressionStatement = expressionStatements.get(0);
-			return Optional.of(expressionStatement.getExpression());
+		ExpressionStatement singleExpressionStatement = ASTNodeUtil
+			.findSingletonListElement(body.statements(), ExpressionStatement.class)
+			.orElse(null);
+		if (singleExpressionStatement != null) {
+			return Optional.of(singleExpressionStatement.getExpression());
 		}
 		ExpressionsThrowingExceptionVisitor throwingExceptionsVisitor = new ExpressionsThrowingExceptionVisitor(
 				exceptionType);

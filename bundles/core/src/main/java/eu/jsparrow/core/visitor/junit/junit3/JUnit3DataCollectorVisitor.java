@@ -367,13 +367,12 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 			return Optional.empty();
 		}
 
-		List<TypeLiteral> listWithExpectedTypeLiteral = ASTNodeUtil.returnTypedList(methodInvocation.arguments(),
-				TypeLiteral.class);
-
-		if (listWithExpectedTypeLiteral.size() != 1) {
+		TypeLiteral typeLiteral = ASTNodeUtil
+			.findSingletonListElement(methodInvocation.arguments(), TypeLiteral.class)
+			.orElse(null);
+		if (typeLiteral == null) {
 			return Optional.empty();
 		}
-		TypeLiteral typeLiteral = listWithExpectedTypeLiteral.get(0);
 
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		if (methodBinding == null) {

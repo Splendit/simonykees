@@ -45,12 +45,7 @@ abstract class AbstractIfExpressionVisitor extends ASTVisitor {
 			.equals("equals")) { //$NON-NLS-1$
 			return Optional.empty();
 		}
-		List<Expression> invocationArgumentList = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-				Expression.class);
-		if (invocationArgumentList.size() != 1) {
-			return Optional.empty();
-		}
-		return Optional.of(invocationArgumentList.get(0));
+		return ASTNodeUtil.findSingletonListElement(methodInvocation.arguments(), Expression.class);
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.impl;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -34,7 +35,8 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 3.9.0
  *
  */
-public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteASTVisitor implements InsertBreakStatementInLoopsEvent {
+public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteASTVisitor
+		implements InsertBreakStatementInLoopsEvent {
 
 	@SuppressWarnings("nls")
 	private List<String> safeCollectionMethods = Collections
@@ -42,7 +44,7 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 
 	@Override
 	public boolean visit(EnhancedForStatement forStatement) {
-		IfStatement ifStatement = findSingleBodyStatement(forStatement.getBody());
+		IfStatement ifStatement = findSingleBodyStatement(forStatement.getBody()).orElse(null);
 		if (ifStatement == null || ifStatement.getElseStatement() != null) {
 			return true;
 		}
@@ -56,14 +58,10 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 		if (thenStatement.getNodeType() == ASTNode.BLOCK) {
 
 			Block ifBodyBlock = (Block) thenStatement;
-			List<ExpressionStatement> ifBodyStatements = ASTNodeUtil.returnTypedList(ifBodyBlock.statements(),
-					ExpressionStatement.class);
-			if (ifBodyStatements.size() != 1) {
-				return true;
-			}
-
-			ExpressionStatement expressionStatement = ifBodyStatements.get(0);
-			if (!isBooleanLiteralAssignment(expressionStatement)) {
+			ExpressionStatement expressionStatement = ASTNodeUtil
+				.findSingletonListElement(ifBodyBlock.statements(), ExpressionStatement.class)
+				.orElse(null);
+			if (expressionStatement == null || !isBooleanLiteralAssignment(expressionStatement)) {
 				return true;
 			}
 
@@ -107,16 +105,12 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 		return rhs.getNodeType() == ASTNode.BOOLEAN_LITERAL;
 	}
 
-	private IfStatement findSingleBodyStatement(Statement body) {
+	private Optional<IfStatement> findSingleBodyStatement(Statement body) {
 		if (body.getNodeType() != ASTNode.BLOCK) {
-			return body.getNodeType() == ASTNode.IF_STATEMENT ? (IfStatement) body : null;
+			return body.getNodeType() == ASTNode.IF_STATEMENT ? Optional.of((IfStatement) body) : Optional.empty();
 		}
 		Block block = (Block) body;
-		List<IfStatement> bodyStatements = ASTNodeUtil.returnTypedList(block.statements(), IfStatement.class);
-		if (bodyStatements.size() != 1) {
-			return null;
-		}
-		return bodyStatements.get(0);
+		return ASTNodeUtil.findSingletonListElement(block.statements(), IfStatement.class);
 	}
 
 	private boolean hasSideEffects(Expression expression) {
