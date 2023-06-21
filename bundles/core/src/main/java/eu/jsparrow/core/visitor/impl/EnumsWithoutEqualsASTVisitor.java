@@ -36,8 +36,11 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor i
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		if (methodInvocation.arguments()
-			.size() != 1 || methodInvocation.getExpression() == null) {
+		Expression singleArgument = ASTNodeUtil
+			.findSingletonListElement(methodInvocation.arguments(), Expression.class)
+			.orElse(null);
+		
+		if (singleArgument == null || methodInvocation.getExpression() == null) {
 			return false;
 		}
 		boolean isEquals = StringUtils.equals(EQUALS, methodInvocation.getName()
@@ -51,9 +54,7 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor i
 		if (expressionBinding != null && !expressionBinding.isEnum()) {
 			return false;
 		}
-		Expression argument = (Expression) methodInvocation.arguments()
-			.get(0);
-		ITypeBinding argumentBinding = argument.resolveTypeBinding();
+		ITypeBinding argumentBinding = singleArgument.resolveTypeBinding();
 		if (argumentBinding != null && !argumentBinding.isEnum()) {
 			return false;
 		}
@@ -67,7 +68,7 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor i
 		}
 
 		Expression left = (Expression) astRewrite.createMoveTarget(expression);
-		Expression right = (Expression) astRewrite.createMoveTarget(argument);
+		Expression right = (Expression) astRewrite.createMoveTarget(singleArgument);
 		Expression replacementNode = NodeBuilder.newInfixExpression(methodInvocation.getAST(), newOperator, left,
 				right);
 		Expression replacedNode = methodInvocation;
@@ -84,7 +85,7 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor i
 		astRewrite.replace(replacedNode, replacementNode, null);
 		saveComments(methodInvocation);
 		onRewrite();
-		addMarkerEvent(replacedNode, expression, argument, newOperator);
+		addMarkerEvent(replacedNode, expression, singleArgument, newOperator);
 		return false;
 	}
 

@@ -33,7 +33,8 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @author Matthias Webhofer
  * @since 1.2
  */
-public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForEachASTVisitor implements LambdaForEachIfWrapperToFilterEvent {
+public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForEachASTVisitor
+		implements LambdaForEachIfWrapperToFilterEvent {
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
@@ -46,52 +47,44 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 			return true;
 		}
 
-		// get arguments from forEach method, check for size and type
-		List<Expression> methodArgs = ASTNodeUtil.convertToTypedList(methodInvocationNode.arguments(),
-				Expression.class);
+		LambdaExpression lambdaExpressionAsSingleArgument = ASTNodeUtil
+			.findSingletonListElement(methodInvocationNode.arguments(), LambdaExpression.class)
+			.orElse(null);
 
-		if (methodArgs.size() == 1 && methodArgs.get(0) instanceof LambdaExpression) {
+		if (lambdaExpressionAsSingleArgument != null) {
 
-			/*
-			 * get lambda expression and its parameters and check for size
-			 */
-			LambdaExpression lambdaExpression = (LambdaExpression) methodArgs.get(0);
-			List<VariableDeclaration> lambdaExpressionParams = ASTNodeUtil
-				.convertToTypedList(lambdaExpression.parameters(), VariableDeclaration.class);
-
+			VariableDeclaration singleLambdaParameter = ASTNodeUtil
+				.findSingletonListElement(lambdaExpressionAsSingleArgument.parameters(), VariableDeclaration.class)
+				.orElse(null);
 			// if statement can only be in a block
-			if (lambdaExpressionParams.size() == 1 && lambdaExpression.getBody() instanceof Block) {
+			if (singleLambdaParameter != null && lambdaExpressionAsSingleArgument.getBody() instanceof Block) {
+				Block block = (Block) lambdaExpressionAsSingleArgument.getBody();
 
-				Block block = (Block) lambdaExpression.getBody();
-
+				IfStatement ifAsSingleBlockStatement = ASTNodeUtil
+					.findSingletonListElement(block.statements(), IfStatement.class)
+					.orElse(null);
 				/*
 				 * block should contain a single if statement and nothing before
 				 * or after it
 				 */
-				if (block.statements()
-					.size() == 1
-						&& block.statements()
-							.get(0) instanceof IfStatement) {
-					IfStatement ifStatement = (IfStatement) block.statements()
-						.get(0);
-					Expression ifStatementExpression = ifStatement.getExpression();
+				if (ifAsSingleBlockStatement != null) {
+					Expression ifStatementExpression = ifAsSingleBlockStatement.getExpression();
 
-					VariableDeclaration variableDeclaration = lambdaExpressionParams.get(0);
-					SimpleName paramName = variableDeclaration.getName();
+					SimpleName paramName = singleLambdaParameter.getName();
 
 					/*
 					 * an else statement must not be present and the parameter
 					 * passed to the forEach lambda must be used for filtering
 					 * in the containing if statement
 					 */
-					if (isElseStatementNullOrEmpty(ifStatement.getElseStatement())
+					if (isElseStatementNullOrEmpty(ifAsSingleBlockStatement.getElseStatement())
 							&& this.isParameterUsedInExpression(paramName, ifStatementExpression)) {
 
 						/*
 						 * create lambda expression for the filter() method
 						 */
 						VariableDeclaration variableDeclarationCopy = (VariableDeclaration) ASTNode
-							.copySubtree(astRewrite.getAST(), variableDeclaration);
+							.copySubtree(astRewrite.getAST(), singleLambdaParameter);
 
 						LambdaExpression filterLambda = LambdaNodeUtil.createLambdaExpression(astRewrite,
 								variableDeclarationCopy, ifStatementExpression);
@@ -124,7 +117,7 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 						 */
 
 						LambdaExpression forEachLambda = LambdaNodeUtil.createLambdaExpression(astRewrite,
-								variableDeclarationCopy, ifStatement.getThenStatement());
+								variableDeclarationCopy, ifAsSingleBlockStatement.getThenStatement());
 
 						if (forEachLambda != null) {
 							/*
@@ -138,8 +131,9 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 
 							// rewrite the AST
 							astRewrite.replace(methodInvocationNode, forEachMethodInvocation, null);
-							saveComments(methodInvocationNode, lambdaExpression, block, ifStatement);
-							addMarkerEvent(methodInvocationNode, ifStatementExpression, variableDeclaration);
+							saveComments(methodInvocationNode, lambdaExpressionAsSingleArgument, block,
+									ifAsSingleBlockStatement);
+							addMarkerEvent(methodInvocationNode, ifStatementExpression, singleLambdaParameter);
 							onRewrite();
 						}
 					}

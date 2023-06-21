@@ -214,7 +214,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor imple
 			return;
 		}
 
-		ReturnStatement elseReturnStatement = findSingleReturnStatement(elseStatement);
+		ReturnStatement elseReturnStatement = findSingleReturnStatement(elseStatement).orElse(null);
 		if (elseReturnStatement == null) {
 			return;
 		}
@@ -334,7 +334,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor imple
 	 */
 	private void analyzeIfElseReturn(MethodDeclaration methodDeclaration, IfStatement ifStatement,
 			Statement elseStatement) {
-		ReturnStatement elseReturnStatement = findSingleReturnStatement(elseStatement);
+		ReturnStatement elseReturnStatement = findSingleReturnStatement(elseStatement).orElse(null);
 		if (elseReturnStatement == null) {
 			return;
 		}
@@ -348,30 +348,22 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor imple
 		insertGuardStatement(methodDeclaration.getBody(), ifStatement, guardStatement);
 	}
 
-	private ReturnStatement findSingleReturnStatement(Statement elseStatement) {
+	private Optional<ReturnStatement> findSingleReturnStatement(Statement elseStatement) {
 		if (ASTNode.IF_STATEMENT == elseStatement.getNodeType()) {
-			return null;
+			return Optional.empty();
 		}
 
-		ReturnStatement elseReturnStatement = null;
 		if (ASTNode.RETURN_STATEMENT == elseStatement.getNodeType()) {
-			elseReturnStatement = (ReturnStatement) elseStatement;
-		} else if (ASTNode.BLOCK == elseStatement.getNodeType()) {
-			Block elseBlock = (Block) elseStatement;
-			List<Statement> elseBlockStatements = ASTNodeUtil.convertToTypedList(elseBlock.statements(),
-					Statement.class);
-			if (elseBlockStatements.size() != 1) {
-				return null;
-			}
+			return Optional.of((ReturnStatement) elseStatement);
+		}
 
-			Statement elseBodyStatement = elseBlockStatements.get(0);
-			if (ASTNode.RETURN_STATEMENT != elseBodyStatement.getNodeType()) {
-				return null;
-			}
-			elseReturnStatement = (ReturnStatement) elseBodyStatement;
+		if (ASTNode.BLOCK == elseStatement.getNodeType()) {
+			Block elseBlock = (Block) elseStatement;
+			return ASTNodeUtil
+				.findSingletonListElement(elseBlock.statements(), ReturnStatement.class);
 
 		}
-		return elseReturnStatement;
+		return Optional.empty();
 	}
 
 	private void insertGuardStatement(Block methodBody, IfStatement ifStatement, IfStatement guardStatement) {

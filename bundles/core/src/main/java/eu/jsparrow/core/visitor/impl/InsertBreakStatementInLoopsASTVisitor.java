@@ -44,7 +44,7 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 
 	@Override
 	public boolean visit(EnhancedForStatement forStatement) {
-		IfStatement ifStatement = findSingleBodyStatement(forStatement.getBody()).orElse(null);
+		IfStatement ifStatement = findSingleIfStatement(forStatement.getBody()).orElse(null);
 		if (ifStatement == null || ifStatement.getElseStatement() != null) {
 			return true;
 		}
@@ -105,12 +105,14 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 		return rhs.getNodeType() == ASTNode.BOOLEAN_LITERAL;
 	}
 
-	private Optional<IfStatement> findSingleBodyStatement(Statement body) {
-		if (body.getNodeType() != ASTNode.BLOCK) {
-			return body.getNodeType() == ASTNode.IF_STATEMENT ? Optional.of((IfStatement) body) : Optional.empty();
+	private Optional<IfStatement> findSingleIfStatement(Statement statement) {
+		if (statement.getNodeType() == ASTNode.BLOCK) {
+			Block block = (Block) statement;
+			return ASTNodeUtil.findSingletonListElement(block.statements(), IfStatement.class);
 		}
-		Block block = (Block) body;
-		return ASTNodeUtil.findSingletonListElement(block.statements(), IfStatement.class);
+		return Optional.of(statement)
+			.filter(node -> node.getNodeType() == ASTNode.IF_STATEMENT)
+			.map(IfStatement.class::cast);
 	}
 
 	private boolean hasSideEffects(Expression expression) {

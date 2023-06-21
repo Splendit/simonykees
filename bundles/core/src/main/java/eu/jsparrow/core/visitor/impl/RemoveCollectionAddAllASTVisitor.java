@@ -52,7 +52,8 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * 
  * @since 3.15.0
  */
-public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisitor implements RemoveCollectionAddAllEvent {
+public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisitor
+		implements RemoveCollectionAddAllEvent {
 
 	private static final String JAVA_UTIL_COLLECTION = java.util.Collection.class.getName();
 
@@ -98,14 +99,15 @@ public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisit
 			return null;
 		}
 
-		if (methodInvocation.arguments()
-			.size() != 1) {
+		Expression singleAddAllArgument = ASTNodeUtil
+			.findSingletonListElement(methodInvocation.arguments(), Expression.class)
+			.orElse(null);
+		if (singleAddAllArgument == null) {
 			return null;
 		}
 
-		Expression addAllArgument = convertToTypedList(methodInvocation.arguments(), Expression.class).get(0);
-		if (addAllArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-			SimpleName variableArgument = (SimpleName) addAllArgument;
+		if (singleAddAllArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
+			SimpleName variableArgument = (SimpleName) singleAddAllArgument;
 			if (variableArgument.getIdentifier()
 				.equals(addAllExpression.getIdentifier())) {
 				return null;
@@ -116,7 +118,7 @@ public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisit
 			return null;
 		}
 		ExpressionStatement addAllStatement = (ExpressionStatement) methodInvocation.getParent();
-		return new AddAllAnalysisResult(addAllExpression, addAllArgument, addAllStatement);
+		return new AddAllAnalysisResult(addAllExpression, singleAddAllArgument, addAllStatement);
 	}
 
 	private VariableDeclarationStatement getVariableDeclarationBeforeAddAll(ExpressionStatement addAllStatement) {
@@ -145,22 +147,21 @@ public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisit
 	private ClassInstanceCreation analyzeVariableDeclarationBeforeAddAll(
 			VariableDeclarationStatement variableDeclarationBeforeAddAll, SimpleName addAllExpression) {
 
-		if (variableDeclarationBeforeAddAll.fragments()
-			.size() != 1) {
+		VariableDeclarationFragment singleVariableDeclarationFragment = ASTNodeUtil
+			.findSingletonListElement(variableDeclarationBeforeAddAll.fragments(), VariableDeclarationFragment.class)
+			.orElse(null);
+		if(singleVariableDeclarationFragment == null) {
 			return null;
 		}
-
-		VariableDeclarationFragment variableDeclarationFragment = convertToTypedList(
-				variableDeclarationBeforeAddAll.fragments(), VariableDeclarationFragment.class).get(0);
-
-		String nameOfVariableDeclaredBeforeAddAll = variableDeclarationFragment.getName()
+		
+		String nameOfVariableDeclaredBeforeAddAll = singleVariableDeclarationFragment.getName()
 			.getIdentifier();
 
 		if (!nameOfVariableDeclaredBeforeAddAll.equals(addAllExpression.getIdentifier())) {
 			return null;
 		}
 
-		Expression initializer = variableDeclarationFragment.getInitializer();
+		Expression initializer = singleVariableDeclarationFragment.getInitializer();
 
 		if (initializer == null) {
 			return null;

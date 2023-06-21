@@ -156,10 +156,10 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor im
 			IndexOfMethodPosition position = this.getPosition(parent);
 			TransformationOption option = this.getTransformationOption(parent, position);
 			if (option != null) {
-				List<Expression> methodArguments = ASTNodeUtil.convertToTypedList(methodInvocationNode.arguments(),
-						Expression.class);
-				if (methodArguments.size() == 1) {
-					Expression methodArgumentExpression = methodArguments.get(0);
+				Expression singleMethodArgument = ASTNodeUtil
+					.findSingletonListElement(methodInvocationNode.arguments(), Expression.class)
+					.orElse(null);
+				if (singleMethodArgument != null) {
 					boolean doTransformation = true;
 
 					/*
@@ -167,12 +167,12 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor im
 					 * a string itself. char-Variables or char literals will be
 					 * ignored.
 					 */
-					if (type == TransformationType.STRING && !isStringType(methodArgumentExpression)) {
+					if (type == TransformationType.STRING && !isStringType(singleMethodArgument)) {
 						doTransformation = false;
 					}
 
 					if (doTransformation) {
-						this.transform(methodInvocationNode.getExpression(), methodArgumentExpression, parent, option);
+						this.transform(methodInvocationNode.getExpression(), singleMethodArgument, parent, option);
 						getCommentRewriter().saveRelatedComments(methodInvocationNode.getParent(),
 								ASTNodeUtil.getSpecificAncestor(methodInvocationNode, Statement.class));
 						onRewrite();
