@@ -3,6 +3,7 @@ bin/
 tmp/
 lib/
 !bundles/license.netlicensing/lib/netlicensing-client-*.jar
+!bundles/ui/lib/oshi-core-6.3.1-20221019.232528-1.jar
 *.tmp
 *.bak
 *.swp
