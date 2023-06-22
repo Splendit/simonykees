@@ -29,7 +29,7 @@ class ASTNodeUtilTest {
 	}
 
 	@Test
-	void findSingletonListElement_shouldFindIfStatement() throws Exception {
+	void findSingletonListElement_shouldNotFindIfStatement() throws Exception {
 		String code = "int i = 0;\n";
 
 		Block block = ASTNodeBuilder.createBlockFromString(code);

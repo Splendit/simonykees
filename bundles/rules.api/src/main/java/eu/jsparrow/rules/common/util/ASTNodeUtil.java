@@ -304,10 +304,7 @@ public class ASTNodeUtil {
 		if (rawlist.size() != 1) {
 			return Optional.empty();
 		}
-
-		return Optional.of(rawlist.get(0))
-			.filter(type::isInstance)
-			.map(type::cast);
+		return castToOptional(rawlist.get(0), type);
 	}
 
 	/**
@@ -325,9 +322,7 @@ public class ASTNodeUtil {
 		if (indexBefore < 0) {
 			return Optional.empty();
 		}
-		return Optional.of(rawlist.get(indexBefore))
-			.filter(type::isInstance)
-			.map(type::cast);
+		return castToOptional(rawlist.get(indexBefore), type);
 	}
 
 	/**
@@ -345,9 +340,7 @@ public class ASTNodeUtil {
 		if (indexAfter >= rawlist.size()) {
 			return Optional.empty();
 		}
-		return Optional.of(rawlist.get(indexAfter))
-			.filter(type::isInstance)
-			.map(type::cast);
+		return castToOptional(rawlist.get(indexAfter), type);
 	}
 
 	/**
@@ -711,5 +704,11 @@ public class ASTNodeUtil {
 		return locationInParent == LabeledStatement.LABEL_PROPERTY
 				|| locationInParent == ContinueStatement.LABEL_PROPERTY
 				|| locationInParent == BreakStatement.LABEL_PROPERTY;
+	}
+
+	public static <T extends ASTNode> Optional<T> castToOptional(Object o, Class<T> type) {
+		return Optional.ofNullable(o)
+			.filter(type::isInstance)
+			.map(type::cast);
 	}
 }
