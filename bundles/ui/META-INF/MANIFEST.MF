@@ -40,7 +40,7 @@ Require-Bundle: eu.jsparrow.i18n,
  eu.jsparrow.crypto,
  com.fasterxml.jackson.core.jackson-databind,
  com.fasterxml.jackson.core.jackson-core
-Bundle-ClassPath: lib/oshi-core-6.3.1-20221019.232528-1.jar
+Bundle-ClassPath: lib/oshi-core-osgi-6.3.1-SNAPSHOT.jar,
  .
 Bundle-Vendor: Splendit IT-Consulting GmbH
  
