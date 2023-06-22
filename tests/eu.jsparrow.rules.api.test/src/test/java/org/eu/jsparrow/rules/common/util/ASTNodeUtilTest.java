@@ -6,7 +6,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.junit.jupiter.api.Test;
@@ -96,8 +100,7 @@ class ASTNodeUtilTest {
 				Statement.class);
 		assertFalse(optionalDeclaration.isPresent());
 	}
-	
-	
+
 	@Test
 	void findListElementAfter_shouldFindIfStatement() throws Exception {
 		String code = ""
@@ -142,4 +145,57 @@ class ASTNodeUtilTest {
 				Statement.class);
 		assertFalse(optionalDeclaration.isPresent());
 	}
+
+	@Test
+	void findSingleInvocationArgument_shouldFindExpression() throws Exception {
+		String code = "useNumber(0)";
+		MethodInvocation methodInvocation = (MethodInvocation) ASTNodeBuilder.createExpressionFromString(code);
+		Optional<Expression> expression = ASTNodeUtil.findSingleInvocationArgument(methodInvocation);
+		assertTrue(expression.isPresent());
+	}
+
+	@Test
+	void findSingleInvocationArgument_shouldFindNumberLiteral() throws Exception {
+		String code = "useNumber(0)";
+		MethodInvocation methodInvocation = (MethodInvocation) ASTNodeBuilder.createExpressionFromString(code);
+		Optional<NumberLiteral> numberLiteral = ASTNodeUtil.findSingleInvocationArgument(methodInvocation,
+				NumberLiteral.class);
+		assertTrue(numberLiteral.isPresent());
+	}
+	
+	@Test
+	void findSingleInvocationArgument_shouldNotFindSingleArgument() throws Exception {
+		String code = "useNumber(0, 1)";
+		MethodInvocation methodInvocation = (MethodInvocation) ASTNodeBuilder.createExpressionFromString(code);
+		Optional<Expression> expression = ASTNodeUtil.findSingleInvocationArgument(methodInvocation);
+		assertFalse(expression.isPresent());
+	}
+
+	@Test
+	void findSingleBlockStatement_shouldFindStatement() throws Exception {
+		String code = "useNumber(0);";
+		Block block = (Block) ASTNodeBuilder.createBlockFromString(code);
+		Optional<Statement> expression = ASTNodeUtil.findSingleBlockStatement(block);
+		assertTrue(expression.isPresent());
+	}
+
+	@Test
+	void findSingleBlockStatement_shouldFindExpressionStatement() throws Exception {
+		String code = "useNumber(0);";
+		Block block = (Block) ASTNodeBuilder.createBlockFromString(code);
+		Optional<ExpressionStatement> expression = ASTNodeUtil.findSingleBlockStatement(block,
+				ExpressionStatement.class);
+		assertTrue(expression.isPresent());
+	}
+
+	@Test
+	void findSingleBlockStatement_shouldNotFindSingleStatement() throws Exception {
+		String code = ""
+				+ "useNumber(0);\n"
+				+ "useNumber(1);";
+		Block block = (Block) ASTNodeBuilder.createBlockFromString(code);
+		Optional<Statement> expression = ASTNodeUtil.findSingleBlockStatement(block);
+		assertFalse(expression.isPresent());
+	}
+
 }

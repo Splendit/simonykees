@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Comment;
@@ -290,6 +291,49 @@ public class ASTNodeUtil {
 			.filter(type::isInstance)
 			.map(type::cast)
 			.collect(Collectors.toList());
+	}
+	
+	/**
+	 * @return if the speified Block has exactly one Statement, then
+	 *         an Optional is returned which stores the single Statement. In all
+	 *         other cases an empty optional is returned.
+	 */
+	public static Optional<Statement> findSingleBlockStatement(Block block) {
+		return findSingleBlockStatement(block, Statement.class);
+	}
+
+	/**
+	 * @return if the Block specified by the first parameter has
+	 *         exactly one Statement which is an instance of the type specified
+	 *         by the 2nd parameter, then an Optional is returned which stores
+	 *         the single Statement. In all other cases an empty optional is
+	 *         returned.
+	 */
+	public static <T extends Statement> Optional<T> findSingleBlockStatement(Block block,
+			Class<T> type) {
+		return findSingletonListElement(block.statements(), type);
+	}
+
+
+	/**
+	 * @return if the speified MethodInvocation has exactly one argument , then
+	 *         an Optional is returned which stores the single argument. In all
+	 *         other cases an empty optional is returned.
+	 */
+	public static Optional<Expression> findSingleInvocationArgument(MethodInvocation methodInvocation) {
+		return findSingleInvocationArgument(methodInvocation, Expression.class);
+	}
+
+	/**
+	 * @return if the MethodInvocation specified by the first parameter has
+	 *         exactly one argument which is an instance of the type specified
+	 *         by the 2nd parameter, then an Optional is returned which stores
+	 *         the single argument. In all other cases an empty optional is
+	 *         returned.
+	 */
+	public static <T extends Expression> Optional<T> findSingleInvocationArgument(MethodInvocation methodInvocation,
+			Class<T> type) {
+		return findSingletonListElement(methodInvocation.arguments(), type);
 	}
 
 	/**
