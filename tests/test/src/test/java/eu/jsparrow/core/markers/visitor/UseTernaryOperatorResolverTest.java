@@ -60,9 +60,10 @@ class UseTernaryOperatorResolverTest extends UsesSimpleJDTUnitFixture {
 		assertEquals(1, events.size());
 		RefactoringMarkerEvent event = events.get(0);
 		String description = ""
-				+ "When possible, this rule transforms an if statement to a ternary operations"
-				+ " which is either used as expression of a return statement"
-				+ " or as left hand side value for an assignment.";
+				+ "This rule replaces if-statements by equivalent statements using the ternary operator"
+				+ " in cases where such a replacement is reasonable."
+				+ " For example, the statement \"x = condition ? 1 : 0;\" is shorter and better readable"
+				+ " than the corresponding if-statement.";
 		assertAll(
 				() -> assertEquals("Use Ternary Operator", event.getName()),
 				() -> assertEquals(description, event.getMessage()),

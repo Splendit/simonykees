@@ -50,9 +50,10 @@ public class UseTernaryOperatorRuleTest extends SingleRuleTest {
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
 				equalTo(""
-						+ "When possible, this rule transforms an if statement to a ternary operations"
-						+ " which is either used as expression of a return statement"
-						+ " or as left hand side value for an assignment."));
+						+ "This rule replaces if-statements by equivalent statements using the ternary operator"
+						+ " in cases where such a replacement is reasonable."
+						+ " For example, the statement \"x = condition ? 1 : 0;\" is shorter and better readable"
+						+ " than the corresponding if-statement."));
 	}
 
 	@Test
