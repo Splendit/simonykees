@@ -99,8 +99,7 @@ public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisit
 			return null;
 		}
 
-		Expression singleAddAllArgument = ASTNodeUtil
-			.findSingletonListElement(methodInvocation.arguments(), Expression.class)
+		Expression singleAddAllArgument = ASTNodeUtil.findSingleInvocationArgument(methodInvocation)
 			.orElse(null);
 		if (singleAddAllArgument == null) {
 			return null;
@@ -150,10 +149,10 @@ public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisit
 		VariableDeclarationFragment singleVariableDeclarationFragment = ASTNodeUtil
 			.findSingletonListElement(variableDeclarationBeforeAddAll.fragments(), VariableDeclarationFragment.class)
 			.orElse(null);
-		if(singleVariableDeclarationFragment == null) {
+		if (singleVariableDeclarationFragment == null) {
 			return null;
 		}
-		
+
 		String nameOfVariableDeclaredBeforeAddAll = singleVariableDeclarationFragment.getName()
 			.getIdentifier();
 

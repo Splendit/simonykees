@@ -156,8 +156,7 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor im
 			IndexOfMethodPosition position = this.getPosition(parent);
 			TransformationOption option = this.getTransformationOption(parent, position);
 			if (option != null) {
-				Expression singleMethodArgument = ASTNodeUtil
-					.findSingletonListElement(methodInvocationNode.arguments(), Expression.class)
+				Expression singleMethodArgument = ASTNodeUtil.findSingleInvocationArgument(methodInvocationNode)
 					.orElse(null);
 				if (singleMethodArgument != null) {
 					boolean doTransformation = true;

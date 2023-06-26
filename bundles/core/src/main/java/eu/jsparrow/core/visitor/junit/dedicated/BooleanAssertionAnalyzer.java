@@ -160,8 +160,7 @@ public class BooleanAssertionAnalyzer {
 			return Collections.emptyList();
 		}
 
-		Expression rightOperand = ASTNodeUtil
-			.findSingletonListElement(equalsInvocation.arguments(), Expression.class)
+		Expression rightOperand = ASTNodeUtil.findSingleInvocationArgument(equalsInvocation)
 			.orElse(null);
 		if (rightOperand == null) {
 			return Collections.emptyList();

@@ -62,7 +62,7 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor impl
 			return true;
 		}
 
-		Expression onlyArgument = ASTNodeUtil.findSingletonListElement(methodInvocation.arguments(), Expression.class)
+		Expression onlyArgument = ASTNodeUtil.findSingleInvocationArgument(methodInvocation)
 			.orElse(null);
 		if (onlyArgument == null) {
 			return true;

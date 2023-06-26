@@ -86,12 +86,12 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		}
 
 		LambdaExpression lambdaExpressionAsOnlyArgument = ASTNodeUtil
-			.findSingletonListElement(methodInvocation.arguments(), LambdaExpression.class)
+			.findSingleInvocationArgument(methodInvocation, LambdaExpression.class)
 			.orElse(null);
 		if (lambdaExpressionAsOnlyArgument == null) {
 			return true;
 		}
-		
+
 		SimpleName parameter = extractSingleParameter(lambdaExpressionAsOnlyArgument).orElse(null);
 		Block body = extractLambdaExpressionBlockBody(lambdaExpressionAsOnlyArgument);
 
@@ -135,7 +135,8 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 		ListRewrite argumentsPropertyRewriter = astRewrite.getListRewrite(mapInvocation,
 				MethodInvocation.ARGUMENTS_PROPERTY);
-		LambdaExpression mapExpression = generateLambdaExpression(ast, extractableBlock, lambdaExpressionAsOnlyArgument);
+		LambdaExpression mapExpression = generateLambdaExpression(ast, extractableBlock,
+				lambdaExpressionAsOnlyArgument);
 		argumentsPropertyRewriter.insertFirst(mapExpression, null);
 
 		/*
@@ -158,7 +159,8 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		/*
 		 * Replace the type of the parameter if any
 		 */
-		Type type = LambdaNodeUtil.extractSingleParameterType(lambdaExpressionAsOnlyArgument).orElse(null);
+		Type type = LambdaNodeUtil.extractSingleParameterType(lambdaExpressionAsOnlyArgument)
+			.orElse(null);
 		if (type != null) {
 			Type newType = analyzer.getNewForEachParameterType();
 			if (newType.isPrimitiveType()) {

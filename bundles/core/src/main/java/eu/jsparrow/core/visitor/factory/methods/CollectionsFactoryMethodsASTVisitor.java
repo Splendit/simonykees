@@ -62,8 +62,7 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 			return true;
 		}
 
-		Expression argument = ASTNodeUtil
-			.findSingletonListElement(methodInvocation.arguments(), Expression.class)
+		Expression argument = ASTNodeUtil.findSingleInvocationArgument(methodInvocation)
 			.orElse(null);
 		if (argument == null) {
 			return true;

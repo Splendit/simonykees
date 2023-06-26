@@ -147,10 +147,9 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		}
 
 		MethodInvocation assumedAssertThatInvocation = (MethodInvocation) assertionInvocationExpression;
-		Expression assumedAssertThatArgument = ASTNodeUtil
-			.findSingletonListElement(assumedAssertThatInvocation.arguments(), Expression.class)
-			.orElse(null);		
-		if(assumedAssertThatArgument == null) {
+		Expression assumedAssertThatArgument = ASTNodeUtil.findSingleInvocationArgument(assumedAssertThatInvocation)
+			.orElse(null);
+		if (assumedAssertThatArgument == null) {
 			return Optional.empty();
 		}
 

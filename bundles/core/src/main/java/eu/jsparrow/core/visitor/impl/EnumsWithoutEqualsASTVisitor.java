@@ -36,10 +36,9 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor i
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		Expression singleArgument = ASTNodeUtil
-			.findSingletonListElement(methodInvocation.arguments(), Expression.class)
+		Expression singleArgument = ASTNodeUtil.findSingleInvocationArgument(methodInvocation)
 			.orElse(null);
-		
+
 		if (singleArgument == null || methodInvocation.getExpression() == null) {
 			return false;
 		}

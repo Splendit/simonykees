@@ -85,7 +85,7 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 		if (isStreamForEachInvocation(methodInvocation) && !isRawMethodExpression(methodInvocation)) {
 
 			LambdaExpression lambdaAsSingleArgument = ASTNodeUtil
-				.findSingletonListElement(methodInvocation.arguments(), LambdaExpression.class)
+				.findSingleInvocationArgument(methodInvocation, LambdaExpression.class)
 				.orElse(null);
 
 			// and if the parameter of 'forEach' is a lambda expression ...
@@ -196,7 +196,7 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 		SimpleName name = methodInvocation.getName();
 		if (ADD_METHOD_NAME.equals(name.getIdentifier())) {
 			SimpleName simpleNameAsOnlyArgument = ASTNodeUtil
-				.findSingletonListElement(methodInvocation.arguments(), SimpleName.class)
+				.findSingleInvocationArgument(methodInvocation, SimpleName.class)
 				.orElse(null);
 			if (simpleNameAsOnlyArgument != null && simpleNameAsOnlyArgument.getIdentifier()
 				.equals(parameter.getIdentifier())) {

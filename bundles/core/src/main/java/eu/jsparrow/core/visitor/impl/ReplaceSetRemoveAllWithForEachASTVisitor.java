@@ -44,8 +44,7 @@ public class ReplaceSetRemoveAllWithForEachASTVisitor extends AbstractASTRewrite
 			return true;
 		}
 
-		Expression removeAllArgument = ASTNodeUtil
-			.findSingletonListElement(methodInvocation.arguments(), Expression.class)
+		Expression removeAllArgument = ASTNodeUtil.findSingleInvocationArgument(methodInvocation)
 			.orElse(null);
 		if (removeAllArgument == null) {
 			return true;

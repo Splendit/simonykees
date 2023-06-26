@@ -37,18 +37,18 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 		implements LambdaForEachIfWrapperToFilterEvent {
 
 	@Override
-	public boolean visit(MethodInvocation methodInvocationNode) {
+	public boolean visit(MethodInvocation methodInvocation) {
 		boolean toStreamNeeded = false;
 
 		// only forEach method is interesting
-		if (isCollectionForEachInvocation(methodInvocationNode)) {
+		if (isCollectionForEachInvocation(methodInvocation)) {
 			toStreamNeeded = true;
-		} else if (!isStreamForEachInvocation(methodInvocationNode)) {
+		} else if (!isStreamForEachInvocation(methodInvocation)) {
 			return true;
 		}
 
 		LambdaExpression lambdaExpressionAsSingleArgument = ASTNodeUtil
-			.findSingletonListElement(methodInvocationNode.arguments(), LambdaExpression.class)
+			.findSingleInvocationArgument(methodInvocation, LambdaExpression.class)
 			.orElse(null);
 
 		if (lambdaExpressionAsSingleArgument != null) {
@@ -94,7 +94,7 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 						 * as argument
 						 */
 						Expression streamExpressionCopy = (Expression) astRewrite
-							.createCopyTarget(methodInvocationNode.getExpression());
+							.createCopyTarget(methodInvocation.getExpression());
 
 						if (toStreamNeeded) {
 							SimpleName streamName = astRewrite.getAST()
@@ -130,10 +130,10 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 									forEachMethodName, forEachLambda);
 
 							// rewrite the AST
-							astRewrite.replace(methodInvocationNode, forEachMethodInvocation, null);
-							saveComments(methodInvocationNode, lambdaExpressionAsSingleArgument, block,
+							astRewrite.replace(methodInvocation, forEachMethodInvocation, null);
+							saveComments(methodInvocation, lambdaExpressionAsSingleArgument, block,
 									ifAsSingleBlockStatement);
-							addMarkerEvent(methodInvocationNode, ifStatementExpression, singleLambdaParameter);
+							addMarkerEvent(methodInvocation, ifStatementExpression, singleLambdaParameter);
 							onRewrite();
 						}
 					}

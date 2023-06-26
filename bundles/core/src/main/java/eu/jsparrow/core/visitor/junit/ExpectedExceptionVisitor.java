@@ -141,8 +141,7 @@ public class ExpectedExceptionVisitor extends ASTVisitor {
 	}
 
 	public boolean hasSingleParameterOfType(MethodInvocation methodInvocation, String qualifedTypeName) {
-		ITypeBinding typeOfSingleParameter = ASTNodeUtil
-			.findSingletonListElement(methodInvocation.arguments(), Expression.class)
+		ITypeBinding typeOfSingleParameter = ASTNodeUtil.findSingleInvocationArgument(methodInvocation)
 			.map(Expression::resolveTypeBinding)
 			.orElse(null);
 

@@ -53,8 +53,7 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 	 */
 	protected Expression getStringExpressionAsTheOnlyArgument(MethodInvocation methodInvocation) {
 
-		return ASTNodeUtil
-			.findSingletonListElement(methodInvocation.arguments(), Expression.class)
+		return ASTNodeUtil.findSingleInvocationArgument(methodInvocation)
 			.filter(argument -> ClassRelationUtil
 				.isContentOfType(argument.resolveTypeBinding(), java.lang.String.class.getName()))
 			.orElse(null);

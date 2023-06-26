@@ -367,8 +367,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 			return Optional.empty();
 		}
 
-		TypeLiteral typeLiteral = ASTNodeUtil
-			.findSingletonListElement(methodInvocation.arguments(), TypeLiteral.class)
+		TypeLiteral typeLiteral = ASTNodeUtil.findSingleInvocationArgument(methodInvocation, TypeLiteral.class)
 			.orElse(null);
 		if (typeLiteral == null) {
 			return Optional.empty();
