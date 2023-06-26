@@ -170,7 +170,7 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 	private <T extends Statement> Optional<T> unwrapToSingleStatement(Statement statement, Class<T> type) {
 		if (statement.getNodeType() == ASTNode.BLOCK) {
 			Block block = (Block) statement;
-			return ASTNodeUtil.findSingletonListElement(block.statements(), type);
+			return ASTNodeUtil.findSingleBlockStatement(block, type);
 		}
 		return Optional.of(statement)
 			.filter(type::isInstance)

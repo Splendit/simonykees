@@ -59,7 +59,7 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 
 			Block ifBodyBlock = (Block) thenStatement;
 			ExpressionStatement expressionStatement = ASTNodeUtil
-				.findSingletonListElement(ifBodyBlock.statements(), ExpressionStatement.class)
+				.findSingleBlockStatement(ifBodyBlock, ExpressionStatement.class)
 				.orElse(null);
 			if (expressionStatement == null || !isBooleanLiteralAssignment(expressionStatement)) {
 				return true;
@@ -107,8 +107,7 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 
 	private Optional<IfStatement> findSingleIfStatement(Statement statement) {
 		if (statement.getNodeType() == ASTNode.BLOCK) {
-			Block block = (Block) statement;
-			return ASTNodeUtil.findSingletonListElement(block.statements(), IfStatement.class);
+			return ASTNodeUtil.findSingleBlockStatement((Block) statement, IfStatement.class);
 		}
 		return Optional.of(statement)
 			.filter(node -> node.getNodeType() == ASTNode.IF_STATEMENT)

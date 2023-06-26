@@ -214,7 +214,7 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor imple
 		}
 
 		LambdaExpression lambdaExpressionAsOnlyArgument = ASTNodeUtil
-			.findSingletonListElement(method.arguments(), LambdaExpression.class)
+			.findSingleInvocationArgument(method, LambdaExpression.class)
 			.orElse(null);
 		if (lambdaExpressionAsOnlyArgument == null) {
 			return false;

@@ -226,8 +226,7 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 		Optional<ASTNode> singleBodyExpression;
 		if (ASTNode.BLOCK == body.getNodeType()) {
 			Block block = (Block) body;
-			singleBodyExpression = ASTNodeUtil
-				.findSingletonListElement(block.statements(), ExpressionStatement.class)
+			singleBodyExpression = ASTNodeUtil.findSingleBlockStatement(block, ExpressionStatement.class)
 				.map(ExpressionStatement::getExpression);
 		} else {
 			singleBodyExpression = Optional.of(body);

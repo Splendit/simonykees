@@ -164,10 +164,9 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor impl
 		Statement thenStatement = ifStatement.getThenStatement();
 		if (thenStatement.getNodeType() == ASTNode.BLOCK) {
 			Block block = (Block) thenStatement;
-			singleBodyExpressionStatement = ASTNodeUtil
-				.findSingletonListElement(block.statements(), ExpressionStatement.class)
+			singleBodyExpressionStatement = ASTNodeUtil.findSingleBlockStatement(block, ExpressionStatement.class)
 				.orElse(null);
-			
+
 		} else if (thenStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
 			singleBodyExpressionStatement = (ExpressionStatement) thenStatement;
 		}

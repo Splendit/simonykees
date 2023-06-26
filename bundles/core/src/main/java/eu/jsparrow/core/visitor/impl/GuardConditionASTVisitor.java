@@ -359,8 +359,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor imple
 
 		if (ASTNode.BLOCK == elseStatement.getNodeType()) {
 			Block elseBlock = (Block) elseStatement;
-			return ASTNodeUtil
-				.findSingletonListElement(elseBlock.statements(), ReturnStatement.class);
+			return ASTNodeUtil.findSingleBlockStatement(elseBlock, ReturnStatement.class);
 
 		}
 		return Optional.empty();

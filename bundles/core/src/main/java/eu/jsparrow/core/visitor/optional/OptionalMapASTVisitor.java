@@ -130,7 +130,8 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor implements
 		LambdaNodeUtil.saveComments(getCommentRewriter(), analyzer,
 				ASTNodeUtil.getSpecificAncestor(lambdaExpression, Statement.class));
 
-		Type parameterType = LambdaNodeUtil.extractSingleParameterType(lambdaExpression).orElse(null);
+		Type parameterType = LambdaNodeUtil.extractSingleParameterType(lambdaExpression)
+			.orElse(null);
 		if (parameterType == null) {
 			return;
 		}
@@ -148,14 +149,13 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor implements
 
 	public static Optional<SimpleName> findParameterName(LambdaExpression lambdaExpression) {
 		Optional<VariableDeclarationFragment> fragmentAsOnlyParameter = ASTNodeUtil
-			.findSingletonListElement(lambdaExpression.parameters(), VariableDeclarationFragment.class);		
-		if(fragmentAsOnlyParameter.isPresent()) {
+			.findSingletonListElement(lambdaExpression.parameters(), VariableDeclarationFragment.class);
+		if (fragmentAsOnlyParameter.isPresent()) {
 			return fragmentAsOnlyParameter.map(VariableDeclarationFragment::getName);
 		}
-		
+
 		return ASTNodeUtil
-			.findSingletonListElement(lambdaExpression.parameters(), 	SingleVariableDeclaration.class)
+			.findSingletonListElement(lambdaExpression.parameters(), SingleVariableDeclaration.class)
 			.map(SingleVariableDeclaration::getName);
 	}
-
 }

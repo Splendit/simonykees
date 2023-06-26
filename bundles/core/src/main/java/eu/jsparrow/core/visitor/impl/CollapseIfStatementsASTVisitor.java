@@ -208,8 +208,7 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 			innerIfStatement = (IfStatement) thenStatement;
 		} else if (thenStatement.getNodeType() == ASTNode.BLOCK) {
 			Block block = (Block) thenStatement;
-			innerIfStatement = ASTNodeUtil
-				.findSingletonListElement(block.statements(), IfStatement.class)
+			innerIfStatement = ASTNodeUtil.findSingleBlockStatement(block, IfStatement.class)
 				.orElse(null);
 		}
 		if (innerIfStatement == null) {

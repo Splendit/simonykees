@@ -76,8 +76,7 @@ public class OptionalFilterASTVisitor extends AbstractOptionalASTVisitor impleme
 		}
 
 		Block body = (Block) lambdaBody;
-		IfStatement singleIfStatement = ASTNodeUtil
-			.findSingletonListElement(body.statements(), IfStatement.class)
+		IfStatement singleIfStatement = ASTNodeUtil.findSingleBlockStatement(body, IfStatement.class)
 			.orElse(null);
 		if (singleIfStatement == null) {
 			return true;

@@ -226,8 +226,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 		Statement thenStatement = ifStatement.getThenStatement();
 		if (thenStatement.getNodeType() == ASTNode.BLOCK) {
 			Block ifBody = (Block) thenStatement;
-			return ASTNodeUtil
-				.findSingletonListElement(ifBody.statements(), BreakStatement.class)
+			return ASTNodeUtil.findSingleBlockStatement(ifBody, BreakStatement.class)
 				.isPresent();
 		}
 		return thenStatement.getNodeType() == ASTNode.BREAK_STATEMENT;

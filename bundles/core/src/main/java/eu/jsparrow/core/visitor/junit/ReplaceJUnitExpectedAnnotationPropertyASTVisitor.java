@@ -114,7 +114,7 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 			return Optional.empty();
 		}
 		ExpressionStatement singleExpressionStatement = ASTNodeUtil
-			.findSingletonListElement(body.statements(), ExpressionStatement.class)
+			.findSingleBlockStatement(body, ExpressionStatement.class)
 			.orElse(null);
 		if (singleExpressionStatement != null) {
 			return Optional.of(singleExpressionStatement.getExpression());

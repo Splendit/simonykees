@@ -513,11 +513,10 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	 */
 	private Optional<Expression> extractSingleBodyExpression(LambdaExpression lambdaExpressionNode) {
 		ASTNode body = lambdaExpressionNode.getBody();
-		
+
 		if (ASTNode.BLOCK == body.getNodeType()) {
 			Block block = (Block) body;
-			return ASTNodeUtil
-				.findSingletonListElement(block.statements(), ExpressionStatement.class)
+			return ASTNodeUtil.findSingleBlockStatement(block, ExpressionStatement.class)
 				.map(ExpressionStatement::getExpression);
 		}
 		return Optional.of(body)
