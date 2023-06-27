@@ -95,17 +95,10 @@ public abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends Abstra
 
 	private Optional<Expression> findBufferedIOArgument(ClassInstanceCreation classInstanceCreation) {
 
-		List<Expression> newBufferedIOArgs = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(),
-				Expression.class);
-		if (newBufferedIOArgs.size() != 1) {
-			return Optional.empty();
-		}
-		Expression bufferedIOArg = newBufferedIOArgs.get(0);
-		ITypeBinding firstArgType = bufferedIOArg.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(firstArgType, fileIOQualifiedTypeName)) {
-			return Optional.empty();
-		}
-		return Optional.of(bufferedIOArg);
+		return ASTNodeUtil
+			.findSingletonListElement(classInstanceCreation.arguments(), Expression.class)
+			.filter(bufferedIOArg -> ClassRelationUtil.isContentOfType(bufferedIOArg.resolveTypeBinding(),
+					fileIOQualifiedTypeName));
 	}
 
 	TransformationData createTransformationData(NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer,

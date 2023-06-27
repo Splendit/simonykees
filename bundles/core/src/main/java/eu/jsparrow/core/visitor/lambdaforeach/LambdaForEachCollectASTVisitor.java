@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.lambdaforeach;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
@@ -57,7 +58,8 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * @since 1.2
  *
  */
-public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisitor implements LambdaForEachCollectEvent {
+public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisitor
+		implements LambdaForEachCollectEvent {
 
 	private static final String ADD_METHOD_NAME = "add"; //$NON-NLS-1$
 	private static final String JAVA_UTIL_STREAM_COLLECTORS = java.util.stream.Collectors.class.getName();
@@ -69,7 +71,7 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		boolean continueVisiting = super.visit(compilationUnit);
-		if(continueVisiting) {
+		if (continueVisiting) {
 			verifyImport(compilationUnit, JAVA_UTIL_STREAM_COLLECTORS);
 		}
 
@@ -82,18 +84,19 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 		// if the method name matches with 'Stream::forEach' ...
 		if (isStreamForEachInvocation(methodInvocation) && !isRawMethodExpression(methodInvocation)) {
 
+			LambdaExpression lambdaAsSingleArgument = ASTNodeUtil
+				.findSingleInvocationArgument(methodInvocation, LambdaExpression.class)
+				.orElse(null);
+
 			// and if the parameter of 'forEach' is a lambda expression ...
-			List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-			if (arguments.size() == 1 && ASTNode.LAMBDA_EXPRESSION == arguments.get(0)
-				.getNodeType()) {
+			if (lambdaAsSingleArgument != null) {
 				/*
 				 * the lambda expression must have only one parameter and its
 				 * body must contain only one expression invoking the
 				 * 'List::add' method.
 				 */
-				LambdaExpression lambdaExpression = (LambdaExpression) arguments.get(0);
-				SimpleName parameter = extractSingleParameter(lambdaExpression);
-				MethodInvocation bodyExpression = extractSingleBodyExpression(lambdaExpression);
+				SimpleName parameter = extractSingleParameter(lambdaAsSingleArgument).orElse(null);
+				MethodInvocation bodyExpression = extractSingleBodyExpression(lambdaAsSingleArgument).orElse(null);
 
 				if (parameter != null && bodyExpression != null && isListAddInvocation(bodyExpression, parameter)) {
 					Expression collectionExpression = bodyExpression.getExpression();
@@ -107,7 +110,7 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 						 */
 						Expression targetDecl = createTargetExpression(methodInvocation, collection);
 						astRewrite.replace(methodInvocation, targetDecl, null);
-						getCommentRewriter().saveCommentsInParentStatement(lambdaExpression);
+						getCommentRewriter().saveCommentsInParentStatement(lambdaAsSingleArgument);
 						addMarkerEvent(methodInvocation);
 						onRewrite();
 					}
@@ -168,7 +171,6 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 		Name streamCollectorsTypeName = addImport(JAVA_UTIL_STREAM_COLLECTORS, methodInvocation);
 		collectorsToList.setExpression(streamCollectorsTypeName);
 		listRewirte.insertFirst(collectorsToList, null);
-		
 
 		collect.setExpression((Expression) astRewrite.createCopyTarget(methodInvocation.getExpression()));
 
@@ -193,20 +195,18 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 	private boolean isListAddInvocation(MethodInvocation methodInvocation, SimpleName parameter) {
 		SimpleName name = methodInvocation.getName();
 		if (ADD_METHOD_NAME.equals(name.getIdentifier())) {
-			List<Expression> arguments = ASTNodeUtil.returnTypedList(methodInvocation.arguments(), Expression.class);
-			if (arguments.size() == 1) {
-				Expression argument = arguments.get(0);
-				if (ASTNode.SIMPLE_NAME == argument.getNodeType() && ((SimpleName) argument).getIdentifier()
-					.equals(parameter.getIdentifier())) {
-					Expression expression = methodInvocation.getExpression();
-					if (expression != null && ClassRelationUtil.isContentOfTypes(expression.resolveTypeBinding(),
-							Collections.singletonList(JAVA_UTIL_LIST))) {
-						return true;
-					}
+			SimpleName simpleNameAsOnlyArgument = ASTNodeUtil
+				.findSingleInvocationArgument(methodInvocation, SimpleName.class)
+				.orElse(null);
+			if (simpleNameAsOnlyArgument != null && simpleNameAsOnlyArgument.getIdentifier()
+				.equals(parameter.getIdentifier())) {
+				Expression expression = methodInvocation.getExpression();
+				if (expression != null && ClassRelationUtil.isContentOfTypes(expression.resolveTypeBinding(),
+						Collections.singletonList(JAVA_UTIL_LIST))) {
+					return true;
 				}
 			}
 		}
-
 		return false;
 	}
 
@@ -221,25 +221,18 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 	 *         expression or {@code null} if the body lambda expression is not a
 	 *         single method invocation or contains more than one statements.
 	 */
-	private MethodInvocation extractSingleBodyExpression(LambdaExpression lambdaExpression) {
-		MethodInvocation methodInvocation = null;
+	private Optional<MethodInvocation> extractSingleBodyExpression(LambdaExpression lambdaExpression) {
 		ASTNode body = lambdaExpression.getBody();
+		Optional<ASTNode> singleBodyExpression;
 		if (ASTNode.BLOCK == body.getNodeType()) {
 			Block block = (Block) body;
-			List<ExpressionStatement> statements = ASTNodeUtil.returnTypedList(block.statements(),
-					ExpressionStatement.class);
-			if (statements.size() == 1) {
-				ExpressionStatement statement = statements.get(0);
-				Expression expression = statement.getExpression();
-				if (ASTNode.METHOD_INVOCATION == expression.getNodeType()) {
-					methodInvocation = (MethodInvocation) expression;
-				}
-
-			}
-		} else if (ASTNode.METHOD_INVOCATION == body.getNodeType()) {
-			methodInvocation = (MethodInvocation) body;
+			singleBodyExpression = ASTNodeUtil.findSingleBlockStatement(block, ExpressionStatement.class)
+				.map(ExpressionStatement::getExpression);
+		} else {
+			singleBodyExpression = Optional.of(body);
 		}
-
-		return methodInvocation;
+		return singleBodyExpression
+			.filter(node -> ASTNode.METHOD_INVOCATION == node.getNodeType())
+			.map(MethodInvocation.class::cast);
 	}
 }

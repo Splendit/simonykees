@@ -62,8 +62,9 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor impl
 			return true;
 		}
 
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		if (arguments.size() != 1) {
+		Expression onlyArgument = ASTNodeUtil.findSingleInvocationArgument(methodInvocation)
+			.orElse(null);
+		if (onlyArgument == null) {
 			return true;
 		}
 
@@ -93,7 +94,7 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor impl
 			return true;
 		}
 
-		replace(methodInvocation, arguments.get(0), defaultValue, followingStatement);
+		replace(methodInvocation, onlyArgument, defaultValue, followingStatement);
 		return true;
 	}
 
@@ -159,24 +160,22 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor impl
 			return null;
 		}
 
-		ExpressionStatement singleBodyStatement = null;
+		ExpressionStatement singleBodyExpressionStatement = null;
 		Statement thenStatement = ifStatement.getThenStatement();
 		if (thenStatement.getNodeType() == ASTNode.BLOCK) {
 			Block block = (Block) thenStatement;
-			List<ExpressionStatement> bodyStatements = ASTNodeUtil.returnTypedList(block.statements(),
-					ExpressionStatement.class);
-			if (bodyStatements.size() == 1) {
-				singleBodyStatement = bodyStatements.get(0);
-			}
+			singleBodyExpressionStatement = ASTNodeUtil.findSingleBlockStatement(block, ExpressionStatement.class)
+				.orElse(null);
+
 		} else if (thenStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
-			singleBodyStatement = (ExpressionStatement) thenStatement;
+			singleBodyExpressionStatement = (ExpressionStatement) thenStatement;
 		}
 
-		if (singleBodyStatement == null) {
+		if (singleBodyExpressionStatement == null) {
 			return null;
 		}
 
-		Expression bodyExpression = singleBodyStatement.getExpression();
+		Expression bodyExpression = singleBodyExpressionStatement.getExpression();
 		if (bodyExpression.getNodeType() != ASTNode.ASSIGNMENT) {
 			return null;
 		}

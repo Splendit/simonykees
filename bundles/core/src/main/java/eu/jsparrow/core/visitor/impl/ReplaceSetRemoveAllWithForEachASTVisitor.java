@@ -25,7 +25,6 @@ public class ReplaceSetRemoveAllWithForEachASTVisitor extends AbstractASTRewrite
 	private static final List<String> JAVA_UTIL_SET = Collections.singletonList(java.util.Set.class.getName());
 	private static final List<String> JAVA_UTIL_LIST = Collections.singletonList(java.util.List.class.getName());
 
-
 	private static final String REMOVE_ALL = "removeAll"; //$NON-NLS-1$
 	private static final String REMOVE = "remove"; //$NON-NLS-1$
 	private static final String FOR_EACH = "forEach"; //$NON-NLS-1$
@@ -44,11 +43,12 @@ public class ReplaceSetRemoveAllWithForEachASTVisitor extends AbstractASTRewrite
 		if (methodInvocationExpression == null) {
 			return true;
 		}
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		if (arguments.size() != 1) {
+
+		Expression removeAllArgument = ASTNodeUtil.findSingleInvocationArgument(methodInvocation)
+			.orElse(null);
+		if (removeAllArgument == null) {
 			return true;
 		}
-		Expression removeAllArgument = arguments.get(0);
 
 		if (isSet(methodInvocationExpression) && isList(removeAllArgument)) {
 			transform(methodInvocation, methodInvocationExpression, removeAllArgument);

@@ -136,7 +136,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	private boolean isFilesNewBufferedWriterInvocation(MethodInvocation bufferedIOInitializerMethodInvocation) {
 
 		IMethodBinding methodBinding = bufferedIOInitializerMethodInvocation.resolveMethodBinding();
-		if(methodBinding == null) {
+		if (methodBinding == null) {
 			return false;
 		}
 
@@ -240,16 +240,10 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 
 	private Optional<Expression> findBufferedIOArgument(ClassInstanceCreation classInstanceCreation) {
 
-		List<Expression> newBufferedIOArgs = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(),
-				Expression.class);
-		if (newBufferedIOArgs.size() != 1) {
-			return Optional.empty();
-		}
-		Expression bufferedIOArg = newBufferedIOArgs.get(0);
-		ITypeBinding firstArgType = bufferedIOArg.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(firstArgType, java.io.FileWriter.class.getName())) {
-			return Optional.empty();
-		}
-		return Optional.of(bufferedIOArg);
+		return ASTNodeUtil
+			.findSingletonListElement(classInstanceCreation.arguments(), Expression.class)
+			.filter(bufferedIOArg -> ClassRelationUtil.isContentOfType(bufferedIOArg.resolveTypeBinding(),
+					java.io.FileWriter.class.getName()));
+
 	}
 }

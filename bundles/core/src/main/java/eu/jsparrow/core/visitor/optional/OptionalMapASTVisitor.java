@@ -1,6 +1,6 @@
 package eu.jsparrow.core.visitor.optional;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -70,10 +70,10 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor implements
 		}
 
 		MethodInvocation methodInvocation = (MethodInvocation) lambdaExpression.getParent();
-		if(methodInvocation.getExpression() == null) {
+		if (methodInvocation.getExpression() == null) {
 			return false;
 		}
-		
+
 		boolean isOptionalIfPresent = hasRightTypeAndName(methodInvocation, java.util.Optional.class.getName(),
 				IF_PRESENT);
 		if (!isOptionalIfPresent) {
@@ -81,10 +81,10 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor implements
 		}
 
 		/*
-		 * Check the requirements for extracting a variable. 
+		 * Check the requirements for extracting a variable.
 		 */
 
-		SimpleName parameter = findParameterName(lambdaExpression);
+		SimpleName parameter = findParameterName(lambdaExpression).orElse(null);
 		if (parameter == null) {
 			return false;
 		}
@@ -130,7 +130,8 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor implements
 		LambdaNodeUtil.saveComments(getCommentRewriter(), analyzer,
 				ASTNodeUtil.getSpecificAncestor(lambdaExpression, Statement.class));
 
-		Type parameterType = LambdaNodeUtil.extractSingleParameterType(lambdaExpression);
+		Type parameterType = LambdaNodeUtil.extractSingleParameterType(lambdaExpression)
+			.orElse(null);
 		if (parameterType == null) {
 			return;
 		}
@@ -146,23 +147,15 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor implements
 		}
 	}
 
-	public static SimpleName findParameterName(LambdaExpression lambdaExpression) {
-		List<VariableDeclarationFragment> fragments = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
-				VariableDeclarationFragment.class);
-		if (fragments.size() == 1) {
-			return fragments.get(0)
-				.getName();
+	public static Optional<SimpleName> findParameterName(LambdaExpression lambdaExpression) {
+		Optional<VariableDeclarationFragment> fragmentAsOnlyParameter = ASTNodeUtil
+			.findSingletonListElement(lambdaExpression.parameters(), VariableDeclarationFragment.class);
+		if (fragmentAsOnlyParameter.isPresent()) {
+			return fragmentAsOnlyParameter.map(VariableDeclarationFragment::getName);
 		}
 
-		List<SingleVariableDeclaration> declarations = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
-				SingleVariableDeclaration.class);
-
-		if (declarations.size() == 1) {
-			return declarations.get(0)
-				.getName();
-		}
-
-		return null;
+		return ASTNodeUtil
+			.findSingletonListElement(lambdaExpression.parameters(), SingleVariableDeclaration.class)
+			.map(SingleVariableDeclaration::getName);
 	}
-
 }

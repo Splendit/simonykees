@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.lambdaforeach;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -117,21 +118,15 @@ public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor
 	 * @return the name of the parameter or {@code null} if the lambda
 	 *         expression has more than one ore zero parameters.
 	 */
-	protected SimpleName extractSingleParameter(LambdaExpression lambdaExpression) {
-		SimpleName parameter = null;
-		List<VariableDeclarationFragment> fragments = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
-				VariableDeclarationFragment.class);
-		if (fragments.size() == 1) {
-			VariableDeclarationFragment fragment = fragments.get(0);
-			parameter = fragment.getName();
-		} else {
-			List<SingleVariableDeclaration> declarations = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
-					SingleVariableDeclaration.class);
-			if (declarations.size() == 1) {
-				SingleVariableDeclaration declaration = declarations.get(0);
-				parameter = declaration.getName();
-			}
+	protected Optional<SimpleName> extractSingleParameter(LambdaExpression lambdaExpression) {
+		Optional<VariableDeclarationFragment> fragmentAsOnlyParameter = ASTNodeUtil
+			.findSingletonListElement(lambdaExpression.parameters(), VariableDeclarationFragment.class);
+		if (fragmentAsOnlyParameter.isPresent()) {
+			return fragmentAsOnlyParameter.map(VariableDeclarationFragment::getName);
 		}
-		return parameter;
+
+		return ASTNodeUtil
+			.findSingletonListElement(lambdaExpression.parameters(), SingleVariableDeclaration.class)
+			.map(SingleVariableDeclaration::getName);
 	}
 }

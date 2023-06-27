@@ -663,6 +663,8 @@ public class Messages extends NLS {
 	public static String UseStringJoinRule_name;
 	public static String UseSwitchExpressionRule_description;
 	public static String UseSwitchExpressionRule_name;
+	public static String UseTernaryOperatorRule_description;
+	public static String UseTernaryOperatorRule_name;
 	public static String UseTextBlockRule_description;
 	public static String UseTextBlockRule_name;
 	public static String ValidateExecutor_shutting_down_validation_scheduler;

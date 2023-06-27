@@ -339,18 +339,11 @@ public class GuardConditionRule {
 
 	public int ifReturn_thenSingleReturnStatement_shouldNotTransform() {
 		doSomething("Whatever ");
-		if (condition()) {
-			return 0;
-		}
-		return 1;
+		return condition() ? 0 : 1;
 	}
 
 	public int ifReturnElseReturn_trivialBody_shouldNotTransform() {
-		if (condition()) {
-			return 0;
-		} else {
-			return 1;
-		}
+		return condition() ? 0 : 1;
 	}
 
 	public int ifWithoutReturn_followedElseWithoutReturn_shouldNotTransform() {
@@ -395,10 +388,7 @@ public class GuardConditionRule {
 	public int trivialIfStatement_shouldNotTransform() {
 		doSomething("what ever");
 
-		if (condition()) {
-			return 0;
-		}
-		return 1;
+		return condition() ? 0 : 1;
 	}
 
 	public void emptyMethod() {
