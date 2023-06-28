@@ -107,14 +107,17 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 		if (leftHandSideWhenTrue.getNodeType() == ASTNode.SIMPLE_NAME
 				&& operatorWhenTrue == Assignment.Operator.ASSIGN) {
 			SimpleName leftHandSideSimpleName = (SimpleName) leftHandSideWhenTrue;
-			VariableDeclarationFragment declarationBeforeIf = VariableDeclarationBeforeStatement
-				.findDeclaringFragment(leftHandSideSimpleName, ifStatement, getCompilationUnit())
-				.orElse(null);
+			if (!isVariableUsedInExpression(leftHandSideSimpleName, ifStatement.getExpression())
+					&&!isVariableUsedInExpression(leftHandSideSimpleName, expressionWhenTrue)
+					&&!isVariableUsedInExpression(leftHandSideSimpleName, expressionWhenFalse)) {
+				VariableDeclarationFragment declarationBeforeIf = VariableDeclarationBeforeStatement
+					.findDeclaringFragment(leftHandSideSimpleName, ifStatement, getCompilationUnit())
+					.orElse(null);
 
-			if (declarationBeforeIf != null
-					&& !isVariableUsedInIfCondition(leftHandSideSimpleName, ifStatement.getExpression())) {
-				return Optional
-					.of(() -> replaceByInitializationWithTernary(ifStatement, declarationBeforeIf, supplier));
+				if (declarationBeforeIf != null) {
+					return Optional
+						.of(() -> replaceByInitializationWithTernary(ifStatement, declarationBeforeIf, supplier));
+				}
 			}
 		}
 		return Optional.of(() -> replaceIfStatementByAssignmentOfTernary(ifStatement, leftHandSideWhenTrue,
@@ -236,7 +239,7 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 		return primitiveWhenTrue == primitiveWhenFalse;
 	}
 
-	private boolean isVariableUsedInIfCondition(SimpleName variableName, Expression ifCondition) {
+	private boolean isVariableUsedInExpression(SimpleName variableName, Expression ifCondition) {
 		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(variableName);
 		ifCondition.accept(visitor);
 		return !visitor.getUsages()
