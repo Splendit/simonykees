@@ -12,4 +12,7 @@ public class CodeFormatterRule {
 	 */
 	public  int c( int i ) { return i + 3;}
 	
+	public void d( int  i ) { if (0 == i) { use( 1 ); } else { use(0) ;  } }
+	
+	public void use(int i) {}
 }

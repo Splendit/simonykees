@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -272,14 +273,14 @@ class BodyDeclarationsAnalyzer {
 			.equals("equals")) { //$NON-NLS-1$
 			return false;
 		}
-		List<SingleVariableDeclaration> parameters = ASTNodeUtil.convertToTypedList(methodDeclaration.parameters(),
-				SingleVariableDeclaration.class);
-		if (parameters.size() != 1) {
-			return false;
-		}
-		SingleVariableDeclaration parameter = parameters.get(0);
-		return ClassRelationUtil.isContentOfType(parameter.getType()
-			.resolveBinding(), java.lang.Object.class.getName());
+
+		ITypeBinding typeOfSingleParameter = ASTNodeUtil
+			.findSingletonListElement(methodDeclaration.parameters(), SingleVariableDeclaration.class)
+			.map(SingleVariableDeclaration::getType)
+			.map(Type::resolveBinding)
+			.orElse(null);
+
+		return ClassRelationUtil.isContentOfType(typeOfSingleParameter, java.lang.Object.class.getName());
 	}
 
 	private boolean isHashCodeMethodToRemove(MethodDeclaration methodDeclaration) {

@@ -314,6 +314,33 @@ class SwitchAssigningValueASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
+	
+	@Test
+	void visit_expectNoInitializationWithSwitchExpression_shouldTransform() throws Exception {
+		String original = ""
+				+ "int digit = 10;"
+				+ "String value;\n"
+				+ "String value1;\n"
+				+ "	switch(digit) {\n"
+				+ "	case 0: value = \"zero\"; break;\n"
+				+ "	case 1: value = \"one\"; break;\n"
+				+ "	case 2: value = \"two\"; break;\n"
+				+ "	default: value = \"other\"; break;\n"
+				+ "}";
+
+		String expected = ""
+				+ "int digit = 10;"
+				+ "String value;\n"
+				+ "String value1;\n"				
+				+ "value = switch (digit) {\n"
+				+ "	case 0 -> \"zero\";\n"
+				+ "	case 1 -> \"one\";\n"
+				+ "	case 2 -> \"two\";\n"
+				+ "	default -> \"other\";\n"
+				+ "};";
+
+		assertChange(original, expected);
+	}
 
 	@Test
 	void visit_reassignedMissingDefault_shouldTransform() throws Exception {
@@ -536,4 +563,41 @@ class SwitchAssigningValueASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
+	@Test
+	void visit_assignmentToEvaluatedVariable_shouldTransform() throws Exception {
+		String original = ""
+				+ "	class SampleReassignment8Switch {\n"
+				+ "		void test() {\n"
+				+ "			int value = 0;"
+				+ "			switch (value) {\n"
+				+ "			case (0):\n"
+				+ "				value = \"ZERO\";\n"
+				+ "				break;\n"
+				+ "			case (1):\n"
+				+ "				value = \"ONE\";\n"
+				+ "				break;\n"
+				+ "			case (2):\n"
+				+ "				value = \"TWO\";\n"
+				+ "				break;\n"
+				+ "			default:\n"
+				+ "				value = \"ZERO\";\n"
+				+ "				break;\n"
+				+ "			}\n"
+				+ "		}"
+				+ "	}";
+
+		String expected = ""
+				+ "	class SampleReassignment8Switch {\n"
+				+ "		void test() {\n"
+				+ "			int value = 0;"
+				+ "			value = switch (value) {\n"
+				+ "			case 0 -> \"ZERO\";\n"
+				+ "			case 1 -> \"ONE\";\n"
+				+ "			case 2 -> \"TWO\";\n"
+				+ "			default -> \"ZERO\";\n"
+				+ "			};\n"
+				+ "		}\n"
+				+ "	}";
+		assertChange(original, expected);
+	}
 }

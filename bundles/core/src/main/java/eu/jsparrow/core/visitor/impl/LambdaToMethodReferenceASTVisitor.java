@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
@@ -60,7 +59,8 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 1.2
  *
  */
-public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisitor implements LambdaToMethodReferenceEvent {
+public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisitor
+		implements LambdaToMethodReferenceEvent {
 
 	private Set<String> newImports = new HashSet<>();
 
@@ -83,7 +83,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		if (areIncompatibleFunctionalInterfaces(expectedFunctionalInterface, lambdaBinding)) {
 			return true;
 		}
-		Expression body = extractSingleBodyExpression(lambdaExpressionNode);
+		Expression body = extractSingleBodyExpression(lambdaExpressionNode).orElse(null);
 		// work only with expression lambdas
 		if (body == null) {
 			return true;
@@ -511,23 +511,17 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	 *         expression, or {@code null} if the body is not a single
 	 *         expression.
 	 */
-	private Expression extractSingleBodyExpression(LambdaExpression lambdaExpressionNode) {
+	private Optional<Expression> extractSingleBodyExpression(LambdaExpression lambdaExpressionNode) {
 		ASTNode body = lambdaExpressionNode.getBody();
 
 		if (ASTNode.BLOCK == body.getNodeType()) {
 			Block block = (Block) body;
-			List<Statement> statements = ASTNodeUtil.returnTypedList(block.statements(), Statement.class);
-			if (statements.size() == 1) {
-				Statement singleStatement = statements.get(0);
-				if (ASTNode.EXPRESSION_STATEMENT == singleStatement.getNodeType()) {
-					return ((ExpressionStatement) singleStatement).getExpression();
-				}
-			}
-		} else if (body instanceof Expression) {
-			return (Expression) body;
+			return ASTNodeUtil.findSingleBlockStatement(block, ExpressionStatement.class)
+				.map(ExpressionStatement::getExpression);
 		}
-
-		return null;
+		return Optional.of(body)
+			.filter(Expression.class::isInstance)
+			.map(Expression.class::cast);
 	}
 
 	/**

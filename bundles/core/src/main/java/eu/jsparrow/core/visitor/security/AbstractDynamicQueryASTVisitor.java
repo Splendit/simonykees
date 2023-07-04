@@ -52,18 +52,11 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 	 *         has exactly one {@link String} argument, otherwise null.
 	 */
 	protected Expression getStringExpressionAsTheOnlyArgument(MethodInvocation methodInvocation) {
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		if (arguments.size() != 1) {
-			return null;
-		}
 
-		Expression argument = arguments.get(0);
-		ITypeBinding argumentTypeBinding = argument.resolveTypeBinding();
-		boolean isString = ClassRelationUtil.isContentOfType(argumentTypeBinding, java.lang.String.class.getName());
-		if (!isString) {
-			return null;
-		}
-		return argument;
+		return ASTNodeUtil.findSingleInvocationArgument(methodInvocation)
+			.filter(argument -> ClassRelationUtil
+				.isContentOfType(argument.resolveTypeBinding(), java.lang.String.class.getName()))
+			.orElse(null);
 	}
 
 	/**

@@ -71,6 +71,7 @@ import eu.jsparrow.core.markers.visitor.UseListSortResolver;
 import eu.jsparrow.core.markers.visitor.UseOffsetBasedStringMethodsResolver;
 import eu.jsparrow.core.markers.visitor.UsePredefinedStandardCharsetResolver;
 import eu.jsparrow.core.markers.visitor.UseStringJoinResolver;
+import eu.jsparrow.core.markers.visitor.UseTernaryOperatorResolver;
 import eu.jsparrow.core.markers.visitor.arithmetic.ArithmeticAssignmentResolver;
 import eu.jsparrow.core.markers.visitor.factory.methods.CollectionsFactoryMethodsResolver;
 import eu.jsparrow.core.markers.visitor.files.UseFilesBufferedReaderResolver;
@@ -220,7 +221,7 @@ public class ResolverVisitorsFactory {
 		map.put(UseDedicatedAssertionsResolver.ID, UseDedicatedAssertionsResolver::new);
 		map.put(RemoveRedundantCloseResolver.ID, RemoveRedundantCloseResolver::new);
 		map.put(ReplaceRequestMappingAnnotationResolver.ID, ReplaceRequestMappingAnnotationResolver::new);
-
+		map.put(UseTernaryOperatorResolver.ID, UseTernaryOperatorResolver::new);
 		List<MarkerService> markerServices = getExternalRuleServices();
 		markerServices.stream()
 			.map(MarkerService::loadGeneratingFunctions)

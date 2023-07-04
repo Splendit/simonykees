@@ -141,13 +141,11 @@ public class ExpectedExceptionVisitor extends ASTVisitor {
 	}
 
 	public boolean hasSingleParameterOfType(MethodInvocation methodInvocation, String qualifedTypeName) {
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		if (arguments.size() != 1) {
-			return false;
-		}
-		Expression argument = arguments.get(0);
-		ITypeBinding argumentType = argument.resolveTypeBinding();
-		return ClassRelationUtil.isContentOfType(argumentType, qualifedTypeName);
+		ITypeBinding typeOfSingleParameter = ASTNodeUtil.findSingleInvocationArgument(methodInvocation)
+			.map(Expression::resolveTypeBinding)
+			.orElse(null);
+
+		return ClassRelationUtil.isContentOfType(typeOfSingleParameter, qualifedTypeName);
 	}
 
 	/**

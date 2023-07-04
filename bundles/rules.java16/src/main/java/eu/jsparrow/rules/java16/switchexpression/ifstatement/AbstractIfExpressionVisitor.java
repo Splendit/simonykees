@@ -1,6 +1,5 @@
 package eu.jsparrow.rules.java16.switchexpression.ifstatement;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -8,10 +7,9 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-
-import org.eclipse.jdt.core.dom.MethodInvocation;
 
 /**
  * Child classes of this visitor are expected to visit the condition of an if
@@ -45,12 +43,7 @@ abstract class AbstractIfExpressionVisitor extends ASTVisitor {
 			.equals("equals")) { //$NON-NLS-1$
 			return Optional.empty();
 		}
-		List<Expression> invocationArgumentList = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-				Expression.class);
-		if (invocationArgumentList.size() != 1) {
-			return Optional.empty();
-		}
-		return Optional.of(invocationArgumentList.get(0));
+		return ASTNodeUtil.findSingleInvocationArgument(methodInvocation);
 	}
 
 	@Override

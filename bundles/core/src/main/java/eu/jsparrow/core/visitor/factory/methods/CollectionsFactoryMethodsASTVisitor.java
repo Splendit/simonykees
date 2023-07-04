@@ -39,7 +39,8 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 3.6.0
  *
  */
-public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVisitor implements CollectionsFactoryMethodsEvent {
+public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVisitor
+		implements CollectionsFactoryMethodsEvent {
 
 	private static final String UNMODIFIABLE_LIST = "unmodifiableList"; //$NON-NLS-1$
 	private static final String UNMODIFIABLE_SET = "unmodifiableSet"; //$NON-NLS-1$
@@ -61,12 +62,13 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 			return true;
 		}
 
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		if (arguments.size() != 1) {
+		Expression argument = ASTNodeUtil.findSingleInvocationArgument(methodInvocation)
+			.orElse(null);
+		if (argument == null) {
 			return true;
 		}
 
-		ArgumentAnalyser<?> analyser = analyzeArgument(arguments.get(0));
+		ArgumentAnalyser<?> analyser = analyzeArgument(argument);
 		if (analyser == null) {
 			return true;
 		}

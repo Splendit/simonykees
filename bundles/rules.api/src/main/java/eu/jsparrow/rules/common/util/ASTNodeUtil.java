@@ -3,6 +3,7 @@ package eu.jsparrow.rules.common.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Comment;
@@ -289,6 +291,100 @@ public class ASTNodeUtil {
 			.filter(type::isInstance)
 			.map(type::cast)
 			.collect(Collectors.toList());
+	}
+	
+	/**
+	 * @return if the speified Block has exactly one Statement, then
+	 *         an Optional is returned which stores the single Statement. In all
+	 *         other cases an empty optional is returned.
+	 */
+	public static Optional<Statement> findSingleBlockStatement(Block block) {
+		return findSingleBlockStatement(block, Statement.class);
+	}
+
+	/**
+	 * @return if the Block specified by the first parameter has
+	 *         exactly one Statement which is an instance of the type specified
+	 *         by the 2nd parameter, then an Optional is returned which stores
+	 *         the single Statement. In all other cases an empty optional is
+	 *         returned.
+	 */
+	public static <T extends Statement> Optional<T> findSingleBlockStatement(Block block,
+			Class<T> type) {
+		return findSingletonListElement(block.statements(), type);
+	}
+
+
+	/**
+	 * @return if the speified MethodInvocation has exactly one argument , then
+	 *         an Optional is returned which stores the single argument. In all
+	 *         other cases an empty optional is returned.
+	 */
+	public static Optional<Expression> findSingleInvocationArgument(MethodInvocation methodInvocation) {
+		return findSingleInvocationArgument(methodInvocation, Expression.class);
+	}
+
+	/**
+	 * @return if the MethodInvocation specified by the first parameter has
+	 *         exactly one argument which is an instance of the type specified
+	 *         by the 2nd parameter, then an Optional is returned which stores
+	 *         the single argument. In all other cases an empty optional is
+	 *         returned.
+	 */
+	public static <T extends Expression> Optional<T> findSingleInvocationArgument(MethodInvocation methodInvocation,
+			Class<T> type) {
+		return findSingletonListElement(methodInvocation.arguments(), type);
+	}
+
+	/**
+	 * @return if the List specified by the first parameter contains exactly one
+	 *         element which is an instance of the type specified by the 2nd
+	 *         parameter, then an Optional is returned which stores the only one
+	 *         element of the list. In all other cases an empty optional is
+	 *         returned.
+	 */
+	public static <T extends ASTNode> Optional<T> findSingletonListElement(@SuppressWarnings("rawtypes") List rawlist,
+			Class<T> type) {
+		if (rawlist.size() != 1) {
+			return Optional.empty();
+		}
+		return castToOptional(rawlist.get(0), type);
+	}
+
+	/**
+	 * 
+	 * @return An Optional containing the element before the element specified
+	 *         by the 2nd paramneter which is expected to be an instance of the
+	 *         type specified by the 3rd parameter. In all other cases an empty
+	 *         optional is returned.
+	 * 
+	 */
+	public static <T extends ASTNode> Optional<T> findListElementBefore(@SuppressWarnings("rawtypes") List rawlist,
+			ASTNode element,
+			Class<T> type) {
+		int indexBefore = rawlist.indexOf(element) - 1;
+		if (indexBefore < 0) {
+			return Optional.empty();
+		}
+		return castToOptional(rawlist.get(indexBefore), type);
+	}
+
+	/**
+	 * 
+	 * @return An Optional containing the element after the element specified by
+	 *         the 2nd paramneter which is expected to be an instance of the
+	 *         type specified by the 3rd parameter. In all other cases an empty
+	 *         optional is returned.
+	 * 
+	 */
+	public static <T extends ASTNode> Optional<T> findListElementAfter(@SuppressWarnings("rawtypes") List rawlist,
+			ASTNode element,
+			Class<T> type) {
+		int indexAfter = rawlist.indexOf(element) + 1;
+		if (indexAfter >= rawlist.size()) {
+			return Optional.empty();
+		}
+		return castToOptional(rawlist.get(indexAfter), type);
 	}
 
 	/**
@@ -645,12 +741,18 @@ public class ASTNodeUtil {
 	 * 
 	 * @param simpleName
 	 *            a {@link SimpleName} to check if it represents a label.
-	 * @return true if the given  {@link SimpleName} is a label.
+	 * @return true if the given {@link SimpleName} is a label.
 	 */
 	public static boolean isLabel(SimpleName simpleName) {
 		StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
 		return locationInParent == LabeledStatement.LABEL_PROPERTY
 				|| locationInParent == ContinueStatement.LABEL_PROPERTY
 				|| locationInParent == BreakStatement.LABEL_PROPERTY;
+	}
+
+	public static <T extends ASTNode> Optional<T> castToOptional(Object o, Class<T> type) {
+		return Optional.ofNullable(o)
+			.filter(type::isInstance)
+			.map(type::cast);
 	}
 }

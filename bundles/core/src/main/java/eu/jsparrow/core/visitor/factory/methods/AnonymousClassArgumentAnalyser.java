@@ -9,7 +9,6 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -20,6 +19,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
@@ -55,17 +55,14 @@ public class AnonymousClassArgumentAnalyser extends ArgumentAnalyser<ClassInstan
 		if (anonymousClassDeclaration == null) {
 			return;
 		}
-		List<BodyDeclaration> bodyDeclarations = convertToTypedList(anonymousClassDeclaration.bodyDeclarations(),
-				BodyDeclaration.class);
-		if (bodyDeclarations.size() != 1) {
-			return;
-		}
-		BodyDeclaration declaration = bodyDeclarations.get(0);
-		if (declaration.getNodeType() != ASTNode.INITIALIZER) {
+
+		Initializer initializer = ASTNodeUtil
+			.findSingletonListElement(anonymousClassDeclaration.bodyDeclarations(), Initializer.class)
+			.orElse(null);
+		if (initializer == null) {
 			return;
 		}
 
-		Initializer initializer = (Initializer) declaration;
 		Block body = initializer.getBody();
 		List<Statement> bodyStatements = convertToTypedList(body.statements(), Statement.class);
 

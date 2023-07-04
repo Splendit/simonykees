@@ -12,10 +12,16 @@ public class TestBracketsToControlRule {
 	public static void testforIf() {
 		int i = 0;
 
+		i = i == 0 ? 0 : 0;
+	}
+
+	public static void testforIfWithSystemOut() {
+		final int i = 0;
+
 		if (i == 0) {
-			i = 0;
+			logger.info("0");
 		} else {
-			i = 0;
+			logger.info("0");
 		}
 	}
 

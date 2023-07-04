@@ -531,21 +531,15 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			return null;
 		}
 
-		if (node.bodyDeclarations()
-			.size() != 1) {
-			return null;
-		}
+		MethodDeclaration methodAsSingleBodyDeclaration = ASTNodeUtil
+			.findSingletonListElement(node.bodyDeclarations(), MethodDeclaration.class)
+			.orElse(null);
 
-		if (node.bodyDeclarations()
-			.get(0) instanceof MethodDeclaration) {
-
-			MethodDeclaration methodDeclaration = (MethodDeclaration) node.bodyDeclarations()
-				.get(0);
+		if (methodAsSingleBodyDeclaration != null) {
 			String functionalInterfaceMethodName = functionalInterfaceMethod.getName();
-
-			if (StringUtils.equals(functionalInterfaceMethodName, methodDeclaration.getName()
+			if (StringUtils.equals(functionalInterfaceMethodName, methodAsSingleBodyDeclaration.getName()
 				.getIdentifier())) {
-				return methodDeclaration;
+				return methodAsSingleBodyDeclaration;
 			}
 		}
 
