@@ -73,19 +73,32 @@ public class UseTernaryOperatorASTVisitorTest extends UsesJDTUnitFixture {
 				Arguments.of(
 						""
 								+ "	void test(boolean condition) {\n"
-								+ "		int x;\n"
-								+ "		x = 1;\n"
+								+ "		int x = 0;\n"
 								+ "		if (condition) {\n"
-								+ "			x = 1;\n"
+								+ "			x = x;\n"
 								+ "		} else {\n"
 								+ "			x = 0;\n"
 								+ "		}\n"
 								+ "	}",
 						""
 								+ "	void test(boolean condition) {\n"
-								+ "		int x;\n"
-								+ "		x = 1;\n"
-								+ "		x = condition ? 1 : 0;\n"
+								+ "		int x = 0;\n"
+								+ "		x = condition ? x : 0;\n"
+								+ "	}"),
+				Arguments.of(
+						""
+								+ "	void test(boolean condition) {\n"
+								+ "		int x = 0;\n"
+								+ "		if (condition) {\n"
+								+ "			x = 1;\n"
+								+ "		} else {\n"
+								+ "			x = x;\n"
+								+ "		}\n"
+								+ "	}",
+						""
+								+ "	void test(boolean condition) {\n"
+								+ "		int x = 0;\n"
+								+ "		x = condition ? 1 : x;\n"
 								+ "	}"),
 				Arguments.of(
 						""
