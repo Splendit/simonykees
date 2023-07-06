@@ -6,7 +6,7 @@ Bundle-SymbolicName: eu.jsparrow.crypto
 Bundle-Version: 4.19.0.qualifier
 Bundle-Activator: eu.jsparrow.crypto.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: org.osgi.framework;version="1.10.0"
+Import-Package: org.osgi.framework;version="1.9.0"
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Require-Bundle: eu.jsparrow.i18n, 
