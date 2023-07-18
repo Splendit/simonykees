@@ -31,7 +31,7 @@ void setLiveEnvironment(def url) {
 def mvnBin() { "${tool 'mvn system'}/bin/mvn" }
 
 // jenkins git ssh credentials
-@Field final static def sshCredentials = '7f15bb8a-a1db-4cdf-978f-3ae5983400b6'
+@Field final static def sshCredentials = 'e85bf18f-89af-4890-ab74-042b6330fba9'
 
 // defines the backup repository to push to
 @Field final static def backupOrigin = 'git@github.com:Splendit/simonykees.git'
@@ -170,6 +170,7 @@ void checkout() {
         checkout scm
         // getting the remote url we are building from
         def url = sh(returnStdout: true, script: 'git config remote.origin.url').trim()
+
         setLiveEnvironment(url)
     }
 }
