@@ -17,7 +17,11 @@ import groovy.transform.Field
 @Field boolean isLiveEnvironment = false
 
 void setLiveEnvironment(def url) {
-    def liveUrl = "ssh://git@gitlab.splendit.at:10022/legacy-migration/simonykees.git"
+    /*
+     * FIXME: ITGlobal we should set the remote url to ssh. The credentials should be corrected accordingly. For now, setting the expected liveUrl to https to avoid MOCK steps. 
+     * def liveUrl = "ssh://git@gitlab.splendit.at:10022/legacy-migration/simonykees.git"
+     */
+    def liveUrl = "https://gitlab.splendit.at/legacy-migration/simonykees.git"
     if (liveUrl == url) {
         println "Live environment is enabled"
         isLiveEnvironment = true
@@ -195,7 +199,8 @@ void pushToGithub() {
 void runStandardSteps() {
 
     // this has been added to the standard steps, see SIM-1737
-    pushToGithub();
+    // FIXME: temporary avoiding github push. Ssh credentials need to be updated 
+    //pushToGithub();
 
     compileEclipsePlugin()
     compileMavenPlugin()
@@ -379,6 +384,7 @@ void uploadMappingFile(Profile profile) {
           // tag-deployment.sh uses the same mechanism
     		def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu\\.jsparrow\\.photon\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" releng/eu.jsparrow.site.photon/target/p2content.xml").trim()
     		def directory = "${buildNumber}${profile.qualifier}"
+            // FIXME: ITGlobal skip mapping file upload. we need the deobfuscation service up and running in ITGlobal env
             uploadMappingFiles(directory)
         }
     } else {
