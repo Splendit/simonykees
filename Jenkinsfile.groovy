@@ -188,7 +188,8 @@ void pushToGithub() {
             println "Pushing to GitHub..."
             sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
                 // pushing the repository to github
-                sh("git push $backupOrigin HEAD:refs/heads/$env.BRANCH_NAME")
+                // FIXME: ITGlobal temporary avoiding github push. Ssh credentials need to be updated 
+                //sh("git push $backupOrigin HEAD:refs/heads/$env.BRANCH_NAME")
             }
         }
     } else {
@@ -199,8 +200,7 @@ void pushToGithub() {
 void runStandardSteps() {
 
     // this has been added to the standard steps, see SIM-1737
-    // FIXME: temporary avoiding github push. Ssh credentials need to be updated 
-    //pushToGithub();
+    pushToGithub();
 
     compileEclipsePlugin()
     compileMavenPlugin()
