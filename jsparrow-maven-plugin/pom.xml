@@ -287,7 +287,7 @@
 			<distributionManagement>
 				<repository>
 					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-maven-plugin-develop-test-noProguard</url>
+					<url>http://172.16.0.6:8082/nexus/content/repositories/jmp-develop-test-noProguard</url>
 				</repository>
 			</distributionManagement>
 		</profile>
@@ -297,7 +297,7 @@
 			<distributionManagement>
 				<repository>
 					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-maven-plugin-master-test-noProguard</url>
+					<url>http://172.16.0.6:8082/nexus/content/repositories/jmp-master-test-noProguard</url>
 				</repository>
 			</distributionManagement>
 		</profile>
@@ -307,7 +307,7 @@
 			<distributionManagement>
 				<repository>
 					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-maven-plugin-master-production-proguard</url>
+					<url>http://172.16.0.6:8082/nexus/content/repositories/jmp-master-production-proguard</url>
 				</repository>
 			</distributionManagement>
 		</profile>
@@ -317,7 +317,7 @@
 			<distributionManagement>
 				<repository>
 					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jSparrow-maven-plugin-release-candidate</url>
+					<url>http://172.16.0.6:8082/nexus/content/repositories/jmp-release-candidate/</url>
 				</repository>
 			</distributionManagement>
 		</profile>
