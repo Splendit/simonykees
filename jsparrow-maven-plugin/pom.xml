@@ -19,6 +19,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<proguard.plugin.version>2.4.0</proguard.plugin.version>
 		<proguard.base.version>6.2.2</proguard.base.version>
+		<nexus.base.url.reository>http://172.16.0.6:8082/nexus/content/repositories/</nexus.base.url.reository>
 	</properties>
 
 	<dependencies>
@@ -286,8 +287,8 @@
 			<id>develop-test-noProguard</id>
 			<distributionManagement>
 				<repository>
-					<id>pdrone</id>
-					<url>http://172.16.0.6:8082/nexus/content/repositories/jmp-develop-test-noProguard</url>
+					<id>nexus</id>
+					<url>${nexus.base.url.reository}jmp-develop-test-noProguard</url>
 				</repository>
 			</distributionManagement>
 		</profile>
@@ -296,8 +297,8 @@
 			<id>master-test-noProguard</id>
 			<distributionManagement>
 				<repository>
-					<id>pdrone</id>
-					<url>http://172.16.0.6:8082/nexus/content/repositories/jmp-master-test-noProguard</url>
+					<id>nexus</id>
+					<url>${nexus.base.url.reository}jmp-master-test-noProguard</url>
 				</repository>
 			</distributionManagement>
 		</profile>
@@ -306,8 +307,8 @@
 			<id>master-production-proguard</id>
 			<distributionManagement>
 				<repository>
-					<id>pdrone</id>
-					<url>http://172.16.0.6:8082/nexus/content/repositories/jmp-master-production-proguard</url>
+					<id>nexus</id>
+					<url>${nexus.base.url.reository}jmp-master-production-proguard</url>
 				</repository>
 			</distributionManagement>
 		</profile>
@@ -316,8 +317,8 @@
 			<id>releaseCandidate</id>
 			<distributionManagement>
 				<repository>
-					<id>pdrone</id>
-					<url>http://172.16.0.6:8082/nexus/content/repositories/jmp-release-candidate/</url>
+					<id>nexus</id>
+					<url>${nexus.base.url.reository}jmp-release-candidate/</url>
 				</repository>
 			</distributionManagement>
 		</profile>
