@@ -296,7 +296,8 @@ void tagCommit(def branchName, String subdirectory) {
         stage(stageName) {
             // push tags to github
             sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
-                sh("git push $backupOrigin --tags")
+                // FIXME: ITGlobal - fix ssh credentials to push to github
+                // sh("git push $backupOrigin --tags")
             }
         }
     } else {
