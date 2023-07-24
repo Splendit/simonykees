@@ -49,7 +49,7 @@ if [ -d "$origin_dir" ]; then
 	
 	# then: zip and upload to deobfuscation service
 	zip -r "$target_dir".zip "$target_dir"
-	curl -F file=@"$target_dir".zip http://stacktrace.splendit.loc/upload
+	curl -F file=@"$target_dir".zip http://172.16.0.6:8080/upload
 
 	if [ $? -gt 0 ]; then
 		exitCopyError
