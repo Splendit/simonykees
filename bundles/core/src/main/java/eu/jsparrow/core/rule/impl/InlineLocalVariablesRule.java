@@ -14,20 +14,20 @@ import eu.jsparrow.rules.common.Tag;
 /**
  * @see InlineLocalVariablesASTVisitor
  * 
- * @since 3.2.0
+ * @since 4.19.0
  *
  */
 public class InlineLocalVariablesRule extends RefactoringRuleImpl<InlineLocalVariablesASTVisitor> {
 
-	public static final String RULE_ID = "CollapseIfStatements"; //$NON-NLS-1$
+	public static final String RULE_ID = "InlineLocalVariables"; //$NON-NLS-1$
 
 	public InlineLocalVariablesRule() {
 		this.visitorClass = InlineLocalVariablesASTVisitor.class;
 		this.id = RULE_ID;
-		String name = Messages.CollapseIfStatementsRule_name;
-		String description = Messages.CollapseIfStatementsRule_description;
-		this.ruleDescription = new RuleDescription(name, description, Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY, Tag.FREE));
+		String name = Messages.InlineLocalVariablesRule_name;
+		String description = Messages.InlineLocalVariablesRule_description;
+		this.ruleDescription = new RuleDescription(name, description, Duration.ofMinutes(2),
+				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 	}
 
 	@Override
