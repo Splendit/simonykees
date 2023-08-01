@@ -3,13 +3,18 @@ package eu.jsparrow.core.visitor.impl;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.markers.common.InlineLocalVariablesEvent;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
@@ -37,6 +42,12 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 
 		VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) declarationFragment
 			.getParent();
+
+		if (declarationStatement.fragments()
+			.size() != 1) {
+			return true;
+		}
+
 		SimpleName fragmentName = declarationFragment.getName();
 		LocalVariableUsagesVisitor usageVisitor = new LocalVariableUsagesVisitor(fragmentName);
 		declarationStatement.getParent()
@@ -47,24 +58,40 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		if (usages.size() != 1) {
 			return true;
 		}
-
 		SimpleName usageToReplace = usages.get(0);
 
-		ASTNode initializerMoved = astRewrite.createMoveTarget(initializer);
+		if (usageToReplace.getLocationInParent() == ReturnStatement.EXPRESSION_PROPERTY ||
+				usageToReplace.getLocationInParent() == ThrowStatement.EXPRESSION_PROPERTY) {
 
-		astRewrite.replace(usageToReplace, initializerMoved, null);
+			Statement statement = (Statement) usageToReplace.getParent();
+			if (isStatementFollowingVariableDeclaration(declarationStatement, statement)) {
 
-		if (declarationStatement.fragments()
-			.size() == 1) {
-			astRewrite.remove(declarationStatement, null);
-		} else {
-			astRewrite.remove(declarationFragment, null);
+				ASTNode initializerMoved = astRewrite.createMoveTarget(initializer);
+
+				astRewrite.replace(usageToReplace, initializerMoved, null);
+				astRewrite.remove(declarationStatement, null);
+
+				addMarkerEvent(declarationFragment);
+				onRewrite();
+
+			}
+
+		}
+		return true;
+	}
+
+	private boolean isStatementFollowingVariableDeclaration(VariableDeclarationStatement variableDeclarationStatement,
+			Statement statementToFollow) {
+
+		if (statementToFollow.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return false;
 		}
 
-		addMarkerEvent(declarationFragment);
-		onRewrite();
+		Block block = (Block) statementToFollow.getParent();
 
-		return true;
+		return ASTNodeUtil
+			.findListElementBefore(block.statements(), statementToFollow, VariableDeclarationStatement.class)
+			.orElse(null) == variableDeclarationStatement;
 	}
 
 }

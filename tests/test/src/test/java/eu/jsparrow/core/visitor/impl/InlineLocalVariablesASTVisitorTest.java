@@ -22,12 +22,12 @@ public class InlineLocalVariablesASTVisitorTest extends UsesJDTUnitFixture {
 	@Test
 	void visit_usedForReturn_shouldTransform() throws Exception {
 		String original = "" +
-				"	int returnLocalX() {\n" +
+				"	int useForReturn() {\n" +
 				"		int x = 1;\n" +
 				"		return x;\n" +
 				"	}";
 		String expected = "" +
-				"	int returnLocalX() {\n" +
+				"	int useForReturn() {\n" +
 				"		return 1;\n" +
 				"	}";
 
@@ -35,17 +35,12 @@ public class InlineLocalVariablesASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	void visit_usedAsAssignmentRHS_shouldTransform() throws Exception {
+	void visit_usedAsInitializer_shouldNotTransform() throws Exception {
 		String original = "" +
-				"	void assignLocalX() {\n" +
+				"	void useAsInitializer() {\n" +
 				"		int x = 1;\n" +
 				"		int x2 = x;\n" +
 				"	}";
-		String expected = "" +
-				"	void assignLocalX() {\n" +
-				"		int x2 = 1;\n" +
-				"	}";
-
-		assertChange(original, expected);
+		assertNoChange(original);
 	}
 }
