@@ -1,8 +1,13 @@
 package eu.jsparrow.core.visitor.impl;
 
 import java.util.List;
+import java.util.function.Supplier;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -10,6 +15,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -66,9 +72,26 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 			Statement statement = (Statement) usageToReplace.getParent();
 			if (isStatementFollowingVariableDeclaration(declarationStatement, statement)) {
 
-				ASTNode initializerMoved = astRewrite.createMoveTarget(initializer);
+				Supplier<ASTNode> replacementSuplier;
+				if (initializer.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
+					ArrayInitializer arrayInitializer = (ArrayInitializer) initializer;
+					Type type = declarationStatement.getType();
+					int dimensions = calculateDimensions(type, declarationFragment.getExtraDimensions());
+					if (dimensions < 1) {
+						return true;
+					}
+					Type elementType = findElementType(type);
 
-				astRewrite.replace(usageToReplace, initializerMoved, null);
+					replacementSuplier = () -> createArrayCreationAsReplacement(elementType, dimensions,
+							arrayInitializer);
+
+				} else {
+					replacementSuplier = () -> astRewrite.createMoveTarget(initializer);
+				}
+
+				ASTNode variableReplacement = replacementSuplier.get();
+
+				astRewrite.replace(usageToReplace, variableReplacement, null);
 				astRewrite.remove(declarationStatement, null);
 
 				addMarkerEvent(declarationFragment);
@@ -92,6 +115,37 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		return ASTNodeUtil
 			.findListElementBefore(block.statements(), statementToFollow, VariableDeclarationStatement.class)
 			.orElse(null) == variableDeclarationStatement;
+	}
+
+	private int calculateDimensions(Type type, int extraDimensions) {
+		if (type.isArrayType()) {
+			ArrayType arrayType = (ArrayType) type;
+			return arrayType.getDimensions() + extraDimensions;
+		}
+		return extraDimensions;
+	}
+
+	private Type findElementType(Type type) {
+		if (type.isArrayType()) {
+			ArrayType arrayType = (ArrayType) type;
+			return arrayType.getElementType();
+		}
+		return type;
+	}
+
+	private ArrayCreation createArrayCreationAsReplacement(Type elementType, int dimensions,
+			ArrayInitializer arrayInitializer) {
+
+		AST ast = astRewrite.getAST();
+
+		Type newElementType = (Type) astRewrite.createCopyTarget(elementType);
+		ArrayType newArrayType = ast.newArrayType(newElementType, dimensions);
+
+		ArrayInitializer newArrayInitializer = (ArrayInitializer) astRewrite.createMoveTarget(arrayInitializer);
+		ArrayCreation newArrayCreation = ast.newArrayCreation();
+		newArrayCreation.setType(newArrayType);
+		newArrayCreation.setInitializer(newArrayInitializer);
+		return newArrayCreation;
 	}
 
 }
