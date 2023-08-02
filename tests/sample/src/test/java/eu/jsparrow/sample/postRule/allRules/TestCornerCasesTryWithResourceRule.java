@@ -29,8 +29,7 @@ public class TestCornerCasesTryWithResourceRule {
 	private static final Logger logger = LoggerFactory.getLogger(TestCornerCasesTryWithResourceRule.class);
 
 	public StringReader lostStreamsWithoutTry() {
-		final StringReader a = new StringReader("lalelu");
-		return a;
+		return new StringReader("lalelu");
 	}
 
 	public Object lostStreamsWithTry(String input) {

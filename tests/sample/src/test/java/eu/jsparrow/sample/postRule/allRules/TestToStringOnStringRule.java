@@ -110,25 +110,22 @@ public class TestToStringOnStringRule {
 	}
 
 	public String testToStringInNestedConcatOperations(String input) {
-		final String val = new StringBuilder().append(input)
+		return new StringBuilder().append(input)
 			.append("some-other-nasty-string")
 			.append("abc")
 			.append('c')
 			.toString();
-		return val;
 	}
 
 	public String testToStringInLambdaExpressionBody(String input) {
 		final List<String> stringList = Arrays.asList(input, "foo");
-		final String result = stringList.stream()
+		return stringList.stream()
 			.map(s -> s + ";")
 			.collect(Collectors.joining(","));
-		return result;
 	}
 
 	public String testToStringOnMethodInvocationParameters(String input) {
-		final String result = sampleMethod(input);
-		return result;
+		return sampleMethod(input);
 	}
 
 	public String testRemoveToStringInCodeBlock(String input) {

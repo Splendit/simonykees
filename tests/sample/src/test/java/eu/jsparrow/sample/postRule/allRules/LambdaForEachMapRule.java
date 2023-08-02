@@ -519,8 +519,7 @@ public class LambdaForEachMapRule {
 	}
 
 	private List generateRawListOfStrings() {
-		final List rawList = Arrays.asList("2.3", "4.5");
-		return rawList;
+		return Arrays.asList("2.3", "4.5");
 	}
 
 	interface Inner {
