@@ -21,7 +21,7 @@ class DefaultActiveMarkersTest {
 	@Test
 	void testDefaultMarkersSize() {
 		List<String> actual = defaultActiveMarkers.getActiveMarkers();
-		assertThat(actual, hasSize(89));
+		assertThat(actual, hasSize(90));
 	}
 	@Test
 	void testDefaultActiveMarkers_shouldReturnAllMarkers() {
