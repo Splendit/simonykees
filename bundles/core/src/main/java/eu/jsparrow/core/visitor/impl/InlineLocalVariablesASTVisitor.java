@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -21,6 +22,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.markers.common.InlineLocalVariablesEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
@@ -54,6 +56,15 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 			return true;
 		}
 
+		Type declarationStatementType = declarationStatement.getType();
+		ITypeBinding initializerTypeBinding = initializer.resolveTypeBinding();
+		if (initializerTypeBinding.isPrimitive()) {
+			ITypeBinding declarationStatementTypeBinding = declarationStatementType.resolveBinding();
+			if (!ClassRelationUtil.compareITypeBinding(declarationStatementTypeBinding, initializerTypeBinding)) {
+				return true;
+			}
+		}
+
 		SimpleName fragmentName = declarationFragment.getName();
 		LocalVariableUsagesVisitor usageVisitor = new LocalVariableUsagesVisitor(fragmentName);
 		declarationStatement.getParent()
@@ -75,12 +86,13 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 				Supplier<ASTNode> replacementSuplier;
 				if (initializer.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
 					ArrayInitializer arrayInitializer = (ArrayInitializer) initializer;
-					Type type = declarationStatement.getType();
-					int dimensions = calculateDimensions(type, declarationFragment.getExtraDimensions());
+
+					int dimensions = calculateDimensions(declarationStatementType,
+							declarationFragment.getExtraDimensions());
 					if (dimensions < 1) {
 						return true;
 					}
-					Type elementType = findElementType(type);
+					Type elementType = findElementType(declarationStatementType);
 
 					replacementSuplier = () -> createArrayCreationAsReplacement(elementType, dimensions,
 							arrayInitializer);
