@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -56,13 +57,8 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 			return true;
 		}
 
-		Type declarationStatementType = declarationStatement.getType();
-		ITypeBinding initializerTypeBinding = initializer.resolveTypeBinding();
-		if (initializerTypeBinding.isPrimitive()) {
-			ITypeBinding declarationStatementTypeBinding = declarationStatementType.resolveBinding();
-			if (!ClassRelationUtil.compareITypeBinding(declarationStatementTypeBinding, initializerTypeBinding)) {
-				return true;
-			}
+		if (!checkBindingsForFragmentAndInitializer(declarationFragment, initializer)) {
+			return true;
 		}
 
 		SimpleName fragmentName = declarationFragment.getName();
@@ -86,7 +82,7 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 				Supplier<ASTNode> replacementSuplier;
 				if (initializer.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
 					ArrayInitializer arrayInitializer = (ArrayInitializer) initializer;
-
+					Type declarationStatementType = declarationStatement.getType();
 					int dimensions = calculateDimensions(declarationStatementType,
 							declarationFragment.getExtraDimensions());
 					if (dimensions < 1) {
@@ -112,6 +108,30 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 			}
 
 		}
+		return true;
+	}
+
+	private boolean checkBindingsForFragmentAndInitializer(VariableDeclarationFragment declarationFragment,
+			Expression initializer) {
+		IVariableBinding variableBinding = declarationFragment.resolveBinding();
+		if (variableBinding == null) {
+			return false;
+		}
+
+		ITypeBinding declarationFragmentTypeBinding = variableBinding.getType();
+		if (declarationFragmentTypeBinding == null) {
+			return false;
+		}
+
+		ITypeBinding initializerTypeBinding = initializer.resolveTypeBinding();
+		if (initializerTypeBinding == null) {
+			return false;
+		}
+
+		if (initializerTypeBinding.isPrimitive() || declarationFragmentTypeBinding.isPrimitive()) {
+			return ClassRelationUtil.compareITypeBinding(declarationFragmentTypeBinding, initializerTypeBinding);
+		}
+
 		return true;
 	}
 
