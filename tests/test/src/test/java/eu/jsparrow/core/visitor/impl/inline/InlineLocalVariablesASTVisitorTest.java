@@ -110,6 +110,85 @@ public class InlineLocalVariablesASTVisitorTest extends UsesJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
+	private static Stream<Arguments> subsequentDeclarations() {
+
+		return Stream.of(
+				Arguments.of(
+						"" +
+								"	void subsequentDeclarations() {\n" +
+								"		int a = 1;\n" +
+								"		int b = a;\n" +
+								"		int c = b;\n" +
+								"	}",
+						"" +
+								"	void subsequentDeclarations() {\n" +
+								"		int b = 1;\n" +
+								"		int c = b;\n" +
+								"	}"),
+				Arguments.of(
+						"" +
+								"	void subsequentDeclarations() {\n" +
+								"		int a = 1;\n" +
+								"		int b = a;\n" +
+								"		int c = b;\n" +
+								"		int d = c;\n" +
+								"	}",
+						"" +
+								"	void subsequentDeclarations() {\n" +
+								"		int b = 1;\n" +
+								"		int d = b;\n" +
+								"	}"),
+				Arguments.of(
+						"" +
+								"	int subsequentDeclarations3() {\n" +
+								"		int a = 1;\n" +
+								"		int b = a;\n" +
+								"		return b;\n" +
+								"	}",
+						"" +
+								"	int subsequentDeclarations3() {\n" +
+								"		int b = 1;\n" +
+								"		return b;\n" +
+								"	}"),
+				Arguments.of(
+						"" +
+								"	int subsequentDeclarations4() {\n" +
+								"		int a = 1;\n" +
+								"		int b = a;\n" +
+								"		int c = b;\n" +
+								"		return c;\n" +
+								"	}",
+						"" +
+								"	int subsequentDeclarations4() {\n" +
+								"		int b = 1;\n" +
+								"		return b;\n" +
+								"	}"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("subsequentDeclarations")
+	void visit_subsequentDeclarations_shouldPartiallyTransform(String original, String expected) throws Exception {
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_variableUsedInAssignment_shouldTransform() throws Exception {
+		String original = "" +
+				"		int x;\n" +
+				"		void useInAssignment() {\n" +
+				"			int a = 1;\n" +
+				"			x = a;\n" +
+				"		}";
+
+		String expected = "" +
+				"		int x;\n" +
+				"		void useInAssignment() {\n" +
+				"			x = 1;\n" +
+				"		}";
+
+		assertChange(original, expected);
+	}
+
 	// @Test
 	// void visit__shouldTransform() throws Exception {
 	// String original = "" +

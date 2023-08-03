@@ -34,13 +34,12 @@ public abstract class TestFunctionalInterface2Rule {
 	};
 
 	public void setFields(Object fields) {
-		final Object proxyFields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
+		this.fields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
 				(Object proxy, Method method, Object[] args) -> method.invoke(fields, args));
-		this.fields = proxyFields;
 	}
 
 	public void setFields2(Object fields) {
-		final Object proxyFields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
+		this.fields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
 				new InvocationHandler() {
 
 					@Override
@@ -53,7 +52,6 @@ public abstract class TestFunctionalInterface2Rule {
 
 					}
 				});
-		this.fields = proxyFields;
 	}
 
 	public void testNotCorrectTypeVarDecl() {

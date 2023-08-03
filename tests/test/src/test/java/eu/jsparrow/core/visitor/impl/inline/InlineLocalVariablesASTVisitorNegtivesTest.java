@@ -134,8 +134,32 @@ public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixtu
 		assertNoChange(original);
 	}
 
+	@Test
+	void visit_variableUsedInAssignment_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	int x;\n" +
+				"	void useInAssignment(int pValue) {\n" +
+				"		int a = pValue + 1;\n" +
+				"		int b = (x = a);\n" +
+				"	}";
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_variableUsedInVariableDeclarationExpression_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		int x;\n" +
+				"		void useInAssignment(int pValue) {\n" +
+				"			int a = pValue + 1;\n" +
+				"			for(int i = a; true; ) {\n" +
+				"				break;\n" +
+				"			}\n" +
+				"		}";
+		assertNoChange(original);
+	}
+
 	// @Test
-	// void visit_8_shouldNotTransform() throws Exception {
+	// void visit__shouldNotTransform() throws Exception {
 	// String original = "" +
 	// "";
 	// assertNoChange(original);

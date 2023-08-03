@@ -1,7 +1,9 @@
 package eu.jsparrow.core.visitor.impl.inline;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -9,8 +11,10 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -38,11 +42,17 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  */
 public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor implements InlineLocalVariablesEvent {
 
+	private final Set<VariableDeclarationFragment> transformedFragments = new HashSet<>();
+
 	@Override
 	public boolean visit(VariableDeclarationFragment declarationFragment) {
 
 		Expression initializer = declarationFragment.getInitializer();
 		if (initializer == null) {
+			return false;
+		}
+
+		if (transformedFragments.contains(declarationFragment)) {
 			return false;
 		}
 
@@ -75,7 +85,7 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		SimpleName usageToReplace = usages.get(0);
 
 		Supplier<ASTNode> replacementSuplier = null;
-		if (isUsedBySupportedStatement(declarationStatement, usageToReplace)) {
+		if (isSupportedUsage(declarationStatement, usageToReplace)) {
 
 			if (initializer.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
 				replacementSuplier = findReplacementSupplier(declarationStatement, declarationFragment,
@@ -86,25 +96,66 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		}
 
 		if (replacementSuplier != null) {
+			if (usageToReplace.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+				VariableDeclarationFragment fragmentAsTransformedParent = (VariableDeclarationFragment) usageToReplace
+					.getParent();
+				transformedFragments.add(fragmentAsTransformedParent);
+			}
 			ASTNode variableReplacement = replacementSuplier.get();
-
 			astRewrite.replace(usageToReplace, variableReplacement, null);
 			astRewrite.remove(declarationStatement, null);
-
 			addMarkerEvent(declarationFragment);
 			onRewrite();
+			return false;
 		}
 		return true;
 	}
 
-	private boolean isUsedBySupportedStatement(VariableDeclarationStatement declarationStatement,
+	private boolean isSupportedUsage(VariableDeclarationStatement declarationStatement,
 			SimpleName usageToReplace) {
-		if (usageToReplace.getLocationInParent() == ReturnStatement.EXPRESSION_PROPERTY ||
-				usageToReplace.getLocationInParent() == ThrowStatement.EXPRESSION_PROPERTY) {
-			Statement statement = (Statement) usageToReplace.getParent();
-			return isStatementFollowingVariableDeclaration(declarationStatement, statement);
+
+		Statement statementWithSupportedUsage = findStatementWithSupportedUsage(usageToReplace).orElse(null);
+		
+		if (statementWithSupportedUsage == null || statementWithSupportedUsage.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return false;
 		}
-		return false;
+
+		Block block = (Block) statementWithSupportedUsage.getParent();
+
+		VariableDeclarationStatement statementExpectedToBeDeclaration = ASTNodeUtil
+			.findListElementBefore(block.statements(), statementWithSupportedUsage, VariableDeclarationStatement.class)
+			.orElse(null);
+		return statementExpectedToBeDeclaration == declarationStatement;
+
+	
+	}
+
+	private Optional<Statement> findStatementWithSupportedUsage(SimpleName usageToReplace) {
+
+		if (usageToReplace.getLocationInParent() == ReturnStatement.EXPRESSION_PROPERTY) {
+			return Optional.of((ReturnStatement) usageToReplace.getParent());
+		}
+
+		if (usageToReplace.getLocationInParent() == ThrowStatement.EXPRESSION_PROPERTY) {
+			return Optional.of((ThrowStatement) usageToReplace.getParent());
+		}
+
+		if (usageToReplace.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			Assignment assignment = (Assignment) usageToReplace.getParent();
+			if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+				return Optional.of((ExpressionStatement) assignment.getParent());
+			}
+			return Optional.empty();
+		}
+
+		if (usageToReplace.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			VariableDeclarationFragment declarationFragment = (VariableDeclarationFragment) usageToReplace.getParent();
+			if (declarationFragment.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+				return Optional.of((VariableDeclarationStatement) declarationFragment.getParent());
+			}
+			return Optional.empty();
+		}
+		return Optional.empty();
 
 	}
 
@@ -143,20 +194,6 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		}
 
 		return true;
-	}
-
-	private boolean isStatementFollowingVariableDeclaration(VariableDeclarationStatement variableDeclarationStatement,
-			Statement statementToFollow) {
-
-		if (statementToFollow.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return false;
-		}
-
-		Block block = (Block) statementToFollow.getParent();
-
-		return ASTNodeUtil
-			.findListElementBefore(block.statements(), statementToFollow, VariableDeclarationStatement.class)
-			.orElse(null) == variableDeclarationStatement;
 	}
 
 	private int calculateDimensions(Type type, int extraDimensions) {
