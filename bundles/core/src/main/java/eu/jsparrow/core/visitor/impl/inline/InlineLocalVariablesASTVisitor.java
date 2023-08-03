@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.impl.inline;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -73,42 +74,51 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		}
 		SimpleName usageToReplace = usages.get(0);
 
-		if (usageToReplace.getLocationInParent() == ReturnStatement.EXPRESSION_PROPERTY ||
-				usageToReplace.getLocationInParent() == ThrowStatement.EXPRESSION_PROPERTY) {
+		Supplier<ASTNode> replacementSuplier = null;
+		if (isUsedBySupportedStatement(declarationStatement, usageToReplace)) {
 
-			Statement statement = (Statement) usageToReplace.getParent();
-			if (isStatementFollowingVariableDeclaration(declarationStatement, statement)) {
-
-				Supplier<ASTNode> replacementSuplier;
-				if (initializer.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
-					ArrayInitializer arrayInitializer = (ArrayInitializer) initializer;
-					Type declarationStatementType = declarationStatement.getType();
-					int dimensions = calculateDimensions(declarationStatementType,
-							declarationFragment.getExtraDimensions());
-					if (dimensions < 1) {
-						return true;
-					}
-					Type elementType = findElementType(declarationStatementType);
-
-					replacementSuplier = () -> createArrayCreationAsReplacement(elementType, dimensions,
-							arrayInitializer);
-
-				} else {
-					replacementSuplier = () -> astRewrite.createMoveTarget(initializer);
-				}
-
-				ASTNode variableReplacement = replacementSuplier.get();
-
-				astRewrite.replace(usageToReplace, variableReplacement, null);
-				astRewrite.remove(declarationStatement, null);
-
-				addMarkerEvent(declarationFragment);
-				onRewrite();
-
+			if (initializer.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
+				replacementSuplier = findReplacementSupplier(declarationStatement, declarationFragment,
+						(ArrayInitializer) initializer).orElse(null);
+			} else {
+				replacementSuplier = () -> astRewrite.createMoveTarget(initializer);
 			}
+		}
 
+		if (replacementSuplier != null) {
+			ASTNode variableReplacement = replacementSuplier.get();
+
+			astRewrite.replace(usageToReplace, variableReplacement, null);
+			astRewrite.remove(declarationStatement, null);
+
+			addMarkerEvent(declarationFragment);
+			onRewrite();
 		}
 		return true;
+	}
+
+	private boolean isUsedBySupportedStatement(VariableDeclarationStatement declarationStatement,
+			SimpleName usageToReplace) {
+		if (usageToReplace.getLocationInParent() == ReturnStatement.EXPRESSION_PROPERTY ||
+				usageToReplace.getLocationInParent() == ThrowStatement.EXPRESSION_PROPERTY) {
+			Statement statement = (Statement) usageToReplace.getParent();
+			return isStatementFollowingVariableDeclaration(declarationStatement, statement);
+		}
+		return false;
+
+	}
+
+	private Optional<Supplier<ASTNode>> findReplacementSupplier(VariableDeclarationStatement declarationStatement,
+			VariableDeclarationFragment declarationFragment, ArrayInitializer arrayInitializer) {
+
+		Type declarationStatementType = declarationStatement.getType();
+		int dimensions = calculateDimensions(declarationStatementType,
+				declarationFragment.getExtraDimensions());
+		if (dimensions >= 1) {
+			Type elementType = findElementType(declarationStatementType);
+			return Optional.of(() -> createArrayCreationAsReplacement(elementType, dimensions, arrayInitializer));
+		}
+		return Optional.empty();
 	}
 
 	private boolean checkBindingsForFragmentAndInitializer(VariableDeclarationFragment declarationFragment,

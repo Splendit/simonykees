@@ -120,6 +120,20 @@ public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixtu
 		assertNoChange(original);
 	}
 
+	@Test
+	void visit_ConditionalReturnAfterDeclaration_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		int conditionalReturnAfterDeclaration(int a) {\n"
+				+ "			int square = a * a;\n"
+				+ "			// a changed in if condition\n"
+				+ "			if ((a = a + 2) < 0)\n"
+				+ "				return square;\n"
+				+ "			\n"
+				+ "			return 2;\n"
+				+ "		}";
+		assertNoChange(original);
+	}
+
 	// @Test
 	// void visit_8_shouldNotTransform() throws Exception {
 	// String original = "" +
