@@ -2,7 +2,7 @@ package eu.jsparrow.core.markers.common;
 
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import eu.jsparrow.core.visitor.impl.InlineLocalVariablesASTVisitor;
+import eu.jsparrow.core.visitor.impl.inline.InlineLocalVariablesASTVisitor;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
 /**

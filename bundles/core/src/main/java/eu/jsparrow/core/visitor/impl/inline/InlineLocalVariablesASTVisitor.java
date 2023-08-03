@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl;
+package eu.jsparrow.core.visitor.impl.inline;
 
 import java.util.List;
 import java.util.function.Supplier;

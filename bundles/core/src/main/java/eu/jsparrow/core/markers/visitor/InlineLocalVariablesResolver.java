@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.InlineLocalVariablesRule;
 import eu.jsparrow.core.visitor.impl.CollapseIfStatementsASTVisitor;
-import eu.jsparrow.core.visitor.impl.InlineLocalVariablesASTVisitor;
+import eu.jsparrow.core.visitor.impl.inline.InlineLocalVariablesASTVisitor;
 import eu.jsparrow.rules.common.RefactoringEventImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
