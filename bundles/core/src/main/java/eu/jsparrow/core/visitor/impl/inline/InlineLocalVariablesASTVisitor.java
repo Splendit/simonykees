@@ -72,6 +72,33 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 			return true;
 		}
 
+		SimpleName usageToReplace = findSingleUsageToInline(declarationStatement, declarationFragment).orElse(null);
+		if (usageToReplace == null) {
+			return true;
+		}
+
+		Supplier<ASTNode> usageReplacementSupplier = findUsageReplacementSupplier(declarationStatement,
+				declarationFragment, initializer).orElse(null);
+		if (usageReplacementSupplier == null) {
+			return true;
+		}
+
+		if (usageToReplace.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			VariableDeclarationFragment fragmentAsTransformedParent = (VariableDeclarationFragment) usageToReplace
+				.getParent();
+			transformedFragments.add(fragmentAsTransformedParent);
+		}
+
+		ASTNode usageReplacement = usageReplacementSupplier.get();
+		astRewrite.replace(usageToReplace, usageReplacement, null);
+		astRewrite.remove(declarationStatement, null);
+		addMarkerEvent(declarationFragment);
+		onRewrite();
+		return false;
+	}
+
+	private Optional<SimpleName> findSingleUsageToInline(VariableDeclarationStatement declarationStatement,
+			VariableDeclarationFragment declarationFragment) {
 		SimpleName fragmentName = declarationFragment.getName();
 		LocalVariableUsagesVisitor usageVisitor = new LocalVariableUsagesVisitor(fragmentName);
 		declarationStatement.getParent()
@@ -80,43 +107,19 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		List<SimpleName> usages = usageVisitor.getUsages();
 		usages.remove(fragmentName);
 		if (usages.size() != 1) {
-			return true;
+			return Optional.empty();
 		}
-		SimpleName usageToReplace = usages.get(0);
-
-		Supplier<ASTNode> replacementSuplier = null;
-		if (isSupportedUsage(declarationStatement, usageToReplace)) {
-
-			if (initializer.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
-				replacementSuplier = findReplacementSupplier(declarationStatement, declarationFragment,
-						(ArrayInitializer) initializer).orElse(null);
-			} else {
-				replacementSuplier = () -> astRewrite.createMoveTarget(initializer);
-			}
-		}
-
-		if (replacementSuplier != null) {
-			if (usageToReplace.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-				VariableDeclarationFragment fragmentAsTransformedParent = (VariableDeclarationFragment) usageToReplace
-					.getParent();
-				transformedFragments.add(fragmentAsTransformedParent);
-			}
-			ASTNode variableReplacement = replacementSuplier.get();
-			astRewrite.replace(usageToReplace, variableReplacement, null);
-			astRewrite.remove(declarationStatement, null);
-			addMarkerEvent(declarationFragment);
-			onRewrite();
-			return false;
-		}
-		return true;
+		return Optional.of(usages.get(0))
+			.filter(usage -> isSupportedUsage(declarationStatement, usage));
 	}
 
 	private boolean isSupportedUsage(VariableDeclarationStatement declarationStatement,
 			SimpleName usageToReplace) {
 
 		Statement statementWithSupportedUsage = findStatementWithSupportedUsage(usageToReplace).orElse(null);
-		
-		if (statementWithSupportedUsage == null || statementWithSupportedUsage.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+
+		if (statementWithSupportedUsage == null
+				|| statementWithSupportedUsage.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return false;
 		}
 
@@ -127,7 +130,6 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 			.orElse(null);
 		return statementExpectedToBeDeclaration == declarationStatement;
 
-	
 	}
 
 	private Optional<Statement> findStatementWithSupportedUsage(SimpleName usageToReplace) {
@@ -159,17 +161,21 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 
 	}
 
-	private Optional<Supplier<ASTNode>> findReplacementSupplier(VariableDeclarationStatement declarationStatement,
-			VariableDeclarationFragment declarationFragment, ArrayInitializer arrayInitializer) {
+	private Optional<Supplier<ASTNode>> findUsageReplacementSupplier(VariableDeclarationStatement declarationStatement,
+			VariableDeclarationFragment declarationFragment, Expression initializer) {
 
-		Type declarationStatementType = declarationStatement.getType();
-		int dimensions = calculateDimensions(declarationStatementType,
-				declarationFragment.getExtraDimensions());
-		if (dimensions >= 1) {
+		if (initializer.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
+
+			ArrayInitializer arrayInitializer = (ArrayInitializer) initializer;
+			Type declarationStatementType = declarationStatement.getType();
+			int dimensions = calculateDimensions(declarationStatementType, declarationFragment);
+			if (dimensions < 1) {
+				return Optional.empty();
+			}
 			Type elementType = findElementType(declarationStatementType);
 			return Optional.of(() -> createArrayCreationAsReplacement(elementType, dimensions, arrayInitializer));
 		}
-		return Optional.empty();
+		return Optional.of(() -> astRewrite.createMoveTarget(initializer));
 	}
 
 	private boolean checkBindingsForFragmentAndInitializer(VariableDeclarationFragment declarationFragment,
@@ -196,10 +202,10 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		return true;
 	}
 
-	private int calculateDimensions(Type type, int extraDimensions) {
+	private int calculateDimensions(Type type, VariableDeclarationFragment declarationFragment) {
+		int extraDimensions = declarationFragment.getExtraDimensions();
 		if (type.isArrayType()) {
-			ArrayType arrayType = (ArrayType) type;
-			return arrayType.getDimensions() + extraDimensions;
+			return ((ArrayType) type).getDimensions() + extraDimensions;
 		}
 		return extraDimensions;
 	}
