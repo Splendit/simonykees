@@ -211,6 +211,28 @@ public class InlineLocalVariablesASTVisitorTest extends UsesJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
+	@Test
+	void visit_lableWithSameNameAsVariable_shouldTransform() throws Exception {
+		String original = "" +
+				"	void lableWithSameNameAsVariable() {\n" +
+				"		i: if(true) {\n" +
+				"			\n" +
+				"		}	\n" +
+				"		int i = 0;\n" +
+				"		int x = i;\n" +
+				"	}";
+		
+		String expected = "" +
+				"	void lableWithSameNameAsVariable() {\n" +
+				"		i: if(true) {\n" +
+				"			\n" +
+				"		}	\n" +
+				"		int x = 0;\n" +
+				"	}";
+		
+		assertChange(original, expected);
+	}
+
 	// @Test
 	// void visit__shouldTransform() throws Exception {
 	// String original = "" +
