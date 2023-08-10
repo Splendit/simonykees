@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -35,11 +34,10 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
- * A visitor that searches for nested {@link IfStatement} and collapses them to
- * a single one if possible. Introduces a boolean variable to store the
- * condition if it contains more than 2 components.
+ * A visitor that searches for declarations of local variables which are used
+ * exactly once and can be in-lined.
  * 
- * @since 3.2.0
+ * @since 4.19.0
  *
  */
 public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor implements InlineLocalVariablesEvent {
