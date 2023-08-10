@@ -105,11 +105,12 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 			.accept(usageVisitor);
 
 		List<SimpleName> usages = usageVisitor.getUsages();
-		usages.remove(fragmentName);
-		if (usages.size() != 1) {
+		int firstUsageIndex = usages.indexOf(fragmentName) + 1;
+		int lastUsageIndex = usages.size() - 1;
+		if (firstUsageIndex != lastUsageIndex) {
 			return Optional.empty();
 		}
-		return Optional.of(usages.get(0))
+		return Optional.of(usages.get(firstUsageIndex))
 			.filter(usage -> isSupportedUsage(declarationStatement, usage));
 	}
 
