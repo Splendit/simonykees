@@ -1,11 +1,9 @@
 package eu.jsparrow.core.visitor.impl.inline;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -16,7 +14,6 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -31,7 +28,6 @@ import eu.jsparrow.core.markers.common.InlineLocalVariablesEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * A visitor that searches for declarations of local variables which are used
@@ -99,27 +95,14 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 
 	private Optional<SimpleName> findSingleUsageToInline(VariableDeclarationStatement declarationStatement,
 			VariableDeclarationFragment declarationFragment) {
-		SimpleName fragmentName = declarationFragment.getName();
-		LocalVariableUsagesVisitor usageVisitor = new LocalVariableUsagesVisitor(fragmentName);
+		SingleReferenceOnLocalVariableVisitor singleReferenceVisitor = new SingleReferenceOnLocalVariableVisitor(
+				getCompilationUnit(), declarationFragment);
+
 		declarationStatement.getParent()
-			.accept(usageVisitor);
+			.accept(singleReferenceVisitor);
 
-		List<SimpleName> references = usageVisitor.getUsages()
-			.stream()
-			.filter(usage -> usage != fragmentName)
-			.filter(usage -> isReferencingSameVariable(usage, declarationFragment))
-			.collect(Collectors.toList());
-
-		if (references.size() != 1) {
-			return Optional.empty();
-		}
-		return Optional.of(references.get(0))
+		return singleReferenceVisitor.getSingleLocalVariableReference()
 			.filter(reference -> isSupportedUsage(declarationStatement, reference));
-	}
-
-	private boolean isReferencingSameVariable(SimpleName usage, VariableDeclarationFragment declarationFragment) {
-		IBinding binding = usage.resolveBinding();
-		return getCompilationUnit().findDeclaringNode(binding) == declarationFragment;
 
 	}
 
