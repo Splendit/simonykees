@@ -74,7 +74,7 @@ class ReferenceToLocalVariableAnalyzerTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	void visit_declaringVarialeWithSameNameInRunnable_shouldNotBeReference()
+	void visit_VariableDeclarationFragmentNameWithEqualIdentifier_shouldNotBeReference()
 			throws Exception {
 
 		String code = "" +
@@ -92,10 +92,10 @@ class ReferenceToLocalVariableAnalyzerTest extends UsesJDTUnitFixture {
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, code);
 		List<SimpleName> variableNamesX = collectSimpleNames(defaultFixture.getTypeDeclaration(), "x");
 
-		SimpleName firstX = variableNamesX.get(0);
-		assertEquals(VariableDeclarationFragment.NAME_PROPERTY, firstX.getLocationInParent());
+		SimpleName declarationFragmentName = variableNamesX.get(0);
+		assertEquals(VariableDeclarationFragment.NAME_PROPERTY, declarationFragmentName.getLocationInParent());
 
-		VariableDeclarationFragment declarationFragment = (VariableDeclarationFragment) firstX
+		VariableDeclarationFragment declarationFragment = (VariableDeclarationFragment) declarationFragmentName
 			.getParent();
 
 		CompilationUnit compilationUnit = ASTNodeUtil.getSpecificAncestor(declarationFragment, CompilationUnit.class);
@@ -103,9 +103,36 @@ class ReferenceToLocalVariableAnalyzerTest extends UsesJDTUnitFixture {
 		ReferenceToLocalVariableAnalyzer referenceAnalyzer = new ReferenceToLocalVariableAnalyzer(compilationUnit,
 				declarationFragment);
 
-		SimpleName secondX = variableNamesX.get(1);
+		SimpleName declarationFragmentNameWithSameIdentifier = variableNamesX.get(1);
+		assertEquals(VariableDeclarationFragment.NAME_PROPERTY, declarationFragmentNameWithSameIdentifier.getLocationInParent());
 
-		assertFalse(referenceAnalyzer.isReference(secondX));
+		assertFalse(referenceAnalyzer.isReference(declarationFragmentNameWithSameIdentifier));
+	}
+
+	@Test
+	void visit_SimpleNameSameAsDeclarationFragmentName_shouldNotBeReference()
+			throws Exception {
+
+		String code = "" +
+				"	void simpleNameSameAsDeclarationFragmentName() {\n" +
+				"		int x = 1;\n" +
+				"	}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, code);
+		List<SimpleName> variableNamesX = collectSimpleNames(defaultFixture.getTypeDeclaration(), "x");
+
+		SimpleName declarationFragmentName = variableNamesX.get(0);
+		assertEquals(VariableDeclarationFragment.NAME_PROPERTY, declarationFragmentName.getLocationInParent());
+
+		VariableDeclarationFragment declarationFragment = (VariableDeclarationFragment) declarationFragmentName
+			.getParent();
+
+		CompilationUnit compilationUnit = ASTNodeUtil.getSpecificAncestor(declarationFragment, CompilationUnit.class);
+
+		ReferenceToLocalVariableAnalyzer referenceAnalyzer = new ReferenceToLocalVariableAnalyzer(compilationUnit,
+				declarationFragment);
+
+		assertFalse(referenceAnalyzer.isReference(declarationFragmentName));
 	}
 
 	@Test

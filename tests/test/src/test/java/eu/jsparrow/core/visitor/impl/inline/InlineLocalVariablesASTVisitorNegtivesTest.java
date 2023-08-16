@@ -158,6 +158,35 @@ public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixtu
 		assertNoChange(original);
 	}
 
+	@Test
+	void visit_variableUsedInAnnotation_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	@interface ExampleAnnotation {\n" +
+				"		int value();\n" +
+				"	}\n" +
+				"\n" +
+				"	void useInAnnotation() {\n" +
+				"		final int x = 1;\n" +
+				"			@ExampleAnnotation(value = x)\n" +
+				"		class LocalClass {\n" +
+				"\n" +
+				"		}\n" +
+				"	}";
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_VariableUsedMoreThanTwice_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	int variableUsedMoreThanTwice() {\n" +
+				"		int x = 1;\n" +
+				"		int y = x;\n" +
+				"		int z = x;\n" +
+				"		return x;\n" +
+				"	}";
+		assertNoChange(original);
+	}
+
 	// @Test
 	// void visit__shouldNotTransform() throws Exception {
 	// String original = "" +

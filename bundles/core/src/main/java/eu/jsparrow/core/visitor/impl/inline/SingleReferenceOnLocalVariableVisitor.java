@@ -23,10 +23,13 @@ import eu.jsparrow.rules.common.visitor.helper.ReferenceToLocalVariableAnalyzer;
 class SingleReferenceOnLocalVariableVisitor extends ASTVisitor {
 	private final List<SimpleName> references;
 	private final ReferenceToLocalVariableAnalyzer referenceAnalyzer;
+	private final VariableDeclarationFragment declarationFragment;
+	private boolean declarationFragmentFound = false;
 
 	public SingleReferenceOnLocalVariableVisitor(CompilationUnit compilationUnit,
 			VariableDeclarationFragment declarationFragment) {
 		this.references = new ArrayList<>();
+		this.declarationFragment = declarationFragment;
 		this.referenceAnalyzer = new ReferenceToLocalVariableAnalyzer(compilationUnit, declarationFragment);
 	}
 
@@ -36,11 +39,23 @@ class SingleReferenceOnLocalVariableVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(VariableDeclarationFragment node) {
+		if (declarationFragment == node) {
+			declarationFragmentFound = true;
+		}
+		return true;
+	}
+
+	@Override
 	public boolean visit(SimpleName node) {
-		if (referenceAnalyzer.isReference(node)) {
+		if (isReference(node)) {
 			references.add(node);
 		}
 		return false;
+	}
+
+	private boolean isReference(SimpleName node) {
+		return declarationFragmentFound && referenceAnalyzer.isReference(node);
 	}
 
 	/**

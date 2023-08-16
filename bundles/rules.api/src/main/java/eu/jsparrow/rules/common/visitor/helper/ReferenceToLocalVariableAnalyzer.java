@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -26,14 +27,30 @@ public class ReferenceToLocalVariableAnalyzer {
 			.getIdentifier();
 	}
 
+	/**
+	 * 
+	 * @param node
+	 * @return true if the SimpleName specified by the parameter is a reference
+	 *         to the variable declared by the VariableDeclarationFragment
+	 *         {@link #declarationFragment}, otherwise false.
+	 *         <P>
+	 *         Note that if the parent node of the SimpleName specified by the
+	 *         parameter is the same object as {@link #declarationFragment},
+	 *         then also false is returned.
+	 */
 	public boolean isReference(SimpleName node) {
 
-		if (node.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY ||
-				node.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY ||
-				node.getLocationInParent() == EnumConstantDeclaration.NAME_PROPERTY ||
-				node.getLocationInParent() == FieldAccess.NAME_PROPERTY ||
-				node.getLocationInParent() == SuperFieldAccess.NAME_PROPERTY ||
-				node.getLocationInParent() == QualifiedName.NAME_PROPERTY
+		if (node.getParent() == declarationFragment) {
+			return false;
+		}
+
+		final StructuralPropertyDescriptor locationInParent = node.getLocationInParent();
+		if (locationInParent == VariableDeclarationFragment.NAME_PROPERTY ||
+				locationInParent == SingleVariableDeclaration.NAME_PROPERTY ||
+				locationInParent == EnumConstantDeclaration.NAME_PROPERTY ||
+				locationInParent == FieldAccess.NAME_PROPERTY ||
+				locationInParent == SuperFieldAccess.NAME_PROPERTY ||
+				locationInParent == QualifiedName.NAME_PROPERTY
 
 		) {
 			return false;
