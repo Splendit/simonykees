@@ -17,14 +17,16 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 
 public class ExcludeVariableBinding {
 
-	public boolean isVariableBindingExcludedFor(SimpleName simpleName) {
+	public static boolean isVariableBindingExcludedFor(SimpleName simpleName) {
 		return simpleName.getLocationInParent() == MethodInvocation.NAME_PROPERTY ||
+				simpleName.getLocationInParent() == SuperMethodInvocation.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == ExpressionMethodReference.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == SuperMethodReference.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == TypeMethodReference.NAME_PROPERTY ||
@@ -41,13 +43,13 @@ public class ExcludeVariableBinding {
 				isAnnotationTypeNameProperty(simpleName);
 	}
 
-	public boolean isVariableBindingExcludedFor(QualifiedName qualifiedName) {
+	public static boolean isVariableBindingExcludedFor(QualifiedName qualifiedName) {
 		return qualifiedName.getLocationInParent() == SimpleType.NAME_PROPERTY ||
 				qualifiedName.getLocationInParent() == NameQualifiedType.QUALIFIER_PROPERTY ||
 				isAnnotationTypeNameProperty(qualifiedName);
 	}
 
-	private boolean isAnnotationTypeNameProperty(Name name) {
+	private static boolean isAnnotationTypeNameProperty(Name name) {
 		StructuralPropertyDescriptor locationInParent = name.getLocationInParent();
 		return locationInParent == MarkerAnnotation.TYPE_NAME_PROPERTY ||
 				locationInParent == SingleMemberAnnotation.TYPE_NAME_PROPERTY ||
