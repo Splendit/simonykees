@@ -1,6 +1,7 @@
 package eu.jsparrow.rules.common.visitor.helper;
 
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
@@ -22,9 +23,14 @@ import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+
 public class ExcludeVariableBinding {
 
 	public static boolean isVariableBindingExcludedFor(SimpleName simpleName) {
+		if (ASTNodeUtil.isLabel(simpleName)) {
+			return true;
+		}
 		return simpleName.getLocationInParent() == MethodInvocation.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == SuperMethodInvocation.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == ExpressionMethodReference.NAME_PROPERTY ||
@@ -34,6 +40,7 @@ public class ExcludeVariableBinding {
 				simpleName.getLocationInParent() == TypeDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == EnumDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == AnnotationTypeDeclaration.NAME_PROPERTY ||
+				simpleName.getLocationInParent() == AnnotationTypeMemberDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == RecordDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == SimpleType.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == QualifiedType.NAME_PROPERTY ||
@@ -54,6 +61,10 @@ public class ExcludeVariableBinding {
 		return locationInParent == MarkerAnnotation.TYPE_NAME_PROPERTY ||
 				locationInParent == SingleMemberAnnotation.TYPE_NAME_PROPERTY ||
 				locationInParent == NormalAnnotation.TYPE_NAME_PROPERTY;
+	}
+
+	private ExcludeVariableBinding() {
+		// private default constructor hiding implicit public one
 	}
 
 }
