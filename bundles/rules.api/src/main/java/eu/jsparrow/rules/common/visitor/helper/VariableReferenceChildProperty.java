@@ -1,14 +1,11 @@
 package eu.jsparrow.rules.common.visitor.helper;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -24,6 +21,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -33,39 +31,31 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
- * Collects instances of SimpleName which may be valid references to a given
- * variable declaration. For example, for the following piece of code
+ * Utility class to find out whether a SimpleName can represent a reference to a
+ * variable. This is done by analyzing the location of the specified SimpleName
+ * in its parent node.
  * 
- * <pre>
- * int x = 1;
- * x++;
- * </pre>
- * 
- * exactly one candidate can be found which is the {@code x} in {@code x++;}
- * because the {@code x} in {@code int x = 1;} belongs to the declaration itself
- * and therefore is not counted as reference.
- * <p>
- * Simple names in constructs like for example {@code this::x}, {@code x()} or
- * {@code void x(){}} are also excluded because it is clear that will never be
- * references to variables.
- * <p>
- * This visitor can be used in order to avoid to resolve too many times the
- * binding for a simple in order to get a variable binding.
  *
  */
-public class VariableReferenceCandidatesVisitor extends ASTVisitor {
+public class VariableReferenceChildProperty {
 
-	private final String expectedIdentifier;
-	private final List<SimpleName> referenceCandidates = new ArrayList<>();
-
-	protected VariableReferenceCandidatesVisitor(String expectedIdentifier) {
-		this.expectedIdentifier = expectedIdentifier;
+	public static boolean canBeLocalVariableReference(SimpleName simpleName) {
+		return canBeVariableReference(simpleName, true);
 	}
 
-	public boolean isReferenceCandidate(SimpleName simpleName) {
-		if (!simpleName.getIdentifier()
-			.equals(expectedIdentifier)) {
-			return false;
+	public static boolean canBeVariableReference(SimpleName simpleName) {
+		return canBeVariableReference(simpleName, false);
+	}
+
+	private static boolean canBeVariableReference(SimpleName simpleName, boolean expectingLocalVariable) {
+		if (expectingLocalVariable) {
+			if (simpleName.getLocationInParent() == FieldAccess.NAME_PROPERTY ||
+					simpleName.getLocationInParent() == SuperFieldAccess.NAME_PROPERTY ||
+					simpleName.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
+				return false;
+			}
+		} else if (simpleName.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
+			return !isVariableReferenceExcludedFor((QualifiedName) simpleName.getParent());
 		}
 
 		if (ASTNodeUtil.isLabel(simpleName)) {
@@ -82,11 +72,11 @@ public class VariableReferenceCandidatesVisitor extends ASTVisitor {
 		if (isNamePropertyWithMethodBinding(simpleName)) {
 			return false;
 		}
-		return simpleName.getLocationInParent() != SimpleType.NAME_PROPERTY ||
-				simpleName.getLocationInParent() != QualifiedType.NAME_PROPERTY ||
-				simpleName.getLocationInParent() != NameQualifiedType.NAME_PROPERTY ||
-				simpleName.getLocationInParent() != NameQualifiedType.QUALIFIER_PROPERTY;
 
+		return simpleName.getLocationInParent() != SimpleType.NAME_PROPERTY &&
+				simpleName.getLocationInParent() != QualifiedType.NAME_PROPERTY &&
+				simpleName.getLocationInParent() != NameQualifiedType.NAME_PROPERTY &&
+				simpleName.getLocationInParent() != NameQualifiedType.QUALIFIER_PROPERTY;
 	}
 
 	private static boolean isDeclarationNameProperty(SimpleName simpleName) {
@@ -117,20 +107,16 @@ public class VariableReferenceCandidatesVisitor extends ASTVisitor {
 				locationInParent == NormalAnnotation.TYPE_NAME_PROPERTY;
 	}
 
-	@Override
-	public boolean visit(QualifiedName node) {
-		if (isAnnotationTypeNameProperty(node)) {
-			return false;
+	public static boolean isVariableReferenceExcludedFor(QualifiedName qualifiedName) {
+		if (isAnnotationTypeNameProperty(qualifiedName)) {
+			return true;
 		}
-		return node.getLocationInParent() != SimpleType.NAME_PROPERTY &&
-				node.getLocationInParent() != NameQualifiedType.QUALIFIER_PROPERTY;
+		return qualifiedName.getLocationInParent() == SimpleType.NAME_PROPERTY ||
+				qualifiedName.getLocationInParent() == NameQualifiedType.QUALIFIER_PROPERTY;
 	}
 
-	@Override
-	public boolean visit(SimpleName node) {
-		if (isReferenceCandidate(node)) {
-			referenceCandidates.add(node);
-		}
-		return false;
+	private VariableReferenceChildProperty() {
+		// private default constructor to hide implicit public one
 	}
+
 }
