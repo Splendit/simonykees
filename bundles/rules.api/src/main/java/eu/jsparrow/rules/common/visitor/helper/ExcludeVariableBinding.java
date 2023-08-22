@@ -25,6 +25,12 @@ import org.eclipse.jdt.core.dom.TypeMethodReference;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * This class is planned to be removed. A part of the logics of this class are
+ * contained in VariableReferenceChildProperty.
+ * 
+ */
+@Deprecated
 public class ExcludeVariableBinding {
 
 	public static boolean isVariableBindingExcludedFor(SimpleName simpleName) {

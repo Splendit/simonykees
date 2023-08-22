@@ -13,6 +13,12 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+/**
+ * This class is planned to be removed. A part of the logics of this class are
+ * contained in NodeDeclaringVariableHelper.
+ * 
+ */
+@Deprecated
 public class ReferenceToLocalVariableAnalyzer {
 
 	private final CompilationUnit compilationUnit;
