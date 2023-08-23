@@ -17,11 +17,13 @@ import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
@@ -50,6 +52,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 import eu.jsparrow.jdtunit.JdtUnitException;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.ExcludeVariableBinding;
 import eu.jsparrow.rules.java16.javarecords.UseJavaRecordsASTVisitor;
 
@@ -84,7 +87,7 @@ class ExcludeVariableBindingTest extends UsesJDTUnitFixture {
 
 		};
 
-		defaultFixture.getTypeDeclaration()
+		getCompilationUnit()
 			.accept(simpleNamesCollectorVisitor);
 		assertEquals(1, simpleNames.size());
 		return simpleNames.get(0);
@@ -106,10 +109,16 @@ class ExcludeVariableBindingTest extends UsesJDTUnitFixture {
 			}
 		};
 
-		defaultFixture.getTypeDeclaration()
+		getCompilationUnit()
 			.accept(simpleNamesCollectorVisitor);
+
 		assertEquals(1, qualifiedNames.size());
 		return qualifiedNames.get(0);
+	}
+
+	private CompilationUnit getCompilationUnit() {
+		final TypeDeclaration typeDeclaration = defaultFixture.getTypeDeclaration();
+		return ASTNodeUtil.getSpecificAncestor(typeDeclaration, CompilationUnit.class);
 	}
 
 	@Test
@@ -513,7 +522,6 @@ class ExcludeVariableBindingTest extends UsesJDTUnitFixture {
 
 	@Test
 	void visit_QualifiedFieldDeclarationInitializer_shouldHaveVariableBinding() throws Exception {
-
 		String code = "int max = Integer.MAX_VALUE;";
 
 		QualifiedName qualifiedNameAsInitializer = findUniqueQualifiedName(code,
@@ -523,7 +531,37 @@ class ExcludeVariableBindingTest extends UsesJDTUnitFixture {
 		final IBinding binding = qualifiedNameAsInitializer.resolveBinding();
 		assertNotNull(binding);
 		assertTrue(binding instanceof IVariableBinding);
+	}
 
+	@Test
+	void visit_NamePropertyOfQualifiedName_shouldHaveVariableBinding() throws Exception {
+		String code = "int max = Integer.MAX_VALUE;";
+
+		String identifier = "MAX_VALUE";
+		SimpleName namePropertyOfQualifiedName = findUniqueSimpleName(code, identifier,
+				QualifiedName.NAME_PROPERTY);
+		assertFalse(ExcludeVariableBinding.isVariableBindingExcludedFor(namePropertyOfQualifiedName));
+		final IBinding binding = namePropertyOfQualifiedName.resolveBinding();
+		assertNotNull(binding);
+		assertTrue(binding instanceof IVariableBinding);
+	}
+
+	@Test
+	void visit_NamePropertyOfQualifiedName_shouldNotHaveVariableBinding() throws Exception {
+
+		String code = "" +
+				"	@java.lang.Deprecated\n" +
+				"	void deprecatedMethod() {\n" +
+				"		\n" +
+				"	}";
+
+		String identifier = "Deprecated";
+		SimpleName namePropertyOfQualifiedName = findUniqueSimpleName(code, identifier,
+				QualifiedName.NAME_PROPERTY);
+		assertTrue(ExcludeVariableBinding.isVariableBindingExcludedFor(namePropertyOfQualifiedName));
+		final IBinding binding = namePropertyOfQualifiedName.resolveBinding();
+		assertNotNull(binding);
+		assertFalse(binding instanceof IVariableBinding);
 	}
 
 	public static Stream<Arguments> arguments_LabelX_notVariable() throws Exception {
@@ -561,6 +599,47 @@ class ExcludeVariableBindingTest extends UsesJDTUnitFixture {
 		SimpleName innerClassName = findUniqueSimpleName(method, identifier, childPropertyDescriptor);
 		assertTrue(ExcludeVariableBinding.isVariableBindingExcludedFor(innerClassName));
 		final IBinding binding = innerClassName.resolveBinding();
+		assertNull(binding);
+	}
+
+	@Test
+	void visit_importStaticField_shouldNotExcludeVariableBinding()
+			throws Exception {
+
+		defaultFixture.addImport("java.lang.Integer.MAX_VALUE", true, false);
+
+		String code = "int max = MAX_VALUE;";
+		QualifiedName staticImportName = findUniqueQualifiedName(code, ImportDeclaration.NAME_PROPERTY);
+		assertFalse(ExcludeVariableBinding.isVariableBindingExcludedFor(staticImportName));
+		final IBinding binding = staticImportName.resolveBinding();
+		assertNotNull(binding);
+		assertTrue(binding instanceof IVariableBinding);
+	}
+
+	@Test
+	void visit_importStaticMethod_shouldNotExcludeVariableBinding()
+			throws Exception {
+
+		defaultFixture.addImport("java.lang.Integer.valueOf", true, false);
+
+		String code = "int x = valueOf(1);";
+		QualifiedName staticImportName = findUniqueQualifiedName(code, ImportDeclaration.NAME_PROPERTY);
+		assertFalse(ExcludeVariableBinding.isVariableBindingExcludedFor(staticImportName));
+		final IBinding binding = staticImportName.resolveBinding();
+		assertNotNull(binding);
+		assertFalse(binding instanceof IVariableBinding);
+	}
+
+	@Test
+	void visit_invalidStaticImport_shouldNotExcludeVariableBinding()
+			throws Exception {
+
+		defaultFixture.addImport("java.lang.Integer.INVALID", true, false);
+
+		String code = "int x = INVALID;";
+		QualifiedName staticImportName = findUniqueQualifiedName(code, ImportDeclaration.NAME_PROPERTY);
+		assertFalse(ExcludeVariableBinding.isVariableBindingExcludedFor(staticImportName));
+		final IBinding binding = staticImportName.resolveBinding();
 		assertNull(binding);
 	}
 }
