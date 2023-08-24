@@ -68,7 +68,7 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 			return true;
 		}
 
-		SimpleName usageToReplace = findSingleUsageToInline(declarationStatement, declarationFragment).orElse(null);
+		SimpleName usageToReplace = findUniqueUsageToInline(declarationStatement, declarationFragment).orElse(null);
 		if (usageToReplace == null) {
 			return true;
 		}
@@ -93,15 +93,15 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		return false;
 	}
 
-	private Optional<SimpleName> findSingleUsageToInline(VariableDeclarationStatement declarationStatement,
+	private Optional<SimpleName> findUniqueUsageToInline(VariableDeclarationStatement declarationStatement,
 			VariableDeclarationFragment declarationFragment) {
-		SingleReferenceOnLocalVariableVisitor singleReferenceVisitor = new SingleReferenceOnLocalVariableVisitor(
+		UniqueLocalVariableReferenceVisitor uniqueReferenceVisitor = new UniqueLocalVariableReferenceVisitor(
 				getCompilationUnit(), declarationFragment);
 
 		declarationStatement.getParent()
-			.accept(singleReferenceVisitor);
+			.accept(uniqueReferenceVisitor);
 
-		return singleReferenceVisitor.getSingleLocalVariableReference()
+		return uniqueReferenceVisitor.getUniqueLocalVariableReference()
 			.filter(reference -> isSupportedUsage(declarationStatement, reference));
 
 	}

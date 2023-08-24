@@ -18,10 +18,10 @@ import eu.jsparrow.rules.common.visitor.helper.AbstractLocalVariableReferencesVi
  * @since 4.19.0
  *
  */
-class SingleReferenceOnLocalVariableVisitor extends AbstractLocalVariableReferencesVisitor {
+class UniqueLocalVariableReferenceVisitor extends AbstractLocalVariableReferencesVisitor {
 	private final List<SimpleName> references = new ArrayList<>();
 
-	public SingleReferenceOnLocalVariableVisitor(CompilationUnit compilationUnit,
+	public UniqueLocalVariableReferenceVisitor(CompilationUnit compilationUnit,
 			VariableDeclarationFragment declarationFragment) {
 		super(compilationUnit, declarationFragment);
 	}
@@ -40,7 +40,7 @@ class SingleReferenceOnLocalVariableVisitor extends AbstractLocalVariableReferen
 	 *         the only one reference to the specified local variable. In all
 	 *         other cases, an empty Optional is returned.
 	 */
-	Optional<SimpleName> getSingleLocalVariableReference() {
+	Optional<SimpleName> getUniqueLocalVariableReference() {
 		if (references.size() == 1) {
 			return Optional.of(references.get(0));
 		}
