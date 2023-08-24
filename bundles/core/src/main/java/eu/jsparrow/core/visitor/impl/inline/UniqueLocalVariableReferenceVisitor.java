@@ -1,14 +1,12 @@
 package eu.jsparrow.core.visitor.impl.inline;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import eu.jsparrow.rules.common.visitor.helper.AbstractLocalVariableReferencesVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableReferencesCollectorVisitor;
 
 /**
  * Finds out whether a local variable is or is not referenced exactly once. If a
@@ -18,17 +16,14 @@ import eu.jsparrow.rules.common.visitor.helper.AbstractLocalVariableReferencesVi
  * @since 4.19.0
  *
  */
-class UniqueLocalVariableReferenceVisitor extends AbstractLocalVariableReferencesVisitor {
-	private final List<SimpleName> references = new ArrayList<>();
-
+class UniqueLocalVariableReferenceVisitor extends LocalVariableReferencesCollectorVisitor {
 	public UniqueLocalVariableReferenceVisitor(CompilationUnit compilationUnit,
 			VariableDeclarationFragment declarationFragment) {
 		super(compilationUnit, declarationFragment);
 	}
 
 	@Override
-	protected void referenceFound(SimpleName simpleName) {
-		references.add(simpleName);
+	public void endVisit(SimpleName node) {
 		if (references.size() > 1) {
 			stopVisiting();
 		}
