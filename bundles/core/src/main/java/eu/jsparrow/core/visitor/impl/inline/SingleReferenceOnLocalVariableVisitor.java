@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -30,12 +29,9 @@ class SingleReferenceOnLocalVariableVisitor extends AbstractLocalVariableReferen
 	@Override
 	protected void referenceFound(SimpleName simpleName) {
 		references.add(simpleName);
-
-	}
-
-	@Override
-	protected boolean continueVisiting(ASTNode node) {
-		return references.size() < 2;
+		if (references.size() > 1) {
+			stopVisiting();
+		}
 	}
 
 	/**

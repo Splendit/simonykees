@@ -19,6 +19,7 @@ public abstract class AbstractLocalVariableReferencesVisitor extends ASTVisitor 
 	private final VariableDeclarationFragment targetDeclarationFragment;
 	private boolean canFindReference = false;
 	private boolean invalidBinding = false;
+	private boolean continueVisiting = true;
 
 	protected AbstractLocalVariableReferencesVisitor(CompilationUnit compilationUnit,
 			VariableDeclarationFragment targetDeclarationFragment) {
@@ -29,10 +30,7 @@ public abstract class AbstractLocalVariableReferencesVisitor extends ASTVisitor 
 
 	@Override
 	public final boolean preVisit2(ASTNode node) {
-		if (invalidBinding) {
-			return false;
-		}
-		return continueVisiting(node);
+		return continueVisiting;
 	}
 
 	@Override
@@ -52,9 +50,14 @@ public abstract class AbstractLocalVariableReferencesVisitor extends ASTVisitor 
 				}
 			} catch (UnresolvedBindingException e) {
 				invalidBinding = true;
+				stopVisiting();
 			}
 		}
 		return false;
+	}
+
+	protected final void stopVisiting() {
+		continueVisiting = false;
 	}
 
 	public boolean isInvalidBinding() {
@@ -62,6 +65,4 @@ public abstract class AbstractLocalVariableReferencesVisitor extends ASTVisitor 
 	}
 
 	protected abstract void referenceFound(SimpleName simpleName);
-
-	protected abstract boolean continueVisiting(ASTNode node);
 }
