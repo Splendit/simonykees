@@ -5,12 +5,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import eu.jsparrow.rules.common.visitor.helper.ReferenceToLocalVariableAnalyzer;
+import eu.jsparrow.rules.common.visitor.helper.AbstractLocalVariableReferencesVisitor;
 
 /**
  * Finds out whether a local variable is or is not referenced exactly once. If a
@@ -20,42 +19,23 @@ import eu.jsparrow.rules.common.visitor.helper.ReferenceToLocalVariableAnalyzer;
  * @since 4.19.0
  *
  */
-class SingleReferenceOnLocalVariableVisitor extends ASTVisitor {
-	private final List<SimpleName> references;
-	private final ReferenceToLocalVariableAnalyzer referenceAnalyzer;
-	private final VariableDeclarationFragment declarationFragment;
-	private boolean declarationFragmentFound = false;
+class SingleReferenceOnLocalVariableVisitor extends AbstractLocalVariableReferencesVisitor {
+	private final List<SimpleName> references = new ArrayList<>();
 
 	public SingleReferenceOnLocalVariableVisitor(CompilationUnit compilationUnit,
 			VariableDeclarationFragment declarationFragment) {
-		this.references = new ArrayList<>();
-		this.declarationFragment = declarationFragment;
-		this.referenceAnalyzer = new ReferenceToLocalVariableAnalyzer(compilationUnit, declarationFragment);
+		super(compilationUnit, declarationFragment);
 	}
 
 	@Override
-	public boolean preVisit2(ASTNode node) {
+	protected void referenceFound(SimpleName simpleName) {
+		references.add(simpleName);
+
+	}
+
+	@Override
+	protected boolean continueVisiting(ASTNode node) {
 		return references.size() < 2;
-	}
-
-	@Override
-	public boolean visit(VariableDeclarationFragment node) {
-		if (declarationFragment == node) {
-			declarationFragmentFound = true;
-		}
-		return true;
-	}
-
-	@Override
-	public boolean visit(SimpleName node) {
-		if (isReference(node)) {
-			references.add(node);
-		}
-		return false;
-	}
-
-	private boolean isReference(SimpleName node) {
-		return declarationFragmentFound && referenceAnalyzer.isReference(node);
 	}
 
 	/**

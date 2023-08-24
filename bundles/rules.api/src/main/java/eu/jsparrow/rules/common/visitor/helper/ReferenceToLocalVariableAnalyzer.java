@@ -4,7 +4,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -13,16 +12,18 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.rules.common.exception.UnresolvedBindingException;
+
 public class ReferenceToLocalVariableAnalyzer {
 
 	private final CompilationUnit compilationUnit;
-	private final VariableDeclarationFragment declarationFragment;
+	private final VariableDeclarationFragment targetDeclarationFragment;
 	private final String targetIdentifier;
 
 	public ReferenceToLocalVariableAnalyzer(CompilationUnit compilationUnit,
 			VariableDeclarationFragment declarationFragment) {
 		this.compilationUnit = compilationUnit;
-		this.declarationFragment = declarationFragment;
+		this.targetDeclarationFragment = declarationFragment;
 		this.targetIdentifier = declarationFragment.getName()
 			.getIdentifier();
 	}
@@ -32,15 +33,16 @@ public class ReferenceToLocalVariableAnalyzer {
 	 * @param node
 	 * @return true if the SimpleName specified by the parameter is a reference
 	 *         to the variable declared by the VariableDeclarationFragment
-	 *         {@link #declarationFragment}, otherwise false.
+	 *         {@link #targetDeclarationFragment}, otherwise false.
 	 *         <P>
 	 *         Note that if the parent node of the SimpleName specified by the
-	 *         parameter is the same object as {@link #declarationFragment},
+	 *         parameter is the same object as {@link #targetDeclarationFragment},
 	 *         then also false is returned.
+	 * @throws UnresolvedBindingException
 	 */
-	public boolean isReference(SimpleName node) {
+	public boolean isReference(SimpleName node) throws UnresolvedBindingException {
 
-		if (node.getParent() == declarationFragment) {
+		if (node.getParent() == targetDeclarationFragment) {
 			return false;
 		}
 
@@ -61,23 +63,14 @@ public class ReferenceToLocalVariableAnalyzer {
 			return false;
 		}
 
-		if (ExcludeVariableBinding.isVariableBindingExcludedFor(node)) {
-			return false;
-		}
+		IVariableBinding variableBinding = FindVariableBinding.findVariableBinding(node)
+			.orElse(null);
 
-		IBinding binding = node.resolveBinding();
-		if (binding == null) {
-			return false;
-		}
-		if (binding.getKind() != IBinding.VARIABLE) {
-			return false;
-		}
-		IVariableBinding variableBinding = (IVariableBinding) binding;
-		if (variableBinding.isField() || variableBinding.isParameter()) {
+		if (variableBinding == null || variableBinding.isField() || variableBinding.isParameter()) {
 			return false;
 		}
 
 		ASTNode declaringNode = compilationUnit.findDeclaringNode(variableBinding);
-		return declaringNode == declarationFragment;
+		return declaringNode == targetDeclarationFragment;
 	}
 }
