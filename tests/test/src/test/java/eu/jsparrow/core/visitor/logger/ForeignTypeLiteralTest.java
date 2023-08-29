@@ -14,7 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
-import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
+import eu.jsparrow.rules.common.exception.UnresolvedTypeBindingException;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 class ForeignTypeLiteralTest extends UsesJDTUnitFixture {

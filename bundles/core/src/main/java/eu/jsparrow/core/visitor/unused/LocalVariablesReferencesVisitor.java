@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.visitor.DeclaringNodeNotFoundException;
-import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
+import eu.jsparrow.rules.common.exception.UnresolvedBindingException;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -67,7 +67,7 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 		boolean isReference;
 		try {
 			isReference = isTargetLocalVariableReference(simpleName);
-		} catch (UnresolvedTypeBindingException | DeclaringNodeNotFoundException e) {
+		} catch (UnresolvedBindingException | DeclaringNodeNotFoundException e) {
 			logger.debug(e.getMessage(), e);
 			unresolvedReferenceFound = true;
 			return false;
@@ -93,7 +93,7 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 	}
 
 	private boolean isTargetLocalVariableReference(SimpleName simpleName)
-			throws UnresolvedTypeBindingException, DeclaringNodeNotFoundException {
+			throws UnresolvedBindingException, DeclaringNodeNotFoundException {
 		String identifier = simpleName.getIdentifier();
 		if (!identifier.equals(originalIdentifier)) {
 			return false;
@@ -104,7 +104,7 @@ public class LocalVariablesReferencesVisitor extends ASTVisitor {
 			if (ASTNodeUtil.isLabel(simpleName)) {
 				return false;
 			}
-			throw new UnresolvedTypeBindingException("The binding of the reference candidate cannot be resolved."); //$NON-NLS-1$
+			throw new UnresolvedBindingException("The binding of the reference candidate cannot be resolved."); //$NON-NLS-1$
 		}
 		int kind = binding.getKind();
 		if (kind != IBinding.VARIABLE) {
