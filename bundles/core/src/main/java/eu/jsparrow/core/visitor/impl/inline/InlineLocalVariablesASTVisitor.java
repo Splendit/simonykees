@@ -10,22 +10,15 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.markers.common.InlineLocalVariablesEvent;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -68,7 +61,11 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 			return true;
 		}
 
-		SimpleName usageToReplace = findUniqueUsageToInline(declarationStatement, declarationFragment).orElse(null);
+		SupportedUniqueUsageAnalyzer analyzer = new SupportedUniqueUsageAnalyzer(getCompilationUnit());
+
+		SimpleName usageToReplace = analyzer
+			.findUniqueUsageToInline(declarationStatement, declarationFragment, initializer)
+			.orElse(null);
 		if (usageToReplace == null) {
 			return true;
 		}
@@ -91,67 +88,6 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		addMarkerEvent(declarationFragment);
 		onRewrite();
 		return false;
-	}
-
-	private Optional<SimpleName> findUniqueUsageToInline(VariableDeclarationStatement declarationStatement,
-			VariableDeclarationFragment declarationFragment) {
-		UniqueLocalVariableReferenceVisitor uniqueReferenceVisitor = new UniqueLocalVariableReferenceVisitor(
-				getCompilationUnit(), declarationFragment);
-
-		declarationStatement.getParent()
-			.accept(uniqueReferenceVisitor);
-
-		return uniqueReferenceVisitor.getUniqueLocalVariableReference()
-			.filter(reference -> isSupportedUsage(declarationStatement, reference));
-
-	}
-
-	private boolean isSupportedUsage(VariableDeclarationStatement declarationStatement,
-			SimpleName usageToReplace) {
-
-		Statement statementWithSupportedUsage = findStatementWithSupportedUsage(usageToReplace).orElse(null);
-
-		if (statementWithSupportedUsage == null
-				|| statementWithSupportedUsage.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return false;
-		}
-
-		Block block = (Block) statementWithSupportedUsage.getParent();
-
-		VariableDeclarationStatement statementExpectedToBeDeclaration = ASTNodeUtil
-			.findListElementBefore(block.statements(), statementWithSupportedUsage, VariableDeclarationStatement.class)
-			.orElse(null);
-		return statementExpectedToBeDeclaration == declarationStatement;
-
-	}
-
-	private Optional<Statement> findStatementWithSupportedUsage(SimpleName usageToReplace) {
-
-		if (usageToReplace.getLocationInParent() == ReturnStatement.EXPRESSION_PROPERTY) {
-			return Optional.of((ReturnStatement) usageToReplace.getParent());
-		}
-
-		if (usageToReplace.getLocationInParent() == ThrowStatement.EXPRESSION_PROPERTY) {
-			return Optional.of((ThrowStatement) usageToReplace.getParent());
-		}
-
-		if (usageToReplace.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment) usageToReplace.getParent();
-			if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-				return Optional.of((ExpressionStatement) assignment.getParent());
-			}
-			return Optional.empty();
-		}
-
-		if (usageToReplace.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			VariableDeclarationFragment declarationFragment = (VariableDeclarationFragment) usageToReplace.getParent();
-			if (declarationFragment.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-				return Optional.of((VariableDeclarationStatement) declarationFragment.getParent());
-			}
-			return Optional.empty();
-		}
-		return Optional.empty();
-
 	}
 
 	private Optional<Supplier<ASTNode>> findUsageReplacementSupplier(VariableDeclarationStatement declarationStatement,

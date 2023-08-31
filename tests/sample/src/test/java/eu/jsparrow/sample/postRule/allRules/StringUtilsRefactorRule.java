@@ -36,9 +36,7 @@ public class StringUtilsRefactorRule {
 	}
 
 	public boolean testEndsWith(String testString) {
-		final String sometimesExpectedString = "With";
-
-		return StringUtils.endsWith(testString, sometimesExpectedString);
+		return StringUtils.endsWith(testString, "With");
 	}
 
 	public boolean testStartWith(String testString) {
@@ -55,9 +53,7 @@ public class StringUtilsRefactorRule {
 	}
 
 	public boolean testContains(String testString) {
-		final String sometimesExpectedString = "tain";
-
-		return StringUtils.contains(testString, sometimesExpectedString);
+		return StringUtils.contains(testString, "tain");
 	}
 
 	public String testReplace(String testString) {

@@ -258,8 +258,7 @@ public class OptionalIfPresentRule {
 	}
 
 	public void avoidExternalNameConflicts_shouldTransform() {
-		final String value = "I could crash with the lambda parameter";
-		final Optional<String> user = Optional.ofNullable(value);
+		final Optional<String> user = Optional.ofNullable("I could crash with the lambda parameter");
 		user.ifPresent(logger::info);
 	}
 
