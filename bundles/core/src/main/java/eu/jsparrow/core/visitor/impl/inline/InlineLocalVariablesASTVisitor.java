@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
@@ -19,6 +20,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.markers.common.InlineLocalVariablesEvent;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -57,6 +59,10 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 			return true;
 		}
 
+		if (hasAnnotations(declarationStatement)) {
+			return true;
+		}
+
 		if (!checkBindingsForFragmentAndInitializer(declarationFragment, initializer)) {
 			return true;
 		}
@@ -88,6 +94,12 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		addMarkerEvent(declarationFragment);
 		onRewrite();
 		return false;
+	}
+
+	private boolean hasAnnotations(VariableDeclarationStatement declarationStatement) {
+		return !ASTNodeUtil.convertToTypedList(declarationStatement.modifiers(), Annotation.class)
+			.isEmpty();
+
 	}
 
 	private Optional<Supplier<ASTNode>> findUsageReplacementSupplier(VariableDeclarationStatement declarationStatement,

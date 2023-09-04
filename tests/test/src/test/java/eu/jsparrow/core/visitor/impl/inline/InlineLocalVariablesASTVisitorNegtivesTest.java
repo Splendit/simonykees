@@ -187,6 +187,17 @@ public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixtu
 		assertNoChange(original);
 	}
 
+	@Test
+	void visit_VariableDeclarationWithAnnotation_shouldNotTransform() throws Exception {
+		String original = "" +
+				"int localVariableWithAnnotation() {\n" +
+				"	@Deprecated\n" +
+				"	int x = 1;\n" +
+				"	return x;\n" +
+				"}";
+		assertNoChange(original);
+	}
+
 	// @Test
 	// void visit__shouldNotTransform() throws Exception {
 	// String original = "" +
