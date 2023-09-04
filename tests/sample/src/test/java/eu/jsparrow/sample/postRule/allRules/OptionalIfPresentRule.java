@@ -159,11 +159,9 @@ public class OptionalIfPresentRule {
 	}
 
 	public void getExpressionNotPresent_shouldNotTransform(Optional<String> input) {
-		if (!input.isPresent()) {
-			return;
+		if (input.isPresent()) {
+			logger.info("");
 		}
-		final String value = "";
-		logger.info(value);
 	}
 
 	public void getWithArgument_shouldNotTransform(Optional<String> input, List<String> users) {

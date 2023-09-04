@@ -288,10 +288,7 @@ public class TestWhileToForEachRule {
 		final List<String> l = generateList(input);
 		final StringBuilder sb = new StringBuilder();
 
-		l.forEach(aL -> {
-			final String p = "foo";
-			sb.append(p);
-		});
+		l.forEach(aL -> sb.append("foo"));
 
 		return sb.toString();
 	}

@@ -93,8 +93,7 @@ public class StringBuildingLoopRule {
 		 */
 
 		if (collectionOfStrings.isEmpty()) {
-			final String result = "-";
-			collectionOfStrings.add(result);
+			collectionOfStrings.add("-");
 		}
 		String result = String.join("", collectionOfStrings);
 
@@ -103,12 +102,7 @@ public class StringBuildingLoopRule {
 
 	public String collectingToAField(String input) {
 		final List<String> collectionOfStrings = generateStringList(input);
-		/*
-		 * The result variable is not declared in the same block with the loop.
-		 */
-		final String anotherDecl = "";
-
-		collectionOfStrings.add(anotherDecl);
+		collectionOfStrings.add("");
 
 		collectionOfStrings.forEach(val -> result = result + val);
 

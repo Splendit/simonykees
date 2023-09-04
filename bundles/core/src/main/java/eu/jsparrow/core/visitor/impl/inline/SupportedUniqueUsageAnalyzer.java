@@ -10,9 +10,11 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -21,6 +23,7 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -105,12 +108,44 @@ public class SupportedUniqueUsageAnalyzer {
 			}
 			return Optional.empty();
 		}
+
+		if (expressionWithUsage.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+			if (expressionWithUsage.getNodeType() == ASTNode.METHOD_INVOCATION
+					|| expressionWithUsage.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION
+					|| expressionWithUsage.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
+				return Optional.of((ExpressionStatement) expressionWithUsage.getParent());
+			}
+			return Optional.empty();
+		}
 		return Optional.empty();
 
 	}
 
 	static boolean isSimpleInitializer(Expression initializer) {
-		return initializer.getNodeType() == ASTNode.SIMPLE_NAME || ASTNodeUtil.isLiteral(initializer);
+		if (isSimpleThisExpression(initializer)) {
+			return true;
+		}
+		if (initializer.getNodeType() == ASTNode.SIMPLE_NAME) {
+			return true;
+		}
+		if (initializer.getNodeType() == ASTNode.QUALIFIED_NAME) {
+			QualifiedName qualifiedName = (QualifiedName) initializer;
+			return qualifiedName.getQualifier()
+				.getNodeType() == ASTNode.SIMPLE_NAME;
+		}
+		if (initializer.getNodeType() == ASTNode.SUPER_FIELD_ACCESS) {
+			return true;
+		}
+		if (initializer.getNodeType() == ASTNode.FIELD_ACCESS) {
+			FieldAccess fieldAccess = (FieldAccess) initializer;
+			return isSimpleMemberAccessQualifier(fieldAccess.getExpression());
+		}
+		if (initializer.getNodeType() == ASTNode.TYPE_LITERAL) {
+			TypeLiteral typeLiteral = (TypeLiteral) initializer;
+			return isSupportedSimpleType(typeLiteral.getType());
+
+		}
+		return ASTNodeUtil.isLiteral(initializer);
 	}
 
 	private static boolean isSingletonList(@SuppressWarnings("rawtypes") List list) {
@@ -163,15 +198,22 @@ public class SupportedUniqueUsageAnalyzer {
 		if (expression == null) {
 			return true;
 		}
-		if (expression.getNodeType() == ASTNode.SIMPLE_NAME) {
+		return isSimpleMemberAccessQualifier(expression);
+	}
+
+	private static boolean isSimpleMemberAccessQualifier(Expression memberAccessQualifier) {
+		if (memberAccessQualifier.getNodeType() == ASTNode.SIMPLE_NAME) {
 			return true;
 		}
+		return isSimpleThisExpression(memberAccessQualifier);
+	}
 
-		if (expression.getNodeType() == ASTNode.THIS_EXPRESSION) {
-			ThisExpression thisExpresion = (ThisExpression) expression;
-			return thisExpresion.getQualifier() == null;
+	private static boolean isSimpleThisExpression(Expression expression) {
+		if (expression.getNodeType() != ASTNode.THIS_EXPRESSION) {
+			return false;
 		}
-		return false;
+		ThisExpression thisExpresion = (ThisExpression) expression;
+		return thisExpresion.getQualifier() == null;
 	}
 
 	private static boolean isSimpleSuperMethodInvocation(SuperMethodInvocation superMethodInvocation) {
@@ -190,11 +232,13 @@ public class SupportedUniqueUsageAnalyzer {
 			return false;
 		}
 
-		Type type = classInstanceCreation.getType();
+		return isSupportedSimpleType(classInstanceCreation.getType());
+	}
+
+	private static boolean isSupportedSimpleType(Type type) {
 		if (type.getNodeType() != ASTNode.SIMPLE_TYPE) {
 			return false;
 		}
-
 		Name typeName = ((SimpleType) type).getName();
 		return typeName.getNodeType() == ASTNode.SIMPLE_NAME;
 	}

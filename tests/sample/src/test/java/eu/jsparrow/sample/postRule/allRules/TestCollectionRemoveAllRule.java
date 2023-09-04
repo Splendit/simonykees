@@ -198,9 +198,7 @@ public class TestCollectionRemoveAllRule {
 
 	public String testReferencedCollection(String input) {
 		final List<String> resultList = generateList(input);
-		final List<String> resultList2 = resultList;
-
-		resultList.removeAll(resultList2);
+		resultList.removeAll(resultList);
 
 		final StringBuilder sb = new StringBuilder();
 
