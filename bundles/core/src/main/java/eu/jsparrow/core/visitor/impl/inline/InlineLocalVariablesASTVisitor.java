@@ -46,6 +46,10 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		if (initializer == null) {
 			return false;
 		}
+		
+		if(isCommentProhibitingTransformation(initializer)) {
+			return true;
+		}
 
 		if (transformedFragments.contains(declarationFragment)) {
 			return false;
@@ -101,6 +105,19 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		return false;
 	}
 
+	private boolean isCommentProhibitingTransformation(Expression initializer) {
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Comment> initializerRelatedComments = commentRewriter.findTrailingComments(initializer);
+		int lastIndex = initializerRelatedComments.size() - 1;
+		if (lastIndex >= 0) {
+			Comment lastInitializerRelatedComment = initializerRelatedComments.get(lastIndex);
+			if(lastInitializerRelatedComment.isLineComment()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private boolean hasAnnotations(VariableDeclarationStatement declarationStatement) {
 		return !ASTNodeUtil.convertToTypedList(declarationStatement.modifiers(), Annotation.class)
 			.isEmpty();
@@ -190,5 +207,7 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		List<Comment> commentsRelatedToUsage = commentRewriter.findRelatedComments(usage);
 		commentRewriter.saveBeforeStatement(statementWithInlinedVariable, commentsRelatedToUsage);
 	}
+	
+
 
 }

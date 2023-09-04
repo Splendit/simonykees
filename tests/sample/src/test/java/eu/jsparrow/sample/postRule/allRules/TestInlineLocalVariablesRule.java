@@ -39,4 +39,10 @@ public class TestInlineLocalVariablesRule {
 														 */ ; /* 21 */
 	}
 
+	int lineCommentAfterInitializer_shouldNotTransform() {
+		final int x = 1 // comment
+		;
+		return x;
+	}
+
 }
