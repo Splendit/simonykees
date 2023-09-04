@@ -1,15 +1,40 @@
 package eu.jsparrow.sample.postRule.inlineLocalVariables;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class TestInlineLocalVariablesRule {
-	int result;
+	List<String> result;
 
 	void exampleWithAssignment() {
-		int y = 1;
-		result = y;
+		/* 1 */
+		// 2
+		/* 3 */
+		// 4
+		/* 5 */
+		/* 16 */
+		/* 19 */
+		/* 20 */
+		// 17
+		result /* 18 */ = // 6
+		/* 7 */ Arrays/* 8 */ ./* 9 */ asList(/* 10 */ "item-1"/* 11 */ ,
+				// 12
+				/* 13 */ "item-2"/* 14 */)/* 15 */; // 21
 	}
 
-	int exampleWithReturn(boolean condition) {
-		int y = 1;
-		return y;
+	int exampleWithReturn(int a, int b, int c, int d) {
+		/* 1 */
+		/* 2 */
+		/*
+		 * 17
+		 */
+		/* 19 */
+		/* 20 */
+		/* 18 */
+		return /* 3 */ (/* 4 */ a /* 5 */ + /* 6 */ b/* 7 */) // 8
+				// 9
+				/* 10 */ * /* 11 */ (/* 12 */ c /* 13 */ - /* 14 */ d/* 15 */)/* 16
+				 * */ ; /* 21 */
 	}
+
 }

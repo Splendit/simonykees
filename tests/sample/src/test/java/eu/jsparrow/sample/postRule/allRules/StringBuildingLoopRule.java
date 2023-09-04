@@ -102,6 +102,9 @@ public class StringBuildingLoopRule {
 
 	public String collectingToAField(String input) {
 		final List<String> collectionOfStrings = generateStringList(input);
+		/*
+		 * The result variable is not declared in the same block with the loop.
+		 */
 		collectionOfStrings.add("");
 
 		collectionOfStrings.forEach(val -> result = result + val);

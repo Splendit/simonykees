@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.impl.inline;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -11,10 +12,12 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -23,6 +26,7 @@ import eu.jsparrow.core.markers.common.InlineLocalVariablesEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * A visitor that searches for declarations of local variables which are used
@@ -87,6 +91,7 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 				.getParent();
 			transformedFragments.add(fragmentAsTransformedParent);
 		}
+		saveComments(declarationStatement, initializer, usageToReplace);
 
 		ASTNode usageReplacement = usageReplacementSupplier.get();
 		astRewrite.replace(usageToReplace, usageReplacement, null);
@@ -99,7 +104,6 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 	private boolean hasAnnotations(VariableDeclarationStatement declarationStatement) {
 		return !ASTNodeUtil.convertToTypedList(declarationStatement.modifiers(), Annotation.class)
 			.isEmpty();
-
 	}
 
 	private Optional<Supplier<ASTNode>> findUsageReplacementSupplier(VariableDeclarationStatement declarationStatement,
@@ -172,6 +176,19 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		newArrayCreation.setType(newArrayType);
 		newArrayCreation.setInitializer(newArrayInitializer);
 		return newArrayCreation;
+	}
+
+	private void saveComments(VariableDeclarationStatement variableDeclarationStatement, Expression initializer,
+			SimpleName usage) {
+		Statement statementWithInlinedVariable = ASTNodeUtil.getSpecificAncestor(usage, Statement.class);
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Comment> comments = commentRewriter.findRelatedComments(variableDeclarationStatement);
+		List<Comment> initializerRelatedComments = commentRewriter.findRelatedComments(initializer);
+
+		comments.removeAll(initializerRelatedComments);
+		commentRewriter.saveBeforeStatement(statementWithInlinedVariable, comments);
+		List<Comment> commentsRelatedToUsage = commentRewriter.findRelatedComments(usage);
+		commentRewriter.saveBeforeStatement(statementWithInlinedVariable, commentsRelatedToUsage);
 	}
 
 }
