@@ -133,7 +133,7 @@ public class ParameterizedQueryAnalyzer {
 			return null;
 		}
 		Block blockAroundLocalDeclarationFragment = VariableDeclarationsUtil
-			.findBlockSurroundingDeclaration(variableDeclarationFragment);
+			.findBlockSurroundingDeclaration(variableDeclarationFragment).orElse(null);
 		if (blockAroundLocalDeclarationFragment == null) {
 			return null;
 		}

@@ -56,11 +56,12 @@ public class VariableDeclarationBeforeStatement {
 	public static Optional<VariableDeclarationFragment> findDeclaringFragment(SimpleName simpleName,
 			Statement statement, CompilationUnit compilationUnit) {
 
-		if (statement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+		Block parentBlock = ASTNodeUtil.findParentBlock(statement)
+			.orElse(null);
+		if (parentBlock == null) {
 			return Optional.empty();
 		}
 
-		Block parentBlock = (Block) statement.getParent();
 		VariableDeclarationStatement declarationStatementBefore = ASTNodeUtil
 			.findListElementBefore(parentBlock.statements(), statement, VariableDeclarationStatement.class)
 			.orElse(null);

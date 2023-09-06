@@ -122,10 +122,11 @@ public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisit
 
 	private VariableDeclarationStatement getVariableDeclarationBeforeAddAll(ExpressionStatement addAllStatement) {
 
-		if (addAllStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+		Block parentBlock = ASTNodeUtil.findParentBlock(addAllStatement)
+			.orElse(null);
+		if (parentBlock == null) {
 			return null;
 		}
-		Block parentBlock = (Block) addAllStatement.getParent();
 		@SuppressWarnings("rawtypes")
 		List blockStatemetns = parentBlock.statements();
 		int indexOfStatementBefore = blockStatemetns.indexOf(addAllStatement) - 1;

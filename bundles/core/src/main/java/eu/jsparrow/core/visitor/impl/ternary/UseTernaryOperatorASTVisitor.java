@@ -108,8 +108,8 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 				&& operatorWhenTrue == Assignment.Operator.ASSIGN) {
 			SimpleName leftHandSideSimpleName = (SimpleName) leftHandSideWhenTrue;
 			if (!isVariableUsedInExpression(leftHandSideSimpleName, ifStatement.getExpression())
-					&&!isVariableUsedInExpression(leftHandSideSimpleName, expressionWhenTrue)
-					&&!isVariableUsedInExpression(leftHandSideSimpleName, expressionWhenFalse)) {
+					&& !isVariableUsedInExpression(leftHandSideSimpleName, expressionWhenTrue)
+					&& !isVariableUsedInExpression(leftHandSideSimpleName, expressionWhenFalse)) {
 				VariableDeclarationFragment declarationBeforeIf = VariableDeclarationBeforeStatement
 					.findDeclaringFragment(leftHandSideSimpleName, ifStatement, getCompilationUnit())
 					.orElse(null);
@@ -181,10 +181,11 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 	}
 
 	private Optional<ReturnStatement> findReturnStatementFollowingIf(IfStatement ifStatement) {
-		if (ifStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+		Block block = ASTNodeUtil.findParentBlock(ifStatement)
+			.orElse(null);
+		if (block == null) {
 			return Optional.empty();
 		}
-		Block block = (Block) ifStatement.getParent();
 		return ASTNodeUtil
 			.findListElementAfter(block.statements(), ifStatement, ReturnStatement.class);
 	}

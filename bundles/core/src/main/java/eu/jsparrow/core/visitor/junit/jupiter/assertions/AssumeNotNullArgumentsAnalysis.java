@@ -10,6 +10,8 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+
 /**
  * Analyzes an invocation of {@code org.junit.Assume.assumeNotNull(Object...)}
  * and stores all informations needed for the replacement by corresponding
@@ -50,11 +52,11 @@ class AssumeNotNullArgumentsAnalysis {
 		}
 
 		ExpressionStatement methodInvocationStatement = (ExpressionStatement) methodInvocation.getParent();
-		if (methodInvocationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+		Block block = ASTNodeUtil.findParentBlock(methodInvocationStatement)
+			.orElse(null);
+		if (block == null) {
 			return false;
 		}
-
-		Block block = (Block) methodInvocationStatement.getParent();
 		assumptionWithNullableArray = new AssumeNotNullWithNullableArray(singleVararg, methodInvocationStatement,
 				block);
 
