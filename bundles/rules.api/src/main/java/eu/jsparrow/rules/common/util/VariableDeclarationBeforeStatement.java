@@ -3,7 +3,6 @@ package eu.jsparrow.rules.common.util;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -56,14 +55,8 @@ public class VariableDeclarationBeforeStatement {
 	public static Optional<VariableDeclarationFragment> findDeclaringFragment(SimpleName simpleName,
 			Statement statement, CompilationUnit compilationUnit) {
 
-		Block parentBlock = ASTNodeUtil.findParentBlock(statement)
-			.orElse(null);
-		if (parentBlock == null) {
-			return Optional.empty();
-		}
-
 		VariableDeclarationStatement declarationStatementBefore = ASTNodeUtil
-			.findListElementBefore(parentBlock.statements(), statement, VariableDeclarationStatement.class)
+			.findPreviousStatementInBlock(statement, VariableDeclarationStatement.class)
 			.orElse(null);
 
 		if (declarationStatementBefore == null) {

@@ -349,6 +349,17 @@ public class ASTNodeUtil {
 		return castToOptional(rawlist.get(0), type);
 	}
 
+	public static <T extends Statement> Optional<T> findPreviousStatementInBlock(Statement followingStatement,
+			Class<T> type) {
+		Block parentBlock = ASTNodeUtil.findParentBlock(followingStatement)
+			.orElse(null);
+		if (parentBlock == null) {
+			return Optional.empty();
+		}
+
+		return ASTNodeUtil.findListElementBefore(parentBlock.statements(), followingStatement, type);
+	}
+
 	/**
 	 * 
 	 * @return An Optional containing the element before the element specified

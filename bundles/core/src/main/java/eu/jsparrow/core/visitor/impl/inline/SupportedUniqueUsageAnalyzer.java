@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -68,18 +67,15 @@ public class SupportedUniqueUsageAnalyzer {
 		Statement statementWithSupportedUsage = findStatementWithSupportedUsage(expressionWithUsage)
 			.orElse(null);
 
-		if (statementWithSupportedUsage == null
-				|| statementWithSupportedUsage.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+		if (statementWithSupportedUsage == null) {
 			return false;
 		}
 
-		Block block = (Block) statementWithSupportedUsage.getParent();
-
-		VariableDeclarationStatement statementExpectedToBeDeclaration = ASTNodeUtil
-			.findListElementBefore(block.statements(), statementWithSupportedUsage, VariableDeclarationStatement.class)
+		VariableDeclarationStatement previuosStatement = ASTNodeUtil
+			.findPreviousStatementInBlock(statementWithSupportedUsage, VariableDeclarationStatement.class)
 			.orElse(null);
-		return statementExpectedToBeDeclaration == declarationStatement;
 
+		return previuosStatement == declarationStatement;
 	}
 
 	Optional<Statement> findStatementWithSupportedUsage(Expression expressionWithUsage) {
