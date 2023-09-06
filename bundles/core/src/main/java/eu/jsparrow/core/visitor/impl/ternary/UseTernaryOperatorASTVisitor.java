@@ -132,7 +132,8 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 		Statement elseStatement = ifStatement.getElseStatement();
 
 		if (elseStatement == null) {
-			returnStatementToRemove = findReturnStatementFollowingIf(ifStatement).orElse(null);
+			returnStatementToRemove = ASTNodeUtil.findSubsequentStatementInBlock(ifStatement, ReturnStatement.class)
+				.orElse(null);
 			if (returnStatementToRemove == null) {
 				return Optional.empty();
 			}
@@ -178,16 +179,6 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 		return Optional.of(statement)
 			.filter(type::isInstance)
 			.map(type::cast);
-	}
-
-	private Optional<ReturnStatement> findReturnStatementFollowingIf(IfStatement ifStatement) {
-		Block block = ASTNodeUtil.findParentBlock(ifStatement)
-			.orElse(null);
-		if (block == null) {
-			return Optional.empty();
-		}
-		return ASTNodeUtil
-			.findListElementAfter(block.statements(), ifStatement, ReturnStatement.class);
 	}
 
 	private Optional<Supplier<ConditionalExpression>> findNewConditionalExpressionSupplier(IfStatement ifStatement,

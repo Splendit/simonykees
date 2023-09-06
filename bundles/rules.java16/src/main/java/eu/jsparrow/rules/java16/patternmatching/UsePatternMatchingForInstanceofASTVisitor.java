@@ -98,7 +98,7 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 		}
 
 		if (isThenReturnOrThenBlockEndingWithReturn(ifStatement)) {
-			return findVariableDeclarationAfterIfStatement(ifStatement);
+			return ASTNodeUtil.findSubsequentStatementInBlock(ifStatement, VariableDeclarationStatement.class);
 		}
 
 		return Optional.empty();
@@ -168,18 +168,6 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 			return Optional.empty();
 		}
 		return Optional.of((VariableDeclarationStatement) first);
-	}
-
-	private Optional<VariableDeclarationStatement> findVariableDeclarationAfterIfStatement(
-			IfStatement ifStatement) {
-
-		Block block = ASTNodeUtil.findParentBlock(ifStatement)
-			.orElse(null);
-		if (block == null) {
-			return Optional.empty();
-		}
-
-		return ASTNodeUtil.findListElementAfter(block.statements(), ifStatement, VariableDeclarationStatement.class);
 	}
 
 	private boolean isFragmentWithExpectedTypeCastInitializer(VariableDeclarationFragment fragment,

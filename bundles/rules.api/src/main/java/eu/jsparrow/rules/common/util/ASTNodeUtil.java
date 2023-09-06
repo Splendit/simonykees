@@ -349,15 +349,46 @@ public class ASTNodeUtil {
 		return castToOptional(rawlist.get(0), type);
 	}
 
-	public static <T extends Statement> Optional<T> findPreviousStatementInBlock(Statement followingStatement,
+	/**
+	 * 
+	 * @return An Optional storing the Statement previous to the Statement
+	 *         specified by the 1st parameter if the parent of the specified
+	 *         statement is a Block and if the previous statement has the type
+	 *         specified by the 2nd parameter.
+	 *         <p>
+	 *         Otherwise, an empty Optional is returned.
+	 * 
+	 */
+	public static <T extends Statement> Optional<T> findPreviousStatementInBlock(Statement statement,
 			Class<T> type) {
-		Block parentBlock = ASTNodeUtil.findParentBlock(followingStatement)
+		Block parentBlock = ASTNodeUtil.findParentBlock(statement)
 			.orElse(null);
 		if (parentBlock == null) {
 			return Optional.empty();
 		}
 
-		return ASTNodeUtil.findListElementBefore(parentBlock.statements(), followingStatement, type);
+		return ASTNodeUtil.findListElementBefore(parentBlock.statements(), statement, type);
+	}
+
+	/**
+	 * 
+	 * @return An Optional storing the Statement subsequent to the Statement
+	 *         specified by the 1st parameter if the parent of the specified
+	 *         statement is a Block and if the subsequent statement has the type
+	 *         specified by the 2nd parameter.
+	 *         <p>
+	 *         Otherwise, an empty Optional is returned.
+	 * 
+	 */
+	public static <T extends Statement> Optional<T> findSubsequentStatementInBlock(Statement statement,
+			Class<T> type) {
+		Block parentBlock = ASTNodeUtil.findParentBlock(statement)
+			.orElse(null);
+		if (parentBlock == null) {
+			return Optional.empty();
+		}
+
+		return ASTNodeUtil.findListElementAfter(parentBlock.statements(), statement, type);
 	}
 
 	/**
