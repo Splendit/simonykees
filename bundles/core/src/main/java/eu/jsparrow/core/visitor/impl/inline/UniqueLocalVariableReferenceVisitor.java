@@ -17,16 +17,32 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableReferencesCollectorV
  *
  */
 class UniqueLocalVariableReferenceVisitor extends LocalVariableReferencesCollectorVisitor {
+
+	private final SupportedReferenceAnalyzer supportedReferenceAnalyzer;
+	private boolean unsupportedReferenceFound = false;
+
 	public UniqueLocalVariableReferenceVisitor(CompilationUnit compilationUnit,
-			VariableDeclarationFragment declarationFragment) {
+			VariableDeclarationFragment declarationFragment, SupportedReferenceAnalyzer supportedReferenceAnalyzer) {
 		super(compilationUnit, declarationFragment);
+		this.supportedReferenceAnalyzer = supportedReferenceAnalyzer;
 	}
 
 	@Override
 	public void endVisit(SimpleName node) {
-		if (references.size() > 1) {
+		unsupportedReferenceFound = hasUnsupportedReference();
+		if (unsupportedReferenceFound) {
 			stopVisiting();
 		}
+	}
+
+	private boolean hasUnsupportedReference() {
+		if (references.isEmpty()) {
+			return false;
+		}
+		if (references.size() > 1) {
+			return true;
+		}
+		return !supportedReferenceAnalyzer.isSupportedReference(references.get(0));
 	}
 
 	/**
@@ -36,6 +52,9 @@ class UniqueLocalVariableReferenceVisitor extends LocalVariableReferencesCollect
 	 *         other cases, an empty Optional is returned.
 	 */
 	Optional<SimpleName> getUniqueLocalVariableReference() {
+		if (unsupportedReferenceFound || isInvalidBinding()) {
+			return Optional.empty();
+		}
 		if (references.size() == 1) {
 			return Optional.of(references.get(0));
 		}

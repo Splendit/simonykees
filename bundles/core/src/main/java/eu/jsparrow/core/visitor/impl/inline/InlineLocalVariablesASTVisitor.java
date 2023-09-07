@@ -46,8 +46,8 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		if (initializer == null) {
 			return false;
 		}
-		
-		if(isCommentProhibitingTransformation(initializer)) {
+
+		if (isCommentProhibitingTransformation(initializer)) {
 			return true;
 		}
 
@@ -75,11 +75,24 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 			return true;
 		}
 
-		SupportedUniqueUsageAnalyzer analyzer = new SupportedUniqueUsageAnalyzer(getCompilationUnit());
-
-		SimpleName usageToReplace = analyzer
-			.findUniqueUsageToInline(declarationStatement, declarationFragment, initializer)
+		Statement statementAfterDeclaration = ASTNodeUtil
+			.findSubsequentStatementInBlock(declarationStatement, Statement.class)
 			.orElse(null);
+		if (statementAfterDeclaration == null) {
+			return true;
+		}
+
+		SupportedReferenceAnalyzer supportedReferenceAnalyzer = new SupportedReferenceAnalyzer(
+				statementAfterDeclaration, initializer);
+
+		UniqueLocalVariableReferenceVisitor uniqueLocalVariableReferenceVisitor = new UniqueLocalVariableReferenceVisitor(
+				getCompilationUnit(), declarationFragment, supportedReferenceAnalyzer);
+
+		declarationStatement.getParent()
+			.accept(uniqueLocalVariableReferenceVisitor);
+		SimpleName usageToReplace = uniqueLocalVariableReferenceVisitor.getUniqueLocalVariableReference()
+			.orElse(null);
+
 		if (usageToReplace == null) {
 			return true;
 		}
@@ -111,13 +124,13 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		int lastIndex = initializerRelatedComments.size() - 1;
 		if (lastIndex >= 0) {
 			Comment lastInitializerRelatedComment = initializerRelatedComments.get(lastIndex);
-			if(lastInitializerRelatedComment.isLineComment()) {
+			if (lastInitializerRelatedComment.isLineComment()) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	private boolean hasAnnotations(VariableDeclarationStatement declarationStatement) {
 		return !ASTNodeUtil.convertToTypedList(declarationStatement.modifiers(), Annotation.class)
 			.isEmpty();
@@ -207,7 +220,5 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		List<Comment> commentsRelatedToUsage = commentRewriter.findRelatedComments(usage);
 		commentRewriter.saveBeforeStatement(statementWithInlinedVariable, commentsRelatedToUsage);
 	}
-	
-
 
 }

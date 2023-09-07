@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -33,46 +32,31 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * in-line a local variable which is used exactly once.
  * 
  */
-public class SupportedUniqueUsageAnalyzer {
-	static boolean isSupportedUsage(SimpleName usageToReplace, Expression initializer,
-			Statement statementExpected) {
+public class SupportedReferenceAnalyzer {
+	private final Statement statementToInlineReference;
+	private final boolean simpleInitializer;
 
-		Expression expressionWithUsage;
-		if (isSimpleInitializer(initializer)) {
-			expressionWithUsage = findSupportedParentExpression(usageToReplace).orElse(usageToReplace);
-		} else {
-			expressionWithUsage = usageToReplace;
-		}
-
-		Statement statementFoundWithSupportedUsage = findStatementWithSupportedUsage(expressionWithUsage)
-			.orElse(null);
-
-		return statementFoundWithSupportedUsage == statementExpected;
-
+	protected SupportedReferenceAnalyzer(Statement statementToInlineReference,
+			Expression initializerToReplaceReference) {
+		this.statementToInlineReference = statementToInlineReference;
+		this.simpleInitializer = isSimpleInitializer(initializerToReplaceReference);
 	}
 
-	static boolean isSupportedUsage(SimpleName usageToReplace, Expression initializer,
-			VariableDeclarationStatement declarationStatement) {
+	boolean isSupportedReference(SimpleName reference) {
 
 		Expression expressionWithUsage;
-		if (isSimpleInitializer(initializer)) {
-			expressionWithUsage = findSupportedParentExpression(usageToReplace).orElse(usageToReplace);
+		if (simpleInitializer) {
+			expressionWithUsage = findSupportedParentExpression(reference).orElse(reference);
 		} else {
-			expressionWithUsage = usageToReplace;
+			expressionWithUsage = reference;
 		}
 
-		Statement statementWithSupportedUsage = findStatementWithSupportedUsage(expressionWithUsage)
-			.orElse(null);
+		Statement statementFoundWithSupportedUsage = findStatementWithSupportedUsage(
+				expressionWithUsage)
+					.orElse(null);
 
-		if (statementWithSupportedUsage == null) {
-			return false;
-		}
+		return statementFoundWithSupportedUsage == statementToInlineReference;
 
-		VariableDeclarationStatement previuosStatement = ASTNodeUtil
-			.findPreviousStatementInBlock(statementWithSupportedUsage, VariableDeclarationStatement.class)
-			.orElse(null);
-
-		return previuosStatement == declarationStatement;
 	}
 
 	static Optional<Statement> findStatementWithSupportedUsage(Expression expressionWithUsage) {
@@ -103,13 +87,9 @@ public class SupportedUniqueUsageAnalyzer {
 		}
 
 		if (expressionWithUsage.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-			if (expressionWithUsage.getNodeType() == ASTNode.METHOD_INVOCATION
-					|| expressionWithUsage.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION
-					|| expressionWithUsage.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
-				return Optional.of((ExpressionStatement) expressionWithUsage.getParent());
-			}
-			return Optional.empty();
+			return Optional.of((ExpressionStatement) expressionWithUsage.getParent());
 		}
+
 		return Optional.empty();
 
 	}
