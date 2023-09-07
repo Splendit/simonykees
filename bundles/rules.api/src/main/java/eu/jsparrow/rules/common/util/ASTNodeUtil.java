@@ -399,7 +399,7 @@ public class ASTNodeUtil {
 	 *         optional is returned.
 	 * 
 	 */
-	public static <T extends ASTNode> Optional<T> findListElementBefore(@SuppressWarnings("rawtypes") List rawlist,
+	private static <T extends ASTNode> Optional<T> findListElementBefore(@SuppressWarnings("rawtypes") List rawlist,
 			ASTNode element,
 			Class<T> type) {
 		int indexBefore = rawlist.indexOf(element) - 1;
@@ -417,7 +417,7 @@ public class ASTNodeUtil {
 	 *         optional is returned.
 	 * 
 	 */
-	public static <T extends ASTNode> Optional<T> findListElementAfter(@SuppressWarnings("rawtypes") List rawlist,
+	private static <T extends ASTNode> Optional<T> findListElementAfter(@SuppressWarnings("rawtypes") List rawlist,
 			ASTNode element,
 			Class<T> type) {
 		int indexAfter = rawlist.indexOf(element) + 1;

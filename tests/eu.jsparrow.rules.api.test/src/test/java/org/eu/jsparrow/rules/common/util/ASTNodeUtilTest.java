@@ -21,6 +21,11 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 @SuppressWarnings("nls")
 class ASTNodeUtilTest {
 
+	private static <T extends Statement> T getStatementAt(Block block, int index, Class<T> type) {
+		return type.cast(block.statements()
+			.get(index));
+	}
+
 	@Test
 	void findSingletonListElement_shouldFindVariableDeclarationStatement() throws Exception {
 		String code = "int i = 0;\n";
@@ -57,7 +62,7 @@ class ASTNodeUtilTest {
 	}
 
 	@Test
-	void findListElementBefore_shouldFindVariableDeclarationStatement() throws Exception {
+	void visit_shouldFindPreviousVariableDeclaration() throws Exception {
 		String code = ""
 				+ "		boolean condition = true;\n"
 				+ "		if (condition) {\n"
@@ -65,14 +70,15 @@ class ASTNodeUtilTest {
 
 		Block block = ASTNodeBuilder.createBlockFromString(code);
 		assertNotNull(block);
-		Optional<VariableDeclarationStatement> optionalDeclaration = ASTNodeUtil
-			.findListElementBefore(block.statements(), (IfStatement) block.statements()
-				.get(1), VariableDeclarationStatement.class);
-		assertTrue(optionalDeclaration.isPresent());
+
+		IfStatement ifStatement = getStatementAt(block, 1, IfStatement.class);
+		assertNotNull(ASTNodeUtil
+			.findPreviousStatementInBlock(ifStatement, VariableDeclarationStatement.class)
+			.orElse(null));
 	}
 
 	@Test
-	void findListElementBefore_shouldNotFindIfStatement() throws Exception {
+	void visit_shouldNotFindPreviousIf() throws Exception {
 		String code = ""
 				+ "		boolean condition = true;\n"
 				+ "		if (condition) {\n"
@@ -80,29 +86,43 @@ class ASTNodeUtilTest {
 
 		Block block = ASTNodeBuilder.createBlockFromString(code);
 		assertNotNull(block);
-		Optional<IfStatement> optionalDeclaration = ASTNodeUtil
-			.findListElementBefore(block.statements(), (IfStatement) block.statements()
-				.get(1), IfStatement.class);
-		assertFalse(optionalDeclaration.isPresent());
+
+		IfStatement ifStatement = getStatementAt(block, 1, IfStatement.class);
+		assertNull(ASTNodeUtil
+			.findPreviousStatementInBlock(ifStatement, IfStatement.class)
+			.orElse(null));
 	}
 
 	@Test
-	void findListElementBefore_shouldNotFindAnyStatement() throws Exception {
+	void visit_shouldNotFindAnyPreviousStatement() throws Exception {
 		String code = ""
 				+ "		if (condition) {\n"
 				+ "		}";
 
 		Block block = ASTNodeBuilder.createBlockFromString(code);
 		assertNotNull(block);
-		Optional<Statement> optionalDeclaration = ASTNodeUtil.findListElementBefore(block.statements(),
-				(IfStatement) block.statements()
-					.get(0),
-				Statement.class);
-		assertFalse(optionalDeclaration.isPresent());
+
+		IfStatement ifStatement = getStatementAt(block, 0, IfStatement.class);
+		assertNull(ASTNodeUtil.findPreviousStatementInBlock(ifStatement, Statement.class)
+			.orElse(null));
 	}
 
 	@Test
-	void findListElementAfter_shouldFindIfStatement() throws Exception {
+	void visit_shouldNotFindParentForPreviousStatement() throws Exception {
+		String code = "" +
+				"		if (condition) x = 1;";
+
+		Block block = ASTNodeBuilder.createBlockFromString(code);
+		assertNotNull(block);
+
+		IfStatement ifStatement = getStatementAt(block, 0, IfStatement.class);
+		Statement thenStatement = ifStatement.getThenStatement();
+		assertNull(ASTNodeUtil.findPreviousStatementInBlock(thenStatement, Statement.class)
+			.orElse(null));
+	}
+
+	@Test
+	void visit_shouldFindSubsequentIf() throws Exception {
 		String code = ""
 				+ "		boolean condition = true;\n"
 				+ "		if (condition) {\n"
@@ -110,14 +130,15 @@ class ASTNodeUtilTest {
 
 		Block block = ASTNodeBuilder.createBlockFromString(code);
 		assertNotNull(block);
-		Optional<IfStatement> optionalDeclaration = ASTNodeUtil
-			.findListElementAfter(block.statements(), (VariableDeclarationStatement) block.statements()
-				.get(0), IfStatement.class);
-		assertTrue(optionalDeclaration.isPresent());
+
+		VariableDeclarationStatement declarationStatement = getStatementAt(block, 0,
+				VariableDeclarationStatement.class);
+		assertNotNull(ASTNodeUtil.findSubsequentStatementInBlock(declarationStatement, IfStatement.class)
+			.orElse(null));
 	}
 
 	@Test
-	void findListElementAfter_shouldNotFindVariableDeclarationStatement() throws Exception {
+	void visit_shouldNotFindSubsequentVariableDeclaration() throws Exception {
 		String code = ""
 				+ "		boolean condition = true;\n"
 				+ "		if (condition) {\n"
@@ -125,25 +146,41 @@ class ASTNodeUtilTest {
 
 		Block block = ASTNodeBuilder.createBlockFromString(code);
 		assertNotNull(block);
-		Optional<VariableDeclarationStatement> optionalDeclaration = ASTNodeUtil
-			.findListElementAfter(block.statements(), (VariableDeclarationStatement) block.statements()
-				.get(0), VariableDeclarationStatement.class);
-		assertFalse(optionalDeclaration.isPresent());
+
+		VariableDeclarationStatement declarationStatement = getStatementAt(block, 0,
+				VariableDeclarationStatement.class);
+		assertNull(ASTNodeUtil
+			.findSubsequentStatementInBlock(declarationStatement, VariableDeclarationStatement.class)
+			.orElse(null));
+
 	}
 
 	@Test
-	void findListElementAfter_shouldNotFindAnyStatement() throws Exception {
+	void visit_shouldNotFindAnySubsequentStatement() throws Exception {
 		String code = ""
 				+ "		if (condition) {\n"
 				+ "		}";
 
 		Block block = ASTNodeBuilder.createBlockFromString(code);
 		assertNotNull(block);
-		Optional<Statement> optionalDeclaration = ASTNodeUtil.findListElementAfter(block.statements(),
-				(IfStatement) block.statements()
-					.get(0),
-				Statement.class);
-		assertFalse(optionalDeclaration.isPresent());
+
+		IfStatement ifStatement = getStatementAt(block, 0, IfStatement.class);
+		assertNull(ASTNodeUtil.findSubsequentStatementInBlock(ifStatement, Statement.class)
+			.orElse(null));
+	}
+
+	@Test
+	void visit_shouldNotFindParentForSubsequentStatement() throws Exception {
+		String code = "" +
+				"		if (condition) x = 1;";
+
+		Block block = ASTNodeBuilder.createBlockFromString(code);
+		assertNotNull(block);
+
+		IfStatement ifStatement = getStatementAt(block, 0, IfStatement.class);
+		Statement thenStatement = ifStatement.getThenStatement();
+		assertNull(ASTNodeUtil.findSubsequentStatementInBlock(thenStatement, Statement.class)
+			.orElse(null));
 	}
 
 	@Test
@@ -162,7 +199,7 @@ class ASTNodeUtilTest {
 				NumberLiteral.class);
 		assertTrue(numberLiteral.isPresent());
 	}
-	
+
 	@Test
 	void findSingleInvocationArgument_shouldNotFindSingleArgument() throws Exception {
 		String code = "useNumber(0, 1)";
