@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
@@ -28,8 +29,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
- * Helper class to determine whether or not it is possible and reasonable to
- * in-line a local variable which is used exactly once.
+ * Helper class to find out whether or not it is possible and reasonable to
+ * in-line a reference on a local variable, provided that the local variable is
+ * used exactly once.
  * 
  */
 public class SupportedReferenceAnalyzer {
@@ -44,53 +46,54 @@ public class SupportedReferenceAnalyzer {
 
 	boolean isSupportedReference(SimpleName reference) {
 
-		Expression expressionWithUsage;
-		if (simpleInitializer) {
-			expressionWithUsage = findSupportedParentExpression(reference).orElse(reference);
-		} else {
-			expressionWithUsage = reference;
+		Statement ancestorStatement = ASTNodeUtil.getSpecificAncestor(reference, Statement.class);
+		if (ancestorStatement != statementToInlineReference) {
+			return false;
 		}
 
-		Statement statementFoundWithSupportedUsage = findStatementWithSupportedUsage(
-				expressionWithUsage)
-					.orElse(null);
+		if (simpleInitializer) {
+			Expression expressionEnclosingReference = findSupportedParentExpression(reference).orElse(null);
+			if (expressionEnclosingReference != null) {
+				return analyzeLocationInParent(expressionEnclosingReference);
+			}
+		}
 
-		return statementFoundWithSupportedUsage == statementToInlineReference;
-
+		return analyzeLocationInParent(reference);
 	}
 
-	static Optional<Statement> findStatementWithSupportedUsage(Expression expressionWithUsage) {
+	static boolean analyzeLocationInParent(Expression expressionWithUsage) {
 
 		if (expressionWithUsage.getLocationInParent() == ReturnStatement.EXPRESSION_PROPERTY) {
-			return Optional.of((ReturnStatement) expressionWithUsage.getParent());
+			return true;
 		}
 
 		if (expressionWithUsage.getLocationInParent() == ThrowStatement.EXPRESSION_PROPERTY) {
-			return Optional.of((ThrowStatement) expressionWithUsage.getParent());
-		}
-
-		if (expressionWithUsage.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment) expressionWithUsage.getParent();
-			if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-				return Optional.of((ExpressionStatement) assignment.getParent());
-			}
-			return Optional.empty();
-		}
-
-		if (expressionWithUsage.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			VariableDeclarationFragment parentDeclarationFragment = (VariableDeclarationFragment) expressionWithUsage
-				.getParent();
-			if (parentDeclarationFragment.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-				return Optional.of((VariableDeclarationStatement) parentDeclarationFragment.getParent());
-			}
-			return Optional.empty();
+			return true;
 		}
 
 		if (expressionWithUsage.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-			return Optional.of((ExpressionStatement) expressionWithUsage.getParent());
+			return true;
 		}
 
-		return Optional.empty();
+		if (expressionWithUsage.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			StructuralPropertyDescriptor parentLocationInParent = expressionWithUsage.getParent()
+				.getLocationInParent();
+			return parentLocationInParent == ExpressionStatement.EXPRESSION_PROPERTY;
+		}
+
+		if (expressionWithUsage.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			StructuralPropertyDescriptor parentLocationInParent = expressionWithUsage.getParent()
+				.getLocationInParent();
+			if (parentLocationInParent == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+				VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) expressionWithUsage
+					.getParent()
+					.getParent();
+				return declarationStatement.fragments()
+					.size() == 1;
+			}
+		}
+
+		return false;
 
 	}
 
