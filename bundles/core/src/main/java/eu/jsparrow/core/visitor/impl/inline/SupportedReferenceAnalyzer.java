@@ -36,68 +36,87 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class SupportedReferenceAnalyzer {
 	private final Statement statementToInlineReference;
-	private final boolean simpleInitializer;
+	private final Expression initializerToReplaceReference;
 
-	protected SupportedReferenceAnalyzer(Statement statementToInlineReference,
+	static Optional<VariableDeclarationStatement> findVariableDeclarationStatementWithSingleFragment(
+			VariableDeclarationFragment declarationFragment) {
+
+		if (declarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+			return Optional.empty();
+		}
+
+		VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) declarationFragment
+			.getParent();
+
+		return Optional.of(declarationStatement)
+			.filter(variableDeclarationStatement -> isSingletonList(declarationStatement.fragments()));
+
+	}
+
+	private static boolean isSingletonList(@SuppressWarnings("rawtypes") List list) {
+		return list.size() == 1;
+	}
+
+	SupportedReferenceAnalyzer(Statement statementToInlineReference,
 			Expression initializerToReplaceReference) {
 		this.statementToInlineReference = statementToInlineReference;
-		this.simpleInitializer = isSimpleInitializer(initializerToReplaceReference);
+		this.initializerToReplaceReference = initializerToReplaceReference;
 	}
 
 	boolean isSupportedReference(SimpleName reference) {
 
-		Statement ancestorStatement = ASTNodeUtil.getSpecificAncestor(reference, Statement.class);
-		if (ancestorStatement != statementToInlineReference) {
+		if (analyzeLocationInParent(reference)) {
+			return true;
+		}
+
+		if (!isSimpleInitializer(initializerToReplaceReference)) {
 			return false;
 		}
 
-		if (simpleInitializer) {
-			Expression expressionEnclosingReference = findSupportedParentExpression(reference).orElse(null);
-			if (expressionEnclosingReference != null) {
-				return analyzeLocationInParent(expressionEnclosingReference);
-			}
+		Expression expressionEnclosingReference = findSupportedParentExpression(reference).orElse(null);
+		if (expressionEnclosingReference == null) {
+			return false;
 		}
 
-		return analyzeLocationInParent(reference);
+		return analyzeLocationInParent(expressionEnclosingReference);
 	}
 
-	static boolean analyzeLocationInParent(Expression expressionWithUsage) {
+	private boolean analyzeLocationInParent(Expression expressionWithUsage) {
 
-		if (expressionWithUsage.getLocationInParent() == ReturnStatement.EXPRESSION_PROPERTY) {
-			return true;
-		}
+		ASTNode parent = expressionWithUsage.getParent();
+		if (parent == statementToInlineReference) {
+			if (expressionWithUsage.getLocationInParent() == ReturnStatement.EXPRESSION_PROPERTY) {
+				return true;
+			}
 
-		if (expressionWithUsage.getLocationInParent() == ThrowStatement.EXPRESSION_PROPERTY) {
-			return true;
-		}
+			if (expressionWithUsage.getLocationInParent() == ThrowStatement.EXPRESSION_PROPERTY) {
+				return true;
+			}
 
-		if (expressionWithUsage.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-			return true;
+			if (expressionWithUsage.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+				return true;
+			}
+			return false;
 		}
 
 		if (expressionWithUsage.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			StructuralPropertyDescriptor parentLocationInParent = expressionWithUsage.getParent()
+			StructuralPropertyDescriptor parentLocationInParent = parent
 				.getLocationInParent();
-			return parentLocationInParent == ExpressionStatement.EXPRESSION_PROPERTY;
+			return parentLocationInParent == ExpressionStatement.EXPRESSION_PROPERTY
+					&& parent.getParent() == statementToInlineReference;
 		}
 
 		if (expressionWithUsage.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			StructuralPropertyDescriptor parentLocationInParent = expressionWithUsage.getParent()
-				.getLocationInParent();
-			if (parentLocationInParent == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-				VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) expressionWithUsage
-					.getParent()
-					.getParent();
-				return declarationStatement.fragments()
-					.size() == 1;
-			}
+			VariableDeclarationStatement declarationStatementFound = findVariableDeclarationStatementWithSingleFragment(
+					(VariableDeclarationFragment) parent).orElse(null);
+			return declarationStatementFound == statementToInlineReference;
 		}
 
 		return false;
 
 	}
 
-	static boolean isSimpleInitializer(Expression initializer) {
+	private static boolean isSimpleInitializer(Expression initializer) {
 		if (isSimpleThisExpression(initializer)) {
 			return true;
 		}
@@ -124,11 +143,7 @@ public class SupportedReferenceAnalyzer {
 		return ASTNodeUtil.isLiteral(initializer);
 	}
 
-	private static boolean isSingletonList(@SuppressWarnings("rawtypes") List list) {
-		return list.size() == 1;
-	}
-
-	static Optional<Expression> findSupportedParentExpression(SimpleName uniqueUsage) {
+	private static Optional<Expression> findSupportedParentExpression(SimpleName uniqueUsage) {
 
 		if (uniqueUsage.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
 			MethodInvocation methodInvocation = (MethodInvocation) uniqueUsage.getParent();

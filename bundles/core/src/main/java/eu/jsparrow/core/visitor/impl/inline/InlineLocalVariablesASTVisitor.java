@@ -55,15 +55,11 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 			return false;
 		}
 
-		if (declarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-			return true;
-		}
+		VariableDeclarationStatement declarationStatement = SupportedReferenceAnalyzer
+			.findVariableDeclarationStatementWithSingleFragment(declarationFragment)
+			.orElse(null);
 
-		VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) declarationFragment
-			.getParent();
-
-		if (declarationStatement.fragments()
-			.size() != 1) {
+		if (declarationStatement == null) {
 			return true;
 		}
 
