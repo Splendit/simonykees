@@ -7,15 +7,24 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * Helper class to find out whether or not it is possible and reasonable to
@@ -24,8 +33,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
  * 
  */
 class SupportedReferenceAnalyzer {
-	private final Statement statementToInlineReference;
-	private final Expression initializerToReplaceReference;
+	private final Statement statementFollowingDeclaration;
+	private final Expression initializerOfDeclaration;
 
 	static Optional<VariableDeclarationStatement> findVariableDeclarationStatementWithSingleFragment(
 			VariableDeclarationFragment declarationFragment) {
@@ -43,62 +52,90 @@ class SupportedReferenceAnalyzer {
 
 	}
 
-	SupportedReferenceAnalyzer(Statement statementToInlineReference,
-			Expression initializerToReplaceReference) {
-		this.statementToInlineReference = statementToInlineReference;
-		this.initializerToReplaceReference = initializerToReplaceReference;
+	SupportedReferenceAnalyzer(Statement statementFollowingDeclaration,
+			Expression initializerOfDeclaration) {
+		this.statementFollowingDeclaration = statementFollowingDeclaration;
+		this.initializerOfDeclaration = initializerOfDeclaration;
 	}
 
 	boolean isSupportedReference(SimpleName reference) {
 
-		if (analyzeLocationInParent(reference)) {
-			return true;
-		}
+		
+		ASTNode parent = reference.getParent();
+		if (parent == statementFollowingDeclaration) {
+			if (reference.getLocationInParent() == ReturnStatement.EXPRESSION_PROPERTY) {
+				return true;
+			}
 
-		if (!SimpleStructureHelper.isSimpleInitializer(initializerToReplaceReference, true)) {
+			if (reference.getLocationInParent() == ThrowStatement.EXPRESSION_PROPERTY) {
+				return true;
+			}
+		}
+		return false;
+
+		/*
+		if (!isConstantInitializer(initializerOfDeclaration)) {
 			return false;
 		}
 
-		Expression expressionEnclosingReference = findSupportedParentExpression(reference).orElse(null);
-		if (expressionEnclosingReference == null) {
-			return false;
+		if (reference.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+			MethodInvocation methodInvocation = (MethodInvocation) reference.getParent();
+			return SimpleStructureHelper.isSingletonList(methodInvocation.arguments());
 		}
 
-		return analyzeLocationInParent(expressionEnclosingReference);
+		if (reference.getLocationInParent() == SuperMethodInvocation.ARGUMENTS_PROPERTY) {
+			SuperMethodInvocation superMethodInvocation = (SuperMethodInvocation) reference.getParent();
+			return SimpleStructureHelper.isSingletonList(superMethodInvocation.arguments());
+		}
+
+		if (reference.getLocationInParent() == ClassInstanceCreation.ARGUMENTS_PROPERTY) {
+			ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) reference.getParent();
+			return SimpleStructureHelper.isSingletonList(classInstanceCreation.arguments());
+		}
+
+		return reference.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY;
+		*/
 	}
 
-	private boolean analyzeLocationInParent(Expression expressionWithUsage) {
+	static boolean isConstantInitializer(Expression initializer) {
 
-		ASTNode parent = expressionWithUsage.getParent();
-		if (parent == statementToInlineReference) {
-			if (expressionWithUsage.getLocationInParent() == ReturnStatement.EXPRESSION_PROPERTY) {
-				return true;
+		if (initializer.getNodeType() == ASTNode.PREFIX_EXPRESSION) {
+			PrefixExpression prefixExpression = (PrefixExpression) initializer;
+			if (SimpleStructureHelper.isSupportedPrefixExpression(prefixExpression)) {
+				return isConstantInitializer(prefixExpression.getOperand());
 			}
+		}
+		
 
-			if (expressionWithUsage.getLocationInParent() == ThrowStatement.EXPRESSION_PROPERTY) {
-				return true;
-			}
+		if (ASTNodeUtil.isLiteral(initializer)) {
+			return true;
+		}
+		
 
-			if (expressionWithUsage.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-				return true;
-			}
-			return false;
+		if (initializer.getNodeType() == ASTNode.SIMPLE_NAME) {
+			return isStaticFinalField((SimpleName) initializer);
 		}
 
-		if (expressionWithUsage.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			StructuralPropertyDescriptor parentLocationInParent = parent
-				.getLocationInParent();
-			return parentLocationInParent == ExpressionStatement.EXPRESSION_PROPERTY
-					&& parent.getParent() == statementToInlineReference;
-		}
-
-		if (expressionWithUsage.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			VariableDeclarationStatement declarationStatementFound = findVariableDeclarationStatementWithSingleFragment(
-					(VariableDeclarationFragment) parent).orElse(null);
-			return declarationStatementFound == statementToInlineReference;
+		if (initializer.getNodeType() == ASTNode.QUALIFIED_NAME) {
+			return isStaticFinalField((QualifiedName) initializer);
 		}
 
 		return false;
+	}
+
+	static boolean isStaticFinalField(Name name) {
+		IBinding binding = name.resolveBinding();
+		if (binding == null) {
+			return false;
+		}
+
+		if (binding.getKind() != IBinding.VARIABLE) {
+			return false;
+		}
+
+		IVariableBinding variableBinding = (IVariableBinding) binding;
+		int modifiers = variableBinding.getModifiers();
+		return Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers);
 	}
 
 	private static Optional<Expression> findSupportedParentExpression(SimpleName uniqueUsage) {

@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -159,8 +160,7 @@ class SupportedReferenceAnalyzerTest extends UsesJDTUnitFixture {
 		assertNotNull(simpleName);
 		assertTrue(analyzer.isSupportedReference(simpleName));
 	}
-	
-	
+
 	@Test
 	void visit_ReferenceUsedInVariableDeclarationStatementWithTwoFragments_shouldNotBeSupported() throws Exception {
 		Block block = ASTNodeBuilder.createBlockFromString("" +
@@ -304,5 +304,4 @@ class SupportedReferenceAnalyzerTest extends UsesJDTUnitFixture {
 		assertNotNull(simpleName);
 		assertFalse(analyzer.isSupportedReference(simpleName));
 	}
-
 }
