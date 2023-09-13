@@ -159,9 +159,11 @@ public class OptionalIfPresentRule {
 	}
 
 	public void getExpressionNotPresent_shouldNotTransform(Optional<String> input) {
-		if (input.isPresent()) {
-			logger.info("");
+		if (!input.isPresent()) {
+			return;
 		}
+		final String value = "";
+		logger.info(value);
 	}
 
 	public void getWithArgument_shouldNotTransform(Optional<String> input, List<String> users) {
@@ -256,7 +258,8 @@ public class OptionalIfPresentRule {
 	}
 
 	public void avoidExternalNameConflicts_shouldTransform() {
-		final Optional<String> user = Optional.ofNullable("I could crash with the lambda parameter");
+		final String value = "I could crash with the lambda parameter";
+		final Optional<String> user = Optional.ofNullable(value);
 		user.ifPresent(logger::info);
 	}
 

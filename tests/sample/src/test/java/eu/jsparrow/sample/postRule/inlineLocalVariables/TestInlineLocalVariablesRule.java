@@ -9,17 +9,16 @@ public class TestInlineLocalVariablesRule {
 	void exampleWithAssignment() {
 		/* 1 */
 		// 2
-		/* 3 */
+		List<String> /* 3 */
 		// 4
-		/* 5 */
-		/* 16 */
-		/* 19 */
-		/* 20 */
+		x /* 5 */
+				=
+				// 6
+				/* 7 */ Arrays/* 8 */ ./* 9 */ asList(/* 10 */ "item-1"/* 11 */ ,
+						// 12
+						/* 13 */ "item-2"/* 14 */)/* 15 */;/* 16 */
 		// 17
-		result /* 18 */ = // 6
-		/* 7 */ Arrays/* 8 */ ./* 9 */ asList(/* 10 */ "item-1"/* 11 */ ,
-				// 12
-				/* 13 */ "item-2"/* 14 */)/* 15 */; // 21
+		result /* 18 */ = /* 19 */ x /* 20 */; // 21
 	}
 
 	int exampleWithReturn(int a, int b, int c, int d) {

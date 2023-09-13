@@ -265,29 +265,32 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitBreakCasting20(String input) {
+		final double defaultValue = -1.0;
 		final List<Integer> values = new ArrayList<>();
 		double defaultIndex = values.stream()
 			.filter(value -> value > 4)
 			.findFirst()
 			.map(Double::valueOf)
-			.orElse(-1.0);
+			.orElse(defaultValue);
 
 		return defaultIndex;
 	}
 
 	public double implicitBreakCasting21(String input) {
+		final double defaultValue = -1.0;
 		final List<Integer> values = new ArrayList<>();
 		double defaultIndex = values.stream()
 			.filter(value -> value > 4)
 			.findFirst()
 			.map(value -> Double.valueOf(value + 1))
-			.orElse(-1.0);
+			.orElse(defaultValue);
 
 		return defaultIndex;
 	}
 
 	public double implicitBreakCasting30(String input) {
-		final double defaultIndex = -1.0;
+		final double defaultValue = -1.0;
+		final double defaultIndex = defaultValue;
 		final List<Double> values = new ArrayList<>();
 		// comment before loop
 		// comment inside
@@ -298,12 +301,13 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitBreakCasting31(String input) {
+		final int defaultValue = -1;
 		final List<Double> values = new ArrayList<>();
 		double defaultIndex = values.stream()
 			.filter(value -> value > 4)
 			.findFirst()
 			.map(value -> value * 3.1)
-			.orElse(Double.valueOf(-1));
+			.orElse(Double.valueOf(defaultValue));
 		return defaultIndex;
 	}
 

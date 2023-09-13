@@ -1,6 +1,7 @@
 package eu.jsparrow.core.markers.common;
 
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 
 import eu.jsparrow.core.visitor.impl.inline.InlineLocalVariablesASTVisitor;
 
@@ -13,12 +14,10 @@ import eu.jsparrow.core.visitor.impl.inline.InlineLocalVariablesASTVisitor;
  */
 public interface InlineLocalVariablesEvent {
 
-	/**
-	 * 
-	 * @param fragment
-	 *            the original variable declaration fragment to be removed by
-	 *            in-lining.
-	 */
-	default void addMarkerEvent(VariableDeclarationFragment fragment) {
+	default void addMarkerEvent(ReturnStatement returnStatement) {
 	}
+
+	default void addMarkerEvent(ThrowStatement throwStatement) {
+	}
+
 }

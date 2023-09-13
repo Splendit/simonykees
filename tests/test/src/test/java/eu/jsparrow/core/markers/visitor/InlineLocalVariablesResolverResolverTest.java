@@ -69,15 +69,15 @@ class InlineLocalVariablesResolverResolverTest extends UsesJDTUnitFixture {
 				() -> assertEquals("InlineLocalVariablesResolver", event.getResolver()),
 				() -> assertEquals(description, event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
-				() -> assertEquals(87, event.getOffset()),
+				() -> assertEquals(111, event.getOffset()),
 				() -> assertEquals(14, event.getLength()),
-				() -> assertEquals(6, event.getLineNumber()),
+				() -> assertEquals(7, event.getLineNumber()),
 				() -> assertEquals(2, event.getWeightValue()));
 	}
 
 	@Test
 	void test_resolveMarkers_shouldResolveOne() throws Exception {
-		setResolver(node -> node.getStartPosition() == 87);
+		setResolver(node -> node.getStartPosition() == 111);
 		assertChange(ORIGINAL, EXPECTED);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertEquals(1, events.size());

@@ -1,13 +1,16 @@
 package eu.jsparrow.sample.postRule.allRules;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import junit.framework.TestCase;
+import junit.textui.TestRunner;
 
-import org.junit.jupiter.api.Test;
+public class ReplaceJUnit3TestCasesTestRunnerRunWithClassVariableRule extends TestCase {
 
-public class ReplaceJUnit3TestCasesTestRunnerRunWithClassVariableRule {
-
-	@Test
 	public void testAddition() {
 		assertEquals(10, 5 + 5);
+	}
+
+	public static void main(String[] args) {
+		final Class<ReplaceJUnit3TestCasesTestRunnerRunWithClassVariableRule> testClass = ReplaceJUnit3TestCasesTestRunnerRunWithClassVariableRule.class;
+		TestRunner.run(testClass);
 	}
 }

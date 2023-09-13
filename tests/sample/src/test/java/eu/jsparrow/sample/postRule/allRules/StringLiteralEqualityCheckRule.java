@@ -88,7 +88,8 @@ public class StringLiteralEqualityCheckRule {
 	}
 
 	public boolean checkingCustomComparable() {
-		final ComparableString foo = new ComparableString("customComparable");
+		final String val = "customComparable";
+		final ComparableString foo = new ComparableString(val);
 
 		return foo.equals("customComparable");
 	}

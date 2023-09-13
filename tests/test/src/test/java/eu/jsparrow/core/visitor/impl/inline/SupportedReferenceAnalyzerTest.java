@@ -25,6 +25,7 @@ import eu.jsparrow.common.UsesJDTUnitFixture;
 import eu.jsparrow.jdtunit.JdtUnitException;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
+@Disabled("Intended to be removed.")
 class SupportedReferenceAnalyzerTest extends UsesJDTUnitFixture {
 
 	static SupportedReferenceAnalyzer createAnalyzer(Block block) throws JdtUnitException {

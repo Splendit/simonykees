@@ -9,6 +9,10 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * Contains all structural information which is necessary for the
@@ -46,9 +50,41 @@ class InLineLocalVariablesAnalysisData {
 		}
 		SimpleName simpleName = (SimpleName) statementExpression;
 		String identifier = simpleName.getIdentifier();
-		return LocalVariableDeclarationData.findData(block, identifier)
+		return findLocalVariableDeclarationData(statement, identifier)
 			.map(variableDeclarationData -> new InLineLocalVariablesAnalysisData(block, variableDeclarationData,
 					statement, simpleName));
+	}
+
+	private static Optional<LocalVariableDeclarationData> findLocalVariableDeclarationData(Statement statement,
+			String expectedIdentifier) {
+		VariableDeclarationStatement precedingDeclarationStatement = ASTNodeUtil
+			.findPreviousStatementInBlock(statement, VariableDeclarationStatement.class)
+			.orElse(null);
+		if (precedingDeclarationStatement == null) {
+			return Optional.empty();
+		}
+		VariableDeclarationFragment uniqueDeclarationFragment = ASTNodeUtil
+			.findSingletonListElement(precedingDeclarationStatement.fragments(),
+					VariableDeclarationFragment.class)
+			.orElse(null);
+
+		if (uniqueDeclarationFragment == null) {
+			return Optional.empty();
+		}
+
+		Expression initializer = uniqueDeclarationFragment.getInitializer();
+		if (initializer == null) {
+			return Optional.empty();
+		}
+		String identifier = uniqueDeclarationFragment.getName()
+			.getIdentifier();
+		if (!identifier.equals(expectedIdentifier)) {
+			return Optional.empty();
+		}
+
+		return Optional.of(new LocalVariableDeclarationData(precedingDeclarationStatement, uniqueDeclarationFragment,
+				initializer));
+
 	}
 
 	private InLineLocalVariablesAnalysisData(Block block, LocalVariableDeclarationData localVariableDeclarationData,

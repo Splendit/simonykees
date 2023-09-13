@@ -18,13 +18,13 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableReferencesCollectorV
  */
 class UniqueLocalVariableReferenceVisitor extends LocalVariableReferencesCollectorVisitor {
 
-	private final SupportedReferenceAnalyzer supportedReferenceAnalyzer;
+	private final SimpleName expectedReference;
 	private boolean unsupportedReferenceFound = false;
 
 	public UniqueLocalVariableReferenceVisitor(CompilationUnit compilationUnit,
-			VariableDeclarationFragment declarationFragment, SupportedReferenceAnalyzer supportedReferenceAnalyzer) {
+			VariableDeclarationFragment declarationFragment, SimpleName expectedReference) {
 		super(compilationUnit, declarationFragment);
-		this.supportedReferenceAnalyzer = supportedReferenceAnalyzer;
+		this.expectedReference = expectedReference;
 	}
 
 	@Override
@@ -35,14 +35,14 @@ class UniqueLocalVariableReferenceVisitor extends LocalVariableReferencesCollect
 		}
 	}
 
-	private boolean hasUnsupportedReference() {
+	boolean hasUnsupportedReference() {
 		if (references.isEmpty()) {
 			return false;
 		}
 		if (references.size() > 1) {
 			return true;
 		}
-		return !supportedReferenceAnalyzer.isSupportedReference(references.get(0));
+		return references.get(0) != expectedReference;
 	}
 
 	/**

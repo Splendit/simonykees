@@ -1,9 +1,7 @@
 package eu.jsparrow.core.visitor.impl.inline;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -16,8 +14,10 @@ import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -37,81 +37,99 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  */
 public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor implements InlineLocalVariablesEvent {
 
-	private final Set<VariableDeclarationFragment> transformedFragments = new HashSet<>();
-
 	@Override
-	public boolean visit(VariableDeclarationFragment declarationFragment) {
+	public boolean visit(ReturnStatement node) {
 
-		Expression initializer = declarationFragment.getInitializer();
-		if (initializer == null) {
-			return false;
-		}
-
-		if (isCommentProhibitingTransformation(initializer)) {
-			return true;
-		}
-
-		if (transformedFragments.contains(declarationFragment)) {
-			return false;
-		}
-
-		VariableDeclarationStatement declarationStatement = SupportedReferenceAnalyzer
-			.findVariableDeclarationStatementWithSingleFragment(declarationFragment)
+		InLineLocalVariablesAnalysisData transformationData = InLineLocalVariablesAnalysisData
+			.findAnalysisData(node)
+			.filter(this::validateTransformationData)
 			.orElse(null);
 
-		if (declarationStatement == null) {
+		if (transformationData == null) {
 			return true;
 		}
 
-		if (hasAnnotations(declarationStatement)) {
-			return true;
-		}
-
-		if (!checkBindingsForFragmentAndInitializer(declarationFragment, initializer)) {
-			return true;
-		}
-
-		Statement statementAfterDeclaration = ASTNodeUtil
-			.findSubsequentStatementInBlock(declarationStatement, Statement.class)
-			.orElse(null);
-		if (statementAfterDeclaration == null) {
-			return true;
-		}
-
-		SupportedReferenceAnalyzer supportedReferenceAnalyzer = new SupportedReferenceAnalyzer(
-				statementAfterDeclaration, initializer);
-
-		UniqueLocalVariableReferenceVisitor uniqueLocalVariableReferenceVisitor = new UniqueLocalVariableReferenceVisitor(
-				getCompilationUnit(), declarationFragment, supportedReferenceAnalyzer);
-
-		declarationStatement.getParent()
-			.accept(uniqueLocalVariableReferenceVisitor);
-		SimpleName usageToReplace = uniqueLocalVariableReferenceVisitor.getUniqueLocalVariableReference()
-			.orElse(null);
-
-		if (usageToReplace == null) {
-			return true;
-		}
-
-		Supplier<ASTNode> usageReplacementSupplier = findUsageReplacementSupplier(declarationStatement,
-				declarationFragment, initializer).orElse(null);
+		Supplier<ASTNode> usageReplacementSupplier = findUsageReplacementSupplier(
+				transformationData.getLocalVariableDeclarationData()).orElse(null);
 		if (usageReplacementSupplier == null) {
 			return true;
 		}
 
-		if (usageToReplace.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			VariableDeclarationFragment fragmentAsTransformedParent = (VariableDeclarationFragment) usageToReplace
-				.getParent();
-			transformedFragments.add(fragmentAsTransformedParent);
-		}
-		saveComments(declarationStatement, initializer, usageToReplace);
+		transform(transformationData, usageReplacementSupplier);
+		addMarkerEvent(node);
 
+		return false;
+	}
+
+	@Override
+	public boolean visit(ThrowStatement node) {
+
+		InLineLocalVariablesAnalysisData transformationData = InLineLocalVariablesAnalysisData
+			.findAnalysisData(node)
+			.filter(this::validateTransformationData)
+			.orElse(null);
+
+		if (transformationData == null) {
+			return true;
+		}
+
+		Supplier<ASTNode> usageReplacementSupplier = findUsageReplacementSupplier(
+				transformationData.getLocalVariableDeclarationData()).orElse(null);
+		if (usageReplacementSupplier == null) {
+			return true;
+		}
+
+		transform(transformationData, usageReplacementSupplier);
+		addMarkerEvent(node);
+
+		return false;
+	}
+
+	private boolean validateTransformationData(InLineLocalVariablesAnalysisData transformationData) {
+
+		Expression initializer = transformationData.getLocalVariableDeclarationData()
+			.getInitializer();
+
+		if (isCommentProhibitingTransformation(initializer)) {
+			return false;
+		}
+
+		VariableDeclarationStatement declarationStatement = transformationData.getLocalVariableDeclarationData()
+			.getVariableDeclarationStatement();
+
+		if (hasAnnotations(declarationStatement)) {
+			return false;
+		}
+
+		VariableDeclarationFragment declarationFragment = transformationData.getLocalVariableDeclarationData()
+			.getVariableDeclarationFragment();
+
+		if (!checkBindingsForFragmentAndInitializer(declarationFragment, initializer)) {
+			return false;
+		}
+
+		SimpleName usageToReplace = transformationData.getSimpleNameToReplace();
+
+		UniqueLocalVariableReferenceVisitor uniqueLocalVariableReferenceVisitor = new UniqueLocalVariableReferenceVisitor(
+				getCompilationUnit(), declarationFragment, usageToReplace);
+
+		transformationData.getBlock()
+			.accept(uniqueLocalVariableReferenceVisitor);
+
+		return !uniqueLocalVariableReferenceVisitor.hasUnsupportedReference();
+	}
+
+	private void transform(InLineLocalVariablesAnalysisData transformationData,
+			Supplier<ASTNode> usageReplacementSupplier) {
+		VariableDeclarationStatement declarationStatement = transformationData.getLocalVariableDeclarationData()
+			.getVariableDeclarationStatement();
+
+		SimpleName usageToReplace = transformationData.getSimpleNameToReplace();
+		saveComments(transformationData);
 		ASTNode usageReplacement = usageReplacementSupplier.get();
 		astRewrite.replace(usageToReplace, usageReplacement, null);
 		astRewrite.remove(declarationStatement, null);
-		addMarkerEvent(declarationFragment);
 		onRewrite();
-		return false;
 	}
 
 	private boolean isCommentProhibitingTransformation(Expression initializer) {
@@ -132,10 +150,16 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 			.isEmpty();
 	}
 
-	private Optional<Supplier<ASTNode>> findUsageReplacementSupplier(VariableDeclarationStatement declarationStatement,
-			VariableDeclarationFragment declarationFragment, Expression initializer) {
+	private Optional<Supplier<ASTNode>> findUsageReplacementSupplier(
+			LocalVariableDeclarationData localVariableDeclarationData) {
 
+		Expression initializer = localVariableDeclarationData
+			.getInitializer();
 		if (initializer.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
+			VariableDeclarationStatement declarationStatement = localVariableDeclarationData
+				.getVariableDeclarationStatement();
+			VariableDeclarationFragment declarationFragment = localVariableDeclarationData
+				.getVariableDeclarationFragment();
 
 			ArrayInitializer arrayInitializer = (ArrayInitializer) initializer;
 			Type declarationStatementType = declarationStatement.getType();
@@ -204,9 +228,16 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		return newArrayCreation;
 	}
 
-	private void saveComments(VariableDeclarationStatement variableDeclarationStatement, Expression initializer,
-			SimpleName usage) {
-		Statement statementWithInlinedVariable = ASTNodeUtil.getSpecificAncestor(usage, Statement.class);
+	private void saveComments(InLineLocalVariablesAnalysisData transformationData) {
+
+		LocalVariableDeclarationData localVariableDeclarationData = transformationData
+			.getLocalVariableDeclarationData();
+		VariableDeclarationStatement variableDeclarationStatement = localVariableDeclarationData
+			.getVariableDeclarationStatement();
+		Expression initializer = localVariableDeclarationData
+			.getInitializer();
+		Statement statementWithInlinedVariable = transformationData.getStatementWithSimpleNameToReplace();
+		SimpleName usage = transformationData.getSimpleNameToReplace();
 		CommentRewriter commentRewriter = getCommentRewriter();
 		List<Comment> comments = commentRewriter.findRelatedComments(variableDeclarationStatement);
 		List<Comment> initializerRelatedComments = commentRewriter.findRelatedComments(initializer);

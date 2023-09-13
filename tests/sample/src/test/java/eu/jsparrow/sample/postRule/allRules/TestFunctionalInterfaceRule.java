@@ -251,11 +251,13 @@ public class TestFunctionalInterfaceRule {
 
 	public String redeclaringLocalVariableInAnEnclosingScope(String input) {
 		final String local = input;
-		final int toString = 0;
+		final int a = 0;
+		final int toString = a;
 
 		final AFunctionalInterface foo = (int a1) -> {
 			final String toString1 = "toString";
-			final String input1 = Integer.toString(a1);
+			final String local1 = Integer.toString(a1);
+			final String input1 = local1;
 		};
 
 		return local;
@@ -263,15 +265,18 @@ public class TestFunctionalInterfaceRule {
 
 	public String nestedRedeclaringLocalVariableInAnEnclosingScope(String input) {
 		final String local = input;
-		final int toString = 0;
+		final int a = 0;
+		final int toString = a;
 
 		final AFunctionalInterface foo = (int a1) -> {
 			final String toString1 = "toString";
-			final String input1 = Integer.toString(a1);
+			final String local1 = Integer.toString(a1);
+			final String input1 = local1;
 
 			final AFunctionalInterface foo1 = (int a2) -> {
 				final String toString2 = "toString";
-				final String input2 = Integer.toString(a2);
+				final String local2 = Integer.toString(a2);
+				final String input2 = local2;
 			};
 		};
 

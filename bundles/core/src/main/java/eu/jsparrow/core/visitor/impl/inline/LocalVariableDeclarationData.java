@@ -22,31 +22,6 @@ class LocalVariableDeclarationData {
 	private final VariableDeclarationFragment variableDeclarationFragment;
 	private final Expression initializer;
 
-	static Optional<LocalVariableDeclarationData> findData(Block block, String expectedIdentifier) {
-		@SuppressWarnings("rawtypes")
-		List statements = block.statements();
-		for (Object statement : statements) {
-			if (statement instanceof VariableDeclarationStatement) {
-				VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) statement;
-				List<VariableDeclarationFragment> variableDeclarationFragments = ASTNodeUtil
-					.convertToTypedList(variableDeclarationStatement.fragments(), VariableDeclarationFragment.class);
-				for (VariableDeclarationFragment fragment : variableDeclarationFragments) {
-					Expression initializer = fragment.getInitializer();
-					if (initializer != null) {
-						SimpleName name = fragment.getName();
-						String identifier = name.getIdentifier();
-						if (identifier.equals(expectedIdentifier)) {
-							LocalVariableDeclarationData declarationData = new LocalVariableDeclarationData(
-									variableDeclarationStatement, fragment, initializer);
-							return Optional.of(declarationData);
-						}
-					}
-				}
-			}
-		}
-		return Optional.empty();
-	}
-
 	LocalVariableDeclarationData(VariableDeclarationStatement variableDeclarationStatement,
 			VariableDeclarationFragment variableDeclarationFragment, Expression initializer) {
 		this.variableDeclarationStatement = variableDeclarationStatement;

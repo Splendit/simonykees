@@ -5,7 +5,8 @@ import java.util.function.Predicate;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 
 import eu.jsparrow.core.rule.RuleDescriptionFactory;
 import eu.jsparrow.core.rule.impl.InlineLocalVariablesRule;
@@ -40,16 +41,49 @@ public class InlineLocalVariablesResolver extends InlineLocalVariablesASTVisitor
 		return this.description;
 	}
 
+	
 	@Override
-	public boolean visit(VariableDeclarationFragment fragment) {
-		if (positionChecker.test(fragment)) {
-			super.visit(fragment);
+	public boolean visit(ThrowStatement node) {
+		if (positionChecker.test(node)) {
+			super.visit(node);
 		}
 		return true;
 	}
 
 	@Override
-	public void addMarkerEvent(VariableDeclarationFragment node) {
+	public void addMarkerEvent(ThrowStatement node) {
+		int credit = description.getCredit();
+		int highlightLength = 0;
+		int offset = node.getStartPosition();
+		int length = node.getLength();
+		CompilationUnit cu = getCompilationUnit();
+		int lineNumber = cu.getLineNumber(node.getStartPosition());
+		IJavaElement javaElement = cu.getJavaElement();
+		RefactoringMarkerEvent event = new RefactoringEventImpl.Builder()
+			.withResolver(ID)
+			.withName(description.getName())
+			.withMessage(description.getDescription())
+			.withIJavaElement(javaElement)
+			.withHighlightLength(highlightLength)
+			.withOffset(offset)
+			.withCodePreview(description.getDescription())
+			.withLength(length)
+			.withWeightValue(credit)
+			.withLineNumber(lineNumber)
+			.build();
+		addMarkerEvent(event);
+	}
+	
+	@Override
+	public boolean visit(ReturnStatement node) {
+		if (positionChecker.test(node)) {
+			super.visit(node);
+		}
+		return true;
+	}
+
+	@Override
+	public void addMarkerEvent(ReturnStatement node) {
 		int credit = description.getCredit();
 		int highlightLength = 0;
 		int offset = node.getStartPosition();
