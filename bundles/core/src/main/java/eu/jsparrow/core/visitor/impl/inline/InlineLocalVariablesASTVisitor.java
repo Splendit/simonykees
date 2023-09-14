@@ -103,20 +103,8 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 
 		VariableDeclarationFragment declarationFragment = transformationData.getLocalVariableDeclarationData()
 			.getVariableDeclarationFragment();
-
-		if (!checkBindingsForFragmentAndInitializer(declarationFragment, initializer)) {
-			return false;
-		}
-
-		SimpleName usageToReplace = transformationData.getSimpleNameToReplace();
-
-		UniqueLocalVariableReferenceVisitor uniqueLocalVariableReferenceVisitor = new UniqueLocalVariableReferenceVisitor(
-				getCompilationUnit(), declarationFragment, usageToReplace);
-
-		transformationData.getBlock()
-			.accept(uniqueLocalVariableReferenceVisitor);
-
-		return !uniqueLocalVariableReferenceVisitor.hasUnsupportedReference();
+		
+		return checkBindingsForFragmentAndInitializer(declarationFragment, initializer);
 	}
 
 	private void transform(InLineLocalVariablesAnalysisData transformationData,

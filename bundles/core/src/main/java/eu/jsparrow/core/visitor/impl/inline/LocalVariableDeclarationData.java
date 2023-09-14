@@ -1,15 +1,8 @@
 package eu.jsparrow.core.visitor.impl.inline;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * Contains all informations about a local variable declaration which are
