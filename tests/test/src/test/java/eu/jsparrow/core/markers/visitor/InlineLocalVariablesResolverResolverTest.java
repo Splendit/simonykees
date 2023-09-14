@@ -61,7 +61,7 @@ class InlineLocalVariablesResolverResolverTest extends UsesJDTUnitFixture {
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertEquals(1, events.size());
 		RefactoringMarkerEvent event = events.get(0);
-		String description = "This rule looks for local variables which are used exactly once and in-lines them in cases where this is reasonable.";
+		String description = "This rule scans for local variables which can be in-lined. It in-lines a local variable if it is used exactly once in a return- or throw statement.";
 
 		assertAll(
 				() -> assertEquals("Inline Local Variables", event.getName()),

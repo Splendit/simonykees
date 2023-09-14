@@ -49,7 +49,10 @@ public class InlineLocalVariablesRuleTest extends SingleRuleTest {
 				contains(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
-				equalTo("This rule looks for local variables which are used exactly once and in-lines them in cases where this is reasonable."));
+				equalTo("" +
+						"This rule scans for local variables which can be in-lined." +
+						" It in-lines a local variable if it is used exactly once in a return- or throw statement."));
+
 	}
 
 	@Test
