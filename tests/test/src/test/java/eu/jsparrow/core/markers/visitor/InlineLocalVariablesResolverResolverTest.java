@@ -17,18 +17,30 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 
 class InlineLocalVariablesResolverResolverTest extends UsesJDTUnitFixture {
-	
-	private static final String ORIGINAL = "" +
-			"		int getResult(int a, int b) {\n" +
-			"			int result = a + b;\n" +
-			"			return result;\n" +
-			"		}";
-	private static final String EXPECTED = "" +
-			"		int getResult(int a, int b) {\n" +
-			"			return a + b;\n" +
-			"		}";
 
+	private static final String RULE_DESCRIPTION = "" +
+			"This rule scans for local variables which can be in-lined." +
+			" It in-lines a local variable if it is used exactly once in a return- or throw statement.";
 
+	private static final String RETURN_ORIGINAL = "" +
+			"	int returnResult(int a, int b) {\n" +
+			"		int result = a + b;\n" +
+			"		return result;\n" +
+			"	}";
+	private static final String RETURN_EXPECTED = "" +
+			"	int returnResult(int a, int b) {\n" +
+			"		return a + b;\n" +
+			"	}";
+
+	private static final String THROW_ORIGINAL = "" +
+			"	void throwRuntimeException() {\n" +
+			"		RuntimeException runtimeException = new RuntimeException();\n" +
+			"		throw runtimeException;\n" +
+			"	}";
+	private static final String THROW_EXPECTED = "" +
+			"	void throwRuntimeException() {\n" +
+			"		throw new RuntimeException();\n" +
+			"	}";
 
 	@BeforeEach
 	void setUpVisitor() throws Exception {
@@ -47,38 +59,71 @@ class InlineLocalVariablesResolverResolverTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	void test_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
+	void test_Return_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
 		setResolver(node -> false);
-		assertNoChange(ORIGINAL);
+		assertNoChange(RETURN_ORIGINAL);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertTrue(events.isEmpty());
 	}
 
 	@Test
-	void test_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
+	void test_Return_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
 		setResolver(node -> true);
-		assertChange(ORIGINAL, EXPECTED);
+		assertChange(RETURN_ORIGINAL, RETURN_EXPECTED);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertEquals(1, events.size());
 		RefactoringMarkerEvent event = events.get(0);
-		String description = "This rule scans for local variables which can be in-lined. It in-lines a local variable if it is used exactly once in a return- or throw statement.";
-
 		assertAll(
 				() -> assertEquals("Inline Local Variables", event.getName()),
-				() -> assertEquals(description, event.getMessage()),
+				() -> assertEquals(RULE_DESCRIPTION, event.getMessage()),
 				() -> assertEquals("InlineLocalVariablesResolver", event.getResolver()),
-				() -> assertEquals(description, event.getCodePreview()),
+				() -> assertEquals(RULE_DESCRIPTION, event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
-				() -> assertEquals(111, event.getOffset()),
+				() -> assertEquals(114, event.getOffset()),
 				() -> assertEquals(14, event.getLength()),
 				() -> assertEquals(7, event.getLineNumber()),
 				() -> assertEquals(2, event.getWeightValue()));
 	}
 
 	@Test
-	void test_resolveMarkers_shouldResolveOne() throws Exception {
-		setResolver(node -> node.getStartPosition() == 111);
-		assertChange(ORIGINAL, EXPECTED);
+	void test_Return_resolveMarkers_shouldResolveOne() throws Exception {
+		setResolver(node -> node.getStartPosition() == 114);
+		assertChange(RETURN_ORIGINAL, RETURN_EXPECTED);
+		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
+		assertEquals(1, events.size());
+	}
+
+	@Test
+	void test_Throw_AlwaysFalsePredicate_shouldGenerateNoMarkers() throws Exception {
+		setResolver(node -> false);
+		assertNoChange(THROW_ORIGINAL);
+		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
+		assertTrue(events.isEmpty());
+	}
+
+	@Test
+	void test_Throw_markerGeneration_shouldGenerateOneMarkerEvent() throws Exception {
+		setResolver(node -> true);
+		assertChange(THROW_ORIGINAL, THROW_EXPECTED);
+		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
+		assertEquals(1, events.size());
+		RefactoringMarkerEvent event = events.get(0);
+		assertAll(
+				() -> assertEquals("Inline Local Variables", event.getName()),
+				() -> assertEquals(RULE_DESCRIPTION, event.getMessage()),
+				() -> assertEquals("InlineLocalVariablesResolver", event.getResolver()),
+				() -> assertEquals(RULE_DESCRIPTION, event.getCodePreview()),
+				() -> assertEquals(0, event.getHighlightLength()),
+				() -> assertEquals(152, event.getOffset()),
+				() -> assertEquals(23, event.getLength()),
+				() -> assertEquals(7, event.getLineNumber()),
+				() -> assertEquals(2, event.getWeightValue()));
+	}
+
+	@Test
+	void test_Throw_resolveMarkers_shouldResolveOne() throws Exception {
+		setResolver(node -> node.getStartPosition() == 152);
+		assertChange(THROW_ORIGINAL, THROW_EXPECTED);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertEquals(1, events.size());
 	}
