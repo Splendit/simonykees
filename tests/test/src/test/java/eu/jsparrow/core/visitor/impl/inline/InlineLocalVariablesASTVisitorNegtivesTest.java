@@ -8,7 +8,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -26,27 +25,6 @@ public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixtu
 	@AfterEach
 	void tearDown() throws Exception {
 		fixtureProject.clear();
-	}
-
-	@Disabled("InlineLocalVariablesASTVisitor not entered because no ReturnStatement and no ThrowStatement")
-	@Test
-	void visit_NoInitializer_shouldNotTransform() throws Exception {
-		String original = "" +
-				"	void noInitializer() {\n" +
-				"		int sum;\n" +
-				"	}";
-		assertNoChange(original);
-	}
-
-	@Disabled("InlineLocalVariablesASTVisitor not entered because no ReturnStatement and no ThrowStatement")
-	@Test
-	void visit_DeclarationAsForLoopCounter_shouldNotTransform() throws Exception {
-		String original = "" +
-				"	void declarationAsForLoopCounter() {\n" +
-				"		for (int i = 0; i < 10; i++) {\n" +
-				"		}\n" +
-				"	}";
-		assertNoChange(original);
 	}
 
 	/**
@@ -113,17 +91,6 @@ public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixtu
 		assertNoChange(original);
 	}
 
-	@Disabled("InlineLocalVariablesASTVisitor not entered because no ReturnStatement and no ThrowStatement")
-	@Test
-	void visit_IncrementAsOnlyUse_shouldNotTransform() throws Exception {
-		String original = "" +
-				"	void incrementAsOnlyUse() {\n" +
-				"		int x = 0;\n" +
-				"		++x;\n" +
-				"	}";
-		assertNoChange(original);
-	}
-
 	/**
 	 * Not transformed because the statement preceding the
 	 * {@link ReturnStatement} is not a {@link VariableDeclarationStatement}.
@@ -153,6 +120,20 @@ public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixtu
 				"	}";
 		assertNoChange(original);
 	}
+	
+	/**
+	 * Not transformed because the exception is initialized with null.
+	 */
+	@Test
+	void visit_ExceptionInitializedWithNull_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void statementBetweenDeclarationAndThrow(String message) throws Exception {\n" +
+				"		Exception exception = null;\n" +
+				"		throw exception;\n" +
+				"	}";
+		assertNoChange(original);
+	}
+
 
 	/**
 	 * Not transformed because the expression of the return statement is not a
@@ -165,6 +146,15 @@ public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixtu
 				"		int returnNumberLiteral() {\n"
 				+ "			return 2;\n"
 				+ "		}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_ReturnStatementWithoutExpression_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		void returnWithoutExpression() {\n" +
+				"			return;\n" +
+				"		}";
 		assertNoChange(original);
 	}
 
@@ -185,50 +175,6 @@ public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixtu
 				+ "			\n"
 				+ "			return 2;\n"
 				+ "		}";
-		assertNoChange(original);
-	}
-
-	@Disabled("InlineLocalVariablesASTVisitor not entered because no ReturnStatement and no ThrowStatement")
-	@Test
-	void visit_variableUsedInAssignment_shouldNotTransform() throws Exception {
-		String original = "" +
-				"	int x;\n" +
-				"	void useInAssignment(int pValue) {\n" +
-				"		int a = pValue + 1;\n" +
-				"		int b = (x = a);\n" +
-				"	}";
-		assertNoChange(original);
-	}
-
-	@Disabled("InlineLocalVariablesASTVisitor not entered because no ReturnStatement and no ThrowStatement")
-	@Test
-	void visit_variableUsedInVariableDeclarationExpression_shouldNotTransform() throws Exception {
-		String original = "" +
-				"		int x;\n" +
-				"		void useInAssignment(int pValue) {\n" +
-				"			int a = pValue + 1;\n" +
-				"			for(int i = a; true; ) {\n" +
-				"				break;\n" +
-				"			}\n" +
-				"		}";
-		assertNoChange(original);
-	}
-
-	@Disabled("InlineLocalVariablesASTVisitor not entered because no ReturnStatement and no ThrowStatement")
-	@Test
-	void visit_variableUsedInAnnotation_shouldNotTransform() throws Exception {
-		String original = "" +
-				"	@interface ExampleAnnotation {\n" +
-				"		int value();\n" +
-				"	}\n" +
-				"\n" +
-				"	void useInAnnotation() {\n" +
-				"		final int x = 1;\n" +
-				"			@ExampleAnnotation(value = x)\n" +
-				"		class LocalClass {\n" +
-				"\n" +
-				"		}\n" +
-				"	}";
 		assertNoChange(original);
 	}
 

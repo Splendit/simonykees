@@ -139,7 +139,7 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 	}
 
 	private Optional<Supplier<ASTNode>> findUsageReplacementSupplier(
-			LocalVariableDeclarationData localVariableDeclarationData) {
+			SupportedVariableData localVariableDeclarationData) {
 
 		Expression initializer = localVariableDeclarationData
 			.getInitializer();
@@ -218,7 +218,7 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 
 	private void saveComments(InLineLocalVariablesAnalysisData transformationData) {
 
-		LocalVariableDeclarationData localVariableDeclarationData = transformationData
+		SupportedVariableData localVariableDeclarationData = transformationData
 			.getLocalVariableDeclarationData();
 		VariableDeclarationStatement variableDeclarationStatement = localVariableDeclarationData
 			.getVariableDeclarationStatement();
