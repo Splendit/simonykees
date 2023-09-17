@@ -53,15 +53,15 @@ class SupportedVariableData {
 		this.initializer = initializer;
 	}
 
-	public VariableDeclarationStatement getVariableDeclarationStatement() {
+	VariableDeclarationStatement getVariableDeclarationStatement() {
 		return variableDeclarationStatement;
 	}
 
-	public VariableDeclarationFragment getVariableDeclarationFragment() {
+	VariableDeclarationFragment getVariableDeclarationFragment() {
 		return variableDeclarationFragment;
 	}
 
-	public Expression getInitializer() {
+	Expression getInitializer() {
 		return initializer;
 	}
 }

@@ -3,7 +3,6 @@ package eu.jsparrow.core.visitor.impl.inline;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -74,15 +73,15 @@ class InLineLocalVariablesAnalysisData {
 		this.simpleNameToReplace = simpleNameToReplace;
 	}
 
-	public SupportedVariableData getLocalVariableDeclarationData() {
+	SupportedVariableData getLocalVariableDeclarationData() {
 		return localVariableDeclarationData;
 	}
 
-	public Statement getStatementWithSimpleNameToReplace() {
+	Statement getStatementWithSimpleNameToReplace() {
 		return statementWithSimpleNameToReplace;
 	}
 
-	public SimpleName getSimpleNameToReplace() {
+	SimpleName getSimpleNameToReplace() {
 		return simpleNameToReplace;
 	}
 }
