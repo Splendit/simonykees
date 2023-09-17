@@ -103,7 +103,7 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 
 		VariableDeclarationFragment declarationFragment = transformationData.getLocalVariableDeclarationData()
 			.getVariableDeclarationFragment();
-		
+
 		return checkBindingsForFragmentAndInitializer(declarationFragment, initializer);
 	}
 
@@ -181,7 +181,21 @@ public class InlineLocalVariablesASTVisitor extends AbstractASTRewriteASTVisitor
 		if (initializerTypeBinding.isPrimitive() || declarationFragmentTypeBinding.isPrimitive()) {
 			return ClassRelationUtil.compareITypeBinding(declarationFragmentTypeBinding, initializerTypeBinding);
 		}
+		ITypeBinding[] initializerTypeArguments = initializerTypeBinding.getTypeArguments();
+		ITypeBinding[] declarationFragmentTypeArguments = declarationFragmentTypeBinding.getTypeArguments();
 
+		int expectedTypeArgumentsLength = declarationFragmentTypeArguments.length;
+		if (initializerTypeArguments.length != expectedTypeArgumentsLength) {
+			return false;
+		}
+
+		for (int i = 0; i < expectedTypeArgumentsLength; i++) {
+			ITypeBinding initializerTypeArgument = initializerTypeArguments[i];
+			ITypeBinding declarationFragmentTypeArgument = declarationFragmentTypeArguments[i];
+			if (!ClassRelationUtil.compareITypeBinding(initializerTypeArgument, declarationFragmentTypeArgument)) {
+				return false;
+			}
+		}
 		return true;
 	}
 

@@ -120,7 +120,7 @@ public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixtu
 				"	}";
 		assertNoChange(original);
 	}
-	
+
 	/**
 	 * Not transformed because the exception is initialized with null.
 	 */
@@ -133,7 +133,6 @@ public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixtu
 				"	}";
 		assertNoChange(original);
 	}
-
 
 	/**
 	 * Not transformed because the expression of the return statement is not a
@@ -148,7 +147,7 @@ public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixtu
 				+ "		}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	void visit_ReturnStatementWithoutExpression_shouldNotTransform() throws Exception {
 		String original = "" +
@@ -207,11 +206,32 @@ public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixtu
 		assertNoChange(original);
 	}
 
+	@Test
+	void visit_RawTypeInitializedWithParameterizedType_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.Map.class.getName());
+		String original = "" +
+				"	Map<Integer, Integer> cornerCaseWithRawType(Map<String, String> mapStringToString) {\n" +
+				"		Map map = mapStringToString;\n" +
+				"		return map;\n" +
+				"	}";
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_DifferentTypeArguments_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.Map.class.getName());
+		String original = "" +
+				"	Map<?, ?> cornerCaseWithRawType6(Map<String, String> mapStringToString) {\n" +
+				"		Map<?, ?> map = mapStringToString;\n" +
+				"		return map;\n" +
+				"	}";
+		assertNoChange(original);
+	}
+
 	// @Test
 	// void visit__shouldNotTransform() throws Exception {
 	// String original = "" +
 	// "";
 	// assertNoChange(original);
 	// }
-
 }
