@@ -46,13 +46,12 @@ public class InlineLocalVariablesRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Inline Local Variables"));
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+				contains(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
-				equalTo("" +
-						"This rule scans for local variables which can be in-lined." +
-						" It in-lines a local variable if it is used exactly once in a return- or throw statement."));
-
+				equalTo(""
+						+ "This rule scans for local variables which are declared and then immediately returned or thrown"
+						+ " and in-lines them if this is possible."));
 	}
 
 	@Test
@@ -74,5 +73,4 @@ public class InlineLocalVariablesRuleTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-
 }

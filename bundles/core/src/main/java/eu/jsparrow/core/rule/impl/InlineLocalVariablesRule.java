@@ -27,12 +27,11 @@ public class InlineLocalVariablesRule extends RefactoringRuleImpl<InlineLocalVar
 		String name = Messages.InlineLocalVariablesRule_name;
 		String description = Messages.InlineLocalVariablesRule_description;
 		this.ruleDescription = new RuleDescription(name, description, Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS));
 	}
 
 	@Override
 	protected String provideRequiredJavaVersion() {
 		return JavaCore.VERSION_1_1;
 	}
-
 }

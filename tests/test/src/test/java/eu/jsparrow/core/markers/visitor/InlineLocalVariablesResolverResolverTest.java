@@ -18,9 +18,9 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 
 class InlineLocalVariablesResolverResolverTest extends UsesJDTUnitFixture {
 
-	private static final String RULE_DESCRIPTION = "" +
-			"This rule scans for local variables which can be in-lined." +
-			" It in-lines a local variable if it is used exactly once in a return- or throw statement.";
+	private static final String RULE_DESCRIPTION = ""
+			+ "This rule scans for local variables which are declared and then immediately returned or thrown"
+			+ " and in-lines them if this is possible.";
 
 	private static final String RETURN_ORIGINAL = "" +
 			"	int returnResult(int a, int b) {\n" +
