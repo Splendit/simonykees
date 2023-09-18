@@ -1,13 +1,21 @@
 package eu.jsparrow.core.visitor.impl.inline;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -41,7 +49,7 @@ class InLineLocalVariablesAnalysisData {
 		if (statementExpression.getNodeType() != ASTNode.SIMPLE_NAME) {
 			return Optional.empty();
 		}
-		
+
 		SimpleName simpleName = (SimpleName) statementExpression;
 		String identifier = simpleName.getIdentifier();
 
@@ -53,17 +61,44 @@ class InLineLocalVariablesAnalysisData {
 		}
 
 		return SupportedVariableData.extractVariableData(precedingDeclarationStatement, identifier)
-			.filter(variableDeclarationData -> {
-				if (statement.getNodeType() == ASTNode.THROW_STATEMENT) {
-					Expression initializer = variableDeclarationData.getInitializer();
-					if (initializer.getNodeType() == ASTNode.NULL_LITERAL) {
-						return false;
-					}
-				}
-				return true;
-			})
+			.filter(variableDeclarationData -> analyzeVariableInitializer(variableDeclarationData, statement))
 			.map(variableDeclarationData -> new InLineLocalVariablesAnalysisData(variableDeclarationData,
 					statement, simpleName));
+	}
+
+	private static boolean analyzeVariableInitializer(SupportedVariableData variableDeclarationData,
+			Statement statementWithSimpleNameToReplace) {
+		Expression initializer = variableDeclarationData.getInitializer();
+		if (statementWithSimpleNameToReplace.getNodeType() == ASTNode.THROW_STATEMENT
+				&& initializer.getNodeType() == ASTNode.NULL_LITERAL) {
+			return false;
+		}
+		if (initializer.getNodeType() == ASTNode.LAMBDA_EXPRESSION || initializer instanceof MethodReference) {
+			ITypeBinding returnType = Optional.of(variableDeclarationData)
+				.map(SupportedVariableData::getVariableDeclarationFragment)
+				.map(VariableDeclarationFragment::resolveBinding)
+				.map(IVariableBinding::getDeclaringMethod)
+				.map(IMethodBinding::getReturnType)
+				.orElse(null);
+			if (returnType == null) {
+				return false;
+			}
+			return isFunctionalInterface(returnType);
+		}
+		return true;
+	}
+
+	private static boolean isFunctionalInterface(ITypeBinding typeBinding) {
+		IAnnotationBinding[] annotations = typeBinding.getAnnotations();
+		if (annotations == null) {
+			return false;
+		}
+		return Arrays.stream(annotations)
+			.map(IAnnotationBinding::getAnnotationType)
+			.filter(Objects::nonNull)
+			.map(ITypeBinding::getQualifiedName)
+			.anyMatch(qualifiedName -> FunctionalInterface.class.getName()
+				.equals(qualifiedName));
 	}
 
 	private InLineLocalVariablesAnalysisData(SupportedVariableData localVariableDeclarationData,

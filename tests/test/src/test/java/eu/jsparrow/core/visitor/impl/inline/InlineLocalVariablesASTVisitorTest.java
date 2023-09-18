@@ -224,7 +224,7 @@ public class InlineLocalVariablesASTVisitorTest extends UsesJDTUnitFixture {
 				"		int i = 0;\n" +
 				"		return i;\n" +
 				"	}";
-		
+
 		String expected = "" +
 				"	int lableWithSameNameAsVariable() {\n" +
 				"		i: if(true) {\n" +
@@ -232,7 +232,159 @@ public class InlineLocalVariablesASTVisitorTest extends UsesJDTUnitFixture {
 				"		}	\n" +
 				"		return 0;\n" +
 				"	}";
-		
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_returnMapWithTypeArguments_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.util.Map.class.getName());
+		defaultFixture.addImport(java.util.HashMap.class.getName());
+
+		String original = "" +
+				"	Map<String, String> exampleWithTypeArguments() {\n" +
+				"		Map<String, String> map = new HashMap<>();\n" +
+				"		return map;\n" +
+				"	}";
+
+		String expected = "" +
+				"	Map<String, String> exampleWithTypeArguments() {\n" +
+				"		return new HashMap<>();\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_returnMapAsRawType_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.util.Map.class.getName());
+		defaultFixture.addImport(java.util.HashMap.class.getName());
+
+		String original = "" +
+				"	Map exampleWithRawTypes() {\n" +
+				"		Map map = new HashMap();\n" +
+				"		return map;\n" +
+				"	}";
+
+		String expected = "" +
+				"	Map exampleWithRawTypes() {\n" +
+				"		return new HashMap();\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	private static Stream<Arguments> positiveExamplesWithLambda() {
+		return Stream.of(
+				Arguments.of(
+						"" +
+								"	Runnable getRunnable() {\n" +
+								"		Runnable r = () -> {\n" +
+								"		};\n" +
+								"		return r;\n" +
+								"	}",
+						"" +
+								"	Runnable getRunnable() {\n" +
+								"		return () -> {\n" +
+								"		};\n" +
+								"	}"),
+				Arguments.of(
+						"" +
+								"	void exampleWithLambdaReturningLambda() {\n" +
+								"		java.util.function.Supplier<Runnable> supplier = () -> {\n" +
+								"			Runnable r = () -> {\n" +
+								"			};\n" +
+								"			return r;\n" +
+								"		};\n" +
+								"	}",
+						"" +
+								"	void exampleWithLambdaReturningLambda() {\n" +
+								"		java.util.function.Supplier<Runnable> supplier = () -> {\n" +
+								"			return () -> {\n" +
+								"			};\n" +
+								"		};\n" +
+								"	}"),
+				Arguments.of(
+						"" +
+								"	void exampleWithLambdaReturningLambda() {\n" +
+								"		java.util.function.Function<Object, Runnable> function = o -> {\n" +
+								"			Runnable r = () -> {\n" +
+								"			};\n" +
+								"			return r;\n" +
+								"		};\n" +
+								"	}",
+						"" +
+								"	void exampleWithLambdaReturningLambda() {\n" +
+								"		java.util.function.Function<Object, Runnable> function = o -> {\n" +
+								"			return () -> {\n" +
+								"			};\n" +
+								"		};\n" +
+								"	}"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("positiveExamplesWithLambda")
+	void visit_LambdaExpressionAsInitializer_shouldTransform(String original, String expected) throws Exception {
+		assertChange(original, expected);
+	}
+
+	private static Stream<Arguments> positiveExamplesWithMethodReference() {
+		return Stream.of(
+				Arguments.of(
+						"" +
+								"	Runnable getRunnable() {\n" +
+								"		Runnable r = this::exampleMethod;" +
+								"		return r;\n" +
+								"	}",
+						"" +
+								"	Runnable getRunnable() {\n" +
+								"		return this::exampleMethod;\n" +
+								"	}"),
+				Arguments.of(
+						"" +
+								"	void exampleWithLambdaReturningLambda() {\n" +
+								"		java.util.function.Supplier<Runnable> supplier = () -> {\n" +
+								"			Runnable r = this::exampleMethod;" +
+								"			return r;\n" +
+								"		};\n" +
+								"	}",
+						"" +
+								"	void exampleWithLambdaReturningLambda() {\n" +
+								"		java.util.function.Supplier<Runnable> supplier = () -> {\n" +
+								"			return this::exampleMethod;\n" +
+								"		};\n" +
+								"	}"),
+				Arguments.of(
+						"" +
+								"	void exampleWithLambdaReturningLambda() {\n" +
+								"		java.util.function.Function<Object, Runnable> function = o -> {\n" +
+								"			Runnable r = this::exampleMethod;" +
+								"			return r;\n" +
+								"		};\n" +
+								"	}",
+						"" +
+								"	void exampleWithLambdaReturningLambda() {\n" +
+								"		java.util.function.Function<Object, Runnable> function = o -> {\n" +
+								"			return this::exampleMethod;\n" +
+								"		};\n" +
+								"	}"));
+
+	}
+
+	@ParameterizedTest
+	@MethodSource("positiveExamplesWithMethodReference")
+	void visit_MethodReferenceAsInitializer_shouldTransform(String methodOriginal, String methodExpected)
+			throws Exception {
+		String original = methodOriginal +
+				"\n" +
+				"	void exampleMethod() {\n" +
+				"	}";
+
+		String expected = methodExpected +
+				"\n" +
+				"	void exampleMethod() {\n" +
+				"	}";
+
 		assertChange(original, expected);
 	}
 

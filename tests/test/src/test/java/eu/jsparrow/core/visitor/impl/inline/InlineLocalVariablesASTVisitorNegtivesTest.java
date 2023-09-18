@@ -228,10 +228,62 @@ public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixtu
 		assertNoChange(original);
 	}
 
-	// @Test
-	// void visit__shouldNotTransform() throws Exception {
-	// String original = "" +
-	// "";
-	// assertNoChange(original);
-	// }
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"	Object getObjectReturningLambda() {\n" +
+					"		Runnable r = () -> {\n" +
+					"		};\n" +
+					"		return r;\n" +
+					"	}",
+			"" +
+					"	void exampleWithLambdaReturningLambda() {\n" +
+					"		java.util.function.Supplier<Object> supplier = () -> {\n" +
+					"			Runnable r = () -> {\n" +
+					"			};\n" +
+					"			return r;\n" +
+					"		};\n" +
+					"	}",
+			"" +
+					"	void exampleWithLambdaReturningLambda() {\n" +
+					"		java.util.function.Function<Object, Object> function = o -> {\n" +
+					"			Runnable r = () -> {\n" +
+					"			};\n" +
+					"			return r;\n" +
+					"		};\n" +
+					"	}",
+	})
+	void visit_LambdaExpressionAsInitializer_shouldNotTransform(String original) throws Exception {
+		assertNoChange(original);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"	Object getObject() {\n" +
+					"		Runnable r = this::exampleMethod;\n" +
+					"		return r;\n" +
+					"	}",
+			"" +
+					"	void exampleWithLambdaReturningLambda() {\n" +
+					"		java.util.function.Supplier<Object> supplier = () -> {\n" +
+					"			Runnable r = this::exampleMethod;\n" +
+					"			return r;\n" +
+					"		};\n" +
+					"	}",
+			"" +
+					"	void exampleWithLambdaReturningLambda() {\n" +
+					"		java.util.function.Function<Object, Object> function = o -> {\n" +
+					"			Runnable r = this::exampleMethod;\n" +
+					"			return r;\n" +
+					"		};\n" +
+					"	}",
+	})
+	void visit_MethodReferenceAsInitializer_shouldNotTransform(String method) throws Exception {
+		String original = method +
+				"\n" +
+				"	void exampleMethod() {\n" +
+				"	}";
+		assertNoChange(original);
+	}
 }
