@@ -54,7 +54,8 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 4.2.0
  * 
  */
-public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewriteASTVisitor implements UsePatternMatchingForInstanceofEvent {
+public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewriteASTVisitor
+		implements UsePatternMatchingForInstanceofEvent {
 
 	@Override
 	public boolean visit(InstanceofExpression instanceOf) {
@@ -97,7 +98,7 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 		}
 
 		if (isThenReturnOrThenBlockEndingWithReturn(ifStatement)) {
-			return findVariableDeclarationAfterIfStatement(ifStatement);
+			return ASTNodeUtil.findSubsequentStatementInBlock(ifStatement, VariableDeclarationStatement.class);
 		}
 
 		return Optional.empty();
@@ -167,26 +168,6 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 			return Optional.empty();
 		}
 		return Optional.of((VariableDeclarationStatement) first);
-	}
-
-	private Optional<VariableDeclarationStatement> findVariableDeclarationAfterIfStatement(
-			IfStatement ifStatement) {
-		if (ifStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return Optional.empty();
-		}
-		Block block = (Block) ifStatement.getParent();
-		List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
-		int indexOfStatementAfterIf = statements.indexOf(ifStatement) + 1;
-
-		if (indexOfStatementAfterIf >= statements.size()) {
-			return Optional.empty();
-		}
-
-		Statement statementAfterIf = statements.get(indexOfStatementAfterIf);
-		if (statementAfterIf.getNodeType() != ASTNode.VARIABLE_DECLARATION_STATEMENT) {
-			return Optional.empty();
-		}
-		return Optional.of((VariableDeclarationStatement) statementAfterIf);
 	}
 
 	private boolean isFragmentWithExpectedTypeCastInitializer(VariableDeclarationFragment fragment,

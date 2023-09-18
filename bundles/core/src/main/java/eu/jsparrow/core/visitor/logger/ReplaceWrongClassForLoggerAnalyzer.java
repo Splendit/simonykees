@@ -13,7 +13,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
-import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
+import eu.jsparrow.rules.common.exception.UnresolvedBindingException;
+import eu.jsparrow.rules.common.exception.UnresolvedTypeBindingException;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class ReplaceWrongClassForLoggerAnalyzer {
@@ -55,7 +56,7 @@ public class ReplaceWrongClassForLoggerAnalyzer {
 					"warning"));
 
 	static boolean isClassLiteralToReplace(TypeLiteral typeLiteral,
-			AbstractTypeDeclaration surroundingTypeDeclaration, CompilationUnit compilationUnit) throws UnresolvedTypeBindingException {
+			AbstractTypeDeclaration surroundingTypeDeclaration, CompilationUnit compilationUnit) throws UnresolvedBindingException {
 
 		MethodInvocation getLoggerInvocation = findGetLoggerInvocationForTypeLiteral(typeLiteral)
 			.orElse(null);
@@ -100,10 +101,10 @@ public class ReplaceWrongClassForLoggerAnalyzer {
 		
 	}
 
-	private static boolean analyzeGetLoggerInvocation(MethodInvocation getLoggerInvocation) throws UnresolvedTypeBindingException {
+	private static boolean analyzeGetLoggerInvocation(MethodInvocation getLoggerInvocation) throws UnresolvedBindingException {
 		IMethodBinding getLoggerMethodBinding = getLoggerInvocation.resolveMethodBinding();
 		if (getLoggerMethodBinding == null) {
-			throw new UnresolvedTypeBindingException(String.format("Cannot resolve method binding for getLogger invocation {%s}.", getLoggerInvocation.toString())); //$NON-NLS-1$
+			throw new UnresolvedBindingException(String.format("Cannot resolve method binding for getLogger invocation {%s}.", getLoggerInvocation.toString())); //$NON-NLS-1$
 		}
 
 		if (getLoggerInvocation.resolveTypeBinding() == null) {

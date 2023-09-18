@@ -292,28 +292,26 @@ public class ASTNodeUtil {
 			.map(type::cast)
 			.collect(Collectors.toList());
 	}
-	
+
 	/**
-	 * @return if the speified Block has exactly one Statement, then
-	 *         an Optional is returned which stores the single Statement. In all
-	 *         other cases an empty optional is returned.
+	 * @return if the speified Block has exactly one Statement, then an Optional
+	 *         is returned which stores the single Statement. In all other cases
+	 *         an empty optional is returned.
 	 */
 	public static Optional<Statement> findSingleBlockStatement(Block block) {
 		return findSingleBlockStatement(block, Statement.class);
 	}
 
 	/**
-	 * @return if the Block specified by the first parameter has
-	 *         exactly one Statement which is an instance of the type specified
-	 *         by the 2nd parameter, then an Optional is returned which stores
-	 *         the single Statement. In all other cases an empty optional is
-	 *         returned.
+	 * @return if the Block specified by the first parameter has exactly one
+	 *         Statement which is an instance of the type specified by the 2nd
+	 *         parameter, then an Optional is returned which stores the single
+	 *         Statement. In all other cases an empty optional is returned.
 	 */
 	public static <T extends Statement> Optional<T> findSingleBlockStatement(Block block,
 			Class<T> type) {
 		return findSingletonListElement(block.statements(), type);
 	}
-
 
 	/**
 	 * @return if the speified MethodInvocation has exactly one argument , then
@@ -353,13 +351,55 @@ public class ASTNodeUtil {
 
 	/**
 	 * 
+	 * @return An Optional storing the Statement previous to the Statement
+	 *         specified by the 1st parameter if the parent of the specified
+	 *         statement is a Block and if the previous statement has the type
+	 *         specified by the 2nd parameter.
+	 *         <p>
+	 *         Otherwise, an empty Optional is returned.
+	 * 
+	 */
+	public static <T extends Statement> Optional<T> findPreviousStatementInBlock(Statement statement,
+			Class<T> type) {
+		Block parentBlock = ASTNodeUtil.findParentBlock(statement)
+			.orElse(null);
+		if (parentBlock == null) {
+			return Optional.empty();
+		}
+
+		return ASTNodeUtil.findListElementBefore(parentBlock.statements(), statement, type);
+	}
+
+	/**
+	 * 
+	 * @return An Optional storing the Statement subsequent to the Statement
+	 *         specified by the 1st parameter if the parent of the specified
+	 *         statement is a Block and if the subsequent statement has the type
+	 *         specified by the 2nd parameter.
+	 *         <p>
+	 *         Otherwise, an empty Optional is returned.
+	 * 
+	 */
+	public static <T extends Statement> Optional<T> findSubsequentStatementInBlock(Statement statement,
+			Class<T> type) {
+		Block parentBlock = ASTNodeUtil.findParentBlock(statement)
+			.orElse(null);
+		if (parentBlock == null) {
+			return Optional.empty();
+		}
+
+		return ASTNodeUtil.findListElementAfter(parentBlock.statements(), statement, type);
+	}
+
+	/**
+	 * 
 	 * @return An Optional containing the element before the element specified
 	 *         by the 2nd paramneter which is expected to be an instance of the
 	 *         type specified by the 3rd parameter. In all other cases an empty
 	 *         optional is returned.
 	 * 
 	 */
-	public static <T extends ASTNode> Optional<T> findListElementBefore(@SuppressWarnings("rawtypes") List rawlist,
+	private static <T extends ASTNode> Optional<T> findListElementBefore(@SuppressWarnings("rawtypes") List rawlist,
 			ASTNode element,
 			Class<T> type) {
 		int indexBefore = rawlist.indexOf(element) - 1;
@@ -377,7 +417,7 @@ public class ASTNodeUtil {
 	 *         optional is returned.
 	 * 
 	 */
-	public static <T extends ASTNode> Optional<T> findListElementAfter(@SuppressWarnings("rawtypes") List rawlist,
+	private static <T extends ASTNode> Optional<T> findListElementAfter(@SuppressWarnings("rawtypes") List rawlist,
 			ASTNode element,
 			Class<T> type) {
 		int indexAfter = rawlist.indexOf(element) + 1;
@@ -385,6 +425,20 @@ public class ASTNodeUtil {
 			return Optional.empty();
 		}
 		return castToOptional(rawlist.get(indexAfter), type);
+	}
+
+	/**
+	 * 
+	 * @return an Optional storing a Block representing the parent of the
+	 *         specified Statement or an empty Optional if the parent of the
+	 *         statement is not a block.
+	 * 
+	 */
+	public static Optional<Block> findParentBlock(Statement statement) {
+		if (statement.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
+			return Optional.of((Block) statement.getParent());
+		}
+		return Optional.empty();
 	}
 
 	/**

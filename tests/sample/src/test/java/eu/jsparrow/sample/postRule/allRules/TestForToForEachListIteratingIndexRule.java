@@ -31,10 +31,9 @@ public class TestForToForEachListIteratingIndexRule {
 
 	private List<Integer> generateHashCodeList(String input) {
 		final List<String> foo = generateList(input);
-		final List<Integer> fooHashCodes = foo.stream()
+		return foo.stream()
 			.map(String::hashCode)
 			.collect(Collectors.toList());
-		return fooHashCodes;
 	}
 
 	public String testRawType(String input) {

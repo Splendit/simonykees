@@ -55,19 +55,15 @@ public class TestPrimitiveBoxedForStringWithExpressionsRule {
 			.toString(/* ctor arg comment */ 5 + input
 					+ intSampleMethod("2")) /* trailing comment */ ;
 
-		final String result = Integer.toString(5 + input + intSampleMethod("2"))
-				+ Integer.toString(input + intSampleMethod());
-		return result;
+		return Integer.toString(5 + input + intSampleMethod("2")) + Integer.toString(input + intSampleMethod());
 	}
 
 	public String testNestedIntegerBoxing(int input) {
-		final String val = Integer.toString(Integer.valueOf(input) + 1);
-		return val;
+		return Integer.toString(Integer.valueOf(input) + 1);
 	}
 
 	public String testMethodInvocationIntegerBoxing(int input) {
-		final String val = Integer.toString(intSampleMethod(Integer.toString(3)) + 4);
-		return val;
+		return Integer.toString(intSampleMethod(Integer.toString(3)) + 4);
 	}
 
 	public String testLiteralConcatWithExpression(int input) {
