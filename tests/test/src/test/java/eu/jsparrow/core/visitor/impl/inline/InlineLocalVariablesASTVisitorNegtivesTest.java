@@ -14,8 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
-@SuppressWarnings({ "nls" })
-public class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixture {
+class InlineLocalVariablesASTVisitorNegtivesTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() {

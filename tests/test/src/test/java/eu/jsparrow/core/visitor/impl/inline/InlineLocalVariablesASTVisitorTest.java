@@ -4,7 +4,6 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -12,8 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
-@SuppressWarnings({ "nls" })
-public class InlineLocalVariablesASTVisitorTest extends UsesJDTUnitFixture {
+class InlineLocalVariablesASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() {
@@ -108,87 +106,6 @@ public class InlineLocalVariablesASTVisitorTest extends UsesJDTUnitFixture {
 	@ParameterizedTest
 	@MethodSource("arrayInitializerToArrayCreation")
 	void visit_arrayInitializerToArrayCreation_shouldTransform(String original, String expected) throws Exception {
-		assertChange(original, expected);
-	}
-
-	private static Stream<Arguments> subsequentDeclarations() {
-
-		return Stream.of(
-				Arguments.of(
-						"" +
-								"	void subsequentDeclarations() {\n" +
-								"		int a = 1;\n" +
-								"		int b = a;\n" +
-								"		int c = b;\n" +
-								"	}",
-						"" +
-								"	void subsequentDeclarations() {\n" +
-								"		int b = 1;\n" +
-								"		int c = b;\n" +
-								"	}"),
-				Arguments.of(
-						"" +
-								"	void subsequentDeclarations() {\n" +
-								"		int a = 1;\n" +
-								"		int b = a;\n" +
-								"		int c = b;\n" +
-								"		int d = c;\n" +
-								"	}",
-						"" +
-								"	void subsequentDeclarations() {\n" +
-								"		int b = 1;\n" +
-								"		int d = b;\n" +
-								"	}"),
-				Arguments.of(
-						"" +
-								"	int subsequentDeclarations3() {\n" +
-								"		int a = 1;\n" +
-								"		int b = a;\n" +
-								"		return b;\n" +
-								"	}",
-						"" +
-								"	int subsequentDeclarations3() {\n" +
-								"		int b = 1;\n" +
-								"		return b;\n" +
-								"	}"),
-				Arguments.of(
-						"" +
-								"	int subsequentDeclarations4() {\n" +
-								"		int a = 1;\n" +
-								"		int b = a;\n" +
-								"		int c = b;\n" +
-								"		return c;\n" +
-								"	}",
-						"" +
-								"	int subsequentDeclarations4() {\n" +
-								"		int b = 1;\n" +
-								"		return b;\n" +
-								"	}"));
-	}
-
-	@Disabled("For the moment disabled, will maybe be abolished.")
-	@ParameterizedTest
-	@MethodSource("subsequentDeclarations")
-	void visit_subsequentDeclarations_shouldPartiallyTransform(String original, String expected) throws Exception {
-		assertChange(original, expected);
-	}
-
-	@Disabled("Temporarily disabled, expected to be enabled")
-	@Test
-	void visit_variableUsedInAssignment_shouldTransform() throws Exception {
-		String original = "" +
-				"		int x;\n" +
-				"		void useInAssignment() {\n" +
-				"			int a = 1;\n" +
-				"			x = a;\n" +
-				"		}";
-
-		String expected = "" +
-				"		int x;\n" +
-				"		void useInAssignment() {\n" +
-				"			x = 1;\n" +
-				"		}";
-
 		assertChange(original, expected);
 	}
 
