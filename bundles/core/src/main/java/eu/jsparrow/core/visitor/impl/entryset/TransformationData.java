@@ -9,61 +9,53 @@ import org.eclipse.jdt.core.dom.Type;
 public class TransformationData {
 	private final SupportedLoopStructure forStatementData;
 	private final Expression mapExpression;
-
 	private final Type valueType;
 	private final int extraValueDimensions;
 	private final MethodInvocation mapGetterInvocationToReplace;
+	private final String mapEntryIdentifier;
 
-	TransformationData(SupportedLoopStructure forStatementData) {
+	TransformationData(SupportedLoopStructure forStatementData, String mapEntryIdentifier) {
 		this.forStatementData = forStatementData;
 		this.mapExpression = forStatementData.getAssumedMapExpression();
 
 		ValueDeclarationStructure valueDeclarationData = forStatementData.getValueDeclarationData();
 		this.valueType = valueDeclarationData.getDeclarationStatement()
 			.getType();
-
-		// this.valueType = forStatementData.getSupportedBodyStructure()
-		// .getMappingValueType();
-
 		this.extraValueDimensions = valueDeclarationData.getDeclarationFragment()
 			.getExtraDimensions();
-
-		// this.extraValueDimensions =
-		// forStatementData.getSupportedBodyStructure()
-		// .getExtraValueDimensions();
-
 		this.mapGetterInvocationToReplace = valueDeclarationData.getValueByKeyGetterInvocation();
-
-		// this.mapGetterInvocationToReplace =
-		// forStatementData.getSupportedBodyStructure()
-		// .getMapGetterInvocation();
+		this.mapEntryIdentifier = mapEntryIdentifier;
 	}
 
-	public Expression getMapExpression() {
+	Expression getMapExpression() {
 		return mapExpression;
 	}
 
-	public Type getValueType() {
+	Type getValueType() {
 		return valueType;
 	}
 
-	public int getExtraValueDimensions() {
+	int getExtraValueDimensions() {
 		return extraValueDimensions;
 	}
 
-	public SingleVariableDeclaration getLoopParameter() {
+	SingleVariableDeclaration getLoopParameter() {
 		return forStatementData.getParameter();
 	}
 
-	public Expression getLoopExpression() {
+	Expression getLoopExpression() {
 		return forStatementData.getExpression();
 	}
 
-	public Block getLoopBody() {
+	Block getLoopBody() {
 		return forStatementData.getBody();
 	}
 
-	public MethodInvocation getMapGetterInvocationToReplace() {
+	MethodInvocation getMapGetterInvocationToReplace() {
 		return mapGetterInvocationToReplace;
+	}
+
+	String getMapEntryIdentifier() {
+		return mapEntryIdentifier;
 	}
 }

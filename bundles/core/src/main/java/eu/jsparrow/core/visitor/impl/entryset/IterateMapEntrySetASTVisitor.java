@@ -7,9 +7,13 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -17,12 +21,14 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.markers.common.IterateMapEntrySetEvent;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.SafeVariableNameFactory;
 
 /**
  * 
@@ -30,6 +36,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 		implements IterateMapEntrySetEvent {
 
+	private static final String ENTRY = "entry"; //$NON-NLS-1$
 	private static final String TYPE_NAME_ENTRY = "Entry"; //$NON-NLS-1$
 	private static final String TYPE_NAME_MAP = "Map"; //$NON-NLS-1$
 	private static final String ENTRY_SET = "entrySet"; //$NON-NLS-1$
@@ -39,20 +46,43 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 	private static final List<String> JAVA_UTIL_MAP_SINGLETON_LIST = Collections
 		.singletonList(java.util.Map.class.getName());
 
+	private final SafeVariableNameFactory variableNameFactory = new SafeVariableNameFactory();
+
 	@Override
 	public boolean visit(EnhancedForStatement enhancedForStatement) {
 		extractTransformationData(enhancedForStatement).ifPresent(this::transform);
 		return true;
 	}
 
+	@Override
+	public void endVisit(CompilationUnit compilationUnit) {
+		variableNameFactory.clearCompilationUnitScope(compilationUnit);
+		super.endVisit(compilationUnit);
+	}
+
+	@Override
+	public void endVisit(TypeDeclaration typeDeclaration) {
+		variableNameFactory.clearFieldScope(typeDeclaration);
+	}
+
+	@Override
+	public void endVisit(MethodDeclaration methodDeclaration) {
+		variableNameFactory.clearLocalVariablesScope(methodDeclaration);
+	}
+
+	@Override
+	public void endVisit(FieldDeclaration fieldDeclaration) {
+		variableNameFactory.clearLocalVariablesScope(fieldDeclaration);
+	}
+
+	@Override
+	public void endVisit(Initializer initializer) {
+		variableNameFactory.clearLocalVariablesScope(initializer);
+	}
+
 	private void transform(TransformationData transformationData) {
-		transformationData.toString();
-		// ...
 
-		String mapEntryIdentifier = "entry"; //$NON-NLS-1$
-
-		// dead code just to demonstrate line of reasoning
-
+		String mapEntryIdentifier = transformationData.getMapEntryIdentifier();
 		SingleVariableDeclaration keyParameterTpReplace = transformationData.getLoopParameter();
 		SingleVariableDeclaration newMapEntryParameter = createNewMapEntryParameter(transformationData,
 				mapEntryIdentifier);
@@ -178,7 +208,9 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 			return Optional.empty();
 		}
 
-		return Optional.of(new TransformationData(supportedLoopHeader));
+		String mapEntryIdentifier = variableNameFactory.createSafeVariableName(enhancedForStatement, ENTRY);
+
+		return Optional.of(new TransformationData(supportedLoopHeader, mapEntryIdentifier));
 	}
 
 	/**
