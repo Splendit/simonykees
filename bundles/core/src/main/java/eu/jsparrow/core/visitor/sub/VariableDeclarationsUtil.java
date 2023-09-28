@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.sub;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -49,14 +50,15 @@ public class VariableDeclarationsUtil {
 		}
 		return (VariableDeclarationFragment) declarationNode;
 	}
-	
+
 	/**
 	 * 
 	 * @param variableName
 	 *            a variable name
 	 * @return If the specified {@link SimpleName} references a local variable
 	 *         declaration, then this method returns the corresponding
-	 *         {@link VariableDeclarationStatement}. Otherwise, null is returned.
+	 *         {@link VariableDeclarationStatement}. Otherwise, null is
+	 *         returned.
 	 */
 	public static VariableDeclarationStatement findLocalVariableDeclarationStatement(SimpleName variableName) {
 		VariableDeclarationFragment variableDeclarationFragment = VariableDeclarationsUtil
@@ -70,22 +72,19 @@ public class VariableDeclarationsUtil {
 		return (VariableDeclarationStatement) variableDeclarationFragment.getParent();
 	}
 
-
 	/**
 	 * @return If the given {@link VariableDeclarationFragment} declares a local
-	 *         variable, then this method returns the {@link Block} containing
-	 *         the given variable declaration. Otherwise, null is returned.
+	 *         variable, then this method returns an Optional storing the {@link Block} which contains
+	 *         the given variable declaration. Otherwise, an empty Optional is returned.
 	 */
-	public static Block findBlockSurroundingDeclaration(VariableDeclarationFragment variableDeclarationFragment) {
+	public static Optional<Block> findBlockSurroundingDeclaration(
+			VariableDeclarationFragment variableDeclarationFragment) {
 		if (variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-			return null;
+			return Optional.empty();
 		}
 		VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) variableDeclarationFragment
 			.getParent();
-		if (variableDeclarationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return null;
-		}
-		return (Block) variableDeclarationStatement.getParent();
+		return ASTNodeUtil.findParentBlock(variableDeclarationStatement);
 	}
 
 	/**

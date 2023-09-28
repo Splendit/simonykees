@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -225,12 +226,8 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 		Statement thenStatement = ifStatement.getThenStatement();
 		if (thenStatement.getNodeType() == ASTNode.BLOCK) {
 			Block ifBody = (Block) thenStatement;
-			List<Statement> ifBodyStatements = ASTNodeUtil.convertToTypedList(ifBody.statements(), Statement.class);
-			if (ifBodyStatements.size() != 1) {
-				return false;
-			}
-			Statement singleBodyStatement = ifBodyStatements.get(0);
-			return singleBodyStatement.getNodeType() == ASTNode.BREAK_STATEMENT;
+			return ASTNodeUtil.findSingleBlockStatement(ifBody, BreakStatement.class)
+				.isPresent();
 		}
 		return thenStatement.getNodeType() == ASTNode.BREAK_STATEMENT;
 	}

@@ -14,6 +14,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.java16.javarecords.UseJavaRecordsResolver;
 import eu.jsparrow.rules.java16.patternmatching.UsePatternMatchingForInstanceofResolver;
 import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionResolver;
+import eu.jsparrow.rules.java16.switchexpression.ifstatement.ReplaceMultiBranchIfBySwitchResolver;
 import eu.jsparrow.rules.java16.textblock.UseTextBlockResolver;
 
 @Component
@@ -30,6 +31,7 @@ public class Java16MarkersServiceImpl implements MarkerService {
 		Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> map = new HashMap<>();
 		map.put(UseTextBlockResolver.ID, UseTextBlockResolver::new);
 		map.put(UseSwitchExpressionResolver.ID, UseSwitchExpressionResolver::new);
+		map.put(ReplaceMultiBranchIfBySwitchResolver.ID, ReplaceMultiBranchIfBySwitchResolver::new);
 		map.put(UseJavaRecordsResolver.ID, UseJavaRecordsResolver::new);
 		map.put(UsePatternMatchingForInstanceofResolver.ID, UsePatternMatchingForInstanceofResolver::new);
 		return Collections.unmodifiableMap(map);

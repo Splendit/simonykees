@@ -53,23 +53,17 @@ public class LambdaNodeUtil {
 	 * @param lambdaExpression
 	 *            lambda expression to be checked
 	 * 
-	 * @return the {@link Type} of the parameter if the lambda expression has
-	 *         only one parameter expressed as a
-	 *         {@link SingleVariableDeclaration}, or {@code null} the lambda
-	 *         expression does not have exactly one parameter or if the
+	 * @return an Optional storing the {@link Type} of the parameter if the
+	 *         lambda expression has only one parameter expressed as a
+	 *         {@link SingleVariableDeclaration}, or an empty Optional if the
+	 *         lambda expression does not have exactly one parameter or if the
 	 *         parameter type is implicit.
 	 */
-	public static Type extractSingleParameterType(LambdaExpression lambdaExpression) {
-		Type parameterType = null;
+	public static Optional<Type> extractSingleParameterType(LambdaExpression lambdaExpression) {
 
-		List<SingleVariableDeclaration> declarations = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
-				SingleVariableDeclaration.class);
-		if (declarations.size() == 1) {
-			SingleVariableDeclaration declaration = declarations.get(0);
-			parameterType = declaration.getType();
-		}
-
-		return parameterType;
+		return ASTNodeUtil
+			.findSingletonListElement(lambdaExpression.parameters(), SingleVariableDeclaration.class)
+			.map(SingleVariableDeclaration::getType);
 	}
 
 	/**

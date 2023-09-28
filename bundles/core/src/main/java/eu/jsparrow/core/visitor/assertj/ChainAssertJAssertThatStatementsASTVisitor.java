@@ -179,16 +179,10 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		if (!SupportedAssertJAssertions.isSupportedAssertJAsserThatMethodName(assumedAssertThatMethodName)) {
 			return Optional.empty();
 		}
+		Expression argument = ASTNodeUtil.findSingleInvocationArgument(assumedAssertThatInvocation)
+			.orElse(null);
 
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(assumedAssertThatInvocation.arguments(),
-				Expression.class);
-
-		if (arguments.size() != 1) {
-			return Optional.empty();
-		}
-
-		Expression argument = arguments.get(0);
-		if (!isSupportedAssertThatArgumentStructure(argument)) {
+		if (argument == null || !isSupportedAssertThatArgumentStructure(argument)) {
 			return Optional.empty();
 		}
 

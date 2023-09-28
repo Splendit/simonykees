@@ -6,8 +6,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
-import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
 import eu.jsparrow.core.markers.common.ReplaceWrongClassForLoggerEvent;
+import eu.jsparrow.rules.common.exception.UnresolvedBindingException;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -27,7 +27,7 @@ public class ReplaceWrongClassForLoggerASTVisitor extends AbstractASTRewriteASTV
 		try {
 			doReplacement = ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(node,
 					surroundingTypeDeclaration, getCompilationUnit());
-		} catch (UnresolvedTypeBindingException exc) {
+		} catch (UnresolvedBindingException exc) {
 			doReplacement = false;
 		}
 

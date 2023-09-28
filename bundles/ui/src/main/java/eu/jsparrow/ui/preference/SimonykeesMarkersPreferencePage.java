@@ -1,14 +1,10 @@
 package eu.jsparrow.ui.preference;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.viewers.CheckboxTreeViewer;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -19,13 +15,9 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import eu.jsparrow.core.markers.ResolverVisitorsFactory;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RuleDescription;
-import eu.jsparrow.ui.preference.marker.CheckboxTreeViewerWrapper;
-import eu.jsparrow.ui.preference.marker.MarkerContentProvider;
-import eu.jsparrow.ui.preference.marker.MarkerItemWrapper;
-import eu.jsparrow.ui.preference.marker.MarkerLabelProvider;
+import eu.jsparrow.ui.preference.marker.MarkerItemWrapperFilter;
+import eu.jsparrow.ui.preference.marker.MarkerTreeViewWrapper;
 import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
 
 /**
@@ -36,8 +28,8 @@ import eu.jsparrow.ui.preference.profile.DefaultActiveMarkers;
  */
 public class SimonykeesMarkersPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	private CheckboxTreeViewerWrapper treeViewerWrapper;
-	private Text searchField;
+	protected Text searchField;
+	private MarkerTreeViewWrapper treeViewerWrapper;
 
 	@Override
 	public void init(IWorkbench workbench) {
@@ -55,43 +47,14 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		Group group = new Group(mainComposite, SWT.NONE);
 		group.setText(Messages.SimonykeesMarkersPreferencePage_jSparrowMarkersGroupText);
 		group.setLayout(new GridLayout(1, false));
-		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		GridData groupLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+
+		GridData groupLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, true);
 		groupLayoutData.heightHint = 400;
+		group.setLayoutData(groupLayoutData);
 
-		Composite searchComposite = new Composite(group, SWT.NONE);
-		searchComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		searchComposite.setLayout(new GridLayout(1, true));
+		createSearchTextField(group);
 
-		searchField = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
-		searchField.setMessage(Messages.SimonykeesMarkersPreferencePage_searchLabelMessage);
-		GridData searchFieldGridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
-		searchFieldGridData.widthHint = 180;
-		searchField.setLayoutData(searchFieldGridData);
-
-		CheckboxTreeViewer checkboxTreeViewer = new CheckboxTreeViewer(group);
-		checkboxTreeViewer.getTree()
-			.setLayoutData(new GridData(GridData.FILL_BOTH));
-		checkboxTreeViewer.setContentProvider(new MarkerContentProvider());
-		checkboxTreeViewer.setLabelProvider(new MarkerLabelProvider());
-		checkboxTreeViewer.setInput("root"); //$NON-NLS-1$
-
-		treeViewerWrapper = new CheckboxTreeViewerWrapper(checkboxTreeViewer);
-
-		Map<String, RuleDescription> allMarkerDescriptions = ResolverVisitorsFactory.getAllMarkerDescriptions();
-		List<String> allActiveMarkers = SimonykeesPreferenceManager.getAllActiveMarkers();
-		treeViewerWrapper.populateCheckboxTreeView(allMarkerDescriptions, allActiveMarkers);
-		checkboxTreeViewer.addCheckStateListener(treeViewerWrapper::createCheckListener);
-		checkboxTreeViewer.setComparator(new ViewerComparator() {
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				Comparator<MarkerItemWrapper> comparator = Comparator
-					.comparing(MarkerItemWrapper::getName);
-				return comparator.compare((MarkerItemWrapper) e1, (MarkerItemWrapper) e2);
-			}
-		});
-
-		searchField.addModifyListener(treeViewerWrapper::createSearchFieldModifyListener);
+		treeViewerWrapper = new MarkerTreeViewWrapper(group);
 
 		Composite bulkActionsComposite = new Composite(mainComposite, SWT.NONE);
 		bulkActionsComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
@@ -102,6 +65,28 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		return mainComposite;
 	}
 
+	protected void createSearchTextField(Group group) {
+		Composite searchComposite = new Composite(group, SWT.NONE);
+		searchComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		searchComposite.setLayout(new GridLayout(1, true));
+		searchField = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
+		searchField.setMessage(Messages.SimonykeesMarkersPreferencePage_searchLabelMessage);
+		GridData searchFieldGridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
+		searchFieldGridData.widthHint = 180;
+		searchField.setLayoutData(searchFieldGridData);
+		searchField.addModifyListener(this::textRetrievalModified);
+	}
+
+	/**
+	 * Method for the listener functionality for modifying text in
+	 * {@link #searchField}
+	 */
+	protected void textRetrievalModified(ModifyEvent modifyEvent) {
+		Text source = (Text) modifyEvent.getSource();
+		String searchText = source.getText();
+		treeViewerWrapper.setTreeViewerFilters(new MarkerItemWrapperFilter(treeViewerWrapper, searchText));
+	}
+
 	protected void addActiveMarker(String markerId) {
 		SimonykeesPreferenceManager.addActiveMarker(markerId);
 	}
@@ -110,7 +95,7 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 		SimonykeesPreferenceManager.removeActiveMarker(markerId);
 	}
 
-	protected void addButton(Composite composite, String name, boolean turn, CheckboxTreeViewerWrapper treeWrapper) {
+	protected void addButton(Composite composite, String name, boolean turn, MarkerTreeViewWrapper treeWrapper) {
 		Button thisButton = new Button(composite, SWT.PUSH);
 		thisButton.setLayoutData(new GridData(SWT.DEFAULT, SWT.DEFAULT, false, false));
 		thisButton.setText(name);
@@ -121,13 +106,18 @@ public class SimonykeesMarkersPreferencePage extends PreferencePage implements I
 	protected void performDefaults() {
 		super.performDefaults();
 		if (treeViewerWrapper != null) {
-			DefaultActiveMarkers defaultMarkers = new DefaultActiveMarkers();
-			treeViewerWrapper.selectMarkers(defaultMarkers.getActiveMarkers());
+			treeViewerWrapper.selectDefaultMarkers(new DefaultActiveMarkers());
 		}
+	}
+	
+	@Override
+	public boolean performOk() {
+		Set<String> selectedMarkersToApply = treeViewerWrapper.getSelectedMarkersToApply();
+		SimonykeesPreferenceManager.setAllActiveMarkers(selectedMarkersToApply);
+		return true;
 	}
 
 	public void setSearchField(String string) {
 		searchField.setText(string);
-
 	}
 }

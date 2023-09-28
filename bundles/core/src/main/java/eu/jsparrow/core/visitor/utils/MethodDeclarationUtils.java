@@ -120,23 +120,18 @@ public class MethodDeclarationUtils {
 			return false;
 		}
 
-		List<VariableDeclaration> params = ASTNodeUtil.convertToTypedList(methodDeclaration.parameters(),
-				VariableDeclaration.class);
+		ITypeBinding typeOfSingleParameter = ASTNodeUtil
+			.findSingletonListElement(methodDeclaration.parameters(), VariableDeclaration.class)
+			.map(VariableDeclaration::resolveBinding)
+			.map(IVariableBinding::getType)
+			.orElse(null);
 
-		if (params.size() != 1) {
+		if (typeOfSingleParameter == null || !typeOfSingleParameter.isArray()) {
 			return false;
 		}
 
-		VariableDeclaration param = params.get(0);
-		IVariableBinding paramVariableBinding = param.resolveBinding();
-		ITypeBinding paramTypeBinding = paramVariableBinding.getType();
-
-		if (!paramTypeBinding.isArray()) {
-			return false;
-		}
-
-		return ClassRelationUtil.isContentOfType(paramTypeBinding.getElementType(), java.lang.String.class.getName())
-				&& paramTypeBinding.getDimensions() == 1;
+		return ClassRelationUtil.isContentOfType(typeOfSingleParameter.getElementType(), java.lang.String.class.getName())
+				&& typeOfSingleParameter.getDimensions() == 1;
 	}
 
 	public static boolean isJavaApplicationMainMethod(CompilationUnit compilationUnit,
@@ -154,11 +149,11 @@ public class MethodDeclarationUtils {
 		}
 		String declaringClassQualifiedName = declaringClass.getQualifiedName();
 		ITypeRoot typeRoot = compilationUnit.getTypeRoot();
-		if(typeRoot == null) {
+		if (typeRoot == null) {
 			return false;
 		}
 		IType primaryType = typeRoot.findPrimaryType();
-		if(primaryType == null) {
+		if (primaryType == null) {
 			return false;
 		}
 		String primaryTypeQualifiedName = primaryType.getFullyQualifiedName();

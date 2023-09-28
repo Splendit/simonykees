@@ -47,7 +47,11 @@ public class LoggerRuleWizardPageModel {
 		this.rule = (StandardLoggerRule) rule;
 
 		currentSelectionMap.putAll(this.rule.getDefaultOptions());
-
+		this.rule.getSelectedOptions()
+			.entrySet()
+			.forEach(entry -> {
+				currentSelectionMap.put(entry.getKey(), entry.getValue());
+			});
 		systemOutReplaceOptions.putAll(this.rule.getSystemOutReplaceOptions());
 		systemErrReplaceOptions.putAll(this.rule.getSystemErrReplaceOptions());
 		printStackTraceReplaceOptions.putAll(this.rule.getPrintStackTraceReplaceOptions());
@@ -213,5 +217,4 @@ public class LoggerRuleWizardPageModel {
 	public String getSelectionStatus() {
 		return selectionStatus;
 	}
-
 }

@@ -459,11 +459,7 @@ public class TestForToForEachArrayIteratingIndexRule {
 		}
 
 		public Boolean valueOf(boolean value) {
-			if (value) {
-				return TRUE;
-			} else {
-				return FALSE;
-			}
+			return value ? TRUE : FALSE;
 		}
 	}
 }

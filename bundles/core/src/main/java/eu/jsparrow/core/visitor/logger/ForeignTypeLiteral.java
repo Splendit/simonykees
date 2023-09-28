@@ -6,7 +6,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
-import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
+import eu.jsparrow.rules.common.exception.UnresolvedTypeBindingException;
 
 /**
  * A {@link TypeLiteral} is regarded as foreign type literal if it is not

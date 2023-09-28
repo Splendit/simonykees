@@ -147,12 +147,11 @@ public class UseDedicatedAssertJAssertionsASTVisitor extends AbstractASTRewriteA
 		}
 
 		MethodInvocation assumedAssertThatInvocation = (MethodInvocation) assertionInvocationExpression;
-		List<Expression> assumedAssertThatArguments = ASTNodeUtil
-			.convertToTypedList(assumedAssertThatInvocation.arguments(), Expression.class);
-		if (assumedAssertThatArguments.size() != 1) {
+		Expression assumedAssertThatArgument = ASTNodeUtil.findSingleInvocationArgument(assumedAssertThatInvocation)
+			.orElse(null);
+		if (assumedAssertThatArgument == null) {
 			return Optional.empty();
 		}
-		Expression assumedAssertThatArgument = assumedAssertThatArguments.get(0);
 
 		String assumedAssertThatMethodName = assumedAssertThatInvocation.getName()
 			.getIdentifier();

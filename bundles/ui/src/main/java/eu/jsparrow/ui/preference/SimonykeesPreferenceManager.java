@@ -2,6 +2,7 @@ package eu.jsparrow.ui.preference;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -281,7 +282,7 @@ public class SimonykeesPreferenceManager {
 		return Arrays.asList(value.split(",")); //$NON-NLS-1$
 	}
 
-	public static void setAllActiveMarkers(List<String> activeMarkers) {
+	public static void setAllActiveMarkers(Collection<String> activeMarkers) {
 		String newValue = String.join(",", activeMarkers); //$NON-NLS-1$
 		store.setValue(SimonykeesPreferenceConstants.ACTIVE_MARKERS, newValue);
 

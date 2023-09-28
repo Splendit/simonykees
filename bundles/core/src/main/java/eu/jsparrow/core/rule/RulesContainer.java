@@ -73,12 +73,14 @@ public class RulesContainer {
 				/*
 				 * Coding conventions
 				 */
+				new UseTernaryOperatorRule(),
 				new RemoveUnusedLocalVariablesRule(),
 				new TryWithResourceRule(), new MultiCatchRule(), new FunctionalInterfaceRule(),
 				new CollectionRemoveAllRule(), new ReplaceSetRemoveAllWithForEachRule(),
 				new ImmutableStaticFinalCollectionsRule(), new DiamondOperatorRule(),
 				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),
-				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
+				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new InlineLocalVariablesRule(),
+				new EnumsWithoutEqualsRule(),
 				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new MapGetOrDefaultRule(),
 				new DateDeprecatedRule(), new RemoveDoubleNegationRule(), new OptionalIfPresentRule(),
 				new OptionalMapRule(), new OptionalFilterRule(), new OptionalIfPresentOrElseRule(),

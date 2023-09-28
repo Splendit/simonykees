@@ -24,6 +24,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
+import eu.jsparrow.ui.wizard.projects.SelectSourcesToRefactorDialog;
 
 /**
  * Content displayed in Eclipse editor when the jSparrow plugin is installed.
@@ -118,6 +119,10 @@ public class WelcomePage extends FormPage {
 	}
 
 	private void createButtonsSide(Composite rightComposite) {
+		Button selectProjectButton = new Button(rightComposite, SWT.PUSH);
+		selectProjectButton.setText("Refactoring..."); //$NON-NLS-1$
+		createButtonListenerToOpenSelectProject(selectProjectButton);
+
 		Group gettingStartedGroup = new Group(rightComposite, SWT.NONE);
 		gettingStartedGroup.setText(Messages.WelcomePage_getting_started_group);
 		GridData groupGridData = new GridData(GridData.FILL_HORIZONTAL);
@@ -194,6 +199,18 @@ public class WelcomePage extends FormPage {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				Program.launch(urlString);
+			}
+		});
+	}
+
+	private void createButtonListenerToOpenSelectProject(Button selectProjectButton) {
+
+		selectProjectButton.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				SelectSourcesToRefactorDialog.selectJavaSourcesToRefactor(Display.getDefault()
+					.getActiveShell());
 			}
 		});
 	}

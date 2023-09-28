@@ -1,8 +1,6 @@
-package eu.jsparrow.core.exception.visitor;
+package eu.jsparrow.rules.common.exception;
 
 import org.eclipse.jdt.core.dom.ITypeBinding;
-
-import eu.jsparrow.rules.common.exception.SimonykeesException;
 
 /**
  * Indicates that an {@link ITypeBinding} cannot be resolved or found.
@@ -10,7 +8,7 @@ import eu.jsparrow.rules.common.exception.SimonykeesException;
  * @since 4.8.0
  *
  */
-public class UnresolvedTypeBindingException extends SimonykeesException {
+public class UnresolvedTypeBindingException extends UnresolvedBindingException {
 
 	private static final long serialVersionUID = 917395804661919739L;
 

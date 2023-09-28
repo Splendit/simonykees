@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
@@ -25,7 +24,7 @@ import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 public class RunDefaultProfileImplicitWizard extends AbstractRuleWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunDefaultProfileImplicitWizard.class);
-	
+
 	private SelectRulesWizardData selectRulesWizardData;
 
 	public RunDefaultProfileImplicitWizard(RefactoringPipeline refactoringPipeline,
@@ -43,17 +42,10 @@ public class RunDefaultProfileImplicitWizard extends AbstractRuleWizard {
 					.collect(Collectors.joining(";"))); //$NON-NLS-1$
 		logger.info(message);
 
-		refactoringPipeline.setRules(selectedRules);
-		refactoringPipeline.updateInitialSourceMap();
-
-		Job job = createRefactoringJob(refactoringPipeline, javaProjects);
-		job.addJobChangeListener(createPreviewWizardJobChangeAdapter(refactoringPipeline, javaProjects, selectRulesWizardData));
-
-		job.setUser(true);
-		job.schedule();
-
+		proceedToRefactoringPreviewWizard(javaProjects, selectedRules, selectRulesWizardData, null);
 		return true;
 	}
+
 
 	@Override
 	public boolean performFinish() {

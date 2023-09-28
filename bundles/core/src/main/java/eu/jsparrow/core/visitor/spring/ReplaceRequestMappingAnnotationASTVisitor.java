@@ -97,12 +97,12 @@ public class ReplaceRequestMappingAnnotationASTVisitor extends AbstractAddImport
 
 		if (methodValue.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
 			ArrayInitializer arrayInitializer = (ArrayInitializer) methodValue;
-			List<Expression> expressions = ASTNodeUtil.convertToTypedList(arrayInitializer.expressions(),
-					Expression.class);
-			if (expressions.size() != 1) {
+			methodValue = ASTNodeUtil
+				.findSingletonListElement(arrayInitializer.expressions(), Expression.class)
+				.orElse(null);
+			if (methodValue == null) {
 				return true;
 			}
-			methodValue = expressions.get(0);
 		}
 
 		if (!ClassRelationUtil.isContentOfType(methodValue.resolveTypeBinding(), REQUEST_METHOD)) {

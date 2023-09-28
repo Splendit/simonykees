@@ -31,6 +31,7 @@ import eu.jsparrow.core.markers.visitor.GuardConditionResolver;
 import eu.jsparrow.core.markers.visitor.ImmutableStaticFinalCollectionsResolver;
 import eu.jsparrow.core.markers.visitor.IndexOfToContainsResolver;
 import eu.jsparrow.core.markers.visitor.InefficientConstructorResolver;
+import eu.jsparrow.core.markers.visitor.InlineLocalVariablesResolver;
 import eu.jsparrow.core.markers.visitor.InsertBreakStatementInLoopsResolver;
 import eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver;
 import eu.jsparrow.core.markers.visitor.MakeFieldsAndVariablesFinalResolver;
@@ -71,6 +72,7 @@ import eu.jsparrow.core.markers.visitor.UseListSortResolver;
 import eu.jsparrow.core.markers.visitor.UseOffsetBasedStringMethodsResolver;
 import eu.jsparrow.core.markers.visitor.UsePredefinedStandardCharsetResolver;
 import eu.jsparrow.core.markers.visitor.UseStringJoinResolver;
+import eu.jsparrow.core.markers.visitor.UseTernaryOperatorResolver;
 import eu.jsparrow.core.markers.visitor.arithmetic.ArithmeticAssignmentResolver;
 import eu.jsparrow.core.markers.visitor.factory.methods.CollectionsFactoryMethodsResolver;
 import eu.jsparrow.core.markers.visitor.files.UseFilesBufferedReaderResolver;
@@ -106,7 +108,6 @@ import eu.jsparrow.core.markers.visitor.security.random.UseSecureRandomResolver;
 import eu.jsparrow.core.markers.visitor.stream.tolist.ReplaceStreamCollectByToListResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.MultiCatchResolver;
 import eu.jsparrow.core.markers.visitor.trycatch.TryWithResourceResolver;
-import eu.jsparrow.core.rule.impl.ReplaceSetRemoveAllWithForEachRule;
 import eu.jsparrow.rules.api.MarkerService;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
@@ -188,6 +189,7 @@ public class ResolverVisitorsFactory {
 		map.put(UseParameterizedLDAPQueryResolver.ID, UseParameterizedLDAPQueryResolver::new);
 		map.put(CollapseIfStatementsResolver.ID, CollapseIfStatementsResolver::new);
 		map.put(GuardConditionResolver.ID, GuardConditionResolver::new);
+		map.put(InlineLocalVariablesResolver.ID, InlineLocalVariablesResolver::new);
 		map.put(MultiVariableDeclarationLineResolver.ID, MultiVariableDeclarationLineResolver::new);
 		map.put(ReImplementingInterfaceResolver.ID, ReImplementingInterfaceResolver::new);
 		map.put(RemoveDoubleNegationResolver.ID, RemoveDoubleNegationResolver::new);
@@ -221,7 +223,7 @@ public class ResolverVisitorsFactory {
 		map.put(UseDedicatedAssertionsResolver.ID, UseDedicatedAssertionsResolver::new);
 		map.put(RemoveRedundantCloseResolver.ID, RemoveRedundantCloseResolver::new);
 		map.put(ReplaceRequestMappingAnnotationResolver.ID, ReplaceRequestMappingAnnotationResolver::new);
-
+		map.put(UseTernaryOperatorResolver.ID, UseTernaryOperatorResolver::new);		
 		List<MarkerService> markerServices = getExternalRuleServices();
 		markerServices.stream()
 			.map(MarkerService::loadGeneratingFunctions)
