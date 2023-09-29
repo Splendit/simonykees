@@ -14,7 +14,7 @@ public class TransformationData {
 	private final MethodInvocation mapGetterInvocationToReplace;
 	private final String mapEntryIdentifier;
 
-	TransformationData(SupportedLoopStructure forStatementData, String mapEntryIdentifier) {
+	TransformationData(SupportedLoopStructure forStatementData, Type keyType, Type valueType, String mapEntryIdentifier) {
 		this.forStatementData = forStatementData;
 		this.mapExpression = forStatementData.getAssumedMapExpression();
 

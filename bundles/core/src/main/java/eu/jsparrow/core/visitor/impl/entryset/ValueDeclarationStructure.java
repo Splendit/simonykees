@@ -36,7 +36,7 @@ class ValueDeclarationStructure {
 	private final MethodInvocation valueByKeyGetterInvocation;
 
 	static Optional<ValueDeclarationStructure> findSupportedValueDeclaration(Block block,
-			Expression expectedMapExpression, String expectedKeyIdentifier) {
+			SimpleName expectedMapName, String expectedKeyIdentifier) {
 
 		VariableDeclarationStatement assumedValueDeclaration = ItemAtIndex
 			.findItemAtIndex(block.statements(), 0, VariableDeclarationStatement.class)
@@ -55,13 +55,13 @@ class ValueDeclarationStructure {
 			return Optional.empty();
 		}
 
-		return extractValueByKeyGetterInvocation(firstFragment, expectedMapExpression, expectedKeyIdentifier)
+		return extractValueByKeyGetterInvocation(firstFragment, expectedMapName, expectedKeyIdentifier)
 			.map(valueByKeyGetterInvocation -> new ValueDeclarationStructure(assumedValueDeclaration, firstFragment,
 					valueByKeyGetterInvocation));
 	}
 
 	private static Optional<MethodInvocation> extractValueByKeyGetterInvocation(VariableDeclarationFragment fragment,
-			Expression expectedMapExpression, String expectedKeyIdentifier) {
+			SimpleName expectedMapName, String expectedKeyIdentifier) {
 		Expression initializer = fragment.getInitializer();
 		if (initializer == null) {
 			return Optional.empty();
@@ -78,7 +78,7 @@ class ValueDeclarationStructure {
 			return Optional.empty();
 		}
 
-		if (!methodInvocationExpression.subtreeMatch(AST_MATCHER, expectedMapExpression)) {
+		if (!AST_MATCHER.match(expectedMapName, methodInvocationExpression)) {
 			return Optional.empty();
 		}
 

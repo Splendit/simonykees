@@ -5,13 +5,16 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -22,10 +25,12 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.markers.common.IterateMapEntrySetEvent;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.SafeVariableNameFactory;
@@ -182,13 +187,26 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 
 	private Optional<TransformationData> extractTransformationData(EnhancedForStatement enhancedForStatement) {
 
-		SupportedLoopStructure supportedLoopHeader = SupportedLoopStructure
+		SupportedLoopStructure supportedForStatementData = SupportedLoopStructure
 			.findSupportedLoopStructure(enhancedForStatement)
 			.orElse(null);
-		if (supportedLoopHeader == null) {
+		if (supportedForStatementData == null) {
 			return Optional.empty();
 		}
-		Expression assumedMapExpression = supportedLoopHeader.getAssumedMapExpression();
+		SimpleName assumedMapExpression = supportedForStatementData.getAssumedMapExpression();
+
+		IBinding binding = assumedMapExpression.resolveBinding();
+		if (binding == null) {
+			return Optional.empty();
+			// or better: throw exception...
+		}
+		if (binding.getKind() != IBinding.VARIABLE) {
+			return Optional.empty();
+		}
+		IVariableBinding mapVariableBinding = (IVariableBinding) binding;
+		if (mapVariableBinding.isField()) {
+			return Optional.empty();
+		}
 
 		ITypeBinding typeBinding = assumedMapExpression.resolveTypeBinding();
 		if (!ClassRelationUtil.isContentOfTypes(typeBinding, JAVA_UTIL_MAP_SINGLETON_LIST) &&
@@ -203,14 +221,57 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 
 		ITypeBinding keyTypeBinding = typeArguments[0];
 		ITypeBinding valueTypeBinding = typeArguments[1];
-
 		if (!isTypeSafe(keyTypeBinding) || !isTypeSafe(valueTypeBinding)) {
 			return Optional.empty();
 		}
 
+		ASTNode declaringNode = getCompilationUnit().findDeclaringNode(mapVariableBinding);
+		if (declaringNode == null) {
+			return Optional.empty();
+		}
+
+		List<Type> mappingTypeArguments = Optional.of(mapVariableBinding)
+			.map(variableBinding -> getCompilationUnit().findDeclaringNode(variableBinding))
+			.flatMap(this::findMapVariableType)
+			.filter(Type::isParameterizedType)
+			.map(ParameterizedType.class::cast)		
+			.map(parameterizedType -> ASTNodeUtil.convertToTypedList(parameterizedType.typeArguments(), Type.class))
+			.orElse(Collections.emptyList());
+		
+		if(mappingTypeArguments.size() != 2) {
+			return Optional.empty();
+		}
+		Type keyType = mappingTypeArguments.get(0);
+		Type valueType = mappingTypeArguments.get(1);
+
 		String mapEntryIdentifier = variableNameFactory.createSafeVariableName(enhancedForStatement, ENTRY);
 
-		return Optional.of(new TransformationData(supportedLoopHeader, mapEntryIdentifier));
+		return Optional.of(new TransformationData(supportedForStatementData, keyType, valueType, mapEntryIdentifier));
+	}
+
+	private Optional<Type> findMapVariableType(ASTNode declaringNode) {
+
+		Optional<ASTNode> optionalDeclaringNode = Optional.of(declaringNode);
+		if (declaringNode.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+			return optionalDeclaringNode.map(ASTNode::getParent)
+				.map(VariableDeclarationStatement.class::cast)
+				.map(VariableDeclarationStatement::getType);
+		}
+
+		if (declaringNode.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
+			return optionalDeclaringNode.map(ASTNode::getParent)
+				.map(VariableDeclarationExpression.class::cast)
+				.map(VariableDeclarationExpression::getType);
+		}
+
+		if (declaringNode.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION) {
+			return optionalDeclaringNode
+				.map(SingleVariableDeclaration.class::cast)
+				.map(SingleVariableDeclaration::getType);
+		}
+
+		return Optional.empty();
+
 	}
 
 	/**
