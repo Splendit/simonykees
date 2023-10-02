@@ -8,19 +8,21 @@ import org.eclipse.jdt.core.dom.Type;
 
 public class TransformationData {
 	private final SupportedLoopStructure forStatementData;
-	private final Expression mapExpression;
+	private final Type keyType;
 	private final Type valueType;
+	private final Expression mapExpression;
 	private final int extraValueDimensions;
 	private final MethodInvocation mapGetterInvocationToReplace;
 	private final String mapEntryIdentifier;
 
-	TransformationData(SupportedLoopStructure forStatementData, Type keyType, Type valueType, String mapEntryIdentifier) {
+	TransformationData(SupportedLoopStructure forStatementData, Type keyType, Type valueType,
+			String mapEntryIdentifier) {
 		this.forStatementData = forStatementData;
+		this.keyType = keyType;
+		this.valueType = valueType;
 		this.mapExpression = forStatementData.getAssumedMapExpression();
-
 		ValueDeclarationStructure valueDeclarationData = forStatementData.getValueDeclarationData();
-		this.valueType = valueDeclarationData.getDeclarationStatement()
-			.getType();
+
 		this.extraValueDimensions = valueDeclarationData.getDeclarationFragment()
 			.getExtraDimensions();
 		this.mapGetterInvocationToReplace = valueDeclarationData.getValueByKeyGetterInvocation();
@@ -29,6 +31,10 @@ public class TransformationData {
 
 	Expression getMapExpression() {
 		return mapExpression;
+	}
+
+	public Type getKeyType() {
+		return keyType;
 	}
 
 	Type getValueType() {

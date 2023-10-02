@@ -116,10 +116,8 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 		SimpleType simpleEntryType = ast.newSimpleType(qualifiedEntryTypeName);
 		ParameterizedType parameterizedEntryType = ast.newParameterizedType(simpleEntryType);
 
-		SingleVariableDeclaration loopParameter = transformationData.getLoopParameter();
-		Type newKeyType = createNewType(loopParameter.getType(), loopParameter.getExtraDimensions());
-		Type newValueType = createNewType(transformationData.getValueType(),
-				transformationData.getExtraValueDimensions());
+		Type newKeyType = createNewType(transformationData.getKeyType());
+		Type newValueType = createNewType(transformationData.getValueType());
 		@SuppressWarnings("rawtypes")
 		List typeArguments = parameterizedEntryType.typeArguments();
 		typeArguments.add(newKeyType);
@@ -173,6 +171,10 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 			return ast.newArrayType(newType, dimensions);
 		}
 		return newType;
+	}
+
+	private Type createNewType(Type typeToCopy) {
+		return createNewType(typeToCopy, 0);
 	}
 
 	private MethodInvocation createEntryGetterInvocation(String mapEntryIdentifier, String getterIdentifier) {
@@ -234,11 +236,11 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 			.map(variableBinding -> getCompilationUnit().findDeclaringNode(variableBinding))
 			.flatMap(this::findMapVariableType)
 			.filter(Type::isParameterizedType)
-			.map(ParameterizedType.class::cast)		
+			.map(ParameterizedType.class::cast)
 			.map(parameterizedType -> ASTNodeUtil.convertToTypedList(parameterizedType.typeArguments(), Type.class))
 			.orElse(Collections.emptyList());
-		
-		if(mappingTypeArguments.size() != 2) {
+
+		if (mappingTypeArguments.size() != 2) {
 			return Optional.empty();
 		}
 		Type keyType = mappingTypeArguments.get(0);

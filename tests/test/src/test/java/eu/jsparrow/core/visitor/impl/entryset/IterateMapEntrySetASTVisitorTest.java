@@ -18,6 +18,8 @@ class IterateMapEntrySetASTVisitorTest extends UsesJDTUnitFixture {
 	void tearDown() throws Exception {
 		fixtureProject.clear();
 	}
+	
+	
 
 	@Test
 	void visit_iterateMapKeyAndValue_shouldTransform() throws Exception {
