@@ -116,12 +116,12 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 		SimpleType simpleEntryType = ast.newSimpleType(qualifiedEntryTypeName);
 		ParameterizedType parameterizedEntryType = ast.newParameterizedType(simpleEntryType);
 
-		Type newKeyType = createNewType(transformationData.getKeyType());
-		Type newValueType = createNewType(transformationData.getValueType());
+		Type typeArgumentForKey = createNewType(transformationData.getTypeArgumentForKey());
+		Type typeArgumentForValue = createNewType(transformationData.getTypeArgumentForValue());
 		@SuppressWarnings("rawtypes")
 		List typeArguments = parameterizedEntryType.typeArguments();
-		typeArguments.add(newKeyType);
-		typeArguments.add(newValueType);
+		typeArguments.add(typeArgumentForKey);
+		typeArguments.add(typeArgumentForValue);
 		// ASTNode.copySubtree(ast, newValueType)
 		SingleVariableDeclaration newMapEntryParameter = ast.newSingleVariableDeclaration();
 		newMapEntryParameter.setType(parameterizedEntryType);
@@ -243,12 +243,12 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 		if (mappingTypeArguments.size() != 2) {
 			return Optional.empty();
 		}
-		Type keyType = mappingTypeArguments.get(0);
-		Type valueType = mappingTypeArguments.get(1);
+		Type typeArgumentForKey = mappingTypeArguments.get(0);
+		Type typeArgumentForValue = mappingTypeArguments.get(1);
 
 		String mapEntryIdentifier = variableNameFactory.createSafeVariableName(enhancedForStatement, ENTRY);
 
-		return Optional.of(new TransformationData(supportedForStatementData, keyType, valueType, mapEntryIdentifier));
+		return Optional.of(new TransformationData(supportedForStatementData, typeArgumentForKey, typeArgumentForValue, mapEntryIdentifier));
 	}
 
 	private Optional<Type> findMapVariableType(ASTNode declaringNode) {
