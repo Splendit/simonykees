@@ -134,9 +134,9 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 		AST ast = astRewrite.getAST();
 		MethodInvocation newMapEntrySetInvocation = ast.newMethodInvocation();
 		newMapEntrySetInvocation.setName(ast.newSimpleName(ENTRY_SET));
-		Expression mapExpression = transformationData.getMapExpression();
-		Expression newMapExpression = (Expression) astRewrite.createCopyTarget(mapExpression);
-		newMapEntrySetInvocation.setExpression(newMapExpression);
+		String mapVariableIdentifier = transformationData.getMapVariableIdentifier();
+		SimpleName newMapVariableName = ast.newSimpleName(mapVariableIdentifier);
+		newMapEntrySetInvocation.setExpression(newMapVariableName);
 		return newMapEntrySetInvocation;
 	}
 
@@ -195,9 +195,9 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 		if (supportedForStatementData == null) {
 			return Optional.empty();
 		}
-		SimpleName assumedMapExpression = supportedForStatementData.getAssumedMapExpression();
+		SimpleName assumedMapVariableName = supportedForStatementData.getAssumedMapVariableName();
 
-		IBinding binding = assumedMapExpression.resolveBinding();
+		IBinding binding = assumedMapVariableName.resolveBinding();
 		if (binding == null) {
 			return Optional.empty();
 			// or better: throw exception...
@@ -210,7 +210,7 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 			return Optional.empty();
 		}
 
-		ITypeBinding typeBinding = assumedMapExpression.resolveTypeBinding();
+		ITypeBinding typeBinding = mapVariableBinding.getType();
 		if (!ClassRelationUtil.isContentOfTypes(typeBinding, JAVA_UTIL_MAP_SINGLETON_LIST) &&
 				!ClassRelationUtil.isInheritingContentOfTypes(typeBinding, JAVA_UTIL_MAP_SINGLETON_LIST)) {
 			return Optional.empty();
@@ -248,7 +248,8 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 
 		String mapEntryIdentifier = variableNameFactory.createSafeVariableName(enhancedForStatement, ENTRY);
 
-		return Optional.of(new TransformationData(supportedForStatementData, typeArgumentForKey, typeArgumentForValue, mapEntryIdentifier));
+		return Optional.of(new TransformationData(supportedForStatementData, typeArgumentForKey, typeArgumentForValue,
+				mapEntryIdentifier));
 	}
 
 	private Optional<Type> findMapVariableType(ASTNode declaringNode) {

@@ -6,43 +6,35 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 
-public class TransformationData {
+class TransformationData {
 	private final SupportedLoopStructure forStatementData;
+	private final String mapVariableIdentifier;
 	private final Type typeArgumentForKey;
 	private final Type typeArgumentForValue;
-	private final Expression mapExpression;
-	private final int extraValueDimensions;
 	private final MethodInvocation mapGetterInvocationToReplace;
 	private final String mapEntryIdentifier;
 
 	TransformationData(SupportedLoopStructure forStatementData, Type typeArgumentForKey, Type typeArgumentForValue,
 			String mapEntryIdentifier) {
 		this.forStatementData = forStatementData;
+		this.mapVariableIdentifier = forStatementData.getAssumedMapVariableName()
+			.getIdentifier();
 		this.typeArgumentForKey = typeArgumentForKey;
 		this.typeArgumentForValue = typeArgumentForValue;
-		this.mapExpression = forStatementData.getAssumedMapExpression();
-		ValueDeclarationStructure valueDeclarationData = forStatementData.getValueDeclarationData();
-
-		this.extraValueDimensions = valueDeclarationData.getDeclarationFragment()
-			.getExtraDimensions();
-		this.mapGetterInvocationToReplace = valueDeclarationData.getValueByKeyGetterInvocation();
+		this.mapGetterInvocationToReplace = forStatementData.getAssumedMapGetterInvocation();
 		this.mapEntryIdentifier = mapEntryIdentifier;
 	}
 
-	Expression getMapExpression() {
-		return mapExpression;
+	String getMapVariableIdentifier() {
+		return mapVariableIdentifier;
 	}
 
-	public Type getTypeArgumentForKey() {
+	Type getTypeArgumentForKey() {
 		return typeArgumentForKey;
 	}
 
 	Type getTypeArgumentForValue() {
 		return typeArgumentForValue;
-	}
-
-	int getExtraValueDimensions() {
-		return extraValueDimensions;
 	}
 
 	SingleVariableDeclaration getLoopParameter() {
