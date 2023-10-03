@@ -3,24 +3,22 @@ package eu.jsparrow.core.visitor.impl.entryset;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Type;
 
 class TransformationData {
 	private final SupportedLoopStructure forStatementData;
+	private final ParameterizedType parameterizedMapType;
 	private final String mapVariableIdentifier;
-	private final Type typeArgumentForKey;
-	private final Type typeArgumentForValue;
 	private final MethodInvocation mapGetterInvocationToReplace;
 	private final String mapEntryIdentifier;
 
-	TransformationData(SupportedLoopStructure forStatementData, Type typeArgumentForKey, Type typeArgumentForValue,
+	TransformationData(SupportedLoopStructure forStatementData, ParameterizedType parameterizedMapType,
 			String mapEntryIdentifier) {
 		this.forStatementData = forStatementData;
 		this.mapVariableIdentifier = forStatementData.getAssumedMapVariableName()
 			.getIdentifier();
-		this.typeArgumentForKey = typeArgumentForKey;
-		this.typeArgumentForValue = typeArgumentForValue;
+		this.parameterizedMapType = parameterizedMapType;
 		this.mapGetterInvocationToReplace = forStatementData.getAssumedMapGetterInvocation();
 		this.mapEntryIdentifier = mapEntryIdentifier;
 	}
@@ -29,12 +27,8 @@ class TransformationData {
 		return mapVariableIdentifier;
 	}
 
-	Type getTypeArgumentForKey() {
-		return typeArgumentForKey;
-	}
-
-	Type getTypeArgumentForValue() {
-		return typeArgumentForValue;
+	ParameterizedType getParameterizedMapType() {
+		return parameterizedMapType;
 	}
 
 	SingleVariableDeclaration getLoopParameter() {

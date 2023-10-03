@@ -106,28 +106,28 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 		onRewrite();
 	}
 
-	@SuppressWarnings("unchecked")
 	private SingleVariableDeclaration createNewMapEntryParameter(TransformationData transformationData,
 			String mapEntryIdentifier) {
+		AST ast = astRewrite.getAST();
+		SingleVariableDeclaration newMapEntryParameter = ast.newSingleVariableDeclaration();
+		ParameterizedType parameterizedEntryType = createParameterizedEntryType(transformationData);
+		newMapEntryParameter.setType(parameterizedEntryType);
+		newMapEntryParameter.setName(ast.newSimpleName(mapEntryIdentifier));
+
+		return newMapEntryParameter;
+	}
+
+	private ParameterizedType createParameterizedEntryType(TransformationData transformationData) {
 		AST ast = astRewrite.getAST();
 		SimpleName simpleEntryTypeName = ast.newSimpleName(TYPE_NAME_ENTRY);
 		SimpleName simpleMapTypeName = ast.newSimpleName(TYPE_NAME_MAP);
 		QualifiedName qualifiedEntryTypeName = ast.newQualifiedName(simpleMapTypeName, simpleEntryTypeName);
 		SimpleType simpleEntryType = ast.newSimpleType(qualifiedEntryTypeName);
-		ParameterizedType parameterizedEntryType = ast.newParameterizedType(simpleEntryType);
 
-		Type typeArgumentForKey = createNewType(transformationData.getTypeArgumentForKey());
-		Type typeArgumentForValue = createNewType(transformationData.getTypeArgumentForValue());
-		@SuppressWarnings("rawtypes")
-		List typeArguments = parameterizedEntryType.typeArguments();
-		typeArguments.add(typeArgumentForKey);
-		typeArguments.add(typeArgumentForValue);
-		// ASTNode.copySubtree(ast, newValueType)
-		SingleVariableDeclaration newMapEntryParameter = ast.newSingleVariableDeclaration();
-		newMapEntryParameter.setType(parameterizedEntryType);
-		newMapEntryParameter.setName(ast.newSimpleName(mapEntryIdentifier));
-
-		return newMapEntryParameter;
+		ParameterizedType parameterizedMapType = transformationData.getParameterizedMapType();
+		ParameterizedType parameterizedSubtreeCopy = (ParameterizedType) ASTNode.copySubtree(ast, parameterizedMapType);
+		parameterizedSubtreeCopy.setType(simpleEntryType);
+		return parameterizedSubtreeCopy;
 	}
 
 	private MethodInvocation createNewMapEntrySetInvocation(TransformationData transformationData) {
@@ -171,10 +171,6 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 			return ast.newArrayType(newType, dimensions);
 		}
 		return newType;
-	}
-
-	private Type createNewType(Type typeToCopy) {
-		return createNewType(typeToCopy, 0);
 	}
 
 	private MethodInvocation createEntryGetterInvocation(String mapEntryIdentifier, String getterIdentifier) {
@@ -232,24 +228,20 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 			return Optional.empty();
 		}
 
-		List<Type> mappingTypeArguments = Optional.of(mapVariableBinding)
+		ParameterizedType parameterizedMapType = Optional.of(mapVariableBinding)
 			.map(variableBinding -> getCompilationUnit().findDeclaringNode(variableBinding))
 			.flatMap(this::findMapVariableType)
 			.filter(Type::isParameterizedType)
 			.map(ParameterizedType.class::cast)
-			.map(parameterizedType -> ASTNodeUtil.convertToTypedList(parameterizedType.typeArguments(), Type.class))
-			.orElse(Collections.emptyList());
+			.orElse(null);
 
-		if (mappingTypeArguments.size() != 2) {
+		if (parameterizedMapType == null) {
 			return Optional.empty();
 		}
-		Type typeArgumentForKey = mappingTypeArguments.get(0);
-		Type typeArgumentForValue = mappingTypeArguments.get(1);
 
 		String mapEntryIdentifier = variableNameFactory.createSafeVariableName(enhancedForStatement, ENTRY);
 
-		return Optional.of(new TransformationData(supportedForStatementData, typeArgumentForKey, typeArgumentForValue,
-				mapEntryIdentifier));
+		return Optional.of(new TransformationData(supportedForStatementData, parameterizedMapType, mapEntryIdentifier));
 	}
 
 	private Optional<Type> findMapVariableType(ASTNode declaringNode) {
