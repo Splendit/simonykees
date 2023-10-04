@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -30,7 +29,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.markers.common.IterateMapEntrySetEvent;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.SafeVariableNameFactory;
@@ -140,14 +138,15 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 		return newMapEntrySetInvocation;
 	}
 
+	@SuppressWarnings("unchecked")
 	private VariableDeclarationStatement createKeyDeclarationStatement(TransformationData transformationData,
 			String mapEntryIdentifier) {
 		AST ast = astRewrite.getAST();
 
 		VariableDeclarationFragment keyDeclarationFragment = ast.newVariableDeclarationFragment();
-		SingleVariableDeclaration loopParameter = transformationData.getLoopParameter();
-		String keyIdentifier = loopParameter.getName()
-			.getIdentifier();
+
+		KeyVariableDeclarationData keyDeclarationData = transformationData.getKeyDeclarationData();
+		String keyIdentifier = keyDeclarationData.getKeyIdentifier();
 		SimpleName newKeyName = ast.newSimpleName(keyIdentifier);
 		keyDeclarationFragment.setName(newKeyName);
 
@@ -155,22 +154,13 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 		keyDeclarationFragment.setInitializer(newKeyInitializer);
 		VariableDeclarationStatement keyDeclarationStatement = ast
 			.newVariableDeclarationStatement(keyDeclarationFragment);
-		Type newKeyType = createNewType(loopParameter.getType(), loopParameter.getExtraDimensions());
+		Type newKeyType = (Type) ASTNode.copySubtree(ast, keyDeclarationData.getKeyType());
 		keyDeclarationStatement.setType(newKeyType);
+		keyDeclarationData.getKeyExtraDimensions()
+			.map(keyExtraDimensions -> ASTNode.copySubtrees(ast, keyExtraDimensions))
+			.ifPresent(keyExtraDimensions -> keyDeclarationFragment.extraDimensions()
+				.addAll(keyExtraDimensions));
 		return keyDeclarationStatement;
-	}
-
-	private Type createNewType(Type typeToCopy, int dimensions) {
-		if (typeToCopy.isArrayType()) {
-			ArrayType arrayType = (ArrayType) typeToCopy;
-			return createNewType(arrayType.getElementType(), arrayType.getDimensions() + dimensions);
-		}
-		Type newType = (Type) astRewrite.createCopyTarget(typeToCopy);
-		if (dimensions > 0) {
-			AST ast = astRewrite.getAST();
-			return ast.newArrayType(newType, dimensions);
-		}
-		return newType;
 	}
 
 	private MethodInvocation createEntryGetterInvocation(String mapEntryIdentifier, String getterIdentifier) {
@@ -239,9 +229,22 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 			return Optional.empty();
 		}
 
+		KeyVariableDeclarationData keyDeclarationData = null;
+		try {
+			keyDeclarationData = KeyVariableDeclarationData
+				.extractKeyVariableDeclarationData(enhancedForStatement.getParameter());
+		} catch (UnsupportedDimensionException e) {
+			e.printStackTrace();
+		}
+
+		if (keyDeclarationData == null) {
+			return Optional.empty();
+		}
+
 		String mapEntryIdentifier = variableNameFactory.createSafeVariableName(enhancedForStatement, ENTRY);
 
-		return Optional.of(new TransformationData(supportedForStatementData, parameterizedMapType, mapEntryIdentifier));
+		return Optional.of(new TransformationData(supportedForStatementData, parameterizedMapType, mapEntryIdentifier,
+				keyDeclarationData));
 	}
 
 	private Optional<Type> findMapVariableType(ASTNode declaringNode) {
