@@ -74,15 +74,6 @@ class SupportedLoopStructure {
 			.getName()
 			.getIdentifier();
 
-		// ValueDeclarationStructure valueDeclarationData =
-		// ValueDeclarationStructure.findSupportedValueDeclaration(body,
-		// assumedMapVariableName, expectedKeyIdentifier)
-		// .orElse(null);
-		//
-		// if (valueDeclarationData == null) {
-		// return Optional.empty();
-		// }
-
 		MethodInvocation assumedMapGetterInvocation = findAssumedMapGetterInvocation(body, assumedMapVariableName,
 				expectedKeyIdentifier)
 					.orElse(null);

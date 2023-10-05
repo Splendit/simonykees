@@ -77,38 +77,10 @@ class IterateMapEntrySetASTVisitorTest extends UsesJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
+
 	@Test
 	void visit_introduceEntryVariableThreeTimes_shouldTransform() throws Exception {
-		String useKeyAndValueMethod = "\n" +
-				"	static <K, V> void useKeyAndValue(K key, V value) {\n" +
-				"	}";
 
-		String original = "" +
-				"		void iterateMapKeyAndValue2(Map<String[], Integer> map) {\n"
-				+ "			for (String key[] : map.keySet()) {\n"
-				+ "				Integer value = map.get(key);\n"
-				+ "				useKeyAndValue(key, value);\n"
-				+ "			}\n"
-				+ "		}" +
-				useKeyAndValueMethod;
-
-		String expected = "" +
-				"		void iterateMapKeyAndValue2(Map<String[], Integer> map) {\n"
-				+ "			for (Map.Entry<String[], Integer> entry : map.entrySet()) {\n"
-				+ "				String key[] = entry.getKey();\n"
-				+ "				Integer value = entry.getValue();\n"
-				+ "				useKeyAndValue(key, value);\n"
-				+ "			}\n"
-				+ "		}" +
-				useKeyAndValueMethod;
-
-		assertChange(original, expected);
-	}
-	
-	
-	
-	@Test
-	void visit_keyWithExtraDimensions_shouldTransform() throws Exception {
 		String useKeyAndValueMethod = "\n" +
 				"	static <K, V> void useKeyAndValue(K key, V value) {\n" +
 				"	}";
@@ -148,6 +120,35 @@ class IterateMapEntrySetASTVisitorTest extends UsesJDTUnitFixture {
 				"			useKeyAndValue(key, value);\n" +
 				"		}\n" +
 				"	}" +
+				useKeyAndValueMethod;
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_keyWithExtraDimensions_shouldTransform() throws Exception {
+
+		String useKeyAndValueMethod = "\n" +
+				"	static <K, V> void useKeyAndValue(K key, V value) {\n" +
+				"	}";
+
+		String original = "" +
+				"		void iterateMapKeyAndValue2(Map<String[], Integer> map) {\n"
+				+ "			for (String key[] : map.keySet()) {\n"
+				+ "				Integer value = map.get(key);\n"
+				+ "				useKeyAndValue(key, value);\n"
+				+ "			}\n"
+				+ "		}" +
+				useKeyAndValueMethod;
+
+		String expected = "" +
+				"		void iterateMapKeyAndValue2(Map<String[], Integer> map) {\n"
+				+ "			for (Map.Entry<String[], Integer> entry : map.entrySet()) {\n"
+				+ "				String key[] = entry.getKey();\n"
+				+ "				Integer value = entry.getValue();\n"
+				+ "				useKeyAndValue(key, value);\n"
+				+ "			}\n"
+				+ "		}" +
 				useKeyAndValueMethod;
 
 		assertChange(original, expected);
