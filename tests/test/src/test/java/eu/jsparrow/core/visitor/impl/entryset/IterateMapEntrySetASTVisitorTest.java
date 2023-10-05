@@ -154,6 +154,34 @@ class IterateMapEntrySetASTVisitorTest extends UsesJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
+	@Test
+	void visit_NoKeyVariableNecessary_shouldTransform() throws Exception {
+
+
+		String original = "" +
+				"	void iterateMap(Map<String, Integer> map) {\n"
+				+ "		for (String key : map.keySet()) {\n"
+				+ "			Integer value = map.get(key);\n"
+				+ "			useOnlyValue(value);\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "	\n"
+				+ "	static <V> void useOnlyValue(V value) {\n"
+				+ "	}";
+
+		String expected = "" +
+				"	void iterateMap(Map<String, Integer> map) {\n"
+				+ "		for (Map.Entry<String, Integer> entry : map.entrySet()) {\n"
+				+ "			Integer value = entry.getValue();\n"
+				+ "			useOnlyValue(value);\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "	\n"
+				+ "	static <V> void useOnlyValue(V value) {\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
 
 	// @Test
 	// void visit__shouldTransform() throws Exception {

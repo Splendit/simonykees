@@ -9,7 +9,9 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -22,6 +24,8 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -29,8 +33,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.markers.common.IterateMapEntrySetEvent;
+import eu.jsparrow.rules.common.exception.UnresolvedBindingException;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.FindVariableBinding;
 import eu.jsparrow.rules.common.visitor.helper.SafeVariableNameFactory;
 
 /**
@@ -91,15 +97,17 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 				mapEntryIdentifier);
 		Expression keySetExpressionToReplace = transformationData.getLoopExpression();
 		Expression newEntrySetExpression = createNewMapEntrySetInvocation(transformationData);
-		VariableDeclarationStatement newKeyDeclarationStatement = createKeyDeclarationStatement(transformationData,
-				mapEntryIdentifier);
 		Expression valueInitializerToReplace = transformationData.getMapGetterInvocationToReplace();
 		MethodInvocation valueInitializerReplecement = createEntryGetterInvocation(mapEntryIdentifier,
 				GET_VALUE);
 		astRewrite.replace(keyParameterTpReplace, newMapEntryParameter, null);
 		astRewrite.replace(keySetExpressionToReplace, newEntrySetExpression, null);
-		astRewrite.getListRewrite(transformationData.getLoopBody(), Block.STATEMENTS_PROPERTY)
-			.insertAt(newKeyDeclarationStatement, 0, null);
+		if (transformationData.isKeyVariableDeclarationNecessary()) {
+			VariableDeclarationStatement newKeyDeclarationStatement = createKeyDeclarationStatement(transformationData,
+					mapEntryIdentifier);
+			astRewrite.getListRewrite(transformationData.getLoopBody(), Block.STATEMENTS_PROPERTY)
+				.insertAt(newKeyDeclarationStatement, 0, null);
+		}
 		astRewrite.replace(valueInitializerToReplace, valueInitializerReplecement, null);
 		onRewrite();
 	}
@@ -223,8 +231,62 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 		}
 
 		String mapEntryIdentifier = variableNameFactory.createSafeVariableName(enhancedForStatement, ENTRY);
+		boolean keyVariableDeclarationNecessary = isKeyVariableDeclarationNecessary(supportedForStatementData);
 
-		return Optional.of(new TransformationData(supportedForStatementData, parameterizedMapType, mapEntryIdentifier));
+		return Optional.of(new TransformationData(supportedForStatementData, parameterizedMapType, mapEntryIdentifier,
+				keyVariableDeclarationNecessary));
+	}
+
+	private boolean isKeyVariableDeclarationNecessary(SupportedLoopStructure supportedForStatementData) {
+		SingleVariableDeclaration loopParameter = supportedForStatementData.getParameter();
+		MethodInvocation assumedMapGetterInvocation = supportedForStatementData.getAssumedMapGetterInvocation();
+		String expectedKeyIdentifier = loopParameter.getName()
+			.getIdentifier();
+		SimpleNamesCollectorVisitor namesCollectorVisitor = new SimpleNamesCollectorVisitor(expectedKeyIdentifier);
+		supportedForStatementData.getBody()
+			.accept(namesCollectorVisitor);
+		List<SimpleName> matchingSimpleNames = namesCollectorVisitor.getMatchingSimpleNames();
+
+		return matchingSimpleNames.stream()
+			.anyMatch(name -> isReference(name, loopParameter, assumedMapGetterInvocation));
+
+	}
+
+	private boolean isReference(SimpleName simpleName, SingleVariableDeclaration loopParameter,
+			MethodInvocation assumedMapGetterInvocation) {
+
+		final StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
+
+		if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY
+				&& simpleName.getParent() == assumedMapGetterInvocation) {
+			return false;
+		}
+
+		if (locationInParent == VariableDeclarationFragment.NAME_PROPERTY ||
+				locationInParent == SingleVariableDeclaration.NAME_PROPERTY ||
+				locationInParent == EnumConstantDeclaration.NAME_PROPERTY ||
+				locationInParent == FieldAccess.NAME_PROPERTY ||
+				locationInParent == SuperFieldAccess.NAME_PROPERTY ||
+				locationInParent == QualifiedName.NAME_PROPERTY
+
+		) {
+			return false;
+		}
+
+		IVariableBinding variableBinding;
+		try {
+			variableBinding = FindVariableBinding.findVariableBinding(simpleName)
+				.orElse(null);
+		} catch (UnresolvedBindingException e) {
+			return false;
+		}
+
+		if (variableBinding == null || variableBinding.isField() || variableBinding.isParameter()) {
+			return false;
+		}
+
+		ASTNode declaringNode = getCompilationUnit().findDeclaringNode(variableBinding);
+		return declaringNode == loopParameter;
 	}
 
 	private Optional<Type> findMapVariableType(ASTNode declaringNode) {

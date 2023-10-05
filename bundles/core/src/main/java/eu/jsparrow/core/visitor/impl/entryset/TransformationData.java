@@ -12,15 +12,17 @@ class TransformationData {
 	private final String mapVariableIdentifier;
 	private final MethodInvocation mapGetterInvocationToReplace;
 	private final String mapEntryIdentifier;
+	private final boolean keyVariableDeclarationNecessary;
 
 	TransformationData(SupportedLoopStructure forStatementData, ParameterizedType parameterizedMapType,
-			String mapEntryIdentifier) {
+			String mapEntryIdentifier, boolean keyVariableDeclarationNecessary) {
 		this.forStatementData = forStatementData;
 		this.mapVariableIdentifier = forStatementData.getAssumedMapVariableName()
 			.getIdentifier();
 		this.parameterizedMapType = parameterizedMapType;
 		this.mapGetterInvocationToReplace = forStatementData.getAssumedMapGetterInvocation();
 		this.mapEntryIdentifier = mapEntryIdentifier;
+		this.keyVariableDeclarationNecessary = keyVariableDeclarationNecessary;
 	}
 
 	String getMapVariableIdentifier() {
@@ -50,4 +52,9 @@ class TransformationData {
 	String getMapEntryIdentifier() {
 		return mapEntryIdentifier;
 	}
+
+	boolean isKeyVariableDeclarationNecessary() {
+		return keyVariableDeclarationNecessary;
+	}
+
 }
