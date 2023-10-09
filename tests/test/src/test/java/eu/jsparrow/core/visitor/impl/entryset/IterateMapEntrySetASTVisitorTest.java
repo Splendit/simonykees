@@ -3,6 +3,8 @@ package eu.jsparrow.core.visitor.impl.entryset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
 
@@ -77,7 +79,6 @@ class IterateMapEntrySetASTVisitorTest extends UsesJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
-
 	@Test
 	void visit_introduceEntryVariableThreeTimes_shouldTransform() throws Exception {
 
@@ -124,7 +125,7 @@ class IterateMapEntrySetASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	void visit_keyWithExtraDimensions_shouldTransform() throws Exception {
 
@@ -154,15 +155,40 @@ class IterateMapEntrySetASTVisitorTest extends UsesJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
-	@Test
-	void visit_NoKeyVariableNecessary_shouldTransform() throws Exception {
-
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"			useOnlyValue(value);\n",
+			"" +
+					"			useOnlyValue(value);\n" +
+					"			Runnable r = new Runnable() {\n" +
+					"				@Override\n" +
+					"				public void run() {\n" +
+					"					String key = \"\";\n" +
+					"				}\n" +
+					"			};",
+			"" +
+					"			useOnlyValue(value);\n" +
+					"			Runnable r = new Runnable() {\n" +
+					"				@Override\n" +
+					"				public void run() {\n" +
+					"					String key;\n" +
+					"					key = \"\";\n" +
+					"				}\n" +
+					"			};",
+			"" +
+					"			useOnlyValue(value);\n" +
+					"			key: while (true) {\n" +
+					"				break key;\n" +
+					"			}"
+	})
+	void visit_NoKeyVariableNecessary_shouldTransform(String statementsAfterValueDeclaration) throws Exception {
 
 		String original = "" +
 				"	void iterateMap(Map<String, Integer> map) {\n"
 				+ "		for (String key : map.keySet()) {\n"
 				+ "			Integer value = map.get(key);\n"
-				+ "			useOnlyValue(value);\n"
+				+ statementsAfterValueDeclaration
 				+ "		}\n"
 				+ "	}\n"
 				+ "	\n"
@@ -173,7 +199,7 @@ class IterateMapEntrySetASTVisitorTest extends UsesJDTUnitFixture {
 				"	void iterateMap(Map<String, Integer> map) {\n"
 				+ "		for (Map.Entry<String, Integer> entry : map.entrySet()) {\n"
 				+ "			Integer value = entry.getValue();\n"
-				+ "			useOnlyValue(value);\n"
+				+ statementsAfterValueDeclaration
 				+ "		}\n"
 				+ "	}\n"
 				+ "	\n"

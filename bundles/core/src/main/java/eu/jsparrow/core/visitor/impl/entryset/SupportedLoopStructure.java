@@ -54,6 +54,7 @@ class SupportedLoopStructure {
 	private final SimpleName assumedMapVariableName;
 	private final Block body;
 	private final MethodInvocation assumedMapGetterInvocation;
+	private final SimpleName assumedMapGetterArgument;
 
 	static Optional<SupportedLoopStructure> findSupportedLoopStructure(
 			EnhancedForStatement enhancedForStatement) {
@@ -74,17 +75,26 @@ class SupportedLoopStructure {
 			.getName()
 			.getIdentifier();
 
-		MethodInvocation assumedMapGetterInvocation = findAssumedMapGetterInvocation(body, assumedMapVariableName,
-				expectedKeyIdentifier)
-					.orElse(null);
+		MethodInvocation assumedMapGetterInvocation = findAssumedMapGetterInvocation(body, assumedMapVariableName)
+			.orElse(null);
 
 		if (assumedMapGetterInvocation == null) {
 			return Optional.empty();
 		}
 
+		SimpleName assumedMapGetterArgument = ASTNodeUtil
+			.findSingletonListElement(assumedMapGetterInvocation.arguments(), SimpleName.class)
+			.filter(argument -> argument.getIdentifier()
+				.equals(expectedKeyIdentifier))
+			.orElse(null);
+
+		if (assumedMapGetterArgument == null) {
+			return Optional.empty();
+		}
+
 		return Optional
 			.of(new SupportedLoopStructure(enhancedForStatement, assumedMapVariableName, body,
-					assumedMapGetterInvocation));
+					assumedMapGetterInvocation, assumedMapGetterArgument));
 	}
 
 	private static Optional<SimpleName> findAssumedMapVariableName(Expression forStatementExpression) {
@@ -122,8 +132,7 @@ class SupportedLoopStructure {
 		return Optional.of(assumedMapExpression);
 	}
 
-	static Optional<MethodInvocation> findAssumedMapGetterInvocation(Block block, SimpleName expectedMapName,
-			String expectedKeyIdentifier) {
+	private static Optional<MethodInvocation> findAssumedMapGetterInvocation(Block block, SimpleName expectedMapName) {
 
 		VariableDeclarationStatement assumedValueDeclaration = ItemAtIndex
 			.findItemAtIndex(block.statements(), 0, VariableDeclarationStatement.class)
@@ -168,28 +177,17 @@ class SupportedLoopStructure {
 			return Optional.empty();
 		}
 
-		SimpleName expectedUniqueArgument = ASTNodeUtil
-			.findSingletonListElement(methodInvocation.arguments(), SimpleName.class)
-			.orElse(null);
-		if (expectedUniqueArgument == null) {
-			return Optional.empty();
-		}
-
-		String uniqueArgumentIdentifier = expectedUniqueArgument.getIdentifier();
-		if (!expectedKeyIdentifier.equals(uniqueArgumentIdentifier)) {
-			return Optional.empty();
-		}
-
 		return Optional.of(methodInvocation);
 	}
 
 	private SupportedLoopStructure(EnhancedForStatement enhancedForStatement, SimpleName assumedMapVariableName,
-			Block body, MethodInvocation assumedMapGetterInvocation) {
+			Block body, MethodInvocation assumedMapGetterInvocation, SimpleName assumedMapGetterArgument) {
 		this.parameter = enhancedForStatement.getParameter();
 		this.expression = enhancedForStatement.getExpression();
 		this.assumedMapVariableName = assumedMapVariableName;
 		this.body = body;
 		this.assumedMapGetterInvocation = assumedMapGetterInvocation;
+		this.assumedMapGetterArgument = assumedMapGetterArgument;
 
 	}
 
@@ -216,4 +214,7 @@ class SupportedLoopStructure {
 		return assumedMapGetterInvocation;
 	}
 
+	SimpleName getAssumedMapGetterArgument() {
+		return assumedMapGetterArgument;
+	}
 }

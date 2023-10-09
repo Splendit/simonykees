@@ -9,9 +9,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
-import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -24,8 +22,6 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -239,39 +235,22 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 
 	private boolean isKeyVariableDeclarationNecessary(SupportedLoopStructure supportedForStatementData) {
 		SingleVariableDeclaration loopParameter = supportedForStatementData.getParameter();
-		MethodInvocation assumedMapGetterInvocation = supportedForStatementData.getAssumedMapGetterInvocation();
 		String expectedKeyIdentifier = loopParameter.getName()
 			.getIdentifier();
 		SimpleNamesCollectorVisitor namesCollectorVisitor = new SimpleNamesCollectorVisitor(expectedKeyIdentifier);
 		supportedForStatementData.getBody()
 			.accept(namesCollectorVisitor);
 		List<SimpleName> matchingSimpleNames = namesCollectorVisitor.getMatchingSimpleNames();
-
+		SimpleName assumedMapGetterArgument = supportedForStatementData.getAssumedMapGetterArgument();
 		return matchingSimpleNames.stream()
-			.anyMatch(name -> isReference(name, loopParameter, assumedMapGetterInvocation));
+			.filter(name -> name != assumedMapGetterArgument)
+			.filter(NameLocationInParent::canBeReferenceToLocalVariable)
+			.anyMatch(name -> isReference(name, loopParameter));
 
 	}
 
-	private boolean isReference(SimpleName simpleName, SingleVariableDeclaration loopParameter,
-			MethodInvocation assumedMapGetterInvocation) {
+	private boolean isReference(SimpleName simpleName, SingleVariableDeclaration loopParameter) {
 
-		final StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
-
-		if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY
-				&& simpleName.getParent() == assumedMapGetterInvocation) {
-			return false;
-		}
-
-		if (locationInParent == VariableDeclarationFragment.NAME_PROPERTY ||
-				locationInParent == SingleVariableDeclaration.NAME_PROPERTY ||
-				locationInParent == EnumConstantDeclaration.NAME_PROPERTY ||
-				locationInParent == FieldAccess.NAME_PROPERTY ||
-				locationInParent == SuperFieldAccess.NAME_PROPERTY ||
-				locationInParent == QualifiedName.NAME_PROPERTY
-
-		) {
-			return false;
-		}
 
 		IVariableBinding variableBinding;
 		try {
