@@ -14,12 +14,26 @@ import eu.jsparrow.rules.common.visitor.helper.ExcludeVariableBinding;
 /**
  * Offers useful methods analyzing the location of a name in its parent node.
  * 
- * TODO: Move this class to a more public place, also re-factor and move
- * {@link eu.jsparrow.rules.common.visitor.helper.ReferenceToLocalVariableAnalyzer}.
+ * TODO:
+ * <ul>
+ * <li>Move {@link ExcludeVariableBinding} to a more public place</li>
+ * <li>Move this class to the same place as {@link ExcludeVariableBinding}</li>
+ * <l>Move all functionalities of {@link ExcludeVariableBinding} into this
+ * class.</li>
+ * <li>Move {@link eu.jsparrow.rules.common.visitor.helper.FindVariableBinding},
+ * {@link eu.jsparrow.rules.common.visitor.helper.ReferenceToLocalVariableAnalyzer},
+ * {@link SimpleNamesCollectorVisitor} and other classes handling variable
+ * references to the same place as {@link NameLocationInParent}</li>
+ * <li>Re-factor everything in a way that
+ * {@link eu.jsparrow.rules.common.visitor.helper.FindVariableBinding} does not
+ * any more reference {@link ExcludeVariableBinding}.</li>
+ * <li>remove also {@code ExcludeVariableBindingTest} because
+ * {@code NameLocationInParentTest} covers everything.</li>
+ * </ul>
  */
 public class NameLocationInParent {
 
-	public static boolean canBeReferenceToLocalVariable(SimpleName simpleName) {
+	public static boolean isPotentialReferenceToLocalVariable(SimpleName simpleName) {
 		final StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
 		if (locationInParent == VariableDeclarationFragment.NAME_PROPERTY ||
 				locationInParent == SingleVariableDeclaration.NAME_PROPERTY ||
@@ -32,7 +46,7 @@ public class NameLocationInParent {
 			return false;
 		}
 
-		return canHaveVariableBinding(simpleName);
+		return hasPotentiallyVariableBinding(simpleName);
 	}
 
 	/**
@@ -40,7 +54,7 @@ public class NameLocationInParent {
 	 * {@link ExcludeVariableBinding#isVariableBindingExcludedFor(SimpleName)}
 	 * into this class.
 	 */
-	public static boolean canHaveVariableBinding(SimpleName simpleName) {
+	public static boolean hasPotentiallyVariableBinding(SimpleName simpleName) {
 		return !ExcludeVariableBinding.isVariableBindingExcludedFor(simpleName);
 	}
 
