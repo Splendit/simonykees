@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 /**
- * TODO: ??? move all functionalities to {@link ASTNodeBuilder} ???
+ * TODO:move all functionalities to {@link ASTNodeBuilder}
  * 
  *
  */

@@ -33,30 +33,43 @@ import eu.jsparrow.rules.common.visitor.helper.ExcludeVariableBinding;
  */
 public class NameLocationInParent {
 
-	public static boolean isPotentialReferenceToLocalVariable(SimpleName simpleName) {
+	public static boolean canBeReferenceToLocalVariable(SimpleName simpleName) {
+		return !isReferenceToLocalVariableExcludedFor(simpleName);
+	}
+
+	public static boolean isReferenceToLocalVariableExcludedFor(SimpleName simpleName) {
 		final StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
-		if (locationInParent == VariableDeclarationFragment.NAME_PROPERTY ||
+		return locationInParent == VariableDeclarationFragment.NAME_PROPERTY ||
 				locationInParent == SingleVariableDeclaration.NAME_PROPERTY ||
 				locationInParent == EnumConstantDeclaration.NAME_PROPERTY ||
 				locationInParent == FieldAccess.NAME_PROPERTY ||
 				locationInParent == SuperFieldAccess.NAME_PROPERTY ||
-				locationInParent == QualifiedName.NAME_PROPERTY
-
-		) {
-			return false;
-		}
-
-		return hasPotentiallyVariableBinding(simpleName);
+				locationInParent == QualifiedName.NAME_PROPERTY ||
+				isVariableBindingExcludedFor(simpleName);
 	}
 
+	public static boolean canHaveVariableBinding(SimpleName simpleName) {
+		return !isVariableBindingExcludedFor(simpleName);
+	}
+	
 	/**
 	 * TODO: move
 	 * {@link ExcludeVariableBinding#isVariableBindingExcludedFor(SimpleName)}
 	 * into this class.
 	 */
-	public static boolean hasPotentiallyVariableBinding(SimpleName simpleName) {
-		return !ExcludeVariableBinding.isVariableBindingExcludedFor(simpleName);
+	public static boolean isVariableBindingExcludedFor(SimpleName simpleName) {
+		return ExcludeVariableBinding.isVariableBindingExcludedFor(simpleName);
 	}
+	
+	/**
+	 * TODO: move
+	 * {@link ExcludeVariableBinding#isVariableBindingExcludedFor(QualifiedName)}
+	 * into this class.
+	 */
+	public static boolean isVariableBindingExcludedFor(QualifiedName qualifiedName) {
+		return ExcludeVariableBinding.isVariableBindingExcludedFor(qualifiedName);
+	}
+
 
 	/**
 	 * Private default constructor hiding implicit public one.

@@ -244,7 +244,7 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 		SimpleName assumedMapGetterArgument = supportedForStatementData.getAssumedMapGetterArgument();
 		return matchingSimpleNames.stream()
 			.filter(name -> name != assumedMapGetterArgument)
-			.filter(NameLocationInParent::isPotentialReferenceToLocalVariable)
+			.filter(NameLocationInParent::canBeReferenceToLocalVariable)
 			.anyMatch(name -> isReference(name, loopParameter));
 
 	}

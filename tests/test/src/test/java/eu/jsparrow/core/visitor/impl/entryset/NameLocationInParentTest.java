@@ -1,8 +1,6 @@
 package eu.jsparrow.core.visitor.impl.entryset;
 
-import static eu.jsparrow.core.visitor.impl.entryset.TestHelper.createExampleEnumDeclaration;
 import static eu.jsparrow.core.visitor.impl.entryset.TestHelper.createExpressionFromString;
-import static eu.jsparrow.core.visitor.impl.entryset.TestHelper.createStatementFromString;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,7 +17,6 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -155,7 +152,7 @@ class NameLocationInParentTest {
 			.filter(simpleName -> simpleName.getLocationInParent() == MethodInvocation.NAME_PROPERTY)
 			.findFirst()
 			.get();
-		assertFalse(NameLocationInParent.hasPotentiallyVariableBinding(methodInvocationName));
+		assertFalse(NameLocationInParent.canHaveVariableBinding(methodInvocationName));
 		IBinding binding = methodInvocationName.resolveBinding();
 		assertNotNull(binding);
 		assertFalse(binding instanceof IVariableBinding);
@@ -168,7 +165,7 @@ class NameLocationInParentTest {
 			.filter(simpleName -> simpleName.getLocationInParent() == MethodDeclaration.NAME_PROPERTY)
 			.findFirst()
 			.get();
-		assertFalse(NameLocationInParent.hasPotentiallyVariableBinding(methodInvocationName));
+		assertFalse(NameLocationInParent.canHaveVariableBinding(methodInvocationName));
 		IBinding binding = methodInvocationName.resolveBinding();
 		assertNotNull(binding);
 		assertFalse(binding instanceof IVariableBinding);
@@ -193,7 +190,7 @@ class NameLocationInParentTest {
 			.filter(simpleName -> simpleName.getLocationInParent() == locationInParent)
 			.findFirst()
 			.get();
-		assertFalse(NameLocationInParent.isPotentialReferenceToLocalVariable(variableName));
+		assertFalse(NameLocationInParent.canBeReferenceToLocalVariable(variableName));
 		IBinding binding = variableName.resolveBinding();
 		assertTrue(binding instanceof IVariableBinding);
 	}
@@ -205,7 +202,7 @@ class NameLocationInParentTest {
 					.fragments()
 					.get(0);
 		assertFalse(
-				NameLocationInParent.isPotentialReferenceToLocalVariable(localVariableDeclaratioFragment.getName()));
+				NameLocationInParent.canBeReferenceToLocalVariable(localVariableDeclaratioFragment.getName()));
 	}
 
 	@Test
@@ -214,14 +211,14 @@ class NameLocationInParentTest {
 				EnhancedForStatement.class)
 					.getParameter();
 		assertFalse(
-				NameLocationInParent.isPotentialReferenceToLocalVariable(loopParameter.getName()));
+				NameLocationInParent.canBeReferenceToLocalVariable(loopParameter.getName()));
 	}
 
 	@Test
 	void testIsPotentialReferenceToLocalVariable_shouldReturnTrue()
 			throws Exception {
 		SimpleName simpleName = createExpressionFromString("x", SimpleName.class);
-		assertTrue(NameLocationInParent.isPotentialReferenceToLocalVariable(simpleName));
+		assertTrue(NameLocationInParent.canBeReferenceToLocalVariable(simpleName));
 	}
 
 }
