@@ -34,11 +34,13 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodReference;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -510,4 +512,35 @@ class ExcludeVariableReferenceTest {
 		assertFalse(canHaveVariableBinding);
 	}
 
+	@Disabled("This test fails, THEREFORE TODO: consider qualifier of ThisExpression!")
+	@Test
+	void test_QualifierOfThisExpression_shouldExcludeLocalVariableBinding()
+			throws Exception {
+		ThisExpression thisExpression = (ThisExpression) TestHelper.createExpressionFromString("X.this",
+				ThisExpression.class);
+		assertTrue(
+				NameLocationInParent.isReferenceToLocalVariableExcludedFor((SimpleName) thisExpression.getQualifier()));
+	}
+
+	@Disabled("This test fails, THEREFORE TODO: consider qualifier of SuperFieldAccess!")
+	@Test
+	void test_QualifierOfSuperFieldAccess_shouldExcludeLocalVariableBinding()
+			throws Exception {
+		SuperFieldAccess superFieldAccess = (SuperFieldAccess) TestHelper.createExpressionFromString(
+				"X.super.superField",
+				SuperFieldAccess.class);
+		assertTrue(NameLocationInParent
+			.isReferenceToLocalVariableExcludedFor((SimpleName) superFieldAccess.getQualifier()));
+	}
+
+	@Disabled("This test fails, THEREFORE TODO: consider qualifier of SuperMethodInvocation!")
+	@Test
+	void test_QualifierOfSuperMethodInvocation_shouldExcludeLocalVariableBinding()
+			throws Exception {
+		SuperMethodInvocation superMethodInvocation = (SuperMethodInvocation) TestHelper.createExpressionFromString(
+				"X.super.superMethod()",
+				SuperMethodInvocation.class);
+		assertTrue(NameLocationInParent
+			.isReferenceToLocalVariableExcludedFor((SimpleName) superMethodInvocation.getQualifier()));
+	}
 }
