@@ -46,7 +46,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
-class ExcludeVariableBindingTest {
+class ExcludeVariableReferenceTest {
 
 	@Test
 	void visit_MethodInvocation_shouldNotHaveVariableBinding() throws Exception {
