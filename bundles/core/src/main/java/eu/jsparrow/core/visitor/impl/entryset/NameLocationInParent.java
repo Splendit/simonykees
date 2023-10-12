@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodReference;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -91,10 +92,12 @@ public class NameLocationInParent {
 				simpleName.getLocationInParent() == AnnotationTypeDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == AnnotationTypeMemberDeclaration.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == RecordDeclaration.NAME_PROPERTY ||
-				// simpleName.getLocationInParent() == SimpleType.NAME_PROPERTY ||
+				// simpleName.getLocationInParent() == SimpleType.NAME_PROPERTY
+				// ||
 				simpleName.getLocationInParent() == QualifiedType.NAME_PROPERTY ||
 				simpleName.getLocationInParent() == NameQualifiedType.NAME_PROPERTY ||
-				// simpleName.getLocationInParent() == NameQualifiedType.QUALIFIER_PROPERTY ||
+				// simpleName.getLocationInParent() ==
+				// NameQualifiedType.QUALIFIER_PROPERTY ||
 				simpleName.getLocationInParent() == MemberValuePair.NAME_PROPERTY ||
 				isVariableReferenceExcludedForName(simpleName);
 	}
@@ -109,7 +112,10 @@ public class NameLocationInParent {
 				locationInParent == NameQualifiedType.QUALIFIER_PROPERTY ||
 				locationInParent == MarkerAnnotation.TYPE_NAME_PROPERTY ||
 				locationInParent == SingleMemberAnnotation.TYPE_NAME_PROPERTY ||
-				locationInParent == NormalAnnotation.TYPE_NAME_PROPERTY;
+				locationInParent == NormalAnnotation.TYPE_NAME_PROPERTY ||
+				locationInParent == ThisExpression.QUALIFIER_PROPERTY ||
+				locationInParent == SuperFieldAccess.QUALIFIER_PROPERTY ||
+				locationInParent == SuperMethodInvocation.QUALIFIER_PROPERTY;
 	}
 
 	/**
