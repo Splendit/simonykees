@@ -104,13 +104,8 @@ class ExcludeVariableReferenceTest {
 		assertTrue(NameLocationInParent.isVariableBindingExcludedFor(qualifiedName.getName()));
 	}
 
-	/**
-	 * Does not exclude reference to a variable although it would be reasonable
-	 * to do so because the name belongs to a Type. to exclude reference to a
-	 * variable. After corresponding corrections, this test may fail.
-	 */
 	@Test
-	void test_QualifiedNameAsQualifiedNameQualifier_cannotExcludeVariableBinding() throws Exception {
+	void test_QualifiedNameAsQualifiedNameQualifier_shouldExcludeVariableBinding() throws Exception {
 		SimpleType simpleType = (SimpleType) TestHelper
 			.createStatementFromString("a.b.X x;", VariableDeclarationStatement.class)
 			.getType();
@@ -118,16 +113,11 @@ class ExcludeVariableReferenceTest {
 		QualifiedName qualifiedNameAsQualifier = (QualifiedName) qualifiedName.getQualifier();
 		boolean variableBindingExcludedFor = NameLocationInParent
 			.isVariableBindingExcludedFor(qualifiedNameAsQualifier);
-		assertFalse(variableBindingExcludedFor);
+		assertTrue(variableBindingExcludedFor);
 	}
 
-	/**
-	 * Does not exclude reference to a variable although it would be reasonable
-	 * to do so because the name belongs to a Type. to exclude reference to a
-	 * variable. After corresponding corrections, this test may fail.
-	 */
 	@Test
-	void test_SimpleNameAsQualifiedNameQualifier_cannotExcludeVariableBinding() throws Exception {
+	void test_SimpleNameAsQualifiedNameQualifier_shouldExcludeVariableBinding() throws Exception {
 		SimpleType simpleType = (SimpleType) TestHelper
 			.createStatementFromString("a.b.X x;", VariableDeclarationStatement.class)
 			.getType();
@@ -135,7 +125,7 @@ class ExcludeVariableReferenceTest {
 		QualifiedName qualifiedNameAsQualifier = (QualifiedName) qualifiedName.getQualifier();
 		SimpleName simpleNameAsQualifier = (SimpleName) qualifiedNameAsQualifier.getQualifier();
 		boolean variableBindingExcludedFor = NameLocationInParent.isVariableBindingExcludedFor(simpleNameAsQualifier);
-		assertFalse(variableBindingExcludedFor);
+		assertTrue(variableBindingExcludedFor);
 	}
 
 	private static Stream<Arguments> bodyDeclarations_excludingVariableBinding() throws Exception {
