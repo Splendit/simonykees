@@ -20,7 +20,7 @@ import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
  */
 public class TestHelper {
 
-	static <T extends ASTNode> T extractFirstNodeOfType(ASTNode node, Class<T> nodeType) {
+	public static <T extends ASTNode> T extractFirstNodeOfType(ASTNode node, Class<T> nodeType) {
 		List<ASTNode> list = new ArrayList<>();
 
 		ASTVisitor visitor = new ASTVisitor() {
@@ -40,12 +40,12 @@ public class TestHelper {
 			.get();
 	}
 
-	static <T extends Expression> T createExpressionFromString(String code, Class<T> expressionSubclass)
+	public static <T extends Expression> T createExpressionFromString(String code, Class<T> expressionSubclass)
 			throws Exception {
 		return expressionSubclass.cast(ASTNodeBuilder.createExpressionFromString(code));
 	}
 
-	static <T extends BodyDeclaration> T createBodyDeclarationFromString(String className,
+	public static <T extends BodyDeclaration> T createBodyDeclarationFromString(String className,
 			String bodyDeclaration,
 			Class<T> bodyDeclarationSubclass) throws Exception {
 
@@ -54,7 +54,7 @@ public class TestHelper {
 			.get(0));
 	}
 
-	static <T extends Statement> T createStatementFromString(String code, Class<T> statementSubClass)
+	public static <T extends Statement> T createStatementFromString(String code, Class<T> statementSubClass)
 			throws Exception {
 		return statementSubClass.cast(ASTNodeBuilder.createBlockFromString(code)
 			.statements()
@@ -62,7 +62,7 @@ public class TestHelper {
 
 	}
 
-	static EnumDeclaration createExampleEnumDeclaration() throws Exception {
+	public static EnumDeclaration createExampleEnumDeclaration() throws Exception {
 
 		String enumDeclarationSource = ""
 				+ "		enum ExampleEnum {\n"

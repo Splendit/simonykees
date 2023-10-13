@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl.entryset;
+package eu.jsparrow.core.visitor.impl.entryset.excluderef;
 
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.core.visitor.impl.entryset.SimpleNamesCollectorVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.ExcludeVariableBinding;
 
@@ -78,27 +79,28 @@ public class NameLocationInParent {
 		if (ASTNodeUtil.isLabel(simpleName)) {
 			return true;
 		}
-		if (simpleName.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
+		StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
+		if (locationInParent == QualifiedName.NAME_PROPERTY) {
 			return isVariableBindingExcludedFor((QualifiedName) simpleName.getParent());
 		}
-		return simpleName.getLocationInParent() == MethodInvocation.NAME_PROPERTY ||
-				simpleName.getLocationInParent() == SuperMethodInvocation.NAME_PROPERTY ||
-				simpleName.getLocationInParent() == ExpressionMethodReference.NAME_PROPERTY ||
-				simpleName.getLocationInParent() == SuperMethodReference.NAME_PROPERTY ||
-				simpleName.getLocationInParent() == TypeMethodReference.NAME_PROPERTY ||
-				simpleName.getLocationInParent() == MethodDeclaration.NAME_PROPERTY ||
-				simpleName.getLocationInParent() == TypeDeclaration.NAME_PROPERTY ||
-				simpleName.getLocationInParent() == EnumDeclaration.NAME_PROPERTY ||
-				simpleName.getLocationInParent() == AnnotationTypeDeclaration.NAME_PROPERTY ||
-				simpleName.getLocationInParent() == AnnotationTypeMemberDeclaration.NAME_PROPERTY ||
-				simpleName.getLocationInParent() == RecordDeclaration.NAME_PROPERTY ||
+		return locationInParent == MethodInvocation.NAME_PROPERTY ||
+				locationInParent == SuperMethodInvocation.NAME_PROPERTY ||
+				locationInParent == ExpressionMethodReference.NAME_PROPERTY ||
+				locationInParent == SuperMethodReference.NAME_PROPERTY ||
+				locationInParent == TypeMethodReference.NAME_PROPERTY ||
+				locationInParent == MethodDeclaration.NAME_PROPERTY ||
+				locationInParent == TypeDeclaration.NAME_PROPERTY ||
+				locationInParent == EnumDeclaration.NAME_PROPERTY ||
+				locationInParent == AnnotationTypeDeclaration.NAME_PROPERTY ||
+				locationInParent == AnnotationTypeMemberDeclaration.NAME_PROPERTY ||
+				locationInParent == RecordDeclaration.NAME_PROPERTY ||
 				// simpleName.getLocationInParent() == SimpleType.NAME_PROPERTY
 				// ||
-				simpleName.getLocationInParent() == QualifiedType.NAME_PROPERTY ||
-				simpleName.getLocationInParent() == NameQualifiedType.NAME_PROPERTY ||
+				locationInParent == QualifiedType.NAME_PROPERTY ||
+				locationInParent == NameQualifiedType.NAME_PROPERTY ||
 				// simpleName.getLocationInParent() ==
 				// NameQualifiedType.QUALIFIER_PROPERTY ||
-				simpleName.getLocationInParent() == MemberValuePair.NAME_PROPERTY ||
+				locationInParent == MemberValuePair.NAME_PROPERTY ||
 				isVariableReferenceExcludedForName(simpleName);
 	}
 
