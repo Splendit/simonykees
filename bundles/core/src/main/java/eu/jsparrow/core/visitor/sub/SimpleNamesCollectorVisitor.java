@@ -29,7 +29,7 @@ public class SimpleNamesCollectorVisitor extends ASTVisitor {
 		return false;
 	}
 
-	List<SimpleName> getMatchingSimpleNames() {
+	public List<SimpleName> getMatchingSimpleNames() {
 		return matchingSimpleNames;
 	}
 }

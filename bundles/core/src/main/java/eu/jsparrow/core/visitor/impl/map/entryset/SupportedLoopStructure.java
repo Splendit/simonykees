@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl.entryset;
+package eu.jsparrow.core.visitor.impl.map.entryset;
 
 import java.util.Optional;
 
@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import eu.jsparrow.core.visitor.impl.map.ItemAtIndex;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
