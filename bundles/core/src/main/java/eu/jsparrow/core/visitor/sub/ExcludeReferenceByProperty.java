@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl.entryset.excluderef;
+package eu.jsparrow.core.visitor.sub;
 
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
@@ -34,16 +34,16 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * @since 4.20.0
  *
  */
-class ExcludeReferenceByProperty {
+public class ExcludeReferenceByProperty {
 
-	static boolean isReferenceToLocalVariableExcludedFor(StructuralPropertyDescriptor locationInParent) {
+	public static boolean isReferenceToLocalVariableExcludedFor(StructuralPropertyDescriptor locationInParent) {
 		return locationInParent == FieldAccess.NAME_PROPERTY ||
 				locationInParent == SuperFieldAccess.NAME_PROPERTY ||
 				locationInParent == QualifiedName.NAME_PROPERTY ||
 				isReferenceToVariableExcluded4SimpleName(locationInParent);
 	}
 
-	static boolean isReferenceToVariableExcluded4SimpleName(StructuralPropertyDescriptor locationInParent) {
+	public static boolean isReferenceToVariableExcluded4SimpleName(StructuralPropertyDescriptor locationInParent) {
 		return locationInParent == LabeledStatement.LABEL_PROPERTY ||
 				locationInParent == ContinueStatement.LABEL_PROPERTY ||
 				locationInParent == BreakStatement.LABEL_PROPERTY ||
@@ -67,7 +67,7 @@ class ExcludeReferenceByProperty {
 				isReferenceToVariableExcluded4Name(locationInParent);
 	}
 
-	static boolean isReferenceToVariableExcluded4QualifiedName(StructuralPropertyDescriptor locationInParent) {
+	public static boolean isReferenceToVariableExcluded4QualifiedName(StructuralPropertyDescriptor locationInParent) {
 		return isReferenceToVariableExcluded4Name(locationInParent);
 	}
 

@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl.entryset.excluderef;
+package eu.jsparrow.core.visitor.sub;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

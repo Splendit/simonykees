@@ -29,7 +29,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.markers.common.IterateMapEntrySetEvent;
-import eu.jsparrow.core.visitor.impl.entryset.excluderef.ExcludeVariableReference;
+import eu.jsparrow.core.visitor.sub.ExcludeVariableReference;
+import eu.jsparrow.core.visitor.sub.SimpleNamesCollectorVisitor;
 import eu.jsparrow.rules.common.exception.UnresolvedBindingException;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;

@@ -1,10 +1,9 @@
-package eu.jsparrow.core.visitor.impl.entryset.excluderef;
+package eu.jsparrow.core.visitor.sub;
 
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
-import eu.jsparrow.core.visitor.impl.entryset.SimpleNamesCollectorVisitor;
 import eu.jsparrow.rules.common.visitor.helper.ExcludeVariableBinding;
 
 /**

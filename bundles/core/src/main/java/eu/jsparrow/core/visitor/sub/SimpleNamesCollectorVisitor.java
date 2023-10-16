@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl.entryset;
+package eu.jsparrow.core.visitor.sub;
 
 import java.util.ArrayList;
 import java.util.List;
