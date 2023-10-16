@@ -8,7 +8,10 @@ import eu.jsparrow.core.visitor.impl.entryset.SimpleNamesCollectorVisitor;
 import eu.jsparrow.rules.common.visitor.helper.ExcludeVariableBinding;
 
 /**
- * Offers useful methods analyzing the location of a name in its parent node.
+ * This class offers methods to determine whether or not a reference to a local
+ * variable or a field can be excluded for a given name without the expensive
+ * resolving of its binding. This is done by analyzing the location of the given
+ * qualified name or simple name in its parent.
  * 
  * TODO:
  * <ul>
@@ -18,7 +21,7 @@ import eu.jsparrow.rules.common.visitor.helper.ExcludeVariableBinding;
  * <li>Move {@link eu.jsparrow.rules.common.visitor.helper.FindVariableBinding},
  * {@link eu.jsparrow.rules.common.visitor.helper.ReferenceToLocalVariableAnalyzer},
  * {@link SimpleNamesCollectorVisitor} and other classes handling variable
- * references to the same place as {@link NameLocationInParent}</li>
+ * references to the same place as {@link ExcludeVariableReference}</li>
  * <li>Re-factor everything in a way that
  * {@link eu.jsparrow.rules.common.visitor.helper.FindVariableBinding} does not
  * any more reference {@link ExcludeVariableBinding}.</li>
@@ -27,33 +30,31 @@ import eu.jsparrow.rules.common.visitor.helper.ExcludeVariableBinding;
  * <li>At last, remove {@link ExcludeVariableBinding} and all corresponding
  * tests which only apply the the removed class.</li>
  * </ul>
+ * 
+ * @since 4.20.0
  */
-public class NameLocationInParent {
+public class ExcludeVariableReference {
 
-	public static boolean canBeReferenceToLocalVariable(SimpleName simpleName) {
-		return !isReferenceToLocalVariableExcludedFor(simpleName);
-	}
-
+	/**
+	 * @return true if a reference to a local variable can be excluded for the
+	 *         specified simple name.
+	 */
 	public static boolean isReferenceToLocalVariableExcludedFor(SimpleName simpleName) {
 		return ExcludeReferenceByProperty.isReferenceToLocalVariableExcludedFor(simpleName.getLocationInParent());
 	}
 
-	public static boolean canHaveVariableBinding(SimpleName simpleName) {
-		return !isVariableBindingExcludedFor(simpleName);
-	}
-
-	public static boolean isVariableBindingExcludedFor(SimpleName simpleName) {
+	public static boolean isReferenceToVariableExcludedFor(SimpleName simpleName) {
 		StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
 		if (locationInParent == QualifiedName.NAME_PROPERTY || locationInParent == QualifiedName.QUALIFIER_PROPERTY) {
-			return isVariableBindingExcludedFor((QualifiedName) simpleName.getParent());
+			return isReferenceToVariableExcludedFor((QualifiedName) simpleName.getParent());
 		}
 		return ExcludeReferenceByProperty.isReferenceToVariableExcluded4SimpleName(locationInParent);
 	}
 
-	public static boolean isVariableBindingExcludedFor(QualifiedName qualifiedName) {
+	public static boolean isReferenceToVariableExcludedFor(QualifiedName qualifiedName) {
 		StructuralPropertyDescriptor locationInParent = qualifiedName.getLocationInParent();
 		if (locationInParent == QualifiedName.QUALIFIER_PROPERTY) {
-			return isVariableBindingExcludedFor((QualifiedName) qualifiedName.getParent());
+			return isReferenceToVariableExcludedFor((QualifiedName) qualifiedName.getParent());
 		}
 		return ExcludeReferenceByProperty.isReferenceToVariableExcluded4QualifiedName(locationInParent);
 	}
@@ -61,7 +62,7 @@ public class NameLocationInParent {
 	/**
 	 * Private default constructor hiding implicit public one.
 	 */
-	private NameLocationInParent() {
+	private ExcludeVariableReference() {
 
 	}
 

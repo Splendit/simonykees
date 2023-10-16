@@ -42,6 +42,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * In both examples {@link #assumedMapVariableName} is the simple name
  * {@code map}.
  * 
+ * @since 4.20.0
  */
 class SupportedLoopStructure {
 

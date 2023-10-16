@@ -30,6 +30,10 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+/**
+ * @since 4.20.0
+ *
+ */
 class ExcludeReferenceByProperty {
 
 	static boolean isReferenceToLocalVariableExcludedFor(StructuralPropertyDescriptor locationInParent) {
@@ -57,21 +61,17 @@ class ExcludeReferenceByProperty {
 				locationInParent == AnnotationTypeDeclaration.NAME_PROPERTY ||
 				locationInParent == AnnotationTypeMemberDeclaration.NAME_PROPERTY ||
 				locationInParent == RecordDeclaration.NAME_PROPERTY ||
-				// simpleName.getLocationInParent() ==
-				// SimpleType.NAME_PROPERTY ||
 				locationInParent == QualifiedType.NAME_PROPERTY ||
 				locationInParent == NameQualifiedType.NAME_PROPERTY ||
-				// simpleName.getLocationInParent() ==
-				// NameQualifiedType.QUALIFIER_PROPERTY ||
 				locationInParent == MemberValuePair.NAME_PROPERTY ||
-				isExcludingReferenceToVariable4Name(locationInParent);
+				isReferenceToVariableExcluded4Name(locationInParent);
 	}
 
 	static boolean isReferenceToVariableExcluded4QualifiedName(StructuralPropertyDescriptor locationInParent) {
-		return isExcludingReferenceToVariable4Name(locationInParent);
+		return isReferenceToVariableExcluded4Name(locationInParent);
 	}
 
-	private static boolean isExcludingReferenceToVariable4Name(StructuralPropertyDescriptor locationInParent) {
+	private static boolean isReferenceToVariableExcluded4Name(StructuralPropertyDescriptor locationInParent) {
 		return locationInParent == SimpleType.NAME_PROPERTY ||
 				locationInParent == NameQualifiedType.QUALIFIER_PROPERTY ||
 				locationInParent == MarkerAnnotation.TYPE_NAME_PROPERTY ||

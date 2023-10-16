@@ -8,7 +8,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 /**
  * Collects {@link SimpleName}-nodes which have an expected identifier.
- *
+ * 
+ * @since 4.20.0
  */
 public class SimpleNamesCollectorVisitor extends ASTVisitor {
 

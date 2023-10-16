@@ -6,6 +6,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
+/**
+ * 
+ * 
+ * @since 4.20.0
+ */
 class TransformationData {
 	private final SupportedLoopStructure forStatementData;
 	private final ParameterizedType parameterizedMapType;

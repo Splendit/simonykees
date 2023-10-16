@@ -48,83 +48,88 @@ import org.junit.jupiter.params.provider.MethodSource;
 import eu.jsparrow.core.visitor.impl.entryset.TestHelper;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
+/**
+ * Because of {@link ExcludeReferenceByPropertyTest}, this test could be
+ * shortened.
+ *
+ */
 class ExcludeVariableReferenceTest {
 
 	@Test
-	void visit_MethodInvocation_shouldNotHaveVariableBinding() throws Exception {
+	void test_MethodInvocation_shouldExcludeReferenceToVariable() throws Exception {
 		MethodInvocation methodInvocation = TestHelper.createExpressionFromString("exampleMethod()",
 				MethodInvocation.class);
-		boolean variableBindingExcludedFor = NameLocationInParent
-			.isVariableBindingExcludedFor(methodInvocation.getName());
+		boolean variableBindingExcludedFor = ExcludeVariableReference
+			.isReferenceToVariableExcludedFor(methodInvocation.getName());
 		assertTrue(variableBindingExcludedFor);
 	}
 
 	@Test
-	void visit_SuperMethodInvocation_shouldNotHaveVariableBinding() throws Exception {
+	void test_SuperMethodInvocation_shouldExcludeReferenceToVariable() throws Exception {
 		SuperMethodInvocation superMethodInvocation = TestHelper.createExpressionFromString("super.superMethod()",
 				SuperMethodInvocation.class);
-		boolean variableBindingExcludedFor = NameLocationInParent
-			.isVariableBindingExcludedFor(superMethodInvocation.getName());
+		boolean variableBindingExcludedFor = ExcludeVariableReference
+			.isReferenceToVariableExcludedFor(superMethodInvocation.getName());
 		assertTrue(variableBindingExcludedFor);
 	}
 
 	@Test
-	void visit_ExpressionMethodReference_shouldNotHaveVariableBinding() throws Exception {
+	void test_ExpressionMethodReference_shouldExcludeReferenceToVariable() throws Exception {
 		ExpressionMethodReference expressionMethodReference = TestHelper.createExpressionFromString("this::xMethod",
 				ExpressionMethodReference.class);
-		boolean variableBindingExcludedFor = NameLocationInParent
-			.isVariableBindingExcludedFor(expressionMethodReference.getName());
+		boolean variableBindingExcludedFor = ExcludeVariableReference
+			.isReferenceToVariableExcludedFor(expressionMethodReference.getName());
 		assertTrue(variableBindingExcludedFor);
 	}
 
 	@Test
-	void visit_SuperMethodReference_shouldNotHaveVariableBinding() throws Exception {
+	void test_SuperMethodReference_shouldExcludeReferenceToVariable() throws Exception {
 		SuperMethodReference superMethodReference = TestHelper.createExpressionFromString("super::superMethod",
 				SuperMethodReference.class);
-		boolean variableBindingExcludedFor = NameLocationInParent
-			.isVariableBindingExcludedFor(superMethodReference.getName());
+		boolean variableBindingExcludedFor = ExcludeVariableReference
+			.isReferenceToVariableExcludedFor(superMethodReference.getName());
 		assertTrue(variableBindingExcludedFor);
 	}
 
 	@Test
-	void visit_TypeMethodReference_shouldNotHaveVariableBinding() throws Exception {
+	void test_TypeMethodReference_shouldExcludeReferenceToVariable() throws Exception {
 		TypeMethodReference typeMethodReference = TestHelper.createExpressionFromString(
 				"InnerClass.@MarkerAnnotation InnerInnerClass::xMethod", TypeMethodReference.class);
-		boolean variableBindingExcludedFor = NameLocationInParent
-			.isVariableBindingExcludedFor(typeMethodReference.getName());
+		boolean variableBindingExcludedFor = ExcludeVariableReference
+			.isReferenceToVariableExcludedFor(typeMethodReference.getName());
 		assertTrue(variableBindingExcludedFor);
 	}
 
 	@Test
-	void visit_NamePropertyOfQualifiedName_shouldExcludeVariableBinding() throws Exception {
+	void test_NamePropertyOfQualifiedName_shouldExcludeReferenceToVariable() throws Exception {
 		SimpleType simpleType = (SimpleType) TestHelper
 			.createStatementFromString("a.b.X x;", VariableDeclarationStatement.class)
 			.getType();
 		QualifiedName qualifiedName = (QualifiedName) simpleType.getName();
-		assertTrue(NameLocationInParent.isVariableBindingExcludedFor(qualifiedName.getName()));
+		assertTrue(ExcludeVariableReference.isReferenceToVariableExcludedFor(qualifiedName.getName()));
 	}
 
 	@Test
-	void test_QualifiedNameAsQualifiedNameQualifier_shouldExcludeVariableBinding() throws Exception {
+	void test_QualifiedNameAsQualifiedNameQualifier_shouldExcludeReferenceToVariable() throws Exception {
 		SimpleType simpleType = (SimpleType) TestHelper
 			.createStatementFromString("a.b.X x;", VariableDeclarationStatement.class)
 			.getType();
 		QualifiedName qualifiedName = (QualifiedName) simpleType.getName();
 		QualifiedName qualifiedNameAsQualifier = (QualifiedName) qualifiedName.getQualifier();
-		boolean variableBindingExcludedFor = NameLocationInParent
-			.isVariableBindingExcludedFor(qualifiedNameAsQualifier);
+		boolean variableBindingExcludedFor = ExcludeVariableReference
+			.isReferenceToVariableExcludedFor(qualifiedNameAsQualifier);
 		assertTrue(variableBindingExcludedFor);
 	}
 
 	@Test
-	void test_SimpleNameAsQualifiedNameQualifier_shouldExcludeVariableBinding() throws Exception {
+	void test_SimpleNameAsQualifiedNameQualifier_shouldExcludeReferenceToVariable() throws Exception {
 		SimpleType simpleType = (SimpleType) TestHelper
 			.createStatementFromString("a.b.X x;", VariableDeclarationStatement.class)
 			.getType();
 		QualifiedName qualifiedName = (QualifiedName) simpleType.getName();
 		QualifiedName qualifiedNameAsQualifier = (QualifiedName) qualifiedName.getQualifier();
 		SimpleName simpleNameAsQualifier = (SimpleName) qualifiedNameAsQualifier.getQualifier();
-		boolean variableBindingExcludedFor = NameLocationInParent.isVariableBindingExcludedFor(simpleNameAsQualifier);
+		boolean variableBindingExcludedFor = ExcludeVariableReference.isReferenceToVariableExcludedFor(simpleNameAsQualifier);
 		assertTrue(variableBindingExcludedFor);
 	}
 
@@ -165,7 +170,7 @@ class ExcludeVariableReferenceTest {
 
 	@ParameterizedTest
 	@MethodSource("bodyDeclarations_excludingVariableBinding")
-	void test_BodyDeclaration_shouldExcludeVariableBinding(String code, ChildPropertyDescriptor childPropertyDescriptor)
+	void test_BodyDeclaration_shouldExcludeReferenceToVariable(String code, ChildPropertyDescriptor childPropertyDescriptor)
 			throws Exception {
 
 		TypeDeclaration typeDeclaration = ASTNodeBuilder.createTypeDeclarationFromString("TestClass", code);
@@ -173,13 +178,13 @@ class ExcludeVariableReferenceTest {
 			.get(0);
 		SimpleName simpleName = (SimpleName) bodyDeclaration.getStructuralProperty(childPropertyDescriptor);
 
-		boolean variableBindingExcludedFor = NameLocationInParent.isVariableBindingExcludedFor(simpleName);
+		boolean variableBindingExcludedFor = ExcludeVariableReference.isReferenceToVariableExcludedFor(simpleName);
 
 		assertTrue(variableBindingExcludedFor);
 	}
 
 	@Test
-	void test_AnnotationTypeMemberDeclaration_shouldExcludeVariableBinding() throws Exception {
+	void test_AnnotationTypeMemberDeclaration_shouldExcludeReferenceToVariable() throws Exception {
 		String code = "" +
 				"	@interface ExampleAnnotation {\n" +
 				"			int x();\n" +
@@ -193,8 +198,8 @@ class ExcludeVariableReferenceTest {
 			.bodyDeclarations()
 			.get(0);
 
-		boolean variableBindingExcludedFor = NameLocationInParent
-			.isVariableBindingExcludedFor(annotationMemberDeclaration.getName());
+		boolean variableBindingExcludedFor = ExcludeVariableReference
+			.isReferenceToVariableExcludedFor(annotationMemberDeclaration.getName());
 		assertTrue(variableBindingExcludedFor);
 	}
 
@@ -216,14 +221,14 @@ class ExcludeVariableReferenceTest {
 
 	@ParameterizedTest
 	@MethodSource("arguments_SimpleNameAsTypeProperty_excludingVariableBinding")
-	void test_SimpleNameAsTypeProperty_shouldExcludeVariableBinding(String stringCodingVariableType,
+	void test_SimpleNameAsTypeProperty_shouldExcludeReferenceToVariable(String stringCodingVariableType,
 			ChildPropertyDescriptor childPropertyDescriptor)
 			throws Exception {
 		String code = stringCodingVariableType + " x;";
 		Type type = TestHelper.createStatementFromString(code, VariableDeclarationStatement.class)
 			.getType();
 		SimpleName simpleName = (SimpleName) type.getStructuralProperty(childPropertyDescriptor);
-		boolean variableBindingExcludedFor = NameLocationInParent.isVariableBindingExcludedFor(simpleName);
+		boolean variableBindingExcludedFor = ExcludeVariableReference.isReferenceToVariableExcludedFor(simpleName);
 		assertTrue(variableBindingExcludedFor);
 	}
 
@@ -239,19 +244,19 @@ class ExcludeVariableReferenceTest {
 
 	@ParameterizedTest
 	@MethodSource("arguments_QualifiedNameAsTypeProperty_excludingVariableBinding")
-	void test_QualifiedNameAsTypeProperty_shouldExcludeVariableBinding(String stringCodingVariableType,
+	void test_QualifiedNameAsTypeProperty_shouldExcludeReferenceToVariable(String stringCodingVariableType,
 			ChildPropertyDescriptor childPropertyDescriptor)
 			throws Exception {
 		String code = stringCodingVariableType + " x;";
 		Type type = TestHelper.createStatementFromString(code, VariableDeclarationStatement.class)
 			.getType();
 		QualifiedName qualifiedName = (QualifiedName) type.getStructuralProperty(childPropertyDescriptor);
-		boolean variableBindingExcludedFor = NameLocationInParent.isVariableBindingExcludedFor(qualifiedName);
+		boolean variableBindingExcludedFor = ExcludeVariableReference.isReferenceToVariableExcludedFor(qualifiedName);
 		assertTrue(variableBindingExcludedFor);
 	}
 
 	@Test
-	void test_NamePropertyOfMemberValuePair_shouldNotHaveVariableBinding() throws Exception {
+	void test_NamePropertyOfMemberValuePair_shouldExcludeReferenceToVariable() throws Exception {
 		NormalAnnotation normalAnnotation = (NormalAnnotation) TestHelper
 			.createStatementFromString("@XAnnotation(x=1) int x;", VariableDeclarationStatement.class)
 			.modifiers()
@@ -259,8 +264,8 @@ class ExcludeVariableReferenceTest {
 
 		MemberValuePair memberValuePair = (MemberValuePair) normalAnnotation.values()
 			.get(0);
-		boolean variableBindingExcludedFor = NameLocationInParent
-			.isVariableBindingExcludedFor(memberValuePair.getName());
+		boolean variableBindingExcludedFor = ExcludeVariableReference
+			.isReferenceToVariableExcludedFor(memberValuePair.getName());
 		assertTrue(variableBindingExcludedFor);
 	}
 
@@ -280,7 +285,7 @@ class ExcludeVariableReferenceTest {
 
 	@ParameterizedTest
 	@MethodSource("arguments_SimpleNameAsAnnotationTypeNameProperty_excludingVariableBinding")
-	void test_SimpleNameAsAnnotationTypeNameProperty_shouldExcludeVariableBinding(String stringCodingAnnotation,
+	void test_SimpleNameAsAnnotationTypeNameProperty_shouldExcludeReferenceToVariable(String stringCodingAnnotation,
 			ChildPropertyDescriptor childPropertyDescriptor) throws Exception {
 
 		Annotation annotation = (Annotation) TestHelper
@@ -289,7 +294,7 @@ class ExcludeVariableReferenceTest {
 			.modifiers()
 			.get(0);
 		SimpleName simpleName = (SimpleName) annotation.getStructuralProperty(childPropertyDescriptor);
-		boolean variableBindingExcludedFor = NameLocationInParent.isVariableBindingExcludedFor(simpleName);
+		boolean variableBindingExcludedFor = ExcludeVariableReference.isReferenceToVariableExcludedFor(simpleName);
 		assertTrue(variableBindingExcludedFor);
 	}
 
@@ -309,7 +314,7 @@ class ExcludeVariableReferenceTest {
 
 	@ParameterizedTest
 	@MethodSource("arguments_QualifiedNameAsAnnotationTypeNameProperty_excludingVariableBinding")
-	void test_QualifiedNameAsAnnotationTypeNameProperty_shouldExcludeVariableBinding(String stringCodingAnnotation,
+	void test_QualifiedNameAsAnnotationTypeNameProperty_shouldExcludeReferenceToVariable(String stringCodingAnnotation,
 			ChildPropertyDescriptor childPropertyDescriptor) throws Exception {
 
 		Annotation annotation = (Annotation) TestHelper
@@ -318,7 +323,7 @@ class ExcludeVariableReferenceTest {
 			.modifiers()
 			.get(0);
 		QualifiedName qualifiedName = (QualifiedName) annotation.getStructuralProperty(childPropertyDescriptor);
-		boolean variableBindingExcludedFor = NameLocationInParent.isVariableBindingExcludedFor(qualifiedName);
+		boolean variableBindingExcludedFor = ExcludeVariableReference.isReferenceToVariableExcludedFor(qualifiedName);
 		assertTrue(variableBindingExcludedFor);
 	}
 
@@ -341,46 +346,46 @@ class ExcludeVariableReferenceTest {
 
 	@ParameterizedTest
 	@MethodSource("arguments_Label_ExcludingVariableBinding")
-	void test_Label_shouldExcludeVariableBinding(String code, ChildPropertyDescriptor childPropertyDescriptor)
+	void test_Label_shouldExcludeReferenceToVariable(String code, ChildPropertyDescriptor childPropertyDescriptor)
 			throws Exception {
 
 		Statement statement = (Statement) ASTNodeBuilder.createBlockFromString(code)
 			.statements()
 			.get(0);
 		SimpleName simpleName = (SimpleName) statement.getStructuralProperty(childPropertyDescriptor);
-		boolean variableBindingExcludedFor = NameLocationInParent.isVariableBindingExcludedFor(simpleName);
+		boolean variableBindingExcludedFor = ExcludeVariableReference.isReferenceToVariableExcludedFor(simpleName);
 		assertTrue(variableBindingExcludedFor);
 	}
 
 	@Test
-	void visit_SimpleName_shouldNotExcludeVariableBinding() throws Exception {
+	void test_SimpleName_shouldNotExcludeReferenceToVariable() throws Exception {
 		SimpleName simpleName = TestHelper.createExpressionFromString("x", SimpleName.class);
-		boolean variableBindingExcludedFor = NameLocationInParent.isVariableBindingExcludedFor(simpleName);
+		boolean variableBindingExcludedFor = ExcludeVariableReference.isReferenceToVariableExcludedFor(simpleName);
 		assertFalse(variableBindingExcludedFor);
 	}
 
 	@Test
-	void visit_QualifiedName_shouldNotExcludeVariableBinding() throws Exception {
+	void test_QualifiedName_shouldNotExcludeReferenceToVariable() throws Exception {
 		QualifiedName qualifiedName = TestHelper.createExpressionFromString("a.b.X", QualifiedName.class);
-		boolean variableBindingExcludedFor = NameLocationInParent.isVariableBindingExcludedFor(qualifiedName);
+		boolean variableBindingExcludedFor = ExcludeVariableReference.isReferenceToVariableExcludedFor(qualifiedName);
 		assertFalse(variableBindingExcludedFor);
 	}
 
 	@Test
-	void test_QualifiedNameAsQualifiedNameQualifier_shouldNotExcludeVariableBinding() throws Exception {
+	void test_QualifiedNameAsQualifiedNameQualifier_shouldNotExcludeReferenceToVariable() throws Exception {
 		QualifiedName qualifiedName = TestHelper.createExpressionFromString("a.b.X", QualifiedName.class);
 		QualifiedName qualifiedNameAsQualifier = (QualifiedName) qualifiedName.getQualifier();
-		boolean variableBindingExcludedFor = NameLocationInParent
-			.isVariableBindingExcludedFor(qualifiedNameAsQualifier);
+		boolean variableBindingExcludedFor = ExcludeVariableReference
+			.isReferenceToVariableExcludedFor(qualifiedNameAsQualifier);
 		assertFalse(variableBindingExcludedFor);
 	}
 
 	@Test
-	void test_SimpleNameAsQualifiedNameQualifier_shouldNotExcludeVariableBinding() throws Exception {
+	void test_SimpleNameAsQualifiedNameQualifier_shouldNotExcludeReferenceToVariable() throws Exception {
 		QualifiedName qualifiedName = TestHelper.createExpressionFromString("a.b.X", QualifiedName.class);
 		QualifiedName qualifiedNameAsQualifier = (QualifiedName) qualifiedName.getQualifier();
 		SimpleName simpleNameAsQualifier = (SimpleName) qualifiedNameAsQualifier.getQualifier();
-		boolean variableBindingExcludedFor = NameLocationInParent.isVariableBindingExcludedFor(simpleNameAsQualifier);
+		boolean variableBindingExcludedFor = ExcludeVariableReference.isReferenceToVariableExcludedFor(simpleNameAsQualifier);
 		assertFalse(variableBindingExcludedFor);
 	}
 
@@ -390,7 +395,7 @@ class ExcludeVariableReferenceTest {
 			.createStatementFromString("a.b.X x;", VariableDeclarationStatement.class)
 			.fragments()
 			.get(0);
-		assertTrue(NameLocationInParent.isReferenceToLocalVariableExcludedFor(variableDeclarationFragment.getName()));
+		assertTrue(ExcludeVariableReference.isReferenceToLocalVariableExcludedFor(variableDeclarationFragment.getName()));
 	}
 
 	@Test
@@ -408,7 +413,7 @@ class ExcludeVariableReferenceTest {
 			.parameters()
 			.get(0);
 
-		boolean variableBindingExcludedFor = NameLocationInParent
+		boolean variableBindingExcludedFor = ExcludeVariableReference
 			.isReferenceToLocalVariableExcludedFor(singleVariableDeclaration.getName());
 		assertTrue(variableBindingExcludedFor);
 	}
@@ -427,107 +432,76 @@ class ExcludeVariableReferenceTest {
 		EnumConstantDeclaration enumConstantDeclaration = (EnumConstantDeclaration) enumDeclaration.enumConstants()
 			.get(0);
 
-		boolean variableBindingExcludedFor = NameLocationInParent
+		boolean variableBindingExcludedFor = ExcludeVariableReference
 			.isReferenceToLocalVariableExcludedFor(enumConstantDeclaration.getName());
 		assertTrue(variableBindingExcludedFor);
 	}
 
 	@Test
-	void test_FieldAccessName_shouldExcludeLocalVariableBinding()
+	void test_FieldAccessName_shouldExcludeLocalVariableReference()
 			throws Exception {
 		FieldAccess fieldAccess = (FieldAccess) TestHelper.createExpressionFromString("this.x",
 				FieldAccess.class);
-		assertTrue(NameLocationInParent.isReferenceToLocalVariableExcludedFor(fieldAccess.getName()));
+		assertTrue(ExcludeVariableReference.isReferenceToLocalVariableExcludedFor(fieldAccess.getName()));
 	}
 
 	@Test
-	void test_SuperFieldAccess_shouldExcludeLocalVariableBinding()
+	void test_SuperFieldAccess_shouldExcludeLocalVariableReference()
 			throws Exception {
 		SuperFieldAccess superFieldAccess = (SuperFieldAccess) TestHelper.createExpressionFromString("super.x",
 				SuperFieldAccess.class);
-		assertTrue(NameLocationInParent.isReferenceToLocalVariableExcludedFor(superFieldAccess.getName()));
+		assertTrue(ExcludeVariableReference.isReferenceToLocalVariableExcludedFor(superFieldAccess.getName()));
 	}
 
 	@Test
-	void test_QualifiedName_shouldExcludeLocalVariableBinding()
+	void test_QualifiedName_shouldExcludeLocalVariableReference()
 			throws Exception {
 		QualifiedName qualifiedName = (QualifiedName) TestHelper.createExpressionFromString("a.b.X",
 				QualifiedName.class);
-		assertTrue(NameLocationInParent.isReferenceToLocalVariableExcludedFor(qualifiedName.getName()));
+		assertTrue(ExcludeVariableReference.isReferenceToLocalVariableExcludedFor(qualifiedName.getName()));
 	}
 
 	@Test
 	void test_MethodInvocation_shouldExcludeLocalVariableReference() throws Exception {
 		MethodInvocation methodInvocation = TestHelper.createExpressionFromString("exampleMethod()",
 				MethodInvocation.class);
-		boolean variableBindingExcludedFor = NameLocationInParent
+		boolean variableBindingExcludedFor = ExcludeVariableReference
 			.isReferenceToLocalVariableExcludedFor(methodInvocation.getName());
 		assertTrue(variableBindingExcludedFor);
 	}
 
 	@Test
-	void test_SimpleName_shouldNotExcludeLocalVariableBinding() throws Exception {
+	void test_SimpleName_shouldNotExcludeLocalVariableReference() throws Exception {
 		SimpleName simpleName = TestHelper.createExpressionFromString("x", SimpleName.class);
-		assertFalse(NameLocationInParent.isReferenceToLocalVariableExcludedFor(simpleName));
+		assertFalse(ExcludeVariableReference.isReferenceToLocalVariableExcludedFor(simpleName));
 	}
 
 	@Test
-	void testCanBeReferenceToLocalVariable_shouldReturnTrue() throws Exception {
-		SimpleName simpleName = TestHelper.createExpressionFromString("x", SimpleName.class);
-		assertTrue(NameLocationInParent.canBeReferenceToLocalVariable(simpleName));
-
-	}
-
-	@Test
-	void testCanBeReferenceToLocalVariable_shouldReturnFalse() throws Exception {
-		MethodInvocation methodInvocation = TestHelper.createExpressionFromString("exampleMethod()",
-				MethodInvocation.class);
-		boolean canBeReferenceToLocalVariable = NameLocationInParent
-			.canBeReferenceToLocalVariable(methodInvocation.getName());
-		assertFalse(canBeReferenceToLocalVariable);
-	}
-
-	@Test
-	void testCanHaveVariableBinding_shouldReturnTrue() throws Exception {
-		SimpleName simpleName = TestHelper.createExpressionFromString("x", SimpleName.class);
-		assertTrue(NameLocationInParent.canHaveVariableBinding(simpleName));
-	}
-
-	@Test
-	void testCanHaveVariableBinding_shouldReturnFalse() throws Exception {
-		MethodInvocation methodInvocation = TestHelper.createExpressionFromString("exampleMethod()",
-				MethodInvocation.class);
-		boolean canHaveVariableBinding = NameLocationInParent
-			.canHaveVariableBinding(methodInvocation.getName());
-		assertFalse(canHaveVariableBinding);
-	}
-
-	@Test
-	void test_QualifierOfThisExpression_shouldExcludeLocalVariableBinding()
+	void test_QualifierOfThisExpression_shouldExcludeLocalVariableReference()
 			throws Exception {
 		ThisExpression thisExpression = (ThisExpression) TestHelper.createExpressionFromString("X.this",
 				ThisExpression.class);
 		assertTrue(
-				NameLocationInParent.isReferenceToLocalVariableExcludedFor((SimpleName) thisExpression.getQualifier()));
+				ExcludeVariableReference.isReferenceToLocalVariableExcludedFor((SimpleName) thisExpression.getQualifier()));
 	}
 
 	@Test
-	void test_QualifierOfSuperFieldAccess_shouldExcludeLocalVariableBinding()
+	void test_QualifierOfSuperFieldAccess_shouldExcludeLocalVariableReference()
 			throws Exception {
 		SuperFieldAccess superFieldAccess = (SuperFieldAccess) TestHelper.createExpressionFromString(
 				"X.super.superField",
 				SuperFieldAccess.class);
-		assertTrue(NameLocationInParent
+		assertTrue(ExcludeVariableReference
 			.isReferenceToLocalVariableExcludedFor((SimpleName) superFieldAccess.getQualifier()));
 	}
 
 	@Test
-	void test_QualifierOfSuperMethodInvocation_shouldExcludeLocalVariableBinding()
+	void test_QualifierOfSuperMethodInvocation_shouldExcludeLocalVariableReference()
 			throws Exception {
 		SuperMethodInvocation superMethodInvocation = (SuperMethodInvocation) TestHelper.createExpressionFromString(
 				"X.super.superMethod()",
 				SuperMethodInvocation.class);
-		assertTrue(NameLocationInParent
+		assertTrue(ExcludeVariableReference
 			.isReferenceToLocalVariableExcludedFor((SimpleName) superMethodInvocation.getQualifier()));
 	}
 }

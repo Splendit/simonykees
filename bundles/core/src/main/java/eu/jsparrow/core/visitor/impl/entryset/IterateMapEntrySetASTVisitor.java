@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.markers.common.IterateMapEntrySetEvent;
-import eu.jsparrow.core.visitor.impl.entryset.excluderef.NameLocationInParent;
+import eu.jsparrow.core.visitor.impl.entryset.excluderef.ExcludeVariableReference;
 import eu.jsparrow.rules.common.exception.UnresolvedBindingException;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -37,7 +37,7 @@ import eu.jsparrow.rules.common.visitor.helper.FindVariableBinding;
 import eu.jsparrow.rules.common.visitor.helper.SafeVariableNameFactory;
 
 /**
- * 
+ * @since 4.20.0
  */
 public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 		implements IterateMapEntrySetEvent {
@@ -245,13 +245,16 @@ public class IterateMapEntrySetASTVisitor extends AbstractASTRewriteASTVisitor
 		SimpleName assumedMapGetterArgument = supportedForStatementData.getAssumedMapGetterArgument();
 		return matchingSimpleNames.stream()
 			.filter(name -> name != assumedMapGetterArgument)
-			.filter(NameLocationInParent::canBeReferenceToLocalVariable)
+			.filter(IterateMapEntrySetASTVisitor::canBeReferenceToLocalVariable)
 			.anyMatch(name -> isReference(name, loopParameter));
 
 	}
 
-	private boolean isReference(SimpleName simpleName, SingleVariableDeclaration loopParameter) {
+	private static boolean canBeReferenceToLocalVariable(SimpleName simpleName) {
+		return !ExcludeVariableReference.isReferenceToLocalVariableExcludedFor(simpleName);
+	}
 
+	private boolean isReference(SimpleName simpleName, SingleVariableDeclaration loopParameter) {
 
 		IVariableBinding variableBinding;
 		try {
