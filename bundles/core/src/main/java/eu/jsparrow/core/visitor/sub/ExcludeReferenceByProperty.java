@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
@@ -56,6 +57,7 @@ public class ExcludeReferenceByProperty {
 				locationInParent == SingleVariableDeclaration.NAME_PROPERTY ||
 				locationInParent == MethodDeclaration.NAME_PROPERTY ||
 				locationInParent == TypeDeclaration.NAME_PROPERTY ||
+				locationInParent == TypeParameter.NAME_PROPERTY ||
 				locationInParent == EnumDeclaration.NAME_PROPERTY ||
 				locationInParent == EnumConstantDeclaration.NAME_PROPERTY ||
 				locationInParent == AnnotationTypeDeclaration.NAME_PROPERTY ||

@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.junit.jupiter.api.Test;
@@ -129,7 +130,8 @@ class ExcludeVariableReferenceTest {
 		QualifiedName qualifiedName = (QualifiedName) simpleType.getName();
 		QualifiedName qualifiedNameAsQualifier = (QualifiedName) qualifiedName.getQualifier();
 		SimpleName simpleNameAsQualifier = (SimpleName) qualifiedNameAsQualifier.getQualifier();
-		boolean variableBindingExcludedFor = ExcludeVariableReference.isReferenceToVariableExcludedFor(simpleNameAsQualifier);
+		boolean variableBindingExcludedFor = ExcludeVariableReference
+			.isReferenceToVariableExcludedFor(simpleNameAsQualifier);
 		assertTrue(variableBindingExcludedFor);
 	}
 
@@ -170,13 +172,35 @@ class ExcludeVariableReferenceTest {
 
 	@ParameterizedTest
 	@MethodSource("bodyDeclarations_excludingVariableBinding")
-	void test_BodyDeclaration_shouldExcludeReferenceToVariable(String code, ChildPropertyDescriptor childPropertyDescriptor)
+	void test_BodyDeclaration_shouldExcludeReferenceToVariable(String code,
+			ChildPropertyDescriptor childPropertyDescriptor)
 			throws Exception {
 
 		TypeDeclaration typeDeclaration = ASTNodeBuilder.createTypeDeclarationFromString("TestClass", code);
 		BodyDeclaration bodyDeclaration = (BodyDeclaration) typeDeclaration.bodyDeclarations()
 			.get(0);
 		SimpleName simpleName = (SimpleName) bodyDeclaration.getStructuralProperty(childPropertyDescriptor);
+
+		boolean variableBindingExcludedFor = ExcludeVariableReference.isReferenceToVariableExcludedFor(simpleName);
+
+		assertTrue(variableBindingExcludedFor);
+	}
+
+	@Test
+	void test_TypeParameter_shouldExcludeReferenceToVariable()
+			throws Exception {
+
+		String code = "" +
+				"	class Wrapper<T> {\n"
+				+ "	}";
+
+		TypeDeclaration typeDeclaration = ASTNodeBuilder.createTypeDeclarationFromString("TestClass", code);
+		TypeDeclaration nestedTypeDeclaration = (TypeDeclaration) typeDeclaration.bodyDeclarations()
+			.get(0);
+		TypeParameter typeParameter = (TypeParameter) nestedTypeDeclaration.typeParameters()
+			.get(0);
+		
+		SimpleName simpleName = typeParameter.getName();
 
 		boolean variableBindingExcludedFor = ExcludeVariableReference.isReferenceToVariableExcludedFor(simpleName);
 
@@ -385,7 +409,8 @@ class ExcludeVariableReferenceTest {
 		QualifiedName qualifiedName = TestHelper.createExpressionFromString("a.b.X", QualifiedName.class);
 		QualifiedName qualifiedNameAsQualifier = (QualifiedName) qualifiedName.getQualifier();
 		SimpleName simpleNameAsQualifier = (SimpleName) qualifiedNameAsQualifier.getQualifier();
-		boolean variableBindingExcludedFor = ExcludeVariableReference.isReferenceToVariableExcludedFor(simpleNameAsQualifier);
+		boolean variableBindingExcludedFor = ExcludeVariableReference
+			.isReferenceToVariableExcludedFor(simpleNameAsQualifier);
 		assertFalse(variableBindingExcludedFor);
 	}
 
@@ -395,7 +420,8 @@ class ExcludeVariableReferenceTest {
 			.createStatementFromString("a.b.X x;", VariableDeclarationStatement.class)
 			.fragments()
 			.get(0);
-		assertTrue(ExcludeVariableReference.isReferenceToLocalVariableExcludedFor(variableDeclarationFragment.getName()));
+		assertTrue(
+				ExcludeVariableReference.isReferenceToLocalVariableExcludedFor(variableDeclarationFragment.getName()));
 	}
 
 	@Test
@@ -482,7 +508,8 @@ class ExcludeVariableReferenceTest {
 		ThisExpression thisExpression = (ThisExpression) TestHelper.createExpressionFromString("X.this",
 				ThisExpression.class);
 		assertTrue(
-				ExcludeVariableReference.isReferenceToLocalVariableExcludedFor((SimpleName) thisExpression.getQualifier()));
+				ExcludeVariableReference
+					.isReferenceToLocalVariableExcludedFor((SimpleName) thisExpression.getQualifier()));
 	}
 
 	@Test

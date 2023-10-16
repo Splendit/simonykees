@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,6 +62,7 @@ class ExcludeReferenceByPropertyTest {
 				Arguments.of(VariableDeclarationFragment.NAME_PROPERTY),
 				Arguments.of(SingleVariableDeclaration.NAME_PROPERTY),
 				Arguments.of(TypeDeclaration.NAME_PROPERTY),
+				Arguments.of(TypeParameter.NAME_PROPERTY),
 				Arguments.of(EnumDeclaration.NAME_PROPERTY),
 				Arguments.of(EnumConstantDeclaration.NAME_PROPERTY),
 				Arguments.of(AnnotationTypeDeclaration.NAME_PROPERTY),
@@ -115,6 +117,7 @@ class ExcludeReferenceByPropertyTest {
 				Arguments.of(VariableDeclarationFragment.NAME_PROPERTY),
 				Arguments.of(SingleVariableDeclaration.NAME_PROPERTY),
 				Arguments.of(TypeDeclaration.NAME_PROPERTY),
+				Arguments.of(TypeParameter.NAME_PROPERTY),
 				Arguments.of(EnumDeclaration.NAME_PROPERTY),
 				Arguments.of(EnumConstantDeclaration.NAME_PROPERTY),
 				Arguments.of(AnnotationTypeDeclaration.NAME_PROPERTY),
