@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl.map.entryset;
+package eu.jsparrow.core.visitor.impl.map.iterate;
 
 import java.util.Optional;
 

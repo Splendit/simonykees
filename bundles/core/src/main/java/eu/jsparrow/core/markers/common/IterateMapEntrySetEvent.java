@@ -2,7 +2,7 @@ package eu.jsparrow.core.markers.common;
 
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 
-import eu.jsparrow.core.visitor.impl.map.entryset.IterateMapEntrySetASTVisitor;
+import eu.jsparrow.core.visitor.impl.map.iterate.IterateMapEntrySetASTVisitor;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
 /**

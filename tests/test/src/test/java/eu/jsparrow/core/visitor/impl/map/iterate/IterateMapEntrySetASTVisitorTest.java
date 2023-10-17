@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl.map.entryset;
+package eu.jsparrow.core.visitor.impl.map.iterate;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl.map.entryset;
+package eu.jsparrow.core.visitor.impl.map.iterate;
 
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
