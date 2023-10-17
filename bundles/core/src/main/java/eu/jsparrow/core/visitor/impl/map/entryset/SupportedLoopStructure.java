@@ -13,8 +13,8 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import eu.jsparrow.core.visitor.impl.map.ItemAtIndex;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ItemAtIndex;
 
 /**
  * Stores all structural informations about an EnhancedForStatement which seems

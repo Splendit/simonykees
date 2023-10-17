@@ -1,11 +1,9 @@
-package eu.jsparrow.core.visitor.impl.map;
+package eu.jsparrow.rules.common.util;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 public class ItemAtIndex {
 	/**
