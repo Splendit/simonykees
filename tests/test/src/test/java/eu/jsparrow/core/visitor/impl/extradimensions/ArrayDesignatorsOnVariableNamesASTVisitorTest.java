@@ -87,6 +87,47 @@ class ArrayDesignatorsOnVariableNamesASTVisitorTest extends UsesJDTUnitFixture {
 		assertNoChange(original);
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"		InnerClass @X [] x[];",
+			"		InnerClass.@X InnerClass2 x[];",
+			"		InnerClass.InnerClass2.@X InnerClass3 x[];",
+			"		InnerClass.@X InnerClass2.@X InnerClass3 x[];",
+			"		java.util.List<@X InnerClass> x[];",
+	})
+	void visit_TypesContainingAnnotations_shouldNotTransform(String variableDeclaration) throws Exception {
+
+		String original = "" +
+				"	void typeContainingAnnotations() {\n" +
+				variableDeclaration + "\n" +
+				"	}\n" +
+				"\n" +
+				"	@interface X {\n" +
+				"	}\n" +
+				"\n" +
+				"	class InnerClass {\n" +
+				"		class InnerClass2 {\n" +
+				"			class InnerClass3 {\n" +
+				"			}\n" +
+				"		}\n" +
+				"	}";
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_ExtraDimensionsWithAnnotations_shouldNotTransform() throws Exception {
+
+		String original = "" +
+				"	void extraDimensionsWithAnnotations() {\n" +
+				"		int i2Dim @X [] @X [];\n" +
+				"	}\n" +
+				"\n" +
+				"	@interface X {\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
 	// @Test
 	// void visit__shouldTransform() throws Exception {
 	// String original = "";

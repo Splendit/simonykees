@@ -31,6 +31,7 @@ public class ArrayDesignatorsOnVariableNamesASTVisitor extends AbstractASTRewrit
 		if (variableDeclarationFragments.size() == 1) {
 			findDimensionsTransformationData(node.getType(), variableDeclarationFragments.get(0))
 				.ifPresent(this::transform);
+
 		} else {
 			// ----------------------------
 			// Not implemented yet:
@@ -54,6 +55,7 @@ public class ArrayDesignatorsOnVariableNamesASTVisitor extends AbstractASTRewrit
 		if (variableDeclarationFragments.size() == 1) {
 			findDimensionsTransformationData(node.getType(), variableDeclarationFragments.get(0))
 				.ifPresent(this::transform);
+
 		} else {
 			// ----------------------------
 			// Not implemented yet:
@@ -75,11 +77,39 @@ public class ArrayDesignatorsOnVariableNamesASTVisitor extends AbstractASTRewrit
 		return true;
 	}
 
+	private boolean isTypeContainingAnnotation(Type type) {
+		ContainingAnnotationVisitor firstAnnotationVisitor = new ContainingAnnotationVisitor();
+		type.accept(firstAnnotationVisitor);
+		return firstAnnotationVisitor.isContainingAnnotation();
+	}
+
+	private boolean isExtraDimensionContainingAnnotation(List<Dimension> extraDimensionsList) {
+		for (Dimension dimension : extraDimensionsList) {
+			if (!dimension.annotations()
+				.isEmpty()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private Optional<DimensionsTransformationData> findDimensionsTransformationData(Type typeToReplace,
 			VariableDeclaration variableDeclaration) {
 
 		int extraDimensions = variableDeclaration.getExtraDimensions();
 		if (extraDimensions < 1) {
+			return Optional.empty();
+		}
+
+		if (isTypeContainingAnnotation(typeToReplace)) {
+			return Optional.empty();
+		}
+
+		List<Dimension> extraDimensionsList = ASTNodeUtil.convertToTypedList(
+				variableDeclaration.extraDimensions(),
+				Dimension.class);
+
+		if (isExtraDimensionContainingAnnotation(extraDimensionsList)) {
 			return Optional.empty();
 		}
 
@@ -93,9 +123,7 @@ public class ArrayDesignatorsOnVariableNamesASTVisitor extends AbstractASTRewrit
 			componentType = typeToReplace;
 			totalDimensions = extraDimensions;
 		}
-		List<Dimension> extraDimensionsList = ASTNodeUtil.convertToTypedList(
-				variableDeclaration.extraDimensions(),
-				Dimension.class);
+
 		return Optional
 			.of(new DimensionsTransformationData(componentType, totalDimensions, extraDimensionsList, typeToReplace));
 
