@@ -58,9 +58,33 @@ class ArrayDesignatorsOnVariableNamesASTVisitorTest extends UsesJDTUnitFixture {
 	void visit_extraDimensionOnFieldName_shouldTransform() throws Exception {
 
 		String original = "int iArray[] = {1,2,3};";
-		String expected = "int iArray[] = {1,2,3};";
+		String expected = "int[] iArray = {1,2,3};";
 
 		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_extraDimensionsOnParameterName_shouldTransform() throws Exception {
+
+		String original = "" +
+				"	void extraDimensionsOnParameterName(int iArray[]) {\n" +
+				"	}";
+
+		String expected = "" +
+				"	void extraDimensionsOnParameterName(int[] iArray) {\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_NoExtraDimensionOnLocalVariableName_shouldNotTransform() throws Exception {
+
+		String original = "" +
+				"	void noExtraDimensionsOnLocalVariableName() {\n" +
+				"		int i = 1;\n" +
+				"	}";
+		assertNoChange(original);
 	}
 
 	// @Test
