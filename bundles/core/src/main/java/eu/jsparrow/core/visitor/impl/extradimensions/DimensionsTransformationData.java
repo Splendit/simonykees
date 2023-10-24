@@ -1,7 +1,9 @@
 package eu.jsparrow.core.visitor.impl.extradimensions;
 
 import java.util.List;
+import java.util.function.Consumer;
 
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.Type;
 
@@ -10,15 +12,15 @@ public class DimensionsTransformationData {
 	private final Type componentType;
 	private final int totalDimensions;
 	private final List<Dimension> extraDimensionsList;
-	private final Type typeToReplace;
+	private final Consumer<ArrayType> newArrayTypeSetter;
 
-	DimensionsTransformationData(Type componentType, int totalDimensions, List<Dimension> extraDimensionsList,
-			Type typeToReplace) {
+	DimensionsTransformationData(ArrayTypeData arrayTypeData, List<Dimension> extraDimensionsList,
+			Consumer<ArrayType> newArrayTypeSetter) {
 
-		this.componentType = componentType;
-		this.totalDimensions = totalDimensions;
+		this.componentType = arrayTypeData.getComponentType();
+		this.totalDimensions = arrayTypeData.getDimensions();
 		this.extraDimensionsList = extraDimensionsList;
-		this.typeToReplace = typeToReplace;
+		this.newArrayTypeSetter = newArrayTypeSetter;
 
 	}
 
@@ -34,8 +36,7 @@ public class DimensionsTransformationData {
 		return extraDimensionsList;
 	}
 
-	Type getTypeToReplace() {
-		return typeToReplace;
+	Consumer<ArrayType> getNewArrayTypeSetter() {
+		return newArrayTypeSetter;
 	}
-
 }
