@@ -14,11 +14,19 @@ public class DimensionsTransformationData {
 	private final List<Dimension> extraDimensionsList;
 	private final Consumer<ArrayType> newArrayTypeSetter;
 
-	DimensionsTransformationData(ArrayTypeData arrayTypeData, List<Dimension> extraDimensionsList,
+	DimensionsTransformationData(ExtraDimensionsToArrayData extraDimensionsToArrayData,
+			Consumer<ArrayType> newArrayTypeSetter) {
+		this.componentType = extraDimensionsToArrayData.getComponentType();
+		this.totalDimensions = extraDimensionsToArrayData.getTotalDimensions();
+		this.extraDimensionsList = extraDimensionsToArrayData.getExtraDimensionsList();
+		this.newArrayTypeSetter = newArrayTypeSetter;
+	}
+
+	DimensionsTransformationData(Type componentType, int totalDimensions, List<Dimension> extraDimensionsList,
 			Consumer<ArrayType> newArrayTypeSetter) {
 
-		this.componentType = arrayTypeData.getComponentType();
-		this.totalDimensions = arrayTypeData.getDimensions();
+		this.componentType = componentType;
+		this.totalDimensions = totalDimensions;
 		this.extraDimensionsList = extraDimensionsList;
 		this.newArrayTypeSetter = newArrayTypeSetter;
 
