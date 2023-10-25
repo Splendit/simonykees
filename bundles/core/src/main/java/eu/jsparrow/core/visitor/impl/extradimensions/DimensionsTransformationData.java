@@ -22,16 +22,6 @@ public class DimensionsTransformationData {
 		this.newArrayTypeSetter = newArrayTypeSetter;
 	}
 
-	DimensionsTransformationData(Type componentType, int totalDimensions, List<Dimension> extraDimensionsList,
-			Consumer<ArrayType> newArrayTypeSetter) {
-
-		this.componentType = componentType;
-		this.totalDimensions = totalDimensions;
-		this.extraDimensionsList = extraDimensionsList;
-		this.newArrayTypeSetter = newArrayTypeSetter;
-
-	}
-
 	Type getComponentType() {
 		return componentType;
 	}
