@@ -1,10 +1,8 @@
 package eu.jsparrow.core.visitor.impl.extradimensions;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -15,12 +13,12 @@ import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.markers.common.IterateMapEntrySetEvent;
+import eu.jsparrow.core.visitor.impl.extradimensions.ExtraDimensionsAnalyzer.Result;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -31,73 +29,55 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 public class ArrayDesignatorsOnVariableNamesASTVisitor extends AbstractASTRewriteASTVisitor
 		implements IterateMapEntrySetEvent {
 
-	private static Map<VariableDeclaration, ExtraDimensionsToArrayData> collectFragmentsWithSupportedExtraDimensions(
-			Type type, List<? extends VariableDeclaration> variableDeclarations) {
-		Map<VariableDeclaration, ExtraDimensionsToArrayData> map = new HashMap<>();
-		variableDeclarations.forEach(declaration -> {
-			ExtraDimensionsToArrayData.findExtraDimensionsToArrayData(type, declaration)
-				.ifPresent(data -> map.put(declaration, data));
-		});
-		return map;
-	}
-
-	private static boolean isContainingAnnotation(Type type) {
-		ContainingAnnotationVisitor firstAnnotationVisitor = new ContainingAnnotationVisitor();
-		type.accept(firstAnnotationVisitor);
-		return firstAnnotationVisitor.isContainingAnnotation();
-	}
-
 	@Override
 	public boolean visit(VariableDeclarationStatement node) {
-		if (!isContainingAnnotation(node.getType())) {
+
+		Result result = ExtraDimensionsAnalyzer.findResult(node);
+		ExtraDimensionsToArrayData simpleResult = result.getSimpleResult()
+			.orElse(null);
+
+		if (simpleResult != null) {
+			transformDimensions(createTransformationData(simpleResult, node.getType()));
+		} else {
+
+			Map<VariableDeclarationFragment, ExtraDimensionsToArrayData> fragmentsWithExtraDimensions = result
+				.getMultipleResults();
 
 			List<VariableDeclarationFragment> variableDeclarationFragments = ASTNodeUtil
 				.convertToTypedList(node.fragments(), VariableDeclarationFragment.class);
 
-			if (variableDeclarationFragments.size() == 1) {
-				findDimensionsTransformationData(node.getType(), variableDeclarationFragments.get(0))
-					.ifPresent(this::transformDimensions);
+			if (!fragmentsWithExtraDimensions.isEmpty() && node.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
+				ChildListPropertyDescriptor locationInParent = Block.STATEMENTS_PROPERTY;
 
-			} else {
-				if (node.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
-					ChildListPropertyDescriptor locationInParent = Block.STATEMENTS_PROPERTY;
-					Map<VariableDeclaration, ExtraDimensionsToArrayData> fragmentsWithExtraDimensions = collectFragmentsWithSupportedExtraDimensions(
-							node.getType(), variableDeclarationFragments);
+				ListRewrite statementsRewrite = astRewrite.getListRewrite(node.getParent(), locationInParent);
+				Collections.reverse(variableDeclarationFragments);
 
-					if (!fragmentsWithExtraDimensions.isEmpty()) {
+				variableDeclarationFragments.forEach(fragment -> {
 
-						ListRewrite statementsRewrite = astRewrite.getListRewrite(node.getParent(), locationInParent);
-						Collections.reverse(variableDeclarationFragments);
+					VariableDeclarationStatement newVariableDeclarationStatement = (VariableDeclarationStatement) ASTNode
+						.copySubtree(astRewrite.getAST(), node);
+					VariableDeclarationFragment newFragment = (VariableDeclarationFragment) astRewrite
+						.createMoveTarget(fragment);
 
-						variableDeclarationFragments.forEach(fragment -> {
+					newVariableDeclarationStatement.fragments()
+						.clear();
+					ListRewrite variableRewrite = astRewrite.getListRewrite(newVariableDeclarationStatement,
+							VariableDeclarationStatement.FRAGMENTS_PROPERTY);
+					variableRewrite.insertLast(newFragment, null);
 
-							VariableDeclarationStatement newVariableDeclarationStatement = (VariableDeclarationStatement) ASTNode
-								.copySubtree(astRewrite.getAST(), node);
-							VariableDeclarationFragment newFragment = (VariableDeclarationFragment) astRewrite
-								.createMoveTarget(fragment);
-
-							newVariableDeclarationStatement.fragments()
-								.clear();
-							ListRewrite variableRewrite = astRewrite.getListRewrite(newVariableDeclarationStatement,
-									VariableDeclarationStatement.FRAGMENTS_PROPERTY);
-							variableRewrite.insertLast(newFragment, null);
-
-							Consumer<ArrayType> newArrayTypeSetter = newVariableDeclarationStatement::setType;
-							if (fragmentsWithExtraDimensions.containsKey(fragment)) {
-								ExtraDimensionsToArrayData extraDimensionsToArrayData = fragmentsWithExtraDimensions
-									.get(fragment);
-								DimensionsTransformationData dimensionTransformationData = new DimensionsTransformationData(
-										extraDimensionsToArrayData, newArrayTypeSetter);
-								transformDimensions(dimensionTransformationData);
-							}
-							statementsRewrite.insertAfter(newVariableDeclarationStatement, node, null);
-						});
-
-						astRewrite.remove(node, null);
-						onRewrite();
-
+					Consumer<ArrayType> newArrayTypeSetter = newVariableDeclarationStatement::setType;
+					if (fragmentsWithExtraDimensions.containsKey(fragment)) {
+						ExtraDimensionsToArrayData extraDimensionsToArrayData = fragmentsWithExtraDimensions
+							.get(fragment);
+						DimensionsTransformationData dimensionTransformationData = new DimensionsTransformationData(
+								extraDimensionsToArrayData, newArrayTypeSetter);
+						transformDimensions(dimensionTransformationData);
 					}
-				}
+					statementsRewrite.insertAfter(newVariableDeclarationStatement, node, null);
+				});
+
+				astRewrite.remove(node, null);
+				onRewrite();
 			}
 		}
 
@@ -106,41 +86,38 @@ public class ArrayDesignatorsOnVariableNamesASTVisitor extends AbstractASTRewrit
 
 	@Override
 	public boolean visit(FieldDeclaration node) {
-		if (!isContainingAnnotation(node.getType())) {
-			List<VariableDeclarationFragment> variableDeclarationFragments = ASTNodeUtil
-				.convertToTypedList(node.fragments(), VariableDeclarationFragment.class);
-
-			if (variableDeclarationFragments.size() == 1) {
-				findDimensionsTransformationData(node.getType(), variableDeclarationFragments.get(0))
-					.ifPresent(this::transformDimensions);
-			} else {
-				// ----------------------------
-				// Not implemented yet:
-				// ----------------------------
-				// case where within a multiple field declaration one
-				// or more fragments with extra dimensions can be found.
-				// In this case it is necessary to split the multiple variable
-				// declaration statement in simple ones, each containing one
-				// fragment, and then transform the declarations with extra
-				// dimensions.
-			}
+		Result result = ExtraDimensionsAnalyzer.findResult(node);
+		ExtraDimensionsToArrayData simpleResult = result.getSimpleResult()
+			.orElse(null);
+		if (simpleResult != null) {
+			transformDimensions(createTransformationData(simpleResult, node.getType()));
+		} else {
+			// ----------------------------
+			// Not implemented yet:
+			// ----------------------------
+			// case where within a multiple field declaration one
+			// or more fragments with extra dimensions can be found.
+			// In this case it is necessary to split the multiple variable
+			// declaration statement in simple ones, each containing one
+			// fragment, and then transform the declarations with extra
+			// dimensions.
 		}
-
 		return true;
 	}
 
 	@Override
 	public boolean visit(SingleVariableDeclaration node) {
-		if (!isContainingAnnotation(node.getType())) {
-			findDimensionsTransformationData(node.getType(), node).ifPresent(this::transformDimensions);
-		}
+		ExtraDimensionsAnalyzer.findResult(node)
+			.getSimpleResult()
+			.map(result -> createTransformationData(result, node.getType()))
+			.ifPresent(this::transformDimensions);
 		return true;
 	}
 
-	private Optional<DimensionsTransformationData> findDimensionsTransformationData(Type typeToReplace,
-			VariableDeclaration variableDeclaration) {
-		return ExtraDimensionsToArrayData.findExtraDimensionsToArrayData(typeToReplace, variableDeclaration)
-			.map(data -> new DimensionsTransformationData(data, getReplaceTypeByArrayTypeLambda(typeToReplace)));
+	private DimensionsTransformationData createTransformationData(ExtraDimensionsToArrayData extraDimensionsToArrayData,
+			Type typeToReplace) {
+		return new DimensionsTransformationData(extraDimensionsToArrayData,
+				getReplaceTypeByArrayTypeLambda(typeToReplace));
 
 	}
 
