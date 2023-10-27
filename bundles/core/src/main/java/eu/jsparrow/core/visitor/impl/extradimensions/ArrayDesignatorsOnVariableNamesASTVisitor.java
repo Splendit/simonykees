@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -37,7 +38,7 @@ public class ArrayDesignatorsOnVariableNamesASTVisitor extends AbstractASTRewrit
 			.orElse(null);
 
 		if (simpleResult != null) {
-			transformDimensions(createTransformationData(simpleResult, node.getType()));
+			transformDimensions(simpleResult);
 		} else {
 
 			Map<VariableDeclarationFragment, ExtraDimensionsToArrayData> fragmentsWithExtraDimensions = result
@@ -65,22 +66,16 @@ public class ArrayDesignatorsOnVariableNamesASTVisitor extends AbstractASTRewrit
 							VariableDeclarationStatement.FRAGMENTS_PROPERTY);
 					variableRewrite.insertLast(newFragment, null);
 
-					Consumer<ArrayType> newArrayTypeSetter = newVariableDeclarationStatement::setType;
 					if (fragmentsWithExtraDimensions.containsKey(fragment)) {
 						ExtraDimensionsToArrayData extraDimensionsToArrayData = fragmentsWithExtraDimensions
 							.get(fragment);
-						DimensionsTransformationData dimensionTransformationData = new DimensionsTransformationData(
-								extraDimensionsToArrayData, newArrayTypeSetter);
-						transformDimensions(dimensionTransformationData);
+						transformDimensions(extraDimensionsToArrayData, newVariableDeclarationStatement, VariableDeclarationStatement.TYPE_PROPERTY);
 					}
 					statementsRewrite.insertAfter(newVariableDeclarationStatement, node, null);
 				});
-
 				astRewrite.remove(node, null);
-				onRewrite();
 			}
 		}
-
 		return true;
 	}
 
@@ -90,7 +85,7 @@ public class ArrayDesignatorsOnVariableNamesASTVisitor extends AbstractASTRewrit
 		ExtraDimensionsToArrayData simpleResult = result.getSimpleResult()
 			.orElse(null);
 		if (simpleResult != null) {
-			transformDimensions(createTransformationData(simpleResult, node.getType()));
+			transformDimensions(simpleResult);
 		} else {
 			// ----------------------------
 			// Not implemented yet:
@@ -109,31 +104,33 @@ public class ArrayDesignatorsOnVariableNamesASTVisitor extends AbstractASTRewrit
 	public boolean visit(SingleVariableDeclaration node) {
 		ExtraDimensionsAnalyzer.findResult(node)
 			.getSimpleResult()
-			.map(result -> createTransformationData(result, node.getType()))
 			.ifPresent(this::transformDimensions);
 		return true;
 	}
 
-	private DimensionsTransformationData createTransformationData(ExtraDimensionsToArrayData extraDimensionsToArrayData,
-			Type typeToReplace) {
-		return new DimensionsTransformationData(extraDimensionsToArrayData,
-				getReplaceTypeByArrayTypeLambda(typeToReplace));
-
+	private void transformDimensions(ExtraDimensionsToArrayData transformationData, ASTNode newDeclarationSubtreeCopy,
+			ChildPropertyDescriptor typeProperty) {
+		Consumer<ArrayType> newArrayTypeSetter = arrayType -> newDeclarationSubtreeCopy
+			.setStructuralProperty(typeProperty, arrayType);
+		transformDimensions(transformationData, newArrayTypeSetter);
 	}
 
-	private Consumer<ArrayType> getReplaceTypeByArrayTypeLambda(Type typeToReplace) {
-		return newArrayType -> astRewrite.replace(typeToReplace, newArrayType, null);
+	private void transformDimensions(ExtraDimensionsToArrayData transformationData) {
+		Type originalDeclarationType = transformationData.getOriginalDeclarationType();
+		Consumer<ArrayType> newArrayTypeSetter = newArrayType -> astRewrite.replace(originalDeclarationType,
+				newArrayType, null);
+		transformDimensions(transformationData, newArrayTypeSetter);
 	}
 
-	private void transformDimensions(DimensionsTransformationData transformationData) {
+	private void transformDimensions(ExtraDimensionsToArrayData transformationData,
+			Consumer<ArrayType> newArrayTypeSetter) {
 		Type componentType = transformationData.getComponentType();
 		int totalDimensions = transformationData.getTotalDimensions();
 		List<Dimension> extraDimensionsList = transformationData.getExtraDimensionsList();
 		Type newComponentType = (Type) astRewrite.createCopyTarget(componentType);
 		ArrayType newArrayType = astRewrite.getAST()
 			.newArrayType(newComponentType, totalDimensions);
-		transformationData.getNewArrayTypeSetter()
-			.accept(newArrayType);
+		newArrayTypeSetter.accept(newArrayType);
 		extraDimensionsList.forEach(dimension -> astRewrite.remove(dimension, null));
 		onRewrite();
 	}

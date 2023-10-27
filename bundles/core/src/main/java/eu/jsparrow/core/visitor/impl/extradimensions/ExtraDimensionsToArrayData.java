@@ -24,7 +24,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  *
  */
 public class ExtraDimensionsToArrayData {
-
+	private final Type originalDeclarationType;
 	private final Type componentType;
 	private final int totalDimensions;
 	private final List<Dimension> extraDimensionsList;
@@ -45,31 +45,39 @@ public class ExtraDimensionsToArrayData {
 		return extraDimensionsList;
 	}
 
-	static Optional<ExtraDimensionsToArrayData> findExtraDimensionsToArrayData(Type type,
+	static Optional<ExtraDimensionsToArrayData> findExtraDimensionsToArrayData(Type originalDeclarationType,
 			VariableDeclaration variableDeclaration) {
-		
+
 		List<Dimension> supportedExtraDimensions = collectSupportedExtraDimensions(variableDeclaration);
 		int extraDimensions = supportedExtraDimensions.size();
 		if (extraDimensions >= 1) {
-			if (type.isArrayType()) {
-				ArrayType arrayType = (ArrayType) type;
+			if (originalDeclarationType.isArrayType()) {
+				ArrayType arrayType = (ArrayType) originalDeclarationType;
 				Type componentType = arrayType.getElementType();
 				int totalDimensions = extraDimensions + arrayType.dimensions()
 					.size();
 				return Optional
-					.of(new ExtraDimensionsToArrayData(componentType, totalDimensions, supportedExtraDimensions));
+					.of(new ExtraDimensionsToArrayData(originalDeclarationType, componentType, totalDimensions,
+							supportedExtraDimensions));
 			}
 			return Optional
-				.of(new ExtraDimensionsToArrayData(type, extraDimensions, supportedExtraDimensions));
+				.of(new ExtraDimensionsToArrayData(originalDeclarationType, originalDeclarationType, extraDimensions,
+						supportedExtraDimensions));
 		}
 
 		return Optional.empty();
 	}
 
-	private ExtraDimensionsToArrayData(Type componentType, int totalDimensions, List<Dimension> extraDimensionsList) {
+	private ExtraDimensionsToArrayData(Type originalDeclarationType, Type componentType, int totalDimensions,
+			List<Dimension> extraDimensionsList) {
+		this.originalDeclarationType = originalDeclarationType;
 		this.componentType = componentType;
 		this.totalDimensions = totalDimensions;
 		this.extraDimensionsList = extraDimensionsList;
+	}
+
+	Type getOriginalDeclarationType() {
+		return originalDeclarationType;
 	}
 
 	Type getComponentType() {
