@@ -42,6 +42,7 @@ class ArrayDesignatorsOnVariableNamesCascadingASTVisitorTest extends UsesJDTUnit
 				"			int x1, x2[], x3[][];\n" +
 				"		} };\n" +
 				"	}";
+
 		String expected = "" +
 				"	void cascadingLocalVariableDeclarations() {\n" +
 				"\n" +
@@ -70,6 +71,64 @@ class ArrayDesignatorsOnVariableNamesCascadingASTVisitorTest extends UsesJDTUnit
 				"			int[][] x3;\n" +
 				"		} };\n" +
 				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_cascadingFieldDeclarations_shouldTransform() throws Exception {
+		String original = ""
+				+ "		Runnable r = new Runnable() {\n"
+				+ "			int x1 = 0, x2[] = {}, x3[][] = { {}, {} };\n"
+				+ "\n"
+				+ "			@Override\n"
+				+ "			public void run() {\n"
+				+ "			}\n"
+				+ "\n"
+				+ "		}, r2[] = { new Runnable() {\n"
+				+ "			int x1 = 0, x2[] = {}, x3[][] = { {}, {} };\n"
+				+ "\n"
+				+ "			@Override\n"
+				+ "			public void run() {\n"
+				+ "			}\n"
+				+ "\n"
+				+ "		}, new Runnable() {\n"
+				+ "			int x1 = 0, x2[] = {}, x3[][] = { {}, {} };\n"
+				+ "\n"
+				+ "			@Override\n"
+				+ "			public void run() {\n"
+				+ "			}\n"
+				+ "		} };";
+
+		String expected = ""
+				+ "		Runnable r = new Runnable() {\n"
+				+ "			int x1 = 0;\n"
+				+ "			int[] x2 = {};\n"
+				+ "			int[][] x3 = { {}, {} };\n"
+				+ "\n"
+				+ "			@Override\n"
+				+ "			public void run() {\n"
+				+ "			}\n"
+				+ "\n"
+				+ "		};"
+				+ "		Runnable[] r2 = { new Runnable() {\n"
+				+ "			int x1 = 0;\n"
+				+ "			int[] x2 = {};\n"
+				+ "			int[][] x3 = { {}, {} };\n"
+				+ "\n"
+				+ "			@Override\n"
+				+ "			public void run() {\n"
+				+ "			}\n"
+				+ "\n"
+				+ "		}, new Runnable() {\n"
+				+ "			int x1 = 0;\n"
+				+ "			int[] x2 = {};\n"
+				+ "			int[][] x3 = { {}, {} };\n"
+				+ "\n"
+				+ "			@Override\n"
+				+ "			public void run() {\n"
+				+ "			}\n"
+				+ "		} };";
 
 		assertChange(original, expected);
 	}
