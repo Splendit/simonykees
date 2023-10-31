@@ -15,14 +15,14 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 public class MultipleVariableDeclarationData {
-	private final ASTNode multipleDeclaration;
+	private final ASTNode declaration;
 	private final List<VariableDeclarationFragment> variableDeclarationFragments;
 	private final ChildListPropertyDescriptor locationInParent;
 	private final ChildListPropertyDescriptor fragmentsProperty;
 	private final ChildPropertyDescriptor typeProperty;
-	private final Supplier<ASTNode> copyWithoutFragmentsSupplyer;
+	private final Supplier<ASTNode> cloneDeclarationWithoutFragmentsLambda;
 
-	Optional<MultipleVariableDeclarationData> findMultipleVariableDeclarationData(
+	static Optional<MultipleVariableDeclarationData> findMultipleVariableDeclarationData(
 			VariableDeclarationStatement variableDeclarationStatement) {
 		if (variableDeclarationStatement.fragments()
 			.size() <= 1) {
@@ -34,34 +34,33 @@ public class MultipleVariableDeclarationData {
 		return Optional
 			.of(new MultipleVariableDeclarationData(variableDeclarationStatement, Block.STATEMENTS_PROPERTY));
 	}
-
+	
 	protected MultipleVariableDeclarationData(VariableDeclarationStatement multipleDeclaration,
 			ChildListPropertyDescriptor locationInParent) {
-		this.multipleDeclaration = multipleDeclaration;
+		this.declaration = multipleDeclaration;
 		this.variableDeclarationFragments = ASTNodeUtil.convertToTypedList(multipleDeclaration.fragments(),
 				VariableDeclarationFragment.class);
 		this.locationInParent = locationInParent;
 		this.fragmentsProperty = VariableDeclarationStatement.FRAGMENTS_PROPERTY;
 		this.typeProperty = VariableDeclarationStatement.TYPE_PROPERTY;
-		this.copyWithoutFragmentsSupplyer = () -> {
+		this.cloneDeclarationWithoutFragmentsLambda = () -> {
 			VariableDeclarationStatement newVariableDeclarationStatement = (VariableDeclarationStatement) ASTNode
 				.copySubtree(multipleDeclaration.getAST(), multipleDeclaration);
 			newVariableDeclarationStatement.fragments()
 				.clear();
 			return newVariableDeclarationStatement;
 		};
-
 	}
 
 	protected MultipleVariableDeclarationData(FieldDeclaration multipleDeclaration,
 			ChildListPropertyDescriptor locationInParent) {
-		this.multipleDeclaration = multipleDeclaration;
+		this.declaration = multipleDeclaration;
 		this.variableDeclarationFragments = ASTNodeUtil.convertToTypedList(multipleDeclaration.fragments(),
 				VariableDeclarationFragment.class);
 		this.locationInParent = locationInParent;
 		this.fragmentsProperty = FieldDeclaration.FRAGMENTS_PROPERTY;
 		this.typeProperty = FieldDeclaration.TYPE_PROPERTY;
-		this.copyWithoutFragmentsSupplyer = () -> {
+		this.cloneDeclarationWithoutFragmentsLambda = () -> {
 			FieldDeclaration newFieldDeclaration = (FieldDeclaration) ASTNode
 				.copySubtree(multipleDeclaration.getAST(), multipleDeclaration);
 			newFieldDeclaration.fragments()
@@ -71,8 +70,8 @@ public class MultipleVariableDeclarationData {
 
 	}
 
-	ASTNode getMultipleDeclaration() {
-		return multipleDeclaration;
+	ASTNode getDeclaration() {
+		return declaration;
 	}
 
 	List<VariableDeclarationFragment> getVariableDeclarationFragments() {
@@ -90,9 +89,8 @@ public class MultipleVariableDeclarationData {
 	ChildPropertyDescriptor getTypeProperty() {
 		return typeProperty;
 	}
-
-	Supplier<ASTNode> getCopyWithoutFragmentsSupplyer() {
-		return copyWithoutFragmentsSupplyer;
+	
+	ASTNode cloneDeclarationWithoutFragments() {
+		return cloneDeclarationWithoutFragmentsLambda.get();
 	}
-
 }
