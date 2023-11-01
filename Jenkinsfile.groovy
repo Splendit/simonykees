@@ -316,7 +316,7 @@ void buildEclipsePlugin(Profile profile, String timestamp) {
 
 void deployEclipsePlugin(Profile profile, String timestamp) {
 
-    def mvnCommand = "clean deploy -DskipTests -B ${profile.mvnOptions(timestamp)}"
+    def mvnCommand = "clean deploy -DskipTests -X -B ${profile.mvnOptions(timestamp)}"
 
     def stageName = "Eclipse Deploy: ${profile.formattedName()}"
 
