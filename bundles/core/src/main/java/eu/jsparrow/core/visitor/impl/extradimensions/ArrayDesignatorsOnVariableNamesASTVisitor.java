@@ -38,8 +38,7 @@ public class ArrayDesignatorsOnVariableNamesASTVisitor extends AbstractASTRewrit
 			.orElse(null);
 
 		if (simpleResult != null) {
-			transformDimensions(simpleResult);
-
+			transformDimensions(simpleResult, createLambdaToReplaceOriginalType(node.getType()));
 		} else {
 			result.getMultipleResult()
 				.ifPresent(multipleResult -> transformMultiple(node, multipleResult));
@@ -53,7 +52,7 @@ public class ArrayDesignatorsOnVariableNamesASTVisitor extends AbstractASTRewrit
 		ExtraDimensionsToArrayData simpleResult = result.getSimpleResult()
 			.orElse(null);
 		if (simpleResult != null) {
-			transformDimensions(simpleResult);
+			transformDimensions(simpleResult, createLambdaToReplaceOriginalType(node.getType()));
 		} else {
 			result.getMultipleResult()
 				.ifPresent(multipleResult -> transformMultiple(node, multipleResult));
@@ -63,9 +62,17 @@ public class ArrayDesignatorsOnVariableNamesASTVisitor extends AbstractASTRewrit
 
 	@Override
 	public boolean visit(SingleVariableDeclaration node) {
-		ExtraDimensionsAnalyzer.analyze(node)
-			.ifPresent(this::transformDimensions);
+
+		ExtraDimensionsToArrayData simpleResult = ExtraDimensionsAnalyzer.analyze(node)
+			.orElse(null);
+		if (simpleResult != null) {
+			transformDimensions(simpleResult, createLambdaToReplaceOriginalType(node.getType()));
+		}
 		return true;
+	}
+
+	private Consumer<ArrayType> createLambdaToReplaceOriginalType(Type type) {
+		return newArrayType -> astRewrite.replace(type, newArrayType, null);
 	}
 
 	private void transformMultiple(ASTNode multipleDeclaration, MultipleResult multipleResult) {
@@ -94,26 +101,13 @@ public class ArrayDesignatorsOnVariableNamesASTVisitor extends AbstractASTRewrit
 					.get(fragment);
 
 				ChildPropertyDescriptor typeProperty = multipleResult.getTypeProperty();
-				transformDimensions(extraDimensionsToArrayData, newVariableDeclarationStatement,
-						typeProperty);
+				Consumer<ArrayType> newArrayTypeSetter = arrayType -> newVariableDeclarationStatement
+					.setStructuralProperty(typeProperty, arrayType);
+				transformDimensions(extraDimensionsToArrayData, newArrayTypeSetter);
 			}
 			statementsRewrite.insertAfter(newVariableDeclarationStatement, multipleDeclaration, null);
 		});
 		astRewrite.remove(multipleDeclaration, null);
-	}
-
-	private void transformDimensions(ExtraDimensionsToArrayData transformationData, ASTNode newDeclarationSubtreeCopy,
-			ChildPropertyDescriptor typeProperty) {
-		Consumer<ArrayType> newArrayTypeSetter = arrayType -> newDeclarationSubtreeCopy
-			.setStructuralProperty(typeProperty, arrayType);
-		transformDimensions(transformationData, newArrayTypeSetter);
-	}
-
-	private void transformDimensions(ExtraDimensionsToArrayData transformationData) {
-		Type originalDeclarationType = transformationData.getOriginalDeclarationType();
-		Consumer<ArrayType> newArrayTypeSetter = newArrayType -> astRewrite.replace(originalDeclarationType,
-				newArrayType, null);
-		transformDimensions(transformationData, newArrayTypeSetter);
 	}
 
 	private void transformDimensions(ExtraDimensionsToArrayData transformationData,

@@ -24,7 +24,6 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  *
  */
 public class ExtraDimensionsToArrayData {
-	private final Type originalDeclarationType;
 	private final Type componentType;
 	private final int totalDimensions;
 	private final List<Dimension> extraDimensionsList;
@@ -57,27 +56,22 @@ public class ExtraDimensionsToArrayData {
 				int totalDimensions = extraDimensions + arrayType.dimensions()
 					.size();
 				return Optional
-					.of(new ExtraDimensionsToArrayData(originalDeclarationType, componentType, totalDimensions,
+					.of(new ExtraDimensionsToArrayData(componentType, totalDimensions,
 							supportedExtraDimensions));
 			}
 			return Optional
-				.of(new ExtraDimensionsToArrayData(originalDeclarationType, originalDeclarationType, extraDimensions,
+				.of(new ExtraDimensionsToArrayData(originalDeclarationType, extraDimensions,
 						supportedExtraDimensions));
 		}
 
 		return Optional.empty();
 	}
 
-	private ExtraDimensionsToArrayData(Type originalDeclarationType, Type componentType, int totalDimensions,
+	private ExtraDimensionsToArrayData(Type componentType, int totalDimensions,
 			List<Dimension> extraDimensionsList) {
-		this.originalDeclarationType = originalDeclarationType;
 		this.componentType = componentType;
 		this.totalDimensions = totalDimensions;
 		this.extraDimensionsList = extraDimensionsList;
-	}
-
-	Type getOriginalDeclarationType() {
-		return originalDeclarationType;
 	}
 
 	Type getComponentType() {
