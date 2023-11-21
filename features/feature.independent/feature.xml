@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="eu.jsparrow.standalone.feature"
+      id="eu.jsparrow.independent.feature"
       label="jSparrow"
       version="4.19.0.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
@@ -52,7 +52,7 @@
          unpack="false"/>
 
    <plugin
-         id="eu.jsparrow.standalone"
+         id="eu.jsparrow.independent"
          download-size="0"
          install-size="0"
          version="0.0.0"

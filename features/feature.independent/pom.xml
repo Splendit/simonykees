@@ -8,9 +8,9 @@
 		<version>4.19.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>eu.jsparrow.standalone.feature</artifactId>
+	<artifactId>eu.jsparrow.independent.feature</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<name>jSparrow :: standalone feature</name>
+	<name>jSparrow :: independent feature</name>
 	<description>jSparrow Feature for headless run</description>
 
 	<scm>
