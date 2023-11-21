@@ -9,16 +9,16 @@
 		<version>4.19.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>eu.jsparrow.standalone</artifactId>
+	<artifactId>eu.jsparrow.independent</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<name>jSparrow :: standalone</name>
+	<name>jSparrow :: independent</name>
 	<description>jSparrow Plugin for headless start</description>
 
 	<properties>
 		<snakeyaml.version>1.23</snakeyaml.version>
 		<jackson.version>2.12.0</jackson.version>
-		<standalone.properties.destinationFile>src/main/resources/standalone.properties</standalone.properties.destinationFile>
-		<standalone.properties.sourceFile></standalone.properties.sourceFile>
+		<independent.properties.destinationFile>src/main/resources/independent.properties</independent.properties.destinationFile>
+		<independent.properties.sourceFile></independent.properties.sourceFile>
 		<proguard.extra.options>
 			-libraryjars
 			${project.basedir}/../license.api/target/eu.jsparrow.license.api-${project.version}_proguard_base.jar
@@ -38,7 +38,7 @@
 			<resource>
 				<directory>src/main/resources</directory>
 				<includes>
-					<include>standalone.properties</include>
+					<include>independent.properties</include>
 					<include>banner.txt</include>
 				</includes>
 			</resource>
@@ -87,8 +87,8 @@
 						</goals>
 						<configuration>
 							<overWrite>true</overWrite>
-							<sourceFile>${standalone.properties.sourceFile}</sourceFile>
-							<destinationFile>${standalone.properties.destinationFile}</destinationFile>
+							<sourceFile>${independent.properties.sourceFile}</sourceFile>
+							<destinationFile>${independent.properties.destinationFile}</destinationFile>
 						</configuration>
 					</execution>
 				</executions>
@@ -177,7 +177,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<standalone.properties.sourceFile>src/main/resources/standalone.test.properties</standalone.properties.sourceFile>
+				<independent.properties.sourceFile>src/main/resources/independent.test.properties</independent.properties.sourceFile>
 			</properties>
 
 		</profile>
@@ -189,7 +189,7 @@
 				</property>
 			</activation>
 			<properties>
-				<standalone.properties.sourceFile>src/main/resources/standalone.prod.properties</standalone.properties.sourceFile>
+				<independent.properties.sourceFile>src/main/resources/independent.prod.properties</independent.properties.sourceFile>
 			</properties>
 		</profile>
 

@@ -9,7 +9,7 @@
         thread="main"
         visible="true">
      <run
-           class="eu.jsparrow.standalone.Activator">
+           class="eu.jsparrow.independent.Activator">
      </run>
   </application>
 </extension>
