@@ -42,6 +42,9 @@
 		<!-- standalone -->
 		<module>standalone</module>
 		<module>crypto</module>
+		
+		<!-- independent -->
+		<module>independent</module>
 	</modules>
 
 	<build>
