@@ -54,7 +54,7 @@ public class BundleStarter {
 
 		startEquinoxFramework(configuration);
 
-		List<Bundle> bundles = loadBundles();
+		List<Bundle> bundles = installBundles();
 		startBundles(bundles);
 
 		stopEquinoxFramework();
@@ -143,7 +143,7 @@ public class BundleStarter {
 	 * @return a list of the installed bundles
 	 * @throws BundleException
 	 */
-	protected List<Bundle> loadBundles() throws BundleException {
+	protected List<Bundle> installBundles() throws BundleException {
 //		log.debug(Messages.BundleStarter_loadOsgiBundles);
 
 		bundleContext = getBundleContext();
