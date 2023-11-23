@@ -22,9 +22,9 @@ public class BundleStarter {
 	
 
 	private static final String JSPARROW_BUNDLE_PREFIX = "eu.jsparrow."; //$NON-NLS-1$
-	protected static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.independent"; //$NON-NLS-1$
-	protected static final String ORG_APACHE_FELIX_SCR = "org.apache.felix.scr"; //$NON-NLS-1$
-	private static final String JSPARROW_MANIFEST = "manifest.independent"; //$NON-NLS-1$
+	private static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.independent"; //$NON-NLS-1$
+	private static final String ORG_APACHE_FELIX_SCR = "org.apache.felix.scr"; //$NON-NLS-1$
+	static final String JSPARROW_MANIFEST = "manifest.independent"; //$NON-NLS-1$
 
 	private Framework framework;
 	private BundleContext bundleContext = null;
