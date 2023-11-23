@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.stream.Collectors;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -16,10 +17,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
-
-
 public class BundleStarter {
-	
 
 	private static final String JSPARROW_BUNDLE_PREFIX = "eu.jsparrow."; //$NON-NLS-1$
 	private static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.independent"; //$NON-NLS-1$
@@ -29,15 +27,8 @@ public class BundleStarter {
 	private Framework framework;
 	private BundleContext bundleContext = null;
 
-
 	private boolean standaloneStarted = false;
 	private long standaloneBundleID;
-
-	public BundleStarter() {
-
-
-		
-	}
 
 	/**
 	 * Starts the equinox framework with the given configuration, starts the
@@ -69,7 +60,7 @@ public class BundleStarter {
 	 *             if the framework cannot be started.
 	 */
 	private void startEquinoxFramework(Map<String, String> configuration) throws BundleException {
-		//log.debug(Messages.BundleStarter_startEquinox);
+		// log.debug(Messages.BundleStarter_startEquinox);
 
 		ServiceLoader<FrameworkFactory> ffs = ServiceLoader.load(FrameworkFactory.class);
 		FrameworkFactory frameworkFactory = ffs.iterator()
@@ -89,28 +80,34 @@ public class BundleStarter {
 	protected void startBundles(List<Bundle> bundles) {
 		startApacheFelixSCR(bundles);
 
-		bundles.stream()
+		List<Bundle> jSparrowBundles = bundles.stream()
 			.filter(bundle -> bundle.getHeaders()
 				.get(Constants.FRAGMENT_HOST) == null)
 			.filter(bundle -> bundle.getSymbolicName() != null)
 			.filter(bundle -> bundle.getSymbolicName()
 				.startsWith(JSPARROW_BUNDLE_PREFIX))
+			.collect(Collectors.toList());
+
+		jSparrowBundles.stream()
+			.filter(bundle -> !bundle.getSymbolicName()
+				.startsWith(STANDALONE_BUNDLE_NAME))
 			.forEach(bundle -> {
 				try {
-//					String loggerInfo = NLS.bind(Messages.BundleStarter_startingBundle, bundle.getSymbolicName(),
-//							bundle.getState());
-//					log.debug(loggerInfo);
-
 					bundle.start();
-					if (bundle.getSymbolicName()
-						.startsWith(STANDALONE_BUNDLE_NAME)) {
-						standaloneBundleID = bundle.getBundleId();
-						standaloneStarted = true;
-					}
-				} catch (Exception e) {
+				} catch (BundleException e) {
 					e.printStackTrace();
-//					log.debug(e.getMessage(), e);
-//					log.error(e.getMessage());
+				}
+			});
+
+		jSparrowBundles.stream()
+			.filter(bundle -> bundle.getSymbolicName()
+				.startsWith(STANDALONE_BUNDLE_NAME))
+			.findFirst()
+			.ifPresent(bundle -> {
+				try {
+					bundle.start();
+				} catch (BundleException e) {
+					e.printStackTrace();
 				}
 			});
 	}
@@ -125,12 +122,14 @@ public class BundleStarter {
 			String symbolicName = bundle.getSymbolicName();
 			if (symbolicName.startsWith(ORG_APACHE_FELIX_SCR)) {
 				try {
-					String message = String.format("Starting bundle %s:%s [%d]", symbolicName, bundle.getVersion(), bundle.getState()); //$NON-NLS-1$
-//					log.debug(message);
+					// String message = String.format("Starting bundle %s:%s
+					// [%d]", symbolicName, bundle.getVersion(), //$NON-NLS-1$
+					// bundle.getState());
+					// log.debug(message);
 					bundle.start();
 				} catch (BundleException e) {
-//					log.debug(e.getMessage(), e);
-//					log.error(e.getMessage());
+					// log.debug(e.getMessage(), e);
+					// log.error(e.getMessage());
 				}
 			}
 		}
@@ -144,7 +143,7 @@ public class BundleStarter {
 	 * @throws BundleException
 	 */
 	protected List<Bundle> installBundles() throws BundleException {
-//		log.debug(Messages.BundleStarter_loadOsgiBundles);
+		// log.debug(Messages.BundleStarter_loadOsgiBundles);
 
 		bundleContext = getBundleContext();
 		final List<Bundle> bundles = new ArrayList<>();
@@ -163,12 +162,13 @@ public class BundleStarter {
 					}
 				}
 			} else {
-//				throw new MojoExecutionException(
-//						"The standalone manifest file could not be found. Please read the readme-file."); //$NON-NLS-1$
+				// throw new MojoExecutionException(
+				// "The standalone manifest file could not be found. Please read
+				// the readme-file."); //$NON-NLS-1$
 			}
 		} catch (IOException e) {
-//			log.debug(e.getMessage(), e);
-//			log.error(e.getMessage());
+			// log.debug(e.getMessage(), e);
+			// log.error(e.getMessage());
 		}
 
 		return bundles;
@@ -186,11 +186,11 @@ public class BundleStarter {
 		framework.waitForStop(0);
 		standaloneStarted = false;
 
-//		log.debug(Messages.BundleStarter_equinoxStopped);
+		// log.debug(Messages.BundleStarter_equinoxStopped);
 
 		String exitMessage = bundleContext.getProperty("eu.jsparrow.standalone.exit.message"); //$NON-NLS-1$
 		if (exitMessage != null && !exitMessage.isEmpty()) {
-//			throw new MojoExecutionException(exitMessage);
+			// throw new MojoExecutionException(exitMessage);
 		}
 	}
 
@@ -208,8 +208,8 @@ public class BundleStarter {
 
 				this.stopEquinoxFramework();
 			} catch (BundleException | InterruptedException e) {
-//				log.debug(e.getMessage(), e);
-//				log.error(e.getMessage());
+				// log.debug(e.getMessage(), e);
+				// log.error(e.getMessage());
 			}
 		}
 	}
