@@ -45,7 +45,7 @@ public class ExcludedModules {
 			return Collections.emptyList();
 		}
 
-		if (rootProjectConfig.isEmpty()) {
+		if (rootProjectConfig == null || rootProjectConfig.isEmpty()) {
 			logInfo = "Cannot find excluded modules. The root yml file path is not provided"; //$NON-NLS-1$
 			logger.debug(logInfo);
 			return Collections.emptyList();
