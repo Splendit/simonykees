@@ -19,27 +19,27 @@ import eu.jsparrow.independent.util.ProxyUtils;
 import eu.jsparrow.logging.LoggingUtil;
 
 
-public class JSparrowIndependentDelegate {
+public class JSparrowIndependentHandler {
 	private static final String LIST_RULES_SELECTED_ID_KEY = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
-	private static final Logger logger = LoggerFactory.getLogger(JSparrowIndependentDelegate.class);
-	private static JSparrowIndependentDelegate instance;
+	private static final Logger logger = LoggerFactory.getLogger(JSparrowIndependentHandler.class);
+	private static JSparrowIndependentHandler instance;
 
 	private final RefactoringInvoker refactoringInvoker;
 	private final ListRulesUtil listRulesUtil;
 	private StandaloneLicenseUtilService licenseService;
 
-	static JSparrowIndependentDelegate getInstance() {
+	static JSparrowIndependentHandler getInstance() {
 		return instance;
 	}
 
 	static void start() throws Exception {
 		if (instance != null) {
-			throw new IllegalStateException(JSparrowIndependentDelegate.class.getName() + " has already been started."); //$NON-NLS-1$
+			throw new IllegalStateException(JSparrowIndependentHandler.class.getName() + " has already been started."); //$NON-NLS-1$
 		}
 
 		BundleContext context = Activator.getContext();
@@ -47,7 +47,7 @@ public class JSparrowIndependentDelegate {
 			throw new IllegalStateException(Activator.class.getName() + " has not been started."); //$NON-NLS-1$
 		}
 
-		instance = new JSparrowIndependentDelegate();
+		instance = new JSparrowIndependentHandler();
 		instance.doStart(context);
 	}
 
@@ -58,7 +58,7 @@ public class JSparrowIndependentDelegate {
 		}
 	}
 
-	private JSparrowIndependentDelegate() {
+	private JSparrowIndependentHandler() {
 		this.refactoringInvoker = new RefactoringInvoker();
 		this.listRulesUtil = new ListRulesUtil();
 	}

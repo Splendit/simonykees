@@ -29,20 +29,20 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		logger.info(Messages.Activator_start);
 		Activator.context = context;
-		JSparrowIndependentDelegate.start();
+		JSparrowIndependentHandler.start();
 	}
 
 	@Override
 	public void stop(BundleContext context) {
-		JSparrowIndependentDelegate.stop(context);
+		JSparrowIndependentHandler.stop(context);
 		Activator.context = null;
 		logger.info(Messages.Activator_stop);
 	}
 
-	private JSparrowIndependentDelegate getNonNullableJSparrowHandler() {
-		JSparrowIndependentDelegate handler = JSparrowIndependentDelegate.getInstance();
+	private JSparrowIndependentHandler getNonNullableJSparrowHandler() {
+		JSparrowIndependentHandler handler = JSparrowIndependentHandler.getInstance();
 		if (handler == null) {
-			throw new IllegalStateException(JSparrowIndependentDelegate.class.getName() + " has not been started."); //$NON-NLS-1$
+			throw new IllegalStateException(JSparrowIndependentHandler.class.getName() + " has not been started."); //$NON-NLS-1$
 		}
 		return handler;
 	}
