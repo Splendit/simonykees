@@ -37,10 +37,16 @@ public class Activator implements BundleActivator {
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
+	private static BundleContext context;
+
 	private RefactoringInvoker refactoringInvoker;
 	ListRulesUtil listRulesUtil;
 
 	StandaloneLicenseUtilService licenseService;
+
+	static BundleContext getContext() {
+		return context;
+	}
 
 	public Activator() {
 		this(new RefactoringInvoker(), new ListRulesUtil());
@@ -53,6 +59,7 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
+		Activator.context = context;
 
 		boolean debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
 		LoggingUtil.configureLogger(debugEnabled);
@@ -105,7 +112,7 @@ public class Activator implements BundleActivator {
 		} finally {
 			cleanUp(context);
 		}
-
+		Activator.context = null;
 		logger.info(Messages.Activator_stop);
 	}
 
@@ -160,7 +167,8 @@ public class Activator implements BundleActivator {
 	 * Contrary to {@link Activator#refactor(BundleContext)}, this method does
 	 * not stop JMP if the license is invalid.
 	 * 
-	 * @param context all the settings etc.
+	 * @param context
+	 *            all the settings etc.
 	 */
 	private void runInReportMode(BundleContext context) {
 		try {
