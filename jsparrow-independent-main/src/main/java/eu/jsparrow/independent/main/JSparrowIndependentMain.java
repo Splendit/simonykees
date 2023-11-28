@@ -20,10 +20,10 @@ public class JSparrowIndependentMain {
 
 		final String tempWorkspacePath = "/home/gregor/minimal-sample-projects/temp-workspace/" + val;
 
-		configuration.put("debug.enabled", "true");
-		configuration.put("STANDALONE.MODE", "REFACTOR");
-		configuration.put("LICENSE", "IT43A7PPH");
-		configuration.put("ROOT.PROJECT.BASE.PATH", SAMPLE_PROJECT_PATH);
+		// configuration.put("debug.enabled", "true");
+		// configuration.put("STANDALONE.MODE", "REFACTOR");
+		// configuration.put("LICENSE", "IT43A7PPH");
+		// configuration.put("ROOT.PROJECT.BASE.PATH", SAMPLE_PROJECT_PATH);
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, "target/bundlecache");
 		configuration.put("DEFAULT.CONFIG", "true");

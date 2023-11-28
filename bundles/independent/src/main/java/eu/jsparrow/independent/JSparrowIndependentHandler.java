@@ -1,5 +1,10 @@
 package eu.jsparrow.independent;
 
+import static eu.jsparrow.independent.ContextPropertyHelper.DEBUG_ENABLED;
+import static eu.jsparrow.independent.ContextPropertyHelper.LICENSE_KEY;
+import static eu.jsparrow.independent.ContextPropertyHelper.STANDALONE_MODE_KEY;
+import static eu.jsparrow.independent.ContextPropertyHelper.getProperty;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,9 +26,8 @@ import eu.jsparrow.logging.LoggingUtil;
 
 public class JSparrowIndependentHandler {
 	private static final String LIST_RULES_SELECTED_ID_KEY = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
-	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
-	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
-	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
+	
+
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
 	private static final Logger logger = LoggerFactory.getLogger(JSparrowIndependentHandler.class);
@@ -64,7 +68,7 @@ public class JSparrowIndependentHandler {
 	}
 
 	private void doStart(BundleContext context) throws Exception {
-		boolean debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
+		boolean debugEnabled = Boolean.parseBoolean(getProperty(DEBUG_ENABLED));
 		LoggingUtil.configureLogger(debugEnabled);
 
 		registerShutdownHook(context);
@@ -111,7 +115,7 @@ public class JSparrowIndependentHandler {
 	}
 
 	private StandaloneMode parseMode(BundleContext context) {
-		String value = context.getProperty(STANDALONE_MODE_KEY);
+		String value = getProperty(STANDALONE_MODE_KEY);
 		return StandaloneMode.fromString(value);
 	}
 
@@ -181,7 +185,7 @@ public class JSparrowIndependentHandler {
 		if (yamlStandaloneConfig != null) {
 			licenseKey = yamlStandaloneConfig.getKey();
 		}
-		String cmdlineLicenseKey = context.getProperty(LICENSE_KEY);
+		String cmdlineLicenseKey = getProperty(LICENSE_KEY);
 		if (cmdlineLicenseKey != null) {
 			logger.info(Messages.RefactoringInvoker_OverridingConfigWithCommandLine);
 			licenseKey = cmdlineLicenseKey;
