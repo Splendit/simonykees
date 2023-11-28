@@ -4,11 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
-import java.nio.file.SimpleFileVisitor;
 import java.nio.file.Path;
-
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -33,6 +32,9 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.http.JsonUtil;
+/*
+ * TODO: Clarify problem of discouraged access.
+ */
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
@@ -270,6 +272,10 @@ public class RefactoringInvoker {
 		boolean computedStatistics = standaloneConfigs.stream()
 			.map(StandaloneConfig::getStatisticsData)
 			.filter(Objects::nonNull)
+			/*
+			 * TODO: Clarify problem of discouraged access on
+			 * StandaloneStatisticsData
+			 */
 			.map(StandaloneStatisticsData::getMetricData)
 			.anyMatch(Optional::isPresent);
 
@@ -282,6 +288,10 @@ public class RefactoringInvoker {
 		Map<String, JsparrowRuleData> rulesData = new HashMap<>();
 
 		for (StandaloneConfig config : standaloneConfigs) {
+			/*
+			 * TODO: Clarify problem of discouraged access on
+			 * config.getStatisticsData().getMetricData()
+			 */
 			JsparrowMetric metrics = config.getStatisticsData()
 				.getMetricData()
 				.orElse(null);
@@ -409,7 +419,16 @@ public class RefactoringInvoker {
 		File directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
 
 		if (directory.exists() || directory.mkdirs()) {
-			System.setProperty(USER_DIR, directory.getAbsolutePath());
+			String directoryAbsolutePath = directory.getAbsolutePath();
+			/*
+			 * Local variable to debug
+			 */
+			String user_dir_bak = System.getProperty(USER_DIR);
+			/*
+			 * TODO: clarify whether or not a change of the property USER_DIR is
+			 * indicated at this position
+			 */
+			System.setProperty(USER_DIR, directoryAbsolutePath);
 		}
 	}
 
