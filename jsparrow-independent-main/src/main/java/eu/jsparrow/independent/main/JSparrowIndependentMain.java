@@ -7,7 +7,6 @@ import java.util.Map;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
-
 @SuppressWarnings("nls")
 public class JSparrowIndependentMain {
 
@@ -27,7 +26,9 @@ public class JSparrowIndependentMain {
 		configuration.put("ROOT.PROJECT.BASE.PATH", SAMPLE_PROJECT_PATH);
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, "target/bundlecache");
-		
+		configuration.put("DEFAULT.CONFIG", "true");
+		configuration.put("SELECTED.SOURCES", "**");
+
 		configuration.put("osgi.instance.area.default", tempWorkspacePath);
 		System.setProperty("user.dir", tempWorkspacePath);
 
