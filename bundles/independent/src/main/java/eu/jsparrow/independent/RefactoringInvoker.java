@@ -1,6 +1,5 @@
 package eu.jsparrow.independent;
 
-import static eu.jsparrow.independent.ContextPropertyHelper.ROOT_PROJECT_BASE_PATH;
 import static eu.jsparrow.independent.ContextPropertyHelper.SELECTED_SOURCES;
 import static eu.jsparrow.independent.ContextPropertyHelper.USE_DEFAULT_CONFIGURATION;
 import static eu.jsparrow.independent.ContextPropertyHelper.getProperty;
@@ -76,6 +75,7 @@ public class RefactoringInvoker {
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$	
 	private static final String ROOT_CONFIG_PATH = "ROOT.CONFIG.PATH"; //$NON-NLS-1$
+	private static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_OVERRIDE = "CONFIG.FILE.OVERRIDE"; //$NON-NLS-1$
 	private static final String FORMATTING_FILE = "formatting.file.path"; //$NON-NLS-1$
 	private static final String REPORT_DESTIATION_PATH = "REPORT.DESTINATION.PATH"; //$NON-NLS-1$	
@@ -446,7 +446,7 @@ public class RefactoringInvoker {
 				workspaceRoot.canRead(), workspaceRoot.canWrite(), workspaceRoot.canExecute());
 		logWorkSpaceContent(workspaceRoot);
 
-		String folder = getProperty(ROOT_PROJECT_BASE_PATH);
+		String folder = context.getProperty(ROOT_PROJECT_BASE_PATH);
 
 		List<IJavaProject> imported;
 

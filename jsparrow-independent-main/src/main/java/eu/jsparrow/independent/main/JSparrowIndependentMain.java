@@ -10,6 +10,8 @@ import org.osgi.framework.Constants;
 @SuppressWarnings("nls")
 public class JSparrowIndependentMain {
 
+	private static final String TRUE_AS_STRING = Boolean.TRUE.toString();
+	public static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH";
 	public static final String SAMPLE_PROJECT_PATH = "/home/gregor/minimal-sample-projects/simple-maven-projects/example-project";
 
 	public static void main(String[] args) {
@@ -20,18 +22,22 @@ public class JSparrowIndependentMain {
 
 		final String tempWorkspacePath = "/home/gregor/minimal-sample-projects/temp-workspace/" + val;
 
-		// configuration.put("debug.enabled", "true");
-		// configuration.put("STANDALONE.MODE", "REFACTOR");
-		// configuration.put("LICENSE", "IT43A7PPH");
-		// configuration.put("ROOT.PROJECT.BASE.PATH", SAMPLE_PROJECT_PATH);
+		configuration.put("context.containing.jsparrow.properties", TRUE_AS_STRING);
+		configuration.put("debug.enabled", TRUE_AS_STRING);
+		configuration.put("STANDALONE.MODE", "REFACTOR");
+		configuration.put("LICENSE", "IT43A7PPH");
+		configuration.put("DEFAULT.CONFIG", TRUE_AS_STRING);
+		configuration.put("SELECTED.SOURCES", "**");
+
+				
+		configuration.put(ROOT_PROJECT_BASE_PATH, SAMPLE_PROJECT_PATH);
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, "target/bundlecache");
-		// configuration.put("DEFAULT.CONFIG", "true");
-		// configuration.put("SELECTED.SOURCES", "**");
 
 		configuration.put("osgi.instance.area.default", tempWorkspacePath);
+		System.setProperty("user.dir", tempWorkspacePath);
 		
-		configuration.put("start.jsparrow.independent.handler", Boolean.TRUE.toString());
+		configuration.put("start.jsparrow.independent.handler", TRUE_AS_STRING);
 
 		/*
 		 * This is solution B from this article:

@@ -49,11 +49,6 @@ public class JSparrowIndependentHandler {
 			throw new IllegalStateException(Activator.class.getName() + " has not been started."); //$NON-NLS-1$
 		}
 		String osgi_instance_area_default = context.getProperty("osgi.instance.area.default"); //$NON-NLS-1$
-		// osgi_instance_area_default is expected to store the value of
-		// tempWorkspacePath which is assigned in the stand alone application
-		// "JSparrowIndependentMain" in the package
-		// "eu.jsparrow.independent.main"
-		System.setProperty("user.dir", osgi_instance_area_default); //$NON-NLS-1$
 		instance = new JSparrowIndependentHandler();
 		instance.doStart(context);
 	}
