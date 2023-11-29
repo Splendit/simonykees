@@ -26,11 +26,10 @@ public class JSparrowIndependentMain {
 		// configuration.put("ROOT.PROJECT.BASE.PATH", SAMPLE_PROJECT_PATH);
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, "target/bundlecache");
-		configuration.put("DEFAULT.CONFIG", "true");
-		configuration.put("SELECTED.SOURCES", "**");
+		// configuration.put("DEFAULT.CONFIG", "true");
+		// configuration.put("SELECTED.SOURCES", "**");
 
 		configuration.put("osgi.instance.area.default", tempWorkspacePath);
-		System.setProperty("user.dir", tempWorkspacePath);
 
 		/*
 		 * This is solution B from this article:

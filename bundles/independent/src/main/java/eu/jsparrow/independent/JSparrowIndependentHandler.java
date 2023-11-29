@@ -23,10 +23,8 @@ import eu.jsparrow.independent.exceptions.StandaloneException;
 import eu.jsparrow.independent.util.ProxyUtils;
 import eu.jsparrow.logging.LoggingUtil;
 
-
 public class JSparrowIndependentHandler {
 	private static final String LIST_RULES_SELECTED_ID_KEY = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
-	
 
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
@@ -50,7 +48,12 @@ public class JSparrowIndependentHandler {
 		if (context == null) {
 			throw new IllegalStateException(Activator.class.getName() + " has not been started."); //$NON-NLS-1$
 		}
-
+		String osgi_instance_area_default = context.getProperty("osgi.instance.area.default"); //$NON-NLS-1$
+		// osgi_instance_area_default is expected to store the value of
+		// tempWorkspacePath which is assigned in the stand alone application
+		// "JSparrowIndependentMain" in the package
+		// "eu.jsparrow.independent.main"
+		System.setProperty("user.dir", osgi_instance_area_default); //$NON-NLS-1$
 		instance = new JSparrowIndependentHandler();
 		instance.doStart(context);
 	}

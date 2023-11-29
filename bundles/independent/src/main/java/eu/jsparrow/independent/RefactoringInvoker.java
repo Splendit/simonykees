@@ -1,6 +1,8 @@
 package eu.jsparrow.independent;
 
 import static eu.jsparrow.independent.ContextPropertyHelper.ROOT_PROJECT_BASE_PATH;
+import static eu.jsparrow.independent.ContextPropertyHelper.SELECTED_SOURCES;
+import static eu.jsparrow.independent.ContextPropertyHelper.USE_DEFAULT_CONFIGURATION;
 import static eu.jsparrow.independent.ContextPropertyHelper.getProperty;
 
 import java.io.File;
@@ -72,13 +74,11 @@ public class RefactoringInvoker {
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
-	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
-	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
+	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$	
 	private static final String ROOT_CONFIG_PATH = "ROOT.CONFIG.PATH"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_OVERRIDE = "CONFIG.FILE.OVERRIDE"; //$NON-NLS-1$
 	private static final String FORMATTING_FILE = "formatting.file.path"; //$NON-NLS-1$
-	private static final String REPORT_DESTIATION_PATH = "REPORT.DESTINATION.PATH"; //$NON-NLS-1$
-	private static final String SELECTED_SOURCES = "SELECTED.SOURCES"; //$NON-NLS-1$
+	private static final String REPORT_DESTIATION_PATH = "REPORT.DESTINATION.PATH"; //$NON-NLS-1$	
 	public static final String STATISTICS_START_TIME = "STATISTICS_START_TIME"; //$NON-NLS-1$
 	public static final String STATISTICS_REPO_OWNER = "STATISTICS_REPO_OWNER"; //$NON-NLS-1$
 	public static final String STATISTICS_REPO_NAME = "STATISTICS_REPO_NAME"; //$NON-NLS-1$
@@ -412,7 +412,7 @@ public class RefactoringInvoker {
 	}
 
 	private boolean parseUseDefaultConfiguration(BundleContext context) {
-		String useDefaultConfigValue = context.getProperty(USE_DEFAULT_CONFIGURATION);
+		String useDefaultConfigValue = getProperty(USE_DEFAULT_CONFIGURATION);
 		return Boolean.parseBoolean(useDefaultConfigValue);
 	}
 
@@ -505,7 +505,7 @@ public class RefactoringInvoker {
 		}
 
 		StandaloneStatisticsMetadata metadata = extractStatisticsMetadata(context);
-		String selectedSources = context.getProperty(SELECTED_SOURCES);
+		String selectedSources = getProperty(SELECTED_SOURCES);
 
 		for (IJavaProject javaProject : importedProjects) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
