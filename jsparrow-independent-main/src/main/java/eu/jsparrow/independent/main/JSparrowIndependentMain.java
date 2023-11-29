@@ -30,6 +30,8 @@ public class JSparrowIndependentMain {
 		// configuration.put("SELECTED.SOURCES", "**");
 
 		configuration.put("osgi.instance.area.default", tempWorkspacePath);
+		
+		configuration.put("start.jsparrow.independent.handler", Boolean.TRUE.toString());
 
 		/*
 		 * This is solution B from this article:

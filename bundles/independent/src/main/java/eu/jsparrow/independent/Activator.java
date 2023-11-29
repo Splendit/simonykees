@@ -29,7 +29,14 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		logger.info(Messages.Activator_start);
 		Activator.context = context;
-		JSparrowIndependentHandler.start();
+		/*
+		 * It is not always desired that JSparrowIndependentHandler starts at
+		 * this position, because it may also be started from another bundle,
+		 * for example a bundle which provides the user interface.
+		 */
+		if (Boolean.parseBoolean(context.getProperty("start.jsparrow.independent.handler"))) { //$NON-NLS-1$
+			JSparrowIndependentHandler.start();
+		}
 	}
 
 	@Override
