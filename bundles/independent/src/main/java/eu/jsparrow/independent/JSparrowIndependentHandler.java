@@ -35,11 +35,11 @@ public class JSparrowIndependentHandler {
 	private final ListRulesUtil listRulesUtil;
 	private StandaloneLicenseUtilService licenseService;
 
-	static JSparrowIndependentHandler getInstance() {
+	public static JSparrowIndependentHandler getInstance() {
 		return instance;
 	}
 
-	static void start() throws Exception {
+	public static void start() throws Exception {
 		if (instance != null) {
 			throw new IllegalStateException(JSparrowIndependentHandler.class.getName() + " has already been started."); //$NON-NLS-1$
 		}
@@ -58,7 +58,7 @@ public class JSparrowIndependentHandler {
 		instance.doStart(context);
 	}
 
-	static void stop(BundleContext context) {
+	public static void stop(BundleContext context) {
 		if (instance != null) {
 			instance.doStop(context);
 			instance = null;
