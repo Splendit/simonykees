@@ -14,6 +14,9 @@ public class ContextPropertyHelper {
 	public static final String STANDALONE_MODE_KEY = "STANDALONE.MODE";
 	public static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	public static final String SELECTED_SOURCES = "SELECTED.SOURCES"; //$NON-NLS-1$
+	
+	public static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH";
+	private static final String SELECTED_PROJECT_PATH = "/home/gregor/minimal-sample-projects/simple-maven-projects/example-project/";
 
 	// Values
 
@@ -21,6 +24,7 @@ public class ContextPropertyHelper {
 
 	static {
 		HashMap<String, String> temp = new HashMap<>();
+		temp.put(ROOT_PROJECT_BASE_PATH, SELECTED_PROJECT_PATH);
 		temp.put(DEBUG_ENABLED, TRUE_VALUE);
 		temp.put(STANDALONE_MODE_KEY, "REFACTOR");
 		temp.put(LICENSE_KEY, "IT43A7PPH");

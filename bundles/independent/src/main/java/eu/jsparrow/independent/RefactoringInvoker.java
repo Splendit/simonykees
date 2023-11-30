@@ -446,7 +446,7 @@ public class RefactoringInvoker {
 				workspaceRoot.canRead(), workspaceRoot.canWrite(), workspaceRoot.canExecute());
 		logWorkSpaceContent(workspaceRoot);
 
-		String folder = context.getProperty(ROOT_PROJECT_BASE_PATH);
+		String folder = getProperty(context, ROOT_PROJECT_BASE_PATH);
 
 		List<IJavaProject> imported;
 
