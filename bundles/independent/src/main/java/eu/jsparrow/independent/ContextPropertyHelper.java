@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.osgi.framework.BundleContext;
+
 @SuppressWarnings("nls")
 public class ContextPropertyHelper {
 	private static final String TRUE_VALUE = Boolean.TRUE.toString();
@@ -27,21 +29,18 @@ public class ContextPropertyHelper {
 		JSPARROW_INDEPENDENT_CONFIG = Collections.unmodifiableMap(temp);
 	}
 
-	public static String getProperty(String key) {
-		if (!isContextContainingJSparrowProperties()) {
+	public static String getProperty(BundleContext context, String key) {
+		if (!isContextContainingJSparrowProperties(context)) {
 			String value = JSPARROW_INDEPENDENT_CONFIG.get(key);
 			if (value != null) {
 				return value;
 			}
 		}
-		return Activator.getContext()
-			.getProperty(key);
-
+		return context.getProperty(key);
 	}
 
-	public static boolean isContextContainingJSparrowProperties() {
-		String propertyValue = Activator.getContext()
-			.getProperty("context.containing.jsparrow.properties");
+	public static boolean isContextContainingJSparrowProperties(BundleContext context) {
+		String propertyValue = context.getProperty("context.containing.jsparrow.properties");
 		if (propertyValue == null) {
 			return false;
 		}
@@ -51,5 +50,4 @@ public class ContextPropertyHelper {
 	private ContextPropertyHelper() {
 		// private default constructor hiding implicit public one
 	}
-
 }

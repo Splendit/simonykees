@@ -412,7 +412,7 @@ public class RefactoringInvoker {
 	}
 
 	private boolean parseUseDefaultConfiguration(BundleContext context) {
-		String useDefaultConfigValue = getProperty(USE_DEFAULT_CONFIGURATION);
+		String useDefaultConfigValue = getProperty(context, USE_DEFAULT_CONFIGURATION);
 		return Boolean.parseBoolean(useDefaultConfigValue);
 	}
 
@@ -505,7 +505,7 @@ public class RefactoringInvoker {
 		}
 
 		StandaloneStatisticsMetadata metadata = extractStatisticsMetadata(context);
-		String selectedSources = getProperty(SELECTED_SOURCES);
+		String selectedSources = getProperty(context, SELECTED_SOURCES);
 
 		for (IJavaProject javaProject : importedProjects) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
