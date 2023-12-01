@@ -39,9 +39,10 @@ public class BundleStarter {
 	 * @throws BundleException
 	 * @throws MojoExecutionException
 	 * @throws InterruptedException
+	 * @throws IOException
 	 */
 	public void runStandalone(Map<String, String> configuration)
-			throws BundleException, InterruptedException {
+			throws BundleException, InterruptedException, IOException {
 
 		startEquinoxFramework(configuration);
 
@@ -141,36 +142,26 @@ public class BundleStarter {
 	 * 
 	 * @return a list of the installed bundles
 	 * @throws BundleException
+	 * @throws IOException
 	 */
-	protected List<Bundle> installBundles() throws BundleException {
-		// log.debug(Messages.BundleStarter_loadOsgiBundles);
+	protected List<Bundle> installBundles() throws BundleException, IOException {
+
+		List<String> namesOfbundlesToInstall = ProductPlugInHelper.getProductPlugInNames()
+			.stream()
+			.filter(name -> !name.startsWith("org.eclipse.osgi_")) //$NON-NLS-1$
+			.collect(Collectors.toList());
 
 		bundleContext = getBundleContext();
 		final List<Bundle> bundles = new ArrayList<>();
 
-		try (InputStream is = getManifestInputStream()) {
-			if (is != null) {
-				try (BufferedReader reader = getBufferedReaderFromInputStream(is)) {
+		for (String bundleName : namesOfbundlesToInstall) {
 
-					String line = ""; //$NON-NLS-1$
-					while ((line = reader.readLine()) != null) {
-						InputStream fileStream = getBundleResourceInputStream(line);
-						if (!line.startsWith("org.eclipse.osgi_")) { //$NON-NLS-1$
-							Bundle bundle = bundleContext.installBundle("file://" + line, fileStream); //$NON-NLS-1$
-							bundles.add(bundle);
-						}
-					}
-				}
-			} else {
-				// throw new MojoExecutionException(
-				// "The standalone manifest file could not be found. Please read
-				// the readme-file."); //$NON-NLS-1$
+			try (InputStream fileStream = getBundleResourceInputStream(bundleName)) {
+				Bundle bundle = bundleContext.installBundle("file://" + bundleName, fileStream); //$NON-NLS-1$
+				bundles.add(bundle);
 			}
-		} catch (IOException e) {
-			// log.debug(e.getMessage(), e);
-			// log.error(e.getMessage());
-		}
 
+		}
 		return bundles;
 	}
 
@@ -224,10 +215,6 @@ public class BundleStarter {
 
 	protected BundleContext getBundleContext() {
 		return framework.getBundleContext();
-	}
-
-	protected InputStream getManifestInputStream() {
-		return getClass().getResourceAsStream("/" + JSPARROW_MANIFEST); //$NON-NLS-1$
 	}
 
 	protected InputStream getBundleResourceInputStream(String resouceName) {

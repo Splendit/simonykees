@@ -1,5 +1,6 @@
 package eu.jsparrow.independent.main;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class JSparrowIndependentMain {
 		BundleStarter bundleStarter = new BundleStarter();
 		try {
 			bundleStarter.runStandalone(configuration);
-		} catch (BundleException | InterruptedException e) {
+		} catch (BundleException | InterruptedException | IOException e) {
 			e.printStackTrace();
 		}
 

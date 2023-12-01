@@ -1,8 +1,6 @@
 package eu.jsparrow.independent.main;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -51,7 +49,32 @@ public class ProductPlugInHelper {
 		}
 	}
 
-	static List<String> copyProductPlugIns() throws URISyntaxException, IOException {
+	/**
+	 * 
+	 * @return Sorted List of the names of all plug-in files from the
+	 *         directory<br>
+	 *         {@code "/simonykees/releng/eu.jsparrow.independent.product/target/repository/plugins"}.
+	 * @throws IOException
+	 */
+	static List<String> getProductPlugInNames() throws IOException {
+		File simonykees = new File("..").getCanonicalFile();
+
+		Path plugInsPath = Paths.get(simonykees.getAbsolutePath(), //
+				"releng", //
+				"eu.jsparrow.independent.product", //
+				"target", //
+				"repository", //
+				"plugins");
+
+		List<String> pluginNames = Arrays.asList(plugInsPath.toFile()
+			.list());
+
+		Collections.sort(pluginNames);
+
+		return pluginNames;
+	}
+
+	static void copyProductPlugIns() throws URISyntaxException, IOException {
 		Path sourceMainResourcesAbsolutePath = Paths.get("src", "main", "resources")
 			.toAbsolutePath();
 		clearSourceMainResources(sourceMainResourcesAbsolutePath);
@@ -68,27 +91,8 @@ public class ProductPlugInHelper {
 				"repository", //
 				"plugins");
 
-		String[] pluginFileNames = plugInsPath.toFile()
-			.list();
-
-		List<String> pluginNames = Arrays.asList(pluginFileNames);
-
-		Collections.sort(pluginNames);
-
 		File sourceMainResourcesAbsolutePath2File = sourceMainResourcesAbsolutePath.toFile();
 
-		File manifestIndependent = new File(sourceMainResourcesAbsolutePath2File, BundleStarter.JSPARROW_MANIFEST);
-
-		manifestIndependent.createNewFile();
-
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(manifestIndependent, false))) {
-			for (String name : pluginNames) {
-				writer.write(name);
-				writer.newLine();
-			}
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
 		File[] pluginFiles = plugInsPath.toFile()
 			.listFiles();
 		for (File file : pluginFiles) {
@@ -96,8 +100,6 @@ public class ProductPlugInHelper {
 			Path target = (new File(sourceMainResourcesAbsolutePath2File, file.getName())).toPath();
 			Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
 		}
-
-		return pluginNames;
 	}
 
 	public static void main(String[] args) {
