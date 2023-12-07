@@ -1,7 +1,9 @@
 package eu.jsparrow.independent.main;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -76,6 +78,17 @@ public class ProductPlugInHelper {
 			productRepositoryPlugInsDirectory = pathToRepositoryPlugins.toFile();
 		}
 		return productRepositoryPlugInsDirectory;
+	}
+
+	/**
+	 * If it is an acceptable approach to get the plug-in - input stream
+	 * directly from the plug-in directory of the product, then this method will
+	 * be used, and the method where the plug-ins are copied to the resources
+	 * folder to be installed from there can be abolished.
+	 */
+	static InputStream getRepositoryPlugInInputStream(String plugInName) throws IOException {
+		File plugInFile = new File(getRepositoryPlugInsDirectory(), plugInName);
+		return new FileInputStream(plugInFile);
 	}
 
 	public static void main(String[] args) {

@@ -155,12 +155,13 @@ public class BundleStarter {
 		final List<Bundle> bundles = new ArrayList<>();
 
 		for (String bundleName : namesOfbundlesToInstall) {
-
-			try (InputStream fileStream = getBundleResourceInputStream(bundleName)) {
+			try (InputStream fileStream = ProductPlugInHelper.getRepositoryPlugInInputStream(bundleName)) {
+				// instead of:
+				// try (InputStream fileStream =
+				// getBundleResourceInputStream(bundleName)) {
 				Bundle bundle = bundleContext.installBundle("file://" + bundleName, fileStream); //$NON-NLS-1$
 				bundles.add(bundle);
 			}
-
 		}
 		return bundles;
 	}
