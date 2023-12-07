@@ -1,14 +1,17 @@
 package eu.jsparrow.independent.main;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
+import java.net.URI;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -17,6 +20,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
+@SuppressWarnings("nls")
 public class BundleStarter {
 
 	private static final String JSPARROW_BUNDLE_PREFIX = "eu.jsparrow."; //$NON-NLS-1$
@@ -29,6 +33,34 @@ public class BundleStarter {
 
 	private boolean standaloneStarted = false;
 	private long standaloneBundleID;
+
+	static List<String> getBundleURIListToInstall() throws IOException {
+
+		File repositoryPlugInsDirectory = getRepositoryPlugInsDirectory();
+
+		List<String> pluginNames = Arrays.asList(repositoryPlugInsDirectory.list());
+		Collections.sort(pluginNames);
+
+		String pluginsDirectoryAbsolutePath = repositoryPlugInsDirectory.getAbsolutePath();
+		return pluginNames.stream()
+			.filter(name -> !name.startsWith("org.eclipse.osgi_"))
+			.map(name -> Paths.get(pluginsDirectoryAbsolutePath, name))
+			.map(Path::toUri)
+			.map(URI::toString)
+			.collect(Collectors.toList());
+
+	}
+
+	static File getRepositoryPlugInsDirectory() throws IOException {
+		File simonykees = new File("..").getCanonicalFile();
+		return Paths.get(simonykees.getAbsolutePath(), //
+				"releng", //
+				"eu.jsparrow.independent.product", //
+				"target", //
+				"repository", //
+				"plugins")
+			.toFile();
+	}
 
 	/**
 	 * Starts the equinox framework with the given configuration, starts the
@@ -61,7 +93,6 @@ public class BundleStarter {
 	 *             if the framework cannot be started.
 	 */
 	private void startEquinoxFramework(Map<String, String> configuration) throws BundleException {
-		// log.debug(Messages.BundleStarter_startEquinox);
 
 		ServiceLoader<FrameworkFactory> ffs = ServiceLoader.load(FrameworkFactory.class);
 		FrameworkFactory frameworkFactory = ffs.iterator()
@@ -146,22 +177,13 @@ public class BundleStarter {
 	 */
 	protected List<Bundle> installBundles() throws BundleException, IOException {
 
-		List<String> namesOfbundlesToInstall = ProductPlugInHelper.getProductPlugInNames()
-			.stream()
-			.filter(name -> !name.startsWith("org.eclipse.osgi_")) //$NON-NLS-1$
-			.collect(Collectors.toList());
-
+		List<String> bundleURIListToInstall = getBundleURIListToInstall();
 		bundleContext = getBundleContext();
 		final List<Bundle> bundles = new ArrayList<>();
 
-		for (String bundleName : namesOfbundlesToInstall) {
-			try (InputStream fileStream = ProductPlugInHelper.getRepositoryPlugInInputStream(bundleName)) {
-				// instead of:
-				// try (InputStream fileStream =
-				// getBundleResourceInputStream(bundleName)) {
-				Bundle bundle = bundleContext.installBundle("file://" + bundleName, fileStream); //$NON-NLS-1$
-				bundles.add(bundle);
-			}
+		for (String bundleURI : bundleURIListToInstall) {
+			Bundle bundle = bundleContext.installBundle(bundleURI);
+			bundles.add(bundle);
 		}
 		return bundles;
 	}
@@ -216,14 +238,6 @@ public class BundleStarter {
 
 	protected BundleContext getBundleContext() {
 		return framework.getBundleContext();
-	}
-
-	protected InputStream getBundleResourceInputStream(String resouceName) {
-		return getClass().getResourceAsStream("/" + resouceName); //$NON-NLS-1$
-	}
-
-	protected BufferedReader getBufferedReaderFromInputStream(InputStream is) {
-		return new BufferedReader(new InputStreamReader(is));
 	}
 
 	public boolean isStandaloneStarted() {
