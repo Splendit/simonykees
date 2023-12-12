@@ -26,18 +26,18 @@ public class JSparrowIndependentMain {
 		configuration.put("context.containing.jsparrow.properties", TRUE_AS_STRING);
 		configuration.put("debug.enabled", TRUE_AS_STRING);
 		configuration.put("STANDALONE.MODE", "REFACTOR");
+		// configuration.put("STANDALONE.MODE", "SELECT_SOURCES");
 		configuration.put("LICENSE", "IT43A7PPH");
 		configuration.put("DEFAULT.CONFIG", TRUE_AS_STRING);
 		configuration.put("SELECTED.SOURCES", "**");
 
-				
 		configuration.put(ROOT_PROJECT_BASE_PATH, SAMPLE_PROJECT_PATH);
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, "target/bundlecache");
 
 		configuration.put("osgi.instance.area.default", tempWorkspacePath);
 		System.setProperty("user.dir", tempWorkspacePath);
-		
+
 		configuration.put("start.jsparrow.independent.handler", TRUE_AS_STRING);
 
 		/*

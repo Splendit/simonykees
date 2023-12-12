@@ -31,9 +31,9 @@ public class JSparrowIndependentHandler {
 	private static final Logger logger = LoggerFactory.getLogger(JSparrowIndependentHandler.class);
 	private static JSparrowIndependentHandler instance;
 
-	private final RefactoringInvoker refactoringInvoker;
-	private final SelectSourcesInvoker selectSourcesInvoker;
-	private final ListRulesUtil listRulesUtil;
+	private RefactoringInvoker refactoringInvoker;
+	private SelectSourcesInvoker selectSourcesInvoker;
+	private ListRulesUtil listRulesUtil;
 	private StandaloneLicenseUtilService licenseService;
 
 	public static JSparrowIndependentHandler getInstance() {
@@ -62,9 +62,7 @@ public class JSparrowIndependentHandler {
 	}
 
 	private JSparrowIndependentHandler() {
-		this.refactoringInvoker = new RefactoringInvoker();
-		this.selectSourcesInvoker = new SelectSourcesInvoker();
-		this.listRulesUtil = new ListRulesUtil();
+
 	}
 
 	private void doStart(BundleContext context) throws Exception {
@@ -89,6 +87,7 @@ public class JSparrowIndependentHandler {
 			listRules(listRulesId);
 			break;
 		case LIST_RULES_SHORT:
+			listRulesUtil = new ListRulesUtil();
 			listRulesUtil.listRulesShort();
 			break;
 		case LICENSE_INFO:
@@ -113,9 +112,12 @@ public class JSparrowIndependentHandler {
 		if (licenseService != null && (mode == StandaloneMode.REFACTOR || mode == StandaloneMode.LICENSE_INFO)) {
 			licenseService.stop(getAgentUrl(context));
 		}
-
-		refactoringInvoker.cleanUp();
-		selectSourcesInvoker.cleanUp();
+		if (refactoringInvoker != null) {
+			refactoringInvoker.cleanUp();
+		}
+		if (selectSourcesInvoker != null) {
+			selectSourcesInvoker.cleanUp();
+		}
 	}
 
 	private StandaloneMode parseMode(BundleContext context) {
@@ -156,12 +158,12 @@ public class JSparrowIndependentHandler {
 
 		return yamlStandaloneConfig;
 	}
-	
+
 	private void selectSources(BundleContext context) {
 		String key = getLicenseKey(context);
 		String agentUrl = getAgentUrl(context);
 		licenseService = getStandaloneLicenseUtilService();
-
+		selectSourcesInvoker = new SelectSourcesInvoker();
 		try {
 			boolean validLicense = licenseService.validate(key, agentUrl);
 			if (validLicense) {
@@ -177,6 +179,7 @@ public class JSparrowIndependentHandler {
 			doSetExitErrorMessageAndCleanUp(context, e.getMessage());
 		}
 	}
+
 	/**
 	 * @see Activator#runInReportMode(BundleContext)
 	 * 
@@ -186,7 +189,7 @@ public class JSparrowIndependentHandler {
 		String key = getLicenseKey(context);
 		String agentUrl = getAgentUrl(context);
 		licenseService = getStandaloneLicenseUtilService();
-
+		refactoringInvoker = new RefactoringInvoker();
 		try {
 			boolean validLicense = licenseService.validate(key, agentUrl);
 			if (validLicense) {
@@ -264,6 +267,7 @@ public class JSparrowIndependentHandler {
 	 *            all the settings etc.
 	 */
 	private void runInReportMode(BundleContext context) {
+		refactoringInvoker = new RefactoringInvoker();
 		try {
 			refactoringInvoker.runInReportMode(context);
 		} catch (StandaloneException e) {
@@ -274,6 +278,7 @@ public class JSparrowIndependentHandler {
 	}
 
 	private void listRules(String listRulesId) {
+		listRulesUtil = new ListRulesUtil();
 		if (listRulesId != null && !listRulesId.isEmpty()) {
 			listRulesUtil.listRules(listRulesId);
 		} else {
