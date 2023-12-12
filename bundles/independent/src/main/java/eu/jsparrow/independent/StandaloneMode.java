@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public enum StandaloneMode {
 	TEST,
+	SELECT_SOURCES,
 	REFACTOR,
 	REPORT,
 	LIST_RULES,
@@ -21,6 +22,8 @@ public enum StandaloneMode {
 		switch (upperCaseValue) {
 		case "TEST":
 			return TEST;
+		case "SELECT_SOURCES":
+			return SELECT_SOURCES;
 		case "REFACTOR":
 			return REFACTOR;
 		case "REPORT":

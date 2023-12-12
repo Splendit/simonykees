@@ -32,6 +32,7 @@ public class JSparrowIndependentHandler {
 	private static JSparrowIndependentHandler instance;
 
 	private final RefactoringInvoker refactoringInvoker;
+	private final SelectSourcesInvoker selectSourcesInvoker;
 	private final ListRulesUtil listRulesUtil;
 	private StandaloneLicenseUtilService licenseService;
 
@@ -62,6 +63,7 @@ public class JSparrowIndependentHandler {
 
 	private JSparrowIndependentHandler() {
 		this.refactoringInvoker = new RefactoringInvoker();
+		this.selectSourcesInvoker = new SelectSourcesInvoker();
 		this.listRulesUtil = new ListRulesUtil();
 	}
 
@@ -74,6 +76,9 @@ public class JSparrowIndependentHandler {
 		StandaloneMode mode = parseMode(context);
 		String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID_KEY);
 		switch (mode) {
+		case SELECT_SOURCES:
+			selectSources(context);
+			break;
 		case REFACTOR:
 			refactor(context);
 			break;
@@ -110,6 +115,7 @@ public class JSparrowIndependentHandler {
 		}
 
 		refactoringInvoker.cleanUp();
+		selectSourcesInvoker.cleanUp();
 	}
 
 	private StandaloneMode parseMode(BundleContext context) {
@@ -150,7 +156,27 @@ public class JSparrowIndependentHandler {
 
 		return yamlStandaloneConfig;
 	}
+	
+	private void selectSources(BundleContext context) {
+		String key = getLicenseKey(context);
+		String agentUrl = getAgentUrl(context);
+		licenseService = getStandaloneLicenseUtilService();
 
+		try {
+			boolean validLicense = licenseService.validate(key, agentUrl);
+			if (validLicense) {
+				selectSourcesInvoker.startRefactoring(context);
+			} else {
+				String message = Messages.StandaloneActivator_noValidLicenseFound;
+				logger.error(message);
+				doSetExitErrorMessageAndCleanUp(context, message);
+			}
+		} catch (StandaloneException e) {
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
+			doSetExitErrorMessageAndCleanUp(context, e.getMessage());
+		}
+	}
 	/**
 	 * @see Activator#runInReportMode(BundleContext)
 	 * 
