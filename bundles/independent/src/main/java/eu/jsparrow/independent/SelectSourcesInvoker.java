@@ -543,9 +543,8 @@ public class SelectSourcesInvoker {
 			String logMsg = NLS.bind(Messages.RefactoringInvoker_loadingConfigurationForProject, projectName);
 			logger.debug(logMsg);
 			try {
-				YAMLConfig config = getConfiguration(context, javaProject.getProject()
-					.getLocation()
-					.toFile());
+				String testFilter = context.getProperty("RULES.FILTER"); //$NON-NLS-1$
+				YAMLConfig config = YAMLConfig.getTestConfig(testFilter);
 				StandaloneConfig standaloneConfig = new StandaloneConfig(javaProject, path, config, metadata,
 						selectedSources);
 

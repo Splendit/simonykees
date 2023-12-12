@@ -13,8 +13,10 @@ public class JSparrowIndependentMain {
 
 	private static final String TRUE_AS_STRING = Boolean.TRUE.toString();
 	public static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH";
-	public static final String SAMPLE_PROJECT_PATH = "/home/gregor/minimal-sample-projects/simple-maven-projects/example-project";
+	//public static final String SAMPLE_PROJECT_PATH = "/home/gregor/minimal-sample-projects/simple-maven-projects/example-project";
+	public static final String SAMPLE_PROJECT_PATH = "/home/gregor/opensource/et_redux/";
 
+	
 	public static void main(String[] args) {
 		Map<String, String> configuration = new HashMap<>();
 
@@ -25,8 +27,9 @@ public class JSparrowIndependentMain {
 
 		configuration.put("context.containing.jsparrow.properties", TRUE_AS_STRING);
 		configuration.put("debug.enabled", TRUE_AS_STRING);
-		configuration.put("STANDALONE.MODE", "REFACTOR");
-		// configuration.put("STANDALONE.MODE", "SELECT_SOURCES");
+		// configuration.put("STANDALONE.MODE", "REFACTOR");
+		configuration.put("STANDALONE.MODE", "SELECT_SOURCES");
+		configuration.put("RULES.FILTER", "DiamondOperator"); //$NON-NLS-1$
 		configuration.put("LICENSE", "IT43A7PPH");
 		configuration.put("DEFAULT.CONFIG", TRUE_AS_STRING);
 		configuration.put("SELECTED.SOURCES", "**");

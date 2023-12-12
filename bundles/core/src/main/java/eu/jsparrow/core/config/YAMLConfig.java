@@ -1,5 +1,7 @@
 package eu.jsparrow.core.config;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -10,6 +12,31 @@ import java.util.List;
  * @since 2.2.2
  */
 public class YAMLConfig {
+
+	@SuppressWarnings("nls")
+	private static final List<String> RULES_FOR_TEST = Collections.unmodifiableList(
+			Arrays.asList(
+					"UseTernaryOperator",
+					"RemoveUnusedLocalVariables", "TryWithResource", "MultiCatch", "FunctionalInterface",
+					"ImmutableStaticFinalCollections",
+					"DiamondOperator", "OverrideAnnotation", "RearrangeClassMembers", "BracketsToControl",
+					"MultiVariableDeclarationLine", "InlineLocalVariables", "EnumsWithoutEquals",
+					"ReImplementingInterface", "RemoveDoubleNegation", "GuardCondition", "CollapseIfStatements",
+					"RemoveExplicitCallToSuper", "RemoveEmptyStatement", "RemoveUnnecessaryThrows",
+					"RemoveModifiersInInterfaceProperties", "RemoveUnusedParameter", "ReorderModifiers", "UseListSort",
+					"HideDefaultConstructorInUtilityClasses", "MakeFieldsAndVariablesFinal", "RemoveCollectionAddAll",
+					"RemoveRedundantTypeCast", "UseFilesBufferedWriter", "UsePredefinedStandardCharset",
+					"RemoveRedundantClose", "ReplaceWrongClassForLogger", "UseSecureRandom",
+					"ReplaceJUnit4AnnotationsWithJupiter", "ReplaceJUnit4AssertionsWithJupiter",
+					"RemoveNewStringConstructor", "InefficientConstructor", "PrimitiveBoxedForString",
+					"IndexOfToContains", "RemoveToStringOnString", "StringLiteralEqualityCheck", "StringConcatToPlus",
+					"UseIsEmptyOnCollections", "ArithmethicAssignment", "StringBufferToBuilder", "WhileToForEach",
+					"ForToForEachRule", "EnhancedForLoopToStreamForEach", "LambdaForEachIfWrapperToFilter",
+					"StatementLambdaToExpression", "LambdaForEachMap", "FlatMapInsteadOfNestedLoops",
+					"EnhancedForLoopToStreamAnyMatch", "EnhancedForLoopToStreamFindFirst", "LambdaToMethodReference",
+					"UseStringBuilderAppend", "CodeFormatter", "OrganizeImports"
+
+			));
 
 	/**
 	 * this list holds all IDs of rules which should be executed if no default
@@ -76,6 +103,39 @@ public class YAMLConfig {
 			.add(profile);
 
 		config.setSelectedProfile("default"); //$NON-NLS-1$
+
+		return config;
+	}
+
+	/**
+	 * provides a default configuration for jsparrow
+	 * 
+	 * @return default configuration
+	 */
+	public static YAMLConfig getTestConfig(String filter) {
+		YAMLConfig config = new YAMLConfig();
+
+		List<String> profileRules = new LinkedList<>();
+
+		String upperCaseFilter = filter.toUpperCase();
+		if (upperCaseFilter != null && !upperCaseFilter.isEmpty()) {
+			RULES_FOR_TEST.stream()
+				.filter(rule -> rule.toUpperCase()
+					.contains(upperCaseFilter))
+				.forEach(profileRules::add);
+		} else {
+			RULES_FOR_TEST.stream()
+				.forEach(profileRules::add);
+		}
+
+		YAMLProfile profile = new YAMLProfile();
+		profile.setName("test"); //$NON-NLS-1$
+		profile.setRules(profileRules);
+
+		config.getProfiles()
+			.add(profile);
+
+		config.setSelectedProfile("test"); //$NON-NLS-1$
 
 		return config;
 	}
