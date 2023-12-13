@@ -31,10 +31,12 @@ public class YAMLConfig {
 					"RemoveNewStringConstructor", "InefficientConstructor", "PrimitiveBoxedForString",
 					"IndexOfToContains", "RemoveToStringOnString", "StringLiteralEqualityCheck", "StringConcatToPlus",
 					"UseIsEmptyOnCollections", "ArithmethicAssignment", "StringBufferToBuilder", "WhileToForEach",
-					"ForToForEachRule", "EnhancedForLoopToStreamForEach", "LambdaForEachIfWrapperToFilter",
+					"ForToForEach", "EnhancedForLoopToStreamForEach", "LambdaForEachIfWrapperToFilter",
 					"StatementLambdaToExpression", "LambdaForEachMap", "FlatMapInsteadOfNestedLoops",
 					"EnhancedForLoopToStreamAnyMatch", "EnhancedForLoopToStreamFindFirst", "LambdaToMethodReference",
-					"UseStringBuilderAppend", "CodeFormatter", "OrganizeImports"
+					"UseStringBuilderAppend", "CodeFormatter"
+			// , "OrganizeImports"
+			// The rule with the id "OrganizeImports" is not in the RulesContainer
 
 			));
 

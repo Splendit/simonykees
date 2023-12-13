@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,10 +22,6 @@ import eu.jsparrow.independent.exceptions.StandaloneException;
  * @since 3.3.0
  */
 public class EclipseProjectFileManager {
-
-	private static final List<ProjectFiles> PROJECT_FILES_LIST = Collections
-		.unmodifiableList(Arrays.asList(ProjectFiles.PROJECT_DESCRIPTION_FILE,
-				ProjectFiles.CLASS_PATH_FILE, ProjectFiles.SETTINGS_DIRECTORY));
 
 	private static final Logger logger = LoggerFactory.getLogger(EclipseProjectFileManager.class);
 	private List<EclipseProjectFileManagerStatus> projects;
@@ -78,7 +72,8 @@ public class EclipseProjectFileManager {
 			.getFileName()
 			.toString();
 
-		for (ProjectFiles projectFile : PROJECT_FILES_LIST) {
+		ProjectFiles[] projectFilesArray = ProjectFiles.values();
+		for (ProjectFiles projectFile : projectFilesArray) {
 			File fileToBackup = getFile(path, projectFile);
 			if (fileToBackup.exists()) {
 				moveFile(fileToBackup, getBackupFile(path, projectFile));
@@ -101,8 +96,8 @@ public class EclipseProjectFileManager {
 		String name = Paths.get(path)
 			.getFileName()
 			.toString();
-
-		for (ProjectFiles projectFile : PROJECT_FILES_LIST) {
+		ProjectFiles[] projectFilesArray = ProjectFiles.values();
+		for (ProjectFiles projectFile : projectFilesArray) {
 			if (project.isExistingFileMoved(projectFile)) {
 				Files.move(getBackupFile(path, projectFile).toPath(), getFile(path, projectFile).toPath());
 				String loggerInfo = getRestoreDoneMessage(projectFile, name);
@@ -113,11 +108,12 @@ public class EclipseProjectFileManager {
 
 	private void deleteCreatedEclipseProjectFiles(EclipseProjectFileManagerStatus project) throws IOException {
 		String path = project.getPath();
-
-		File settings = getFile(path, ProjectFiles.SETTINGS_DIRECTORY);
-		removeDirectory(settings);
-		Files.deleteIfExists(getFile(path, ProjectFiles.CLASS_PATH_FILE).toPath());
-		Files.deleteIfExists(getFile(path, ProjectFiles.PROJECT_DESCRIPTION_FILE).toPath());
+		
+		ProjectFiles[] projectFilesArray = ProjectFiles.values();
+		for (ProjectFiles projectFile : projectFilesArray) {
+			File fileToRemove = getFile(path, projectFile);
+			removeFile(fileToRemove);
+		}
 	}
 
 	public void revertEclipseProjectFiles() {
@@ -166,13 +162,13 @@ public class EclipseProjectFileManager {
 		Files.move(src.toPath(), dest.toPath());
 	}
 
-	protected void removeDirectory(File directory) throws IOException {
+	protected void removeFile(File directory) throws IOException {
 		if (!directory.isDirectory()) {
 			Files.deleteIfExists(directory.toPath());
 			return;
 		}
 		for (File file : directory.listFiles()) {
-			removeDirectory(file);
+			removeFile(file);
 		}
 		Files.delete(directory.toPath());
 	}
