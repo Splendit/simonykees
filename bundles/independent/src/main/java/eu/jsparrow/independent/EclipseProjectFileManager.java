@@ -4,8 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
@@ -21,13 +25,11 @@ import eu.jsparrow.independent.exceptions.StandaloneException;
  */
 public class EclipseProjectFileManager {
 
+	private static final List<ProjectFiles> PROJECT_FILES_LIST = Collections
+		.unmodifiableList(Arrays.asList(ProjectFiles.PROJECT_DESCRIPTION_FILE,
+				ProjectFiles.CLASS_PATH_FILE, ProjectFiles.SETTINGS_DIRECTORY));
+
 	private static final Logger logger = LoggerFactory.getLogger(EclipseProjectFileManager.class);
-
-	private static final String PROJECT_FILE_NAME = ".project"; //$NON-NLS-1$
-	private static final String CLASSPATH_FILE_NAME = ".classpath"; //$NON-NLS-1$
-	private static final String SETTINGS_DIRECTORY_NAME = ".settings"; //$NON-NLS-1$
-	private static final String TEMP_FILE_EXTENSION = ".tmp"; //$NON-NLS-1$
-
 	private List<EclipseProjectFileManagerStatus> projects;
 
 	public EclipseProjectFileManager() {
@@ -76,35 +78,14 @@ public class EclipseProjectFileManager {
 			.getFileName()
 			.toString();
 
-		File projectDescription = getProjectDescriptionFile(path);
-		File classpathFile = getClasspathFileFile(path);
-		File settingsDirectory = getSettingsDirectoryFile(path);
-
-		String loggerInfo;
-
-		if (projectDescription.exists()) {
-			moveFile(projectDescription, getProjectDescriptionRenameFile(path));
-			project.setExistingProjectFileMoved(true);
-
-			loggerInfo = NLS.bind(Messages.EclipseProjectFileManager_fileBackupDone, PROJECT_FILE_NAME, name);
-			logger.debug(loggerInfo);
-		}
-
-		if (classpathFile.exists()) {
-			moveFile(classpathFile, getClasspathFileRenameFile(path));
-			project.setExistingClasspathFileMoved(true);
-
-			loggerInfo = NLS.bind(Messages.EclipseProjectFileManager_fileBackupDone, CLASSPATH_FILE_NAME, name);
-			logger.debug(loggerInfo);
-		}
-
-		if (settingsDirectory.exists()) {
-			moveFile(settingsDirectory, getSettingsDirectoryRenameFile(path));
-			project.setExistingSettingsDirectoryMoved(true);
-
-			loggerInfo = NLS.bind(Messages.EclipseProjectFileManager_directoryBackupDone, SETTINGS_DIRECTORY_NAME,
-					name);
-			logger.debug(loggerInfo);
+		for (ProjectFiles projectFile : PROJECT_FILES_LIST) {
+			File fileToBackup = getFile(path, projectFile);
+			if (fileToBackup.exists()) {
+				moveFile(fileToBackup, getBackupFile(path, projectFile));
+				project.setExistingFileMoved(projectFile, true);
+				String loggerInfo = getBackupDoneMessage(projectFile, name);
+				logger.debug(loggerInfo);
+			}
 		}
 	}
 
@@ -121,35 +102,22 @@ public class EclipseProjectFileManager {
 			.getFileName()
 			.toString();
 
-		String loggerInfo;
-		if (project.isExistingProjectFileMoved()) {
-			Files.move(getProjectDescriptionRenameFile(path).toPath(), getProjectDescriptionFile(path).toPath());
-			loggerInfo = NLS.bind(Messages.EclipseProjectFileManager_fileRestoreDone, PROJECT_FILE_NAME, name);
-			logger.debug(loggerInfo);
-		}
-
-		if (project.isExistingClasspathFileMoved()) {
-			Files.move(getClasspathFileRenameFile(path).toPath(), getClasspathFileFile(path).toPath());
-			loggerInfo = NLS.bind(Messages.EclipseProjectFileManager_fileRestoreDone, CLASSPATH_FILE_NAME, name);
-			logger.debug(loggerInfo);
-		}
-
-		if (project.isExistingSettingsDirectoryMoved()) {
-			Files.move(getSettingsDirectoryRenameFile(path).toPath(), getSettingsDirectoryFile(path).toPath());
-			loggerInfo = NLS.bind(Messages.EclipseProjectFileManager_directoryRestoreDone, SETTINGS_DIRECTORY_NAME,
-					name);
-			logger.debug(loggerInfo);
+		for (ProjectFiles projectFile : PROJECT_FILES_LIST) {
+			if (project.isExistingFileMoved(projectFile)) {
+				Files.move(getBackupFile(path, projectFile).toPath(), getFile(path, projectFile).toPath());
+				String loggerInfo = getRestoreDoneMessage(projectFile, name);
+				logger.debug(loggerInfo);
+			}
 		}
 	}
 
 	private void deleteCreatedEclipseProjectFiles(EclipseProjectFileManagerStatus project) throws IOException {
 		String path = project.getPath();
 
-		File settings = getSettingsDirectoryFile(path);
+		File settings = getFile(path, ProjectFiles.SETTINGS_DIRECTORY);
 		removeDirectory(settings);
-		Files.deleteIfExists(getClasspathFileFile(path).toPath());
-		Files.deleteIfExists(getProjectDescriptionFile(path).toPath());
-
+		Files.deleteIfExists(getFile(path, ProjectFiles.CLASS_PATH_FILE).toPath());
+		Files.deleteIfExists(getFile(path, ProjectFiles.PROJECT_DESCRIPTION_FILE).toPath());
 	}
 
 	public void revertEclipseProjectFiles() {
@@ -170,28 +138,28 @@ public class EclipseProjectFileManager {
 		}
 	}
 
-	protected File getProjectDescriptionFile(String path) {
-		return new File(path + File.separator + PROJECT_FILE_NAME);
+	protected String getBackupDoneMessage(ProjectFiles projectFile, String projectName) {
+		String fileName = projectFile.getFileName();
+		if (projectFile.isDirectory()) {
+			return NLS.bind(Messages.EclipseProjectFileManager_directoryBackupDone, fileName, projectName);
+		}
+		return NLS.bind(Messages.EclipseProjectFileManager_fileBackupDone, fileName, projectName);
 	}
 
-	protected File getProjectDescriptionRenameFile(String path) {
-		return new File(path + File.separator + PROJECT_FILE_NAME + TEMP_FILE_EXTENSION);
+	protected String getRestoreDoneMessage(ProjectFiles projectFile, String projectName) {
+		String fileName = projectFile.getFileName();
+		if (projectFile.isDirectory()) {
+			return NLS.bind(Messages.EclipseProjectFileManager_directoryRestoreDone, fileName, projectName);
+		}
+		return NLS.bind(Messages.EclipseProjectFileManager_fileRestoreDone, fileName, projectName);
 	}
 
-	protected File getClasspathFileRenameFile(String path) {
-		return new File(path + File.separator + CLASSPATH_FILE_NAME + TEMP_FILE_EXTENSION);
+	protected File getFile(String path, ProjectFiles projectFile) {
+		return new File(path + File.separator + projectFile.getFileName());
 	}
 
-	protected File getClasspathFileFile(String path) {
-		return new File(path + File.separator + CLASSPATH_FILE_NAME);
-	}
-
-	protected File getSettingsDirectoryRenameFile(String path) {
-		return new File(path + File.separator + SETTINGS_DIRECTORY_NAME + TEMP_FILE_EXTENSION);
-	}
-
-	protected File getSettingsDirectoryFile(String path) {
-		return new File(path + File.separator + SETTINGS_DIRECTORY_NAME);
+	protected File getBackupFile(String path, ProjectFiles projectFile) {
+		return new File(path + File.separator + projectFile.getBackupFileName());
 	}
 
 	protected void moveFile(File src, File dest) throws IOException {
@@ -200,15 +168,11 @@ public class EclipseProjectFileManager {
 
 	protected void removeDirectory(File directory) throws IOException {
 		if (!directory.isDirectory()) {
-			Files.delete(directory.toPath());
+			Files.deleteIfExists(directory.toPath());
 			return;
 		}
 		for (File file : directory.listFiles()) {
-			if (file.isDirectory()) {
-				removeDirectory(file);
-			} else {
-				Files.deleteIfExists(file.toPath());
-			}
+			removeDirectory(file);
 		}
 		Files.delete(directory.toPath());
 	}
@@ -224,11 +188,8 @@ public class EclipseProjectFileManager {
 	 */
 	class EclipseProjectFileManagerStatus {
 		private String path;
-
-		private boolean existingProjectFileMoved = false;
-		private boolean existingClasspathFileMoved = false;
-		private boolean existingSettingsDirectoryMoved = false;
 		private boolean cleanUpAlreadyDone = false;
+		private final Map<ProjectFiles, Boolean> movedProjectFiles = new HashMap<>();
 
 		public EclipseProjectFileManagerStatus(String path) {
 			this.path = path;
@@ -242,28 +203,13 @@ public class EclipseProjectFileManager {
 			this.path = path;
 		}
 
-		public boolean isExistingProjectFileMoved() {
-			return existingProjectFileMoved;
+		public boolean isExistingFileMoved(ProjectFiles projectFile) {
+			return movedProjectFiles.containsKey(projectFile) && movedProjectFiles.get(projectFile)
+				.booleanValue();
 		}
 
-		public void setExistingProjectFileMoved(boolean existingProjectFileMoved) {
-			this.existingProjectFileMoved = existingProjectFileMoved;
-		}
-
-		public boolean isExistingClasspathFileMoved() {
-			return existingClasspathFileMoved;
-		}
-
-		public void setExistingClasspathFileMoved(boolean existingClasspathFileMoved) {
-			this.existingClasspathFileMoved = existingClasspathFileMoved;
-		}
-
-		public boolean isExistingSettingsDirectoryMoved() {
-			return existingSettingsDirectoryMoved;
-		}
-
-		public void setExistingSettingsDirectoryMoved(boolean existingSettingsDirectoryMoved) {
-			this.existingSettingsDirectoryMoved = existingSettingsDirectoryMoved;
+		public void setExistingFileMoved(ProjectFiles projectFile, boolean existingFileMoved) {
+			movedProjectFiles.put(projectFile, Boolean.valueOf(existingFileMoved));
 		}
 
 		public boolean isCleanUpAlreadyDone() {

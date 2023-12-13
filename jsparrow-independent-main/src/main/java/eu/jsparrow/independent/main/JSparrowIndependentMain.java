@@ -11,10 +11,15 @@ import org.osgi.framework.Constants;
 @SuppressWarnings("nls")
 public class JSparrowIndependentMain {
 
+	public static final String OPENSOURCE_PROJECT_ET_REDUX = "/home/gregor/opensource/et_redux/";
+	public static final String SIMPLE_MAVEN_PROJECT = "/home/gregor/opensource/eclipse-plugin-tests/workspace/jsparrow-independent-simple-test/";
+	//public static final String SIMPLE_MAVEN_PROJECT = "/home/gregor/opensource/eclipse-plugin-tests/workspace/simple-test/";
+	public static final String ROOT_PROJECT_BASE_PATH_VALUE = SIMPLE_MAVEN_PROJECT;
+	
+	
 	private static final String TRUE_AS_STRING = Boolean.TRUE.toString();
 	public static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH";
-	//public static final String SAMPLE_PROJECT_PATH = "/home/gregor/minimal-sample-projects/simple-maven-projects/example-project";
-	public static final String SAMPLE_PROJECT_PATH = "/home/gregor/opensource/et_redux/";
+	
 
 	
 	public static void main(String[] args) {
@@ -34,7 +39,7 @@ public class JSparrowIndependentMain {
 		configuration.put("DEFAULT.CONFIG", TRUE_AS_STRING);
 		configuration.put("SELECTED.SOURCES", "**");
 
-		configuration.put(ROOT_PROJECT_BASE_PATH, SAMPLE_PROJECT_PATH);
+		configuration.put(ROOT_PROJECT_BASE_PATH, ROOT_PROJECT_BASE_PATH_VALUE);
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, "target/bundlecache");
 
