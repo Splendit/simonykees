@@ -89,7 +89,7 @@ public class YAMLConfig {
 	 * 
 	 * @return default configuration
 	 */
-	public static YAMLConfig getTestConfig(String filter) {
+	public static YAMLConfig getConfigFromRulesContainer(String filter) {
 		YAMLConfig config = new YAMLConfig();
 
 		Predicate<String> idPredicate = getFilterPredicate(filter);

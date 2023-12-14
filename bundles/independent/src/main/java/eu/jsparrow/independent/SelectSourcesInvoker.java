@@ -70,12 +70,12 @@ public class SelectSourcesInvoker {
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
-	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$	
+	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 	private static final String ROOT_CONFIG_PATH = "ROOT.CONFIG.PATH"; //$NON-NLS-1$
 	private static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_OVERRIDE = "CONFIG.FILE.OVERRIDE"; //$NON-NLS-1$
 	private static final String FORMATTING_FILE = "formatting.file.path"; //$NON-NLS-1$
-	private static final String REPORT_DESTIATION_PATH = "REPORT.DESTINATION.PATH"; //$NON-NLS-1$	
+	private static final String REPORT_DESTIATION_PATH = "REPORT.DESTINATION.PATH"; //$NON-NLS-1$
 	public static final String STATISTICS_START_TIME = "STATISTICS_START_TIME"; //$NON-NLS-1$
 	public static final String STATISTICS_REPO_OWNER = "STATISTICS_REPO_OWNER"; //$NON-NLS-1$
 	public static final String STATISTICS_REPO_NAME = "STATISTICS_REPO_NAME"; //$NON-NLS-1$
@@ -372,14 +372,13 @@ public class SelectSourcesInvoker {
 	private YAMLConfig getConfiguration(BundleContext context, File projectRootDir) throws StandaloneException {
 
 		boolean useDefaultConfig = parseUseDefaultConfiguration(context);
-		String profile = context.getProperty(SELECTED_PROFILE);
-		String configFileOverride = context.getProperty(CONFIG_FILE_OVERRIDE);
-
 		if (useDefaultConfig) {
 			logger.debug(Messages.RefactoringInvoker_usingDefaultConfiguration);
 			return yamlConfigurationWrapper.getDefaultYamlConfig();
 		}
 
+		String profile = context.getProperty(SELECTED_PROFILE);
+		String configFileOverride = context.getProperty(CONFIG_FILE_OVERRIDE);
 		if (configFileOverride != null && !configFileOverride.isEmpty()) {
 			String logMsg = NLS.bind(Messages.RefactoringInvoker_usingOverriddenConfiguration, configFileOverride);
 			logger.debug(logMsg);
@@ -398,6 +397,11 @@ public class SelectSourcesInvoker {
 
 		return configFinder.getYAMLFilePath(projectRootDir.toPath(), ConfigType.JSPARROW_FILE)
 			.orElse(context.getProperty(ROOT_CONFIG_PATH));
+	}
+
+	private boolean parseBooleanProperty(BundleContext context, String key) {
+		String value = getProperty(context, key);
+		return value != null && Boolean.parseBoolean(value);
 	}
 
 	private boolean parseUseDefaultConfiguration(BundleContext context) {
@@ -532,8 +536,16 @@ public class SelectSourcesInvoker {
 			String logMsg = NLS.bind(Messages.RefactoringInvoker_loadingConfigurationForProject, projectName);
 			logger.debug(logMsg);
 			try {
-				String testFilter = context.getProperty("RULES.FILTER"); //$NON-NLS-1$
-				YAMLConfig config = YAMLConfig.getTestConfig(testFilter);
+				boolean rulesFromRulesContainer = parseBooleanProperty(context, "RULES.FROM.RULES_CONTAINER"); //$NON-NLS-1$
+				YAMLConfig config = null;
+				if (rulesFromRulesContainer) {
+					String testFilter = context.getProperty("RULES.FILTER"); //$NON-NLS-1$
+					config = YAMLConfig.getConfigFromRulesContainer(testFilter);
+				} else {
+					config = getConfiguration(context, javaProject.getProject()
+						.getLocation()
+						.toFile());
+				}
 				StandaloneConfig standaloneConfig = new StandaloneConfig(javaProject, path, config, metadata,
 						selectedSources);
 

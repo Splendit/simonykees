@@ -1,0 +1,18 @@
+!jsparrow.config
+
+selectedProfile:
+
+profiles:
+  - name: profile1
+    rules:
+      - DiamondOperator
+
+  - name: profile2
+    rules:
+      - LambdaToMethodReference
+
+rules:
+  - ArithmethicAssignment 
+  - DiamondOperator
+  - CodeFormatter
+  - LambdaToMethodReference
