@@ -1,9 +1,11 @@
 package eu.jsparrow.core.config;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
+
+import eu.jsparrow.core.rule.RulesContainer;
+import eu.jsparrow.rules.common.RefactoringRule;
 
 /**
  * Model class for configuration data.
@@ -12,33 +14,6 @@ import java.util.List;
  * @since 2.2.2
  */
 public class YAMLConfig {
-
-	@SuppressWarnings("nls")
-	private static final List<String> RULES_FOR_TEST = Collections.unmodifiableList(
-			Arrays.asList(
-					"UseTernaryOperator",
-					"RemoveUnusedLocalVariables", "TryWithResource", "MultiCatch", "FunctionalInterface",
-					"ImmutableStaticFinalCollections",
-					"DiamondOperator", "OverrideAnnotation", "RearrangeClassMembers", "BracketsToControl",
-					"MultiVariableDeclarationLine", "InlineLocalVariables", "EnumsWithoutEquals",
-					"ReImplementingInterface", "RemoveDoubleNegation", "GuardCondition", "CollapseIfStatements",
-					"RemoveExplicitCallToSuper", "RemoveEmptyStatement", "RemoveUnnecessaryThrows",
-					"RemoveModifiersInInterfaceProperties", "RemoveUnusedParameter", "ReorderModifiers", "UseListSort",
-					"HideDefaultConstructorInUtilityClasses", "MakeFieldsAndVariablesFinal", "RemoveCollectionAddAll",
-					"RemoveRedundantTypeCast", "UseFilesBufferedWriter", "UsePredefinedStandardCharset",
-					"RemoveRedundantClose", "ReplaceWrongClassForLogger", "UseSecureRandom",
-					"ReplaceJUnit4AnnotationsWithJupiter", "ReplaceJUnit4AssertionsWithJupiter",
-					"RemoveNewStringConstructor", "InefficientConstructor", "PrimitiveBoxedForString",
-					"IndexOfToContains", "RemoveToStringOnString", "StringLiteralEqualityCheck", "StringConcatToPlus",
-					"UseIsEmptyOnCollections", "ArithmethicAssignment", "StringBufferToBuilder", "WhileToForEach",
-					"ForToForEach", "EnhancedForLoopToStreamForEach", "LambdaForEachIfWrapperToFilter",
-					"StatementLambdaToExpression", "LambdaForEachMap", "FlatMapInsteadOfNestedLoops",
-					"EnhancedForLoopToStreamAnyMatch", "EnhancedForLoopToStreamFindFirst", "LambdaToMethodReference",
-					"UseStringBuilderAppend", "CodeFormatter"
-			// , "OrganizeImports"
-			// The rule with the id "OrganizeImports" is not in the RulesContainer
-
-			));
 
 	/**
 	 * this list holds all IDs of rules which should be executed if no default
@@ -117,18 +92,13 @@ public class YAMLConfig {
 	public static YAMLConfig getTestConfig(String filter) {
 		YAMLConfig config = new YAMLConfig();
 
+		Predicate<String> idPredicate = getFilterPredicate(filter);
 		List<String> profileRules = new LinkedList<>();
-
-		String upperCaseFilter = filter.toUpperCase();
-		if (upperCaseFilter != null && !upperCaseFilter.isEmpty()) {
-			RULES_FOR_TEST.stream()
-				.filter(rule -> rule.toUpperCase()
-					.contains(upperCaseFilter))
-				.forEach(profileRules::add);
-		} else {
-			RULES_FOR_TEST.stream()
-				.forEach(profileRules::add);
-		}
+		RulesContainer.getAllRules(false)
+			.stream()
+			.map(RefactoringRule::getId)
+			.filter(idPredicate)
+			.forEach(profileRules::add);
 
 		YAMLProfile profile = new YAMLProfile();
 		profile.setName("test"); //$NON-NLS-1$
@@ -140,6 +110,21 @@ public class YAMLConfig {
 		config.setSelectedProfile("test"); //$NON-NLS-1$
 
 		return config;
+	}
+
+	private static Predicate<String> getFilterPredicate(String filterText) {
+		if (filterText == null) {
+			return s -> true;
+		}
+		String upperCaseFilter = filterText.trim()
+			.toUpperCase();
+
+		if (upperCaseFilter.isEmpty()) {
+			return s -> true;
+		}
+		return id -> id.toUpperCase()
+			.contains(upperCaseFilter);
+
 	}
 
 	/**
