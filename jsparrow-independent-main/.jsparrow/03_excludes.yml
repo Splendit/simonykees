@@ -1,0 +1,15 @@
+!jsparrow.config
+
+rules:
+  - ArithmethicAssignment 
+  - DiamondOperator
+  - CodeFormatter
+  - LambdaToMethodReference
+
+excludes:
+    excludeModules:
+      - multi-1
+    excludePackages:
+      - base.sub1
+    excludeClasses:
+      - base.AllChanges.java
