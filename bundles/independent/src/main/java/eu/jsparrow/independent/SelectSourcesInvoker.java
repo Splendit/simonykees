@@ -36,9 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.http.JsonUtil;
-/*
- * TODO: Clarify problem of discouraged access.
- */
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
@@ -274,10 +271,6 @@ public class SelectSourcesInvoker {
 		boolean computedStatistics = standaloneConfigs.stream()
 			.map(StandaloneConfig::getStatisticsData)
 			.filter(Objects::nonNull)
-			/*
-			 * TODO: Clarify problem of discouraged access on
-			 * StandaloneStatisticsData
-			 */
 			.map(StandaloneStatisticsData::getMetricData)
 			.anyMatch(Optional::isPresent);
 
@@ -290,10 +283,6 @@ public class SelectSourcesInvoker {
 		Map<String, JsparrowRuleData> rulesData = new HashMap<>();
 
 		for (StandaloneConfig config : standaloneConfigs) {
-			/*
-			 * TODO: Clarify problem of discouraged access on
-			 * config.getStatisticsData().getMetricData()
-			 */
 			JsparrowMetric metrics = config.getStatisticsData()
 				.getMetricData()
 				.orElse(null);
