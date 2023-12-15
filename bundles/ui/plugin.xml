@@ -95,8 +95,6 @@
 			id="eu.jsparrow.ui.EditProfilesHandler" name="%command.name.edit_profiles_handler" />
 		<command defaultHandler="eu.jsparrow.ui.handler.WelcomeHandler"
            id="eu.jsparrow.ui.handler.WelcomeHandler" name="jSparrow Dashboard" />
-		<command defaultHandler="eu.jsparrow.ui.handler.IndependentHandler"
-           id="eu.jsparrow.ui.handler.IndependentHandler" name="jSparrow Independent" />
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page class="eu.jsparrow.ui.preference.SimonykeesPreferencePage"
@@ -150,26 +148,6 @@
         </toolbar>
      </menuContribution>
   	</extension>
-  
- 	  <extension
-        point="org.eclipse.ui.menus">
-     
-     <menuContribution
-           allPopups="false"
-           locationURI="toolbar:org.eclipse.ui.main.toolbar">
-        <toolbar
-              id="eu.jsparrow.independent.startup.toolbar"
-              label="jSparrow Independent">
-           <command
-                 commandId="eu.jsparrow.ui.handler.IndependentHandler"
-                 icon="$nl$/icons/jsparrow-icon-16-003.png"
-                 label="jSparrow Independent"
-                 style="push">
-           </command>
-        </toolbar>
-     </menuContribution>
-  </extension>
-   
  	<!-- jSparrow Marker Annotations -->
 	<extension
          point="org.eclipse.ui.editors.markerAnnotationSpecification">

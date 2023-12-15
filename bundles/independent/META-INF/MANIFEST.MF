@@ -41,4 +41,3 @@ Bundle-ClassPath: lib/plexus-utils.jar,
  lib/woodstox-core.jar,
  .
 Import-Package: org.eclipse.jdt.launching
-Export-Package: eu.jsparrow.independent
