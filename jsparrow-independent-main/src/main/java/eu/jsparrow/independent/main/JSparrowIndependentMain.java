@@ -37,7 +37,6 @@ public class JSparrowIndependentMain {
 
 		final String tempWorkspacePath = "/home/gregor/minimal-sample-projects/temp-workspace/" + val;
 
-		configuration.put("context.containing.jsparrow.properties", TRUE_AS_STRING);
 		configuration.put("debug.enabled", TRUE_AS_STRING);
 
 		configuration.put("STANDALONE.MODE", "SELECT_SOURCES");

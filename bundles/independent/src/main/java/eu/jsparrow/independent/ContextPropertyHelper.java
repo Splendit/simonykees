@@ -45,21 +45,7 @@ public class ContextPropertyHelper {
 
 	@Deprecated
 	public static String getProperty(BundleContext context, String key) {
-		if (!isContextContainingJSparrowProperties(context)) {
-			String value = JSPARROW_INDEPENDENT_CONFIG.get(key);
-			if (value != null) {
-				return value;
-			}
-		}
 		return context.getProperty(key);
-	}
-
-	public static boolean isContextContainingJSparrowProperties(BundleContext context) {
-		String propertyValue = context.getProperty("context.containing.jsparrow.properties");
-		if (propertyValue == null) {
-			return false;
-		}
-		return Boolean.parseBoolean(propertyValue);
 	}
 
 	private ContextPropertyHelper() {
