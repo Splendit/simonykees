@@ -3,7 +3,6 @@ package eu.jsparrow.independent;
 import static eu.jsparrow.independent.ContextPropertyHelper.DEBUG_ENABLED;
 import static eu.jsparrow.independent.ContextPropertyHelper.LICENSE_KEY;
 import static eu.jsparrow.independent.ContextPropertyHelper.STANDALONE_MODE_KEY;
-import static eu.jsparrow.independent.ContextPropertyHelper.getProperty;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -66,7 +65,7 @@ public class JSparrowIndependentHandler {
 	}
 
 	private void doStart(BundleContext context) throws Exception {
-		boolean debugEnabled = Boolean.parseBoolean(getProperty(context, DEBUG_ENABLED));
+		boolean debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
 		LoggingUtil.configureLogger(debugEnabled);
 
 		registerShutdownHook(context);
@@ -121,7 +120,7 @@ public class JSparrowIndependentHandler {
 	}
 
 	private StandaloneMode parseMode(BundleContext context) {
-		String value = getProperty(context, STANDALONE_MODE_KEY);
+		String value = context.getProperty(STANDALONE_MODE_KEY);
 		return StandaloneMode.fromString(value);
 	}
 
@@ -212,7 +211,7 @@ public class JSparrowIndependentHandler {
 		if (yamlStandaloneConfig != null) {
 			licenseKey = yamlStandaloneConfig.getKey();
 		}
-		String cmdlineLicenseKey = getProperty(context, LICENSE_KEY);
+		String cmdlineLicenseKey = context.getProperty(LICENSE_KEY);
 		if (cmdlineLicenseKey != null) {
 			logger.info(Messages.RefactoringInvoker_OverridingConfigWithCommandLine);
 			licenseKey = cmdlineLicenseKey;

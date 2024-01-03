@@ -2,7 +2,6 @@ package eu.jsparrow.independent;
 
 import static eu.jsparrow.independent.ContextPropertyHelper.SELECTED_SOURCES;
 import static eu.jsparrow.independent.ContextPropertyHelper.USE_DEFAULT_CONFIGURATION;
-import static eu.jsparrow.independent.ContextPropertyHelper.getProperty;
 
 import java.io.File;
 import java.io.IOException;
@@ -412,7 +411,7 @@ public class RefactoringInvoker {
 	}
 
 	private boolean parseUseDefaultConfiguration(BundleContext context) {
-		String useDefaultConfigValue = getProperty(context, USE_DEFAULT_CONFIGURATION);
+		String useDefaultConfigValue = context.getProperty(USE_DEFAULT_CONFIGURATION);
 		return Boolean.parseBoolean(useDefaultConfigValue);
 	}
 
@@ -446,7 +445,7 @@ public class RefactoringInvoker {
 				workspaceRoot.canRead(), workspaceRoot.canWrite(), workspaceRoot.canExecute());
 		logWorkSpaceContent(workspaceRoot);
 
-		String folder = getProperty(context, ROOT_PROJECT_BASE_PATH);
+		String folder =context.getProperty(ROOT_PROJECT_BASE_PATH);
 
 		List<IJavaProject> imported;
 
@@ -505,7 +504,7 @@ public class RefactoringInvoker {
 		}
 
 		StandaloneStatisticsMetadata metadata = extractStatisticsMetadata(context);
-		String selectedSources = getProperty(context, SELECTED_SOURCES);
+		String selectedSources = context.getProperty(SELECTED_SOURCES);
 
 		for (IJavaProject javaProject : importedProjects) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
