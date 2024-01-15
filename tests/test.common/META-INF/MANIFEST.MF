@@ -9,7 +9,6 @@ Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Require-Bundle: eu.jsparrow.rules.api,
  eu.jsparrow.test.framework,
- javax.annotation;bundle-version="[1.2.0,2.0.0)",
  org.apache.commons.lang3,
  org.eclipse.jdt.launching;bundle-version="[3.5.1,4.0.0)",
  org.eclipse.core.runtime;bundle-version="[3.11.0,4.0.0)",
