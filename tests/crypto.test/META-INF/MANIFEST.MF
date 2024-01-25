@@ -9,7 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT Consulting GmbH
 Require-Bundle: org.mockito;bundle-version="[2.13.0,3.0.0)",
  org.hamcrest;bundle-version="[1.1.0,2.0.0)",
- org.junit,
+ org.junit;bundle-version="[4.13.2,5.0.0)",
  org.junit.platform.commons,
  org.junit.platform.engine,
  org.opentest4j

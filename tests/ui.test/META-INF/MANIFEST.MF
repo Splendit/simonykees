@@ -13,7 +13,7 @@ Require-Bundle: org.eclipse.jdt.junit4.runtime;bundle-version="[1.2.0,2.0.0)",
  eu.jsparrow.logging,
  eu.jsparrow.license.netlicensing,
  eu.jsparrow.test.framework,
- org.junit,
+ org.junit;bundle-version="[4.13.2,5.0.0)",
  org.junit.platform.commons,
  org.junit.platform.engine,
  org.opentest4j
