@@ -13,7 +13,7 @@ Require-Bundle: org.eclipse.jdt.junit4.runtime;bundle-version="[1.2.0,2.0.0)",
  eu.jsparrow.rules.imports,
  eu.jsparrow.rules.java10,
  org.junit;bundle-version="[4.13.2,5.0.0)",
- org.junit.platform.commons,
+ org.junit.platform.commons;bundle-version="[1.8.1,2.0.0)",
  org.junit.platform.engine,
  org.opentest4j
 Bundle-Vendor: Splendit IT-Consulting GmbH
