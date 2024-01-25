@@ -7,7 +7,7 @@ Bundle-Version: 4.19.0.qualifier
 Fragment-Host: eu.jsparrow.crypto
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT Consulting GmbH
-Require-Bundle: org.mockito;bundle-version="[2.13.0,3.0.0)",
+Require-Bundle: org.mockito;bundle-version="[2.23.0,3.0.0)",
  org.hamcrest;bundle-version="[1.1.0,2.0.0)",
  org.junit;bundle-version="[4.13.2,5.0.0)",
  org.junit.platform.commons;bundle-version="[1.8.1,2.0.0)",
