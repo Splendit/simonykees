@@ -18,7 +18,7 @@ Require-Bundle: eu.jsparrow.logging,
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Import-Package: org.junit.jupiter.api;version="[5.8.1,6.0.0)",
  org.junit.jupiter.api.function;version="[5.8.1,6.0.0)",
- org.junit.jupiter.engine.execution,
+ org.junit.jupiter.engine.execution;version="[5.8.1,6.0.0)",
  org.junit.jupiter.params,
  org.junit.jupiter.params.provider,
  org.eclipse.jdt.core
