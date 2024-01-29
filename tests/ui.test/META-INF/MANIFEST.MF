@@ -5,7 +5,7 @@ Bundle-Name: jSparrow UI Test Fragment
 Bundle-SymbolicName: eu.jsparrow.ui.test
 Bundle-Version: 4.19.0.qualifier
 Fragment-Host: eu.jsparrow.ui
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Require-Bundle: org.eclipse.jdt.junit4.runtime;bundle-version="[1.2.0,2.0.0)",
  org.mockito;bundle-version="[2.23.0,3.0.0)",

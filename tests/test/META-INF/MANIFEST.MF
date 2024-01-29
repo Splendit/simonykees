@@ -5,7 +5,7 @@ Bundle-Name: jSparrow Test Fragment
 Bundle-SymbolicName: eu.jsparrow.test
 Bundle-Version: 4.19.0.qualifier
 Fragment-Host: eu.jsparrow.core
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.license.netlicensing,
  eu.jsparrow.test.framework,

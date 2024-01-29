@@ -4,7 +4,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Test Framework
 Bundle-SymbolicName: eu.jsparrow.test.framework
 Bundle-Version: 4.19.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Require-Bundle: org.eclipse.jdt.core;bundle-version="[3.29.0,4.0.0)",

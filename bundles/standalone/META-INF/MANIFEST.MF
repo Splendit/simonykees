@@ -5,7 +5,7 @@ Bundle-Name: jSparrow Standalone
 Bundle-SymbolicName: eu.jsparrow.standalone;singleton:=true
 Bundle-Version: 4.19.0.qualifier
 Bundle-Activator: eu.jsparrow.standalone.Activator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.i18n,
