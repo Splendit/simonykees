@@ -21,4 +21,3 @@ Require-Bundle: eu.jsparrow.logging,
 Service-Component: OSGI-INF/eu.jsparrow.rules.imports.ImportsRuleServiceImpl.xml
 Bundle-ActivationPolicy: lazy
 Export-Package: eu.jsparrow.rules.imports
-Import-Package: org.eclipse.jdt.core.manipulation
