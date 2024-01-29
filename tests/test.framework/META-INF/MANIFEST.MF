@@ -22,5 +22,5 @@ Import-Package: org.eclipse.jdt.core,
  org.junit.jupiter.api;version="[5.8.1,6.0.0)",
  org.junit.jupiter.api.function;version="[5.8.1,6.0.0)",
  org.junit.jupiter.engine.execution;version="[5.8.1,6.0.0)",
- org.junit.jupiter.params,
- org.junit.jupiter.params.provider
+ org.junit.jupiter.params;version="[5.8.1,6.0.0)",
+ org.junit.jupiter.params.provider;version="[5.8.1,6.0.0)"
