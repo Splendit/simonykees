@@ -129,6 +129,10 @@
 		<maven.install.version>3.0.0-M1</maven.install.version>
 		<maven.release.version>3.0.0-M4</maven.release.version>
 		<maven.resources.version>3.2.0</maven.resources.version>
+		<maven.jarsigner.version>3.0.0</maven.jarsigner.version>
+		<maven.enforcer.version>3.0.0</maven.enforcer.version>
+		<lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
+		<directory.maven.version>1.0</directory.maven.version>
 		<proguard.plugin.version>2.5.3</proguard.plugin.version>
 		<proguard.base.version>6.2.2</proguard.base.version>
 		<sonar.plugin.version>3.9.1.2184</sonar.plugin.version>
@@ -224,7 +228,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0-M2</version>
+				<version>${maven.enforcer.version}</version>
 				<executions>
 					<execution>
 						<id>enforce-maven</id>
@@ -308,7 +312,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jarsigner-plugin</artifactId>
-				<version>1.4</version>
+				<version>${maven.jarsigner.version}</version>
 				<configuration>
 					<keystore>${keystore.directory}/jarsigner.keystore</keystore>
 					<storepass>FZHr9ba3fRtRQ5NcNjDUGK7</storepass>
@@ -450,7 +454,7 @@
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
+					<version>${lifecycle.mapping.version}</version>
 					<configuration>
 						<lifecycleMappingMetadata>
 							<pluginExecutions>
@@ -503,7 +507,7 @@
 					<!-- https://github.com/jdcasey/directory-maven-plugin#directory-of-goal -->
 					<groupId>org.commonjava.maven.plugins</groupId>
 					<artifactId>directory-maven-plugin</artifactId>
-					<version>0.3</version>
+					<version>${directory.maven.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
