@@ -108,35 +108,35 @@
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<tycho.version>2.7.0</tycho.version>
+		<tycho.version>2.7.5</tycho.version>
 		<tycho.test.platformArgs />
 		<tycho.test.jvmArgs>-Xmx512m</tycho.test.jvmArgs>
 
-		<maven.site.version>3.11.0</maven.site.version>
-		<maven.wagon.version>3.5.1</maven.wagon.version>
-		<maven.javadoc.version>3.3.2</maven.javadoc.version>
-		<maven.info.version>3.2.2</maven.info.version>
-		<maven.jxr.version>3.1.1</maven.jxr.version>
-		<maven.surefire.version>3.0.0-M5</maven.surefire.version>
+		<maven.site.version>4.0.0-M13</maven.site.version>
+		<maven.wagon.version>3.5.3</maven.wagon.version>
+		<maven.javadoc.version>3.6.3</maven.javadoc.version>
+		<maven.info.version>3.5.0</maven.info.version>
+		<maven.jxr.version>3.3.2</maven.jxr.version>
+		<maven.surefire.version>3.2.5</maven.surefire.version>
 		<maven.findbugs.version>3.0.5</maven.findbugs.version>
 		<maven.changelog.version>2.3</maven.changelog.version>
-		<maven.versions.version>2.9.0</maven.versions.version>
-		<maven.antrun.version>3.0.0</maven.antrun.version>
-		<maven.assembly.version>3.3.0</maven.assembly.version>
-		<maven.dependency.version>3.2.0</maven.dependency.version>
-		<maven.clean.version>3.1.0</maven.clean.version>
-		<maven.deploy.version>3.0.0-M2</maven.deploy.version>
-		<maven.install.version>3.0.0-M1</maven.install.version>
-		<maven.release.version>3.0.0-M4</maven.release.version>
-		<maven.resources.version>3.2.0</maven.resources.version>
+		<maven.versions.version>2.16.2</maven.versions.version>
+		<maven.antrun.version>3.1.0</maven.antrun.version>
+		<maven.assembly.version>3.6.0</maven.assembly.version>
+		<maven.dependency.version>3.6.1</maven.dependency.version>
+		<maven.clean.version>3.3.2</maven.clean.version>
+		<maven.deploy.version>3.1.1</maven.deploy.version>
+		<maven.install.version>3.1.1</maven.install.version>
+		<maven.release.version>3.0.1</maven.release.version>
+		<maven.resources.version>3.3.1</maven.resources.version>
 		<maven.jarsigner.version>3.0.0</maven.jarsigner.version>
-		<maven.enforcer.version>3.0.0</maven.enforcer.version>
+		<maven.enforcer.version>3.4.1</maven.enforcer.version>
 		<lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
 		<directory.maven.version>1.0</directory.maven.version>
-		<proguard.plugin.version>2.5.3</proguard.plugin.version>
+		<proguard.plugin.version>2.6.0</proguard.plugin.version>
 		<proguard.base.version>6.2.2</proguard.base.version>
-		<sonar.plugin.version>3.9.1.2184</sonar.plugin.version>
-		<jacoco.plugin.version>0.8.7</jacoco.plugin.version>
+		<sonar.plugin.version>3.10.0.2594</sonar.plugin.version>
+		<jacoco.plugin.version>0.8.11</jacoco.plugin.version>
 
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 
