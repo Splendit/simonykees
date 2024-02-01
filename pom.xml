@@ -182,9 +182,9 @@
 
 	<repositories>
 		<repository>
-			<id>2021-06-updates</id>
+			<id>2022-03-updates</id>
 			<layout>p2</layout>
-			<url>http://download.eclipse.org/eclipse/updates/4.20</url>
+			<url>http://download.eclipse.org/eclipse/updates/4.23</url>
 		</repository>
 		<repository>
 			<id>2021-06</id>
