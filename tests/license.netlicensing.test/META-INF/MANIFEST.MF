@@ -8,8 +8,8 @@ Fragment-Host: eu.jsparrow.license.netlicensing
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.eclipse.jdt.junit4.runtime;bundle-version="[1.2.0,2.0.0)",
  eu.jsparrow.logging,
- org.mockito;bundle-version="[2.23.0,3.0.0)",
- org.hamcrest;bundle-version="[1.1.0,2.0.0)",
+ org.mockito.mockito-core;bundle-version="[2.23.0,6.0.0)",
+ org.hamcrest;bundle-version="[1.1.0,3.0.0)",
  eu.jsparrow.rules.imports,
  eu.jsparrow.rules.java10,
  org.junit;bundle-version="[4.13.2,5.0.0)",
