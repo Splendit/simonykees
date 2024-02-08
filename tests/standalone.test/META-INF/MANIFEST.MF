@@ -7,7 +7,7 @@ Bundle-Version: 4.19.0.qualifier
 Fragment-Host: eu.jsparrow.standalone
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: Splendit IT-Consulting GmbH
-Require-Bundle: org.mockito;bundle-version="[2.23.0,6.0.0)",
+Require-Bundle: org.mockito.mockito-core;bundle-version="[2.23.0,6.0.0)",
  org.hamcrest;bundle-version="[1.1.0,3.0.0)",
  eu.jsparrow.rules.api, 
  org.junit;bundle-version="[4.13.2,5.0.0)",

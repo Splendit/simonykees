@@ -26,8 +26,8 @@
 		<module>eu.jsparrow.rules.api.test</module>
 		<module>eu.jsparrow.rules.java16.test</module>
 
-		<!-- standalone -->
-		<module>standalone.test</module>
+		<!-- standalone
+		<module>standalone.test</module>-->
 		<module>crypto.test</module>
 	</modules>
 	

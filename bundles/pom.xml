@@ -39,8 +39,8 @@
 		<module>core</module>
 		<module>ui</module>
 
-		<!-- standalone -->
-		<module>standalone</module>
+		<!-- standalone
+		<module>standalone</module>-->
 		<module>crypto</module>
 	</modules>
 
