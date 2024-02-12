@@ -1,6 +1,6 @@
 package eu.jsparrow.core.refactorer;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
@@ -36,7 +36,7 @@ public class StandaloneStatisticsDataTest {
 
 	private RefactoringRule rule = new ArithmethicAssignmentRule();
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		filesCount = 5;
 		projectName = "testProject";

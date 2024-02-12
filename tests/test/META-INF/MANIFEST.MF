@@ -17,9 +17,6 @@ Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.rules.imports,
  eu.jsparrow.rules.java10,
  eu.jsparrow.rules.java16,
- org.junit;bundle-version="[4.13.2,5.0.0)",
- org.junit.platform.commons;bundle-version="[1.8.1,2.0.0)",
- org.junit.platform.engine;bundle-version="[1.8.1,2.0.0)",
  org.opentest4j;bundle-version="[1.2.0,2.0.0)"
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Import-Package: org.junit.jupiter.api;version="[5.8.1,6.0.0)",

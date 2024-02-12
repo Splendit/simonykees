@@ -1,6 +1,6 @@
 package eu.jsparrow.core.visitor.make_final;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;

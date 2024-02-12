@@ -1,17 +1,15 @@
 package eu.jsparrow.license.netlicensing.validation.impl;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
@@ -21,24 +19,23 @@ import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.testhelper.NetlicensingLicenseModelFactory;
 
-@RunWith(MockitoJUnitRunner.class)
 public class NetlicensingLicenseValidationTest {
 
-	@Mock
 	NetlicensingLicenseCache cache;
 
-	@Mock
 	NetlicensingValidationParametersFactory parametersFactory;
 
-	@Mock
 	NetlicensingValidationRequest request;
 
 	private NetlicensingLicenseModel model;
 
 	private NetlicensingLicenseValidation netlicensingValidation;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
+		cache = mock(NetlicensingLicenseCache.class);
+		parametersFactory = mock(NetlicensingValidationParametersFactory.class);
+		request = mock(NetlicensingValidationRequest.class);
 		model = NetlicensingLicenseModelFactory.create();
 		netlicensingValidation = new NetlicensingLicenseValidation(model, cache, parametersFactory, request);
 	}
@@ -74,15 +71,13 @@ public class NetlicensingLicenseValidationTest {
 		when(parametersFactory.createVerifyParameters(any())).thenReturn(validationParameters);
 		when(parametersFactory.createValidationParameters(any())).thenReturn(validationParameters);
 
-		when(request.send(any(), any())).thenReturn(intermediateValidationResult)
-			.thenReturn(finalValidationResult);
+		when(request.send(any(), any())).thenReturn(intermediateValidationResult).thenReturn(finalValidationResult);
 
 		netlicensingValidation.validate();
 
 		ArgumentCaptor<NetlicensingLicenseModel> argument = ArgumentCaptor.forClass(NetlicensingLicenseModel.class);
 		verify(parametersFactory).createValidationParameters(argument.capture());
-		assertEquals(LicenseType.NODE_LOCKED, argument.getValue()
-			.getType());
+		assertEquals(LicenseType.NODE_LOCKED, argument.getValue().getType());
 	}
 
 	@Test

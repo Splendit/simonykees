@@ -62,7 +62,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitorTest
 
 	@Test
 	public void visit_qualifiedAssumeThat_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Assume.class.getName());
+		defaultFixture.addImport("org.junit.Assume");
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 		defaultFixture.addImport("org.hamcrest.CoreMatchers.notNullValue", true, false);
 		String original = "" +
@@ -85,7 +85,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitorTest
 
 	@Test
 	public void visit_needingMatcherAssumeQualifier_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Assume.class.getName());
+		defaultFixture.addImport("org.junit.Assume");
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 		defaultFixture.addImport("org.hamcrest.CoreMatchers.notNullValue", true, false);
 		String original = "" +
