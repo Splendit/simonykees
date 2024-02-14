@@ -1,13 +1,13 @@
 package eu.jsparrow.standalone;
 
 import static org.hamcrest.Matchers.isEmptyString;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.File;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class YAMLStandaloneConfigTest {
 

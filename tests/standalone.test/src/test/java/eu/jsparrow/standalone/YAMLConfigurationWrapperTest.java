@@ -3,15 +3,15 @@ package eu.jsparrow.standalone;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLLoggerRule;
@@ -25,7 +25,7 @@ public class YAMLConfigurationWrapperTest {
 
 	private YAMLConfigurationWrapper yamlConfigurationWrapper;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		yamlConfigurationWrapper = new YAMLConfigurationWrapper();
 	}

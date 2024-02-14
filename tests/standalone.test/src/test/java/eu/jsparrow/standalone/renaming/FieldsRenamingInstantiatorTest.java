@@ -19,8 +19,8 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorWrapper;
@@ -34,7 +34,7 @@ public class FieldsRenamingInstantiatorTest {
 	private IJavaProject javaProject;
 	private FieldDeclarationVisitorWrapper fieldDeclarationVisitorWrapper;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		javaProject = mock(IJavaProject.class);
 		fieldDeclarationVisitorWrapper = mock(FieldDeclarationVisitorWrapper.class);

@@ -3,8 +3,8 @@ package eu.jsparrow.standalone;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,9 +31,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLExcludes;
@@ -67,7 +67,7 @@ public class StandaloneConfigTest {
 	private CompilationUnitProvider iCompilationUnitsProvider;
 	private YAMLConfig config;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUpClass() throws IOException {
 		path = Files.createTempDirectory("jsparrow-standlaone-test-"); //$NON-NLS-1$
 	}
@@ -78,7 +78,7 @@ public class StandaloneConfigTest {
 		Files.deleteIfExists(path);
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 
 		workspace = mock(IWorkspace.class);

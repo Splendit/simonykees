@@ -3,7 +3,7 @@ package eu.jsparrow.standalone.xml;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,8 +16,8 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.junit.Test;
-import org.junit.function.ThrowingRunnable;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.osgi.framework.Bundle;
 
 import eu.jsparrow.standalone.Activator;
@@ -75,7 +75,7 @@ public class FormatterXmlParserTest {
 	@Test
 	public void readSettings_invalidPath_shouldThrowException() throws Exception {
 		String invalidPath = String.join("/", "/xyz", "unavailable.xml");
-		ThrowingRunnable tr = () -> FormatterXmlParser.getFormatterSettings(new File(invalidPath));
+		Executable tr = () -> FormatterXmlParser.getFormatterSettings(new File(invalidPath));
 		FormatterXmlParserException e = assertThrows(FormatterXmlParserException.class, tr);
 
 		assertThat(e.getMessage(), startsWith(PATH_UNAVAILABLE));
@@ -83,7 +83,7 @@ public class FormatterXmlParserTest {
 
 	@Test
 	public void readSettings_nullPath_shouldThrowException() throws Exception {
-		ThrowingRunnable tr = () -> FormatterXmlParser.getFormatterSettings(null);
+		Executable tr = () -> FormatterXmlParser.getFormatterSettings(null);
 		FormatterXmlParserException e = assertThrows(FormatterXmlParserException.class, tr);
 
 		assertThat(e.getMessage(), startsWith(FILE_PATH_IS_NULL));
@@ -91,7 +91,7 @@ public class FormatterXmlParserTest {
 
 	@Test
 	public void readSettings_missingProfiles_shouldThrowException() throws Exception {
-		ThrowingRunnable tr = () -> FormatterXmlParser.getFormatterSettings(loadResource("missing-profiles.xml"));
+		Executable tr = () -> FormatterXmlParser.getFormatterSettings(loadResource("missing-profiles.xml"));
 		FormatterXmlParserException e = assertThrows(FormatterXmlParserException.class, tr);
 
 		assertThat(e.getMessage(), startsWith(UNEXPECTED_XML_STRUCTURE));
@@ -99,7 +99,7 @@ public class FormatterXmlParserTest {
 
 	@Test
 	public void readSettings_missingProfile_shouldThrowException() throws Exception {
-		ThrowingRunnable tr = () -> FormatterXmlParser.getFormatterSettings(loadResource("missing-profile.xml"));
+		Executable tr = () -> FormatterXmlParser.getFormatterSettings(loadResource("missing-profile.xml"));
 		FormatterXmlParserException e = assertThrows(FormatterXmlParserException.class, tr);
 
 		assertThat(e.getMessage(), startsWith(UNEXPECTED_XML_STRUCTURE));
@@ -107,7 +107,7 @@ public class FormatterXmlParserTest {
 
 	@Test
 	public void readSettings_missingSettings_shouldThrowException() throws Exception {
-		ThrowingRunnable tr = () -> FormatterXmlParser.getFormatterSettings(loadResource("missing-settings.xml"));
+		Executable tr = () -> FormatterXmlParser.getFormatterSettings(loadResource("missing-settings.xml"));
 		FormatterXmlParserException e = assertThrows(FormatterXmlParserException.class, tr);
 
 		assertThat(e.getMessage(), startsWith(NO_FORMATTER_SETTINGS_FOUND));
@@ -115,7 +115,7 @@ public class FormatterXmlParserTest {
 
 	@Test
 	public void readSettings_noFormatterKind_shouldThrowException() throws Exception {
-		ThrowingRunnable tr = () -> FormatterXmlParser.getFormatterSettings(loadResource("no-formatter-kind.xml"));
+		Executable tr = () -> FormatterXmlParser.getFormatterSettings(loadResource("no-formatter-kind.xml"));
 		FormatterXmlParserException e = assertThrows(FormatterXmlParserException.class, tr);
 
 		assertThat(e.getMessage(), startsWith(NO_CODE_FORMATTER_PROFILE_FOUND));

@@ -22,9 +22,9 @@ Require-Bundle: eu.jsparrow.logging,
  org.eclipse.osgi;bundle-version="[3.17.200,4.0.0)",
  org.eclipse.osgi.services;bundle-version="[3.10.200,4.0.0)",
  org.eclipse.core.jobs;bundle-version="[3.12.100,4.0.0)",
- org.eclipse.m2e.core;bundle-version="[1.18.4,2.0.0)",
- org.eclipse.m2e.jdt;bundle-version="[1.18.3,2.0.0)",
- org.eclipse.m2e.maven.runtime;bundle-version="[1.18.3,2.0.0)",
+ org.eclipse.m2e.core;bundle-version="[1.18.4,3.0.0)",
+ org.eclipse.m2e.jdt;bundle-version="[1.18.3,3.0.0)",
+ org.eclipse.m2e.maven.runtime;bundle-version="[1.18.3,4.0.0)",
  org.eclipse.core.net;bundle-version="[1.3.1100,2.0.0)",
  org.freemarker;bundle-version="[2.3.22,2.4.0)"
 Bundle-Vendor: Splendit IT-Consulting GmbH

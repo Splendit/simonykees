@@ -14,8 +14,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.BundleContext;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
@@ -34,7 +34,7 @@ public class RefactoringInvokerTest {
 
 	private MavenProjectImporter mavenImporter;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		refactoringInvoker = new TestableRefactoringInvoker();
 		mavenImporter = mock(MavenProjectImporter.class);
