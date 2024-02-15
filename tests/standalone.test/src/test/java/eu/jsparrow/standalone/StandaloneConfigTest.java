@@ -3,10 +3,10 @@ package eu.jsparrow.standalone;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -30,9 +30,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.junit.AfterClass;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.config.YAMLConfig;
@@ -72,7 +72,7 @@ public class StandaloneConfigTest {
 		path = Files.createTempDirectory("jsparrow-standlaone-test-"); //$NON-NLS-1$
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDownClass() throws IOException {
 
 		Files.deleteIfExists(path);
@@ -121,8 +121,8 @@ public class StandaloneConfigTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void createRefactoringStates_shouldThrowStandaloneException() throws Exception {
-		doThrow(JavaModelException.class).when(pipeline)
-			.createRefactoringState(any(ICompilationUnit.class), any(List.class));
+		doThrow(JavaModelException.class).when(pipeline).createRefactoringState(any(ICompilationUnit.class),
+				any(List.class));
 
 		assertThrows(StandaloneException.class, () -> standaloneConfig.createRefactoringStates());
 
@@ -136,8 +136,7 @@ public class StandaloneConfigTest {
 		when(excludes.getExcludePackages()).thenReturn(Collections.emptyList());
 		when(config.getExcludes()).thenReturn(excludes);
 
-		assertThrows(StandaloneException.class, 
-				() -> standaloneConfig.createRefactoringStates());
+		assertThrows(StandaloneException.class, () -> standaloneConfig.createRefactoringStates());
 	}
 
 	@Test
@@ -170,8 +169,7 @@ public class StandaloneConfigTest {
 	@Test
 	public void computeRefactoring_shouldThrowStandaloneException() throws Exception {
 		hasRefactoringStates = true;
-		doThrow(RefactoringException.class).when(pipeline)
-			.doRefactoring(any(IProgressMonitor.class));
+		doThrow(RefactoringException.class).when(pipeline).doRefactoring(any(IProgressMonitor.class));
 		when(config.getRules()).thenReturn(Collections.singletonList("CodeFormatter"));//$NON-NLS-1$
 
 		assertThrows(StandaloneException.class, () -> standaloneConfig.computeRefactoring());
@@ -189,8 +187,7 @@ public class StandaloneConfigTest {
 	@Test
 	public void commitChanges_shouldThrowStandaloneException() throws Exception {
 		hasRefactoringStates = true;
-		doThrow(RefactoringException.class).when(pipeline)
-			.commitRefactoring();
+		doThrow(RefactoringException.class).when(pipeline).commitRefactoring();
 
 		assertThrows(StandaloneException.class, () -> standaloneConfig.commitRefactoring());
 	}
@@ -208,7 +205,7 @@ public class StandaloneConfigTest {
 			ICompilationUnit iCompilationUnit = mock(ICompilationUnit.class);
 			iCompilationUnitsProvider = mock(CompilationUnitProvider.class);
 			when(iCompilationUnitsProvider.getFilteredCompilationUnits())
-				.thenReturn(Collections.singletonList(iCompilationUnit));
+					.thenReturn(Collections.singletonList(iCompilationUnit));
 			super.compilationUnitsProvider = iCompilationUnitsProvider;
 
 			super.statisticsData = new StandaloneStatisticsData(1, "TestProject", super.statisticsMetadata, //$NON-NLS-1$
@@ -229,6 +226,5 @@ public class StandaloneConfigTest {
 		public List<RefactoringRule> getProjectRules() {
 			return Collections.singletonList(new CodeFormatterRule());
 		}
-
 	}
 }
