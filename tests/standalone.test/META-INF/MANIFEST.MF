@@ -18,6 +18,5 @@ Import-Package: org.junit;version="4.13.2",
  org.junit.jupiter.engine.execution;version="[5.8.1,6.0.0)",
  org.junit.jupiter.params;version="[5.8.1,6.0.0)",
  org.junit.jupiter.params.provider;version="[5.8.1,6.0.0)",
- org.junit.rules;version="4.13.2",
  org.junit.runner;version="4.13.2",
  org.junit.runners;version="4.13.2"

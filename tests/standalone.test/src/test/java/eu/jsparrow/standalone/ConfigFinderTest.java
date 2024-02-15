@@ -5,27 +5,28 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import org.mockito.Mock;
 import org.slf4j.Logger;
 
 import eu.jsparrow.standalone.ConfigFinder.ConfigType;
@@ -43,19 +44,31 @@ public class ConfigFinderTest {
 	 * Base setup used for all other inner classes.
 	 */
 	public abstract static class ConfigFinderBaseTest {
-		ConfigFinder configFinder;
 
-		@Mock
+		Path tempDirectory;
+		ConfigFinder configFinder;
 		Logger mockLogger;
 
-		@Rule
-		public TemporaryFolder folder = new TemporaryFolder();
-
 		@Before
-		public void setUp() {
-			initMocks(this);
+		public void setUp() throws IOException {
+			mockLogger = mock(Logger.class);
+			tempDirectory = Files.createTempDirectory("jsparrow-standalone-test-").toAbsolutePath();
+			assertTrue(tempDirectory.toFile().getName().startsWith("jsparrow-standalone-test-"));
+			assertEquals("tmp", tempDirectory.toFile().getParentFile().getName());
 			configFinder = new ConfigFinder();
 			configFinder.setLogger(mockLogger);
+		}
+
+		@After
+		public void tearDown() throws IOException {
+			assertTrue(Files.isDirectory(tempDirectory));
+			File[] childFiles = tempDirectory.toFile().listFiles();
+			for (File childFile : childFiles) {
+				assertTrue(childFile.isFile());
+				Files.delete(childFile.toPath());
+			}
+			Files.delete(tempDirectory);
+
 		}
 	}
 
@@ -75,12 +88,11 @@ public class ConfigFinderTest {
 
 		@Test
 		public void getYAMLFilePath_validConfigFile_isPresentTrue() throws IOException {
-			folder.newFile(configFileName);
+			Path newFile = new File(tempDirectory.toFile(), configFileName).toPath();
 
-			Path path = Paths.get(folder.getRoot()
-				.getAbsolutePath());
+			Files.createFile(newFile);
 
-			Optional<String> configFile = configFinder.getYAMLFilePath(path, ConfigType.CONFIG_FILE);
+			Optional<String> configFile = configFinder.getYAMLFilePath(tempDirectory, ConfigType.CONFIG_FILE);
 
 			assertTrue(String.format("Valid config file '%s' should be found", configFileName), configFile.isPresent());
 		}
@@ -103,12 +115,11 @@ public class ConfigFinderTest {
 
 		@Test
 		public void getYAMLFilePath_invalidConfigFile_isPresentFalse() throws IOException {
-			folder.newFile(configFileName);
+			Path newFile = new File(tempDirectory.toFile(), configFileName).toPath();
 
-			Path path = Paths.get(folder.getRoot()
-				.getAbsolutePath());
+			Files.createFile(newFile);
 
-			Optional<String> configFile = configFinder.getYAMLFilePath(path, ConfigType.CONFIG_FILE);
+			Optional<String> configFile = configFinder.getYAMLFilePath(tempDirectory, ConfigType.CONFIG_FILE);
 
 			assertFalse(String.format("Invalid config file '%s' should not be found", configFileName),
 					configFile.isPresent());
@@ -122,10 +133,7 @@ public class ConfigFinderTest {
 
 		@Test
 		public void getYAMLFilePath_noConfigFile_isPresentFalse() {
-			Path path = Paths.get(folder.getRoot()
-				.getAbsolutePath());
-
-			Optional<String> configFile = configFinder.getYAMLFilePath(path, ConfigType.CONFIG_FILE);
+			Optional<String> configFile = configFinder.getYAMLFilePath(tempDirectory, ConfigType.CONFIG_FILE);
 
 			assertFalse("Config file does not exist and should not be present", configFile.isPresent());
 		}
@@ -151,29 +159,58 @@ public class ConfigFinderTest {
 		}
 
 		@Test
-		public void getYAMLFilePath_multipleMatches_firstMatchReturned() throws IOException {
+		public void getYAMLFilePath_multipleMatches_firstReturned() throws IOException {
 			String expectedFirstFileName = "CONFIG.YAML";
 
-			File expectedFirstFile = folder.newFile(expectedFirstFileName);
-			folder.newFile("config.yaml");
-			folder.newFile("config.yml");
-			folder.newFile("Config.yaml");
-			folder.newFile("Config.yml");
-			folder.newFile("COnfig.yml");
+			List<String> fileNames = Arrays.asList(expectedFirstFileName, "config.yaml", "config.yml", "Config.yaml", "Config.yml",
+					"COnfig.yml");
 
-			Path path = Paths.get(folder.getRoot()
-				.getAbsolutePath());
-
-			Optional<String> configFile = configFinder.getYAMLFilePath(path, ConfigType.CONFIG_FILE);
-
-			// configFileName is used for a nicer assert message exclusively
-			String configFileName = "<empty>";
-			if (configFile.isPresent()) {
-				configFileName = StringUtils.substringAfterLast(configFile.get(), "/");
+			for (String fileName : fileNames) {
+				Path nextFile = new File(tempDirectory.toFile(), fileName).toPath();
+				Files.createFile(nextFile);
 			}
 
-			assertEquals(String.format("Expected the first valid config file to be '%s' and not '%s'",
-					expectedFirstFileName, configFileName), expectedFirstFile.getAbsolutePath(), configFile.get());
+			Optional<String> configFile = configFinder.getYAMLFilePath(tempDirectory, ConfigType.CONFIG_FILE);
+
+			String configFileName = StringUtils.substringAfterLast(configFile.get(), "/");
+			assertEquals(expectedFirstFileName, configFileName);
+
+		}
+
+		@Test
+		public void getYAMLFilePath_multipleMatches_lastReturned() throws IOException {
+			String expectedFirstFileName = "CONFIG.YAML";
+
+			List<String> fileNames = Arrays.asList("config.yml", "Config.yaml", "Config.yml", "COnfig.yml",
+					expectedFirstFileName);
+
+			for (String fileName : fileNames) {
+				Path file = new File(tempDirectory.toFile(), fileName).toPath();
+				Files.createFile(file);
+			}
+			
+			Optional<String> configFile = configFinder.getYAMLFilePath(tempDirectory, ConfigType.CONFIG_FILE);
+
+			String configFileName = StringUtils.substringAfterLast(configFile.get(), "/");
+			assertEquals(expectedFirstFileName, configFileName);
+		}
+
+		@Test
+		public void getYAMLFilePath_multipleMatches_3rdReturned() throws IOException {
+			String expectedFirstFileName = "CONFIG.YAML";
+
+			List<String> fileNames = Arrays.asList("config.yaml", "Config.yaml", expectedFirstFileName,
+					"Config.yml", "COnfig.yml");
+
+			for (String fileName : fileNames) {
+				Path file = new File(tempDirectory.toFile(), fileName).toPath();
+				Files.createFile(file);
+			}
+
+			Optional<String> configFile = configFinder.getYAMLFilePath(tempDirectory, ConfigType.CONFIG_FILE);
+
+			String configFileName = StringUtils.substringAfterLast(configFile.get(), "/");
+			assertEquals(expectedFirstFileName, configFileName);
 		}
 	}
 }
