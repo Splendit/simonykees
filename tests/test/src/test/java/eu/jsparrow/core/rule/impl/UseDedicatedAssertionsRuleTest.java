@@ -48,7 +48,7 @@ class UseDedicatedAssertionsRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Use Dedicated Assertions"));
+		assertEquals("Use Dedicated Assertions", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT, Tag.CODING_CONVENTIONS), description.getTags());
 		assertEquals(2, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),

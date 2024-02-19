@@ -59,7 +59,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace JUnit 3 Test Cases"));
+		assertEquals("Replace JUnit 3 Test Cases", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT), description.getTags());
 		assertEquals(15, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(), equalTo(

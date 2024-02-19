@@ -42,7 +42,7 @@ public class HideDefaultConstructorInUtilityClassesRuleTest extends SingleRuleTe
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Hide Default Constructor In Utility Classes"));
+		assertEquals("Hide Default Constructor In Utility Classes", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS), description.getTags());
 		assertEquals(5, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(), equalTo(

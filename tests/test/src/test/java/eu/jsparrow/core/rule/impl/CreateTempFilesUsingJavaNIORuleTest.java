@@ -30,9 +30,9 @@ public class CreateTempFilesUsingJavaNIORuleTest {
 	@Test
 	public void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
+		assertEquals("Create Temp Files Using Java NIO", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.SECURITY, Tag.IO_OPERATIONS), description.getTags());
 		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getName(), equalTo("Create Temp Files Using Java NIO"));
 		assertThat(description.getDescription(), equalTo(
 				"According to the documentation of 'File.createTempFile(String, String)', a suitable "
 						+ "alternative for creating temporary files in security-sensitive applications is to "

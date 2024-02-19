@@ -43,7 +43,7 @@ class RemoveRedundantCloseRulesTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Remove Redundant Close"));
+		assertEquals("Remove Redundant Close", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.CODING_CONVENTIONS, Tag.READABILITY), description.getTags());
 		assertEquals(2, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),

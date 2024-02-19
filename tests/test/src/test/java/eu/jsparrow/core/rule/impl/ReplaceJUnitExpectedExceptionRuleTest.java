@@ -37,7 +37,7 @@ class ReplaceJUnitExpectedExceptionRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace JUnit ExpectedException with assertThrows"));
+		assertEquals("Replace JUnit ExpectedException with assertThrows", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY),
 				description.getTags());
 		assertEquals(5, description.getRemediationCost().toMinutes());

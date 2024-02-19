@@ -45,7 +45,7 @@ class ReplaceSetRemoveAllWithForEachRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace Set.removeAll With ForEach"));
+		assertEquals("Replace Set.removeAll With ForEach", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.PERFORMANCE), description.getTags());
 		assertEquals(5, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),

@@ -36,7 +36,7 @@ class ReplaceStringFormatByFormattedRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace String.format by String.formatted"));
+		assertEquals("Replace String.format by String.formatted", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_15, Tag.STRING_MANIPULATION, Tag.READABILITY), description.getTags());
 		assertEquals(2, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),

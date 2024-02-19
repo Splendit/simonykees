@@ -43,7 +43,7 @@ public class InlineLocalVariablesRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Inline Local Variables"));
+		assertEquals("Inline Local Variables", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS), description.getTags());
 		assertEquals(2, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),

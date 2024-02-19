@@ -37,7 +37,7 @@ class UseTextBlockRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Use Text Block"));
+		assertEquals("Use Text Block", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_15, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
 		assertEquals(5, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),

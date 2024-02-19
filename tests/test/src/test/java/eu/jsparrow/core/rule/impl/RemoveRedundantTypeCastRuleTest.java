@@ -40,7 +40,7 @@ public class RemoveRedundantTypeCastRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Remove Redundant Type Casts"));
+		assertEquals("Remove Redundant Type Casts", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY), description.getTags());
 		assertEquals(5, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),

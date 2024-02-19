@@ -84,7 +84,7 @@ class ReplaceRequestMappingAnnotationRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace Request Mapping Annotation"));
+		assertEquals("Replace Request Mapping Annotation", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.SPRING, Tag.CODING_CONVENTIONS, Tag.READABILITY),
 				description.getTags());
 		assertEquals(2, description.getRemediationCost().toMinutes());

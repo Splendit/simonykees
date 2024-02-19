@@ -37,7 +37,7 @@ class UsePatternMatchingForInstanceofRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Use Pattern Matching for Instanceof"));
+		assertEquals("Use Pattern Matching for Instanceof", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_16, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
 		assertEquals(5, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(), equalTo(

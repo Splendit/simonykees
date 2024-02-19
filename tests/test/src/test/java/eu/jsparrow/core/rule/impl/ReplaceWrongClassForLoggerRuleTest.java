@@ -44,7 +44,7 @@ class ReplaceWrongClassForLoggerRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace Wrong Class for Logger"));
+		assertEquals("Replace Wrong Class for Logger", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.LOGGING), description.getTags());
 		assertEquals(5, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),

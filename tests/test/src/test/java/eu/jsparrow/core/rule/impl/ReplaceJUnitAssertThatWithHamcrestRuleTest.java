@@ -48,7 +48,7 @@ class ReplaceJUnitAssertThatWithHamcrestRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace JUnit assertThat with Hamcrest"));
+		assertEquals("Replace JUnit assertThat with Hamcrest", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT), description.getTags());
 		assertEquals(2, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(), equalTo(

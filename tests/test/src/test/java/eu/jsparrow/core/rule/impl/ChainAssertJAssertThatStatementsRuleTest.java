@@ -59,7 +59,7 @@ class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Chain AssertJ AssertThat Statements"));
+		assertEquals("Chain AssertJ AssertThat Statements", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY),
 				description.getTags());
 		assertEquals(5, description.getRemediationCost().toMinutes());

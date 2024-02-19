@@ -38,7 +38,7 @@ class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Shift AssertJ Description Before Assertion"));
+		assertEquals("Shift AssertJ Description Before Assertion", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS),
 				description.getTags());
 		assertEquals(5, description.getRemediationCost().toMinutes());

@@ -43,7 +43,7 @@ class EnhancedForLoopToStreamForEachRulesTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace For-Loop with Iterable::forEach"));
+		assertEquals("Replace For-Loop with Iterable::forEach", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP), description.getTags());
 		assertEquals(15, description.getRemediationCost().toMinutes());
 		String ruleDescription = ""
