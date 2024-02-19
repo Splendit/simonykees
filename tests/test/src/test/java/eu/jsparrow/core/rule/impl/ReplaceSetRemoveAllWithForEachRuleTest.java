@@ -1,7 +1,6 @@
 package eu.jsparrow.core.rule.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -11,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,8 +47,7 @@ class ReplaceSetRemoveAllWithForEachRuleTest extends SingleRuleTest {
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace Set.removeAll With ForEach"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_8, Tag.PERFORMANCE));
+		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.PERFORMANCE), description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
 				equalTo("Using the method 'removeAll(Collection)' in order to removing elements from a Set may lead to performance problems because of a possible O(n^2) complexity."

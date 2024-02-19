@@ -1,47 +1,47 @@
 package eu.jsparrow.core.rule.impl;
 
-import static org.hamcrest.Matchers.contains;
+import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
+import static eu.jsparrow.common.util.RulesTestUtil.createJavaProject;
+import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.util.Arrays;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static eu.jsparrow.common.util.RulesTestUtil.*;
-
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.SingleRuleTest;
-
 import eu.jsparrow.rules.common.RuleDescription;
-import eu.jsparrow.rules.common.Tag; 
+import eu.jsparrow.rules.common.Tag;
 
 class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 
 	private ShiftAssertJDescriptionBeforeAssertionRule rule;
-	
+
 	@BeforeEach
 	void setUp() throws Exception {
 		rule = new ShiftAssertJDescriptionBeforeAssertionRule();
 		testProject = createJavaProject("javaVersionTestProject", "bin");
 	}
-	
+
 	@Test
 	void test_ruleId() {
 		String ruleId = rule.getId();
 		assertThat(ruleId, equalTo("ShiftAssertJDescriptionBeforeAssertion"));
 	}
-	
+
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Shift AssertJ Description Before Assertion"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS));
+		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS),
+				description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
 				equalTo("AssertJ provides methods for setting descriptions or error messages of assertions, e.g.: as, describedAs, withFailMessage, overridingErrorMessage. "
@@ -49,7 +49,7 @@ class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 						+ "\nThis rule, swaps the invocation of the assertion methods with the invocation of the methods setting descriptions or the error "
 						+ "messages for the corresponding assertions."));
 	}
-	
+
 	@Test
 	void test_requiredLibraries() throws Exception {
 
@@ -59,7 +59,7 @@ class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 
 		assertThat(rule.requiredLibraries(), equalTo("AssertJ"));
 	}
-	
+
 	@Test
 	void test_requiredJavaVersion() throws Exception {
 		assertThat(rule.getRequiredJavaVersion(), equalTo("1.7"));
@@ -68,7 +68,7 @@ class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 	@Test
 	void calculateEnabledForProject_ShouldBeDisabled() throws Exception {
 		addToClasspath(testProject, Arrays
-				.asList(generateMavenEntryFromDepedencyString("org.assertj", "assertj-core", "3.21.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.assertj", "assertj-core", "3.21.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
 
 		rule.calculateEnabledForProject(testProject);
@@ -79,7 +79,7 @@ class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 	@Test
 	void calculateEnabledForProject_ShouldBeEnabled() throws Exception {
 		addToClasspath(testProject, Arrays
-				.asList(generateMavenEntryFromDepedencyString("org.assertj", "assertj-core", "3.21.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.assertj", "assertj-core", "3.21.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
 
 		rule.calculateEnabledForProject(testProject);

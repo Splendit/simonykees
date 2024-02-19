@@ -1,7 +1,6 @@
 package eu.jsparrow.core.rule.impl.unused;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,7 +30,7 @@ class RemoveUnusedFieldsRuleTest extends SingleRuleTest {
 
 	private static final String PRERULE_UNUSED_PACKAGE = "eu.jsparrow.sample.preRule.unused";
 	private static final String PRERULE_DIRECTORY = RulesTestUtil.PRERULE_DIRECTORY + "/unused";
-	
+
 	private RemoveUnusedFieldsRule rule;
 
 	@BeforeEach
@@ -44,18 +44,16 @@ class RemoveUnusedFieldsRuleTest extends SingleRuleTest {
 		String ruleId = rule.getId();
 		assertThat(ruleId, equalTo("RemoveUnusedFields"));
 	}
-	
+
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Remove Unused Fields"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
+		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS), description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
-		assertThat(description.getDescription(),
-				equalTo("Finds and remove fields that are never used actively."));
+		assertThat(description.getDescription(), equalTo("Finds and remove fields that are never used actively."));
 	}
-	
+
 	@Test
 	void test_requiredLibraries() throws Exception {
 
@@ -65,7 +63,7 @@ class RemoveUnusedFieldsRuleTest extends SingleRuleTest {
 
 		assertThat(rule.requiredLibraries(), nullValue());
 	}
-	
+
 	@Test
 	void test_requiredJavaVersion() throws Exception {
 		assertThat(rule.getRequiredJavaVersion(), equalTo("1.1"));
@@ -79,23 +77,23 @@ class RemoveUnusedFieldsRuleTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-	
+
 	@Test
 	void testTransformation() throws Exception {
 		Path preRule = getPreRuleFile("unused/UnusedFields.java");
 		Path postRule = getPostRuleFile("UnusedFields.java", "unused");
-		
-		List<UnusedFieldWrapper> unusedFields = UnusedCodeTestHelper.findFieldsToBeRemoved(PRERULE_UNUSED_PACKAGE, PRERULE_DIRECTORY);
+
+		List<UnusedFieldWrapper> unusedFields = UnusedCodeTestHelper.findFieldsToBeRemoved(PRERULE_UNUSED_PACKAGE,
+				PRERULE_DIRECTORY);
 		RemoveUnusedFieldsRule rule = new RemoveUnusedFieldsRule(unusedFields);
-		
-		String refactoring = UnusedCodeTestHelper.applyRemoveUnusedCodeRefactoring(rule, "eu.jsparrow.sample.preRule.unused", preRule, root);
+
+		String refactoring = UnusedCodeTestHelper.applyRemoveUnusedCodeRefactoring(rule,
+				"eu.jsparrow.sample.preRule.unused", preRule, root);
 		String postRulePackage = getPostRulePackage("unused");
-		String actual = StringUtils.replace(refactoring, "package eu.jsparrow.sample.preRule.unused",
-				postRulePackage);
+		String actual = StringUtils.replace(refactoring, "package eu.jsparrow.sample.preRule.unused", postRulePackage);
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
-		
+
 		assertEquals(expected, actual);
 	}
-	
 
 }

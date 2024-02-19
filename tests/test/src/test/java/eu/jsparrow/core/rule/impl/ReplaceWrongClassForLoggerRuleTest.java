@@ -2,7 +2,6 @@ package eu.jsparrow.core.rule.impl;
 
 import static eu.jsparrow.common.util.RulesTestUtil.createJavaProject;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -10,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,8 +46,7 @@ class ReplaceWrongClassForLoggerRuleTest extends SingleRuleTest {
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace Wrong Class for Logger"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_1, Tag.READABILITY, Tag.LOGGING));
+		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.LOGGING), description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
 				equalTo("If a given logger is initialized with a class which is different from the class where it is declared, then this rule will replace the wrong initialization argument by the correct one. For example, if a logger for the class 'Employee' is initialized with 'User.class', then the argument of the initialization will be replaced by 'Employee.class'."));

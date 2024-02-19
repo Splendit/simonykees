@@ -1,12 +1,13 @@
 package org.eu.jsparrow.rules.java16.switchexpression.ifstatement;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +39,7 @@ class ReplaceMultiBranchIfBySwitchRuleTest extends SingleRuleTest {
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace Multi-Branch If By Switch"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_14, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
+		assertEquals(Arrays.asList(Tag.JAVA_14, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(15)));
 		assertThat(description.getDescription(),
 				equalTo("In Java 14, the switch expressions turned to a standard feature."

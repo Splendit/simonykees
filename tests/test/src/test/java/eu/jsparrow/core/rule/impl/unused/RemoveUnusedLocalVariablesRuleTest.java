@@ -1,7 +1,6 @@
 package eu.jsparrow.core.rule.impl.unused;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +32,6 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-@SuppressWarnings("nls")
 class RemoveUnusedLocalVariablesRuleTest extends SingleRuleTest {
 
 	private RemoveUnusedLocalVariablesRule rule;
@@ -54,8 +52,7 @@ class RemoveUnusedLocalVariablesRuleTest extends SingleRuleTest {
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Remove Unused Local Variables"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
+		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS), description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
 				equalTo("Finds and removes local variables that are never used actively."));

@@ -3,7 +3,6 @@ package eu.jsparrow.core.rule.impl;
 import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -62,8 +61,8 @@ class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Chain AssertJ AssertThat Statements"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY),
+				description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
 				equalTo("AssertJ encourages writing fluent test cases by chaining the assertions that target the "

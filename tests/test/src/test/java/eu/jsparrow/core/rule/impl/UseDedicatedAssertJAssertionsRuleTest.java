@@ -4,8 +4,8 @@ import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.createJavaProject;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -44,8 +44,7 @@ class UseDedicatedAssertJAssertionsRuleTest extends SingleRuleTest {
 				+ "improve the corresponding failure messages. This rule finds AssertJ assertions that can be simplified and replaces "
 				+ "them with equivalent dedicated assertions.";
 		assertThat(description.getName(), equalTo("Use Dedicated AssertJ Assertions"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_8, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY), description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
 				equalTo(ruleDescription));

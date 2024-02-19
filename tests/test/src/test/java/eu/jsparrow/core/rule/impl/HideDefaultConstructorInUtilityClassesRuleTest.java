@@ -1,7 +1,6 @@
 package eu.jsparrow.core.rule.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,13 +21,13 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 public class HideDefaultConstructorInUtilityClassesRuleTest extends SingleRuleTest {
-	
+
 	private static final String STANDARD_FILE = "HideDefaultConstructorInUtilityClassRule.java";
 	private static final String INTERFACE_FILE = "HideDefaultConstructorInUtilityInterfaceRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "hideDefaultConstructor";
-	
+
 	private HideDefaultConstructorInUtilityClassesRule rule;
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		rule = new HideDefaultConstructorInUtilityClassesRule();
@@ -44,11 +44,10 @@ public class HideDefaultConstructorInUtilityClassesRuleTest extends SingleRuleTe
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Hide Default Constructor In Utility Classes"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS));
+		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS), description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
-		assertThat(description.getDescription(),
-				equalTo("Utility classes are classes containing static properties only. Those classes should not be instantiated. A "
+		assertThat(description.getDescription(), equalTo(
+				"Utility classes are classes containing static properties only. Those classes should not be instantiated. A "
 						+ "private constructor, throwing an IllegalStateException, is introduced to utility classes by this rule, unless "
 						+ "they already have another declared constructor. This hides the default public constructor and thus "
 						+ "prevents the instantiation of such a class."));
@@ -59,7 +58,7 @@ public class HideDefaultConstructorInUtilityClassesRuleTest extends SingleRuleTe
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(),  nullValue());
+		assertThat(rule.requiredLibraries(), nullValue());
 	}
 
 	@Test
@@ -94,7 +93,7 @@ public class HideDefaultConstructorInUtilityClassesRuleTest extends SingleRuleTe
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
+
 	@Test
 	void testTransformationWithInterfaceFile() throws Exception {
 		root = RulesTestUtil.addSourceContainer(testProject, "/allRulesTestRoot");

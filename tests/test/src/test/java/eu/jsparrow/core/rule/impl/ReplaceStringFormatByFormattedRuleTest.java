@@ -1,11 +1,13 @@
 package eu.jsparrow.core.rule.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,8 +38,7 @@ class ReplaceStringFormatByFormattedRuleTest extends SingleRuleTest {
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace String.format by String.formatted"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_15, Tag.STRING_MANIPULATION, Tag.READABILITY));
+		assertEquals(Arrays.asList(Tag.JAVA_15, Tag.STRING_MANIPULATION, Tag.READABILITY), description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
 				equalTo("This rule replaces the static invocations of String.format(String, Object...) "

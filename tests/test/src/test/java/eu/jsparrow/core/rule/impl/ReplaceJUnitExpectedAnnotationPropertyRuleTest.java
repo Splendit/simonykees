@@ -4,7 +4,6 @@ import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.createJavaProject;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -47,18 +46,17 @@ class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace JUnit Expected Annotation Property with assertThrows"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_8, Tag.TESTING, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY));
+		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY),
+				description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
-		assertThat(description.getDescription(),
-				equalTo("Using the 'expected' annotation property for testing the thrown exceptions is rather misleading. Often it becomes unclear which part of the test code is responsible for throwing the exception. This rule aims to overcome this problem by replacing the 'expected' annotation property with 'assertThrows()' introduced in JUnit 4.13."));
+		assertThat(description.getDescription(), equalTo(
+				"Using the 'expected' annotation property for testing the thrown exceptions is rather misleading. Often it becomes unclear which part of the test code is responsible for throwing the exception. This rule aims to overcome this problem by replacing the 'expected' annotation property with 'assertThrows()' introduced in JUnit 4.13."));
 	}
 
 	@Test
 	void test_requiredLibraries() throws Exception {
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 
 		rule.calculateEnabledForProject(testProject);
@@ -69,8 +67,7 @@ class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
 	@Test
 	void test_requiredJavaVersion() throws Exception {
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 
 		rule.calculateEnabledForProject(testProject);
@@ -80,8 +77,7 @@ class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
 
 	@Test
 	void calculateEnabledForProject_supportLibraryVersion_4_13_shouldReturnTrue_shouldReturnTrue() throws Exception {
-		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("junit", "junit", "4.13")));
+		addToClasspath(testProject, Arrays.asList(generateMavenEntryFromDepedencyString("junit", "junit", "4.13")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 
 		rule.calculateEnabledForProject(testProject);
@@ -94,8 +90,7 @@ class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
 	@Test
 	void calculateEnabledForProject_supportJunitJupiter_5_0_shouldReturnTrue() throws Exception {
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 
 		rule.calculateEnabledForProject(testProject);
@@ -107,8 +102,8 @@ class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
 	void testTransformationWithDefaultFile() throws Exception {
 		root = RulesTestUtil.addSourceContainer(testProject, "/allRulesTestRoot");
 
-		RulesTestUtil.addToClasspath(testProject, Arrays.asList(
-				RulesTestUtil.generateMavenEntryFromDepedencyString("junit", "junit", "4.13")));
+		RulesTestUtil.addToClasspath(testProject,
+				Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("junit", "junit", "4.13")));
 		rule.calculateEnabledForProject(testProject);
 
 		Path preRule = getPreRuleFile(STANDARD_FILE);
@@ -124,12 +119,12 @@ class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
 	void testTransformationWithJupiter() throws Exception {
 		root = RulesTestUtil.addSourceContainer(testProject, "/allRulesTestRoot");
 
-		RulesTestUtil.addToClasspath(testProject, Arrays.asList(
-				RulesTestUtil.generateMavenEntryFromDepedencyString("junit", "junit", "4.13"),
-				RulesTestUtil.generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-engine",
-						"5.0.0"),
-				RulesTestUtil.generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-						"5.0.0")));
+		RulesTestUtil.addToClasspath(testProject,
+				Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("junit", "junit", "4.13"),
+						RulesTestUtil.generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-engine",
+								"5.0.0"),
+						RulesTestUtil.generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
+								"5.0.0")));
 		rule.calculateEnabledForProject(testProject);
 
 		Path preRule = getPreRuleFile(STANDARD_FILE);

@@ -4,7 +4,6 @@ import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.createJavaProject;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,8 +50,7 @@ class UseDedicatedAssertionsRuleTest extends SingleRuleTest {
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Use Dedicated Assertions"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT, Tag.CODING_CONVENTIONS));
+		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT, Tag.CODING_CONVENTIONS), description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
 				equalTo("Replaces boolean assertions (e.g., 'assertTrue' and 'assertFalse') with the corresponding "

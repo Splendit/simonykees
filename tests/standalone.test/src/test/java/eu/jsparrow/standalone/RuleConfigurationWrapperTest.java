@@ -2,9 +2,8 @@ package eu.jsparrow.standalone;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -15,6 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -94,9 +94,7 @@ public class RuleConfigurationWrapperTest {
 
 		RuleConfigurationWrapper ruleConfigurationWrapper = new RuleConfigurationWrapper(config, refactoringRules);
 		List<RefactoringRule> rules = ruleConfigurationWrapper.getSelectedAutomaticRules();
-
-		assertThat(rules, hasSize(1));
-		assertThat(rules, contains(refactoringRule));
+		assertEquals(Arrays.asList(refactoringRule), rules);
 	}
 
 	@Test
@@ -105,9 +103,7 @@ public class RuleConfigurationWrapperTest {
 
 		RuleConfigurationWrapper ruleConfigurationWrapper = new RuleConfigurationWrapper(config, refactoringRules);
 		List<RefactoringRule> rules = ruleConfigurationWrapper.getSelectedAutomaticRules();
-
-		assertThat(rules, hasSize(1));
-		assertThat(rules, contains(refactoringRule));
+		assertEquals(Arrays.asList(refactoringRule), rules);
 	}
 
 	@Test

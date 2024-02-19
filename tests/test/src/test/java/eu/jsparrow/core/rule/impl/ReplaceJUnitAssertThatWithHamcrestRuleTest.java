@@ -4,7 +4,6 @@ import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.createJavaProject;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,18 +50,17 @@ class ReplaceJUnitAssertThatWithHamcrestRuleTest extends SingleRuleTest {
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace JUnit assertThat with Hamcrest"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT));
+		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT), description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
-		assertThat(description.getDescription(),
-				equalTo("The JUnit Assert.assertThat method is deprecated. Its sole purpose is to forward the call to the MatcherAssert.assertThat method defined in Hamcrest 1.3. Therefore, it is recommended to directly use the equivalent assertion defined in the third party Hamcrest library."));
+		assertThat(description.getDescription(), equalTo(
+				"The JUnit Assert.assertThat method is deprecated. Its sole purpose is to forward the call to the MatcherAssert.assertThat method defined in Hamcrest 1.3. Therefore, it is recommended to directly use the equivalent assertion defined in the third party Hamcrest library."));
 	}
 
 	@Test
 	void test_requiredLibraries() throws Exception {
-		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library", "1.3"),
-					generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3")));
+		addToClasspath(testProject,
+				Arrays.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library", "1.3"),
+						generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
 
 		rule.calculateEnabledForProject(testProject);
@@ -72,9 +70,9 @@ class ReplaceJUnitAssertThatWithHamcrestRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library", "1.3"),
-					generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3")));
+		addToClasspath(testProject,
+				Arrays.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library", "1.3"),
+						generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 
 		rule.calculateEnabledForProject(testProject);
@@ -84,9 +82,9 @@ class ReplaceJUnitAssertThatWithHamcrestRuleTest extends SingleRuleTest {
 
 	@Test
 	void calculateEnabledForProject_supportHamcrestVersion_1_3_shouldReturnTrue() throws Exception {
-		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library", "1.3"),
-					generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3")));
+		addToClasspath(testProject,
+				Arrays.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library", "1.3"),
+						generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
 
 		rule.calculateEnabledForProject(testProject);
@@ -97,24 +95,20 @@ class ReplaceJUnitAssertThatWithHamcrestRuleTest extends SingleRuleTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {
-			STANDARD_FILE,
-			ON_DEMAND_IMPORTS, 
-			DUPLICATE_IMPORTS })
+	@ValueSource(strings = { STANDARD_FILE, ON_DEMAND_IMPORTS, DUPLICATE_IMPORTS })
 	void testTransformationWithDefaultFile(String preRuleFileName) throws Exception {
 		root = RulesTestUtil.addSourceContainer(testProject, "/allRulesTestRoot");
 		loadUtilities();
-		RulesTestUtil.addToClasspath(testProject, Arrays.asList(
-				generateMavenEntryFromDepedencyString("junit", "junit", "4.13"),
-				generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library", "1.3"),
-				generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3")));
+		RulesTestUtil.addToClasspath(testProject,
+				Arrays.asList(generateMavenEntryFromDepedencyString("junit", "junit", "4.13"),
+						generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library", "1.3"),
+						generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3")));
 		rule.calculateEnabledForProject(testProject);
 
 		Path preRule = getPreRuleFile(preRuleFileName);
 		Path postRule = getPostRuleFile(preRuleFileName, POSTRULE_SUBDIRECTORY);
 
-		String actual = replacePackageName(applyRefactoring(rule, preRule),
-				getPostRulePackage(POSTRULE_SUBDIRECTORY));
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);

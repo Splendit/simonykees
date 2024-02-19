@@ -1,9 +1,10 @@
 package eu.jsparrow.core.rule.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,9 +30,7 @@ public class CreateTempFilesUsingJavaNIORuleTest {
 	@Test
 	public void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_7, Tag.SECURITY, Tag.IO_OPERATIONS));
-		assertThat(description.getTags(), hasSize(3));
+		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.SECURITY, Tag.IO_OPERATIONS), description.getTags());
 		assertThat(description.getName(), equalTo("Create Temp Files Using Java NIO"));
 		assertThat(description.getDescription(), equalTo(
 				"According to the documentation of 'File.createTempFile(String, String)', a suitable "

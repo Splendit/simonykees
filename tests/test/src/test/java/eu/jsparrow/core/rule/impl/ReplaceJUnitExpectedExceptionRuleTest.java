@@ -4,8 +4,8 @@ import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.createJavaProject;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
@@ -39,8 +39,8 @@ class ReplaceJUnitExpectedExceptionRuleTest extends SingleRuleTest {
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace JUnit ExpectedException with assertThrows"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_8, Tag.TESTING, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY));
+		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY),
+				description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
 				equalTo("The 'ExpectedException.none()' rule is deprecated since JUnit 4.13. The recommended alternative is to use 'assertThrows()'. This makes JUnit tests easier to understand and prevents scenarios where some parts of the test code are unreachable. \nThe goal of this rule is to replace 'expectedException.expect()' with 'assertThrows()'. Additionally, new assertions are added for each invocation of 'expectMessage()' and 'expectCause()'."));

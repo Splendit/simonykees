@@ -1,7 +1,6 @@
 package eu.jsparrow.standalone;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
@@ -9,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -109,8 +109,7 @@ public class ListRulesUtilTest {
 	@Test
 	public void getAllRulesFilteredById_noRuleIdProvided_shouldReturnAllRules() {
 		List<RefactoringRule> testRules = listRulesUtil.getAllRulesFilteredById(null);
-
-		assertThat(testRules, contains(rule1));
+		assertEquals(Arrays.asList(rule1), testRules);
 	}
 
 	@Test
@@ -126,8 +125,7 @@ public class ListRulesUtilTest {
 		when(rule2.getId()).thenReturn(rule2id);
 
 		List<RefactoringRule> rules = listRulesUtil.getAllRulesFilteredById(ruleId);
-
-		assertThat(rules, contains(rule1));
+		assertEquals(Arrays.asList(rule1), rules);
 	}
 
 	@Test

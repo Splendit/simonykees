@@ -4,7 +4,6 @@ import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -43,7 +42,7 @@ class ReplaceRequestMappingAnnotationRuleTest extends SingleRuleTest {
 	void test_requiredLibraries() throws Exception {
 		assertThat(rule.requiredLibraries(), equalTo("Spring Web 4.3.5 or later"));
 	}
-	
+
 	@Test
 	void calculateEnabledForProjectShouldBeEnabled() throws Exception {
 		addToClasspath(testProject,
@@ -87,8 +86,8 @@ class ReplaceRequestMappingAnnotationRuleTest extends SingleRuleTest {
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace Request Mapping Annotation"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_5, Tag.SPRING, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.SPRING, Tag.CODING_CONVENTIONS, Tag.READABILITY),
+				description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		String descriptionText = ""
 				+ "The Spring Framework 4.3 introduced some composed annotations like '@GetMapping', '@PostMapping', "

@@ -1,11 +1,12 @@
 package eu.jsparrow.core.rule.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -55,9 +56,7 @@ public class UseFilesWriteStringRuleTest {
 	@Test
 	public void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_11, Tag.PERFORMANCE, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.IO_OPERATIONS));
-		assertThat(description.getTags(), hasSize(4));
+		assertEquals(Arrays.asList(Tag.JAVA_11, Tag.PERFORMANCE, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.IO_OPERATIONS), description.getTags());
 		assertThat(description.getName(), equalTo("Use Files.writeString"));
 		assertThat(description.getDescription(), equalTo(
 				"Java 11 introduced 'Files.writeString(Path, CharSequence, Charset, OpenOption...)' and "

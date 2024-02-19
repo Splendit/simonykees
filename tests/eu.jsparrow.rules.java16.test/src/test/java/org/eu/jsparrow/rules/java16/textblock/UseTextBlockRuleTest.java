@@ -1,12 +1,13 @@
 package org.eu.jsparrow.rules.java16.textblock;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +39,7 @@ class UseTextBlockRuleTest extends SingleRuleTest {
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Use Text Block"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_15, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
+		assertEquals(Arrays.asList(Tag.JAVA_15, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
 				equalTo("Java 15 introduced Text Blocks to express String literals spanning several "
@@ -52,7 +52,7 @@ class UseTextBlockRuleTest extends SingleRuleTest {
 	void test_requiredJavaVersion() throws Exception {
 		assertThat(rule.getRequiredJavaVersion(), equalTo("15"));
 	}
-	
+
 	@Test
 	public void calculateEnabledForProjectShouldBeDisabled() {
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_14);
