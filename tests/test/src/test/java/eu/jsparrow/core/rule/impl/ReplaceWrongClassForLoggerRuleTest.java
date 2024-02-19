@@ -46,9 +46,14 @@ class ReplaceWrongClassForLoggerRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Replace Wrong Class for Logger", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.LOGGING), description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("If a given logger is initialized with a class which is different from the class where it is declared, then this rule will replace the wrong initialization argument by the correct one. For example, if a logger for the class 'Employee' is initialized with 'User.class', then the argument of the initialization will be replaced by 'Employee.class'."));
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "If a given logger is initialized with a class which is different from the class where it is declared,"
+				+ " then this rule will replace the wrong initialization argument by the correct one. For example,"
+				+ " if a logger for the class 'Employee' is initialized with 'User.class',"
+				+ " then the argument of the initialization will be replaced by 'Employee.class'.", //
+				description.getDescription());
 	}
 
 	@Test
@@ -61,7 +66,7 @@ class ReplaceWrongClassForLoggerRuleTest extends SingleRuleTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {			
+	@ValueSource(strings = {
 			SAMPLE_FILE_JAVA_LOGGING,
 			SAMPLE_FILE_SLF4J_LOGGER,
 			SAMPLE_FILE_APACHE_LOG4J,

@@ -68,8 +68,10 @@ class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Remove Unused Types", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS), description.getTags());
-		assertEquals(2, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(), equalTo("Finds and removes types that are not used."));
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals("Finds and removes types that are not used.",
+				description.getDescription());
 	}
 
 	@Test

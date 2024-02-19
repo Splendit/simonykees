@@ -50,9 +50,13 @@ class ReplaceJUnitAssertThatWithHamcrestRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Replace JUnit assertThat with Hamcrest", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT), description.getTags());
-		assertEquals(2, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(), equalTo(
-				"The JUnit Assert.assertThat method is deprecated. Its sole purpose is to forward the call to the MatcherAssert.assertThat method defined in Hamcrest 1.3. Therefore, it is recommended to directly use the equivalent assertion defined in the third party Hamcrest library."));
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "The JUnit Assert.assertThat method is deprecated."
+				+ " Its sole purpose is to forward the call to the MatcherAssert.assertThat method defined in Hamcrest 1.3."
+				+ " Therefore, it is recommended to directly use the equivalent assertion defined in the third party Hamcrest library.",
+				description.getDescription());
 	}
 
 	@Test

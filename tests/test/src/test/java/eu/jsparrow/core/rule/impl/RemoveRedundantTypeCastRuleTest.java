@@ -42,12 +42,14 @@ public class RemoveRedundantTypeCastRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Remove Redundant Type Casts", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY), description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("This rule removes unnecessary type cast operations. If the expression is casted "
-						+ "to a type which already is exactly the type of the expression, then the type casting "
-						+ "prefix is removed. \nAdditionally, also parentheses will be removed if they are "
-						+ "not necessary any more."));
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "This rule removes unnecessary type cast operations. If the expression is casted "
+				+ "to a type which already is exactly the type of the expression, then the type casting "
+				+ "prefix is removed. \nAdditionally, also parentheses will be removed if they are "
+				+ "not necessary any more.",
+				description.getDescription());
 	}
 
 	@Test

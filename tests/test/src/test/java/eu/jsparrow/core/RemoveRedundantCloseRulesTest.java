@@ -45,12 +45,14 @@ class RemoveRedundantCloseRulesTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Remove Redundant Close", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.CODING_CONVENTIONS, Tag.READABILITY), description.getTags());
-		assertEquals(2, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("In Java, the try-with-resource statements are able to automatically close "
-						+ "the resources which are defined in the try-with-resource header. Thus, any "
-						+ "explicit 'close()' invocation in the try block is redundant and potentially "
-						+ "confusing. This rule eliminates redundant resource 'close()' invocations."));
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "In Java, the try-with-resource statements are able to automatically close "
+				+ "the resources which are defined in the try-with-resource header. Thus, any "
+				+ "explicit 'close()' invocation in the try block is redundant and potentially "
+				+ "confusing. This rule eliminates redundant resource 'close()' invocations.",
+				description.getDescription());
 	}
 
 	@Test

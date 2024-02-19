@@ -39,11 +39,13 @@ class UseSwitchExpressionRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Use Switch Expression", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_14, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("In Java 14, the switch expressions turned to a standard feature. "
-						+ "This rule replaces the traditional switch-case statements with switch-case expressions. "
-						+ "Thus, avoiding the fall-through semantics of control flow and at the same time, removing some boilerplate code."));
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "In Java 14, the switch expressions turned to a standard feature. "
+				+ "This rule replaces the traditional switch-case statements with switch-case expressions. "
+				+ "Thus, avoiding the fall-through semantics of control flow and at the same time, removing some boilerplate code.",
+				description.getDescription());
 	}
 
 	@Test

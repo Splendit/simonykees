@@ -47,11 +47,13 @@ class ReplaceSetRemoveAllWithForEachRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Replace Set.removeAll With ForEach", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.PERFORMANCE), description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("Using the method 'removeAll(Collection)' in order to removing elements from a Set may lead to performance problems because of a possible O(n^2) complexity."
-						+ " This rule replaces 'removeAll' invocations by corresponding 'forEach' constructs."
-						+ " For example 'mySet.removeAll(myList);' is replaced by 'myList.forEach(mySet::remove);'"));
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "Using the method 'removeAll(Collection)' in order to removing elements from a Set may lead to performance problems because of a possible O(n^2) complexity."
+				+ " This rule replaces 'removeAll' invocations by corresponding 'forEach' constructs."
+				+ " For example 'mySet.removeAll(myList);' is replaced by 'myList.forEach(mySet::remove);'",
+				description.getDescription());
 	}
 
 	@Test

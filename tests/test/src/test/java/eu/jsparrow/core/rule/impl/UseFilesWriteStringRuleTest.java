@@ -57,12 +57,15 @@ public class UseFilesWriteStringRuleTest {
 	public void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Use Files.writeString", description.getName());
-		assertEquals(Arrays.asList(Tag.JAVA_11, Tag.PERFORMANCE, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.IO_OPERATIONS), description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(), equalTo(
-				"Java 11 introduced 'Files.writeString(Path, CharSequence, Charset, OpenOption...)' and "
-						+ "'Files.writeString(Path, CharSequence, OpenOption...)' for writing text into a file by one "
-						+ "single invocation and in an efficient non-blocking manner. \nThis rule replaces 'BufferedWriters' "
-						+ "that are used to write a single value into a file, with 'Files.write(...)'."));
+		assertEquals(Arrays.asList(Tag.JAVA_11, Tag.PERFORMANCE, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.IO_OPERATIONS),
+				description.getTags());
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "Java 11 introduced 'Files.writeString(Path, CharSequence, Charset, OpenOption...)' and "
+				+ "'Files.writeString(Path, CharSequence, OpenOption...)' for writing text into a file by one "
+				+ "single invocation and in an efficient non-blocking manner. \nThis rule replaces 'BufferedWriters' "
+				+ "that are used to write a single value into a file, with 'Files.write(...)'.",
+				description.getDescription());
 	}
 }

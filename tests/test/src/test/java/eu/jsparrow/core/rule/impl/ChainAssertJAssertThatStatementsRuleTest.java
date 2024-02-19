@@ -62,12 +62,14 @@ class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 		assertEquals("Chain AssertJ AssertThat Statements", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY),
 				description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("AssertJ encourages writing fluent test cases by chaining the assertions that target the "
-						+ "same object instead of invoking 'assertThat' multiple times. This rule replaces consecutive "
-						+ "AssertJ assertThat invocations targeting the same object with an assertion chain. Thus, "
-						+ "eliminating some redundant code and increasing the readability of test cases."));
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "AssertJ encourages writing fluent test cases by chaining the assertions that target the "
+				+ "same object instead of invoking 'assertThat' multiple times. This rule replaces consecutive "
+				+ "AssertJ assertThat invocations targeting the same object with an assertion chain. Thus, "
+				+ "eliminating some redundant code and increasing the readability of test cases.",
+				description.getDescription());
 	}
 
 	@Test

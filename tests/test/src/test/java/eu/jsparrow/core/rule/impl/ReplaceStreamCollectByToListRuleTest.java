@@ -38,13 +38,15 @@ class ReplaceStreamCollectByToListRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Replace Stream.collect() by Stream.toList()", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_16, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
-		assertEquals(2, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("Java 16 introduced 'Stream.toList()' as a shorthand method for converting a Stream into an unmodifiable List. "
-						+ "This rule replaces invocations of 'collect(Collectors.toUnmodifiableList())' by the new method 'toList()'. \n"
-						+ "In case 'Collectors.toList()' is used as a collector, the rule makes additional verifications whether the generated "
-						+ "list is modified by the context or not. In the latter case invocations of 'collect(Collectors.toList())' are also "
-						+ "replaced by invocations of the simpler method 'toList()'."));
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "Java 16 introduced 'Stream.toList()' as a shorthand method for converting a Stream into an unmodifiable List. "
+				+ "This rule replaces invocations of 'collect(Collectors.toUnmodifiableList())' by the new method 'toList()'. \n"
+				+ "In case 'Collectors.toList()' is used as a collector, the rule makes additional verifications whether the generated "
+				+ "list is modified by the context or not. In the latter case invocations of 'collect(Collectors.toList())' are also "
+				+ "replaced by invocations of the simpler method 'toList()'.",
+				description.getDescription());
 	}
 
 	@Test

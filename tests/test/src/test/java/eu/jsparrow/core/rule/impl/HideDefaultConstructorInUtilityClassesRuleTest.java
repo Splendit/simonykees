@@ -44,12 +44,14 @@ public class HideDefaultConstructorInUtilityClassesRuleTest extends SingleRuleTe
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Hide Default Constructor In Utility Classes", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS), description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(), equalTo(
-				"Utility classes are classes containing static properties only. Those classes should not be instantiated. A "
-						+ "private constructor, throwing an IllegalStateException, is introduced to utility classes by this rule, unless "
-						+ "they already have another declared constructor. This hides the default public constructor and thus "
-						+ "prevents the instantiation of such a class."));
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "Utility classes are classes containing static properties only. Those classes should not be instantiated. A "
+				+ "private constructor, throwing an IllegalStateException, is introduced to utility classes by this rule, unless "
+				+ "they already have another declared constructor. This hides the default public constructor and thus "
+				+ "prevents the instantiation of such a class.",
+				description.getDescription());
 	}
 
 	@Test

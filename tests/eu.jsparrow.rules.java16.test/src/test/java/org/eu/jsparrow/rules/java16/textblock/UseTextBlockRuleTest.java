@@ -39,12 +39,14 @@ class UseTextBlockRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Use Text Block", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_15, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("Java 15 introduced Text Blocks to express String literals spanning several "
-						+ "lines of code and significantly reduce the need for escape sequences. \nThis rule replaces "
-						+ "multiline String concatenation expressions with Text Blocks String literals. Thus, removing "
-						+ "some boilerplate code and increasing the readability of String expressions."));
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "Java 15 introduced Text Blocks to express String literals spanning several "
+				+ "lines of code and significantly reduce the need for escape sequences. \nThis rule replaces "
+				+ "multiline String concatenation expressions with Text Blocks String literals. Thus, removing "
+				+ "some boilerplate code and increasing the readability of String expressions.",
+				description.getDescription());
 	}
 
 	@Test

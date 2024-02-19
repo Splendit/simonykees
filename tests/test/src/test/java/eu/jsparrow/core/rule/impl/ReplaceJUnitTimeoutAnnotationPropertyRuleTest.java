@@ -49,9 +49,13 @@ class ReplaceJUnitTimeoutAnnotationPropertyRuleTest extends SingleRuleTest {
 		assertEquals("Replace JUnit Timeout Annotation Property with assertTimeout", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY),
 				description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(), equalTo(
-				"JUnit Jupiter API provides timeout assertions, i.e., assertions that execution of some code completes before a timeout exceeds. In JUnit 4 this is achieved by using the 'timeout' property of '@Test(timeout=...)' annotation. \nThis rule removes the 'timeout' annotation property and inserts an  'assertTimeout' instead."));
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "JUnit Jupiter API provides timeout assertions, i.e., assertions that execution of some code completes before a timeout exceeds."
+				+ " In JUnit 4 this is achieved by using the 'timeout' property of '@Test(timeout=...)' annotation."
+				+ " \nThis rule removes the 'timeout' annotation property and inserts an  'assertTimeout' instead.", //
+				description.getDescription());
 	}
 
 	@Test

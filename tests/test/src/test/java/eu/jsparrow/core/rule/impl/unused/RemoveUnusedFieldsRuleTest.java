@@ -49,8 +49,10 @@ class RemoveUnusedFieldsRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Remove Unused Fields", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS), description.getTags());
-		assertEquals(2, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(), equalTo("Finds and remove fields that are never used actively."));
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals("Finds and remove fields that are never used actively.",
+				description.getDescription());
 	}
 
 	@Test

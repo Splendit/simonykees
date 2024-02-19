@@ -49,13 +49,16 @@ class UseDedicatedAssertionsRuleTest extends SingleRuleTest {
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Use Dedicated Assertions", description.getName());
-		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT, Tag.CODING_CONVENTIONS), description.getTags());
-		assertEquals(2, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("Replaces boolean assertions (e.g., 'assertTrue' and 'assertFalse') with the corresponding "
-						+ "dedicated assertions when testing for equality or null values. \nFor example, "
-						+ "'assertTrue(a.equals(b))' can be replaced by 'assertEquals(a, b)'. Similarly, 'assertSame', "
-						+ "'assertNotSame', 'assertNull', or 'assertNotNull' can be used instead of 'assertTrue' or 'assertFalse'."));
+		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT, Tag.CODING_CONVENTIONS),
+				description.getTags());
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "Replaces boolean assertions (e.g., 'assertTrue' and 'assertFalse') with the corresponding "
+				+ "dedicated assertions when testing for equality or null values. \nFor example, "
+				+ "'assertTrue(a.equals(b))' can be replaced by 'assertEquals(a, b)'. Similarly, 'assertSame', "
+				+ "'assertNotSame', 'assertNull', or 'assertNotNull' can be used instead of 'assertTrue' or 'assertFalse'.",
+				description.getDescription());
 	}
 
 	@Test

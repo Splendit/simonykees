@@ -51,9 +51,12 @@ public class AvoidConcatenationInLoggingStatementsRuleTest extends SingleRuleTes
 		assertEquals("Avoid Concatenation in Logging Statements", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.PERFORMANCE, Tag.CODING_CONVENTIONS, Tag.READABILITY, Tag.LOGGING),
 				description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("Avoid always evaluating concatenated logging messages by introducing parameters, which only evaluate when the logging level is active."));
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "Avoid always evaluating concatenated logging messages by introducing parameters,"
+				+ " which only evaluate when the logging level is active.",
+				description.getDescription());
 	}
 
 	@Test

@@ -39,14 +39,16 @@ class UseDedicatedAssertJAssertionsRuleTest extends SingleRuleTest {
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Use Dedicated AssertJ Assertions", description.getName());
-		String ruleDescription = "AssertJ contains a rich API for writing specific assertions about different types of objects. "
+		String ruleDescription = ""
+				+ "AssertJ contains a rich API for writing specific assertions about different types of objects. "
 				+ "Making use of the appropriate dedicated methods when writing certain assertions will simplify the test code and "
 				+ "improve the corresponding failure messages. This rule finds AssertJ assertions that can be simplified and replaces "
 				+ "them with equivalent dedicated assertions.";
-		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY), description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo(ruleDescription));
+		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY),
+				description.getTags());
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(ruleDescription, description.getDescription());
 	}
 
 	@Test

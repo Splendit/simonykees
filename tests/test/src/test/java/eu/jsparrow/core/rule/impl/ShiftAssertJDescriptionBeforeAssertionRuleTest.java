@@ -41,12 +41,14 @@ class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 		assertEquals("Shift AssertJ Description Before Assertion", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS),
 				description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("AssertJ provides methods for setting descriptions or error messages of assertions, e.g.: as, describedAs, withFailMessage, overridingErrorMessage. "
-						+ "\nThese methods should always be invoked before the actual assertion they intend to describe, otherwise, they have no effect. "
-						+ "\nThis rule, swaps the invocation of the assertion methods with the invocation of the methods setting descriptions or the error "
-						+ "messages for the corresponding assertions."));
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "AssertJ provides methods for setting descriptions or error messages of assertions, e.g.: as, describedAs, withFailMessage, overridingErrorMessage. "
+				+ "\nThese methods should always be invoked before the actual assertion they intend to describe, otherwise, they have no effect. "
+				+ "\nThis rule, swaps the invocation of the assertion methods with the invocation of the methods setting descriptions or the error "
+				+ "messages for the corresponding assertions.",
+				description.getDescription());
 	}
 
 	@Test

@@ -45,15 +45,15 @@ class EnhancedForLoopToStreamForEachRulesTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Replace For-Loop with Iterable::forEach", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP), description.getTags());
-		assertEquals(15, description.getRemediationCost().toMinutes());
+		assertEquals(15, description.getRemediationCost()
+			.toMinutes());
 		String ruleDescription = ""
 				+ "Enhanced For-Loops can be replaced by forEach().\n"
 				+ "\n"
 				+ "For example 'for(Item item: items) { }' becomes 'items.forEach()'.\n"
 				+ "\n"
 				+ "This makes code more readable and can be combined with other stream functions such as filter and map.";
-		assertThat(description.getDescription(),
-				equalTo(ruleDescription));
+		assertEquals(ruleDescription, description.getDescription());
 	}
 
 	@Test

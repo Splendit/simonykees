@@ -32,13 +32,15 @@ public class CreateTempFilesUsingJavaNIORuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Create Temp Files Using Java NIO", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.SECURITY, Tag.IO_OPERATIONS), description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(), equalTo(
-				"According to the documentation of 'File.createTempFile(String, String)', a suitable "
-						+ "alternative for creating temporary files in security-sensitive applications is to "
-						+ "use 'java.nio.file.Files.createTempFile(String, String, FileAttribute<?>...)'. "
-						+ "The reason behind it is that files created by the latter have more restrictive access permissions."
-						+ "\n\nThis rule replaces the temporary file creation using 'java.io.File' by the alternative methods "
-						+ "defined in 'java.nio.file.Files'."));
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "According to the documentation of 'File.createTempFile(String, String)', a suitable "
+				+ "alternative for creating temporary files in security-sensitive applications is to "
+				+ "use 'java.nio.file.Files.createTempFile(String, String, FileAttribute<?>...)'. "
+				+ "The reason behind it is that files created by the latter have more restrictive access permissions."
+				+ "\n\nThis rule replaces the temporary file creation using 'java.io.File' by the alternative methods "
+				+ "defined in 'java.nio.file.Files'.",
+				description.getDescription());
 	}
 }

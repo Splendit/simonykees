@@ -52,9 +52,10 @@ class RemoveUnusedLocalVariablesRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Remove Unused Local Variables", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS), description.getTags());
-		assertEquals(2, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("Finds and removes local variables that are never used actively."));
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals("Finds and removes local variables that are never used actively.",
+				description.getDescription());
 	}
 
 	@Test

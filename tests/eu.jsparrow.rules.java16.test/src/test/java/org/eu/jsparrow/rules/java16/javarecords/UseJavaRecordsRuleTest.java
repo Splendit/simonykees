@@ -39,12 +39,14 @@ class UseJavaRecordsRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Use Java Records", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_16, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
-		assertEquals(20, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("Since Java 16, record classes are a new kind of class in the Java language. "
-						+ "Record classes help to model plain data aggregates with less ceremony than normal classes. "
-						+ "This rule replaces the declarations of local classes, inner classes, and package private "
-						+ "root classes with record class declarations."));
+		assertEquals(20, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "Since Java 16, record classes are a new kind of class in the Java language. "
+				+ "Record classes help to model plain data aggregates with less ceremony than normal classes. "
+				+ "This rule replaces the declarations of local classes, inner classes, and package private "
+				+ "root classes with record class declarations.", //
+				description.getDescription());
 	}
 
 	@Test

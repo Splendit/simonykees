@@ -100,9 +100,11 @@ class ReplaceJUnit4CategoryWithJupiterTagRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Replace JUnit4 Category with JUnit Jupiter Tag", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.JUNIT), description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("This rule replaces JUnit 4 Category annotations with one or more Jupiter Tag annotations. "
-						+ "These replacements are a further step towards a transition from JUnit 4 to JUnit Jupiter."));
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "This rule replaces JUnit 4 Category annotations with one or more Jupiter Tag annotations."
+				+ " These replacements are a further step towards a transition from JUnit 4 to JUnit Jupiter.",
+				description.getDescription());
 	}
 }

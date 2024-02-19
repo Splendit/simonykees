@@ -45,13 +45,14 @@ public class UseTernaryOperatorRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Use Ternary Operator", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY), description.getTags());
-		assertEquals(5, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo(""
-						+ "This rule replaces if-statements by equivalent statements using the ternary operator"
-						+ " in cases where such a replacement is reasonable."
-						+ " For example, the statement \"x = condition ? 1 : 0;\" is shorter and better readable"
-						+ " than the corresponding if-statement."));
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "This rule replaces if-statements by equivalent statements using the ternary operator"
+				+ " in cases where such a replacement is reasonable."
+				+ " For example, the statement \"x = condition ? 1 : 0;\" is shorter and better readable"
+				+ " than the corresponding if-statement.",
+				description.getDescription());
 	}
 
 	@Test

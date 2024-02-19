@@ -38,11 +38,13 @@ class ReplaceStringFormatByFormattedRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals("Replace String.format by String.formatted", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_15, Tag.STRING_MANIPULATION, Tag.READABILITY), description.getTags());
-		assertEquals(2, description.getRemediationCost().toMinutes());
-		assertThat(description.getDescription(),
-				equalTo("This rule replaces the static invocations of String.format(String, Object...) "
-						+ "by invocations of the instance method String.formatted(Object...) introduced in Java 15. "
-						+ "This way, eliminating some code clutter."));
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "This rule replaces the static invocations of String.format(String, Object...) "
+				+ "by invocations of the instance method String.formatted(Object...) introduced in Java 15. "
+				+ "This way, eliminating some code clutter.",
+				description.getDescription());
 	}
 
 	@Test
