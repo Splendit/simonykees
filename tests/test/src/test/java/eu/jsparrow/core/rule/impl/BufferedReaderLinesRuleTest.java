@@ -32,6 +32,7 @@ public class BufferedReaderLinesRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.IO_OPERATIONS),
 				description.getTags());
+		assertEquals(5, description.getRemediationCost().toMinutes());
 		assertThat(description.getName(), equalTo("Use BufferedReader::lines"));
 		assertThat(description.getDescription(),
 				equalTo("Replaces loops iterating over lines of a file by BufferedReader::lines stream."));

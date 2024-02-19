@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -46,7 +45,7 @@ class RemoveRedundantCloseRulesTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Remove Redundant Close"));
 		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.CODING_CONVENTIONS, Tag.READABILITY), description.getTags());
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
+		assertEquals(2, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),
 				equalTo("In Java, the try-with-resource statements are able to automatically close "
 						+ "the resources which are defined in the try-with-resource header. Thus, any "

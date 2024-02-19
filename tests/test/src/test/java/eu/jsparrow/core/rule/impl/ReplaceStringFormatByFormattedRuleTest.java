@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -39,7 +38,7 @@ class ReplaceStringFormatByFormattedRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace String.format by String.formatted"));
 		assertEquals(Arrays.asList(Tag.JAVA_15, Tag.STRING_MANIPULATION, Tag.READABILITY), description.getTags());
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
+		assertEquals(2, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),
 				equalTo("This rule replaces the static invocations of String.format(String, Object...) "
 						+ "by invocations of the instance method String.formatted(Object...) introduced in Java 15. "

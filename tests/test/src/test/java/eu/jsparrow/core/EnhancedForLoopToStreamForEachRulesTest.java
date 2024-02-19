@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -46,7 +45,7 @@ class EnhancedForLoopToStreamForEachRulesTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace For-Loop with Iterable::forEach"));
 		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP), description.getTags());
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(15)));
+		assertEquals(15, description.getRemediationCost().toMinutes());
 		String ruleDescription = ""
 				+ "Enhanced For-Loops can be replaced by forEach().\n"
 				+ "\n"

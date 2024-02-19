@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -46,7 +45,7 @@ public class InlineLocalVariablesRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Inline Local Variables"));
 		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS), description.getTags());
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
+		assertEquals(2, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),
 				equalTo(""
 						+ "This rule scans for local variables which are declared and then immediately returned or thrown"

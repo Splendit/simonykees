@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -40,7 +39,7 @@ class UsePatternMatchingForInstanceofRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Use Pattern Matching for Instanceof"));
 		assertEquals(Arrays.asList(Tag.JAVA_16, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
+		assertEquals(5, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(), equalTo(
 				"This rule replaces instanceof expressions by Pattern Matching for instanceof introduced in Java 16. \n\nCommonly, an instanceof expression is followed by a local variable declaration initialized with a casting expression. Pattern Matching for instanceof combines three steps (i.e., type checking, variable declaration, and type casting) into a single step, thus reducing some boilerplate code and eliminating sources of errors."));
 	}

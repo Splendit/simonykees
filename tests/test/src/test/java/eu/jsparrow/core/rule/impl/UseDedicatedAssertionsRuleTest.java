@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -51,7 +50,7 @@ class UseDedicatedAssertionsRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Use Dedicated Assertions"));
 		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT, Tag.CODING_CONVENTIONS), description.getTags());
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
+		assertEquals(2, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),
 				equalTo("Replaces boolean assertions (e.g., 'assertTrue' and 'assertFalse') with the corresponding "
 						+ "dedicated assertions when testing for equality or null values. \nFor example, "

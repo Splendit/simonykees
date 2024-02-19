@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -40,7 +39,7 @@ class UseJavaRecordsRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Use Java Records"));
 		assertEquals(Arrays.asList(Tag.JAVA_16, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(20)));
+		assertEquals(20, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),
 				equalTo("Since Java 16, record classes are a new kind of class in the Java language. "
 						+ "Record classes help to model plain data aggregates with less ceremony than normal classes. "

@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -40,7 +39,7 @@ class UseTextBlockRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Use Text Block"));
 		assertEquals(Arrays.asList(Tag.JAVA_15, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
+		assertEquals(5, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),
 				equalTo("Java 15 introduced Text Blocks to express String literals spanning several "
 						+ "lines of code and significantly reduce the need for escape sequences. \nThis rule replaces "

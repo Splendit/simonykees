@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -42,7 +41,7 @@ class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 		assertThat(description.getName(), equalTo("Shift AssertJ Description Before Assertion"));
 		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS),
 				description.getTags());
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
+		assertEquals(5, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),
 				equalTo("AssertJ provides methods for setting descriptions or error messages of assertions, e.g.: as, describedAs, withFailMessage, overridingErrorMessage. "
 						+ "\nThese methods should always be invoked before the actual assertion they intend to describe, otherwise, they have no effect. "

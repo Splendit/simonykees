@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -63,7 +62,7 @@ class ChainAssertJAssertThatStatementsRuleTest extends SingleRuleTest {
 		assertThat(description.getName(), equalTo("Chain AssertJ AssertThat Statements"));
 		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY),
 				description.getTags());
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
+		assertEquals(5, description.getRemediationCost().toMinutes());
 		assertThat(description.getDescription(),
 				equalTo("AssertJ encourages writing fluent test cases by chaining the assertions that target the "
 						+ "same object instead of invoking 'assertThat' multiple times. This rule replaces consecutive "

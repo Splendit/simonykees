@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -88,7 +87,7 @@ class ReplaceRequestMappingAnnotationRuleTest extends SingleRuleTest {
 		assertThat(description.getName(), equalTo("Replace Request Mapping Annotation"));
 		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.SPRING, Tag.CODING_CONVENTIONS, Tag.READABILITY),
 				description.getTags());
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
+		assertEquals(2, description.getRemediationCost().toMinutes());
 		String descriptionText = ""
 				+ "The Spring Framework 4.3 introduced some composed annotations like '@GetMapping', '@PostMapping', "
 				+ "etc, as an alternative of '@RequestMapping(method=...)' for annotating HTTP request handlers. "

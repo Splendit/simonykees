@@ -31,6 +31,7 @@ public class UseFilesBufferedWriterRuleTest {
 	public void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.PERFORMANCE, Tag.IO_OPERATIONS), description.getTags());
+		assertEquals(5, description.getRemediationCost().toMinutes());
 		assertThat(description.getName(), equalTo("Use Files.newBufferedWriter"));
 		assertThat(description.getDescription(), equalTo(
 				"Java 7 introduced the 'java.nio.file.Files' class that contains some convenience methods for "

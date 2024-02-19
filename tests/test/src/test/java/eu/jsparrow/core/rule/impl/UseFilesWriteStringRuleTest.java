@@ -57,6 +57,7 @@ public class UseFilesWriteStringRuleTest {
 	public void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertEquals(Arrays.asList(Tag.JAVA_11, Tag.PERFORMANCE, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.IO_OPERATIONS), description.getTags());
+		assertEquals(5, description.getRemediationCost().toMinutes());
 		assertThat(description.getName(), equalTo("Use Files.writeString"));
 		assertThat(description.getDescription(), equalTo(
 				"Java 11 introduced 'Files.writeString(Path, CharSequence, Charset, OpenOption...)' and "
