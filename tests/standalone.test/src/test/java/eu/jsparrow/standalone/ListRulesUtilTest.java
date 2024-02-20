@@ -1,8 +1,5 @@
 package eu.jsparrow.standalone;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -55,7 +52,7 @@ public class ListRulesUtilTest {
 
 		String output = listRulesUtil.listRules(ruleId);
 
-		assertThat(output, containsString(expectedResult));
+		assertTrue(output.contains(expectedResult));
 	}
 
 	@Test
@@ -73,9 +70,9 @@ public class ListRulesUtilTest {
 
 		String output = listRulesUtil.listRules();
 
-		assertThat(output, containsString(rule1id));
-		assertThat(output, containsString(rule1Name));
-		assertThat(output, containsString(rule1Description));
+		assertTrue(output.contains(rule1id));
+		assertTrue(output.contains(rule1Name));
+		assertTrue(output.contains(rule1Description));
 	}
 
 	@Test
@@ -86,7 +83,7 @@ public class ListRulesUtilTest {
 
 		String output = listRulesUtil.listRulesShort();
 
-		assertThat(output, containsString(expectedResult));
+		assertTrue(output.contains(expectedResult));
 	}
 
 	@Test
@@ -102,8 +99,8 @@ public class ListRulesUtilTest {
 
 		String output = listRulesUtil.listRulesShort();
 
-		assertThat(output, containsString(rule1id));
-		assertThat(output, containsString(rule1Name));
+		assertTrue(output.contains(rule1id));
+		assertTrue(output.contains(rule1Name));
 	}
 
 	@Test
@@ -152,7 +149,7 @@ public class ListRulesUtilTest {
 		String whitespace = listRulesUtil.calculateWhitespace(5, 10);
 
 		assertEquals(6, whitespace.length());
-		assertThat(whitespace, equalToIgnoringWhiteSpace("")); //$NON-NLS-1$
+		assertTrue(whitespace.trim().isEmpty()); //$NON-NLS-1$
 	}
 
 	private RefactoringRule addExtraRule() {

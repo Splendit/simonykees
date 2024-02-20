@@ -2,8 +2,6 @@ package eu.jsparrow.standalone.renaming;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -74,7 +72,8 @@ public class FieldsRenamingInstantiatorTest {
 
 		FieldsRenamingRule rule = fieldsRenamingWrapper.createRule(singletonList(metadata),
 				compilationUnitProvider);
-		assertThat(rule.getMetaData(), hasSize(1));
+		assertEquals(1, rule.getMetaData()
+			.size());
 	}
 
 	@Test

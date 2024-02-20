@@ -1,8 +1,5 @@
 package eu.jsparrow.standalone;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -148,7 +145,6 @@ public class RuleConfigurationWrapperTest {
 		assertFalse(selectedRefactoring);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void getLoggerConfiguration_defaultConfiguration_shouldReturnDefaultOptions() throws Exception {
 		YAMLLoggerRule loggerRuleConfiguration = new YAMLLoggerRule();
@@ -157,14 +153,16 @@ public class RuleConfigurationWrapperTest {
 		RuleConfigurationWrapper ruleConfigurationWrapper = new RuleConfigurationWrapper(config, refactoringRules);
 		Map<String, String> loggerConfigurationOptions = ruleConfigurationWrapper.getLoggerRuleConfigurationOptions();
 
-		assertThat(loggerConfigurationOptions,
-				allOf(hasEntry("system-out-print", INFO), hasEntry("system-err-print", ERROR),
-						hasEntry("print-stacktrace", ERROR), hasEntry("system-out-print-exception", INFO),
-						hasEntry("system-err-print-exception", ERROR), hasEntry("new-logging-statement", ERROR),
-						hasEntry("attach-exception-object", "true")));
+		assertEquals(7, loggerConfigurationOptions.size());
+		assertEquals(INFO, loggerConfigurationOptions.get("system-out-print"));
+		assertEquals(ERROR, loggerConfigurationOptions.get("system-err-print"));
+		assertEquals(ERROR, loggerConfigurationOptions.get("print-stacktrace"));
+		assertEquals(INFO, loggerConfigurationOptions.get("system-out-print-exception"));
+		assertEquals(ERROR, loggerConfigurationOptions.get("system-err-print-exception"));
+		assertEquals(ERROR, loggerConfigurationOptions.get("new-logging-statement"));
+		assertEquals("true", loggerConfigurationOptions.get("attach-exception-object"));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void getLoggerConfiguration_customConfiguration_shouldReturnCustomOptions() throws Exception {
 		YAMLLoggerRule loggerRuleConfiguration = new YAMLLoggerRule(LogLevelEnum.ERROR, LogLevelEnum.ERROR,
@@ -174,12 +172,14 @@ public class RuleConfigurationWrapperTest {
 		RuleConfigurationWrapper ruleConfigurationWrapper = new RuleConfigurationWrapper(config, refactoringRules);
 		Map<String, String> loggerConfigurationOptions = ruleConfigurationWrapper.getLoggerRuleConfigurationOptions();
 
-		assertThat(loggerConfigurationOptions,
-				allOf(hasEntry("system-out-print", ERROR), hasEntry("system-err-print", ERROR),
-						hasEntry("print-stacktrace", ERROR), hasEntry("system-out-print-exception", ERROR),
-						hasEntry("system-err-print-exception", ERROR), hasEntry("new-logging-statement", ERROR),
-						hasEntry("attach-exception-object", "false")));
-
+		assertEquals(7, loggerConfigurationOptions.size());
+		assertEquals(ERROR, loggerConfigurationOptions.get("system-out-print"));
+		assertEquals(ERROR, loggerConfigurationOptions.get("system-err-print"));
+		assertEquals(ERROR, loggerConfigurationOptions.get("print-stacktrace"));
+		assertEquals(ERROR, loggerConfigurationOptions.get("system-out-print-exception"));
+		assertEquals(ERROR, loggerConfigurationOptions.get("system-err-print-exception"));
+		assertEquals(ERROR, loggerConfigurationOptions.get("new-logging-statement"));
+		assertEquals("false", loggerConfigurationOptions.get("attach-exception-object"));
 	}
 
 	@Test
@@ -195,7 +195,12 @@ public class RuleConfigurationWrapperTest {
 		Map<String, Boolean> renamingConfigurationOptions = ruleConfigurationWrapper
 			.getFieldRenamingRuleConfigurationOptions();
 
-		assertThat(renamingConfigurationOptions, allOf(hasEntry("public", false), hasEntry("package-protected", false),
-				hasEntry("protected", false), hasEntry("private", true), hasEntry("uppercase-after-underscore", true)));
+		assertEquals(6, renamingConfigurationOptions.size());
+		assertEquals(false, renamingConfigurationOptions.get("public"));
+		assertEquals(false, renamingConfigurationOptions.get("package-protected"));
+		assertEquals(false, renamingConfigurationOptions.get("protected"));
+		assertEquals(true, renamingConfigurationOptions.get("private"));
+		assertEquals(true, renamingConfigurationOptions.get("uppercase-after-underscore"));
+		assertEquals(false, renamingConfigurationOptions.get("uppercase-after-dollar"));
 	}
 }

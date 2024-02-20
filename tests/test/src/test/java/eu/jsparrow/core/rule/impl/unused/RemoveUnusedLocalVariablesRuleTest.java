@@ -1,8 +1,7 @@
 package eu.jsparrow.core.rule.impl.unused;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
@@ -63,7 +62,7 @@ class RemoveUnusedLocalVariablesRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), nullValue());
+		assertNull(rule.requiredLibraries());
 	}
 
 	@Test

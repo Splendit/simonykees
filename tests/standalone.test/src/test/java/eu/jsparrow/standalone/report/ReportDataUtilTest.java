@@ -1,7 +1,5 @@
 package eu.jsparrow.standalone.report;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -67,14 +65,14 @@ class ReportDataUtilTest {
 		assertEquals(3, report.getTotalIssuesFixed());
 		assertEquals(4L, report.getTotalTimeSaved());
 		List<RuleDataModel> ruleDataModel = report.getRuleDataModels();
-		assertThat(ruleDataModel, hasSize(1));
+		assertEquals(1, ruleDataModel.size());
 	}
 
 	@Test
 	void test_create_shouldReturnSampleRule() throws Exception {
 		List<RuleDataModel> ruleDataModels = ReportDataUtil.mapToReportRuleDataModel(jSparrowData.getRules(), rulesMap);
 
-		assertThat(ruleDataModels, hasSize(1));
+		assertEquals(1, ruleDataModels.size());
 		RuleDataModel ruleDataModel = ruleDataModels.get(0);
 		assertEquals("SomeRuleId", ruleDataModel.getRuleId());
 		assertEquals(5, ruleDataModel.getIssuesFixed());

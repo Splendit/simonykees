@@ -1,9 +1,8 @@
 package eu.jsparrow.standalone.xml;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +77,8 @@ public class FormatterXmlParserTest {
 		Executable tr = () -> FormatterXmlParser.getFormatterSettings(new File(invalidPath));
 		FormatterXmlParserException e = assertThrows(FormatterXmlParserException.class, tr);
 
-		assertThat(e.getMessage(), startsWith(PATH_UNAVAILABLE));
+		assertTrue(e.getMessage()
+			.startsWith(PATH_UNAVAILABLE));
 	}
 
 	@Test
@@ -86,7 +86,8 @@ public class FormatterXmlParserTest {
 		Executable tr = () -> FormatterXmlParser.getFormatterSettings(null);
 		FormatterXmlParserException e = assertThrows(FormatterXmlParserException.class, tr);
 
-		assertThat(e.getMessage(), startsWith(FILE_PATH_IS_NULL));
+		assertTrue(e.getMessage()
+			.startsWith(FILE_PATH_IS_NULL));
 	}
 
 	@Test
@@ -94,7 +95,8 @@ public class FormatterXmlParserTest {
 		Executable tr = () -> FormatterXmlParser.getFormatterSettings(loadResource("missing-profiles.xml"));
 		FormatterXmlParserException e = assertThrows(FormatterXmlParserException.class, tr);
 
-		assertThat(e.getMessage(), startsWith(UNEXPECTED_XML_STRUCTURE));
+		assertTrue(e.getMessage()
+			.startsWith(UNEXPECTED_XML_STRUCTURE));
 	}
 
 	@Test
@@ -102,7 +104,8 @@ public class FormatterXmlParserTest {
 		Executable tr = () -> FormatterXmlParser.getFormatterSettings(loadResource("missing-profile.xml"));
 		FormatterXmlParserException e = assertThrows(FormatterXmlParserException.class, tr);
 
-		assertThat(e.getMessage(), startsWith(UNEXPECTED_XML_STRUCTURE));
+		assertTrue(e.getMessage()
+			.startsWith(UNEXPECTED_XML_STRUCTURE));
 	}
 
 	@Test
@@ -110,7 +113,8 @@ public class FormatterXmlParserTest {
 		Executable tr = () -> FormatterXmlParser.getFormatterSettings(loadResource("missing-settings.xml"));
 		FormatterXmlParserException e = assertThrows(FormatterXmlParserException.class, tr);
 
-		assertThat(e.getMessage(), startsWith(NO_FORMATTER_SETTINGS_FOUND));
+		assertTrue(e.getMessage()
+			.startsWith(NO_FORMATTER_SETTINGS_FOUND));
 	}
 
 	@Test
@@ -118,7 +122,8 @@ public class FormatterXmlParserTest {
 		Executable tr = () -> FormatterXmlParser.getFormatterSettings(loadResource("no-formatter-kind.xml"));
 		FormatterXmlParserException e = assertThrows(FormatterXmlParserException.class, tr);
 
-		assertThat(e.getMessage(), startsWith(NO_CODE_FORMATTER_PROFILE_FOUND));
+		assertTrue(e.getMessage()
+			.startsWith(NO_CODE_FORMATTER_PROFILE_FOUND));
 	}
 
 	/**

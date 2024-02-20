@@ -1,7 +1,6 @@
 package eu.jsparrow.license.netlicensing.persistence;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,8 +26,9 @@ import eu.jsparrow.license.netlicensing.testhelper.DummyLicenseModel;
 public class SecureStoragePersistenceTest {
 
 	/*
-	 * TODO change to @RunWith(MockitoJUnitRunner.class) later on. the Silent class
-	 * is for preventing compatibility issues, after upgrading to mockito 2
+	 * TODO change to @RunWith(MockitoJUnitRunner.class) later on. the Silent
+	 * class is for preventing compatibility issues, after upgrading to mockito
+	 * 2
 	 */
 
 	private ISecurePreferences simonykeesLicenseNode;
@@ -80,7 +80,7 @@ public class SecureStoragePersistenceTest {
 
 		LicenseModel result = secureStoragePersistence.load();
 
-		assertThat(result, instanceOf(DemoLicenseModel.class));
+		assertInstanceOf(DemoLicenseModel.class, result);
 	}
 
 	@Test
@@ -90,7 +90,8 @@ public class SecureStoragePersistenceTest {
 			byte[] encryptedModelBytes = "encryptedModel".getBytes();
 			when(encryption.encrypt(eq(modelBytes))).thenReturn(encryptedModelBytes);
 
-			doThrow(StorageException.class).when(simonykeesLicenseNode).putByteArray(anyString(), any(), anyBoolean());
+			doThrow(StorageException.class).when(simonykeesLicenseNode)
+				.putByteArray(anyString(), any(), anyBoolean());
 
 			secureStoragePersistence.save(new DummyLicenseModel());
 		});
@@ -102,6 +103,6 @@ public class SecureStoragePersistenceTest {
 
 		LicenseModel result = secureStoragePersistence.load();
 
-		assertThat(result, instanceOf(DemoLicenseModel.class));
+		assertInstanceOf(DemoLicenseModel.class, result);
 	}
 }
