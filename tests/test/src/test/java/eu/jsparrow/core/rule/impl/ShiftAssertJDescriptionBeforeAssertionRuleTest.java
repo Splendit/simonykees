@@ -3,8 +3,6 @@ package eu.jsparrow.core.rule.impl;
 import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.createJavaProject;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,8 +29,7 @@ class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ShiftAssertJDescriptionBeforeAssertion"));
+		assertEquals("ShiftAssertJDescriptionBeforeAssertion", rule.getId());
 	}
 
 	@Test
@@ -58,12 +55,12 @@ class ShiftAssertJDescriptionBeforeAssertionRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), equalTo("AssertJ"));
+		assertEquals("AssertJ", rule.requiredLibraries());
 	}
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		assertThat(rule.getRequiredJavaVersion(), equalTo("1.7"));
+		assertEquals("1.7", rule.getRequiredJavaVersion());
 	}
 
 	@Test

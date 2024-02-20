@@ -2,9 +2,9 @@ package eu.jsparrow.standalone;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -143,14 +143,15 @@ public class ListRulesUtilTest {
 		Optional<Integer> maxWordLength = listRulesUtil.getMaxWordLength(rules);
 
 		assertTrue(maxWordLength.isPresent());
-		assertThat(maxWordLength.get(), equalTo(rule2id.length()));
+		assertEquals(rule2id.length(), maxWordLength.get()
+			.intValue());
 	}
 
 	@Test
 	public void calculateWhitespace() {
 		String whitespace = listRulesUtil.calculateWhitespace(5, 10);
 
-		assertThat(whitespace.length(), equalTo(6));
+		assertEquals(6, whitespace.length());
 		assertThat(whitespace, equalToIgnoringWhiteSpace("")); //$NON-NLS-1$
 	}
 

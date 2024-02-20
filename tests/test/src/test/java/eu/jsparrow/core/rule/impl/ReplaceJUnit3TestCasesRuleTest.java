@@ -2,8 +2,6 @@ package eu.jsparrow.core.rule.impl;
 
 import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -52,8 +50,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceJUnit3TestCases"));
+		assertEquals("ReplaceJUnit3TestCases", rule.getId());
 	}
 
 	@Test
@@ -78,7 +75,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), equalTo("JUnit 4 or JUnit 5"));
+		assertEquals("JUnit 4 or JUnit 5", rule.requiredLibraries());
 	}
 
 	@Test
@@ -89,7 +86,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.getRequiredJavaVersion(), equalTo("1.5"));
+		assertEquals("1.5", rule.getRequiredJavaVersion());
 	}
 
 	@Test

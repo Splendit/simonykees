@@ -1,7 +1,6 @@
 package eu.jsparrow.core.rule.impl.unused.types;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -59,8 +58,7 @@ class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("RemoveUnusedTypes"));
+		assertEquals("RemoveUnusedTypes", rule.getId());
 	}
 
 	@Test
@@ -86,7 +84,7 @@ class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		assertThat(rule.getRequiredJavaVersion(), equalTo("1.1"));
+		assertEquals("1.1", rule.getRequiredJavaVersion());
 	}
 
 	@Test

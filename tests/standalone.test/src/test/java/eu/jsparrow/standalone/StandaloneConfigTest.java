@@ -1,8 +1,5 @@
 package eu.jsparrow.standalone;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -121,8 +118,9 @@ public class StandaloneConfigTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void createRefactoringStates_shouldThrowStandaloneException() throws Exception {
-		doThrow(JavaModelException.class).when(pipeline).createRefactoringState(any(ICompilationUnit.class),
-				any(List.class));
+		doThrow(JavaModelException.class).when(pipeline)
+			.createRefactoringState(any(ICompilationUnit.class),
+					any(List.class));
 
 		assertThrows(StandaloneException.class, () -> standaloneConfig.createRefactoringStates());
 
@@ -153,8 +151,12 @@ public class StandaloneConfigTest {
 
 		verify(pipeline).doRefactoring(any(NullProgressMonitor.class));
 		assertEquals(2, rules.size());
-		assertThat(rules.get(0), hasProperty("id", equalTo("FieldRenaming")));
-		assertThat(rules.get(1), hasProperty("id", equalTo("CodeFormatter")));
+		assertTrue(rules.stream()
+			.anyMatch(rule -> rule.getId()
+				.equals("FieldRenaming")));
+		assertTrue(rules.stream()
+			.anyMatch(rule -> rule.getId()
+				.equals("CodeFormatter")));
 	}
 
 	@Test
@@ -169,7 +171,8 @@ public class StandaloneConfigTest {
 	@Test
 	public void computeRefactoring_shouldThrowStandaloneException() throws Exception {
 		hasRefactoringStates = true;
-		doThrow(RefactoringException.class).when(pipeline).doRefactoring(any(IProgressMonitor.class));
+		doThrow(RefactoringException.class).when(pipeline)
+			.doRefactoring(any(IProgressMonitor.class));
 		when(config.getRules()).thenReturn(Collections.singletonList("CodeFormatter"));//$NON-NLS-1$
 
 		assertThrows(StandaloneException.class, () -> standaloneConfig.computeRefactoring());
@@ -187,7 +190,8 @@ public class StandaloneConfigTest {
 	@Test
 	public void commitChanges_shouldThrowStandaloneException() throws Exception {
 		hasRefactoringStates = true;
-		doThrow(RefactoringException.class).when(pipeline).commitRefactoring();
+		doThrow(RefactoringException.class).when(pipeline)
+			.commitRefactoring();
 
 		assertThrows(StandaloneException.class, () -> standaloneConfig.commitRefactoring());
 	}
@@ -205,7 +209,7 @@ public class StandaloneConfigTest {
 			ICompilationUnit iCompilationUnit = mock(ICompilationUnit.class);
 			iCompilationUnitsProvider = mock(CompilationUnitProvider.class);
 			when(iCompilationUnitsProvider.getFilteredCompilationUnits())
-					.thenReturn(Collections.singletonList(iCompilationUnit));
+				.thenReturn(Collections.singletonList(iCompilationUnit));
 			super.compilationUnitsProvider = iCompilationUnitsProvider;
 
 			super.statisticsData = new StandaloneStatisticsData(1, "TestProject", super.statisticsMetadata, //$NON-NLS-1$

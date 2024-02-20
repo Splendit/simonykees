@@ -3,8 +3,8 @@ package eu.jsparrow.standalone.renaming;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -62,7 +62,7 @@ public class FieldsRenamingInstantiatorTest {
 
 		FieldsRenamingRule rule = fieldsRenamingWrapper.createRule(singletonList(metadata),
 				compilationUnitProvider);
-		assertThat(rule.getMetaData(), equalTo(emptyList()));
+		assertEquals(emptyList(), rule.getMetaData());
 	}
 
 	@Test
@@ -84,7 +84,7 @@ public class FieldsRenamingInstantiatorTest {
 
 		when(fieldDeclarationVisitorWrapper.prepareRenaming(selectedElements, options)).thenReturn(1);
 
-		assertThrows(StandaloneException.class, 
+		assertThrows(StandaloneException.class,
 				() -> fieldsRenamingWrapper.findFields(selectedElements, options));
 	}
 

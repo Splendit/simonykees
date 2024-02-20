@@ -1,9 +1,6 @@
 package eu.jsparrow.standalone;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
@@ -54,8 +51,7 @@ public class YAMLConfigurationWrapperTest {
 	@Test
 	public void readConfiguration_validYamlFile_shouldReturnDefaultConfiguration() throws StandaloneException {
 		YAMLConfig ymlConfig = yamlConfigurationWrapper.readConfiguration(loadResource("valid.yaml").getPath(), "aaa");
-
-		assertThat(ymlConfig, hasProperty("selectedProfile", equalTo("aaa")));
+		assertEquals("aaa", ymlConfig.getSelectedProfile());
 	}
 
 	@Test

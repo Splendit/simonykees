@@ -3,8 +3,6 @@ package eu.jsparrow.core.rule.impl;
 import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
 import static java.util.Arrays.asList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,7 +37,7 @@ class ReplaceRequestMappingAnnotationRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_requiredLibraries() throws Exception {
-		assertThat(rule.requiredLibraries(), equalTo("Spring Web 4.3.5 or later"));
+		assertEquals("Spring Web 4.3.5 or later", rule.requiredLibraries());
 	}
 
 	@Test
@@ -77,8 +75,7 @@ class ReplaceRequestMappingAnnotationRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceRequestMappingAnnotation"));
+		assertEquals("ReplaceRequestMappingAnnotation", rule.getId());
 	}
 
 	@Test

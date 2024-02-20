@@ -1,8 +1,6 @@
 package eu.jsparrow.core.rule.impl;
 
 import static eu.jsparrow.common.util.RulesTestUtil.createJavaProject;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.charset.StandardCharsets;
@@ -37,8 +35,7 @@ class ReplaceWrongClassForLoggerRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceWrongClassForLogger"));
+		assertEquals("ReplaceWrongClassForLogger", rule.getId());
 	}
 
 	@Test
@@ -62,7 +59,7 @@ class ReplaceWrongClassForLoggerRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.getRequiredJavaVersion(), equalTo("1.1"));
+		assertEquals("1.1", rule.getRequiredJavaVersion());
 	}
 
 	@ParameterizedTest

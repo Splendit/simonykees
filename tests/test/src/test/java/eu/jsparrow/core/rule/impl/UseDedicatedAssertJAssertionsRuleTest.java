@@ -3,8 +3,6 @@ package eu.jsparrow.core.rule.impl;
 import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.createJavaProject;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,8 +29,7 @@ class UseDedicatedAssertJAssertionsRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("UseDedicatedAssertJAssertions"));
+		assertEquals("UseDedicatedAssertJAssertions", rule.getId());
 	}
 
 	@Test
@@ -53,12 +50,12 @@ class UseDedicatedAssertJAssertionsRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_requiredLibraries() throws Exception {
-		assertThat(rule.requiredLibraries(), equalTo("AssertJ [3.20.2, 3.22.x]"));
+		assertEquals("AssertJ [3.20.2, 3.22.x]", rule.requiredLibraries());
 	}
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		assertThat(rule.getRequiredJavaVersion(), equalTo("1.8"));
+		assertEquals("1.8", rule.getRequiredJavaVersion());
 	}
 
 	@Test

@@ -2,8 +2,6 @@ package eu.jsparrow.core.rule.impl;
 
 import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -37,8 +35,7 @@ class ReplaceJUnit4AssumptionsWithHamcrestJUnitRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceJUnit4AssumptionsWithHamcrestJUnit"));
+		assertEquals("ReplaceJUnit4AssumptionsWithHamcrestJUnit", rule.getId());
 	}
 
 	@Test
@@ -62,7 +59,7 @@ class ReplaceJUnit4AssumptionsWithHamcrestJUnitRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), equalTo("Hamcrest Core 1.3 and Hamcrest JUnit 1.0"));
+		assertEquals("Hamcrest Core 1.3 and Hamcrest JUnit 1.0", rule.requiredLibraries());
 	}
 
 	@Test

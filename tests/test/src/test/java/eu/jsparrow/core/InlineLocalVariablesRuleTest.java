@@ -1,7 +1,5 @@
 package eu.jsparrow.core;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -36,8 +34,7 @@ public class InlineLocalVariablesRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("InlineLocalVariables"));
+		assertEquals("InlineLocalVariables", rule.getId());
 	}
 
 	@Test

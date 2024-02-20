@@ -1,9 +1,9 @@
 package eu.jsparrow.standalone.xml;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class FormatterXmlParserTest {
 		expected.put("org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations", "insert");
 
 		Map<String, String> settings = FormatterXmlParser.getFormatterSettings(loadResource("simple.xml"));
-		assertThat(settings.entrySet(), equalTo(expected.entrySet()));
+		assertEquals(expected.entrySet(), settings.entrySet());
 	}
 
 	@Test
@@ -50,7 +50,7 @@ public class FormatterXmlParserTest {
 		expected.put("1_org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations", "1_insert");
 
 		Map<String, String> settings = FormatterXmlParser.getFormatterSettings(loadResource("two-profiles.xml"));
-		assertThat(settings.entrySet(), equalTo(expected.entrySet()));
+		assertEquals(expected.entrySet(), settings.entrySet());
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class FormatterXmlParserTest {
 
 		Map<String, String> settings = FormatterXmlParser
 			.getFormatterSettings(loadResource("second-profile-is-formatter.xml"));
-		assertThat(settings.entrySet(), equalTo(expected.entrySet()));
+		assertEquals(expected.entrySet(), settings.entrySet());
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class FormatterXmlParserTest {
 		int expectedSize = 5000;
 
 		Map<String, String> settings = FormatterXmlParser.getFormatterSettings(loadResource("5000-entries-large.xml"));
-		assertThat(settings.size(), equalTo(expectedSize));
+		assertEquals(expectedSize, settings.size());
 	}
 
 	@Test

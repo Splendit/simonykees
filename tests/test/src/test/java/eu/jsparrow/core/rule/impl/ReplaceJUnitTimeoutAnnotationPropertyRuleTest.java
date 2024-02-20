@@ -3,8 +3,6 @@ package eu.jsparrow.core.rule.impl;
 import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.createJavaProject;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,8 +37,7 @@ class ReplaceJUnitTimeoutAnnotationPropertyRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceJUnitTimeoutAnnotationProperty"));
+		assertEquals("ReplaceJUnitTimeoutAnnotationProperty", rule.getId());
 	}
 
 	@Test
@@ -66,7 +63,7 @@ class ReplaceJUnitTimeoutAnnotationPropertyRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), equalTo("JUnit 5"));
+		assertEquals("JUnit 5", rule.requiredLibraries());
 	}
 
 	@Test
@@ -77,7 +74,7 @@ class ReplaceJUnitTimeoutAnnotationPropertyRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.getRequiredJavaVersion(), equalTo("1.8"));
+		assertEquals("1.8", rule.getRequiredJavaVersion());
 	}
 
 	@Test

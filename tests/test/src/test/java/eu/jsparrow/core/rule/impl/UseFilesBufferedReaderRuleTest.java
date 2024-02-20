@@ -1,7 +1,5 @@
 package eu.jsparrow.core.rule.impl;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
@@ -23,8 +21,7 @@ public class UseFilesBufferedReaderRuleTest {
 
 	@Test
 	public void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("UseFilesBufferedReader"));
+		assertEquals("UseFilesBufferedReader", rule.getId());
 	}
 
 	@Test
