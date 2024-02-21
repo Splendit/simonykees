@@ -41,6 +41,7 @@ public class Activator extends Plugin {
 			testFragmentActivator = frgActClass.newInstance();
 			testFragmentActivator.start(context);
 		} catch (ClassNotFoundException e) {
+			testFragmentActivator = null;
 			/*
 			 * Ignore! Exception is thrown, if the test fragment is not
 			 * available.
@@ -61,6 +62,9 @@ public class Activator extends Plugin {
 	 */
 	@Override
 	public void stop(BundleContext context) throws Exception {
+		if(testFragmentActivator != null) {
+			testFragmentActivator.stop(context);
+		}
 		plugin = null;
 	}
 
