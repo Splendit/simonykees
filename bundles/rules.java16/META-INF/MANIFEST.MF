@@ -21,7 +21,7 @@ Service-Component: OSGI-INF/eu.jsparrow.rules.java16.Java16RulesServiceImpl.xml,
  OSGI-INF/eu.jsparrow.rules.java16.Java16MarkersServiceImpl.xml
 Bundle-ActivationPolicy: lazy
 Export-Package: eu.jsparrow.rules.java16,
- eu.jsparrow.rules.java16.switchexpression;x-friends:=eu.jsparrow.test,
- eu.jsparrow.rules.java16.switchexpression.ifstatement;x-friends:=eu.jsparrow.test,
- eu.jsparrow.rules.java16.textblock;x-friends:=eu.jsparrow.test,
- eu.jsparrow.rules.java16.javarecords;x-friends:=eu.jsparrow.test
+ eu.jsparrow.rules.java16.javarecords;x-friends:="eu.jsparrow.test",
+ eu.jsparrow.rules.java16.switchexpression;x-friends:="eu.jsparrow.test",
+ eu.jsparrow.rules.java16.switchexpression.ifstatement;x-friends:="eu.jsparrow.test",
+ eu.jsparrow.rules.java16.textblock;x-friends:="eu.jsparrow.test"

@@ -9,4 +9,3 @@ Require-Bundle: org.eclipse.osgi;bundle-version="[3.17.200,4.0.0)"
 Export-Package: eu.jsparrow.i18n
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Splendit IT-Consulting GmbH
-

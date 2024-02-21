@@ -10,9 +10,9 @@ Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.test.framework,
  org.opentest4j;bundle-version="[1.2.0,2.0.0)"
 Bundle-Vendor: Splendit IT-Consulting GmbH
-Import-Package: org.junit.jupiter.api;version="[5.8.1,6.0.0)",
+Import-Package: org.eclipse.jdt.core,
+ org.junit.jupiter.api;version="[5.8.1,6.0.0)",
  org.junit.jupiter.api.function;version="[5.8.1,6.0.0)",
  org.junit.jupiter.engine.execution;version="[5.8.1,6.0.0)",
  org.junit.jupiter.params;version="[5.8.1,6.0.0)",
- org.junit.jupiter.params.provider;version="[5.8.1,6.0.0)",
- org.eclipse.jdt.core
+ org.junit.jupiter.params.provider;version="[5.8.1,6.0.0)"
