@@ -7,15 +7,14 @@ Bundle-Version: 4.19.0.qualifier
 Fragment-Host: eu.jsparrow.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: Splendit IT-Consulting GmbH
-Require-Bundle: org.eclipse.jdt.junit4.runtime;bundle-version="[1.2.0,2.0.0)",
- org.mockito.mockito-core;bundle-version="[2.23.0,6.0.0)",
+Require-Bundle: org.mockito.mockito-core;bundle-version="[2.23.0,6.0.0)",
  eu.jsparrow.logging,
  eu.jsparrow.license.netlicensing,
  eu.jsparrow.test.framework,
  org.opentest4j;bundle-version="[1.2.0,2.0.0)"
-Import-Package: org.junit.jupiter.api;version="[5.8.1,6.0.0)",
+Import-Package: org.eclipse.jdt.core,
+ org.junit.jupiter.api;version="[5.8.1,6.0.0)",
  org.junit.jupiter.api.function;version="[5.8.1,6.0.0)",
  org.junit.jupiter.engine.execution;version="[5.8.1,6.0.0)",
  org.junit.jupiter.params;version="[5.8.1,6.0.0)",
- org.junit.jupiter.params.provider;version="[5.8.1,6.0.0)",
- org.eclipse.jdt.core
+ org.junit.jupiter.params.provider;version="[5.8.1,6.0.0)"
