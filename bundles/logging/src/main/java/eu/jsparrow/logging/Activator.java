@@ -1,5 +1,6 @@
 package eu.jsparrow.logging;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -17,6 +18,24 @@ public class Activator implements BundleActivator {
 	// The shared instance
 	private static Activator plugin;
 
+	private static boolean containsJSparrowTestingBundle(BundleContext context) {
+		Bundle[] bundleArray = context.getBundles();
+		for (Bundle bundle : bundleArray) {
+			if(isJSparrowTestingBundle(bundle)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private static boolean isJSparrowTestingBundle(Bundle bundle) {
+		String symbolicName = bundle.getSymbolicName();
+		if(!symbolicName.endsWith(".test")) {
+			return false;
+		}
+		return symbolicName.startsWith("eu.jsparrow.");
+	}
+
 	/**
 	 * The constructor
 	 */
@@ -33,7 +52,11 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		plugin = this;
 		LoggingUtil.setBundle(context.getBundle());
-		LoggingUtil.configureLogger();
+		if (containsJSparrowTestingBundle(context)) {
+			LoggingUtil.configureLoggerForTesting();
+		} else {
+			LoggingUtil.configureLogger();
+		}
 	}
 
 	/*
