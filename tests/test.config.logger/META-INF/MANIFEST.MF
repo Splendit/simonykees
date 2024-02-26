@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: eu.sparrow.test.config.logger
+Bundle-ManifestVersion: 2
+Bundle-Name: jSparrow Test Logger Configuration
+Bundle-SymbolicName: eu.sparrow.test.config.logger
+Bundle-Version: 4.19.0.qualifier
+Bundle-Activator: eu.sparrow.test.config.logger.Activator
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: Splendit IT-Consulting GmbH
+Require-Bundle: org.eclipse.osgi;bundle-version="[3.17.200,4.0.0)",
+ eu.jsparrow.logging
