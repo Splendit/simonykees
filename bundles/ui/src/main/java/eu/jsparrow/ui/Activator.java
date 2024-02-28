@@ -4,7 +4,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +28,6 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
-
-	// is used for configuring the test fragment
-	private static BundleActivator testFragmentActivator;
 
 	// Flag is jSparrow is already running
 	private static boolean running = false;
@@ -84,26 +80,6 @@ public class Activator extends AbstractUIPlugin {
 			}
 		}
 
-		// load pseudo-activator from test fragment and execute its start method
-		try {
-			Class<? extends BundleActivator> fragmentActivatorClass = Class
-				.forName("at.splendit.simonykees.core.TestFragmentActivator") //$NON-NLS-1$
-				.asSubclass(BundleActivator.class);
-			testFragmentActivator = fragmentActivatorClass.newInstance();
-			testFragmentActivator.start(context);
-		} catch (ClassNotFoundException e) {
-			/*
-			 * Ignore! Exception is thrown, if the test fragment is not
-			 * available.
-			 * 
-			 * Note: The test fragment is always available, except in the
-			 * deployed version. We do not want to have any log message at all
-			 * in that case because customers should not know about test
-			 * fragments.
-			 */
-			System.out.println("Error catching"); //$NON-NLS-1$
-		}
-
 		logger.info(Messages.Activator_start);
 	}
 
@@ -124,11 +100,6 @@ public class Activator extends AbstractUIPlugin {
 		logger.info(Messages.Activator_stop);
 
 		plugin = null;
-
-		// stop test fragment pseudo-activator
-		if (testFragmentActivator != null) {
-			testFragmentActivator.stop(context);
-		}
 
 		// stop jSparrow.logging
 		Bundle loggingBundle = context.getBundle(loggingBundleID);
