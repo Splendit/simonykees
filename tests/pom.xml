@@ -20,7 +20,6 @@
 		<!-- all integration test modules -->
 		<module>test.framework</module>
 		<module>test.common</module>
-		<module>test.config.logger</module>
 		<module>license.netlicensing.test</module>
 		<module>test</module>
 		<module>ui.test</module>
