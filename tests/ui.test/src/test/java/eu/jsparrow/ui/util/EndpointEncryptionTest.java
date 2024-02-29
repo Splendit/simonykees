@@ -48,7 +48,8 @@ public class EndpointEncryptionTest {
 			endpointEncryption.decryptEndpoint(encrypted);
 			fail("Expected: " + EndpointEncryptionException.class.getName());
 		} catch (EndpointEncryptionException exc) {
-			assertTrue(exc.getMessage().contains("Signature length not correct"));
+			assertTrue(exc.getMessage().contains("got 4"));
+			assertTrue(exc.getMessage().contains("expecting 512"));
 		}
 
 	}

@@ -38,7 +38,7 @@ import ch.qos.logback.core.util.FileSize;
  * @author Matthias Webhofer
  * @since 1.2
  */
-public class LoggingUtil {
+class LoggingUtil {
 
 	private static final int ROLLING_POLICY_MIN_INDEX = 0;
 	private static final int ROLLING_POLICY_MAX_INDEX = 5;
