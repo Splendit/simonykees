@@ -20,6 +20,9 @@
 
 		<!-- standalone -->
 		<module>feature.standalone</module>
+		
+		<!-- independent -->
+		<module>feature.independent</module>
 
 		<!-- eclipse plugin at least Photon -->
 		<module>feature.photon</module>

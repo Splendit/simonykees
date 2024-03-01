@@ -1,0 +1,7 @@
+!jsparrow.config
+
+rules:
+  - ArithmethicAssignment
+  - DiamondOperator
+  - CodeFormatter
+  - LambdaToMethodReference

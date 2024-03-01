@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="eu.jsparrow.independent.feature"
+      label="jSparrow"
+      version="4.19.0.qualifier"
+      provider-name="Splendit IT-Consulting GmbH">
+
+   <description url="https://jsparrow.github.io/">
+      %description
+   </description>
+
+   <copyright url="https://jsparrow.io/wp-content/uploads/Software-download-terms.pdf">
+      %copyright
+   </copyright>
+
+   <license url="https://jsparrow.io/wp-content/uploads/EULA.pdf">
+      %license
+   </license>
+
+   <url>
+      <update label="jSparrow Update Site" url="http://update.jsparrow.eu"/>
+   </url>
+
+   <requires>
+      <import plugin="com.github.oshi.core" version="6.3.1" match="compatible"/>
+      <import plugin="org.apache.commons.lang3" version="3.0.0" match="compatible"/>
+      <import plugin="org.apache.felix.scr"/>
+      <import plugin="org.eclipse.osgi.util"/>
+      <import plugin="org.eclipse.osgi"/>
+      <import plugin="org.eclipse.osgi.services"/>
+   </requires>
+
+   <plugin
+         id="eu.jsparrow.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.logging"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.i18n"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.independent"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.rules.api"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.license.api"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.license.netlicensing"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

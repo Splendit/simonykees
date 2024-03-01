@@ -2,6 +2,10 @@ package eu.jsparrow.core.config;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
+
+import eu.jsparrow.core.rule.RulesContainer;
+import eu.jsparrow.rules.common.RefactoringRule;
 
 /**
  * Model class for configuration data.
@@ -78,6 +82,49 @@ public class YAMLConfig {
 		config.setSelectedProfile("default"); //$NON-NLS-1$
 
 		return config;
+	}
+
+	/**
+	 * provides a default configuration for jsparrow
+	 * 
+	 * @return default configuration
+	 */
+	public static YAMLConfig getConfigFromRulesContainer(String filter) {
+		YAMLConfig config = new YAMLConfig();
+
+		Predicate<String> idPredicate = getFilterPredicate(filter);
+		List<String> profileRules = new LinkedList<>();
+		RulesContainer.getAllRules(false)
+			.stream()
+			.map(RefactoringRule::getId)
+			.filter(idPredicate)
+			.forEach(profileRules::add);
+
+		YAMLProfile profile = new YAMLProfile();
+		profile.setName("test"); //$NON-NLS-1$
+		profile.setRules(profileRules);
+
+		config.getProfiles()
+			.add(profile);
+
+		config.setSelectedProfile("test"); //$NON-NLS-1$
+
+		return config;
+	}
+
+	private static Predicate<String> getFilterPredicate(String filterText) {
+		if (filterText == null) {
+			return s -> true;
+		}
+		String upperCaseFilter = filterText.trim()
+			.toUpperCase();
+
+		if (upperCaseFilter.isEmpty()) {
+			return s -> true;
+		}
+		return id -> id.toUpperCase()
+			.contains(upperCaseFilter);
+
 	}
 
 	/**

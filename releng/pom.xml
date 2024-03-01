@@ -16,6 +16,7 @@
 
 	<modules>
 		<module>eu.jsparrow.product</module>
+		<module>eu.jsparrow.independent.product</module>
 		<module>eu.jsparrow.site.photon</module>
 	</modules>
 </project>
