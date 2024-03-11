@@ -18,9 +18,11 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 
 class InlineLocalVariablesResolverResolverTest extends UsesJDTUnitFixture {
 
-	private static final String RULE_DESCRIPTION = ""
-			+ "This rule scans for local variables which are declared and then immediately returned or thrown"
-			+ " and in-lines them if this is possible.";
+	private static final String RULE_DESCRIPTION = "" +
+			"According to the rule 'S1488' on the web site 'sonarcloud.io'," +
+			" local variables should not be declared and then immediately returned or thrown." +
+			" Therefore this rule scans for local variables which are exclusively used" +
+			" in one single return- or throw statement and in-lines them if this is possible.";
 
 	private static final String RETURN_ORIGINAL = "" +
 			"	int returnResult(int a, int b) {\n" +

@@ -40,6 +40,16 @@ public class InlineLocalVariablesRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
+		assertThat(description.getName(), equalTo("Inline Local Variables"));
+		assertThat(description.getTags(),
+				contains(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS));
+		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
+		assertThat(description.getDescription(),
+				equalTo( "" +
+						"According to the rule 'S1488' on the web site 'sonarcloud.io'," +
+						" local variables should not be declared and then immediately returned or thrown." +
+						" Therefore this rule scans for local variables which are exclusively used" +
+						" in one single return- or throw statement and in-lines them if this is possible."));
 		assertEquals("Inline Local Variables", description.getName());
 		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS), description.getTags());
 		assertEquals(2, description.getRemediationCost()
