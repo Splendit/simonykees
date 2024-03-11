@@ -1,6 +1,7 @@
 package eu.jsparrow.core.refactorer;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -8,9 +9,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
 import eu.jsparrow.core.statistic.entity.JsparrowData;
@@ -28,18 +28,19 @@ public class StandaloneStatisticsDataTest {
 
 	public TestableStandaloneStatisticsData statisticsData;
 
-	@Mock
 	private RefactoringPipeline refactoringPipeline;
 
-	@Mock
 	private ICompilationUnit compilationUnit;
 
 	private RefactoringRule rule = new ArithmethicAssignmentRule();
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		filesCount = 5;
 		projectName = "testProject";
+
+		refactoringPipeline = mock(RefactoringPipeline.class);
+		compilationUnit = mock(ICompilationUnit.class);
 
 		StandaloneStatisticsMetadata statisticsMetadata = new StandaloneStatisticsMetadata(100, "owner", "repoName");
 
@@ -47,23 +48,18 @@ public class StandaloneStatisticsDataTest {
 				refactoringPipeline);
 
 		statisticsData.setMetricData();
-		statisticsData.setEndTime(Instant.now()
-			.getEpochSecond());
+		statisticsData.setEndTime(Instant.now().getEpochSecond());
 
-		metricData = statisticsData.getMetricData()
-			.get();
+		metricData = statisticsData.getMetricData().get();
 
 	}
 
 	@Test
 	public void setMetricDataTest() {
-		assertTrue(!metricData.getRepoName()
-			.isEmpty());
-		assertTrue(!metricData.getRepoOwner()
-			.isEmpty());
+		assertTrue(!metricData.getRepoName().isEmpty());
+		assertTrue(!metricData.getRepoOwner().isEmpty());
 		assertTrue(metricData.getTimestamp() != 0);
-		assertTrue(!metricData.getuuid()
-			.isEmpty());
+		assertTrue(!metricData.getuuid().isEmpty());
 
 		assertTrue(null != metricData.getData());
 	}
@@ -82,10 +78,8 @@ public class StandaloneStatisticsDataTest {
 		assertTrue(jsparrowData.getTotalTimeSaved() != 0);
 
 		assertTrue(null != jsparrowData.getRules());
-		assertTrue(jsparrowData.getRules()
-			.size() == 1);
-		assertTrue(!ruleData.getRuleId()
-			.isEmpty());
+		assertTrue(jsparrowData.getRules().size() == 1);
+		assertTrue(!ruleData.getRuleId().isEmpty());
 		assertTrue(ruleData.getFilesChanged() != 0);
 		assertTrue(ruleData.getIssuesFixed() != 0);
 		assertTrue(ruleData.getRemediationCost() != 0);
@@ -106,9 +100,7 @@ public class StandaloneStatisticsDataTest {
 
 		@Override
 		public JsparrowRuleData getRuleData(RefactoringRule rule) {
-			return new JsparrowRuleData(rule.getId(), 2, rule.getRuleDescription()
-				.getRemediationCost()
-				.toMinutes(), 2);
+			return new JsparrowRuleData(rule.getId(), 2, rule.getRuleDescription().getRemediationCost().toMinutes(), 2);
 		}
 
 		@Override

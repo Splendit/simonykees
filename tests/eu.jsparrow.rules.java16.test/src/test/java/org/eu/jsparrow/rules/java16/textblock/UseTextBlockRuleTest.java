@@ -1,12 +1,10 @@
 package org.eu.jsparrow.rules.java16.textblock;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Duration;
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,29 +28,29 @@ class UseTextBlockRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("UseTextBlock"));
+		assertEquals("UseTextBlock", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Use Text Block"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_15, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
-		assertThat(description.getDescription(),
-				equalTo("Java 15 introduced Text Blocks to express String literals spanning several "
-						+ "lines of code and significantly reduce the need for escape sequences. \nThis rule replaces "
-						+ "multiline String concatenation expressions with Text Blocks String literals. Thus, removing "
-						+ "some boilerplate code and increasing the readability of String expressions."));
+		assertEquals("Use Text Block", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_15, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "Java 15 introduced Text Blocks to express String literals spanning several "
+				+ "lines of code and significantly reduce the need for escape sequences. \nThis rule replaces "
+				+ "multiline String concatenation expressions with Text Blocks String literals. Thus, removing "
+				+ "some boilerplate code and increasing the readability of String expressions.",
+				description.getDescription());
 	}
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		assertThat(rule.getRequiredJavaVersion(), equalTo("15"));
+		assertEquals("15", rule.getRequiredJavaVersion());
 	}
-	
+
 	@Test
 	public void calculateEnabledForProjectShouldBeDisabled() {
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_14);

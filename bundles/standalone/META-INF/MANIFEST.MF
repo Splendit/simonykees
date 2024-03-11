@@ -5,7 +5,7 @@ Bundle-Name: jSparrow Standalone
 Bundle-SymbolicName: eu.jsparrow.standalone;singleton:=true
 Bundle-Version: 4.19.0.qualifier
 Bundle-Activator: eu.jsparrow.standalone.Activator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.i18n,
@@ -13,19 +13,19 @@ Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.rules.api,
  eu.jsparrow.license.api,
  eu.jsparrow.rules.java16,
- org.eclipse.jdt.core;bundle-version="[3.11.0,4.0.0)",
- org.eclipse.core.resources;bundle-version="[3.10.0,4.0.0)",
- org.eclipse.core.runtime;bundle-version="[3.11.0,4.0.0)",
+ org.eclipse.jdt.core;bundle-version="[3.29.0,4.0.0)",
+ org.eclipse.core.resources;bundle-version="[3.16.100,4.0.0)",
+ org.eclipse.core.runtime;bundle-version="[3.22.0,4.0.0)",
  org.apache.commons.lang3;bundle-version="[3.1.0,4.0.0)",
- org.eclipse.e4.core.contexts,
- org.eclipse.e4.core.di;bundle-version="[1.6.100,2.0.0)",
- org.eclipse.osgi,
- org.eclipse.osgi.services;bundle-version="[3.6.0,4.0.0)",
- org.eclipse.core.jobs,
- org.eclipse.m2e.core;bundle-version="[1.7.0,2.0.0)",
- org.eclipse.m2e.jdt;bundle-version="[1.7.0,2.0.0)",
- org.eclipse.m2e.maven.runtime;bundle-version="[1.7.0,2.0.0)",
- org.eclipse.core.net;bundle-version="[1.3.400,2.0.0)",
+ org.eclipse.e4.core.contexts;bundle-version="[1.9.100,2.0.0)",
+ org.eclipse.e4.core.di;bundle-version="[1.8.100,2.0.0)",
+ org.eclipse.osgi;bundle-version="[3.17.200,4.0.0)",
+ org.eclipse.osgi.services;bundle-version="[3.10.200,4.0.0)",
+ org.eclipse.core.jobs;bundle-version="[3.12.100,4.0.0)",
+ org.eclipse.m2e.core;bundle-version="[1.18.4,3.0.0)",
+ org.eclipse.m2e.jdt;bundle-version="[1.18.3,3.0.0)",
+ org.eclipse.m2e.maven.runtime;bundle-version="[1.18.3,4.0.0)",
+ org.eclipse.core.net;bundle-version="[1.3.1100,2.0.0)",
  org.freemarker;bundle-version="[2.3.22,2.4.0)"
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Bundle-ClassPath: lib/plexus-utils.jar,

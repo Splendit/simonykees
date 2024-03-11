@@ -15,7 +15,6 @@ import oshi.hardware.HWDiskStore;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.UsbDevice;
 
-@SuppressWarnings("nls")
 public class SystemInfoWrapperTest {
 	
 	private SystemInfoWrapper systemInfo;

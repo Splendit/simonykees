@@ -1,8 +1,5 @@
 package eu.jsparrow.core;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,25 +34,23 @@ class EnhancedForLoopToStreamForEachRulesTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("EnhancedForLoopToStreamForEach"));
+		assertEquals("EnhancedForLoopToStreamForEach", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace For-Loop with Iterable::forEach"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(15)));
+		assertEquals("Replace For-Loop with Iterable::forEach", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP), description.getTags());
+		assertEquals(15, description.getRemediationCost()
+			.toMinutes());
 		String ruleDescription = ""
 				+ "Enhanced For-Loops can be replaced by forEach().\n"
 				+ "\n"
 				+ "For example 'for(Item item: items) { }' becomes 'items.forEach()'.\n"
 				+ "\n"
 				+ "This makes code more readable and can be combined with other stream functions such as filter and map.";
-		assertThat(description.getDescription(),
-				equalTo(ruleDescription));
+		assertEquals(ruleDescription, description.getDescription());
 	}
 
 	@Test

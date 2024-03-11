@@ -4,24 +4,24 @@ Bundle-ManifestVersion: 2
 Bundle-Name: jsparrow::rules.api
 Bundle-SymbolicName: eu.jsparrow.rules.api
 Bundle-Version: 4.19.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Export-Package: eu.jsparrow.rules.api,
  eu.jsparrow.rules.common,
  eu.jsparrow.rules.common.builder,
  eu.jsparrow.rules.common.exception,
  eu.jsparrow.rules.common.exception.runtime,
- eu.jsparrow.rules.common.statistics,
  eu.jsparrow.rules.common.markers,
+ eu.jsparrow.rules.common.statistics,
  eu.jsparrow.rules.common.util,
  eu.jsparrow.rules.common.visitor,
  eu.jsparrow.rules.common.visitor.helper
 Require-Bundle: eu.jsparrow.logging,
- org.eclipse.jdt.core;bundle-version="[3.12.0,4.0.0)",
- org.eclipse.ltk.core.refactoring;bundle-version="[3.7.0,4.0.0)",
- org.eclipse.text;bundle-version="[3.6.0,4.0.0)",
- org.eclipse.core.resources;bundle-version="[3.10.0,4.0.0)",
- org.eclipse.equinox.registry;bundle-version="[3.6.100,4.0.0)",
- org.eclipse.core.runtime;bundle-version="[3.11.0,4.0.0)",
+ org.eclipse.jdt.core;bundle-version="[3.29.0,4.0.0)",
+ org.eclipse.ltk.core.refactoring;bundle-version="[3.12.0,4.0.0)",
+ org.eclipse.text;bundle-version="[3.12.0,4.0.0)",
+ org.eclipse.core.resources;bundle-version="[3.16.100,4.0.0)",
+ org.eclipse.equinox.registry;bundle-version="[3.10.200,4.0.0)",
+ org.eclipse.core.runtime;bundle-version="[3.22.0,4.0.0)",
  org.apache.commons.lang3;bundle-version="[3.1.0,4.0.0)",
  eu.jsparrow.i18n

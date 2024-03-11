@@ -1,8 +1,6 @@
 package eu.jsparrow.standalone.report;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -60,28 +58,28 @@ class ReportDataUtilTest {
 		LocalDate date = LocalDate.of(2020, 10, 29);
 		ReportData report = ReportDataUtil.createReportData(jSparrowData, date, rulesMap);
 
-		assertThat(report.getDate(), equalTo("29.10.2020"));
-		assertThat(report.getProjectName(), equalTo("project-name"));
-		assertThat(report.getTotalFilesCount(), equalTo(1));
-		assertThat(report.getTotalFilesChanged(), equalTo(2));
-		assertThat(report.getTotalIssuesFixed(), equalTo(3));
-		assertThat(report.getTotalTimeSaved(), equalTo(4L));
+		assertEquals("29.10.2020", report.getDate());
+		assertEquals("project-name", report.getProjectName());
+		assertEquals(1, report.getTotalFilesCount());
+		assertEquals(2, report.getTotalFilesChanged());
+		assertEquals(3, report.getTotalIssuesFixed());
+		assertEquals(4L, report.getTotalTimeSaved());
 		List<RuleDataModel> ruleDataModel = report.getRuleDataModels();
-		assertThat(ruleDataModel, hasSize(1));
+		assertEquals(1, ruleDataModel.size());
 	}
 
 	@Test
 	void test_create_shouldReturnSampleRule() throws Exception {
 		List<RuleDataModel> ruleDataModels = ReportDataUtil.mapToReportRuleDataModel(jSparrowData.getRules(), rulesMap);
 
-		assertThat(ruleDataModels, hasSize(1));
+		assertEquals(1, ruleDataModels.size());
 		RuleDataModel ruleDataModel = ruleDataModels.get(0);
-		assertThat(ruleDataModel.getRuleId(), equalTo("SomeRuleId"));
-		assertThat(ruleDataModel.getIssuesFixed(), equalTo(5));
-		assertThat(ruleDataModel.getRemediationCost(), equalTo(6L));
-		assertThat(ruleDataModel.getFilesChanged(), equalTo(7));
-		assertThat(ruleDataModel.getRuleLink(), equalTo("https://jsparrow.github.io/rules/some-rule-id.html"));
-		assertThat(ruleDataModel.getRuleName(), equalTo("Some Rule"));
+		assertEquals("SomeRuleId", ruleDataModel.getRuleId());
+		assertEquals(5, ruleDataModel.getIssuesFixed());
+		assertEquals(6L, ruleDataModel.getRemediationCost());
+		assertEquals(7, ruleDataModel.getFilesChanged());
+		assertEquals("https://jsparrow.github.io/rules/some-rule-id.html", ruleDataModel.getRuleLink());
+		assertEquals("Some Rule", ruleDataModel.getRuleName());
 	}
 
 }

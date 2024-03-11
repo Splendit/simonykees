@@ -1,15 +1,12 @@
 package eu.jsparrow.core;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,21 +34,20 @@ public class InlineLocalVariablesRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("InlineLocalVariables"));
+		assertEquals("InlineLocalVariables", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Inline Local Variables"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
-		assertThat(description.getDescription(),
-				equalTo(""
-						+ "This rule scans for local variables which are declared and then immediately returned or thrown"
-						+ " and in-lines them if this is possible."));
+		assertEquals("Inline Local Variables", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS), description.getTags());
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "This rule scans for local variables which are declared and then immediately returned or thrown"
+				+ " and in-lines them if this is possible.",
+				description.getDescription());
 	}
 
 	@Test

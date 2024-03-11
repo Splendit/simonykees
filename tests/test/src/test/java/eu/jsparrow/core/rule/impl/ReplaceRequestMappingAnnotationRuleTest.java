@@ -3,17 +3,13 @@ package eu.jsparrow.core.rule.impl;
 import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
 import static java.util.Arrays.asList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -41,9 +37,9 @@ class ReplaceRequestMappingAnnotationRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_requiredLibraries() throws Exception {
-		assertThat(rule.requiredLibraries(), equalTo("Spring Web 4.3.5 or later"));
+		assertEquals("Spring Web 4.3.5 or later", rule.requiredLibraries());
 	}
-	
+
 	@Test
 	void calculateEnabledForProjectShouldBeEnabled() throws Exception {
 		addToClasspath(testProject,
@@ -79,25 +75,24 @@ class ReplaceRequestMappingAnnotationRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceRequestMappingAnnotation"));
+		assertEquals("ReplaceRequestMappingAnnotation", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace Request Mapping Annotation"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_5, Tag.SPRING, Tag.CODING_CONVENTIONS, Tag.READABILITY));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
+		assertEquals("Replace Request Mapping Annotation", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.SPRING, Tag.CODING_CONVENTIONS, Tag.READABILITY),
+				description.getTags());
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
 		String descriptionText = ""
 				+ "The Spring Framework 4.3 introduced some composed annotations like '@GetMapping', '@PostMapping', "
 				+ "etc, as an alternative of '@RequestMapping(method=...)' for annotating HTTP request handlers. "
 				+ "Accordingly, this rule replaces the '@RequestMapping' annotations with their equivalent dedicated "
 				+ "alternatives, for example, '@RequestMapping(value = \"/hello\", method = RequestMethod.GET)' is "
 				+ "replaced by '@GetMapping(value = \"/hello\")'.";
-		assertThat(description.getDescription(),
-				equalTo(descriptionText));
+		assertEquals(descriptionText, description.getDescription());
 	}
 
 	@Test

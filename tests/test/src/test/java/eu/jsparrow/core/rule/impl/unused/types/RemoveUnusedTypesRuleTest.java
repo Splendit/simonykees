@@ -1,10 +1,7 @@
 package eu.jsparrow.core.rule.impl.unused.types;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
@@ -17,7 +14,6 @@ import static org.mockito.Mockito.when;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,19 +57,18 @@ class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("RemoveUnusedTypes"));
+		assertEquals("RemoveUnusedTypes", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Remove Unused Types"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
-		assertThat(description.getDescription(),
-				equalTo("Finds and removes types that are not used."));
+		assertEquals("Remove Unused Types", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS), description.getTags());
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals("Finds and removes types that are not used.",
+				description.getDescription());
 	}
 
 	@Test
@@ -83,12 +78,12 @@ class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), nullValue());
+		assertNull(rule.requiredLibraries());
 	}
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		assertThat(rule.getRequiredJavaVersion(), equalTo("1.1"));
+		assertEquals("1.1", rule.getRequiredJavaVersion());
 	}
 
 	@Test
@@ -101,19 +96,10 @@ class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {
-			"HelloWorld",
-			"CompleteCompilationUnitToRemove",
-			"ClassUsedAsFieldInSamePackage",
-			"ClassUsedAsFieldInOtherPackage",
-			"ClassExtendedInSamePackage",
-			"ClassExtendedInOtherPackage",
-			"ClassUsingClasses",
-			"ClassWithNestedClasses",
-			"ClassWithLocalClasses",
-			"ClassWithMainMethod",
-			"MainMethodInNestedClass"
-	})
+	@ValueSource(strings = { "HelloWorld", "CompleteCompilationUnitToRemove", "ClassUsedAsFieldInSamePackage",
+			"ClassUsedAsFieldInOtherPackage", "ClassExtendedInSamePackage", "ClassExtendedInOtherPackage",
+			"ClassUsingClasses", "ClassWithNestedClasses", "ClassWithLocalClasses", "ClassWithMainMethod",
+			"MainMethodInNestedClass" })
 	void testTransformation(String className) throws Exception {
 		String preRuleFilePath = String.format("unused/types/%s.java", className);
 		Path preRule = getPreRuleFile(preRuleFilePath);
@@ -132,44 +118,45 @@ class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 
 		assertEquals(expected, actual);
 	}
-	
+
 	@Test
 	void testClassesUsedByTestsOnly() throws Exception {
-		
+
 		String className = "ClassesUsedByTestExclusively";
 		String testClassName = "TestUsingNestedClasses";
-		
-		String preRuleFilePath = String.format("unused/types/%s.java", className);		
-		String preRuleTestFilePath = String.format("unused/types/%s.java", testClassName);		
-		
+
+		String preRuleFilePath = String.format("unused/types/%s.java", className);
+		String preRuleTestFilePath = String.format("unused/types/%s.java", testClassName);
+
 		Path preRule = getPreRuleFile(preRuleFilePath);
 		Path preRuleTest = getPreRuleFile(preRuleTestFilePath);
-		
+
 		Path postRule = getPostRuleFile(className + ".java", "unused/types");
 		Path postRuleTest = getPostRuleFile(testClassName + ".java", "unused/types");
-		
+
 		List<UnusedTypeWrapper> unusedTypes = UnusedCodeTestHelper.findTypesToBeRemoved(PRERULE_UNUSED_PACKAGE,
 				PRERULE_DIRECTORY);
 		RemoveUnusedTypesRule rule = new RemoveUnusedTypesRule(unusedTypes);
 		List<Path> preRuleFiles = Arrays.asList(preRule, preRuleTest);
-		
+
 		List<ICompilationUnit> iCompilationUnits = UnusedCodeTestHelper.applyRemoveUnusedCodeRefactoring(rule,
 				"eu.jsparrow.sample.preRule.unused.types", preRuleFiles, root);
-		
+
 		String postRulePackage = getPostRulePackage("unused.types");
-		
-		String refactoring = iCompilationUnits.get(0).getSource();		
+
+		String refactoring = iCompilationUnits.get(0)
+			.getSource();
 		String actual = StringUtils.replace(refactoring, "package eu.jsparrow.sample.preRule.unused.types",
 				postRulePackage);
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
-		
-		
-		String refactoringTest = iCompilationUnits.get(1).getSource();
+
+		String refactoringTest = iCompilationUnits.get(1)
+			.getSource();
 		String actualTest = StringUtils.replace(refactoringTest, "package eu.jsparrow.sample.preRule.unused.types",
 				postRulePackage);
 		String expectedTest = new String(Files.readAllBytes(postRuleTest), StandardCharsets.UTF_8);
-		assertEquals(expectedTest, actualTest);		
+		assertEquals(expectedTest, actualTest);
 	}
 
 	@Test
@@ -214,12 +201,12 @@ class RemoveUnusedTypesRuleTest extends SingleRuleTest {
 		when(type.getName()).thenReturn(mock(SimpleName.class));
 		when(compilationUnit.getJavaElement()).thenReturn(icu);
 		when(icu.getElementName()).thenReturn("ToBeDeleted");
-		doThrow(new JavaModelException(new RuntimeException("Permission denied"), 985)).when(icu).delete(true, null);
+		doThrow(new JavaModelException(new RuntimeException("Permission denied"), 985)).when(icu)
+			.delete(true, null);
 		UnusedTypeWrapper wrapper = new UnusedTypeWrapper(compilationUnit, JavaAccessModifier.PUBLIC, type, true);
 		unusedTypes.add(wrapper);
 		RemoveUnusedTypesRule rule = new RemoveUnusedTypesRule(unusedTypes);
-		assertThrows(RefactoringException.class, 
-				() -> rule.deleteEmptyCompilationUnits(),  
+		assertThrows(RefactoringException.class, () -> rule.deleteEmptyCompilationUnits(),
 				() -> "The following compilation units could not be removed:\nToBeDeleted");
 	}
 }

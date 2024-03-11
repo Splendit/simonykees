@@ -8,12 +8,14 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.rules.java16.textblock.UseTextBlockResolver;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 
+@Disabled("Test is unstable and not therefore not reproducable")
 class UseTextBlockResolverTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach

@@ -1,8 +1,5 @@
 package eu.jsparrow.core;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,22 +34,22 @@ class RemoveRedundantCloseRulesTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("RemoveRedundantClose"));
+		assertEquals("RemoveRedundantClose", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Remove Redundant Close"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_7, Tag.CODING_CONVENTIONS, Tag.READABILITY));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
-		assertThat(description.getDescription(),
-				equalTo("In Java, the try-with-resource statements are able to automatically close "
-						+ "the resources which are defined in the try-with-resource header. Thus, any "
-						+ "explicit 'close()' invocation in the try block is redundant and potentially "
-						+ "confusing. This rule eliminates redundant resource 'close()' invocations."));
+		assertEquals("Remove Redundant Close", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.CODING_CONVENTIONS, Tag.READABILITY), description.getTags());
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "In Java, the try-with-resource statements are able to automatically close "
+				+ "the resources which are defined in the try-with-resource header. Thus, any "
+				+ "explicit 'close()' invocation in the try block is redundant and potentially "
+				+ "confusing. This rule eliminates redundant resource 'close()' invocations.",
+				description.getDescription());
 	}
 
 	@Test

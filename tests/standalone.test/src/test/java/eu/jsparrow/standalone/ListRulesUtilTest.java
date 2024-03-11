@@ -1,20 +1,17 @@
 package eu.jsparrow.standalone;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.RuleDescription;
@@ -35,7 +32,7 @@ public class ListRulesUtilTest {
 
 	private List<RefactoringRule> rules;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		rule1 = mock(RefactoringRule.class);
 
@@ -55,7 +52,7 @@ public class ListRulesUtilTest {
 
 		String output = listRulesUtil.listRules(ruleId);
 
-		assertThat(output, containsString(expectedResult));
+		assertTrue(output.contains(expectedResult));
 	}
 
 	@Test
@@ -73,9 +70,9 @@ public class ListRulesUtilTest {
 
 		String output = listRulesUtil.listRules();
 
-		assertThat(output, containsString(rule1id));
-		assertThat(output, containsString(rule1Name));
-		assertThat(output, containsString(rule1Description));
+		assertTrue(output.contains(rule1id));
+		assertTrue(output.contains(rule1Name));
+		assertTrue(output.contains(rule1Description));
 	}
 
 	@Test
@@ -86,7 +83,7 @@ public class ListRulesUtilTest {
 
 		String output = listRulesUtil.listRulesShort();
 
-		assertThat(output, containsString(expectedResult));
+		assertTrue(output.contains(expectedResult));
 	}
 
 	@Test
@@ -102,15 +99,14 @@ public class ListRulesUtilTest {
 
 		String output = listRulesUtil.listRulesShort();
 
-		assertThat(output, containsString(rule1id));
-		assertThat(output, containsString(rule1Name));
+		assertTrue(output.contains(rule1id));
+		assertTrue(output.contains(rule1Name));
 	}
 
 	@Test
 	public void getAllRulesFilteredById_noRuleIdProvided_shouldReturnAllRules() {
 		List<RefactoringRule> testRules = listRulesUtil.getAllRulesFilteredById(null);
-
-		assertThat(testRules, contains(rule1));
+		assertEquals(Arrays.asList(rule1), testRules);
 	}
 
 	@Test
@@ -126,8 +122,7 @@ public class ListRulesUtilTest {
 		when(rule2.getId()).thenReturn(rule2id);
 
 		List<RefactoringRule> rules = listRulesUtil.getAllRulesFilteredById(ruleId);
-
-		assertThat(rules, contains(rule1));
+		assertEquals(Arrays.asList(rule1), rules);
 	}
 
 	@Test
@@ -145,15 +140,16 @@ public class ListRulesUtilTest {
 		Optional<Integer> maxWordLength = listRulesUtil.getMaxWordLength(rules);
 
 		assertTrue(maxWordLength.isPresent());
-		assertThat(maxWordLength.get(), equalTo(rule2id.length()));
+		assertEquals(rule2id.length(), maxWordLength.get()
+			.intValue());
 	}
 
 	@Test
 	public void calculateWhitespace() {
 		String whitespace = listRulesUtil.calculateWhitespace(5, 10);
 
-		assertThat(whitespace.length(), equalTo(6));
-		assertThat(whitespace, equalToIgnoringWhiteSpace("")); //$NON-NLS-1$
+		assertEquals(6, whitespace.length());
+		assertTrue(whitespace.trim().isEmpty()); //$NON-NLS-1$
 	}
 
 	private RefactoringRule addExtraRule() {
