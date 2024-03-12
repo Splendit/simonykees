@@ -130,7 +130,8 @@
     	</factory>
  	</extension>
  	
- 	  <extension
+ 	 
+ 	<extension
         point="org.eclipse.ui.menus">
      <menuContribution
            allPopups="false"
@@ -146,8 +147,7 @@
            </command>
         </toolbar>
      </menuContribution>
-  </extension>
-   
+  	</extension>
  	<!-- jSparrow Marker Annotations -->
 	<extension
          point="org.eclipse.ui.editors.markerAnnotationSpecification">

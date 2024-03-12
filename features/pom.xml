@@ -18,8 +18,11 @@
 		<!-- OSGi feature + site deployment -->
 		<module>feature.3rd.party</module>
 
-		<!-- standalone 
-		<module>feature.standalone</module> -->
+		<!-- standalone -->
+		<module>feature.standalone</module>
+		
+		<!-- independent -->
+		<module>feature.independent</module>
 
 		<!-- eclipse plugin at least Photon -->
 		<module>feature.photon</module>

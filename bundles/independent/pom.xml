@@ -1,0 +1,197 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>at.splendit</groupId>
+		<artifactId>bundles</artifactId>
+		<version>4.19.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>eu.jsparrow.independent</artifactId>
+	<packaging>eclipse-plugin</packaging>
+	<name>jSparrow :: independent</name>
+	<description>jSparrow Plugin for headless start</description>
+
+	<properties>
+		<snakeyaml.version>1.23</snakeyaml.version>
+		<jackson.version>2.12.0</jackson.version>
+		<independent.properties.destinationFile>src/main/resources/independent.properties</independent.properties.destinationFile>
+		<independent.properties.sourceFile></independent.properties.sourceFile>
+		<proguard.extra.options>
+			-libraryjars
+			${project.basedir}/../license.api/target/eu.jsparrow.license.api-${project.version}_proguard_base.jar
+			-libraryjars
+			${project.basedir}/../rules.api/target/eu.jsparrow.rules.api-${project.version}_proguard_base.jar
+			-libraryjars
+			${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
+			-libraryjars
+			${project.basedir}/../core/target/eu.jsparrow.core-${project.version}_proguard_base.jar
+		</proguard.extra.options>
+	</properties>
+
+
+	<build>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>independent.properties</include>
+					<include>banner.txt</include>
+				</includes>
+			</resource>
+		</resources>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.github.wvengen</groupId>
+					<artifactId>proguard-maven-plugin</artifactId>
+					<configuration>
+						<exclusions>
+							<exclusion>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow.rules.api</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow.license.api</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow.logging</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow.core</artifactId>
+							</exclusion>
+						</exclusions>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<plugin>
+				<groupId>com.coderplus.maven.plugins</groupId>
+				<artifactId>copy-rename-maven-plugin</artifactId>
+				<version>1.0.1</version>
+				<executions>
+					<execution>
+						<id>copy-properties</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<overWrite>true</overWrite>
+							<sourceFile>${independent.properties.sourceFile}</sourceFile>
+							<destinationFile>${independent.properties.destinationFile}</destinationFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-libraries</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+
+							<artifactItems>
+								<item>
+									<groupId>org.apache.maven.shared</groupId>
+									<artifactId>maven-invoker</artifactId>
+									<version>3.0.0</version>
+								</item>
+								<item>
+									<groupId>org.codehaus.plexus</groupId>
+									<artifactId>plexus-utils</artifactId>
+									<version>3.0.17</version>
+								</item>
+								<item>
+									<groupId>org.yaml</groupId>
+									<artifactId>snakeyaml</artifactId>
+									<version>${snakeyaml.version}</version>
+								</item>
+
+								<dependency>
+									<groupId>com.fasterxml.jackson.dataformat</groupId>
+									<artifactId>jackson-dataformat-xml</artifactId>
+									<version>${jackson.version}</version>
+								</dependency>
+								<dependency>
+									<groupId>com.fasterxml.jackson.core</groupId>
+									<artifactId>jackson-annotations</artifactId>
+									<version>${jackson.version}</version>
+								</dependency>
+								<dependency>
+									<groupId>com.fasterxml.jackson.core</groupId>
+									<artifactId>jackson-core</artifactId>
+									<version>${jackson.version}</version>
+								</dependency>
+								<dependency>
+									<groupId>com.fasterxml.jackson.core</groupId>
+									<artifactId>jackson-databind</artifactId>
+									<version>${jackson.version}</version>
+								</dependency>
+								<depdendency>
+									<groupId>com.fasterxml.jackson.module</groupId>
+									<artifactId>jackson-module-jaxb-annotations</artifactId>
+									<version>${jackson.version}</version>
+								</depdendency>
+								<dependency>
+									<groupId>org.codehaus.woodstox</groupId>
+									<artifactId>stax2-api</artifactId>
+									<version>4.2.1</version>
+								</dependency>
+								<dependency>
+									<groupId>com.fasterxml.woodstox</groupId>
+									<artifactId>woodstox-core</artifactId>
+									<version>6.2.3</version>
+								</dependency>
+							</artifactItems>
+
+							<outputDirectory>lib</outputDirectory>
+							<stripVersion>true</stripVersion>
+							<overWriteReleases>true</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>test</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<independent.properties.sourceFile>src/main/resources/independent.test.properties</independent.properties.sourceFile>
+			</properties>
+
+		</profile>
+		<profile>
+			<id>production</id>
+			<activation>
+				<property>
+					<name>production</name>
+				</property>
+			</activation>
+			<properties>
+				<independent.properties.sourceFile>src/main/resources/independent.prod.properties</independent.properties.sourceFile>
+			</properties>
+		</profile>
+
+	</profiles>
+</project>
