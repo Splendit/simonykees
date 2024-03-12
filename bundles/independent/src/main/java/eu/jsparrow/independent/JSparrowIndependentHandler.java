@@ -20,7 +20,6 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.independent.ConfigFinder.ConfigType;
 import eu.jsparrow.independent.exceptions.StandaloneException;
 import eu.jsparrow.independent.util.ProxyUtils;
-import eu.jsparrow.logging.LoggingUtil;
 
 public class JSparrowIndependentHandler {
 	private static final String LIST_RULES_SELECTED_ID_KEY = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
@@ -65,8 +64,6 @@ public class JSparrowIndependentHandler {
 	}
 
 	private void doStart(BundleContext context) throws Exception {
-		boolean debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
-		LoggingUtil.configureLogger(debugEnabled);
 
 		registerShutdownHook(context);
 		ProxyUtils.configureProxy(context);
