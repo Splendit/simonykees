@@ -51,7 +51,7 @@ public class EndpointEncryptionTest {
 	public void decryptEndpoint_tooShortSignature_shouldThrowException() throws Exception {
 		encrypted = prepareTooShortSignature(encrypted);
 		expectedException.expect(EndpointEncryptionException.class);
-		expectedException.expectMessage("Signature length not correct");
+		expectedException.expectMessage("Bad signature length: got 4 but was expecting 512");
 
 		endpointEncryption.decryptEndpoint(encrypted);
 	}
