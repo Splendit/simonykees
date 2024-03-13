@@ -96,7 +96,7 @@
 
 	<distributionManagement>
 		<repository>
-			<id>pdrone</id>
+			<id>nexus</id>
 			<url>${packagedrone.url.complete}</url>
 		</repository>
 	</distributionManagement>
@@ -172,7 +172,7 @@
 		<!-- Download: used in releng/site to provide a p2 repository for version
 			2.5.1 -->
 		<packagedrone.url.complete>${packagedrone.upload.prefix}${packagedrone.channel.suffix}</packagedrone.url.complete>
-		<packagedrone.upload.prefix>http://packagedrone-vm-01.splendit.loc:8080/maven/</packagedrone.upload.prefix>
+		<packagedrone.upload.prefix>http://172.16.0.6:8082/nexus/content/repositories/</packagedrone.upload.prefix>
 		<packagedrone.download.prefix>http://packagedrone-vm-01.splendit.loc:8080/p2/</packagedrone.download.prefix>
 		<!-- The packagedrone URL is set by activating certain profiles -->
 		<!-- The (develop) test noProguard is used when no other profile is specified -->
@@ -195,11 +195,6 @@
 			<id>orbit</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/tools/orbit/downloads/drops/R20220302172233/repository/</url>
-		</repository>
-		<repository>
-			<id>external</id>
-			<layout>p2</layout>
-			<url>http://packagedrone-vm-01.splendit.loc:8080/p2/jsparrow-external-osgi-dependencies/</url>
 		</repository>
 		<repository>
 			<id>mylyn</id>
@@ -565,43 +560,43 @@
 		<profile>
 			<id>develop-test-noProguard</id>
 			<properties>
-				<packagedrone.channel.suffix>jenkins-jSparrow-develop-test-noProguard</packagedrone.channel.suffix>
+				<packagedrone.channel.suffix>jep-m2-develop-test-no-proguard</packagedrone.channel.suffix>
 			</properties>
 		</profile>
 		<profile>
 			<id>develop-test-proguard</id>
 			<properties>
-				<packagedrone.channel.suffix>jenkins-jSparrow-develop-test-proguard</packagedrone.channel.suffix>
+				<packagedrone.channel.suffix>jep-m2-develop-test-proguard</packagedrone.channel.suffix>
 			</properties>
 		</profile>
 		<profile>
 			<id>master-test-noProguard</id>
 			<properties>
-				<packagedrone.channel.suffix>jenkins-jSparrow-master-test-noProguard</packagedrone.channel.suffix>
+				<packagedrone.channel.suffix>jep-m2-master-test-no-proguard</packagedrone.channel.suffix>
 			</properties>
 		</profile>
 		<profile>
 			<id>master-test-proguard</id>
 			<properties>
-				<packagedrone.channel.suffix>jenkins-jSparrow-master-test-proguard</packagedrone.channel.suffix>
+				<packagedrone.channel.suffix>jep-m2-master-test-proguard</packagedrone.channel.suffix>
 			</properties>
 		</profile>
 		<profile>
 			<id>master-production-noProguard</id>
 			<properties>
-				<packagedrone.channel.suffix>jenkins-jSparrow-master-production-noProguard</packagedrone.channel.suffix>
+				<packagedrone.channel.suffix>jep-m2-master-production-no-proguard</packagedrone.channel.suffix>
 			</properties>
 		</profile>
 		<profile>
 			<id>master-production-proguard</id>
 			<properties>
-				<packagedrone.channel.suffix>jenkins-jSparrow-master-production-proguard</packagedrone.channel.suffix>
+				<packagedrone.channel.suffix>jep-m2-master-production-proguard</packagedrone.channel.suffix>
 			</properties>
 		</profile>
 		<profile>
 			<id>releaseCandidate</id>
 			<properties>
-				<packagedrone.channel.suffix>jSparrow-release-candidate</packagedrone.channel.suffix>
+				<packagedrone.channel.suffix>jep-m2-release-candidate</packagedrone.channel.suffix>
 			</properties>
 		</profile>
 	</profiles>

@@ -17,7 +17,11 @@ import groovy.transform.Field
 @Field boolean isLiveEnvironment = false
 
 void setLiveEnvironment(def url) {
-    def liveUrl = "ssh://git@bitbucket.splendit.loc:7999/lm/simonykees.git"
+    /*
+     * FIXME: ITGlobal we should set the remote url to ssh. The credentials should be corrected accordingly. For now, setting the expected liveUrl to https to avoid MOCK steps. 
+     * def liveUrl = "ssh://git@gitlab.splendit.at:10022/legacy-migration/simonykees.git"
+     */
+    def liveUrl = "https://gitlab.splendit.at/legacy-migration/simonykees.git"
     if (liveUrl == url) {
         println "Live environment is enabled"
         isLiveEnvironment = true
@@ -31,7 +35,7 @@ void setLiveEnvironment(def url) {
 def mvnBin() { "${tool 'mvn system'}/bin/mvn" }
 
 // jenkins git ssh credentials
-@Field final static def sshCredentials = '7f15bb8a-a1db-4cdf-978f-3ae5983400b6'
+@Field final static def sshCredentials = 'e85bf18f-89af-4890-ab74-042b6330fba9'
 
 // defines the backup repository to push to
 @Field final static def backupOrigin = 'git@github.com:Splendit/simonykees.git'
@@ -170,6 +174,7 @@ void checkout() {
         checkout scm
         // getting the remote url we are building from
         def url = sh(returnStdout: true, script: 'git config remote.origin.url').trim()
+
         setLiveEnvironment(url)
     }
 }
@@ -183,7 +188,8 @@ void pushToGithub() {
             println "Pushing to GitHub..."
             sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
                 // pushing the repository to github
-                sh("git push $backupOrigin HEAD:refs/heads/$env.BRANCH_NAME")
+                // FIXME: ITGlobal temporary avoiding github push. Ssh credentials need to be updated 
+                //sh("git push $backupOrigin HEAD:refs/heads/$env.BRANCH_NAME")
             }
         }
     } else {
@@ -290,7 +296,8 @@ void tagCommit(def branchName, String subdirectory) {
         stage(stageName) {
             // push tags to github
             sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
-                sh("git push $backupOrigin --tags")
+                // FIXME: ITGlobal - fix ssh credentials to push to github
+                // sh("git push $backupOrigin --tags")
             }
         }
     } else {
@@ -309,7 +316,7 @@ void buildEclipsePlugin(Profile profile, String timestamp) {
 
 void deployEclipsePlugin(Profile profile, String timestamp) {
 
-    def mvnCommand = "clean deploy -DskipTests -B ${profile.mvnOptions(timestamp)}"
+    def mvnCommand = "clean deploy -DskipTests -X -B ${profile.mvnOptions(timestamp)}"
 
     def stageName = "Eclipse Deploy: ${profile.formattedName()}"
 
@@ -378,6 +385,7 @@ void uploadMappingFile(Profile profile) {
           // tag-deployment.sh uses the same mechanism
     		def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu\\.jsparrow\\.photon\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" releng/eu.jsparrow.site.photon/target/p2content.xml").trim()
     		def directory = "${buildNumber}${profile.qualifier}"
+            // FIXME: ITGlobal skip mapping file upload. we need the deobfuscation service up and running in ITGlobal env
             uploadMappingFiles(directory)
         }
     } else {
