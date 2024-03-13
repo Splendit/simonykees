@@ -8,6 +8,7 @@ import eu.jsparrow.common.UsesJDTUnitFixture;
 
 class ReplaceJUnit4CategoryWithJupiterTagASTVisitorNegativeTest extends UsesJDTUnitFixture {
 
+	private static final String ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY = "org.junit.experimental.categories.Category";
 	private static final String CATEGORY_CLASS_DECLARATIONS = "" +
 			"\n" +
 			"\n" +
@@ -31,7 +32,7 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorNegativeTest extends UsesJDTU
 
 	@Test
 	void visit_MethodWithoutTestAnnotation_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+		defaultFixture.addImport(ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
 
 		String original = "" +
 				"	@Category(FirstCategory.class)\n" +
@@ -45,7 +46,7 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorNegativeTest extends UsesJDTU
 	@Test
 	void visit_MethodWithTwoTestAnnotations_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+		defaultFixture.addImport(ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
 
 		String original = "" +
 				"	@Category(FirstCategory.class)\n" +
@@ -60,7 +61,7 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorNegativeTest extends UsesJDTU
 
 	@Test
 	void visit_CategoryAnnotationOnInterface_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+		defaultFixture.addImport(ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
 
 		String original = ""
 				+ "@Category(ExampleCategory.class)\n"
@@ -75,7 +76,7 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorNegativeTest extends UsesJDTU
 
 	@Test
 	void visit_CategoryAnnotationOnLocalClass_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+		defaultFixture.addImport(ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
 
 		String original = "" +
 				"void exampleWithLocalClass() {\n" +
@@ -92,7 +93,7 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorNegativeTest extends UsesJDTU
 
 	@Test
 	void visit_CategoryAnnotationOnEnum_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+		defaultFixture.addImport(ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
 
 		String original = "" +
 				"	@Category(ExampleCategory.class)\n" +
@@ -109,7 +110,7 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorNegativeTest extends UsesJDTU
 
 	@Test
 	void visit_CategoryAnnotationOnConstructor_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+		defaultFixture.addImport(ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
 
 		String original = "" +
 				"	class JUnit4CategoryAnnotationOnConstructorTest {\n" +

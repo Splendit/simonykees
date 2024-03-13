@@ -1,11 +1,10 @@
 package eu.jsparrow.core.rule.impl;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Duration;
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,26 +27,26 @@ class ReplaceStringFormatByFormattedRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceStringFormatByFormatted"));
+		assertEquals("ReplaceStringFormatByFormatted", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace String.format by String.formatted"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_15, Tag.STRING_MANIPULATION, Tag.READABILITY));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
-		assertThat(description.getDescription(),
-				equalTo("This rule replaces the static invocations of String.format(String, Object...) "
-						+ "by invocations of the instance method String.formatted(Object...) introduced in Java 15. "
-						+ "This way, eliminating some code clutter."));
+		assertEquals("Replace String.format by String.formatted", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_15, Tag.STRING_MANIPULATION, Tag.READABILITY), description.getTags());
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "This rule replaces the static invocations of String.format(String, Object...) "
+				+ "by invocations of the instance method String.formatted(Object...) introduced in Java 15. "
+				+ "This way, eliminating some code clutter.",
+				description.getDescription());
 	}
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		assertThat(rule.getRequiredJavaVersion(), equalTo("15"));
+		assertEquals("15", rule.getRequiredJavaVersion());
 	}
 
 	@Test

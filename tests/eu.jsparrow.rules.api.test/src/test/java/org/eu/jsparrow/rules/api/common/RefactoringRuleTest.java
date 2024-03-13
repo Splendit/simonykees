@@ -25,7 +25,6 @@ import eu.jsparrow.rules.common.util.RefactoringUtil;
  * @author Hans-Jörg Schnedlitz
  * @since 2.5.0
  */
-@SuppressWarnings("nls")
 public class RefactoringRuleTest {
 
 	private RefactoringRule rule;

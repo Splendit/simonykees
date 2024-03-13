@@ -5,28 +5,21 @@ Bundle-Name: jSparrow Test Fragment
 Bundle-SymbolicName: eu.jsparrow.test
 Bundle-Version: 4.19.0.qualifier
 Fragment-Host: eu.jsparrow.core
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.license.netlicensing,
  eu.jsparrow.test.framework,
  eu.jsparrow.test.common,
- org.eclipse.jdt,
- org.eclipse.jdt.launching;bundle-version="[3.5.1,4.0.0)",
- org.mockito;bundle-version="[2.13.0,3.0.0)",
- org.hamcrest;bundle-version="[1.1.0,2.0.0)",
+ org.eclipse.jdt;bundle-version="[3.18.1100,4.0.0)",
+ org.eclipse.jdt.launching;bundle-version="[3.19.500,4.0.0)",
+ org.mockito.mockito-core;bundle-version="[2.23.0,6.0.0)",
  eu.jsparrow.rules.imports,
  eu.jsparrow.rules.java10,
  eu.jsparrow.rules.java16,
- org.junit,
- org.junit.platform.commons,
- org.junit.platform.engine,
- org.opentest4j
+ org.opentest4j;bundle-version="[1.2.0,2.0.0)"
 Bundle-Vendor: Splendit IT-Consulting GmbH
-Import-Package: org.junit.jupiter.api,
- org.junit.jupiter.api.function,
- org.junit.jupiter.engine.execution,
- org.junit.jupiter.params,
- org.junit.jupiter.params.provider
- 
-  
- 
+Import-Package: org.junit.jupiter.api;version="[5.8.1,6.0.0)",
+ org.junit.jupiter.api.function;version="[5.8.1,6.0.0)",
+ org.junit.jupiter.engine.execution;version="[5.8.1,6.0.0)",
+ org.junit.jupiter.params;version="[5.8.1,6.0.0)",
+ org.junit.jupiter.params.provider;version="[5.8.1,6.0.0)"

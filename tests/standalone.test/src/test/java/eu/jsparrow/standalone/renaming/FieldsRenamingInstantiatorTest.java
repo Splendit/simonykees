@@ -2,9 +2,7 @@ package eu.jsparrow.standalone.renaming;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -19,8 +17,8 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorWrapper;
@@ -34,7 +32,7 @@ public class FieldsRenamingInstantiatorTest {
 	private IJavaProject javaProject;
 	private FieldDeclarationVisitorWrapper fieldDeclarationVisitorWrapper;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		javaProject = mock(IJavaProject.class);
 		fieldDeclarationVisitorWrapper = mock(FieldDeclarationVisitorWrapper.class);
@@ -62,7 +60,7 @@ public class FieldsRenamingInstantiatorTest {
 
 		FieldsRenamingRule rule = fieldsRenamingWrapper.createRule(singletonList(metadata),
 				compilationUnitProvider);
-		assertThat(rule.getMetaData(), equalTo(emptyList()));
+		assertEquals(emptyList(), rule.getMetaData());
 	}
 
 	@Test
@@ -74,7 +72,8 @@ public class FieldsRenamingInstantiatorTest {
 
 		FieldsRenamingRule rule = fieldsRenamingWrapper.createRule(singletonList(metadata),
 				compilationUnitProvider);
-		assertThat(rule.getMetaData(), hasSize(1));
+		assertEquals(1, rule.getMetaData()
+			.size());
 	}
 
 	@Test
@@ -84,7 +83,7 @@ public class FieldsRenamingInstantiatorTest {
 
 		when(fieldDeclarationVisitorWrapper.prepareRenaming(selectedElements, options)).thenReturn(1);
 
-		assertThrows(StandaloneException.class, 
+		assertThrows(StandaloneException.class,
 				() -> fieldsRenamingWrapper.findFields(selectedElements, options));
 	}
 

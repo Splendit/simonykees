@@ -2,9 +2,6 @@ package eu.jsparrow.core.rule.impl;
 
 import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -39,38 +35,38 @@ class ReplaceJUnit4AssumptionsWithHamcrestJUnitRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceJUnit4AssumptionsWithHamcrestJUnit"));
+		assertEquals("ReplaceJUnit4AssumptionsWithHamcrestJUnit", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace JUnit 4 Assumptions with Hamcrest JUnit"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
-		assertThat(description.getDescription(),
-				equalTo("This rule replaces the JUnit 4 assumptions 'assumeThat', 'asssumeNoException', and 'assumeNotNull' by the equivalent Hamcrest JUnit assumption 'MatcherAssume.assumeThat'."));
+		assertEquals("Replace JUnit 4 Assumptions with Hamcrest JUnit", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT), description.getTags());
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(
+				"This rule replaces the JUnit 4 assumptions 'assumeThat', 'asssumeNoException', and 'assumeNotNull' by the equivalent Hamcrest JUnit assumption 'MatcherAssume.assumeThat'.", //
+				description.getDescription());
 	}
 
 	@Test
 	void test_requiredLibraries() throws Exception {
-		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3"),
-					generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-junit", "1.0.0.0")));
+		addToClasspath(testProject,
+				Arrays.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3"),
+						generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-junit", "1.0.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), equalTo("Hamcrest Core 1.3 and Hamcrest JUnit 1.0"));
+		assertEquals("Hamcrest Core 1.3 and Hamcrest JUnit 1.0", rule.requiredLibraries());
 	}
 
 	@Test
 	void calculateEnabledForProjectShouldBeEnabled() throws Exception {
-		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3"),
-					generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-junit", "1.0.0.0")));
+		addToClasspath(testProject,
+				Arrays.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3"),
+						generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-junit", "1.0.0.0")));
 
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
 
@@ -81,8 +77,8 @@ class ReplaceJUnit4AssumptionsWithHamcrestJUnitRuleTest extends SingleRuleTest {
 
 	@Test
 	void calculateEnabledForProjectShouldBeDisabled() throws Exception {
-		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-junit", "1.0.0.0")));
+		addToClasspath(testProject,
+				Arrays.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-junit", "1.0.0.0")));
 
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
 
@@ -93,9 +89,9 @@ class ReplaceJUnit4AssumptionsWithHamcrestJUnitRuleTest extends SingleRuleTest {
 
 	@Test
 	void calculateEnabledForJava4ProjectShouldBeDisabled() throws Exception {
-		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3"),
-					generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-junit", "1.0.0.0")));
+		addToClasspath(testProject,
+				Arrays.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3"),
+						generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-junit", "1.0.0.0")));
 
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
 
@@ -108,11 +104,11 @@ class ReplaceJUnit4AssumptionsWithHamcrestJUnitRuleTest extends SingleRuleTest {
 	void testTransformImports() throws Exception {
 		loadUtilities();
 
-		addToClasspath(testProject, Arrays.asList(
-				generateMavenEntryFromDepedencyString("junit", "junit", "4.13"),
-				generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library", "1.3"),
-				generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3"),
-				generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-junit", "1.0.0.0")));
+		addToClasspath(testProject,
+				Arrays.asList(generateMavenEntryFromDepedencyString("junit", "junit", "4.13"),
+						generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library", "1.3"),
+						generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3"),
+						generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-junit", "1.0.0.0")));
 
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.calculateEnabledForProject(testProject);

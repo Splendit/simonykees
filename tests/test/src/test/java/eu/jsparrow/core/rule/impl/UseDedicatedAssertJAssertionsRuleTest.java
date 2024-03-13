@@ -3,13 +3,10 @@ package eu.jsparrow.core.rule.impl;
 import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.createJavaProject;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -32,33 +29,33 @@ class UseDedicatedAssertJAssertionsRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("UseDedicatedAssertJAssertions"));
+		assertEquals("UseDedicatedAssertJAssertions", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		String ruleDescription = "AssertJ contains a rich API for writing specific assertions about different types of objects. "
+		assertEquals("Use Dedicated AssertJ Assertions", description.getName());
+		String ruleDescription = ""
+				+ "AssertJ contains a rich API for writing specific assertions about different types of objects. "
 				+ "Making use of the appropriate dedicated methods when writing certain assertions will simplify the test code and "
 				+ "improve the corresponding failure messages. This rule finds AssertJ assertions that can be simplified and replaces "
 				+ "them with equivalent dedicated assertions.";
-		assertThat(description.getName(), equalTo("Use Dedicated AssertJ Assertions"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_8, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
-		assertThat(description.getDescription(),
-				equalTo(ruleDescription));
+		assertEquals(Arrays.asList(Tag.JAVA_1_8, Tag.TESTING, Tag.ASSERTJ, Tag.CODING_CONVENTIONS, Tag.READABILITY),
+				description.getTags());
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(ruleDescription, description.getDescription());
 	}
 
 	@Test
 	void test_requiredLibraries() throws Exception {
-		assertThat(rule.requiredLibraries(), equalTo("AssertJ [3.20.2, 3.22.x]"));
+		assertEquals("AssertJ [3.20.2, 3.22.x]", rule.requiredLibraries());
 	}
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		assertThat(rule.getRequiredJavaVersion(), equalTo("1.8"));
+		assertEquals("1.8", rule.getRequiredJavaVersion());
 	}
 
 	@Test

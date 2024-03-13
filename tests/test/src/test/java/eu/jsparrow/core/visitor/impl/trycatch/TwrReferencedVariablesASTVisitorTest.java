@@ -1,7 +1,6 @@
 package eu.jsparrow.core.visitor.impl.trycatch;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,9 +9,9 @@ import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.sub.ReferencedVariablesASTVisitor;
 
 public class TwrReferencedVariablesASTVisitorTest extends UsesSimpleJDTUnitFixture {
-	
+
 	private ReferencedVariablesASTVisitor visitor;
-	
+
 	@BeforeEach
 	public void setUp() {
 		visitor = new ReferencedVariablesASTVisitor();
@@ -24,7 +23,8 @@ public class TwrReferencedVariablesASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 		fixture.accept(visitor);
 
-		assertThat(visitor.getReferencedVariables(), hasSize(4));
+		assertEquals(4, visitor.getReferencedVariables()
+			.size());
 	}
-	
+
 }

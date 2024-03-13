@@ -1,11 +1,11 @@
 package eu.jsparrow.license.netlicensing.validation.impl.response;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.ZonedDateTime;
 import java.util.AbstractMap.SimpleEntry;
@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.labs64.netlicensing.domain.vo.Composition;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
@@ -32,7 +32,7 @@ public class ParserTest {
 	ZonedDateTime now = ZonedDateTime.now();
 	ZonedDateTime expireDate = ZonedDateTime.now().plusDays(1);
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		parser = new Parser();
 		now = ZonedDateTime.now();

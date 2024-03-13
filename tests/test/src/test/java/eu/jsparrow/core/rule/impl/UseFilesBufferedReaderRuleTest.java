@@ -1,9 +1,8 @@
 package eu.jsparrow.core.rule.impl;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,21 +21,22 @@ public class UseFilesBufferedReaderRuleTest {
 
 	@Test
 	public void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("UseFilesBufferedReader"));
+		assertEquals("UseFilesBufferedReader", rule.getId());
 	}
 
 	@Test
 	public void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.PERFORMANCE, Tag.IO_OPERATIONS));
-		assertThat(description.getTags(), hasSize(4));
-		assertThat(description.getName(), equalTo("Use Files.newBufferedReader"));
-		assertThat(description.getDescription(), equalTo(
-				"Java 7 introduced the 'java.nio.file.Files' class that contains some convenience methods for"
-						+ " operating on files. This rule makes use of the 'Files.newBufferedReader' method for initializing"
-						+ " 'BufferedReader' objects to read text files in an efficient non-blocking manner."));
+		assertEquals("Use Files.newBufferedReader", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.PERFORMANCE, Tag.IO_OPERATIONS),
+				description.getTags());
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "Java 7 introduced the 'java.nio.file.Files' class that contains some convenience methods for"
+				+ " operating on files. This rule makes use of the 'Files.newBufferedReader' method for initializing"
+				+ " 'BufferedReader' objects to read text files in an efficient non-blocking manner.",
+				description.getDescription());
 	}
 
 }

@@ -1,9 +1,10 @@
 package eu.jsparrow.standalone;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,45 +22,49 @@ import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.LocalProjectScanner;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Answers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 public class MavenProjectImporterTest {
 
-	@Mock
 	LocalProjectScanner localProjectScanner;
 
-	@Mock
 	IProjectConfigurationManager projectConfigurationManager;
 
-	@Mock
 	EclipseProjectFileManager eclipseProjectFileManager;
 
-	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	MavenProjectInfo mavenProjectInfo;
 
-	@Mock
 	IMavenProjectImportResult mavenProjectImportResult;
 
-	@Mock
 	File workspaceRoot;
 
-	@Mock
 	IProject project;
 
-	@Mock
 	IJavaProject javaProject;
 
 	private MavenProjectImporter importer;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
+
+		localProjectScanner = mock(LocalProjectScanner.class);
+
+		projectConfigurationManager = mock(IProjectConfigurationManager.class);
+
+		eclipseProjectFileManager = mock(EclipseProjectFileManager.class);
+
+		mavenProjectInfo = mock(MavenProjectInfo.class);
+
+		mavenProjectImportResult = mock(IMavenProjectImportResult.class);
+
+		workspaceRoot = mock(File.class);
+
+		project = mock(IProject.class);
+
+		javaProject = mock(IJavaProject.class);
+
 		importer = new TestableMavenProjectImporter(eclipseProjectFileManager);
 	}
 
@@ -68,10 +73,10 @@ public class MavenProjectImporterTest {
 		String folders = "";
 
 		when(workspaceRoot.getAbsolutePath()).thenReturn("");
-
-		given(mavenProjectInfo.getPomFile()
-			.getParentFile()
-			.getAbsolutePath()).willReturn("");
+		
+		when(mavenProjectInfo.getPomFile()).thenReturn(mock(File.class));
+		given(mavenProjectInfo.getPomFile().getParentFile()).willReturn(mock(File.class));
+		given(mavenProjectInfo.getPomFile().getParentFile().getAbsolutePath()).willReturn("");
 
 		when(localProjectScanner.getProjects()).thenReturn(Collections.singletonList(mavenProjectInfo));
 
@@ -83,7 +88,7 @@ public class MavenProjectImporterTest {
 		when(mavenProjectImportResult.getProject()).thenReturn(project);
 		when(mavenProjectImportResult.getMavenProjectInfo()).thenReturn(mavenProjectInfo);
 		when(projectConfigurationManager.importProjects(any(), any(), any()))
-			.thenReturn(Collections.singletonList(mavenProjectImportResult));
+				.thenReturn(Collections.singletonList(mavenProjectImportResult));
 		when(mavenProjectInfo.getModel()).thenReturn(new Model());
 
 		List<IJavaProject> importedProjects = importer.importProjects(workspaceRoot, folders);
@@ -120,10 +125,10 @@ public class MavenProjectImporterTest {
 		protected IJavaProject createJavaProject(IProject project) {
 			return javaProject;
 		}
-		
+
 		@Override
 		protected void logProjectInfo(IProject project) {
-			
+
 		}
 	}
 }

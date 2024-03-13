@@ -1,8 +1,8 @@
 package eu.jsparrow.license.netlicensing.persistence;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -14,11 +14,8 @@ import static org.mockito.Mockito.when;
 
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.StorageException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.exception.PersistenceException;
@@ -26,8 +23,6 @@ import eu.jsparrow.license.api.persistence.IEncryption;
 import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
 import eu.jsparrow.license.netlicensing.testhelper.DummyLicenseModel;
 
-@SuppressWarnings("nls")
-@RunWith(MockitoJUnitRunner.Silent.class)
 public class SecureStoragePersistenceTest {
 
 	/*
@@ -36,16 +31,16 @@ public class SecureStoragePersistenceTest {
 	 * 2
 	 */
 
-	@Mock
 	private ISecurePreferences simonykeesLicenseNode;
 
-	@Mock
 	private IEncryption encryption;
 
 	private LicenseSecureStoragePersistence secureStoragePersistence;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
+		simonykeesLicenseNode = mock(ISecurePreferences.class);
+		encryption = mock(IEncryption.class);
 		ISecurePreferences securePreferences = mock(ISecurePreferences.class);
 		when(securePreferences.node(anyString())).thenReturn(simonykeesLicenseNode);
 
@@ -85,19 +80,21 @@ public class SecureStoragePersistenceTest {
 
 		LicenseModel result = secureStoragePersistence.load();
 
-		assertThat(result, instanceOf(DemoLicenseModel.class));
+		assertInstanceOf(DemoLicenseModel.class, result);
 	}
 
-	@Test(expected = PersistenceException.class)
+	@Test
 	public void save_withCorruptedSecureStorage_throwsPersistenceException() throws Exception {
-		byte[] modelBytes = "model".getBytes();
-		byte[] encryptedModelBytes = "encryptedModel".getBytes();
-		when(encryption.encrypt(eq(modelBytes))).thenReturn(encryptedModelBytes);
+		assertThrows(PersistenceException.class, () -> {
+			byte[] modelBytes = "model".getBytes();
+			byte[] encryptedModelBytes = "encryptedModel".getBytes();
+			when(encryption.encrypt(eq(modelBytes))).thenReturn(encryptedModelBytes);
 
-		doThrow(StorageException.class).when(simonykeesLicenseNode)
-			.putByteArray(anyString(), any(), anyBoolean());
+			doThrow(StorageException.class).when(simonykeesLicenseNode)
+				.putByteArray(anyString(), any(), anyBoolean());
 
-		secureStoragePersistence.save(new DummyLicenseModel());
+			secureStoragePersistence.save(new DummyLicenseModel());
+		});
 	}
 
 	@Test
@@ -106,6 +103,6 @@ public class SecureStoragePersistenceTest {
 
 		LicenseModel result = secureStoragePersistence.load();
 
-		assertThat(result, instanceOf(DemoLicenseModel.class));
+		assertInstanceOf(DemoLicenseModel.class, result);
 	}
 }

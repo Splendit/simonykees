@@ -1,8 +1,9 @@
 package eu.jsparrow.ui.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -10,12 +11,9 @@ import java.io.InputStreamReader;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
-@SuppressWarnings("nls")
 public class EndpointEncryptionTest {
 
 	private static final String EXPECTED_KEY = "ABCDEFGIH";
@@ -25,16 +23,12 @@ public class EndpointEncryptionTest {
 
 	private String encrypted;
 
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
-
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		try (InputStream inputStream = getClass().getResourceAsStream("/encrypted-key-endpoint.txt"); //$NON-NLS-1$
 				InputStreamReader isr = new InputStreamReader(inputStream);
 				BufferedReader br = new BufferedReader(isr)) {
-			encrypted = br.lines()
-				.collect(Collectors.joining());
+			encrypted = br.lines().collect(Collectors.joining());
 		}
 
 		endpointEncryption = new EndpointEncryption();
@@ -49,20 +43,26 @@ public class EndpointEncryptionTest {
 
 	@Test
 	public void decryptEndpoint_tooShortSignature_shouldThrowException() throws Exception {
-		encrypted = prepareTooShortSignature(encrypted);
-		expectedException.expect(EndpointEncryptionException.class);
-		expectedException.expectMessage("Signature length not correct");
+		try {
+			encrypted = prepareTooShortSignature(encrypted);
+			endpointEncryption.decryptEndpoint(encrypted);
+			fail("Expected: " + EndpointEncryptionException.class.getName());
+		} catch (EndpointEncryptionException exc) {
+			assertTrue(exc.getMessage().contains("got 4"));
+			assertTrue(exc.getMessage().contains("expecting 512"));
+		}
 
-		endpointEncryption.decryptEndpoint(encrypted);
 	}
 
 	@Test
 	public void decryptEndpoint_invalidSignature_shouldThrowException() throws Exception {
-		encrypted = prepareInvalidSignature(encrypted);
-		expectedException.expect(EndpointEncryptionException.class);
-		expectedException.expectMessage("Invalid signature");
-
-		endpointEncryption.decryptEndpoint(encrypted);
+		try {
+			encrypted = prepareInvalidSignature(encrypted);
+			endpointEncryption.decryptEndpoint(encrypted);
+			fail("Expected: " + EndpointEncryptionException.class.getName());
+		} catch (EndpointEncryptionException exc) {
+			assertTrue(exc.getMessage().contains("Invalid signature"));
+		}
 	}
 
 	@Test
@@ -99,8 +99,7 @@ public class EndpointEncryptionTest {
 
 	@Test
 	public void isEncryptedKey_licensePartNotB64_shouldReturnFalse() throws Exception {
-		encrypted = "asdf:" + Base64.getEncoder()
-			.encode("asdf".getBytes());
+		encrypted = "asdf:" + Base64.getEncoder().encode("asdf".getBytes());
 
 		boolean isEncryptedKey = endpointEncryption.isEncryptedKey(encrypted);
 
@@ -109,8 +108,7 @@ public class EndpointEncryptionTest {
 
 	@Test
 	public void isEncryptedKey_endpointPartNotB64_shouldReturnFalse() throws Exception {
-		encrypted = Base64.getEncoder()
-			.encode("asdf".getBytes()) + ":asdf";
+		encrypted = Base64.getEncoder().encode("asdf".getBytes()) + ":asdf";
 
 		boolean isEncryptedKey = endpointEncryption.isEncryptedKey(encrypted);
 
@@ -118,8 +116,7 @@ public class EndpointEncryptionTest {
 	}
 
 	private String prepareTooShortSignature(String key) {
-		String invalidSignature = Base64.getEncoder()
-			.encodeToString("asdf".getBytes());
+		String invalidSignature = Base64.getEncoder().encodeToString("asdf".getBytes());
 		String[] splitEncrypted = key.split(":");
 		return splitEncrypted[0] + ":" + invalidSignature;
 	}

@@ -26,7 +26,7 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitorTest
 
 	@Test
 	public void visit_qualifiedAssumeTrue_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Assume.class.getName());
+		defaultFixture.addImport("org.junit.Assume");
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 		String original = "" +
 				"	@Test\n" +
@@ -47,7 +47,7 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitorTest
 
 	@Test
 	public void visit_qualifiedAssumeTrueWithMessage_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Assume.class.getName());
+		defaultFixture.addImport("org.junit.Assume");
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 		String original = "" +
 				"	@Test\n" +
