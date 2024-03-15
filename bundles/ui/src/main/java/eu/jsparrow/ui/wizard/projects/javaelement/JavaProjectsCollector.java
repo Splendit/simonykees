@@ -81,19 +81,19 @@ public class JavaProjectsCollector {
 		String logMsg;
 		if (project.hasNature(JavaCore.NATURE_ID)) {
 			logMsg = NLS.bind(Messages.MavenProjectImporter_creatingSingleJavaProject, project.getName());
-			logger.info(logMsg);
+			logger.debug(logMsg);
 
 			IJavaProject javaProject = createJavaProject(project);
 
 			if (!javaProject.isOpen()) {
 				logMsg = NLS.bind(Messages.MavenProjectImporter_javaProjectNotOpened, project.getName());
-				logger.info(logMsg);
+				logger.debug(logMsg);
 				javaProject.open(new NullProgressMonitor());
 			}
 			return Optional.ofNullable(javaProject);
 		} else {
 			logMsg = NLS.bind(Messages.MavenProjectImporter_skippingJavaProjectCreation, project.getName());
-			logger.info(logMsg);
+			logger.debug(logMsg);
 		}
 
 		return Optional.empty();
