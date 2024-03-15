@@ -4,6 +4,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,9 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 
+	// is used for configuring the test fragment
+	private static BundleActivator testFragmentActivator;
+
 	// Flag is jSparrow is already running
 	private static boolean running = false;
 
@@ -53,7 +57,7 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		
+
 		/*
 		 * JNA first tries to read from jna.boot.library.path. If system
 		 * property jna.boot.library.path is set to wrong version from another
@@ -66,7 +70,7 @@ public class Activator extends AbstractUIPlugin {
 		 */
 		System.setProperty("jna.boot.library.path", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		System.setProperty("jna.nosys", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-		
+
 		// start jSparrow logging bundle
 		for (Bundle bundle : context.getBundles()) {
 			if ("eu.jsparrow.logging".equals(bundle.getSymbolicName()) //$NON-NLS-1$
@@ -78,6 +82,26 @@ public class Activator extends AbstractUIPlugin {
 				loggingBundleID = bundle.getBundleId();
 				break;
 			}
+		}
+
+		// load pseudo-activator from test fragment and execute its start method
+		try {
+			Class<? extends BundleActivator> fragmentActivatorClass = Class
+				.forName("eu.jsparrow.core.TestFragmentActivator") //$NON-NLS-1$
+				.asSubclass(BundleActivator.class);
+			testFragmentActivator = fragmentActivatorClass.newInstance();
+			testFragmentActivator.start(context);
+		} catch (ClassNotFoundException e) {
+			/*
+			 * Ignore! Exception is thrown, if the test fragment is not
+			 * available.
+			 * 
+			 * Note: The test fragment is always available, except in the
+			 * deployed version. We do not want to have any log message at all
+			 * in that case because customers should not know about test
+			 * fragments.
+			 */
+			System.out.println("Error catching"); //$NON-NLS-1$
 		}
 
 		logger.info(Messages.Activator_start);
