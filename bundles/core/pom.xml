@@ -15,7 +15,7 @@
 	<description>jSparrow Core Plugin</description>
 
 	<scm>
-		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/core</url>
+		<url>${simonykees.repository.url}/browse/core</url>
 	</scm>
 
 	<repositories>
