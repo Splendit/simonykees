@@ -121,7 +121,7 @@ deploy_eclipse_plugin_develop_proguard:
     untracked: true
     expire_in: 1 days
   only:
-    - alisher.arystay-develop-patch-52509
+    - develop
     - tags
 
 # jmp_deploy:
