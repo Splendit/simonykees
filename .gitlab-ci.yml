@@ -1,5 +1,5 @@
 image: 
-  name: gitlab.itglobal.com:5050/itglobal/projects/splendit/infra/splendit-complex:jdk-11-root
+  name: gitlab.itglobal.com:5050/itglobal/projects/splendit/infra/splendit-complex:jdk-11-root-latest
   entrypoint: ['bash', '-c', 'exec su jenkins -c bash']
 default:
   tags:
@@ -50,71 +50,43 @@ compile_maven_plugin:
     - /^release.*$/
     - tags
 
-# integration_tests:  
-#   stage: test
-#   script:
-#     - echo "Running Integration Tests"
-#     - mvn clean verify -B -fae -Dsurefire.rerunFailingTestsCount=2
-#   artifacts:
-#     paths:
-#       -  $CI_PROJECT_PATH/.m2/
-#     untracked: true
-#     expire_in: 1 days
-#   only:
-#     - develop
-#     - master
-#     - /^release.*$/
-#     - tags    
-
-# sonarqube_analysis:
-#   stage: analyze
-#   script:
-#     - mvn clean verify sonar:sonar -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_TOKEN -Dsonar.projectKey=$PROJECT_KEY
-#   artifacts:
-#     paths:
-#       -  $CI_PROJECT_PATH/.m2/
-#     untracked: true
-#     expire_in: 1 days
-#   only:
-#     - develop
-#     - tags  
-
-# deploy_eclipse_plugin_develop_noProguard:
-#   stage: deploy 
-#   variables:
-#     ENV: "noProguard_test"
-#   script:
-#     - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")_noProguard_test
-#     - mvn clean deploy -DskipTests -B -Pdevelop-test-noProguard -DforceContextQualifier=$TIMESTAMP
-#     - echo "Formatted time '$TIMESTAMP'"
-#   artifacts:
-#     paths:
-#       -  $CI_PROJECT_PATH/.m2/
-#     untracked: true
-#     expire_in: 1 days
-#   only:
-#     - develop
-#     - tags
-
-deploy_eclipse_plugin_develop_proguard:
-  stage: deploy
-  variables:
-    ENV: "test"
-  before_script:
-    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - chmod 400 "$SSH_PRIVATE_KEY"
-    - ssh-add "$SSH_PRIVATE_KEY"
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
+integration_tests:  
+  stage: test
   script:
-    - echo $snapshot && echo $snapshot
-    - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")_test
-    - mvn clean deploy -DskipTests -B -Dproguard -Pdevelop-test-proguard -DforceContextQualifier=$TIMESTAMP
-    # - ./uploadMappingFiles.sh ./ $TIMESTAMP
-    - ARTIFACTNAME=$(ls releng/eu.jsparrow.site.photon/target/*.zip)
-    - rsync --rsync-path="mkdir -p /opt/sites/static/update.jsparrow.eu/public_html/releases/latest && rm -rf /opt/sites/static/update.jsparrow.eu/public_html/releases/latest/*" $ARTIFACTNAME "$SSH_USER"@"$UPDATE_SERVER":/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/
-    - ssh "$SSH_USER"@"$UPDATE_SERVER" 'unzip "/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/*.zip" -d /opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'
+    - echo "Running Integration Tests"
+    - mvn clean verify -B -fae -Dsurefire.rerunFailingTestsCount=2
+  artifacts:
+    paths:
+      -  $CI_PROJECT_PATH/.m2/
+    untracked: true
+    expire_in: 1 days
+  only:
+    - develop
+    - master
+    - /^release.*$/
+    - tags    
+
+sonarqube_analysis:
+  stage: analyze
+  script:
+    - mvn clean verify sonar:sonar -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_TOKEN -Dsonar.projectKey=$PROJECT_KEY
+  artifacts:
+    paths:
+      -  $CI_PROJECT_PATH/.m2/
+    untracked: true
+    expire_in: 1 days
+  only:
+    - develop
+    - tags  
+
+deploy_eclipse_plugin_develop_noProguard:
+  stage: deploy 
+  variables:
+    ENV: "noProguard_test"
+  script:
+    - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")_noProguard_test
+    - mvn clean deploy -DskipTests -B -Pdevelop-test-noProguard -DforceContextQualifier=$TIMESTAMP
+    - echo "Formatted time '$TIMESTAMP'"
   artifacts:
     paths:
       -  $CI_PROJECT_PATH/.m2/
@@ -124,110 +96,150 @@ deploy_eclipse_plugin_develop_proguard:
     - develop
     - tags
 
-# jmp_deploy:
-#   stage: deploy
-#   rules:
-#     - if: $CI_COMMIT_BRANCH == "develop" 
-#       variables: 
-#         ENV: "noProguard_test"
-#         PROFILE: "-Pdevelop-test-noProguard"
-#         PROGUARD: ""
-#     - if: $CI_COMMIT_TAG == "release-^"
-#       variables: 
-#         ENV: "test_rc"
-#         PROFILE: "-PreleaseCandidate"
-#         PROGUARD: "-Dproguard"
-#     - if: $CI_COMMIT_TAG == "master"
-#       variables: 
-#         ENV: ""
-#         PROFILE: "-Pmaster-test-proguard"
-#         PROGUARD: "-Dproguard"
-#   script:
-#     - cd jsparrow-maven-plugin && mvn clean deploy -DskipTests -B $PROGUARD $PROFILE -DforceContextQualifier="$timestamp"_$ENV
-#   artifacts:
-#     paths:
-#       -  $CI_PROJECT_PATH/.m2/
-#     untracked: true
-#     expire_in: 1 days
+deploy_eclipse_plugin_develop_proguard:
+  stage: deploy
+  variables:
+    ENV: "test"
+  before_script:
+    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - 'which rsync || ( apt-get update -y && apt-get install rsync -y )'
+  script:
+    - echo $snapshot && echo $snapshot
+    - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")_test
+    - mvn clean deploy -DskipTests -B -Dproguard -Pdevelop-test-proguard -DforceContextQualifier=$TIMESTAMP
+    - ./uploadMappingFiles.sh ./ $TIMESTAMP
+    - ARTIFACTNAME=$(ls releng/eu.jsparrow.site.photon/target/*.zip)
+    - ssh -oStrictHostKeyChecking=no root@"$UPDATE_SERVER" "mkdir -p '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest'; rm -rf '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'*"
+    - rsync -e "ssh -oStrictHostKeyChecking=no" $ARTIFACTNAME root@"$UPDATE_SERVER":/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/
+    - ssh root@"$UPDATE_SERVER" "unzip '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/*.zip' -d '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'; rm -f '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'*.zip"
+  artifacts:
+    paths:
+      -  $CI_PROJECT_PATH/.m2/
+    untracked: true
+    expire_in: 1 days
+  only:
+    - develop
+    - tags
 
-# deploy_eclipse_plugin_release_candidate:
-#   stage: deploy
-#   variables:
-#     ENV: "test_rc"
-#   script:
-#     - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")_test_rc
-#     - mvn clean deploy -DskipTests -B -Dproguard -PreleaseCandidate -DforceContextQualifier=$TIMESTAMP;
-#     - ./uploadMappingFiles.sh ./ $TIMESTAMP
-#   artifacts:
-#     paths:
-#       -  $CI_PROJECT_PATH/.m2/
-#     untracked: true
-#     expire_in: 1 days
-#   only:
-#     - /^release.*$/
-#     - tags
+jmp_deploy:
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop" 
+      variables: 
+        ENV: "noProguard_test"
+        PROFILE: "-Pdevelop-test-noProguard"
+        PROGUARD: ""
+    - if: $CI_COMMIT_TAG == "release-^"
+      variables: 
+        ENV: "test_rc"
+        PROFILE: "-PreleaseCandidate"
+        PROGUARD: "-Dproguard"
+    - if: $CI_COMMIT_TAG == "master"
+      variables: 
+        ENV: ""
+        PROFILE: "-Pmaster-test-proguard"
+        PROGUARD: "-Dproguard"
+  script:
+    - cd jsparrow-maven-plugin && mvn clean deploy -DskipTests -B $PROGUARD $PROFILE -DforceContextQualifier="$timestamp"_$ENV
+  artifacts:
+    paths:
+      -  $CI_PROJECT_PATH/.m2/
+    untracked: true
+    expire_in: 1 days
 
-# deploy_eclipse_plugin_master_production_proguard:
-#   stage: deploy
-#   script:
-#     - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")
-#     - mvn clean deploy -DskipTests -B -Dproduction -Dproguard -Pmaster-production-proguard -DforceContextQualifier=$TIMESTAMP;  
-#     - ./uploadMappingFiles.sh ./ $TIMESTAMP
-#   artifacts:
-#     paths:
-#       -  $CI_PROJECT_PATH/.m2/
-#     untracked: true
-#     expire_in: 1 days
-#   only:
-#     - master
-#     - tags
+deploy_eclipse_plugin_release_candidate:
+  stage: deploy
+  variables:
+    ENV: "test_rc"
+  script:
+    - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")_test_rc
+    - mvn clean deploy -DskipTests -B -Dproguard -PreleaseCandidate -DforceContextQualifier=$TIMESTAMP;
+    - ./uploadMappingFiles.sh ./ $TIMESTAMP
+  artifacts:
+    paths:
+      -  $CI_PROJECT_PATH/.m2/
+    untracked: true
+    expire_in: 1 days
+  only:
+    - /^release.*$/
+    - tags
 
-# deploy_eclipse_plugin_master_production_no_proguard:
-#   stage: deploy
-#   variables:
-#     ENV: "noProguard"
-#   script:
-#     - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")_noProguard
-#     - mvn clean deploy -DskipTests -B -Dproduction -Pmaster-production-noProguard -DforceContextQualifier=$TIMESTAMP;  
-#   artifacts:
-#     paths:
-#       -  $CI_PROJECT_PATH/.m2/
-#     untracked: true
-#     expire_in: 1 days
-#   only:
-#     - master
-#     - tags
+deploy_eclipse_plugin_master_production_proguard:
+  stage: deploy
+  # before_script:
+  #   - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+  #   - eval $(ssh-agent -s)
+  #   - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  #   - mkdir -p ~/.ssh
+  #   - chmod 700 ~/.ssh
+  #   - 'which rsync || ( apt-get update -y && apt-get install rsync -y )'
+  script:
+    - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")
+    - mvn clean deploy -DskipTests -B -Dproduction -Dproguard -Pmaster-production-proguard -DforceContextQualifier=$TIMESTAMP;  
+    - ./uploadMappingFiles.sh ./ $TIMESTAMP
+    # - ARTIFACTNAME=$(ls releng/eu.jsparrow.site.photon/target/*.zip)
+    # - ssh -oStrictHostKeyChecking=no root@"$UPDATE_SERVER" "mkdir -p '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest'; rm -rf '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'*"
+    # - rsync -e "ssh -oStrictHostKeyChecking=no" $ARTIFACTNAME root@"$UPDATE_SERVER":/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/
+    # - ssh root@"$UPDATE_SERVER" "unzip '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/*.zip' -d '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'; rm -f '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'*.zip"
+  artifacts:
+    paths:
+      -  $CI_PROJECT_PATH/.m2/
+    untracked: true
+    expire_in: 1 days
+  only:
+    - master
+    - tags
 
-# deploy_eclipse_plugin_master_test_proguard:
-#   stage: deploy
-#   variables:
-#     ENV: "test"
-#   script:
-#     - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")_test
-#     - mvn clean deploy -DskipTests -B -Dproguard -Pmaster-test-proguard -DforceContextQualifier=$TIMESTAMP;  
-#     - ./uploadMappingFiles.sh ./ $TIMESTAMP
-#   artifacts:
-#     paths:
-#       -  $CI_PROJECT_PATH/.m2/
-#     untracked: true
-#     expire_in: 1 days
-#   only:
-#     - master
-#     - tags
+deploy_eclipse_plugin_master_production_no_proguard:
+  stage: deploy
+  variables:
+    ENV: "noProguard"
+  script:
+    - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")_noProguard
+    - mvn clean deploy -DskipTests -B -Dproduction -Pmaster-production-noProguard -DforceContextQualifier=$TIMESTAMP;  
+  artifacts:
+    paths:
+      -  $CI_PROJECT_PATH/.m2/
+    untracked: true
+    expire_in: 1 days
+  only:
+    - master
+    - tags
 
-# deploy_eclipse_plugin_master_test_no_proguard:
-#   stage: deploy
-#   script:
-#     - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")_noProguard_test
-#     - mvn clean deploy -DskipTests -B -Pmaster-test-noProguard -DforceContextQualifier=$TIMESTAMP;  
-#   artifacts:
-#     paths:
-#       -  $CI_PROJECT_PATH/.m2/
-#     untracked: true
-#     expire_in: 1 days
-#   only:
-#     - master
-#     - tags
+deploy_eclipse_plugin_master_test_proguard:
+  stage: deploy
+  variables:
+    ENV: "test"
+  script:
+    - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")_test
+    - mvn clean deploy -DskipTests -B -Dproguard -Pmaster-test-proguard -DforceContextQualifier=$TIMESTAMP;  
+    - ./uploadMappingFiles.sh ./ $TIMESTAMP
+  artifacts:
+    paths:
+      -  $CI_PROJECT_PATH/.m2/
+    untracked: true
+    expire_in: 1 days
+  only:
+    - master
+    - tags
+
+deploy_eclipse_plugin_master_test_no_proguard:
+  stage: deploy
+  script:
+    - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")_noProguard_test
+    - mvn clean deploy -DskipTests -B -Pmaster-test-noProguard -DforceContextQualifier=$TIMESTAMP;  
+  artifacts:
+    paths:
+      -  $CI_PROJECT_PATH/.m2/
+    untracked: true
+    expire_in: 1 days
+  only:
+    - master
+    - tags
 
 .post_to_telegram: &post_to_telegram |
   curl -s -X "POST" "https://api.telegram.org/bot$TOKEN/sendMessage" \
