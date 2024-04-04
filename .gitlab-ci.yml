@@ -100,18 +100,11 @@ deploy_eclipse_plugin_develop_proguard:
   stage: deploy
   variables:
     ENV: "test"
-  before_script:
-    - eval $(ssh-agent -s)
-    - ssh-add <(echo "$SSH_PRIVATE_KEY")
   script:
     - echo $snapshot && echo $snapshot
     - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")_test
     - mvn clean deploy -DskipTests -B -Dproguard -Pdevelop-test-proguard -DforceContextQualifier=$TIMESTAMP
     - ./uploadMappingFiles.sh ./ $TIMESTAMP
-    - ARTIFACTNAME=$(ls releng/eu.jsparrow.site.photon/target/*.zip)
-    - ssh -oStrictHostKeyChecking=no root@"$UPDATE_SERVER" "mkdir -p '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest'; rm -rf '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'*"
-    - rsync -e "ssh -oStrictHostKeyChecking=no" $ARTIFACTNAME root@"$UPDATE_SERVER":/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/
-    - ssh root@"$UPDATE_SERVER" "unzip '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/*.zip' -d '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'; rm -f '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'*.zip"
   artifacts:
     paths:
       -  $CI_PROJECT_PATH/.m2/
@@ -166,17 +159,17 @@ deploy_eclipse_plugin_release_candidate:
 
 deploy_eclipse_plugin_master_production_proguard:
   stage: deploy
-  # before_script:
-  #   - eval $(ssh-agent -s)
-  #   - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  before_script:
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY" | base64 -d)
   script:
     - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")
     - mvn clean deploy -DskipTests -B -Dproduction -Dproguard -Pmaster-production-proguard -DforceContextQualifier=$TIMESTAMP;  
     - ./uploadMappingFiles.sh ./ $TIMESTAMP
-    # - ARTIFACTNAME=$(ls releng/eu.jsparrow.site.photon/target/*.zip)
-    # - ssh -oStrictHostKeyChecking=no root@"$UPDATE_SERVER" "mkdir -p '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest'; rm -rf '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'*"
-    # - rsync -e "ssh -oStrictHostKeyChecking=no" $ARTIFACTNAME root@"$UPDATE_SERVER":/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/
-    # - ssh root@"$UPDATE_SERVER" "unzip '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/*.zip' -d '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'; rm -f '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'*.zip"
+    - ARTIFACTNAME=$(ls releng/eu.jsparrow.site.photon/target/*.zip)
+    - ssh -oStrictHostKeyChecking=no root@"$UPDATE_SERVER" "mkdir -p '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest'; rm -rf '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'*"
+    - rsync -e "ssh -oStrictHostKeyChecking=no" $ARTIFACTNAME root@"$UPDATE_SERVER":/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/
+    - ssh root@"$UPDATE_SERVER" "unzip '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/*.zip' -d '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'; rm -f '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'*.zip"
   artifacts:
     paths:
       -  $CI_PROJECT_PATH/.m2/
