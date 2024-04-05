@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>tests</artifactId>
-		<version>4.19.0-SNAPSHOT</version>
+		<version>4.20.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>eu.jsparrow.sample</artifactId>
@@ -463,7 +463,7 @@
 	</build>
 
 	<scm>
-		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/sample</url>
+		<url>${simonykees.repository.url}/browse/sample</url>
 	</scm>
 
 </project>

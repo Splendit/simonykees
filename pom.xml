@@ -5,7 +5,7 @@
 
 	<groupId>at.splendit</groupId>
 	<artifactId>eu.jsparrow</artifactId>
-	<version>4.19.0-SNAPSHOT</version>
+	<version>4.20.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>jSparrow :: parent</name>
 	<description>jSparrow Parent</description>
@@ -79,9 +79,9 @@
 	</modules>
 
 	<scm>
-		<connection>scm:git:ssh://git@bitbucket.splendit.loc:7999/lm/simonykees.git</connection>
-		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse</url>
-		<developerConnection>scm:git:ssh://git@bitbucket.splendit.loc:7999/lm/simonykees.git</developerConnection>
+		<connection>scm:git:ssh://gitlab.splendit.at:10022/legacy-migration/simonykees.git</connection>
+		<url>${simonykees.repository.url}/browse</url>
+		<developerConnection>scm:git:ssh://git@gitlab.splendit.at:10022/legacy-migration/simonykees.git</developerConnection>
 	</scm>
 
 	<issueManagement>
@@ -97,7 +97,7 @@
 	<distributionManagement>
 		<repository>
 			<id>nexus</id>
-			<url>${packagedrone.url.complete}</url>
+			<url>${nexus.url.complete}</url>
 		</repository>
 	</distributionManagement>
 
@@ -167,16 +167,16 @@
 		<!-- Workaround for surefire-argline bug. Required to make Jacoco work -->
 		<test-argline>${tycho.test.jvmArgs} -Dfile.encoding=UTF-8</test-argline>
 
-		<!-- The packagedrone url has to be set differently for upload and download -->
-		<!-- Upload: used in distributionManagement for uploading to packagedrone -->
+		<!-- The nexus url has to be set differently for upload and download -->
+		<!-- Upload: used in distributionManagement for uploading to nexus -->
 		<!-- Download: used in releng/site to provide a p2 repository for version
 			2.5.1 -->
-		<packagedrone.url.complete>${packagedrone.upload.prefix}${packagedrone.channel.suffix}</packagedrone.url.complete>
-		<packagedrone.upload.prefix>http://172.16.0.6:8082/nexus/content/repositories/</packagedrone.upload.prefix>
-		<packagedrone.download.prefix>http://packagedrone-vm-01.splendit.loc:8080/p2/</packagedrone.download.prefix>
-		<!-- The packagedrone URL is set by activating certain profiles -->
+		<nexus.url.complete>${nexus.upload.prefix}${nexus.channel.suffix}</nexus.url.complete>
+		<nexus.upload.prefix>https://nexus.splendit.at/nexus/content/repositories/</nexus.upload.prefix>
+		<!-- The nexus URL is set by activating certain profiles -->
 		<!-- The (develop) test noProguard is used when no other profile is specified -->
-		<packagedrone.channel.suffix>jenkins-jSparrow-develop-test-noProguard</packagedrone.channel.suffix>
+		<nexus.channel.suffix>jenkins-jSparrow-develop-test-noProguard</nexus.channel.suffix>		
+		<simonykees.repository.url>https://gitlab.splendit.at/legacy-migration/simonykees</simonykees.repository.url>
 
 	</properties>
 
@@ -207,7 +207,7 @@
 		<pluginRepository>
 			<id>jsparrow-maven-plugin</id>
 			<name>jsparrow maven plugin</name>
-			<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jSparrow-maven-plugin-release-candidate/</url>
+			<url>https://nexus.splendit.at/nexus/content/repositories/jmp-release-candidate/eu/jsparrow/jsparrow-maven-plugin/</url>
 			<layout>default</layout>
 		</pluginRepository>
 	</pluginRepositories>
@@ -554,49 +554,49 @@
 			</properties>
 		</profile>
 
-		<!-- all deployment channels on packagedrone -->
+		<!-- all deployment channels on nexus -->
 		<!-- we only set the channel url suffix here -->
-		<!-- Example: "jenkins-jSparrow-develop-test-noProguard" instead of "http://packagedrone-vm-01.splendit.loc:8080/p2/jenkins-jSparrow-develop-test-noProguard" -->
+		<!-- Example: "jep-m2-develop-test-no-proguard" instead of "https://nexus.splendit.at/nexus/content/repositories/jep-m2-develop-test-no-proguard" -->
 		<profile>
 			<id>develop-test-noProguard</id>
 			<properties>
-				<packagedrone.channel.suffix>jep-m2-develop-test-no-proguard</packagedrone.channel.suffix>
+				<nexus.channel.suffix>jep-m2-develop-test-no-proguard</nexus.channel.suffix>
 			</properties>
 		</profile>
 		<profile>
 			<id>develop-test-proguard</id>
 			<properties>
-				<packagedrone.channel.suffix>jep-m2-develop-test-proguard</packagedrone.channel.suffix>
+				<nexus.channel.suffix>jep-m2-develop-test-proguard</nexus.channel.suffix>
 			</properties>
 		</profile>
 		<profile>
 			<id>master-test-noProguard</id>
 			<properties>
-				<packagedrone.channel.suffix>jep-m2-master-test-no-proguard</packagedrone.channel.suffix>
+				<nexus.channel.suffix>jep-m2-master-test-no-proguard</nexus.channel.suffix>
 			</properties>
 		</profile>
 		<profile>
 			<id>master-test-proguard</id>
 			<properties>
-				<packagedrone.channel.suffix>jep-m2-master-test-proguard</packagedrone.channel.suffix>
+				<nexus.channel.suffix>jep-m2-master-test-proguard</nexus.channel.suffix>
 			</properties>
 		</profile>
 		<profile>
 			<id>master-production-noProguard</id>
 			<properties>
-				<packagedrone.channel.suffix>jep-m2-master-production-no-proguard</packagedrone.channel.suffix>
+				<nexus.channel.suffix>jep-m2-master-production-no-proguard</nexus.channel.suffix>
 			</properties>
 		</profile>
 		<profile>
 			<id>master-production-proguard</id>
 			<properties>
-				<packagedrone.channel.suffix>jep-m2-master-production-proguard</packagedrone.channel.suffix>
+				<nexus.channel.suffix>jep-m2-master-production-proguard</nexus.channel.suffix>
 			</properties>
 		</profile>
 		<profile>
 			<id>releaseCandidate</id>
 			<properties>
-				<packagedrone.channel.suffix>jep-m2-release-candidate</packagedrone.channel.suffix>
+				<nexus.channel.suffix>jep-m2-release-candidate</nexus.channel.suffix>
 			</properties>
 		</profile>
 	</profiles>

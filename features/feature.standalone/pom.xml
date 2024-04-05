@@ -14,6 +14,6 @@
 	<description>jSparrow Feature for headless run</description>
 
 	<scm>
-		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/feature</url>
+		<url>${simonykees.repository.url}/browse/feature</url>
 	</scm>
 </project>
