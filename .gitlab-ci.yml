@@ -16,6 +16,7 @@ stages:
   - test
   - analyze
   - deploy
+  - production
   - notify
 
 compile_eclipse_plugin:
@@ -158,7 +159,7 @@ deploy_eclipse_plugin_release_candidate:
     - tags
 
 deploy_eclipse_plugin_master_production_proguard:
-  stage: deploy
+  stage: production
   before_script:
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$SSH_PRIVATE_KEY" | base64 -d)
