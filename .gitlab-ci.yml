@@ -1,5 +1,5 @@
 image: 
-  name: gitlab.itglobal.com:5050/itglobal/projects/splendit/infra/splendit-complex:jdk-11-root
+  name: gitlab.itglobal.com:5050/itglobal/projects/splendit/infra/splendit-complex:jdk-11-root-latest
   entrypoint: ['bash', '-c', 'exec su jenkins -c bash']
 default:
   tags:
@@ -16,6 +16,7 @@ stages:
   - test
   - analyze
   - deploy
+  - production
   - notify
 
 compile_eclipse_plugin:
@@ -158,11 +159,18 @@ deploy_eclipse_plugin_release_candidate:
     - tags
 
 deploy_eclipse_plugin_master_production_proguard:
-  stage: deploy
+  stage: production
+  before_script:
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY" | base64 -d)
   script:
     - TIMESTAMP=$(date -u "+%Y%m%d-%H%M")
     - mvn clean deploy -DskipTests -B -Dproduction -Dproguard -Pmaster-production-proguard -DforceContextQualifier=$TIMESTAMP;  
     - ./uploadMappingFiles.sh ./ $TIMESTAMP
+    - ARTIFACTNAME=$(ls releng/eu.jsparrow.site.photon/target/*.zip)
+    - ssh -oStrictHostKeyChecking=no root@"$UPDATE_SERVER" "mkdir -p '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest'; rm -rf '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'*"
+    - rsync -e "ssh -oStrictHostKeyChecking=no" $ARTIFACTNAME root@"$UPDATE_SERVER":/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/
+    - ssh root@"$UPDATE_SERVER" "unzip '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/*.zip' -d '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'; rm -f '/opt/sites/static/update.jsparrow.eu/public_html/releases/latest/'*.zip"
   artifacts:
     paths:
       -  $CI_PROJECT_PATH/.m2/
