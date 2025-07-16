@@ -1,0 +1,78 @@
+Signature-Version: 1.0
+Created-By: 11.0.2 (Oracle Corporation)
+SHA-256-Digest-Manifest: T3Zdr9fELP7DqNc8jNfvuXrQxptkrSy8mUdDQE7keck=
+SHA-256-Digest-Manifest-Main-Attributes: etiQPt2CgakOB8jJIV41XCnbz4rQFPO
+ wl9jKrAcu3S8=
+
+Name: plugins/eu.jsparrow.logging_4.20.0.20250716-2006.jar
+SHA-256-Digest: IvBvXbJGdzaJ8Y4C8z/A77jT0otgzS5tmV1Ojgvx2vo=
+
+Name: plugins/eu.jsparrow.license.api_4.20.0.20250716-2006.jar
+SHA-256-Digest: HnJ4mL6IlKxj0cU52CuVDHrMVsjIhk+rTKUJ70TBklE=
+
+Name: content.xml.xz
+SHA-256-Digest: yjVmY+MlVfBdTpFV67LKhnTdbNDWfNqPD2CFFq0XNA0=
+
+Name: plugins/com.fasterxml.jackson.core.jackson-databind_2.12.1.v202101
+ 28-1726.jar
+SHA-256-Digest: VgKhHaqxeKtjhoeg0oN33hCY3b01QQIkFXiHU+45T/Y=
+
+Name: plugins/eu.jsparrow.crypto_4.20.0.20250716-2006.jar
+SHA-256-Digest: VLR0Ve/znS8FIHnt8fv5SlIJZ9n5+mZu7MSMlQitP4Q=
+
+Name: plugins/com.fasterxml.jackson.core.jackson-core_2.12.1.v20210128-1
+ 726.jar
+SHA-256-Digest: zkpCoBMLM1CdqpapwQSadHZklD9sZGX5+iHNrw6As0s=
+
+Name: plugins/org.apache.commons.lang3_3.1.0.v201403281430.jar
+SHA-256-Digest: IfPeaW7rZMumipamruRcMEaNIaZmUOtoj359GQTowqU=
+
+Name: features/eu.jsparrow.3rd.party.feature_4.20.0.20250716-2006.jar
+SHA-256-Digest: zHZ/x1LokvdOIPnIHhjfnk5p1x67o4n/t4oVrciRFS0=
+
+Name: plugins/eu.jsparrow.core_4.20.0.20250716-2006.jar
+SHA-256-Digest: yHxkxo1ReS34lHu5MQ8UaV12N1CLoQDgqrtq5d5Vd9I=
+
+Name: plugins/eu.jsparrow.ui_4.20.0.20250716-2006.jar
+SHA-256-Digest: rVQXGela1ffRwEuM/uelgjbeoASk46EaLf+aMJpSQnY=
+
+Name: artifacts.xml.xz
+SHA-256-Digest: TAdwsbGKjceltYHw19JW7sftULMOlJ3S2BS3yGLqfbw=
+
+Name: plugins/eu.jsparrow.rules.java16_4.20.0.20250716-2006.jar
+SHA-256-Digest: BuYavRw3OTPQIKD3coz9neLTb+udDWANvnM0ixozI7M=
+
+Name: plugins/eu.jsparrow.i18n_4.20.0.20250716-2006.jar
+SHA-256-Digest: 0mSD0Z195fC764A0CQOi6Q7+wWCSag0VrWr+xOaCbGU=
+
+Name: plugins/eu.jsparrow.rules.imports_4.20.0.20250716-2006.jar
+SHA-256-Digest: E1T1nG1PUB8X2fQI4VWA32PO6JWDBWkeF7mbKGiY2ZA=
+
+Name: p2.index
+SHA-256-Digest: kaDgLwlABgGBCwmHY1Riq0fjVnXehiYz91pMmkCOrhk=
+
+Name: plugins/eu.jsparrow.rules.java10_4.20.0.20250716-2006.jar
+SHA-256-Digest: iQxro+oV5XS7IGXKqxursCJEk8z41qSGEdfSi9HYAQ0=
+
+Name: artifacts.jar
+SHA-256-Digest: glmh5i6NnMN9K43x0w6vydOGxgbBJyL55W/ujO5OwS4=
+
+Name: features/eu.jsparrow.202106.feature_4.20.0.20250716-2006.jar
+SHA-256-Digest: vRQCg21ZoX49jKcSd7gSpxCQwf+DU4Wkcou5FQk9zxs=
+
+Name: plugins/eu.jsparrow.rules.api_4.20.0.20250716-2006.jar
+SHA-256-Digest: LEwrA/zKkOf2nXj6TsPUyv2usGgmqXTdxS5F5/rrM3E=
+
+Name: plugins/com.fasterxml.jackson.core.jackson-annotations_2.12.1.v202
+ 10128-1726.jar
+SHA-256-Digest: CKBhp7BTjvHJR/TqwxjeR11aOxnv4mD2B15zf2hSTeI=
+
+Name: content.jar
+SHA-256-Digest: vpKec8WnUp7LzsMqNHlTz5nfU/Rws1hboFCNS9AlUnU=
+
+Name: plugins/eu.jsparrow.license.netlicensing_4.20.0.20250716-2006.jar
+SHA-256-Digest: cgoGMshpnN4IZjsOOkZJpmMsze5KEVtXKugAIk0kWdA=
+
+Name: features/eu.jsparrow.photon.feature_4.20.0.20250716-2006.jar
+SHA-256-Digest: 5RsnS4FcKorE2J1m3B0ZIrvqUd7Eb4hKdLqQx2ONQ74=
+

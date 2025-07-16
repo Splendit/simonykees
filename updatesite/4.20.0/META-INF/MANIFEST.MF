@@ -1,0 +1,75 @@
+Manifest-Version: 1.0
+Created-By: 11.0.2 (Oracle Corporation)
+
+Name: plugins/eu.jsparrow.logging_4.20.0.20250716-2006.jar
+SHA-256-Digest: dKdN6DUT0duFc7B1HD2mHir5siJIRGLam1nBEC8eqoA=
+
+Name: plugins/eu.jsparrow.license.api_4.20.0.20250716-2006.jar
+SHA-256-Digest: NPsXTUolFC3HPkMdqlXj0NNx7sBfHZWelQAfzNLPFhg=
+
+Name: content.xml.xz
+SHA-256-Digest: 6GiF9b+QMkFdXH6fWPqpiCMp+jezGItv13UJohAGU4k=
+
+Name: plugins/com.fasterxml.jackson.core.jackson-databind_2.12.1.v202101
+ 28-1726.jar
+SHA-256-Digest: osBgzL40GV/F4HVMBMyDE2XpLZ9PTuyR+0Wq+3jqq4U=
+
+Name: plugins/eu.jsparrow.crypto_4.20.0.20250716-2006.jar
+SHA-256-Digest: uYb6xCqTvlq04SYXHyGj4gsqm6kAITMDt8TGEF5nYOI=
+
+Name: plugins/com.fasterxml.jackson.core.jackson-core_2.12.1.v20210128-1
+ 726.jar
+SHA-256-Digest: V9yDuFxV9qKTpstJ63+p5ghSajv3YO8Mt6a2YNzmdVA=
+
+Name: plugins/org.apache.commons.lang3_3.1.0.v201403281430.jar
+SHA-256-Digest: 5mZ3DsNfLfG/ybCtOKxAfmq3zh8u0Tb0k4pG//ml0wQ=
+
+Name: features/eu.jsparrow.3rd.party.feature_4.20.0.20250716-2006.jar
+SHA-256-Digest: jmKJ1qyB/s3Fa+JGy7+TFqkkURjqPwwo4sYvSciVX94=
+
+Name: plugins/eu.jsparrow.core_4.20.0.20250716-2006.jar
+SHA-256-Digest: TVpTeulwWffnQ+EXlvD1H/7EfzMHxjuxJoaStYxiHIE=
+
+Name: plugins/eu.jsparrow.ui_4.20.0.20250716-2006.jar
+SHA-256-Digest: +ZxUSX4MWEknDfjbyV/mbqWW5s9ynbTTa01LeUbt7j4=
+
+Name: artifacts.xml.xz
+SHA-256-Digest: uaAsxMXYAZB9epPTbNcAslhrNegoxoDS+eOB1rgmDIU=
+
+Name: plugins/eu.jsparrow.rules.java16_4.20.0.20250716-2006.jar
+SHA-256-Digest: T2rsUz0rCQhvC/swqZRIGRIY6/8GsoBGuADbBlsKSCQ=
+
+Name: plugins/eu.jsparrow.i18n_4.20.0.20250716-2006.jar
+SHA-256-Digest: cVqVBmj9KybLo+OjTXHNw0caZgSnLc3DCpTRtkVHNIc=
+
+Name: plugins/eu.jsparrow.rules.imports_4.20.0.20250716-2006.jar
+SHA-256-Digest: AcgwKQjjIPkrD+LjqdwNDLoRT9Gke49XSoSAYawASJ8=
+
+Name: p2.index
+SHA-256-Digest: fVmljB1qkbGbL5hFMXtCBFoIwfazRbZp+95IPz62pf0=
+
+Name: plugins/eu.jsparrow.rules.java10_4.20.0.20250716-2006.jar
+SHA-256-Digest: VOjn/z0pgVUbGEmZDreZAWkVBIrLaz87Mi/E7zq0QMk=
+
+Name: artifacts.jar
+SHA-256-Digest: CBAMzpN80b7c3yMWP3uO2UeTce7nYk1RkBBEO23J5kM=
+
+Name: features/eu.jsparrow.202106.feature_4.20.0.20250716-2006.jar
+SHA-256-Digest: du+Xukwax5ckvbqgCuprEymivBId6Tm+0uDKLFpsiGA=
+
+Name: plugins/eu.jsparrow.rules.api_4.20.0.20250716-2006.jar
+SHA-256-Digest: PlNf1+02TZxJS6KNU7wnNtg3KEYQufwgMHQ9p4cR7OM=
+
+Name: plugins/com.fasterxml.jackson.core.jackson-annotations_2.12.1.v202
+ 10128-1726.jar
+SHA-256-Digest: B+xCpzSNTrMp0QsMjYkX3uWDTdqXBVMkgNq1xYqg/ZQ=
+
+Name: content.jar
+SHA-256-Digest: 6p3M5iOSm7zll0Wu13IGBPQe/S34OTnZtW6rbk7IcSk=
+
+Name: plugins/eu.jsparrow.license.netlicensing_4.20.0.20250716-2006.jar
+SHA-256-Digest: bqgdhCOYA19bWT1BfxZV0wE810W0oqrpGMw+6XxVk3M=
+
+Name: features/eu.jsparrow.photon.feature_4.20.0.20250716-2006.jar
+SHA-256-Digest: S3LVlL1B2Jz7z4rNWfAxA8VJ+pk/7NsxoYoC056Ebrk=
+
