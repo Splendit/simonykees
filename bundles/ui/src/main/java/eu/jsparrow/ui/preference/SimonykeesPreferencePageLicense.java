@@ -188,8 +188,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
 		ZonedDateTime expireDate = result.getExpirationDate();
 		String formattedExpireDate = expireDate.format(formatter);
-		return String.format(Messages.SimonykeesPreferencePageLicense_jsparrow_pro_valid_until, result.getKey(),
-				formattedExpireDate);
+		return String.format(Messages.SimonykeesPreferencePageLicense_jsparrow_pro_valid_until, result.getKey());
 	}
 
 	@Override

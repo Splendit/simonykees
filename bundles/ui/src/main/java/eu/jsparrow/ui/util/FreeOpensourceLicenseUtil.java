@@ -16,7 +16,7 @@ public class FreeOpensourceLicenseUtil implements LicenseUtilService {
 
 	@Override
 	public boolean isFreeLicense() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -34,7 +34,7 @@ public class FreeOpensourceLicenseUtil implements LicenseUtilService {
 	@Override
 	public LicenseValidationResult getValidationResult() {
 		LicenseValidationResult result = new LicenseValidationResult(
-				LicenseType.DEMO,
+				LicenseType.FLOATING,
 				"jSparrow Free Opensource License",
 				true,
 				"Free Opensource License",
@@ -55,7 +55,7 @@ public class FreeOpensourceLicenseUtil implements LicenseUtilService {
 
 	@Override
 	public boolean isProLicense() {
-		return false;
+		return true;
 	}
 
 }
