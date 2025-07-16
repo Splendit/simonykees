@@ -24,6 +24,7 @@ import org.osgi.framework.Bundle;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
  * Label provider for left view in select rules wizard
@@ -62,7 +63,7 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 		ImageData imageDataIconLock = tickmarkLockedRuleImage.getImageData();
 		lockedRuleImage = new Image(Display.getCurrent(), imageDataIconLock);
 
-		LicenseUtil licenseUtil = LicenseUtil.get();
+		LicenseUtilService licenseUtil = LicenseUtil.get();
 		freeLicense = licenseUtil.isFreeLicense();
 	}
 

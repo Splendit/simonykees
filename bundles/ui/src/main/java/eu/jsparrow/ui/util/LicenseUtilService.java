@@ -3,7 +3,6 @@ package eu.jsparrow.ui.util;
 import org.eclipse.swt.widgets.Shell;
 
 import eu.jsparrow.license.api.LicenseValidationResult;
-import eu.jsparrow.ui.util.LicenseUtil.LicenseUpdateResult;
 
 /**
  * Implementors of this class provide functions for managing licenses. This is a
@@ -48,4 +47,10 @@ public interface LicenseUtilService {
 	 * @return the validation result
 	 */
 	LicenseValidationResult getValidationResult();
+	
+	void reserveQuantity(int credit);
+	
+	void updateValidationResult();
+	
+	boolean isProLicense();
 }

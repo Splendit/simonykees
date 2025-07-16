@@ -28,6 +28,7 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 
 @SuppressWarnings("nls")
 class RuleDescriptionStyledText extends StyledText {
@@ -98,7 +99,7 @@ class RuleDescriptionStyledText extends StyledText {
 		final String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 		final String documentationLabel = Messages.AbstractSelectRulesWizardPage_seeDocumentation;
 
-		LicenseUtil licenseUtil = LicenseUtil.get();
+		LicenseUtilService licenseUtil = LicenseUtil.get();
 
 		String name = rule.getRuleDescription()
 			.getName();

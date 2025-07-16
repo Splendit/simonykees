@@ -36,6 +36,7 @@ import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.RuleWizardDialog;
@@ -180,7 +181,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	}
 
 	private void showOptionalLockedRuleSelectionDialog(List<RefactoringRule> selectedRules) {
-		LicenseUtil licenseUtil = LicenseUtil.get();
+		LicenseUtilService licenseUtil = LicenseUtil.get();
 		if (!licenseUtil.isFreeLicense() || selectedRules.isEmpty()) {
 			return;
 		}
