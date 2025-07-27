@@ -14,6 +14,7 @@ import eu.jsparrow.ui.preview.model.PayPerUseRuleStatisticsSectionPageModel;
 import eu.jsparrow.ui.preview.model.RuleStatisticsSectionPageModel;
 import eu.jsparrow.ui.preview.model.StatisticsSectionPageModel;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 
 /**
@@ -39,7 +40,7 @@ public class StatisticsSectionFactory {
 	 * @return
 	 */
 	public static StatisticsSection createStatisticsSection(RefactoringPipeline refactoringPipeline) {
-		LicenseUtil licenseUtil = LicenseUtil.get();
+		LicenseUtilService licenseUtil = LicenseUtil.get();
 		LicenseValidationResult validationResult = licenseUtil.getValidationResult();
 		LicenseType licenseType = validationResult.getLicenseType();
 		if (licenseType == LicenseType.PAY_PER_USE) {
@@ -59,7 +60,7 @@ public class StatisticsSectionFactory {
 	 * @return
 	 */
 	public static StatisticsSection createStatisticsSectionForSummaryPage(RefactoringPipeline refactoringPipeline) {
-		LicenseUtil licenseUtil = LicenseUtil.get();
+		LicenseUtilService licenseUtil = LicenseUtil.get();
 		LicenseValidationResult validationResult = licenseUtil.getValidationResult();
 		LicenseType licenseType = validationResult.getLicenseType();
 		if (licenseType == LicenseType.PAY_PER_USE) {
@@ -72,7 +73,7 @@ public class StatisticsSectionFactory {
 	}
 
 	private static StatisticsSectionPageModel createStatisticsSectionModel(List<RefactoringRule> allRules) {
-		LicenseUtil licenseUtil = LicenseUtil.get();
+		LicenseUtilService licenseUtil = LicenseUtil.get();
 		LicenseValidationResult validationResult = licenseUtil.getValidationResult();
 		LicenseType licenseType = validationResult.getLicenseType();
 		int issuesFixedCount = allRules.stream()
@@ -106,7 +107,7 @@ public class StatisticsSectionFactory {
 	 * @return
 	 */
 	public static RuleStatisticsSection createRuleStatisticsSection(RefactoringRule rule) {
-		LicenseUtil licenseUtil = LicenseUtil.get();
+		LicenseUtilService licenseUtil = LicenseUtil.get();
 		LicenseValidationResult validatoinResult = licenseUtil.getValidationResult();
 		LicenseType licenseType = validatoinResult.getLicenseType();
 		if (licenseType == LicenseType.PAY_PER_USE) {

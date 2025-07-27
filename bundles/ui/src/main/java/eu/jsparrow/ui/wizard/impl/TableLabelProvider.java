@@ -19,6 +19,7 @@ import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
  * Label provider for right view in select rules wizard
@@ -54,7 +55,7 @@ public class TableLabelProvider extends BaseLabelProvider implements ITableLabel
 		ImageData imageDataIconLock = tickmarkLockedRuleImage.getImageData();
 		lockedRuleImage = new Image(Display.getCurrent(), imageDataIconLock);
 
-		LicenseUtil licenseUtil = LicenseUtil.get();
+		LicenseUtilService licenseUtil = LicenseUtil.get();
 		freeLicense = licenseUtil.isFreeLicense();
 	}
 

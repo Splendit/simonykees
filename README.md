@@ -90,3 +90,14 @@ This usage of profiles would result in
 ## Statistics
 
 to save the statistics to a .json file, please specify the destination path as the following Java system property `-Deu.jsparrow.statistics.save.path`. This can be done in `eclipse.ini` by adding this property after the `-vmargs` argument. For testing (runtime-eclipse applicaton), the java system properties can be configured in the run/debug configurations.
+
+# 🤝 Need Help Contributing?
+
+If you’re interested in contributing to jSparrow but need assistance getting started or have questions along the way, we’re here to help!
+
+Feel free to reach out to us at office@splendit.at — whether it’s about setting up the project, understanding contribution guidelines, or anything else related to development.
+
+We’d love to hear from you and welcome your involvement!
+
+
+

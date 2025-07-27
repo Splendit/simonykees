@@ -27,6 +27,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
  * Provides resolution for a jSparrow marker.
@@ -97,7 +98,7 @@ public class JSparrowMarkerResolution implements IMarkerResolution2, IJavaComple
 
 	private void chargeCredit() {
 		Job job = Job.create(Messages.JSparrowMarkerResolution_reserving_payPerUseCredit, monitor -> {
-			LicenseUtil licenseUtil = LicenseUtil.get();
+			LicenseUtilService licenseUtil = LicenseUtil.get();
 			licenseUtil.reserveQuantity(weightValue);
 			return Status.OK_STATUS;
 		});
