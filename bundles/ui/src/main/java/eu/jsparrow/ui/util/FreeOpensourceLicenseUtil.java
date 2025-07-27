@@ -35,9 +35,9 @@ public class FreeOpensourceLicenseUtil implements LicenseUtilService {
 	public LicenseValidationResult getValidationResult() {
 		LicenseValidationResult result = new LicenseValidationResult(
 				LicenseType.FLOATING,
-				"jSparrow Free Opensource License",
+				"jSparrow Open Source License",
 				true,
-				"Free Opensource License",
+				"Open Source License",
 				ZonedDateTime.now().plusYears(100)
 				);
 		return result;

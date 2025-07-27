@@ -141,11 +141,6 @@ public class WelcomePage extends FormPage {
 		guidelinesButton.setText(Messages.WelcomePage_guidelines_button);
 		createButtonListenerToOpenWebpage(guidelinesButton, "https://jsparrow.github.io/eclipse/getting-started.html"); //$NON-NLS-1$
 
-		Button licenseButton = new Button(gettingStartedGroup, SWT.PUSH);
-		licenseButton.setLayoutData(buttonGridData);
-		licenseButton.setText(Messages.WelcomePage_buy_license_button);
-		createButtonListenerToOpenWebpage(licenseButton, JSparrowPricingLink.getJSparrowPricingPageAddress());
-
 		Button marketplaceButton = new Button(gettingStartedGroup, SWT.PUSH);
 		marketplaceButton.setLayoutData(buttonGridData);
 		marketplaceButton.setText(Messages.WelcomePage_market_place_button);
