@@ -2,16 +2,12 @@ package eu.jsparrow.core.rule.impl;
 
 import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -41,7 +37,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	private static final String RUN_UNEXPECTED_TEST_IN_MAIN = "ReplaceJUnit3TestCasesRunUnexpectedTestInMainRule.java";
 	private static final String MAIN_METHOD_OF_TESTCASE_NOT_CHANGED = "ReplaceJUnit3TestCasesMainMethodOfTestCaseNotChangedRule.java";
 	private static final String TEST_RUNNER_RUN_WITH_CLASS_VARIABLE = "ReplaceJUnit3TestCasesTestRunnerRunWithClassVariableRule.java";
-	
+
 	private static final String POSTRULE_SUBDIRECTORY = "migrateJUnit3";
 
 	private ReplaceJUnit3TestCasesRule rule;
@@ -54,49 +50,48 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceJUnit3TestCases"));
+		assertEquals("ReplaceJUnit3TestCases", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace JUnit 3 Test Cases"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(15)));
-		assertThat(description.getDescription(),
-				equalTo("This rule migrates JUnit 3 tests to either JUnit JUpiter or JUnit 4 depending on the most up-to-date JUnit version available in the classpath."));
+		assertEquals("Replace JUnit 3 Test Cases", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT), description.getTags());
+		assertEquals(15, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(
+				"This rule migrates JUnit 3 tests to either JUnit JUpiter or JUnit 4 depending on the most up-to-date JUnit version available in the classpath.", //
+				description.getDescription()
+
+		);
 	}
 
 	@Test
 	void test_requiredLibraries() throws Exception {
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), equalTo("JUnit 4 or JUnit 5"));
+		assertEquals("JUnit 4 or JUnit 5", rule.requiredLibraries());
 	}
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.getRequiredJavaVersion(), equalTo("1.5"));
+		assertEquals("1.5", rule.getRequiredJavaVersion());
 	}
 
 	@Test
 	void calculateEnabledForProject_supportLibraryVersion_4_12_shouldAllReturnTrue() throws Exception {
-		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("junit", "junit", "4.12")));
+		addToClasspath(testProject, Arrays.asList(generateMavenEntryFromDepedencyString("junit", "junit", "4.12")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
 		rule.calculateEnabledForProject(testProject);
 
@@ -108,8 +103,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	@Test
 	void calculateEnabledForProject_supportLibraryVersion_Jupiter_shouldAllReturnTrue() throws Exception {
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.calculateEnabledForProject(testProject);
 
@@ -121,8 +115,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	@Test
 	void calculateEnabledForProject_supportJunitJupiter_5_0_shouldReturnTrue() throws Exception {
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());
@@ -132,8 +125,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	void testTransformationToJUnit4() throws Exception {
 		loadUtilities();
 
-		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("junit", "junit", "4.12")));
+		addToClasspath(testProject, Arrays.asList(generateMavenEntryFromDepedencyString("junit", "junit", "4.12")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
 		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());
@@ -152,8 +144,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	void testTransformationToJupiter() throws Exception {
 		loadUtilities();
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.calculateEnabledForProject(testProject);
@@ -169,15 +160,11 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {
-			USING_J_UNIT_3_TEST_RESULT_GETTER,
-			USING_J_UNIT_3_TEST_RESULT_FIELD
-	})
+	@ValueSource(strings = { USING_J_UNIT_3_TEST_RESULT_GETTER, USING_J_UNIT_3_TEST_RESULT_FIELD })
 	void testUsingImplicitJUnit3TestResult(String preRuleFileName) throws Exception {
 		loadUtilities();
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());
@@ -192,16 +179,12 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {
-			IMPORT_OF_NOT_SUPPORTED_CONSTANT,
-			QUALIFIED_NAME_OF_NOT_SUPPORTED_CONSTANT,
-			IMPORT_OF_NOT_SUPPORTED_STATIC_METHOD
-	})
+	@ValueSource(strings = { IMPORT_OF_NOT_SUPPORTED_CONSTANT, QUALIFIED_NAME_OF_NOT_SUPPORTED_CONSTANT,
+			IMPORT_OF_NOT_SUPPORTED_STATIC_METHOD })
 	void testUsingNotSupportedStaticMembers(String preRuleFileName) throws Exception {
 		loadUtilities();
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());
@@ -219,8 +202,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	void testAmbiguousSuperMethodReturnType() throws Exception {
 		loadUtilities();
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());
@@ -238,8 +220,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	void testMainMethodNotRemoved() throws Exception {
 		loadUtilities();
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());
@@ -257,8 +238,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	void testRemoveMainWithRunTest() throws Exception {
 		loadUtilities();
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());
@@ -276,8 +256,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	void testRemoveRunTestInMain() throws Exception {
 		loadUtilities();
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());
@@ -295,8 +274,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	void testRunUnexpectedTestInMain() throws Exception {
 		loadUtilities();
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());
@@ -309,14 +287,12 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
-	
+
 	@Test
 	void testMainMethodOfTestCaseNotChanged() throws Exception {
 		loadUtilities();
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());
@@ -329,13 +305,12 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
+
 	@Test
 	void testTestRunnerRunWithClassVariable() throws Exception {
 		loadUtilities();
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());

@@ -1,17 +1,14 @@
 package eu.jsparrow.ui.preference.profile;
 
-import org.junit.jupiter.api.Test;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class FreeRulesProfileTest {
 
@@ -25,8 +22,8 @@ class FreeRulesProfileTest {
 	@Test
 	void freeRuleIds_shouldReturn20FreeRules() {
 		List<String> ruleIds = freeRulesProfile.getEnabledRuleIds();
-		assertThat(ruleIds, hasSize(20));
-		assertThat(ruleIds, contains(
+		assertEquals(20, ruleIds.size());
+		assertEquals(Arrays.asList(
 				"TryWithResource",
 				"OverrideAnnotation",
 				"MultiVariableDeclarationLine",
@@ -46,8 +43,7 @@ class FreeRulesProfileTest {
 				"UseIsEmptyOnCollections",
 				"ForToForEach",
 				"LambdaToMethodReference",
-				"OrganizeImports"));
-
+				"OrganizeImports"), ruleIds);
 	}
 
 	@Test

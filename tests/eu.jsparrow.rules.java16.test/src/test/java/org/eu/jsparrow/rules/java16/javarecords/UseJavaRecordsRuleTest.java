@@ -1,12 +1,10 @@
 package org.eu.jsparrow.rules.java16.javarecords;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Duration;
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,27 +28,27 @@ class UseJavaRecordsRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("UseJavaRecords"));
+		assertEquals("UseJavaRecords", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Use Java Records"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_16, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(20)));
-		assertThat(description.getDescription(),
-				equalTo("Since Java 16, record classes are a new kind of class in the Java language. "
-						+ "Record classes help to model plain data aggregates with less ceremony than normal classes. "
-						+ "This rule replaces the declarations of local classes, inner classes, and package private "
-						+ "root classes with record class declarations."));
+		assertEquals("Use Java Records", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_16, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
+		assertEquals(20, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "Since Java 16, record classes are a new kind of class in the Java language. "
+				+ "Record classes help to model plain data aggregates with less ceremony than normal classes. "
+				+ "This rule replaces the declarations of local classes, inner classes, and package private "
+				+ "root classes with record class declarations.", //
+				description.getDescription());
 	}
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		assertThat(rule.getRequiredJavaVersion(), equalTo("16"));
+		assertEquals("16", rule.getRequiredJavaVersion());
 	}
 
 	@Test

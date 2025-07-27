@@ -117,10 +117,13 @@ class NewRandomAnalyzer {
 				return false;
 			}
 
-			if (randomConstructionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			Block parentBlock = ASTNodeUtil.findParentBlock(randomConstructionStatement)
+				.orElse(null);
+			if (parentBlock == null) {
 				return false;
 			}
-			blockOfConstructionStatement = (Block) randomConstructionStatement.getParent();
+			
+			blockOfConstructionStatement = parentBlock;
 		}
 		return true;
 	}

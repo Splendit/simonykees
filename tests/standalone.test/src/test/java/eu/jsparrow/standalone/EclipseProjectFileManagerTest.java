@@ -1,7 +1,7 @@
 package eu.jsparrow.standalone;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,12 +9,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.eclipse.core.runtime.CoreException;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
@@ -26,14 +23,13 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
  */
 public class EclipseProjectFileManagerTest {
 
-	private static Path path;
-
 	private static final String DOT_PROJECT = ".project"; //$NON-NLS-1$
 	private static final String DOT_CLASSPATH = ".classpath"; //$NON-NLS-1$
 	private static final String DOT_SETTINGS = ".settings"; //$NON-NLS-1$
 	private static final String DOT_TEMP = ".tmp"; //$NON-NLS-1$
 	private static final String PROJECT_ROOT_DIR = "project-root-dir"; //$NON-NLS-1$
 
+	private Path tempDirectory;
 	private File projectFile;
 	private File projectFileTmp;
 	private File classpathFile;
@@ -44,40 +40,46 @@ public class EclipseProjectFileManagerTest {
 
 	private EclipseProjectFileManager manager;
 
-	@Rule
-	public TemporaryFolder directory = new TemporaryFolder();
-
-	@BeforeClass
-	public static void setUpClass() throws IOException {
-		path = Files.createTempDirectory("jsparrow-standlaone-test-"); //$NON-NLS-1$
+	private static void deleteIfExists(Path path) throws IOException {
+		if (Files.isDirectory(path)) {
+			File[] childFiles = path.toFile().listFiles();
+			for (File childFile : childFiles) {
+				deleteIfExists(childFile.toPath());
+			}
+			Files.delete(path);
+		} else {
+			Files.deleteIfExists(path);
+		}
 	}
 
-	@AfterClass
-	public static void tearDownClass() throws IOException {
-
-		Files.deleteIfExists(path);
-	}
-
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
-		baseDir = directory.newFolder(PROJECT_ROOT_DIR);
-		projectFile = directory.newFile(PROJECT_ROOT_DIR + File.separator + DOT_PROJECT);
-		classpathFile = directory.newFile(PROJECT_ROOT_DIR + File.separator + DOT_CLASSPATH);
-		settingsDirFile = directory.newFolder(PROJECT_ROOT_DIR, DOT_SETTINGS);
-		projectFileTmp = new File(baseDir.getPath() + File.separator + DOT_PROJECT + DOT_TEMP);
-		classpathFileTmp = new File(baseDir.getPath() + File.separator + DOT_CLASSPATH + DOT_TEMP);
-		settingsDirFileTmp = new File(baseDir.getPath() + File.separator + DOT_SETTINGS + DOT_TEMP);
+		tempDirectory = Files.createTempDirectory("jsparrow-standalone-test-").toAbsolutePath();
+		baseDir = new File(tempDirectory.toFile(), PROJECT_ROOT_DIR);
+		Files.createDirectory(baseDir.toPath());
+
+		projectFile = new File(baseDir.getPath(), DOT_PROJECT);
+		classpathFile = new File(baseDir.getPath(), DOT_CLASSPATH);
+		settingsDirFile = new File(baseDir.getPath(), DOT_SETTINGS);
+		Files.createFile(projectFile.toPath());
+		Files.createFile(classpathFile.toPath());
+		Files.createDirectory(settingsDirFile.toPath());
+
+		projectFileTmp = new File(baseDir.getPath(), DOT_PROJECT + DOT_TEMP);
+		classpathFileTmp = new File(baseDir.getPath(), DOT_CLASSPATH + DOT_TEMP);
+		settingsDirFileTmp = new File(baseDir.getPath(), DOT_SETTINGS + DOT_TEMP);
 
 		manager = new TestableEclipseProjectFileManager();
 		manager.addProject(baseDir.getAbsolutePath());
 	}
 
+	@AfterEach
+	public void tearDown() throws IOException {
+		deleteIfExists(tempDirectory);
+	}
+
 	@Test
 	public void backupExistingEclipseFiles_dotProjectExists() throws StandaloneException, IOException {
-
-		projectFileTmp = new File(baseDir.getPath() + File.separator + DOT_PROJECT + DOT_TEMP);
-		classpathFile = new File(baseDir.getPath() + File.separator + DOT_CLASSPATH);
-		settingsDirFile = new File(baseDir.getPath(), DOT_SETTINGS);
 
 		manager.backupExistingEclipseFiles();
 
@@ -87,9 +89,6 @@ public class EclipseProjectFileManagerTest {
 
 	@Test
 	public void backupExistingEclipseFiles_dotClasspathExists() throws StandaloneException, IOException {
-		classpathFileTmp = new File(baseDir.getPath() + File.separator + DOT_CLASSPATH + DOT_TEMP);
-		projectFile = new File(baseDir.getPath() + File.separator + DOT_PROJECT);
-		settingsDirFile = new File(baseDir.getPath(), DOT_SETTINGS);
 
 		manager.backupExistingEclipseFiles();
 
@@ -99,9 +98,6 @@ public class EclipseProjectFileManagerTest {
 
 	@Test
 	public void backupExistingEclipseFiles_dotSettingsExists() throws StandaloneException, IOException {
-		projectFile = new File(baseDir.getPath() + File.separator + DOT_PROJECT);
-		classpathFile = new File(baseDir.getPath() + File.separator + DOT_CLASSPATH);
-		settingsDirFileTmp = new File(baseDir.getPath() + File.separator + DOT_SETTINGS + DOT_TEMP);
 
 		manager.backupExistingEclipseFiles();
 
@@ -111,11 +107,9 @@ public class EclipseProjectFileManagerTest {
 
 	@Test
 	public void restoreExistingEclipseFiles_projectFileMoved() throws IOException, CoreException {
-		manager.getProjects()
-			.stream()
-			.forEach(p -> p.setExistingProjectFileMoved(true));
+		manager.getProjects().stream().forEach(p -> p.setExistingProjectFileMoved(true));
 
-		projectFileTmp = directory.newFile(PROJECT_ROOT_DIR + File.separator + DOT_PROJECT + DOT_TEMP);
+		Files.createFile(projectFileTmp.toPath());
 
 		manager.revertEclipseProjectFiles();
 
@@ -125,11 +119,9 @@ public class EclipseProjectFileManagerTest {
 
 	@Test
 	public void restoreExistingEclipseFiles_classPathFileMoved() throws IOException, CoreException {
-		manager.getProjects()
-			.stream()
-			.forEach(p -> p.setExistingClasspathFileMoved(true));
+		manager.getProjects().stream().forEach(p -> p.setExistingClasspathFileMoved(true));
 
-		classpathFileTmp = directory.newFile(PROJECT_ROOT_DIR + File.separator + DOT_PROJECT + DOT_TEMP);
+		Files.createFile(classpathFileTmp.toPath());
 
 		manager.revertEclipseProjectFiles();
 
@@ -139,11 +131,9 @@ public class EclipseProjectFileManagerTest {
 
 	@Test
 	public void restoreExistingEclipseFiles_settingsFolderMoved() throws IOException, CoreException {
-		manager.getProjects()
-			.stream()
-			.forEach(p -> p.setExistingSettingsDirectoryMoved(true));
+		manager.getProjects().stream().forEach(p -> p.setExistingSettingsDirectoryMoved(true));
 
-		settingsDirFileTmp = directory.newFolder(PROJECT_ROOT_DIR, DOT_SETTINGS + DOT_TEMP);
+		Files.createDirectory(settingsDirFileTmp.toPath());
 
 		manager.revertEclipseProjectFiles();
 

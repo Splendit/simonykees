@@ -38,6 +38,7 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.dialog.ObtainLicenseButtonData;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
  * Preference page for displaying license information and updating license key.
@@ -65,7 +66,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private Button updateButton;
 
-	private LicenseUtil licenseUtil = LicenseUtil.get();
+	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	public SimonykeesPreferencePageLicense() {
 		super();
@@ -123,7 +124,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 				updateDisplayedInformation();
 			}
 		});
-		updateButton.setVisible(true);
+		updateButton.setVisible(false);
 		updateDisplayedInformation();
 
 		composite.addDisposeListener((DisposeEvent e) -> {
@@ -187,8 +188,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
 		ZonedDateTime expireDate = result.getExpirationDate();
 		String formattedExpireDate = expireDate.format(formatter);
-		return String.format(Messages.SimonykeesPreferencePageLicense_jsparrow_pro_valid_until, result.getKey(),
-				formattedExpireDate);
+		return String.format(Messages.SimonykeesPreferencePageLicense_jsparrow_pro_valid_until, result.getKey());
 	}
 
 	@Override

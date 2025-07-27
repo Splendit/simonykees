@@ -1,13 +1,10 @@
 package eu.jsparrow.core.visitor.impl;
 
-import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
@@ -64,11 +61,14 @@ public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisit
 		if (analysisResult == null) {
 			return true;
 		}
-		VariableDeclarationStatement variableDeclarationBeforeAddAll = getVariableDeclarationBeforeAddAll(
-				analysisResult.addAllStatement);
+
+		VariableDeclarationStatement variableDeclarationBeforeAddAll = ASTNodeUtil
+			.findPreviousStatementInBlock(analysisResult.addAllStatement, VariableDeclarationStatement.class)
+			.orElse(null);
 		if (variableDeclarationBeforeAddAll == null) {
 			return true;
 		}
+
 		ClassInstanceCreation instanceCreation = analyzeVariableDeclarationBeforeAddAll(variableDeclarationBeforeAddAll,
 				analysisResult.addAllExpression);
 		if (instanceCreation == null) {
@@ -118,29 +118,6 @@ public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisit
 		}
 		ExpressionStatement addAllStatement = (ExpressionStatement) methodInvocation.getParent();
 		return new AddAllAnalysisResult(addAllExpression, singleAddAllArgument, addAllStatement);
-	}
-
-	private VariableDeclarationStatement getVariableDeclarationBeforeAddAll(ExpressionStatement addAllStatement) {
-
-		if (addAllStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return null;
-		}
-		Block parentBlock = (Block) addAllStatement.getParent();
-		@SuppressWarnings("rawtypes")
-		List blockStatemetns = parentBlock.statements();
-		int indexOfStatementBefore = blockStatemetns.indexOf(addAllStatement) - 1;
-		if (indexOfStatementBefore < 0) {
-			return null;
-		}
-
-		Statement stmBefore = convertToTypedList(blockStatemetns, Statement.class).get(indexOfStatementBefore);
-
-		if (stmBefore.getNodeType() != ASTNode.VARIABLE_DECLARATION_STATEMENT) {
-			return null;
-		}
-
-		return (VariableDeclarationStatement) stmBefore;
-
 	}
 
 	private ClassInstanceCreation analyzeVariableDeclarationBeforeAddAll(

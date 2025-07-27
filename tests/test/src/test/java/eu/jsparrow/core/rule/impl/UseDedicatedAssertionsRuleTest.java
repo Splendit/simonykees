@@ -3,16 +3,12 @@ package eu.jsparrow.core.rule.impl;
 import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.common.util.RulesTestUtil.createJavaProject;
 import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -43,22 +39,23 @@ class UseDedicatedAssertionsRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("UseDedicatedAssertions"));
+		assertEquals("UseDedicatedAssertions", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Use Dedicated Assertions"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT, Tag.CODING_CONVENTIONS));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
-		assertThat(description.getDescription(),
-				equalTo("Replaces boolean assertions (e.g., 'assertTrue' and 'assertFalse') with the corresponding "
-						+ "dedicated assertions when testing for equality or null values. \nFor example, "
-						+ "'assertTrue(a.equals(b))' can be replaced by 'assertEquals(a, b)'. Similarly, 'assertSame', "
-						+ "'assertNotSame', 'assertNull', or 'assertNotNull' can be used instead of 'assertTrue' or 'assertFalse'."));
+		assertEquals("Use Dedicated Assertions", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_1_5, Tag.TESTING, Tag.JUNIT, Tag.CODING_CONVENTIONS),
+				description.getTags());
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "Replaces boolean assertions (e.g., 'assertTrue' and 'assertFalse') with the corresponding "
+				+ "dedicated assertions when testing for equality or null values. \nFor example, "
+				+ "'assertTrue(a.equals(b))' can be replaced by 'assertEquals(a, b)'. Similarly, 'assertSame', "
+				+ "'assertNotSame', 'assertNull', or 'assertNotNull' can be used instead of 'assertTrue' or 'assertFalse'.",
+				description.getDescription());
 	}
 
 	@Test
@@ -70,7 +67,7 @@ class UseDedicatedAssertionsRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), equalTo("JUnit 4 or JUnit 5"));
+		assertEquals("JUnit 4 or JUnit 5", rule.requiredLibraries());
 	}
 
 	@Test
@@ -82,7 +79,7 @@ class UseDedicatedAssertionsRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.getRequiredJavaVersion(), equalTo("1.5"));
+		assertEquals("1.5", rule.getRequiredJavaVersion());
 	}
 
 	@Test

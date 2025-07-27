@@ -21,6 +21,9 @@ echo suffix=$suffix
 completeTag=$dir$subdir$tag-$suffix
 echo completeTag=$completeTag
 
+# init git
+git remote set-url origin https://jenkins-ssh:glpat--Ct2xy6XztmS48q44n-Y@gitlab.splendit.at/legacy-migration/simonykees.git
+
 # tag the build
 git tag $completeTag
 

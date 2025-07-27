@@ -1,17 +1,16 @@
 package eu.jsparrow.license.netlicensing.validation.impl;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
@@ -21,19 +20,18 @@ import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.testhelper.NetlicensingValidationResultFactory;
 
-@RunWith(MockitoJUnitRunner.class)
 public class NetlicensingValidationRequestTest {
 
-	@Mock
 	ResponseEvaluator responseEvaluator;
 
-	@Mock
 	LicenseeServiceWrapper licenseeService;
 
 	private NetlicensingValidationRequest validationRequest;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
+		responseEvaluator = mock(ResponseEvaluator.class);
+		licenseeService = mock(LicenseeServiceWrapper.class);
 		validationRequest = new NetlicensingValidationRequest(responseEvaluator, licenseeService);
 	}
 
@@ -50,12 +48,15 @@ public class NetlicensingValidationRequestTest {
 		assertEquals(expected, result);
 	}
 
-	@Test(expected = ValidationException.class)
+	@Test
 	public void validate_withNetlicensingException_returnsInvalidValidationResult() throws Exception {
-		when(licenseeService.validate(any(), anyString(), nullable(ValidationParameters.class)))
-			.thenThrow(RestException.class);
+		assertThrows(ValidationException.class, () -> {
 
-		validationRequest.send("key", null);
+			when(licenseeService.validate(any(), anyString(), nullable(ValidationParameters.class)))
+					.thenThrow(RestException.class);
+
+			validationRequest.send("key", null);
+		});
 	}
 
 }

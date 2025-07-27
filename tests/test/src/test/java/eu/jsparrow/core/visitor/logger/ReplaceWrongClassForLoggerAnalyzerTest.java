@@ -15,7 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesJDTUnitFixture;
-import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
+import eu.jsparrow.rules.common.exception.UnresolvedBindingException;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 class ReplaceWrongClassForLoggerAnalyzerTest extends UsesJDTUnitFixture {
@@ -90,7 +90,7 @@ class ReplaceWrongClassForLoggerAnalyzerTest extends UsesJDTUnitFixture {
 		TypeLiteral typeLiteral = VisitorTestUtil.findUniqueNode(typeDeclaration, TypeLiteral.class);
 		assertSame(typeDeclaration, ASTNodeUtil.getSpecificAncestor(typeLiteral, AbstractTypeDeclaration.class));
 		assertTrue(ForeignTypeLiteral.isForeignTypeLiteral(typeLiteral, typeDeclaration, defaultFixture.getRootNode()));
-		assertThrows(UnresolvedTypeBindingException.class,
+		assertThrows(UnresolvedBindingException.class,
 				() -> ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, typeDeclaration,
 						defaultFixture.getRootNode()));
 	}
@@ -179,7 +179,7 @@ class ReplaceWrongClassForLoggerAnalyzerTest extends UsesJDTUnitFixture {
 						"	}");
 		TypeDeclaration typeDeclaration = defaultFixture.getTypeDeclaration();
 		TypeLiteral typeLiteral = VisitorTestUtil.findUniqueNode(typeDeclaration, TypeLiteral.class);
-		assertThrows(UnresolvedTypeBindingException.class,
+		assertThrows(UnresolvedBindingException.class,
 				() -> ReplaceWrongClassForLoggerAnalyzer.isClassLiteralToReplace(typeLiteral, typeDeclaration,
 						defaultFixture.getRootNode()));
 	}

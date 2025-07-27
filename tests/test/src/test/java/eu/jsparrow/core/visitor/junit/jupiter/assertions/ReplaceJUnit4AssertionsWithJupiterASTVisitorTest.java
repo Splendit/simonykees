@@ -12,6 +12,8 @@ import eu.jsparrow.core.visitor.junit.jupiter.AbstractReplaceJUnit4WithJupiterAS
 public class ReplaceJUnit4AssertionsWithJupiterASTVisitorTest
 		extends AbstractReplaceJUnit4WithJupiterASTVisitorTest {
 
+	private static final String ORG_JUNIT_ASSERT = "org.junit.Assert";
+
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
 		addDependency("junit", "junit", "4.13");
@@ -26,7 +28,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitorTest
 
 	@Test
 	public void visit_qualifiedAssertEqualsForObjectArray_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Assert.class.getName());
+		defaultFixture.addImport(ORG_JUNIT_ASSERT);
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 		String original = "" +
 				"	@Test\n" +
@@ -46,7 +48,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitorTest
 
 	@Test
 	public void visit_qualifiedAssertEqualsWithObjectArrayAndMessage_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Assert.class.getName());
+		defaultFixture.addImport(ORG_JUNIT_ASSERT);
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 		String original = "" +
 				"	@Test\n" +
@@ -171,7 +173,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitorTest
 
 	@Test
 	public void visit_assertEqualsNewStaticImportNotPossible_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Assert.class.getName());
+		defaultFixture.addImport(ORG_JUNIT_ASSERT);
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 
 		String localClassWithAssertEquals = ""
@@ -203,7 +205,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitorTest
 
 	@Test
 	public void visit_assertEqualsNotAnyNewImportPossible_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Assert.class.getName());
+		defaultFixture.addImport(ORG_JUNIT_ASSERT);
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 
 		String original = "" +

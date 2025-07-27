@@ -1,8 +1,9 @@
 package eu.jsparrow.standalone;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,12 +11,9 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -24,7 +22,6 @@ import org.osgi.framework.BundleContext;
  * @author Matthias Webhofer, Hans-Jörg Schrödl
  * @since 2.5.0
  */
-@RunWith(MockitoJUnitRunner.class)
 public class ActivatorTest {
 
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
@@ -34,26 +31,31 @@ public class ActivatorTest {
 
 	private Activator activator;
 
-	@Mock
 	BundleContext context;
 
-	@Mock
 	private RefactoringInvoker refactoringInvoker;
 
-	@Mock
 	private ListRulesUtil listRulesUtil;
 
-	@Mock
 	private StandaloneLicenseUtilService licenseService;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUpClass() {
+
 		configuration = new HashMap<>();
 		configuration.put(STANDALONE_MODE_KEY, StandaloneMode.TEST.name());
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() {
+		context = mock(BundleContext.class);
+
+		refactoringInvoker = mock(RefactoringInvoker.class);
+
+		listRulesUtil = mock(ListRulesUtil.class);
+
+		licenseService = mock(StandaloneLicenseUtilService.class);
+
 		activator = new TestableActivator();
 	}
 

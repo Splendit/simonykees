@@ -57,7 +57,7 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		
+
 		/*
 		 * JNA first tries to read from jna.boot.library.path. If system
 		 * property jna.boot.library.path is set to wrong version from another
@@ -70,7 +70,7 @@ public class Activator extends AbstractUIPlugin {
 		 */
 		System.setProperty("jna.boot.library.path", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		System.setProperty("jna.nosys", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-		
+
 		// start jSparrow logging bundle
 		for (Bundle bundle : context.getBundles()) {
 			if ("eu.jsparrow.logging".equals(bundle.getSymbolicName()) //$NON-NLS-1$
@@ -87,7 +87,7 @@ public class Activator extends AbstractUIPlugin {
 		// load pseudo-activator from test fragment and execute its start method
 		try {
 			Class<? extends BundleActivator> fragmentActivatorClass = Class
-				.forName("at.splendit.simonykees.core.TestFragmentActivator") //$NON-NLS-1$
+				.forName("eu.jsparrow.core.TestFragmentActivator") //$NON-NLS-1$
 				.asSubclass(BundleActivator.class);
 			testFragmentActivator = fragmentActivatorClass.newInstance();
 			testFragmentActivator.start(context);
@@ -124,11 +124,6 @@ public class Activator extends AbstractUIPlugin {
 		logger.info(Messages.Activator_stop);
 
 		plugin = null;
-
-		// stop test fragment pseudo-activator
-		if (testFragmentActivator != null) {
-			testFragmentActivator.stop(context);
-		}
 
 		// stop jSparrow.logging
 		Bundle loggingBundle = context.getBundle(loggingBundleID);

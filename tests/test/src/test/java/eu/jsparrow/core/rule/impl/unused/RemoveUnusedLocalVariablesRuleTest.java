@@ -1,16 +1,12 @@
 package eu.jsparrow.core.rule.impl.unused;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +29,6 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-@SuppressWarnings("nls")
 class RemoveUnusedLocalVariablesRuleTest extends SingleRuleTest {
 
 	private RemoveUnusedLocalVariablesRule rule;
@@ -46,19 +41,18 @@ class RemoveUnusedLocalVariablesRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("RemoveUnusedLocalVariables"));
+		assertEquals("RemoveUnusedLocalVariables", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Remove Unused Local Variables"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
-		assertThat(description.getDescription(),
-				equalTo("Finds and removes local variables that are never used actively."));
+		assertEquals("Remove Unused Local Variables", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS), description.getTags());
+		assertEquals(2, description.getRemediationCost()
+			.toMinutes());
+		assertEquals("Finds and removes local variables that are never used actively.",
+				description.getDescription());
 	}
 
 	@Test
@@ -68,12 +62,12 @@ class RemoveUnusedLocalVariablesRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), nullValue());
+		assertNull(rule.requiredLibraries());
 	}
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		assertThat(rule.getRequiredJavaVersion(), equalTo("1.1"));
+		assertEquals("1.1", rule.getRequiredJavaVersion());
 	}
 
 	@Test

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>bundles</artifactId>
-		<version>4.18.0-SNAPSHOT</version>
+		<version>4.20.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>eu.jsparrow.crypto</artifactId>
@@ -14,7 +14,7 @@
 	<name>jSparrow :: crypto</name>
 
 	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
 	</properties>
 </project>

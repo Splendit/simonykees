@@ -15,7 +15,7 @@ import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
  */
 public class PayPerUseCreditCalculator {
 
-	private LicenseUtil licenseUtil = LicenseUtil.get();
+	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	/**
 	 * Uses the {@link LicenseUtil} to verify whether the available credit in a

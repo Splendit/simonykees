@@ -22,29 +22,28 @@ public class ReplaceJUnit4AnnotationsWithJupiterASTVisitorImportsTest extends Ab
 		fixtureProject.clear();
 	}
 
-	@SuppressWarnings("restriction")
 	@ParameterizedTest
-	@ValueSource(classes = {
-			junit.extensions.ActiveTestSuite.class,
-			junit.framework.TestResult.class,
-			junit.runner.BaseTestRunner.class,
-			junit.textui.TestRunner.class,
-			org.junit.ClassRule.class,
-			org.junit.experimental.categories.Category.class,
-			org.junit.experimental.ParallelComputer.class,
-			org.junit.function.ThrowingRunnable.class,
-			org.junit.internal.TextListener.class,
-			org.junit.internal.runners.JUnit38ClassRunner.class,
-			org.junit.internal.builders.AllDefaultPossibilitiesBuilder.class,
-			org.junit.matchers.JUnitMatchers.class,
-			org.junit.rules.DisableOnDebug.class,
-			org.junit.runner.Computer.class,
-			org.junit.runners.AllTests.class,
-			org.junit.validator.AnnotationsValidator.class
+	@ValueSource(strings = {
+			"junit.extensions.ActiveTestSuite",
+			"junit.framework.TestResult",
+			"junit.runner.BaseTestRunner",
+			"junit.textui.TestRunner",
+			"org.junit.ClassRule",
+			"org.junit.experimental.categories.Category",
+			"org.junit.experimental.ParallelComputer",
+			"org.junit.function.ThrowingRunnable",
+			"org.junit.internal.TextListener",
+			"org.junit.internal.runners.JUnit38ClassRunner",
+			"org.junit.internal.builders.AllDefaultPossibilitiesBuilder",
+			"org.junit.matchers.JUnitMatchers",
+			"org.junit.rules.DisableOnDebug",
+			"org.junit.runner.Computer",
+			"org.junit.runners.AllTests",
+			"org.junit.validator.AnnotationsValidator"
 	})
-	public void visit_unexpectedJUnitTypeImports_shouldNotTransform(Class<?> clazz) throws Exception {
+	public void visit_unexpectedJUnitTypeImports_shouldNotTransform(String className) throws Exception {
 
-		defaultFixture.addImport(clazz.getName());
+		defaultFixture.addImport(className);
 
 		String original = "" +
 				"	public void test() {\n" +
@@ -53,29 +52,27 @@ public class ReplaceJUnit4AnnotationsWithJupiterASTVisitorImportsTest extends Ab
 		assertNoChange(original);
 	}
 
-	@SuppressWarnings("restriction")
 	@ParameterizedTest
-	@ValueSource(classes = {
-			junit.extensions.ActiveTestSuite.class,
-			junit.framework.TestResult.class,
-			junit.runner.BaseTestRunner.class,
-			junit.textui.TestRunner.class,
-			org.junit.experimental.categories.Category.class,
-			org.junit.experimental.ParallelComputer.class,
-			org.junit.function.ThrowingRunnable.class,
-			org.junit.internal.TextListener.class,
-			org.junit.internal.runners.JUnit38ClassRunner.class,
-			org.junit.internal.builders.AllDefaultPossibilitiesBuilder.class,
-			org.junit.matchers.JUnitMatchers.class,
-			org.junit.rules.DisableOnDebug.class,
-			org.junit.runner.Computer.class,
-			org.junit.runners.AllTests.class,
-			org.junit.validator.AnnotationsValidator.class
+	@ValueSource(strings = {
+			"junit.extensions",
+			"junit.framework",
+			"junit.runner",
+			"junit.textui",
+			"org.junit.experimental.categories",
+			"org.junit.experimental",
+			"org.junit.function",
+			"org.junit.internal",
+			"org.junit.internal.runners",
+			"org.junit.internal.builders",
+			"org.junit.matchers",
+			"org.junit.rules",
+			"org.junit.runner",
+			"org.junit.runners",
+			"org.junit.validator"
 	})
-	public void visit_unexpectedJUnitImportsOnDemand_shouldNotTransform(Class<?> clazz) throws Exception {
+	public void visit_unexpectedJUnitImportsOnDemand_shouldNotTransform(String packageName) throws Exception {
 
-		defaultFixture.addImport(clazz.getPackage()
-			.getName(), false, true);
+		defaultFixture.addImport(packageName, false, true);
 
 		String original = "" +
 				"	public void test() {\n" +
@@ -87,7 +84,7 @@ public class ReplaceJUnit4AnnotationsWithJupiterASTVisitorImportsTest extends Ab
 	@Test
 	public void visit_UnusedBeforeClassImport_shouldTransform() throws Exception {
 
-		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
+		defaultFixture.addImport("org.junit.BeforeClass");
 
 		String original = "" +
 				"	public void test() {\n" +

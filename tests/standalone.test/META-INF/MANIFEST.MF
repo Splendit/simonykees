@@ -3,19 +3,15 @@ Automatic-Module-Name: eu.jsparrow.standalone.test
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow :: test standalone
 Bundle-SymbolicName: eu.jsparrow.standalone.test
-Bundle-Version: 4.18.0.qualifier
+Bundle-Version: 4.20.0.qualifier
 Fragment-Host: eu.jsparrow.standalone
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: Splendit IT-Consulting GmbH
-Require-Bundle: org.mockito;bundle-version="[2.13.0,3.0.0)",
- org.hamcrest;bundle-version="[1.1.0,2.0.0)",
- eu.jsparrow.rules.api, 
- org.junit,
- org.junit.platform.commons,
- org.junit.platform.engine,
- org.opentest4j
-Import-Package: org.junit.jupiter.api,
- org.junit.jupiter.api.function,
- org.junit.jupiter.engine.execution,
- org.junit.jupiter.params,
- org.junit.jupiter.params.provider
+Require-Bundle: org.mockito.mockito-core;bundle-version="[2.23.0,6.0.0)",
+ eu.jsparrow.rules.api,
+ org.opentest4j;bundle-version="[1.2.0,2.0.0)"
+Import-Package: org.junit.jupiter.api;version="[5.8.1,6.0.0)",
+ org.junit.jupiter.api.function;version="[5.8.1,6.0.0)",
+ org.junit.jupiter.engine.execution;version="[5.8.1,6.0.0)",
+ org.junit.jupiter.params;version="[5.8.1,6.0.0)",
+ org.junit.jupiter.params.provider;version="[5.8.1,6.0.0)"

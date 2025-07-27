@@ -1,17 +1,15 @@
 package eu.jsparrow.crypto.service.impl;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.crypto.exception.RSAServiceException;
 import eu.jsparrow.crypto.service.KeyStoreType;
@@ -35,23 +33,17 @@ public class RSAServiceImplTest {
 
 	private RSAService rsaService;
 
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
-
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		InputStream keyStoreResource = getClass().getResourceAsStream(KEYSTORE_RESOURCE_NAME);
 
 		KeyStoreServiceImpl keyStoreService = new KeyStoreServiceImpl();
 		keyStoreService.loadKeyStore(keyStoreResource, KeyStoreType.TYPE_JKS, KEYSTORE_PASSWORD);
 
-		jepPublic = keyStoreService.getPublicKey(JEP_ALIAS)
-			.get();
-		jepPrivate = keyStoreService.getPrivateKey(JEP_ALIAS, JEP_KEY_PASSWORD)
-			.get();
+		jepPublic = keyStoreService.getPublicKey(JEP_ALIAS).get();
+		jepPrivate = keyStoreService.getPrivateKey(JEP_ALIAS, JEP_KEY_PASSWORD).get();
 
-		licensePublic = keyStoreService.getPublicKey(LICENSE_ALIAS)
-			.get();
+		licensePublic = keyStoreService.getPublicKey(LICENSE_ALIAS).get();
 
 		rsaService = new RSAServiceImpl();
 	}
@@ -66,10 +58,10 @@ public class RSAServiceImplTest {
 
 	@Test
 	public void encryptDecrypt_wrongPrivateKeyForDecryption_shouldThrowException() throws Exception {
-		expectedException.expect(RSAServiceException.class);
-
-		String encrypted = rsaService.encrypt(PLAIN_TEXT, licensePublic);
-		rsaService.decrypt(encrypted, jepPrivate);
+		assertThrows(RSAServiceException.class, () -> {
+			String encrypted = rsaService.encrypt(PLAIN_TEXT, licensePublic);
+			rsaService.decrypt(encrypted, jepPrivate);
+		});
 	}
 
 	@Test

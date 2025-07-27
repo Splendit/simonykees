@@ -14,6 +14,8 @@ import eu.jsparrow.core.visitor.junit.jupiter.AbstractReplaceJUnit4WithJupiterAS
 public class JUnit4AssertionsToJupiterAnalyzerVisitorTest
 		extends AbstractReplaceJUnit4WithJupiterASTVisitorTest {
 
+	private static final String ORG_JUNIT_ASSERT = "org.junit.Assert";
+
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
 		addDependency("junit", "junit", "4.13");
@@ -30,8 +32,8 @@ public class JUnit4AssertionsToJupiterAnalyzerVisitorTest
 	@ValueSource(strings = { "@Ignore", "@Ignore()", "@Ignore(\"This test is ignored.\")" })
 	public void visit_testWithJUnit4IgnoreAnnotation_shouldNotTransform(String ignoreAnnotation)
 			throws Exception {
-		defaultFixture.addImport(org.junit.Assert.class.getName());
-		defaultFixture.addImport(org.junit.Ignore.class.getName());
+		defaultFixture.addImport(ORG_JUNIT_ASSERT);
+		defaultFixture.addImport("org.junit.Ignore");
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 		String original = "" +
 				"	" + ignoreAnnotation + "\n" +
@@ -50,7 +52,7 @@ public class JUnit4AssertionsToJupiterAnalyzerVisitorTest
 	@ValueSource(strings = { "@Disabled", "@Disabled()", "@Disabled(\"This test is disabled.\")" })
 	public void visit_testWithJUnitJupiterDisabledAnnotation_shouldTransform(String disableAnnotation)
 			throws Exception {
-		defaultFixture.addImport(org.junit.Assert.class.getName());
+		defaultFixture.addImport(ORG_JUNIT_ASSERT);
 		defaultFixture.addImport(org.junit.jupiter.api.Disabled.class.getName());
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 		String original = "" +
@@ -75,7 +77,7 @@ public class JUnit4AssertionsToJupiterAnalyzerVisitorTest
 
 	@Test
 	public void visit_testWithNonJUnitAnnotation_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Assert.class.getName());
+		defaultFixture.addImport(ORG_JUNIT_ASSERT);
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 		defaultFixture.addImport("java.lang.annotation", false, true);
 

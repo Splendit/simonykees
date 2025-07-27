@@ -22,7 +22,7 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJ
 
 	@Test
 	public void visit_MarkerAnnotationTest_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Test.class.getName());
+		defaultFixture.addImport("org.junit.Test");
 
 		String original = "" +
 				"	@Test\n" +
@@ -33,7 +33,7 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJ
 
 	@Test
 	public void visit_MarkerAnnotationIgnore_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Ignore.class.getName());
+		defaultFixture.addImport("org.junit.Ignore");
 
 		String original = "" +
 				"	@Ignore\n" +
@@ -50,7 +50,7 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJ
 
 	@Test
 	public void visit_SingleMemberAnnotationIgnore_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Ignore.class.getName());
+		defaultFixture.addImport("org.junit.Ignore");
 
 		String original = "" +
 				"	@Ignore(\"Test is not carried out.\")\n" +
@@ -67,12 +67,12 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJ
 
 	@Test
 	public void visit_AllSupportedAnnotations_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.After.class.getName());
-		defaultFixture.addImport(org.junit.AfterClass.class.getName());
-		defaultFixture.addImport(org.junit.Before.class.getName());
-		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
-		defaultFixture.addImport(org.junit.Ignore.class.getName());
-		defaultFixture.addImport(org.junit.Test.class.getName());
+		defaultFixture.addImport("org.junit.After");
+		defaultFixture.addImport("org.junit.AfterClass");
+		defaultFixture.addImport("org.junit.Before");
+		defaultFixture.addImport("org.junit.BeforeClass");
+		defaultFixture.addImport("org.junit.Ignore");
+		defaultFixture.addImport("org.junit.Test");
 
 		List<String> importsToStringExpected = Arrays.asList(
 				"import " + org.junit.jupiter.api.AfterEach.class.getName() + ";",
@@ -174,7 +174,7 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJ
 	@Test
 	public void visit_JUnit4AssertEqualsStaticImport_shouldTansform() throws Exception {
 		defaultFixture.addImport("org.junit.Assert.assertEquals", true, false);
-		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
+		defaultFixture.addImport("org.junit.BeforeClass");
 
 		String original = "" +
 				"	@BeforeClass\n" +
@@ -196,8 +196,8 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJ
 
 	@Test
 	public void visit_JUnit4AssertImportedExplicitly_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Assert.class.getName());
-		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
+		defaultFixture.addImport("org.junit.Assert");
+		defaultFixture.addImport("org.junit.BeforeClass");
 
 		String original = "" +
 				"	@BeforeClass\n" +
@@ -221,7 +221,7 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJ
 	@Test
 	public void visit_JUnit4AssertEqualsStaticImportOnDemand_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.junit.Assert", true, true);
-		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
+		defaultFixture.addImport("org.junit.BeforeClass");
 
 		String original = "" +
 				"	@BeforeClass\n" +
@@ -267,8 +267,8 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJ
 
 	@Test
 	public void visit_IgnoreTestWithAssertClassToString_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Assert.class.getName());
-		defaultFixture.addImport(org.junit.Ignore.class.getName());
+		defaultFixture.addImport("org.junit.Assert");
+		defaultFixture.addImport("org.junit.Ignore");
 
 		String original = "" +
 				"		@Ignore\n" +
@@ -290,8 +290,8 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJ
 
 	@Test
 	public void visit_IgnoreTestWithAssertAsVariable_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Assert.class.getName());
-		defaultFixture.addImport(org.junit.Ignore.class.getName());
+		defaultFixture.addImport("org.junit.Assert");
+		defaultFixture.addImport("org.junit.Ignore");
 
 		String original = "" +
 				"		@Ignore\n" +
@@ -357,7 +357,7 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJ
 
 	@Test
 	public void visit_ClassWithNameDisabledAndIgnoreAnnotation_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Ignore.class.getName());
+		defaultFixture.addImport("org.junit.Ignore");
 		String original = "" +
 				"	@Ignore\n" +
 				"	class Disabled {" +
@@ -374,7 +374,7 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJ
 
 	@Test
 	public void visit_LabeledLoopWithBreakLOOP_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Ignore.class.getName());
+		defaultFixture.addImport("org.junit.Ignore");
 		String original = "" +
 				"	@Ignore\n" +
 				"	void test() {\n" +
@@ -397,7 +397,7 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJ
 
 	@Test
 	public void visit_LabeledLoopWithContinueLOOP_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Ignore.class.getName());
+		defaultFixture.addImport("org.junit.Ignore");
 		String original = "" +
 				"	@Ignore\n" +
 				"	void test() {\n" +
@@ -421,7 +421,7 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJ
 
 	@Test
 	public void visit_AssumeTrueInTestMethod_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Test.class.getName());
+		defaultFixture.addImport("org.junit.Test");
 		defaultFixture.addImport("org.junit.Assume.assumeTrue", true, false);
 		String original = "" +
 				"	@Test\n" +

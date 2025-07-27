@@ -25,6 +25,7 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.wizard.AbstractRefactoringWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -45,7 +46,7 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 	private static final String COMMIT_SUCCESSFUL_TITLE = "Commit Successful";
 	protected RefactoringPipeline refactoringPipeline;
 	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
-	private LicenseUtil licenseUtil = LicenseUtil.get();
+	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	protected AbstractPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
@@ -54,6 +55,8 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 
 	@Override
 	public boolean canFinish() {
+		return true;
+		/*
 		if (!super.canFinish()) {
 			return false;
 		}
@@ -65,6 +68,7 @@ public abstract class AbstractPreviewWizard extends AbstractRefactoringWizard {
 			return true;
 		}
 		return payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
+		*/
 	}
 
 	protected boolean canHaveFreeRule() {

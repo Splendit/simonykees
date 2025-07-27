@@ -3,8 +3,8 @@ package eu.jsparrow.core.statistic;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
 import eu.jsparrow.core.http.JsonUtil;
 import eu.jsparrow.core.statistic.entity.JsparrowData;
@@ -15,7 +15,7 @@ import eu.jsparrow.core.statistic.entity.JsparrowRuleData;
 public class JsparrowMetricTest {
 
 	@Test
-	@Ignore
+	@Disabled
 	public void jsonMetricTest() {
 		JsparrowMetric jm = new JsparrowMetric();
 		jm.setRepoName("jSparrow");

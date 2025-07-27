@@ -108,8 +108,8 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 				&& operatorWhenTrue == Assignment.Operator.ASSIGN) {
 			SimpleName leftHandSideSimpleName = (SimpleName) leftHandSideWhenTrue;
 			if (!isVariableUsedInExpression(leftHandSideSimpleName, ifStatement.getExpression())
-					&&!isVariableUsedInExpression(leftHandSideSimpleName, expressionWhenTrue)
-					&&!isVariableUsedInExpression(leftHandSideSimpleName, expressionWhenFalse)) {
+					&& !isVariableUsedInExpression(leftHandSideSimpleName, expressionWhenTrue)
+					&& !isVariableUsedInExpression(leftHandSideSimpleName, expressionWhenFalse)) {
 				VariableDeclarationFragment declarationBeforeIf = VariableDeclarationBeforeStatement
 					.findDeclaringFragment(leftHandSideSimpleName, ifStatement, getCompilationUnit())
 					.orElse(null);
@@ -132,7 +132,8 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 		Statement elseStatement = ifStatement.getElseStatement();
 
 		if (elseStatement == null) {
-			returnStatementToRemove = findReturnStatementFollowingIf(ifStatement).orElse(null);
+			returnStatementToRemove = ASTNodeUtil.findSubsequentStatementInBlock(ifStatement, ReturnStatement.class)
+				.orElse(null);
 			if (returnStatementToRemove == null) {
 				return Optional.empty();
 			}
@@ -178,15 +179,6 @@ public class UseTernaryOperatorASTVisitor extends AbstractASTRewriteASTVisitor i
 		return Optional.of(statement)
 			.filter(type::isInstance)
 			.map(type::cast);
-	}
-
-	private Optional<ReturnStatement> findReturnStatementFollowingIf(IfStatement ifStatement) {
-		if (ifStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return Optional.empty();
-		}
-		Block block = (Block) ifStatement.getParent();
-		return ASTNodeUtil
-			.findListElementAfter(block.statements(), ifStatement, ReturnStatement.class);
 	}
 
 	private Optional<Supplier<ConditionalExpression>> findNewConditionalExpressionSupplier(IfStatement ifStatement,

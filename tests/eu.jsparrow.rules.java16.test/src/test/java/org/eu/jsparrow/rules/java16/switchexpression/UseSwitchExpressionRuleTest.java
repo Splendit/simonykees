@@ -1,12 +1,10 @@
 package org.eu.jsparrow.rules.java16.switchexpression;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Duration;
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,26 +28,26 @@ class UseSwitchExpressionRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("UseSwitchExpression"));
+		assertEquals("UseSwitchExpression", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Use Switch Expression"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_14, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
-		assertThat(description.getDescription(),
-				equalTo("In Java 14, the switch expressions turned to a standard feature. "
-						+ "This rule replaces the traditional switch-case statements with switch-case expressions. "
-						+ "Thus, avoiding the fall-through semantics of control flow and at the same time, removing some boilerplate code."));
+		assertEquals("Use Switch Expression", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_14, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
+		assertEquals(5, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "In Java 14, the switch expressions turned to a standard feature. "
+				+ "This rule replaces the traditional switch-case statements with switch-case expressions. "
+				+ "Thus, avoiding the fall-through semantics of control flow and at the same time, removing some boilerplate code.",
+				description.getDescription());
 	}
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		assertThat(rule.getRequiredJavaVersion(), equalTo("14"));
+		assertEquals("14", rule.getRequiredJavaVersion());
 	}
 
 	@Test

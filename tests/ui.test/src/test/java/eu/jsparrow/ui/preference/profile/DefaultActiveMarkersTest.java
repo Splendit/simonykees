@@ -1,8 +1,7 @@
 package eu.jsparrow.ui.preference.profile;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
@@ -21,7 +20,7 @@ class DefaultActiveMarkersTest {
 	@Test
 	void testDefaultMarkersSize() {
 		List<String> actual = defaultActiveMarkers.getActiveMarkers();
-		assertThat(actual, hasSize(89));
+		assertEquals(90, actual.size());
 	}
 	@Test
 	void testDefaultActiveMarkers_shouldReturnAllMarkers() {

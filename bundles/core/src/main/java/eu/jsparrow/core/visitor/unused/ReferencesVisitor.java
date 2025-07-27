@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.exception.visitor.UnresolvedTypeBindingException;
+import eu.jsparrow.rules.common.exception.UnresolvedBindingException;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
@@ -67,7 +67,7 @@ public class ReferencesVisitor extends ASTVisitor {
 		boolean isReference;
 		try {
 			isReference = isTargetFieldReference(simpleName);
-		} catch (UnresolvedTypeBindingException e) {
+		} catch (UnresolvedBindingException e) {
 			logger.debug(e.getMessage(), e);
 			unresolvedReferenceFound = true;
 			return false;
@@ -113,7 +113,7 @@ public class ReferencesVisitor extends ASTVisitor {
 		return outermostExpression;
 	}
 
-	private boolean isTargetFieldReference(SimpleName simpleName) throws UnresolvedTypeBindingException {
+	private boolean isTargetFieldReference(SimpleName simpleName) throws UnresolvedBindingException {
 		String identifier = simpleName.getIdentifier();
 		if (!identifier.equals(originalIdentifier)) {
 			return false;
@@ -124,7 +124,7 @@ public class ReferencesVisitor extends ASTVisitor {
 			if (ASTNodeUtil.isLabel(simpleName)) {
 				return false;
 			}
-			throw new UnresolvedTypeBindingException("The binding of the reference candidate cannot be resolved."); //$NON-NLS-1$
+			throw new UnresolvedBindingException("The binding of the reference candidate cannot be resolved."); //$NON-NLS-1$
 		}
 		int kind = binding.getKind();
 		if (kind != IBinding.VARIABLE) {
@@ -137,7 +137,7 @@ public class ReferencesVisitor extends ASTVisitor {
 		}
 		ITypeBinding declaringClass = variableBinding.getDeclaringClass();
 		if (declaringClass == null) {
-			throw new UnresolvedTypeBindingException("The declaring class of the reference candidate cannot be found."); //$NON-NLS-1$
+			throw new UnresolvedBindingException("The declaring class of the reference candidate cannot be found."); //$NON-NLS-1$
 		}
 
 		return ClassRelationUtil.isContentOfType(declaringClass, originalType.getQualifiedName());

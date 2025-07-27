@@ -37,6 +37,7 @@ import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preference.SimonykeesUpdateLicenseDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
  * Lists all rules as checkboxes and a description for the currently selected
@@ -72,7 +73,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	private boolean forcedSelectRight = false;
 	private SelectionSide latestSelectionSide = SelectionSide.NONE;
 
-	private LicenseUtil licenseUtil = LicenseUtil.get();
+	private LicenseUtilService licenseUtil = LicenseUtil.get();
 	private final List<Runnable> afterLicenseUpdateListeners = new ArrayList<>();
 
 	protected AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,

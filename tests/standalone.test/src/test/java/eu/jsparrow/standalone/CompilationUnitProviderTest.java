@@ -1,8 +1,8 @@
 package eu.jsparrow.standalone;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -14,8 +14,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaModelException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import eu.jsparrow.core.config.YAMLExcludes;
 
@@ -29,7 +29,7 @@ public class CompilationUnitProviderTest {
 	private ICompilationUnit compUnitMock;
 	private IPackageDeclaration packageDeclarationMock;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		YAMLExcludes excludes = new YAMLExcludes();
 		excludes.setExcludePackages(Arrays.asList(EU_JSPARROW, EU_JSPARROW_PACKAGE));

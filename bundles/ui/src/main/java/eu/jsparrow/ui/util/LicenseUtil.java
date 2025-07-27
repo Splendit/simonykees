@@ -40,7 +40,7 @@ public class LicenseUtil implements LicenseUtilService {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	private static LicenseUtil instance;
+	private static LicenseUtilService instance;
 
 	private LicenseService licenseService;
 
@@ -101,9 +101,9 @@ public class LicenseUtil implements LicenseUtilService {
 		}
 	}
 
-	public static LicenseUtil get() {
+	public static LicenseUtilService get() {
 		if (instance == null) {
-			instance = new LicenseUtil();
+			instance = new FreeOpensourceLicenseUtil();
 		}
 		return instance;
 	}
@@ -360,31 +360,6 @@ public class LicenseUtil implements LicenseUtilService {
 			properties.load(input);
 		}
 		return properties;
-
-	}
-
-	/**
-	 * This is a helper class. Only used to transport the result of an update
-	 * license and a detailed message if necessary.
-	 */
-	public class LicenseUpdateResult {
-
-		private boolean wasSuccessful;
-
-		private String detailMessage;
-
-		public LicenseUpdateResult(boolean successful, String message) {
-			wasSuccessful = successful;
-			detailMessage = message;
-		}
-
-		public String getDetailMessage() {
-			return detailMessage;
-		}
-
-		public boolean wasSuccessful() {
-			return wasSuccessful;
-		}
 
 	}
 

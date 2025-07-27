@@ -3,14 +3,14 @@ Automatic-Module-Name: eu.jsparrow.crypto
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow :: crypto
 Bundle-SymbolicName: eu.jsparrow.crypto
-Bundle-Version: 4.18.0.qualifier
+Bundle-Version: 4.20.0.qualifier
 Bundle-Activator: eu.jsparrow.crypto.Activator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: org.osgi.framework;version="1.3.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Import-Package: org.osgi.framework;version="[1.10.0,2.0.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Require-Bundle: eu.jsparrow.i18n, 
- org.eclipse.osgi.services;bundle-version="[3.5.0,4.0.0)"
+ org.eclipse.osgi.services;bundle-version="[3.10.200,4.0.0)"
 Export-Package: eu.jsparrow.crypto,
  eu.jsparrow.crypto.exception,
  eu.jsparrow.crypto.service,

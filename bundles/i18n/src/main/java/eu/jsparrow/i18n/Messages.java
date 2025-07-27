@@ -283,6 +283,8 @@ public class Messages extends NLS {
 	public static String InefficientConstructorResolver_name;
 	public static String InefficientConstructorRule_description;
 	public static String InefficientConstructorRule_name;
+	public static String InlineLocalVariablesRule_description;
+	public static String InlineLocalVariablesRule_name;
 	public static String InsertBreakStatementInLoopsRule_description;
 	public static String InsertBreakStatementInLoopsRule_name;
 	public static String MultiVariableDeclarationLineRule_name;

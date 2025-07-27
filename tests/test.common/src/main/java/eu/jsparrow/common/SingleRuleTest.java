@@ -20,8 +20,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeAll;
 
-import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.common.util.RulesTestUtil;
+import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.rules.common.RefactoringRule;
 
 public abstract class SingleRuleTest {
@@ -33,7 +33,7 @@ public abstract class SingleRuleTest {
 	private static final String POSTRULE_BASE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/"; //$NON-NLS-1$
 
 	protected IJavaProject testProject;
-
+	
 	@BeforeAll
 	public static void classSetUp() throws Exception {
 		root = RulesTestUtil.getPackageFragementRoot(JavaCore.VERSION_1_8);

@@ -1,12 +1,10 @@
 package org.eu.jsparrow.rules.java16.switchexpression.ifstatement;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Duration;
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,26 +28,26 @@ class ReplaceMultiBranchIfBySwitchRuleTest extends SingleRuleTest {
 
 	@Test
 	void test_ruleId() {
-		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceMultiBranchIfBySwitch"));
+		assertEquals("ReplaceMultiBranchIfBySwitch", rule.getId());
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace Multi-Branch If By Switch"));
-		assertThat(description.getTags(),
-				contains(Tag.JAVA_14, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(15)));
-		assertThat(description.getDescription(),
-				equalTo("In Java 14, the switch expressions turned to a standard feature."
-						+ " This rule replaces multi-branch if statements by corresponding switch expressions or switch statements with switch labeled rules."
-						+ " Because this rule removes a lot of redundant parts of code, readability is improved."));
+		assertEquals("Replace Multi-Branch If By Switch", description.getName());
+		assertEquals(Arrays.asList(Tag.JAVA_14, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY), description.getTags());
+		assertEquals(15, description.getRemediationCost()
+			.toMinutes());
+		assertEquals(""
+				+ "In Java 14, the switch expressions turned to a standard feature."
+				+ " This rule replaces multi-branch if statements by corresponding switch expressions or switch statements with switch labeled rules."
+				+ " Because this rule removes a lot of redundant parts of code, readability is improved.", //
+				description.getDescription());
 	}
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		assertThat(rule.getRequiredJavaVersion(), equalTo("14"));
+		assertEquals("14", rule.getRequiredJavaVersion());
 	}
 
 	@Test

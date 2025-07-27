@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -14,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.logging.LoggingUtil;
 import eu.jsparrow.standalone.ConfigFinder.ConfigType;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 import eu.jsparrow.standalone.util.ProxyUtils;
@@ -33,7 +33,6 @@ public class Activator implements BundleActivator {
 
 	private static final String LIST_RULES_SELECTED_ID_KEY = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
-	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
@@ -54,8 +53,16 @@ public class Activator implements BundleActivator {
 	@Override
 	public void start(BundleContext context) throws Exception {
 
-		boolean debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
-		LoggingUtil.configureLogger(debugEnabled);
+		// TODO: Discuss whether this is necessary
+		// // start jSparrow logging bundle
+		// for (Bundle bundle : context.getBundles()) {
+		// if ("eu.jsparrow.logging".equals(bundle.getSymbolicName())
+		// //$NON-NLS-1$
+		// && bundle.getState() != Bundle.ACTIVE) {
+		// bundle.start();
+		// break;
+		// }
+		// }
 
 		// Put both together because it looks nicer
 		String startMessage = String.format("%s", Messages.Activator_start); //$NON-NLS-1$
@@ -160,7 +167,8 @@ public class Activator implements BundleActivator {
 	 * Contrary to {@link Activator#refactor(BundleContext)}, this method does
 	 * not stop JMP if the license is invalid.
 	 * 
-	 * @param context all the settings etc.
+	 * @param context
+	 *            all the settings etc.
 	 */
 	private void runInReportMode(BundleContext context) {
 		try {

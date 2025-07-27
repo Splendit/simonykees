@@ -19,7 +19,7 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorNegativeTest extends Abstract
 
 	@Test
 	public void visit_JUnit4TestAnnotationWithTimeOut_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Test.class.getName());
+		defaultFixture.addImport("org.junit.Test");
 
 		String original = "" +
 				"	@Test(timeout=1000L)\n" +

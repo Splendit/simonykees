@@ -43,7 +43,8 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.JSparrowPricingLink;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.LicenseUtil.LicenseUpdateResult;
+import eu.jsparrow.ui.util.LicenseUpdateResult;
+import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
  * Dialog for updating license key.
@@ -162,7 +163,7 @@ public class SimonykeesUpdateLicenseDialog extends Dialog {
 			public void widgetSelected(SelectionEvent arg0) {
 				BusyIndicator.showWhile(Display.getDefault(), () -> {
 
-					LicenseUtil licenseUtil = LicenseUtil.get();
+					LicenseUtilService licenseUtil = LicenseUtil.get();
 					LicenseUpdateResult result = licenseUtil.update(licenseKey);
 					if (!result.wasSuccessful()) {
 						updatedLabel.setImage(scaledCloseRedIconImage);

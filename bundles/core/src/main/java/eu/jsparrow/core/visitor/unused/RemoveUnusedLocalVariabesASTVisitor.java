@@ -35,8 +35,8 @@ public class RemoveUnusedLocalVariabesASTVisitor extends AbstractASTRewriteASTVi
 
 	@Override
 	public boolean visit(VariableDeclarationStatement node) {
-		
-		if(hasUnsupportedAnnotations(node)) {
+
+		if (hasUnsupportedAnnotations(node)) {
 			return true;
 		}
 
@@ -45,8 +45,9 @@ public class RemoveUnusedLocalVariabesASTVisitor extends AbstractASTRewriteASTVi
 
 		List<ExpressionStatement> reassignmentsToRemove = new ArrayList<>();
 		List<VariableDeclarationFragment> fragmentsToRemove = new ArrayList<>();
-		if (node.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
-			Block scope = (Block) node.getParent();
+		Block scope = ASTNodeUtil.findParentBlock(node)
+			.orElse(null);
+		if (scope != null) {
 			for (VariableDeclarationFragment fragment : fragments) {
 				if (SafelyRemoveable.isSafelyRemovable(fragment, options)) {
 					LocalVariablesReferencesVisitor referencesVisitor = new LocalVariablesReferencesVisitor(

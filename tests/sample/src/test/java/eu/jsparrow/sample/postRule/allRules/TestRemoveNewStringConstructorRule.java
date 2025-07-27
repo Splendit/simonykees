@@ -86,14 +86,12 @@ public class TestRemoveNewStringConstructorRule {
 
 	public String testCharArrayInput(String input) {
 		final char[] charArray = input.toCharArray();
-		final String result = new String(charArray);
-		return result;
+		return new String(charArray);
 	}
 
 	public String testCharArrayInputOffest(String input) {
 		final char[] charArray = input.toCharArray();
-		final String result = new String(charArray, 0, 1);
-		return result;
+		return new String(charArray, 0, 1);
 	}
 
 	public String testStringBuffer(String input) {
@@ -123,9 +121,8 @@ public class TestRemoveNewStringConstructorRule {
 
 	public String testConvertInLambdaExpressionBody(String input) {
 		final List<String> list = Collections.singletonList(input);
-		final String result = list.stream()
+		return list.stream()
 			.map(t -> t)
 			.collect(Collectors.joining());
-		return result;
 	}
 }

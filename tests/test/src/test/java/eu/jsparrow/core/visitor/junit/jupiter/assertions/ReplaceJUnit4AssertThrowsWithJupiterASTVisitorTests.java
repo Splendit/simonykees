@@ -156,7 +156,7 @@ class ReplaceJUnit4AssertThrowsWithJupiterASTVisitorTests
 
 	@Test
 	void visit_HiddenLocalThrowingRunnable_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(org.junit.function.ThrowingRunnable.class.getName());
+		defaultFixture.addImport("org.junit.function.ThrowingRunnable");
 
 		String original = ""
 				+ "	ThrowingRunnable runnable = () -> throwsIOException(\"Simply throw an IOException\");"

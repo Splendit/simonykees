@@ -14,27 +14,23 @@ public class StringLiteralEqualityCheckRule {
 	public boolean swapExpressionWithStringLiteral(String input) {
 		"StringLiteralEqualityCheckRule".equals(getClass().getName());
 
-		final boolean swap = input // don't break the semicolon
+		return input // don't break the semicolon
 			.equals("input" // don't break the line
 			);
-		return swap;
 	}
 
 	public boolean swapExpressionWithStringLiteralIgnoreCase(String input) {
 		StringUtils.equalsIgnoreCase(getClass().getName(), "StringLiteralEqualityCheckRule");
 
-		final boolean swap = "input".equals(input);
-		return swap;
+		return "input".equals(input);
 	}
 
 	public boolean swapMethodInvocationExpresion() {
-		final boolean swap = "value".equals(getValue());
-		return swap;
+		return "value".equals(getValue());
 	}
 
 	public boolean swapMethodInvocationExpresionIgnoreCase() {
-		final boolean swap = StringUtils.equalsIgnoreCase(getValue(), "vAlue");
-		return swap;
+		return StringUtils.equalsIgnoreCase(getValue(), "vAlue");
 	}
 
 	public boolean swapInReturnStatement() {
@@ -62,23 +58,17 @@ public class StringLiteralEqualityCheckRule {
 
 	public boolean someCommentsInBetween() {
 		final String foo = "cornerCaseWithCommentsInBetween";
-		final boolean swap =
-				// please dont loose me
-				foo // comparing equality with a copy of init value
-					.equals("cornerCaseWithCommentsInBetween" // I may be useful
-					);
-
-		return swap;
+		return // please dont loose me
+		foo // comparing equality with a copy of init value
+			.equals("cornerCaseWithCommentsInBetween" // I may be useful
+			);
 	}
 
 	public boolean someCommentsInBetween2() {
 		final String foo = "cornerCaseWithCommentsInBetween";
-		final boolean swap =
-				// comparing equality with a copy of init value
-				foo // please dont loose me
-					.equals("cornerCaseWithCommentsInBetween");
-
-		return swap;
+		return // comparing equality with a copy of init value
+		foo // please dont loose me
+			.equals("cornerCaseWithCommentsInBetween");
 	}
 
 	public boolean compareStringExpression() {

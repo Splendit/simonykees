@@ -10,7 +10,6 @@ import org.osgi.framework.BundleContext;
  * @since 1.2
  */
 public class Activator implements BundleActivator {
-
 	// The plug-in ID
 	public static final String PLUGIN_ID = "eu.jsparrow.logging"; //$NON-NLS-1$
 
