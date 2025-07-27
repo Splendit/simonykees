@@ -124,7 +124,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 				updateDisplayedInformation();
 			}
 		});
-		updateButton.setVisible(true);
+		updateButton.setVisible(false);
 		updateDisplayedInformation();
 
 		composite.addDisposeListener((DisposeEvent e) -> {
